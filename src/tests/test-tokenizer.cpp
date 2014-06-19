@@ -4,6 +4,7 @@
 #include <cppunit/extensions/HelperMacros.h>
 #include <cppunit/ui/text/TestRunner.h>
 #include <iostream>
+#include <cstdlib>
 
 #define ASSERT_EQUALS(E, A) wcs_assertEquals((E), (A), __FILE__, __LINE__)
 void wcs_assertEquals(const wchar_t* expected, const wchar_t* actual, const char* file, int line)

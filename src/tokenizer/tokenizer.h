@@ -1,6 +1,7 @@
 #ifndef TOKENIZER_H
 #define TOKENIZER_H
 #include "tokens.h"
+#include <cstring>
 
 
 struct TokenizerError

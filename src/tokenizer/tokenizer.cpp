@@ -1,6 +1,8 @@
 #include "tokenizer.h"
 #include "token_char_types.h"
 #include <cstring>
+#include <wchar.h>
+#include <ctype.h>
 Tokenizer::Tokenizer(const wchar_t* data)
 {
     this->data = NULL;
@@ -31,7 +33,7 @@ void Tokenizer::set(const wchar_t* data)
 }
 Tokenizer::~Tokenizer()
 {
-    set(nullptr);
+    set(NULL);
 }
 
 void Tokenizer::resetToken(Token& token)
@@ -261,7 +263,7 @@ bool Tokenizer::readString(Token& token)
                 for(int i = 0; i < len; i ++)
                 {
                     wchar_t ch = must_get();
-                    tassert(ishexnumber(ch));
+                    tassert(check_digit(16, ch));
                     if(ch >= '0' && ch <= '9')
                         ch -= '0';
                     else if(ch >= 'a' && ch <= 'f')
