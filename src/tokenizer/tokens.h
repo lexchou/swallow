@@ -58,11 +58,16 @@ enum KeywordType
     kExpression,
     kReserved
 };
+enum OperatorType
+{
+    kUnknownOperator,
+    kPrefixUnary,
+    kInfixBinary,
+    kPostfixUnary
+};
 
 struct Token
 {
-    bool spaceBefore;
-    bool spaceAfter;
     //“Operators are made up of one or more of the following characters: /, =, -, +, !, *, %, <, >, &, |, ^, ~, and .. That said, the tokens =, ->, //, /*, */, ., and the unary prefix operator & are reserved. ”
     union
     {
@@ -90,6 +95,10 @@ struct Token
             bool fraction;
             bool exponent;
         } number;
+        struct
+        {
+            OperatorType type;
+        } operators;
     };
     TokenType type;
     std::vector<wchar_t> token;

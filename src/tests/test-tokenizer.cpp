@@ -201,6 +201,135 @@ public:
     
     void testCustomizedOperators()
     {
+        Tokenizer tokenizer(L"");
+        Token token;
+        
+        tokenizer.set(L"a++.b");
+        CPPUNIT_ASSERT(tokenizer.next(token));
+        CPPUNIT_ASSERT_EQUAL(kIdentifier, token.type);
+        ASSERT_EQUALS(L"a", token.c_str());
+        
+        CPPUNIT_ASSERT(tokenizer.next(token));
+        CPPUNIT_ASSERT_EQUAL(kOperator, token.type);
+        CPPUNIT_ASSERT_EQUAL(kPostfixUnary, token.operators.type);
+        ASSERT_EQUALS(L"++", token.c_str());
+        
+        
+        CPPUNIT_ASSERT(tokenizer.next(token));
+        CPPUNIT_ASSERT_EQUAL(kOperator, token.type);
+        CPPUNIT_ASSERT_EQUAL(kInfixBinary, token.operators.type);
+        ASSERT_EQUALS(L".", token.c_str());
+        
+        CPPUNIT_ASSERT(tokenizer.next(token));
+        CPPUNIT_ASSERT_EQUAL(kIdentifier, token.type);
+        ASSERT_EQUALS(L"b", token.c_str());
+        
+        CPPUNIT_ASSERT(!tokenizer.next(token));
+        
+        //
+        tokenizer.set(L"a+b");
+        
+        CPPUNIT_ASSERT(tokenizer.next(token));
+        CPPUNIT_ASSERT_EQUAL(kIdentifier, token.type);
+        ASSERT_EQUALS(L"a", token.c_str());
+        
+        CPPUNIT_ASSERT(tokenizer.next(token));
+        CPPUNIT_ASSERT_EQUAL(kOperator, token.type);
+        CPPUNIT_ASSERT_EQUAL(kInfixBinary, token.operators.type);
+        ASSERT_EQUALS(L"+", token.c_str());
+        
+        CPPUNIT_ASSERT(tokenizer.next(token));
+        CPPUNIT_ASSERT_EQUAL(kIdentifier, token.type);
+        ASSERT_EQUALS(L"b", token.c_str());
+        
+        CPPUNIT_ASSERT(!tokenizer.next(token));
+
+        
+        //
+        tokenizer.set(L"a ++b");
+        
+        CPPUNIT_ASSERT(tokenizer.next(token));
+        CPPUNIT_ASSERT_EQUAL(kIdentifier, token.type);
+        ASSERT_EQUALS(L"a", token.c_str());
+        
+        CPPUNIT_ASSERT(tokenizer.next(token));
+        CPPUNIT_ASSERT_EQUAL(kOperator, token.type);
+        CPPUNIT_ASSERT_EQUAL(kPrefixUnary, token.operators.type);
+        ASSERT_EQUALS(L"++", token.c_str());
+        
+        CPPUNIT_ASSERT(tokenizer.next(token));
+        CPPUNIT_ASSERT_EQUAL(kIdentifier, token.type);
+        ASSERT_EQUALS(L"b", token.c_str());
+        
+        CPPUNIT_ASSERT(!tokenizer.next(token));
+        
+        //
+        tokenizer.set(L"a++ b");
+        
+        CPPUNIT_ASSERT(tokenizer.next(token));
+        CPPUNIT_ASSERT_EQUAL(kIdentifier, token.type);
+        ASSERT_EQUALS(L"a", token.c_str());
+        
+        CPPUNIT_ASSERT(tokenizer.next(token));
+        CPPUNIT_ASSERT_EQUAL(kOperator, token.type);
+        CPPUNIT_ASSERT_EQUAL(kPostfixUnary, token.operators.type);
+        ASSERT_EQUALS(L"++", token.c_str());
+        
+        CPPUNIT_ASSERT(tokenizer.next(token));
+        CPPUNIT_ASSERT_EQUAL(kIdentifier, token.type);
+        ASSERT_EQUALS(L"b", token.c_str());
+        
+        CPPUNIT_ASSERT(!tokenizer.next(token));
+        
+        //
+        tokenizer.set(L"a!+b");
+        
+        CPPUNIT_ASSERT(tokenizer.next(token));
+        CPPUNIT_ASSERT_EQUAL(kIdentifier, token.type);
+        ASSERT_EQUALS(L"a", token.c_str());
+        
+        CPPUNIT_ASSERT(tokenizer.next(token));
+        CPPUNIT_ASSERT_EQUAL(kOperator, token.type);
+        CPPUNIT_ASSERT_EQUAL(kPostfixUnary, token.operators.type);
+        ASSERT_EQUALS(L"!", token.c_str());
+        
+        CPPUNIT_ASSERT(tokenizer.next(token));
+        CPPUNIT_ASSERT_EQUAL(kOperator, token.type);
+        CPPUNIT_ASSERT_EQUAL(kInfixBinary, token.operators.type);
+        ASSERT_EQUALS(L"+", token.c_str());
+        
+        CPPUNIT_ASSERT(tokenizer.next(token));
+        CPPUNIT_ASSERT_EQUAL(kIdentifier, token.type);
+        ASSERT_EQUALS(L"b", token.c_str());
+        
+        CPPUNIT_ASSERT(!tokenizer.next(token));
+        
+        //
+        tokenizer.set(L"true ? 1 : 0");
+        
+        CPPUNIT_ASSERT(tokenizer.next(token));
+        CPPUNIT_ASSERT_EQUAL(kIdentifier, token.type);
+        ASSERT_EQUALS(L"true", token.c_str());
+        
+        CPPUNIT_ASSERT(tokenizer.next(token));
+        CPPUNIT_ASSERT_EQUAL(kOptional, token.type);
+        ASSERT_EQUALS(L"?", token.c_str());
+
+        CPPUNIT_ASSERT(tokenizer.next(token));
+        CPPUNIT_ASSERT_EQUAL(kInteger, token.type);
+        ASSERT_EQUALS(L"1", token.c_str());
+
+        
+        CPPUNIT_ASSERT(tokenizer.next(token));
+        CPPUNIT_ASSERT_EQUAL(kColon, token.type);
+        ASSERT_EQUALS(L":", token.c_str());
+        
+        CPPUNIT_ASSERT(tokenizer.next(token));
+        CPPUNIT_ASSERT_EQUAL(kInteger, token.type);
+        ASSERT_EQUALS(L"0", token.c_str());
+        
+        CPPUNIT_ASSERT(!tokenizer.next(token));
+        
         
     }
     
