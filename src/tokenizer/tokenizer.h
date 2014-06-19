@@ -32,7 +32,7 @@ private:
     void match(wchar_t ch);
     
     
-    bool readSymbol(Token& token, TokenType type);
+    bool readSymbol(Token& token, TokenType::T type);
     bool readOperator(Token& token, int max = 0);
     bool readComment(Token& token);
     bool readMultilineComment(Token& token);

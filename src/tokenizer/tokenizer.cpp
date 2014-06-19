@@ -42,12 +42,7 @@ void Tokenizer::resetToken(Token& token)
     token.comment.nestedLevels = 0;
     token.comment.multiline = 0;
     
-    token.identifier.keyword = kNone;
-    token.identifier.backtick = false;
-    token.identifier.implicitParameterName = false;
-    
-    
-    token.type = kEOF;
+    token.type = TokenType::None;
     token.token.clear();
 }
 bool Tokenizer::peek(wchar_t &ch)
@@ -86,8 +81,8 @@ bool Tokenizer::skipSpaces()
 bool Tokenizer::readOperator(Token& token, int max)
 {
     wchar_t ch;
-    token.type = kOperator;
-    token.operators.type = kUnknownOperator;
+    token.type = TokenType::Operator;
+    token.operators.type = OperatorType::None;
     bool spaceAfter = false;
     bool spaceBefore = false;
     
@@ -129,28 +124,28 @@ bool Tokenizer::readOperator(Token& token, int max)
     if((spaceAfter && spaceBefore) || (!spaceBefore && !spaceAfter))
     {
         //If an operator has whitespace around both sides or around neither side, it is treated as a binary operator. As an example, the + operator in a+b and a + b is treated as a binary operator.
-        token.operators.type = kInfixBinary;
+        token.operators.type = OperatorType::InfixBinary;
     }
     else if(spaceBefore && !spaceAfter)
     {
         //If an operator has whitespace on the left side only, it is treated as a prefix unary operator. As an example, the ++ operator in a ++b is treated as a prefix unary operator.
-        token.operators.type = kPrefixUnary;
+        token.operators.type = OperatorType::PrefixUnary;
     }
     else if(!spaceBefore && spaceAfter)
     {
         //If an operator has whitespace on the right side only, it is treated as a postfix unary operator. As an example, the ++ operator in a++ b is treated as a postfix unary operator.
-        token.operators.type = kPostfixUnary;
+        token.operators.type = OperatorType::PostfixUnary;
     }
     
     if(!spaceBefore && (cursor < (data + size)) && *cursor == '.')
     {
         //If an operator has no whitespace on the left but is followed immediately by a dot (.), it is treated as a postfix unary operator. As an example, the ++ operator in a++.b is treated as a postfix unary operator (a++ . b rather than a ++ .b).
-        token.operators.type = kPostfixUnary;
+        token.operators.type = OperatorType::PostfixUnary;
     }
     if(!spaceBefore && token.token.size() == 1 && (token.token.front() == '?' || token.token.front() == '!'))
     {
         //“If the ! or ? operator has no whitespace on the left, it is treated as a postfix operator”
-        token.operators.type = kPostfixUnary;
+        token.operators.type = OperatorType::PostfixUnary;
     }
     
     return true;
@@ -158,7 +153,7 @@ bool Tokenizer::readOperator(Token& token, int max)
 bool Tokenizer::readMultilineComment(Token& token)
 {
     wchar_t ch, last;
-    token.type = kComment;
+    token.type = TokenType::Comment;
     token.comment.multiline = true;
     token.comment.nestedLevels = 0;
     get(ch);
@@ -189,7 +184,7 @@ bool Tokenizer::readComment(Token& token)
 {
     wchar_t ch;
     //read until end of line
-    token.type = kComment;
+    token.type = TokenType::Comment;
     token.comment.multiline = false;
     token.comment.nestedLevels = 0;
     get(ch);
@@ -207,7 +202,7 @@ bool Tokenizer::readString(Token& token)
     wchar_t ch;
     int len = 0;
     inStringExpression = false;
-    token.type = kString;
+    token.type = TokenType::String;
     token.string.expressionFollowed = false;
     
     must_get();//“string-literal → "quoted-text”
@@ -306,7 +301,7 @@ bool Tokenizer::readNumber(Token& token)
     token.number.sign = false;
     token.number.exponent = false;
     token.number.fraction = false;
-    token.type = kInteger;
+    token.type = TokenType::Integer;
     
     if(ch == '+' || ch == '-')
     {
@@ -330,7 +325,7 @@ bool Tokenizer::readNumber(Token& token)
     readNumberLiteral(token, base);
     if(peek(ch) && ch == '.')//read fraction part
     {
-        token.type = kFloat;
+        token.type = TokenType::Float;
         token.token.push_back(must_get());
         readNumberLiteral(token, base);
     }
@@ -355,7 +350,7 @@ bool Tokenizer::readIdentifier(Token& token)
 {
     wchar_t ch;
     get(ch);
-    token.type = kIdentifier;    
+    token.type = TokenType::Identifier;
     if(ch == '$')
     {
         //implicit-parameter-name -> $ decimal-digits
@@ -390,7 +385,7 @@ bool Tokenizer::readIdentifier(Token& token)
     }
     if(token.identifier.backtick)
     {
-        token.identifier.keyword = kNone;
+        token.identifier.keyword = Keyword::None;
         match('`');
     }
     return true;
@@ -416,7 +411,7 @@ void Tokenizer::match(wchar_t expected)
     wchar_t ch = must_get();
     tassert(ch == expected);
 }
-bool Tokenizer::readSymbol(Token& token, TokenType type)
+bool Tokenizer::readSymbol(Token& token, TokenType::T type)
 {
     token.token.push_back(must_get());
     token.type = type;
@@ -452,27 +447,27 @@ bool Tokenizer::nextImpl(Token& token)
                 return readMultilineComment(token);
             return readOperator(token);
         case ':':
-            return readSymbol(token, kColon);
+            return readSymbol(token, TokenType::Colon);
         case '[':
-            return readSymbol(token, kOpenBracket);
+            return readSymbol(token, TokenType::OpenBracket);
         case ']':
-            return readSymbol(token, kCloseBracket);
+            return readSymbol(token, TokenType::CloseBracket);
         case '(':
-            return readSymbol(token, kOpenParen);
+            return readSymbol(token, TokenType::OpenParen);
         case ')':
             if(inStringExpression)
                 return readString(token);
-            return readSymbol(token, kCloseParen);
+            return readSymbol(token, TokenType::CloseParen);
         case '{':
-            return readSymbol(token, kOpenBrace);
+            return readSymbol(token, TokenType::OpenBrace);
         case '}':
-            return readSymbol(token, kCloseBrace);
+            return readSymbol(token, TokenType::CloseBrace);
         case '@':
-            return readSymbol(token, kAttribute);
+            return readSymbol(token, TokenType::Attribute);
         case '?':
-            return readSymbol(token, kOptional);
+            return readSymbol(token, TokenType::Optional);
         case ',':
-            return readSymbol(token, kComma);
+            return readSymbol(token, TokenType::Comma);
     }
     if(isdigit(ch))
         return readNumber(token);

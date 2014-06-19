@@ -4,3 +4,7 @@ Makefile
 TestTokenizer
 cmake_install.cmake
 swift
+.ycm_extra_conf.pyc
+CMakeScripts/
+swift.build/
+swift.xcodeproj/

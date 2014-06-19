@@ -2,68 +2,133 @@
 #define TOKEN_H
 #include <vector>
 
-enum TokenType
+struct TokenType
 {
-    kEOF,
-    kIdentifier,
-    kString,
-    kInteger,
-    kFloat,
-    kComment,
-    
-    kOptional, // ?
-    kAttribute, // @
-    kColon, // :
-    kComma, // ,
-    kOperator,
-    kOpenParen, // (
-    kCloseParen, // )
-    kOpenBracket, // (
-    kCloseBracket, // )
-    kOpenBrace, // {
-    kCloseBrace, // }
-    
-    
+    enum T
+    {
+        None,
+        Identifier,
+        String,
+        Integer,
+        Float,
+        Comment,
+        
+        Optional, // ?
+        Attribute, // @
+        Colon, // :
+        Comma, // ,
+        Operator,
+        OpenParen, // (
+        CloseParen, // )
+        OpenBracket, // (
+        CloseBracket, // )
+        OpenBrace, // {
+        CloseBrace, // }
+    };
 };
-enum IntegerPrefix
+struct IntegerPrefix
 {
-    kDecimal,
-    kBinary,
-    kOctet,
-    kHexadecimal
+    enum T
+    {
+        Decimal,
+        Binary,
+        Octet,
+        Hexadecimal
+    };
 };
-enum Keyword
+struct Keyword
 {
-    //keywords used in declarations
-    kClass,
-    kDeinit,
-    kEnum,
-    kExtension,
-    kFunc,
-    kImport,
-    kInit,
-    kLet,
-    kProtocol,
-    kStatic,
-    kStruct,
-    kSubscript,
-    kTypealias,
-    kVar
+    enum T
+    {
+        //keywords used in declarations
+        Class,
+        Deinit,
+        Enum,
+        Extension,
+        Func,
+        Import,
+        Init,
+        Let,
+        Protocol,
+        Static,
+        Struct,
+        Subscript,
+        Typealias,
+        Var,
+        //Keywords used in statements
+        Break,
+        Case,
+        Continue,
+        Default,
+        Do,
+        Else,
+        Fallthrough,
+        If,
+        In,
+        For,
+        Return,
+        Switch,
+        Where,
+        While,
+        
+        //Keywords used in expressions and types:
+        As,
+        DynamicType,
+        Is,
+        New,
+        Super,
+        Self,
+        SelfU,
+        Type,
+        Column, // __COLUMN__
+        File, // __FILE__
+        Function,//__FUNCTION__
+        Line, //__LINE__.
+        
+        //Keywords reserved in particular contexts, Outside the context in which they appear in the grammar, they can be used as identifiers.
+        Associativity,
+        DidSet,
+        Get,
+        Infix,
+        Inout,
+        Left,
+        Mutating,
+        None,
+        Nonmutating,
+        Operator,
+        Override,
+        Postfix,
+        Precedence,
+        Prefix,
+        Right,
+        Set,
+        Unowned,
+        Unowned_safe,
+        Unowned_unsafe,
+        Weak,
+        WillSet
+    };
 };
-enum KeywordType
+struct KeywordType
 {
-    kNone,
-    kDeclaration,
-    kStatement,
-    kExpression,
-    kReserved
+    enum T
+    {
+        None,
+        Declaration,
+        Statement,
+        Expression,
+        Reserved
+    };
 };
-enum OperatorType
+struct OperatorType
 {
-    kUnknownOperator,
-    kPrefixUnary,
-    kInfixBinary,
-    kPostfixUnary
+    enum T
+    {
+        None,
+        PrefixUnary,
+        InfixBinary,
+        PostfixUnary
+    };
 };
 
 struct Token
@@ -80,7 +145,8 @@ struct Token
         } comment;
         struct
         {
-            KeywordType keyword;
+            KeywordType type;
+            Keyword::T keyword;
             bool backtick;
             bool implicitParameterName;
         } identifier;
@@ -97,10 +163,10 @@ struct Token
         } number;
         struct
         {
-            OperatorType type;
+            OperatorType::T type;
         } operators;
     };
-    TokenType type;
+    TokenType::T type;
     std::vector<wchar_t> token;
     const wchar_t* c_str()
     {
