@@ -9,6 +9,7 @@ enum TokenType
     kString,
     kInteger,
     kFloat,
+    kComment,
     
     kOptional, // ?
     kAttribute, // @
@@ -78,6 +79,17 @@ struct Token
             bool backtick;
             bool implicitParameterName;
         } identifier;
+        struct
+        {
+            bool expressionFollowed;
+        } string;
+        struct
+        {
+            int base;
+            bool sign;
+            bool fraction;
+            bool exponent;
+        } number;
     };
     TokenType type;
     std::vector<wchar_t> token;
