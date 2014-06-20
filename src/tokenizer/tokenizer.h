@@ -20,6 +20,7 @@ struct KeywordInfo
 };
 class Tokenizer
 {
+public:
     struct State
     {
         const wchar_t* cursor;
@@ -33,6 +34,20 @@ public:
     void set(const wchar_t* data);
     bool next(Token& token);
     bool peek(Token& token);
+
+
+    /**
+     * Save current state for restoring later
+     */
+    State save();
+    /**
+     * Restore the specified state
+     */
+    void restore(const State& state);
+    /**
+     * Restore the state that used to parse given token
+     */
+    void restore(const Token& token);
 private:
     bool nextImpl(Token& token);
     void resetToken(Token& token);

@@ -12,7 +12,9 @@ class StringLiteral;
 class CommentNode;
 class UnaryOperator;
 class BinaryOperator;
+class Identifier;
 class Node;
+class InOutParameter;
 
 class NodeFactory
 {
@@ -27,6 +29,8 @@ public:
     virtual UnaryOperator* createUnary(const std::wstring& op, Node* operand);
     virtual BinaryOperator* createBinary(const std::wstring& op, Node* lhs, Node* rhs);
 
+    virtual Identifier* createIdentifier(const std::wstring& op);
+    virtual InOutParameter* createInOutParameter(Identifier* identifier);
 
 };
 

@@ -3,6 +3,7 @@
 #include "swift_conf.h"
 #include <vector>
 #include <cstring>
+#include <wchar.h>
 
 SWIFT_NS_BEGIN
 
@@ -24,8 +25,8 @@ struct TokenType
         Operator,
         OpenParen, // (
         CloseParen, // )
-        OpenBracket, // (
-        CloseBracket, // )
+        OpenBracket, // [
+        CloseBracket, // ]
         OpenBrace, // {
         CloseBrace, // }
     };
@@ -182,6 +183,10 @@ struct Token
         if(token.empty() || token.back() != '\0')
             token.push_back(0);
         return &token.front();
+    }
+    bool operator ==(const wchar_t*str)
+    {
+        return !wcscmp(c_str(), str);
     }
 };
 

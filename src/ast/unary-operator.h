@@ -15,6 +15,14 @@ private:
     std::wstring op;
 };
 
+
+class Identifier;
+class InOutParameter : public UnaryOperator
+{
+public:
+    InOutParameter(Identifier* identifier);
+};
+
 SWIFT_NS_END
 
 #endif//UNARY_OPERATOR_H
