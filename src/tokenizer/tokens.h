@@ -6,7 +6,7 @@ struct TokenType
 {
     enum T
     {
-        None,
+        _,
         Identifier,
         String,
         Integer,
@@ -40,6 +40,7 @@ struct Keyword
 {
     enum T
     {
+        _,
         //keywords used in declarations
         Class,
         Deinit,
@@ -113,7 +114,7 @@ struct KeywordType
 {
     enum T
     {
-        None,
+        _,
         Declaration,
         Statement,
         Expression,
@@ -124,7 +125,7 @@ struct OperatorType
 {
     enum T
     {
-        None,
+        _,
         PrefixUnary,
         InfixBinary,
         PostfixUnary
@@ -136,8 +137,6 @@ struct Token
     //“Operators are made up of one or more of the following characters: /, =, -, +, !, *, %, <, >, &, |, ^, ~, and .. That said, the tokens =, ->, //, /*, */, ., and the unary prefix operator & are reserved. ”
     union
     {
-        
-        bool customOperator;
         struct
         {
             bool multiline;
@@ -145,7 +144,7 @@ struct Token
         } comment;
         struct
         {
-            KeywordType type;
+            KeywordType::T type;
             Keyword::T keyword;
             bool backtick;
             bool implicitParameterName;
@@ -168,8 +167,16 @@ struct Token
     };
     TokenType::T type;
     std::vector<wchar_t> token;
+    size_t size;
+    void append(wchar_t ch)
+    {
+        token.push_back(ch);
+        size++;
+    }
     const wchar_t* c_str()
     {
+        if(token.empty() || token.back() != '\0')
+            token.push_back(0);
         return &token.front();
     }
 };

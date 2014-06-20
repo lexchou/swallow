@@ -2,6 +2,8 @@
 #define TOKENIZER_H
 #include "tokens.h"
 #include <cstring>
+#include <string>
+#include <map>
 
 
 struct TokenizerError
@@ -10,7 +12,11 @@ struct TokenizerError
     int column;
     int error_code;
 };
-
+struct KeywordInfo
+{
+    Keyword::T keyword;
+    KeywordType::T type;
+};
 class Tokenizer
 {
 public:
@@ -47,7 +53,7 @@ private:
     bool inStringExpression;
     size_t size;
     const wchar_t* cursor;
-    
+    std::map<std::wstring, KeywordInfo> keywords;
 };
 
 #endif//TOKENIZER_H

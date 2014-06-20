@@ -197,7 +197,55 @@ public:
     
     void testKeywords()
     {
+        Tokenizer tokenizer(L"");
+        Token token;
         
+        tokenizer.set(L"for value in $1 `class`");
+        
+        CPPUNIT_ASSERT(tokenizer.next(token));
+        CPPUNIT_ASSERT_EQUAL(TokenType::Identifier, token.type);
+        ASSERT_EQUALS(L"for", token.c_str());
+        CPPUNIT_ASSERT(!token.identifier.backtick);
+        CPPUNIT_ASSERT(!token.identifier.implicitParameterName);
+        CPPUNIT_ASSERT_EQUAL(KeywordType::Statement, token.identifier.type);
+        CPPUNIT_ASSERT_EQUAL(Keyword::For, token.identifier.keyword);
+        
+        CPPUNIT_ASSERT(tokenizer.next(token));
+        CPPUNIT_ASSERT_EQUAL(TokenType::Identifier, token.type);
+        ASSERT_EQUALS(L"value", token.c_str());
+        CPPUNIT_ASSERT(!token.identifier.backtick);
+        CPPUNIT_ASSERT(!token.identifier.implicitParameterName);
+        CPPUNIT_ASSERT_EQUAL(KeywordType::_, token.identifier.type);
+        CPPUNIT_ASSERT_EQUAL(Keyword::_, token.identifier.keyword);
+        
+        CPPUNIT_ASSERT(tokenizer.next(token));
+        CPPUNIT_ASSERT_EQUAL(TokenType::Identifier, token.type);
+        ASSERT_EQUALS(L"in", token.c_str());
+        CPPUNIT_ASSERT(!token.identifier.backtick);
+        CPPUNIT_ASSERT(!token.identifier.implicitParameterName);
+        CPPUNIT_ASSERT_EQUAL(KeywordType::Statement, token.identifier.type);
+        CPPUNIT_ASSERT_EQUAL(Keyword::In, token.identifier.keyword);
+        
+        
+        CPPUNIT_ASSERT(tokenizer.next(token));
+        CPPUNIT_ASSERT_EQUAL(TokenType::Identifier, token.type);
+        ASSERT_EQUALS(L"$1", token.c_str());
+        CPPUNIT_ASSERT(!token.identifier.backtick);
+        CPPUNIT_ASSERT(token.identifier.implicitParameterName);
+        CPPUNIT_ASSERT_EQUAL(KeywordType::_, token.identifier.type);
+        CPPUNIT_ASSERT_EQUAL(Keyword::_, token.identifier.keyword);
+        
+        
+        CPPUNIT_ASSERT(tokenizer.next(token));
+        CPPUNIT_ASSERT_EQUAL(TokenType::Identifier, token.type);
+        ASSERT_EQUALS(L"class", token.c_str());
+        CPPUNIT_ASSERT(token.identifier.backtick);
+        CPPUNIT_ASSERT(!token.identifier.implicitParameterName);
+        CPPUNIT_ASSERT_EQUAL(KeywordType::_, token.identifier.type);
+        CPPUNIT_ASSERT_EQUAL(Keyword::_, token.identifier.keyword);
+        
+        CPPUNIT_ASSERT(!tokenizer.next(token));
+
     }
     
     void testCustomizedOperators()

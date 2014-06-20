@@ -7,6 +7,92 @@ Tokenizer::Tokenizer(const wchar_t* data)
 {
     this->data = NULL;
     set(data);
+    
+    //initialize keyword information
+    KeywordType::T D = KeywordType::Declaration;
+    KeywordType::T S = KeywordType::Statement;
+    KeywordType::T E = KeywordType::Expression;
+    KeywordType::T R = KeywordType::Reserved;
+    
+    struct {
+        const wchar_t* name;
+        KeywordType::T type;
+        Keyword::T keyword;
+    } keywords[] = {
+        //Declaration keywords
+        {L"class",          D, Keyword::Class},
+        {L"deinit",         D, Keyword::Deinit},
+        {L"enum",           D, Keyword::Enum},
+        {L"extension",      D, Keyword::Extension},
+        {L"func",           D, Keyword::Func},
+        {L"import",         D, Keyword::Import},
+        {L"init",           D, Keyword::Init},
+        {L"let",            D, Keyword::Let},
+        {L"protocol",       D, Keyword::Protocol},
+        {L"static",         D, Keyword::Static},
+        {L"struct",         D, Keyword::Struct},
+        {L"subscript",      D, Keyword::Subscript},
+        {L"typealias",      D, Keyword::Typealias},
+        {L"var",            D, Keyword::Var},
+        //Statement keywords
+        {L"break",          S, Keyword::Break},
+        {L"case",           S, Keyword::Case},
+        {L"continue",       S, Keyword::Continue},
+        {L"default",        S, Keyword::Default},
+        {L"do",             S, Keyword::Do},
+        {L"else",           S, Keyword::Else},
+        {L"fallthrough",    S, Keyword::Fallthrough},
+        {L"if",             S, Keyword::If},
+        {L"in",             S, Keyword::In},
+        {L"for",            S, Keyword::For},
+        {L"return",         S, Keyword::Return},
+        {L"switch",         S, Keyword::Switch},
+        {L"where",          S, Keyword::Where},
+        {L"while",          S, Keyword::While},
+        //Expression and type keywords
+        {L"as",             E, Keyword::As},
+        {L"dynamicType",    E, Keyword::DynamicType},
+        {L"is",             E, Keyword::Is},
+        {L"new",            E, Keyword::New},
+        {L"super",          E, Keyword::Super},
+        {L"self",           E, Keyword::Self},
+        {L"Self",           E, Keyword::SelfU},
+        {L"Type",           E, Keyword::Type},
+        {L"__COLUMN__",     E, Keyword::Column},
+        {L"__FILE__",       E, Keyword::File},
+        {L"__FUNCTION__",   E, Keyword::Function},
+        {L"__LINE__",       E, Keyword::Line},
+        //Reserved keywords
+        {L"associativity",  R, Keyword::Associativity},
+        {L"didSet",         R, Keyword::DidSet},
+        {L"get",            R, Keyword::Get},
+        {L"infix",          R, Keyword::Infix},
+        {L"inout",          R, Keyword::Inout},
+        {L"left",           R, Keyword::Left},
+        {L"mutating",       R, Keyword::Mutating},
+        {L"none",           R, Keyword::None},
+        {L"nonmutating",    R, Keyword::Nonmutating},
+        {L"operator",       R, Keyword::Operator},
+        {L"override",       R, Keyword::Override},
+        {L"postfix",        R, Keyword::Postfix},
+        {L"precedence",     R, Keyword::Precedence},
+        {L"prefix",         R, Keyword::Prefix},
+        {L"right",          R, Keyword::Right},
+        {L"set",            R, Keyword::Set},
+        {L"unowned",        R, Keyword::Unowned},
+        {L"unowned(safe)",  R, Keyword::Unowned_safe},
+        {L"unowned(unsafe)",R, Keyword::Unowned_unsafe},
+        {L"weak",           R, Keyword::Weak},
+        {L"willSet",        R, Keyword::WillSet}
+    };
+    
+    for(int i = 0; i < sizeof(keywords) / sizeof(keywords[0]); i++)
+    {
+        std::wstring name = keywords[i].name;
+        KeywordInfo info = {keywords[i].keyword, keywords[i].type};
+        this->keywords.insert(std::make_pair(name, info));
+    }
+    
 }
 void Tokenizer::set(const wchar_t* data)
 {
@@ -38,12 +124,9 @@ Tokenizer::~Tokenizer()
 
 void Tokenizer::resetToken(Token& token)
 {
-    token.customOperator = false;
-    token.comment.nestedLevels = 0;
-    token.comment.multiline = 0;
-    
-    token.type = TokenType::None;
+    token.type = TokenType::_;
     token.token.clear();
+    token.size = 0;
 }
 bool Tokenizer::peek(wchar_t &ch)
 {
@@ -82,7 +165,7 @@ bool Tokenizer::readOperator(Token& token, int max)
 {
     wchar_t ch;
     token.type = TokenType::Operator;
-    token.operators.type = OperatorType::None;
+    token.operators.type = OperatorType::_;
     bool spaceAfter = false;
     bool spaceBefore = false;
     
@@ -107,7 +190,7 @@ bool Tokenizer::readOperator(Token& token, int max)
             unget();
             break;
         }
-        token.token.push_back(ch);
+        token.append(ch);
         if(!spaceBefore && (ch == '?' || ch == '!'))
         {
             //no white before, ?! will be used as syntax sugar operator, only one character
@@ -175,7 +258,7 @@ bool Tokenizer::readMultilineComment(Token& token)
                 break;
             }
         }
-        token.token.push_back(ch);
+        token.append(ch);
     }
     
     return true;
@@ -193,7 +276,7 @@ bool Tokenizer::readComment(Token& token)
     {
         if(ch == '\n')
             break;
-        token.token.push_back(ch);
+        token.append(ch);
     }
     return true;
 }
@@ -212,7 +295,7 @@ bool Tokenizer::readString(Token& token)
             break;
         if(ch != '\\')
         {
-            token.token.push_back(ch);
+            token.append(ch);
             continue;
         }
         ch = must_get();
@@ -227,25 +310,25 @@ bool Tokenizer::readString(Token& token)
         switch(ch)
         {
             case '0':
-                token.token.push_back('\0');
+                token.append('\0');
                 break;
             case '\\':
-                token.token.push_back('\\');
+                token.append('\\');
                 break;
             case 't':
-                token.token.push_back('\t');
+                token.append('\t');
                 break;
             case 'n':
-                token.token.push_back('\n');
+                token.append('\n');
                 break;
             case 'r':
-                token.token.push_back('\r');
+                token.append('\r');
                 break;
             case '\"':
-                token.token.push_back('\"');
+                token.append('\"');
                 break;
             case '\'':
-                token.token.push_back('\'');
+                token.append('\'');
                 break;
             case 'U'://escaped-character → \Uhexadecimal-digit hexadecimal-digit hexadecimal-digit hexadecimal-digit hexadecimal-digit hexadecimal-digit hexadecimal-digit hexadecimal-digit”
                 len = 4;  // 8 hexadecimal digits
@@ -267,7 +350,7 @@ bool Tokenizer::readString(Token& token)
                         ch = ch - 'A' + 0xa;
                     r = (r << 4) | ch;
                 }
-                token.token.push_back(r);
+                token.append(r);
                 len = 0;
                 break;
             }
@@ -281,7 +364,7 @@ bool Tokenizer::readNumberLiteral(Token& token, int base)
 {
     wchar_t ch = must_get();
     tassert(check_digit(base, ch));
-    token.token.push_back(ch);
+    token.append(ch);
     while(get(ch))
     {
         if(!check_digit(base, ch))
@@ -289,7 +372,7 @@ bool Tokenizer::readNumberLiteral(Token& token, int base)
             unget();
             break;
         }
-        token.token.push_back(ch);
+        token.append(ch);
     }
     return true;
 }
@@ -305,20 +388,20 @@ bool Tokenizer::readNumber(Token& token)
     
     if(ch == '+' || ch == '-')
     {
-        token.token.push_back(ch);
+        token.append(ch);
         ch = must_get();
         token.number.sign = true;
     }
-    token.token.push_back(ch);
+    token.append(ch);
         
     if(!peek(ch))
         return true;
     int base = 10;
     switch(ch)
     {
-        case 'b': base = 2; token.token.push_back(must_get()); break;
-        case 'o': base = 8; token.token.push_back(must_get()); break;
-        case 'x': base = 16; token.token.push_back(must_get()); break;
+        case 'b': base = 2; token.append(must_get()); break;
+        case 'o': base = 8; token.append(must_get()); break;
+        case 'x': base = 16; token.append(must_get()); break;
         default: if(!isdigit(ch)) return true;
     }
     token.number.base = base;
@@ -326,20 +409,20 @@ bool Tokenizer::readNumber(Token& token)
     if(peek(ch) && ch == '.')//read fraction part
     {
         token.type = TokenType::Float;
-        token.token.push_back(must_get());
+        token.append(must_get());
         readNumberLiteral(token, base);
     }
     if(peek(ch))
     {
         if(base == 10 && ch == 'e')
         {
-            token.token.push_back(must_get());
+            token.append(must_get());
             readNumberLiteral(token, base);
             token.number.exponent = true;
         }
         else if(base == 16 && ch == 'p')
         {
-            token.token.push_back(must_get());
+            token.append(must_get());
             readNumberLiteral(token, base);
             token.number.exponent = true;
         }
@@ -351,13 +434,17 @@ bool Tokenizer::readIdentifier(Token& token)
     wchar_t ch;
     get(ch);
     token.type = TokenType::Identifier;
+    token.identifier.backtick = false;
+    token.identifier.implicitParameterName = false;
+    token.identifier.keyword = Keyword::_;
+    token.identifier.type = KeywordType::_;
     if(ch == '$')
     {
         //implicit-parameter-name -> $ decimal-digits
-        token.token.push_back(ch);
+        token.append(ch);
         ch = must_get();
         tassert(isdigit(ch));
-        token.token.push_back(ch);
+        token.append(ch);
         while(get(ch))
         {
             if(!isdigit(ch))
@@ -365,7 +452,7 @@ bool Tokenizer::readIdentifier(Token& token)
                 unget();
                 break;
             }
-            token.token.push_back(ch);
+            token.append(ch);
         }
         token.identifier.implicitParameterName = true;
         return true;
@@ -373,7 +460,7 @@ bool Tokenizer::readIdentifier(Token& token)
     if(ch == '`')
         token.identifier.backtick = true;
     else
-        token.token.push_back(ch);
+        token.append(ch);
     while(get(ch))
     {
         if(!isIdentifierCharacter(ch))
@@ -381,12 +468,22 @@ bool Tokenizer::readIdentifier(Token& token)
             unget();
             break;
         }
-        token.token.push_back(ch);
+        token.append(ch);
     }
     if(token.identifier.backtick)
     {
-        token.identifier.keyword = Keyword::None;
         match('`');
+    }
+    if(!token.identifier.backtick && !token.identifier.implicitParameterName)
+    {
+        //resolve keyword
+        using namespace std;
+        map<wstring, KeywordInfo>::iterator iter = keywords.find(token.c_str());
+        if(iter != keywords.end())
+        {
+            token.identifier.keyword = iter->second.keyword;
+            token.identifier.type = iter->second.type;
+        }
     }
     return true;
 }
@@ -413,7 +510,7 @@ void Tokenizer::match(wchar_t expected)
 }
 bool Tokenizer::readSymbol(Token& token, TokenType::T type)
 {
-    token.token.push_back(must_get());
+    token.append(must_get());
     token.type = type;
     return true;
 }
@@ -422,7 +519,7 @@ bool Tokenizer::next(Token& token)
     resetToken(token);
     skipSpaces();
     bool ret = nextImpl(token);
-    token.token.push_back(0);
+    token.append(0);
     return ret;
 }
 bool Tokenizer::nextImpl(Token& token)
