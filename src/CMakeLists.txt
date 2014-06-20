@@ -8,6 +8,7 @@ FIND_PATH(CPPUNIT_INCLUDE_DIR cppunit/TestCase.h
 FIND_PATH(CPPUNIT_LIBRARIES libcppunit.a
     /usr/local/lib
     /usr/lib
+    /usr/lib/x86_64-linux-gnu/
 )
 LINK_DIRECTORIES(${CPPUNIT_LIBRARIES})
 
@@ -25,7 +26,15 @@ cmake_policy(SET CMP0015 OLD)
 
 
 SET(SWIFT_TOKENIZER_SRC tokenizer/tokenizer.cpp)
-SET(SWIFT_PARSER_SRC tokenizer/tokenizer.cpp parser/parser.cpp)
+SET(SWIFT_PARSER_SRC ${SWIFT_TOKENIZER_SRC}
+    parser/parser.cpp
+    ast/nodes.cpp
+    ast/node-factory.cpp
+    ast/binary-operator.cpp
+    ast/unary-operator.cpp
+    ast/literal-nodes.cpp
+    parser/symbol-registry.cpp
+    )
 SET(SWIFT_SRC main.cpp tokenizer/tokenizer.cpp)
 
 

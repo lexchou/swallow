@@ -1,10 +1,13 @@
-#include "tokenizer/tokens.h"
-#include "tokenizer/tokenizer.h"
+#include "parser/parser.h"
+#include "parser/symbol-registry.h"
+#include "ast/ast.h"
+#include "ast/node-factory.h"
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
 #include <cppunit/ui/text/TestRunner.h>
 #include <iostream>
 #include <cstdlib>
+using namespace Swift;
 
 #define ASSERT_EQUALS(E, A) wcs_assertEquals((E), (A), __FILE__, __LINE__)
 void wcs_assertEquals(const wchar_t* expected, const wchar_t* actual, const char* file, int line)
@@ -21,16 +24,30 @@ void wcs_assertEquals(const wchar_t* expected, const wchar_t* actual, const char
 }
 
 
-class TestParser : public CppUnit::TestFixture
+class TestExpression : public CppUnit::TestFixture
 {
-    CPPUNIT_TEST_SUITE(TestParser);
+    CPPUNIT_TEST_SUITE(TestExpression);
+    CPPUNIT_TEST(testLiteral);
     CPPUNIT_TEST_SUITE_END();
 public:
    
+    void testLiteral()
+    {
+        SymbolRegistry sregistry;
+        NodeFactory nodeFactory;
+        Parser parser(&nodeFactory, &sregistry);
+        Node* root = parser.parse(L"3");
+        CPPUNIT_ASSERT(root != NULL);
+        IntegerLiteral* n = dynamic_cast<IntegerLiteral*>(root);
+        CPPUNIT_ASSERT(n != NULL);
+
+        ASSERT_EQUALS(L"3", n->toString());
+
+    }
 };
 ;
 
-CPPUNIT_TEST_SUITE_NAMED_REGISTRATION(TestParser, "alltest");
+CPPUNIT_TEST_SUITE_NAMED_REGISTRATION(TestExpression, "alltest");
 int main(int argc, char** argv)
 {
     CppUnit::TextUi::TestRunner runner;

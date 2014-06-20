@@ -1,6 +1,10 @@
 #ifndef TOKEN_H
 #define TOKEN_H
+#include "swift_conf.h"
 #include <vector>
+#include <cstring>
+
+SWIFT_NS_BEGIN
 
 struct TokenType
 {
@@ -181,4 +185,5 @@ struct Token
     }
 };
 
+SWIFT_NS_END
 #endif//TOKEN_H

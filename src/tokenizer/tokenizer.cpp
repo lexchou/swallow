@@ -3,6 +3,8 @@
 #include <cstring>
 #include <wchar.h>
 #include <ctype.h>
+using namespace Swift;
+
 Tokenizer::Tokenizer(const wchar_t* data)
 {
     this->data = NULL;
@@ -103,18 +105,18 @@ void Tokenizer::set(const wchar_t* data)
     //reset state
     this->data = NULL;
     size = 0;
-    cursor = 0;
     end = 0;
-    hasSpace = false;
-    inStringExpression = false;
+    state.cursor = 0;
+    state.hasSpace = false;
+    state.inStringExpression = false;
     //copy string
     if(data)
     {
         size = wcslen(data);
         this->data = new wchar_t[size + 1];
         memcpy(this->data, data, (size + 1) * sizeof(wchar_t));
-        cursor = this->data;
-        end = cursor + size;
+        state.cursor = this->data;
+        end = state.cursor + size;
     }
 }
 Tokenizer::~Tokenizer()
@@ -137,14 +139,14 @@ bool Tokenizer::peek(wchar_t &ch)
 }
 bool Tokenizer::get(wchar_t &ch)
 {
-    if(cursor >= end)
+    if(state.cursor >= end)
         return false;
-    ch = *cursor++;
+    ch = *state.cursor++;
     return true;
 }
 void Tokenizer::unget()
 {
-    cursor--;
+    state.cursor--;
 }
 bool Tokenizer::skipSpaces()
 {
@@ -169,9 +171,9 @@ bool Tokenizer::readOperator(Token& token, int max)
     bool spaceAfter = false;
     bool spaceBefore = false;
     
-    if(cursor > data)
+    if(state.cursor > data)
     {
-        ch = cursor[-1];
+        ch = state.cursor[-1];
         spaceBefore = iswhite(ch) || ch == '{' || ch == '(' || ch == '[' || ch == ',' || ch == ';' || ch == ':';
     }
     else
@@ -197,9 +199,9 @@ bool Tokenizer::readOperator(Token& token, int max)
             break;
         }
     }
-    if(cursor < data + size)
+    if(state.cursor < data + size)
     {
-        ch = *cursor;
+        ch = *state.cursor;
         spaceAfter = iswhite(ch) || ch == '}' || ch == ')' || ch == ']' || ch == ',' || ch == ';' || ch == ':';
     }
     else
@@ -220,7 +222,7 @@ bool Tokenizer::readOperator(Token& token, int max)
         token.operators.type = OperatorType::PostfixUnary;
     }
     
-    if(!spaceBefore && (cursor < (data + size)) && *cursor == '.')
+    if(!spaceBefore && (state.cursor < (data + size)) && *state.cursor == '.')
     {
         //If an operator has no whitespace on the left but is followed immediately by a dot (.), it is treated as a postfix unary operator. As an example, the ++ operator in a++.b is treated as a postfix unary operator (a++ . b rather than a ++ .b).
         token.operators.type = OperatorType::PostfixUnary;
@@ -284,7 +286,7 @@ bool Tokenizer::readString(Token& token)
 {
     wchar_t ch;
     int len = 0;
-    inStringExpression = false;
+    state.inStringExpression = false;
     token.type = TokenType::String;
     token.string.expressionFollowed = false;
     
@@ -302,7 +304,7 @@ bool Tokenizer::readString(Token& token)
         if(ch == '(')//“quoted-text-item → \(expression)”
         {
             token.string.expressionFollowed = true;
-            inStringExpression = true;
+            state.inStringExpression = true;
             break;
         }
         
@@ -514,6 +516,13 @@ bool Tokenizer::readSymbol(Token& token, TokenType::T type)
     token.type = type;
     return true;
 }
+bool Tokenizer::peek(Token& token)
+{
+    State state = this->state;
+    bool ret = next(token);
+    this->state = state;
+    return ret;
+}
 bool Tokenizer::next(Token& token)
 {
     resetToken(token);
@@ -552,7 +561,7 @@ bool Tokenizer::nextImpl(Token& token)
         case '(':
             return readSymbol(token, TokenType::OpenParen);
         case ')':
-            if(inStringExpression)
+            if(state.inStringExpression)
                 return readString(token);
             return readSymbol(token, TokenType::CloseParen);
         case '{':
@@ -577,7 +586,7 @@ bool Tokenizer::nextImpl(Token& token)
             return readNumber(token);
         }
         unget();
-        ch = *cursor;
+        ch = *state.cursor;
     }
     
     if(isOperator(ch))

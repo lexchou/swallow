@@ -5,6 +5,7 @@
 #include <string>
 #include <map>
 
+SWIFT_NS_BEGIN
 
 struct TokenizerError
 {
@@ -19,12 +20,19 @@ struct KeywordInfo
 };
 class Tokenizer
 {
+    struct State
+    {
+        const wchar_t* cursor;
+        bool hasSpace;
+        bool inStringExpression;
+    };
 public:
     Tokenizer(const wchar_t* data);
     ~Tokenizer();
 public:
     void set(const wchar_t* data);
     bool next(Token& token);
+    bool peek(Token& token);
 private:
     bool nextImpl(Token& token);
     void resetToken(Token& token);
@@ -49,11 +57,11 @@ private:
 private:
     wchar_t* data;
     const wchar_t* end;
-    bool hasSpace;
-    bool inStringExpression;
     size_t size;
-    const wchar_t* cursor;
+    State state;
     std::map<std::wstring, KeywordInfo> keywords;
 };
 
+
+SWIFT_NS_END
 #endif//TOKENIZER_H
