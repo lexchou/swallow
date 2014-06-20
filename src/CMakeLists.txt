@@ -25,11 +25,16 @@ cmake_policy(SET CMP0015 OLD)
 
 
 SET(SWIFT_TOKENIZER_SRC tokenizer/tokenizer.cpp)
+SET(SWIFT_PARSER_SRC tokenizer/tokenizer.cpp parser/parser.cpp)
 SET(SWIFT_SRC main.cpp tokenizer/tokenizer.cpp)
 
+
+ADD_EXECUTABLE(TestParser tests/test-parser.cpp ${SWIFT_TOKENIZER_SRC} ${SWIFT_PARSER_SRC})
+target_link_libraries(TestParser cppunit)
 
 ADD_EXECUTABLE(TestTokenizer tests/test-tokenizer.cpp ${SWIFT_TOKENIZER_SRC})
 target_link_libraries(TestTokenizer cppunit)
 ADD_TEST(NAME TestTokenizer COMMAND TestTokenizer)
+ADD_TEST(NAME TestParser COMMAND TestParser)
 
 ADD_EXECUTABLE(swift ${SWIFT_SRC})
