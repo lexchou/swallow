@@ -34,6 +34,8 @@ SET(SWIFT_PARSER_SRC ${SWIFT_TOKENIZER_SRC}
     ast/node-factory.cpp
     ast/binary-operator.cpp
     ast/unary-operator.cpp
+	ast/member-access.cpp
+	ast/subscript.cpp
 
     ast/literal-nodes.cpp
     ast/dictionary-literal.cpp

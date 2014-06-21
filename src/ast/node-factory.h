@@ -19,6 +19,8 @@ class InOutParameter;
 class ArrayLiteral;
 class DictionaryLiteral;
 class CompileConstant;
+class MemberAccess;
+class Subscript;
 
 class NodeFactory
 {
@@ -39,6 +41,8 @@ public:
     virtual ArrayLiteral* createArrayLiteral();
     virtual DictionaryLiteral* createDictionaryLiteral();
     virtual CompileConstant* createCompilecConstant(const std::wstring& name, const std::wstring& value);
+    virtual MemberAccess* createMemberAccess(Identifier* self, Identifier* field);
+    virtual Subscript* createSubscript(Identifier* self, ExpressionNode* index);
 };
 
 

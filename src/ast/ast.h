@@ -9,4 +9,6 @@
 
 #include "identifier.h"
 #include "comment-node.h"
+#include "member-access.h"
+#include "subscript.h"
 #endif//AST_H

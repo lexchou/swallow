@@ -57,3 +57,12 @@ CompileConstant* NodeFactory::createCompilecConstant(const std::wstring& name, c
 {
     return new CompileConstant(name, value);
 }
+
+MemberAccess* NodeFactory::createMemberAccess(Identifier* self, Identifier* field)
+{
+    return new MemberAccess(self, field);
+}
+Subscript* NodeFactory::createSubscript(Identifier* self, ExpressionNode* index)
+{
+    return new Subscript(self, index);
+}

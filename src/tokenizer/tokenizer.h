@@ -54,6 +54,10 @@ private:
     void match(wchar_t ch);
     
     
+    bool hasWhiteLeft(const wchar_t* cursor);
+    bool hasWhiteRight(const wchar_t* cursor);
+    OperatorType::T calculateOperatorType(const wchar_t* begin, const wchar_t* end);
+    
     bool readSymbol(Token& token, TokenType::T type);
     bool readOperator(Token& token, int max = 0);
     bool readComment(Token& token);

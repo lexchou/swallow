@@ -23,10 +23,31 @@ void wcs_assertEquals(const wchar_t* expected, const wchar_t* actual, const char
     CPPUNIT_NS::Asserter::failNotEqual( expected2, actual2, CPPUNIT_NS::SourceLine(file, line), "");
 }
 
-
-class TestExpression : public CppUnit::TestFixture
+class TestOperatorExpression : public CppUnit::TestFixture
 {
-    CPPUNIT_TEST_SUITE(TestExpression);
+    CPPUNIT_TEST_SUITE(TestOperatorExpression);
+    CPPUNIT_TEST(testAdd);
+    CPPUNIT_TEST_SUITE_END();
+public:
+    void testAdd()
+    {
+        SymbolRegistry sregistry;
+        NodeFactory nodeFactory;
+        Parser parser(&nodeFactory, &sregistry);
+        Node* root = parser.parse(L"3+4*5");
+        CPPUNIT_ASSERT(root != NULL);
+        BinaryOperator* n = dynamic_cast<BinaryOperator*>(root);
+        CPPUNIT_ASSERT(n != NULL);
+        CPPUNIT_ASSERT_EQUAL(2, n->numChildren());
+        
+    }
+};
+CPPUNIT_TEST_SUITE_NAMED_REGISTRATION(TestOperatorExpression, "alltest");
+
+
+class TestLiteralExpression : public CppUnit::TestFixture
+{
+    CPPUNIT_TEST_SUITE(TestLiteralExpression);
     CPPUNIT_TEST(testLiteral);
     CPPUNIT_TEST(testCompileConstants);
     CPPUNIT_TEST(testArrayLiteral);
@@ -162,7 +183,7 @@ public:
 };
 ;
 
-CPPUNIT_TEST_SUITE_NAMED_REGISTRATION(TestExpression, "alltest");
+CPPUNIT_TEST_SUITE_NAMED_REGISTRATION(TestLiteralExpression, "alltest");
 int main(int argc, char** argv)
 {
     CppUnit::TextUi::TestRunner runner;

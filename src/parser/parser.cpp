@@ -147,18 +147,27 @@ GRAMMAR OF A POSTFIX EXPRESSION
 */
 ExpressionNode* Parser::parsePostfixExpression()
 {
-// postfix-expression → primary-expression
-// postfix-expression → postfix-expression postfix-operator
-// postfix-expression → function-call-expression
-// postfix-expression → initializer-expression
-// postfix-expression → explicit-member-expression
-// postfix-expression → postfix-self-expression
-// postfix-expression → dynamic-type-expression
-// postfix-expression → subscript-expression
-// postfix-expression → forced-value-expression
-// postfix-expression → optional-chaining-expression
-
+    // postfix-expression → primary-expression
     return parsePrimaryExpression();
+    // postfix-expression → postfix-expression postfix-operator
+    //TODO
+    // postfix-expression → function-call-expression
+    //TODO
+    // postfix-expression → initializer-expression
+    //TODO
+    // postfix-expression → explicit-member-expression
+    //TODO
+    // postfix-expression → postfix-self-expression
+    //TODO
+    // postfix-expression → dynamic-type-expression
+    //TODO
+    // postfix-expression → subscript-expression
+    //TODO
+    // postfix-expression → forced-value-expression
+    //TODO
+    // postfix-expression → optional-chaining-expression
+    //TODO
+
 }
 
 /*
@@ -209,8 +218,89 @@ ExpressionNode* Parser::parsePrimaryExpression()
         default:
             break;
     }
-
+    // primary-expression → self-expression
+    if(token.type == TokenType::Identifier && token.identifier.keyword == Keyword::Self)
+        return parseSelfExpression();
+    // primary-expression → superclass-expression
+    if(token.type == TokenType::Identifier && token.identifier.keyword == Keyword::Super)
+        return parseSuperExpression();
+    // primary-expression → closure-expression
+    //TODO : not implemeneted
     
+    // primary-expression → parenthesized-expression
+    //TODO : not implemeneted
+    
+    // primary-expression → implicit-member-expression
+    //TODO : not implemeneted
+    
+    // primary-expression → wildcard-expression
+    if(token == L"_")
+    {
+        tokenizer->next(token);
+        return nodeFactory->createIdentifier(L"_");
+    }
+    unexpected(token);
+    return NULL;
+}
+/*
+  GRAMMAR OF A SELF EXPRESSION
+ 
+ ‌ self-expression → self
+ ‌ self-expression → self.identifier
+ ‌ self-expression → self[expression]
+ ‌ self-expression → self.init
+ */
+ExpressionNode* Parser::parseSelfExpression()
+{
+    Token token;
+    this->expect_identifier(token);
+    CHECK_EOF(tokenizer->next(token));
+    Identifier* self = nodeFactory->createIdentifier(L"self");
+    if(token == L".")
+    {
+        expect_identifier(token);
+        Identifier* field = nodeFactory->createIdentifier(token.c_str());
+        MemberAccess* ret = nodeFactory->createMemberAccess(self, field);
+        return ret;
+    }
+    else if(token == L"[")
+    {
+        ExpressionNode* expr = this->parseExpression();
+        Subscript* sub = nodeFactory->createSubscript(self, expr);
+        return sub;
+    }
+    else
+    {
+        tokenizer->restore(token);
+        return self;
+    }
+}
+/*
+ superclass-expression → superclass-method-expression superclass-subscript-expression  superclass-initializer-expression
+‌ superclass-method-expression → super.identifier
+‌ superclass-subscript-expression → super[expression]
+‌ superclass-initializer-expression → super.init
+*/
+ExpressionNode* Parser::parseSuperExpression()
+{
+    Token token;
+    this->expect_identifier(token);
+    CHECK_EOF(tokenizer->next(token));
+    Identifier* super = nodeFactory->createIdentifier(L"super");
+    if(token == L".")
+    {
+        expect_identifier(token);
+        Identifier* field = nodeFactory->createIdentifier(token.c_str());
+        MemberAccess* ret = nodeFactory->createMemberAccess(super, field);
+        return ret;
+    }
+    else if(token == L"[")
+    {
+        ExpressionNode* expr = this->parseExpression();
+        Subscript* sub = nodeFactory->createSubscript(super, expr);
+        return sub;
+    }
+    unexpected(token);
     return NULL;
 }
 
@@ -361,7 +451,23 @@ std::pair<ExpressionNode*, ExpressionNode*> Parser::parseDictionaryLiteralItem()
     ExpressionNode* value = parseExpression();
     return std::make_pair(key, value);
 }
+
+/*
+ expression → prefix-expression binary-expressions opt
+‌ expression-list → expression  expression,expression-list
+*/
 ExpressionNode* Parser::parseExpression()
 {
-    return parsePrefixExpression();
+    Token token;
+    ExpressionNode* lhs = parsePrefixExpression();
+    CHECK_EOF(tokenizer->next(token));
+    std::wstring op = token.c_str();
+    if(token.type == TokenType::Operator && token.operators.type == OperatorType::InfixBinary)
+    {
+        ExpressionNode* rhs = parsePostfixExpression();
+        BinaryOperator* ret = nodeFactory->createBinary(op, lhs, rhs);
+        return ret;
+    }
+    tokenizer->restore(token);
+    return lhs;
 }

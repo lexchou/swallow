@@ -187,21 +187,35 @@ bool Tokenizer::skipSpaces()
     }
     return hasSpace;
 }
+bool Tokenizer::hasWhiteLeft(const wchar_t* cursor)
+{
+    if(cursor > data)
+    {
+        wchar_t ch = cursor[-1];
+        return iswhite(ch) || ch == '{' || ch == '(' || ch == '[' || ch == ',' || ch == ';' || ch == ':';
+    }
+    else
+        return true;//BOF means has white before
+}
+
+bool Tokenizer::hasWhiteRight(const wchar_t* cursor)
+{
+    if(cursor < data + size)
+    {
+        wchar_t ch = *cursor;
+        return iswhite(ch) || ch == '}' || ch == ')' || ch == ']' || ch == ',' || ch == ';' || ch == ':';
+    }
+    return true;//EOF means has white after
+}
+
 bool Tokenizer::readOperator(Token& token, int max)
 {
     wchar_t ch;
     token.type = TokenType::Operator;
     token.operators.type = OperatorType::_;
-    bool spaceAfter = false;
-    bool spaceBefore = false;
+    bool whiteLeft = hasWhiteLeft(state.cursor);
+    const wchar_t* begin = state.cursor;
     
-    if(state.cursor > data)
-    {
-        ch = state.cursor[-1];
-        spaceBefore = iswhite(ch) || ch == '{' || ch == '(' || ch == '[' || ch == ',' || ch == ';' || ch == ':';
-    }
-    else
-        spaceBefore = true;//BOF means has white before
     while(get(ch) && (!max || token.token.size() < max))
     {
         if(!isOperator(ch))
@@ -217,48 +231,51 @@ bool Tokenizer::readOperator(Token& token, int max)
             break;
         }
         token.append(ch);
-        if(!spaceBefore && (ch == '?' || ch == '!'))
+        if(!whiteLeft && (ch == '?' || ch == '!'))
         {
             //no white before, ?! will be used as syntax sugar operator, only one character
             break;
         }
     }
-    if(state.cursor < data + size)
-    {
-        ch = *state.cursor;
-        spaceAfter = iswhite(ch) || ch == '}' || ch == ')' || ch == ']' || ch == ',' || ch == ';' || ch == ':';
-    }
-    else
-        spaceAfter = true;//EOF means has white after
-    if((spaceAfter && spaceBefore) || (!spaceBefore && !spaceAfter))
-    {
-        //If an operator has whitespace around both sides or around neither side, it is treated as a binary operator. As an example, the + operator in a+b and a + b is treated as a binary operator.
-        token.operators.type = OperatorType::InfixBinary;
-    }
-    else if(spaceBefore && !spaceAfter)
-    {
-        //If an operator has whitespace on the left side only, it is treated as a prefix unary operator. As an example, the ++ operator in a ++b is treated as a prefix unary operator.
-        token.operators.type = OperatorType::PrefixUnary;
-    }
-    else if(!spaceBefore && spaceAfter)
-    {
-        //If an operator has whitespace on the right side only, it is treated as a postfix unary operator. As an example, the ++ operator in a++ b is treated as a postfix unary operator.
-        token.operators.type = OperatorType::PostfixUnary;
-    }
-    
-    if(!spaceBefore && (state.cursor < (data + size)) && *state.cursor == '.')
-    {
-        //If an operator has no whitespace on the left but is followed immediately by a dot (.), it is treated as a postfix unary operator. As an example, the ++ operator in a++.b is treated as a postfix unary operator (a++ . b rather than a ++ .b).
-        token.operators.type = OperatorType::PostfixUnary;
-    }
-    if(!spaceBefore && token.token.size() == 1 && (token.token.front() == '?' || token.token.front() == '!'))
-    {
-        //“If the ! or ? operator has no whitespace on the left, it is treated as a postfix operator”
-        token.operators.type = OperatorType::PostfixUnary;
-    }
-    
+    token.operators.type = calculateOperatorType(begin, begin + token.token.size());
     return true;
 }
+OperatorType::T Tokenizer::calculateOperatorType(const wchar_t* begin, const wchar_t* end)
+{
+    OperatorType::T ret = OperatorType::_;
+    bool whiteLeft = hasWhiteLeft(begin);
+    bool whiteRight = hasWhiteRight(end);
+    if((whiteRight && whiteLeft) || (!whiteLeft && !whiteRight))
+    {
+        //If an operator has whitespace around both sides or around neither side, it is treated as a binary operator. As an example, the + operator in a+b and a + b is treated as a binary operator.
+        ret = OperatorType::InfixBinary;
+    }
+    else if(whiteLeft && !whiteRight)
+    {
+        //If an operator has whitespace on the left side only, it is treated as a prefix unary operator. As an example, the ++ operator in a ++b is treated as a prefix unary operator.
+        ret = OperatorType::PrefixUnary;
+    }
+    else if(!whiteLeft && whiteRight)
+    {
+        //If an operator has whitespace on the right side only, it is treated as a postfix unary operator. As an example, the ++ operator in a++ b is treated as a postfix unary operator.
+        ret = OperatorType::PostfixUnary;
+    }
+    
+    if(!whiteLeft && (end < (data + size)) && *end == '.')
+    {
+        //If an operator has no whitespace on the left but is followed immediately by a dot (.), it is treated as a postfix unary operator. As an example, the ++ operator in a++.b is treated as a postfix unary operator (a++ . b rather than a ++ .b).
+        ret = OperatorType::PostfixUnary;
+    }
+    wchar_t front = *begin;
+    size_t size = end - begin;
+    if(!whiteLeft && size == 1 && (front == '?' || front == '!'))
+    {
+        //“If the ! or ? operator has no whitespace on the left, it is treated as a postfix operator”
+        ret = OperatorType::PostfixUnary;
+    }
+    return ret;
+}
+
 bool Tokenizer::readMultilineComment(Token& token)
 {
     wchar_t ch, last;
@@ -605,8 +622,9 @@ bool Tokenizer::nextImpl(Token& token)
         return readNumber(token);
     if(ch == '+' || ch == '-')
     {
+        bool whiteLeft = hasWhiteLeft(state.cursor);
         must_get();
-        if(peek(ch) && isdigit(ch))
+        if(whiteLeft && peek(ch) && isdigit(ch))
         {
             unget();
             return readNumber(token);

@@ -31,6 +31,9 @@ private:
     ExpressionNode* parsePrimaryExpression();
     ExpressionNode* parseLiteralExpression();
     ExpressionNode* parseLiteral();
+    
+    ExpressionNode* parseSelfExpression();
+    ExpressionNode* parseSuperExpression();
     Identifier* parseIdentifier();
     
     std::pair<ExpressionNode*, ExpressionNode*> parseDictionaryLiteralItem();

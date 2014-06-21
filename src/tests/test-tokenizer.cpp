@@ -277,11 +277,11 @@ public:
         CPPUNIT_ASSERT(!tokenizer.next(token));
         
         //
-        tokenizer.set(L"a+b");
+        tokenizer.set(L"1+2");
         
         CPPUNIT_ASSERT(tokenizer.next(token));
-        CPPUNIT_ASSERT_EQUAL(TokenType::Identifier, token.type);
-        ASSERT_EQUALS(L"a", token.c_str());
+        CPPUNIT_ASSERT_EQUAL(TokenType::Integer, token.type);
+        ASSERT_EQUALS(L"1", token.c_str());
         
         CPPUNIT_ASSERT(tokenizer.next(token));
         CPPUNIT_ASSERT_EQUAL(TokenType::Operator, token.type);
@@ -289,8 +289,21 @@ public:
         ASSERT_EQUALS(L"+", token.c_str());
         
         CPPUNIT_ASSERT(tokenizer.next(token));
-        CPPUNIT_ASSERT_EQUAL(TokenType::Identifier, token.type);
-        ASSERT_EQUALS(L"b", token.c_str());
+        CPPUNIT_ASSERT_EQUAL(TokenType::Integer, token.type);
+        ASSERT_EQUALS(L"2", token.c_str());
+        
+        CPPUNIT_ASSERT(!tokenizer.next(token));
+        
+        //
+        tokenizer.set(L"1 +2");
+        
+        CPPUNIT_ASSERT(tokenizer.next(token));
+        CPPUNIT_ASSERT_EQUAL(TokenType::Integer, token.type);
+        ASSERT_EQUALS(L"1", token.c_str());
+        
+        CPPUNIT_ASSERT(tokenizer.next(token));
+        CPPUNIT_ASSERT_EQUAL(TokenType::Integer, token.type);
+        ASSERT_EQUALS(L"+2", token.c_str());
         
         CPPUNIT_ASSERT(!tokenizer.next(token));
 

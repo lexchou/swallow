@@ -7,13 +7,6 @@ Node::Node(int numChildren)
     :children(numChildren)
 {
     assert(numChildren >= 0);
-    if(numChildren)
-    {
-        for(int i = 0; i < numChildren; i++)
-        {
-            children.push_back(NULL);
-        }
-    }
 }
 Node::~Node()
 {
