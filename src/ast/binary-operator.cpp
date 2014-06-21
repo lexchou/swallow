@@ -2,6 +2,6 @@
 USE_SWIFT_NS;
 
 BinaryOperator::BinaryOperator(const std::wstring& op)
-    :Node(2), op(op)
+    :ExpressionNode(2), op(op)
 {
 }

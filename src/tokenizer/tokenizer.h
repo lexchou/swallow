@@ -21,13 +21,6 @@ struct KeywordInfo
 class Tokenizer
 {
 public:
-    struct State
-    {
-        const wchar_t* cursor;
-        bool hasSpace;
-        bool inStringExpression;
-    };
-public:
     Tokenizer(const wchar_t* data);
     ~Tokenizer();
 public:
@@ -39,11 +32,11 @@ public:
     /**
      * Save current state for restoring later
      */
-    State save();
+    TokenizerState save();
     /**
      * Restore the specified state
      */
-    void restore(const State& state);
+    void restore(const TokenizerState& state);
     /**
      * Restore the state that used to parse given token
      */
@@ -73,7 +66,7 @@ private:
     wchar_t* data;
     const wchar_t* end;
     size_t size;
-    State state;
+    TokenizerState state;
     std::map<std::wstring, KeywordInfo> keywords;
 };
 

@@ -29,15 +29,22 @@ SET(SWIFT_TOKENIZER_SRC tokenizer/tokenizer.cpp)
 SET(SWIFT_PARSER_SRC ${SWIFT_TOKENIZER_SRC}
     parser/parser.cpp
     ast/nodes.cpp
+    ast/expression-node.cpp
+    ast/comment-node.cpp
     ast/node-factory.cpp
     ast/binary-operator.cpp
     ast/unary-operator.cpp
+
     ast/literal-nodes.cpp
+    ast/dictionary-literal.cpp
+    ast/array-literal.cpp
+
+    ast/identifier.cpp
     parser/symbol-registry.cpp
     )
 SET(SWIFT_SRC main.cpp tokenizer/tokenizer.cpp)
 
-
+enable_testing()
 ADD_EXECUTABLE(TestParser tests/test-parser.cpp ${SWIFT_TOKENIZER_SRC} ${SWIFT_PARSER_SRC})
 target_link_libraries(TestParser cppunit)
 
@@ -46,4 +53,3 @@ target_link_libraries(TestTokenizer cppunit)
 ADD_TEST(NAME TestTokenizer COMMAND TestTokenizer)
 ADD_TEST(NAME TestParser COMMAND TestParser)
 
-ADD_EXECUTABLE(swift ${SWIFT_SRC})

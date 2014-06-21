@@ -1,7 +1,7 @@
 #ifndef NODE_H
 #define NODE_H
 #include "swift_conf.h"
-#include <list>
+#include <vector>
 
 SWIFT_NS_BEGIN
 
@@ -17,13 +17,9 @@ protected:
     Node* get(int index);
 
 protected:
-    Node** children;
+    std::vector<Node*> children;
     int numChildren;
 };
-
-
-
-
 
 
 SWIFT_NS_END

@@ -137,6 +137,14 @@ struct OperatorType
     };
 };
 
+struct TokenizerState
+{
+
+    const wchar_t* cursor;
+    bool hasSpace;
+    bool inStringExpression;
+};
+
 struct Token
 {
     //“Operators are made up of one or more of the following characters: /, =, -, +, !, *, %, <, >, &, |, ^, ~, and .. That said, the tokens =, ->, //, /*, */, ., and the unary prefix operator & are reserved. ”
@@ -173,6 +181,7 @@ struct Token
     TokenType::T type;
     std::vector<wchar_t> token;
     size_t size;
+    TokenizerState state;
     void append(wchar_t ch)
     {
         token.push_back(ch);

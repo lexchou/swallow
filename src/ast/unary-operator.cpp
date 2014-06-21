@@ -3,7 +3,7 @@
 USE_SWIFT_NS;
 
 UnaryOperator::UnaryOperator(const std::wstring& op)
-    :Node(1), op(op)
+    :ExpressionNode(1), op(op)
 {
 }
 InOutParameter::InOutParameter(Identifier* identifier)

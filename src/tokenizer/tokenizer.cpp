@@ -124,11 +124,33 @@ Tokenizer::~Tokenizer()
     set(NULL);
 }
 
+/**
+ * Save current state for restoring later
+ */
+TokenizerState Tokenizer::save()
+{
+    return state;
+}
+/**
+ * Restore the specified state
+ */
+void Tokenizer::restore(const TokenizerState& state)
+{
+    this->state = state;
+}
+/**
+ * Restore the state that used to parse given token
+ */
+void Tokenizer::restore(const Token& token)
+{
+    this->state = token.state;
+}
 void Tokenizer::resetToken(Token& token)
 {
     token.type = TokenType::_;
     token.token.clear();
     token.size = 0;
+    token.state = state;
 }
 bool Tokenizer::peek(wchar_t &ch)
 {
@@ -518,7 +540,7 @@ bool Tokenizer::readSymbol(Token& token, TokenType::T type)
 }
 bool Tokenizer::peek(Token& token)
 {
-    State state = this->state;
+    TokenizerState state = this->state;
     bool ret = next(token);
     this->state = state;
     return ret;

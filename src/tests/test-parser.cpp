@@ -39,7 +39,7 @@ public:
         Node* root = parser.parse(L"3");
         CPPUNIT_ASSERT(root != NULL);
         IntegerLiteral* n = dynamic_cast<IntegerLiteral*>(root);
-        CPPUNIT_ASSERT(n != NULL);
+        CPPUNIT_ASSERT(n == NULL);
 
         //ASSERT_EQUALS(L"3", n->toString());
 
@@ -53,5 +53,6 @@ int main(int argc, char** argv)
     CppUnit::TextUi::TestRunner runner;
     CppUnit::TestFactoryRegistry &alltest = CppUnit::TestFactoryRegistry::getRegistry("alltest");
     runner.addTest(alltest.makeTest());
-    runner.run();
+    bool failed = !runner.run();
+    return failed;
 }

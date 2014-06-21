@@ -8,3 +8,6 @@ swift
 CMakeScripts/
 swift.build/
 swift.xcodeproj/
+CTestTestfile.cmake
+TestParser
+Testing/

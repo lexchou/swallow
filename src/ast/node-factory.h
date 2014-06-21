@@ -14,7 +14,10 @@ class UnaryOperator;
 class BinaryOperator;
 class Identifier;
 class Node;
+class ExpressionNode;
 class InOutParameter;
+class ArrayLiteral;
+class DictionaryLiteral;
 
 class NodeFactory
 {
@@ -26,12 +29,14 @@ public:
     virtual IntegerLiteral* createInteger(const std::wstring& value);
     virtual FloatLiteral* createFloat(const std::wstring& value);
     virtual StringLiteral* createString(const std::wstring& value);
-    virtual UnaryOperator* createUnary(const std::wstring& op, Node* operand);
-    virtual BinaryOperator* createBinary(const std::wstring& op, Node* lhs, Node* rhs);
+    virtual UnaryOperator* createUnary(const std::wstring& op, ExpressionNode* operand);
+    virtual BinaryOperator* createBinary(const std::wstring& op, ExpressionNode* lhs, ExpressionNode* rhs);
 
     virtual Identifier* createIdentifier(const std::wstring& op);
     virtual InOutParameter* createInOutParameter(Identifier* identifier);
 
+    virtual ArrayLiteral* createArrayLiteral();
+    virtual DictionaryLiteral* createDictionaryLiteral();
 };
 
 

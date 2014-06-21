@@ -586,5 +586,6 @@ int main(int argc, char** argv)
     CppUnit::TextUi::TestRunner runner;
     CppUnit::TestFactoryRegistry &alltest = CppUnit::TestFactoryRegistry::getRegistry("alltest");
     runner.addTest(alltest.makeTest());
-    runner.run();
+    bool failed = !runner.run();
+    return failed;
 }

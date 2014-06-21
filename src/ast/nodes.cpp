@@ -1,25 +1,22 @@
 #include "node.h"
 #include <cstdlib>
 #include <cassert>
-using namespace Swift;
+USE_SWIFT_NS
+
 Node::Node(int numChildren)
-    :children(NULL), numChildren(numChildren)
+    :children(numChildren), numChildren(numChildren)
 {
     assert(numChildren >= 0);
     if(numChildren)
     {
-        children = new Node*[numChildren];
         for(int i = 0; i < numChildren; i++)
         {
-            children[i] = NULL;
+            children.push_back(NULL);
         }
     }
 }
 Node::~Node()
 {
-    if(children)
-        delete[] children;
-    children = NULL;
 }
 void Node::set(int index, Node* val)
 {

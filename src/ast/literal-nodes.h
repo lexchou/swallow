@@ -1,32 +1,32 @@
 #ifndef LITERAL_NODES_H
 #define LITERAL_NODES_H
-#include "node.h"
+#include "expression-node.h"
 #include <string>
 
 SWIFT_NS_BEGIN
 
-class BooleanLiteral : public Node
+class BooleanLiteral : public ExpressionNode
 {
 public:
     BooleanLiteral(bool val);
 private:
     bool value;
 };
-class IntegerLiteral : public Node
+class IntegerLiteral : public ExpressionNode
 {
 public:
     IntegerLiteral(const std::wstring& val);
 private:
     std::wstring value;
 };
-class FloatLiteral : public Node
+class FloatLiteral : public ExpressionNode
 {
 public:
     FloatLiteral(const std::wstring& val);
 private:
     std::wstring value;
 };
-class StringLiteral : public Node
+class StringLiteral : public ExpressionNode
 {
 public:
     StringLiteral(const std::wstring& val);
