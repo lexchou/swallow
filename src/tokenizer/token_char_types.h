@@ -70,6 +70,7 @@ inline static bool isIdentifierHead(wchar_t ch)
         return true;
     switch(ch)
     {
+        case '_':
         case 0x00A8:
         case 0x00AA:
         case 0x00AD:

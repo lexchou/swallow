@@ -12,13 +12,13 @@ protected:
 public:
     virtual ~Node();
 public:
+    Node* get(int index);
+    int numChildren() const;
 protected:
     void set(int index, Node* val);
-    Node* get(int index);
 
 protected:
     std::vector<Node*> children;
-    int numChildren;
 };
 
 

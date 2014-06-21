@@ -2,6 +2,7 @@
 #define PARSER_H
 #include "swift_conf.h"
 #include "tokenizer/tokens.h"
+#include <string>
 
 SWIFT_NS_BEGIN
 
@@ -18,6 +19,8 @@ public:
     ~Parser();
 public:
     Node* parse(const wchar_t* code);
+    void setFileName(const wchar_t* fileName);
+    void setFunctionName(const wchar_t* function);
 private:
     ExpressionNode* parseFloat();
     ExpressionNode* parseInteger();
@@ -60,6 +63,8 @@ private:
     Tokenizer* tokenizer;
     NodeFactory* nodeFactory;
     SymbolRegistry* symbolRegistry;
+    std::wstring fileName;
+    std::wstring functionName;
 };
 
 

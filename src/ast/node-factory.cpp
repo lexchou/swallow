@@ -53,3 +53,7 @@ DictionaryLiteral* NodeFactory::createDictionaryLiteral()
 {
     return new DictionaryLiteral();
 }
+CompileConstant* NodeFactory::createCompilecConstant(const std::wstring& name, const std::wstring& value)
+{
+    return new CompileConstant(name, value);
+}

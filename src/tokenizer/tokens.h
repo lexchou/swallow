@@ -143,6 +143,8 @@ struct TokenizerState
     const wchar_t* cursor;
     bool hasSpace;
     bool inStringExpression;
+    int line;
+    int column;
 };
 
 struct Token

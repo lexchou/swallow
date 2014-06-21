@@ -6,6 +6,7 @@
 #include "ast/ast.h"
 #include <cstdlib>
 #include <stack>
+#include <sstream>
 using namespace Swift;
 
 #define CHECK_EOF(x) x
@@ -14,12 +15,21 @@ Parser::Parser(NodeFactory* nodeFactory, SymbolRegistry* symbolRegistry)
     :nodeFactory(nodeFactory), symbolRegistry(symbolRegistry)
 {
     tokenizer = new Tokenizer(NULL);
+    functionName = L"<top>";
 }
 Parser::~Parser()
 {
     delete tokenizer;
 }
 
+void Parser::setFileName(const wchar_t* fileName)
+{
+    this->fileName = fileName;
+}
+void Parser::setFunctionName(const wchar_t* function)
+{
+    this->functionName = functionName;
+}
 /**
  * Check if the following token is the specified one, consume the token and return true if matched or return false if not.
  */
@@ -70,7 +80,6 @@ void Parser::tassert(Token& token, bool cond)
 Node* Parser::parse(const wchar_t* code)
 {
     tokenizer->set(code);
-    Token token;
     return parseExpression();
 }
 ExpressionNode* Parser::parseFloat()
@@ -103,9 +112,7 @@ ExpressionNode* Parser::parseString()
 ExpressionNode* Parser::parsePrefixExpression()
 {
     Token token;
-    tokenizer->next(token);
-
-    if(token.type == TokenType::Operator && token == L"&")
+    if(match(L"&"))
     {
          //in-out-expression → & identifier
         expect_identifier(token);
@@ -114,14 +121,16 @@ ExpressionNode* Parser::parsePrefixExpression()
         return ret;
     }
 
-
-    ExpressionNode* postfixExpression = parsePostfixExpression();
+    CHECK_EOF(tokenizer->next(token));
     if(symbolRegistry->isPrefixOperator(token.c_str()))
     {
+        ExpressionNode* postfixExpression = parsePostfixExpression();
         UnaryOperator* op = nodeFactory->createUnary(token.c_str(), postfixExpression);
         return op;
     }
-    return postfixExpression;
+    tokenizer->restore(token);
+    ExpressionNode* ret = parsePostfixExpression();
+    return ret;
 }
 /*
 GRAMMAR OF A POSTFIX EXPRESSION
@@ -274,6 +283,7 @@ ExpressionNode* Parser::parseLiteralExpression()
         }
         else if(token.type == TokenType::Colon)//dictionary
         {
+            match(L":");
             DictionaryLiteral* dict = nodeFactory->createDictionaryLiteral();
             ExpressionNode* key = tmp;
             ExpressionNode* value = parseExpression();
@@ -291,7 +301,34 @@ ExpressionNode* Parser::parseLiteralExpression()
             expect(L"]");
             return dict;
         }
+        unexpected(token);
     }
+    
+    if(token.type == TokenType::Identifier)
+    {
+        switch(token.identifier.keyword)
+        {
+            case Keyword::File:
+                return nodeFactory->createCompilecConstant(L"__FILE__", fileName);
+            case Keyword::Line:
+            {
+                std::wstringstream ss;
+                ss<<token.state.column;
+                return nodeFactory->createCompilecConstant(L"__LINE__", ss.str());
+            }
+            case Keyword::Column:
+            {
+                std::wstringstream ss;
+                ss<<token.state.line;
+                return nodeFactory->createCompilecConstant(L"__COLUMN__", ss.str());
+            }
+            case Keyword::Function:
+                return nodeFactory->createCompilecConstant(L"__FUNCTION__", functionName);
+            default:
+                break;
+        }
+    }
+    
     unexpected(token);
     return NULL;
 }

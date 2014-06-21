@@ -109,6 +109,8 @@ void Tokenizer::set(const wchar_t* data)
     state.cursor = 0;
     state.hasSpace = false;
     state.inStringExpression = false;
+    state.line = 1;
+    state.column = 1;
     //copy string
     if(data)
     {
@@ -417,7 +419,7 @@ bool Tokenizer::readNumber(Token& token)
         token.number.sign = true;
     }
     token.append(ch);
-        
+    
     if(!peek(ch))
         return true;
     int base = 10;
@@ -426,10 +428,12 @@ bool Tokenizer::readNumber(Token& token)
         case 'b': base = 2; token.append(must_get()); break;
         case 'o': base = 8; token.append(must_get()); break;
         case 'x': base = 16; token.append(must_get()); break;
+        case '.': break;
         default: if(!isdigit(ch)) return true;
     }
     token.number.base = base;
-    readNumberLiteral(token, base);
+    if(ch != '.')
+        readNumberLiteral(token, base);
     if(peek(ch) && ch == '.')//read fraction part
     {
         token.type = TokenType::Float;
