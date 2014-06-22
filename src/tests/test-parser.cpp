@@ -26,10 +26,10 @@ void wcs_assertEquals(const wchar_t* expected, const wchar_t* actual, const char
 class TestOperatorExpression : public CppUnit::TestFixture
 {
     CPPUNIT_TEST_SUITE(TestOperatorExpression);
-    CPPUNIT_TEST(testAdd);
+    CPPUNIT_TEST(testExpr1);
     CPPUNIT_TEST_SUITE_END();
 public:
-    void testAdd()
+    void testExpr1()
     {
         SymbolRegistry sregistry;
         NodeFactory nodeFactory;
@@ -38,10 +38,24 @@ public:
         CPPUNIT_ASSERT(root != NULL);
         root->serialize(std::wcout);
         std::wcout<<std::endl;
-        BinaryOperator* n = dynamic_cast<BinaryOperator*>(root);
+        Assignment* eq = dynamic_cast<Assignment*>(root);
         
-        CPPUNIT_ASSERT(n != NULL);
-        CPPUNIT_ASSERT_EQUAL(2, n->numChildren());
+        CPPUNIT_ASSERT(eq != NULL);
+        CPPUNIT_ASSERT_EQUAL(2, eq->numChildren());
+        
+        Identifier* id = dynamic_cast<Identifier*>(eq->getLHS());
+        CPPUNIT_ASSERT(id != NULL);
+        ASSERT_EQUALS(L"a", id->getIdentifier().c_str());
+        
+        BinaryOperator* add = dynamic_cast<BinaryOperator*>(eq->getRHS());
+        CPPUNIT_ASSERT(add != NULL);
+        ASSERT_EQUALS(L"+", add->getOperator().c_str());
+        
+        
+        BinaryOperator* mul = dynamic_cast<BinaryOperator*>(add->getRHS());
+        CPPUNIT_ASSERT(mul != NULL);
+        ASSERT_EQUALS(L"*", mul->getOperator().c_str());
+        
         
     }
 };

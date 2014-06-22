@@ -11,6 +11,7 @@ public:
     Identifier(const std::wstring& identifier);
 public:
     void serialize(std::wostream& out);
+    const std::wstring& getIdentifier() const { return identifier;}
 private:
     std::wstring identifier;
 };

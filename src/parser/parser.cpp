@@ -586,16 +586,6 @@ ExpressionNode* Parser::parseBinaryExpression(ExpressionNode* lhs)
     }
     if(token.type == TokenType::Operator)
     {
-        if(token.operators.type == OperatorType::InfixBinary)
-        {
-            Operator* op = symbolRegistry->getOperator(token.token);
-            tassert(token, op != NULL);
-            ExpressionNode* rhs = parsePrefixExpression();
-            BinaryOperator* ret = nodeFactory->createBinary(op->name, op->associativity, op->precedence);
-            ret->setLHS(lhs);
-            ret->setRHS(rhs);
-            return ret;
-        }
         if(token == L"=")
         {
             ExpressionNode* rhs = parsePrefixExpression();
@@ -607,6 +597,17 @@ ExpressionNode* Parser::parseBinaryExpression(ExpressionNode* lhs)
             // binary-expression → conditional-operatorprefix-expression
             ExpressionNode* expr = parseExpression();
             ExpressionNode* ret = nodeFactory->createConditionalOperator(lhs, expr, NULL);
+            return ret;
+        }
+        
+        if(token.operators.type == OperatorType::InfixBinary)
+        {
+            Operator* op = symbolRegistry->getOperator(token.token);
+            tassert(token, op != NULL);
+            ExpressionNode* rhs = parsePrefixExpression();
+            BinaryOperator* ret = nodeFactory->createBinary(op->name, op->associativity, op->precedence);
+            ret->setLHS(lhs);
+            ret->setRHS(rhs);
             return ret;
         }
     }

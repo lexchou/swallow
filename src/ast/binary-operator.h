@@ -14,6 +14,8 @@ public:
 
     void setRHS(ExpressionNode* node){set(1, node);}
     ExpressionNode* getRHS(){return static_cast<ExpressionNode*>(get(1));}
+    
+    const std::wstring& getOperator() const { return op;}
 public:
     virtual void serialize(std::wostream& out);
 private:
