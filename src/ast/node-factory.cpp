@@ -22,10 +22,9 @@ StringLiteral* NodeFactory::createString(const std::wstring& value)
 {
     return new StringLiteral(value);
 }
-UnaryOperator* NodeFactory::createUnary(const std::wstring& op, ExpressionNode* operand)
+UnaryOperator* NodeFactory::createUnary(const std::wstring& op, OperatorType::T type)
 {
-    UnaryOperator* ret = new UnaryOperator(op);
-    ret->setOperand(operand);
+    UnaryOperator* ret = new UnaryOperator(op, type);
     return ret;
 }
 Identifier* NodeFactory::createIdentifier(const std::wstring& op)
@@ -37,11 +36,9 @@ InOutParameter* NodeFactory::createInOutParameter(Identifier* identifier)
     InOutParameter* ret = new InOutParameter(identifier);
     return ret;
 }
-BinaryOperator* NodeFactory::createBinary(const std::wstring& op, ExpressionNode* lhs, ExpressionNode* rhs)
+BinaryOperator* NodeFactory::createBinary(const std::wstring& op, Associativity::T associativity, int precedence)
 {
-    BinaryOperator* ret = new BinaryOperator(op);
-    ret->setLHS(lhs);
-    ret->setRHS(rhs);
+    BinaryOperator* ret = new BinaryOperator(op, associativity, precedence);
     return ret;
 }
 
@@ -66,3 +63,21 @@ Subscript* NodeFactory::createSubscript(Identifier* self, ExpressionNode* index)
 {
     return new Subscript(self, index);
 }
+
+TypeCheck* NodeFactory::createTypeCheck(ExpressionNode* expr, TypeNode* type)
+{
+    return new TypeCheck(expr, type);
+}
+TypeCast* NodeFactory::createTypeCast(ExpressionNode* expr, TypeNode* type)
+{
+    return new TypeCast(expr, type);
+}
+Assignment* NodeFactory::createAssignment(ExpressionNode* lhs, ExpressionNode* rhs)
+{
+    return new Assignment(lhs, rhs);
+}
+ConditionalOperator* NodeFactory::createConditionalOperator(ExpressionNode* cond, ExpressionNode* trueExpr, ExpressionNode* falseExpr)
+{
+    return new ConditionalOperator(cond, trueExpr, falseExpr);
+}
+

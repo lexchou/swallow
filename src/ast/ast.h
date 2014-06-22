@@ -11,4 +11,11 @@
 #include "comment-node.h"
 #include "member-access.h"
 #include "subscript.h"
+
+
+#include "type-check.h"
+#include "type-cast.h"
+#include "assignment.h"
+#include "conditional-operator.h"
+
 #endif//AST_H

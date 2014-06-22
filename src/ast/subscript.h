@@ -9,7 +9,7 @@ class Subscript : public ExpressionNode
 {
 public:
     Subscript(Identifier* self, ExpressionNode* index);
-private:
+protected:
     Identifier* self;
     ExpressionNode* index;
 };

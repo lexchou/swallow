@@ -2,20 +2,11 @@
 #define SYMBOL_REGISTRY_H
 #include "swift_conf.h"
 #include "tokenizer/tokens.h"
+#include "swift_types.h"
 #include <string>
 #include <map>
 
 SWIFT_NS_BEGIN
-
-struct Associativity
-{
-    enum T
-    {
-        None,
-        Left,
-        Right
-    };
-};
 
 
 struct Operator

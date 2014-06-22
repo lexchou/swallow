@@ -9,6 +9,8 @@ class Identifier : public ExpressionNode
 {
 public:
     Identifier(const std::wstring& identifier);
+public:
+    void serialize(std::wostream& out);
 private:
     std::wstring identifier;
 };

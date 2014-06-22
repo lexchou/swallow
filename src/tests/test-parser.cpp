@@ -34,9 +34,12 @@ public:
         SymbolRegistry sregistry;
         NodeFactory nodeFactory;
         Parser parser(&nodeFactory, &sregistry);
-        Node* root = parser.parse(L"3+4*5");
+        Node* root = parser.parse(L"a=4+1*3");
         CPPUNIT_ASSERT(root != NULL);
+        root->serialize(std::wcout);
+        std::wcout<<std::endl;
         BinaryOperator* n = dynamic_cast<BinaryOperator*>(root);
+        
         CPPUNIT_ASSERT(n != NULL);
         CPPUNIT_ASSERT_EQUAL(2, n->numChildren());
         

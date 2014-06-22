@@ -1,13 +1,13 @@
 #ifndef UNARY_OPERATOR_H
 #define UNARY_OPERATOR_H
-#include "expression-node.h"
+#include "operator-node.h"
 #include <string>
 SWIFT_NS_BEGIN
 
-class UnaryOperator : public ExpressionNode
+class UnaryOperator : public OperatorNode
 {
 public:
-    UnaryOperator(const std::wstring& op);
+    UnaryOperator(const std::wstring& op, OperatorType::T type);
 public:
     void setOperand(ExpressionNode* node){set(0, node);}
     ExpressionNode* getOperand(){return static_cast<ExpressionNode*>(get(0));}

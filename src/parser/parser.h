@@ -12,6 +12,7 @@ class ExpressionNode;
 class SymbolRegistry;
 class Identifier;
 class NodeFactory;
+class TypeNode;
 class Parser
 {
 public:
@@ -26,6 +27,7 @@ private:
     ExpressionNode* parseInteger();
     ExpressionNode* parseString();
     ExpressionNode* parseExpression();
+    ExpressionNode* parseBinaryExpression(ExpressionNode* lhs);
     ExpressionNode* parsePrefixExpression();
     ExpressionNode* parsePostfixExpression();
     ExpressionNode* parsePrimaryExpression();
@@ -35,9 +37,18 @@ private:
     ExpressionNode* parseSelfExpression();
     ExpressionNode* parseSuperExpression();
     Identifier* parseIdentifier();
+    TypeNode* parseType();
     
     std::pair<ExpressionNode*, ExpressionNode*> parseDictionaryLiteralItem();
 private:
+    /**
+     * Read next token from tokenizer, throw exception if EOF reached.
+     */
+    void next(Token& token);
+    /**
+     * Peek next token from tokenizer, return false if EOF reached.
+     */
+    bool peek(Token& token);
     /**
      * Check if the following token is an identifier, throw exception if not matched
      */

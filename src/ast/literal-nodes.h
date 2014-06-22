@@ -9,6 +9,8 @@ class BooleanLiteral : public ExpressionNode
 {
 public:
     BooleanLiteral(bool val);
+public:
+    virtual void serialize(std::wostream& out);
 private:
     bool value;
 };
@@ -18,6 +20,7 @@ public:
     IntegerLiteral(const std::wstring& val);
 public:
     const std::wstring& toString() const { return value;}
+    virtual void serialize(std::wostream& out);
 private:
     std::wstring value;
 };
@@ -27,6 +30,7 @@ public:
     FloatLiteral(const std::wstring& val);
 public:
     const std::wstring& toString() const { return value;}
+    virtual void serialize(std::wostream& out);
 private:
     std::wstring value;
 };
@@ -36,6 +40,7 @@ public:
     StringLiteral(const std::wstring& val);
 public:
     const std::wstring& toString() const { return value;}
+    virtual void serialize(std::wostream& out);
 private:
     std::wstring value;
 };
@@ -46,6 +51,8 @@ public:
 public:
     const std::wstring& getName() const;
     const std::wstring& getValue() const;
+public:
+    virtual void serialize(std::wostream& out);
 private:
     std::wstring name;
     std::wstring value;

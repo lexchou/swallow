@@ -9,7 +9,7 @@ class MemberAccess : public ExpressionNode
 {
 public:
     MemberAccess(Identifier* self, Identifier* field);
-private:
+protected:
     Identifier* self;
     Identifier* field;
 };

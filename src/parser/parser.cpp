@@ -7,9 +7,8 @@
 #include <cstdlib>
 #include <stack>
 #include <sstream>
+#include <iostream>
 using namespace Swift;
-
-#define CHECK_EOF(x) x
 
 Parser::Parser(NodeFactory* nodeFactory, SymbolRegistry* symbolRegistry)
     :nodeFactory(nodeFactory), symbolRegistry(symbolRegistry)
@@ -31,13 +30,30 @@ void Parser::setFunctionName(const wchar_t* function)
     this->functionName = functionName;
 }
 /**
+ * Read next token from tokenizer, throw exception if EOF reached.
+ */
+void Parser::next(Token& token)
+{
+    if(tokenizer->next(token))
+        return;
+    throw 0;
+}
+/**
+ * Peek next token from tokenizer, return false if EOF reached.
+ */
+bool Parser::peek(Token& token)
+{
+    token.type = TokenType::_;
+    return tokenizer->peek(token);
+}
+/**
  * Check if the following token is the specified one, consume the token and return true if matched or return false if not.
  */
 bool Parser::match(const wchar_t* token)
 {
     Token t;
-    CHECK_EOF(tokenizer->next(t));
-    if(!wcscmp(t.c_str(), token))
+    next(t);
+    if(t == token)
         return true;
     tokenizer->restore(t);
     return false;
@@ -48,18 +64,19 @@ bool Parser::match(const wchar_t* token)
 bool Parser::predicate(const wchar_t* token)
 {
     Token t;
-    CHECK_EOF(tokenizer->peek(t));
-    return !wcscmp(t.c_str(), token);
+    if(!peek(t))
+        return false;
+    return t == token;
 }
 void Parser::expect(const wchar_t* str)
 {
     Token token;
-    CHECK_EOF(tokenizer->next(token));
-    tassert(token, wcscmp(token.c_str(), str) == 0);
+    next(token);
+    tassert(token, token == str);
 }
 void Parser::expect_identifier(Token& token)
 {
-    CHECK_EOF(tokenizer->next(token));
+    next(token);
     tassert(token, token.type == TokenType::Identifier);
     tassert(token, token.identifier.keyword == Keyword::_);
 }
@@ -85,22 +102,22 @@ Node* Parser::parse(const wchar_t* code)
 ExpressionNode* Parser::parseFloat()
 {
     Token token;
-    tokenizer->next(token);
-    ExpressionNode* ret = nodeFactory->createFloat(token.c_str());
+    next(token);
+    ExpressionNode* ret = nodeFactory->createFloat(token.token);
     return ret;
 }
 ExpressionNode* Parser::parseInteger()
 {
     Token token;
-    tokenizer->next(token);
-    ExpressionNode* ret = nodeFactory->createInteger(token.c_str());
+    next(token);
+    ExpressionNode* ret = nodeFactory->createInteger(token.token);
     return ret;
 }
 ExpressionNode* Parser::parseString()
 {
     Token token;
-    tokenizer->next(token);
-    ExpressionNode* ret = nodeFactory->createString(token.c_str());
+    next(token);
+    ExpressionNode* ret = nodeFactory->createString(token.token);
     return ret;
 }
 /*
@@ -116,16 +133,17 @@ ExpressionNode* Parser::parsePrefixExpression()
     {
          //in-out-expression → & identifier
         expect_identifier(token);
-        Identifier* identifier = nodeFactory->createIdentifier(token.c_str());
+        Identifier* identifier = nodeFactory->createIdentifier(token.token);
         InOutParameter* ret = nodeFactory->createInOutParameter(identifier);
         return ret;
     }
 
-    CHECK_EOF(tokenizer->next(token));
-    if(symbolRegistry->isPrefixOperator(token.c_str()))
+    next(token);
+    if(symbolRegistry->isPrefixOperator(token.token))
     {
         ExpressionNode* postfixExpression = parsePostfixExpression();
-        UnaryOperator* op = nodeFactory->createUnary(token.c_str(), postfixExpression);
+        UnaryOperator* op = nodeFactory->createUnary(token.token, token.operators.type);
+        op->setOperand(postfixExpression);
         return op;
     }
     tokenizer->restore(token);
@@ -184,7 +202,7 @@ GRAMMAR OF A PRIMARY EXPRESSION
 ExpressionNode* Parser::parsePrimaryExpression()
 {
     Token token;
-    CHECK_EOF(tokenizer->peek(token));
+    peek(token);
     if(token.type == TokenType::Identifier)
     {
         //primary-expression → identifier generic-argument-clauseopt
@@ -236,7 +254,7 @@ ExpressionNode* Parser::parsePrimaryExpression()
     // primary-expression → wildcard-expression
     if(token == L"_")
     {
-        tokenizer->next(token);
+        next(token);
         return nodeFactory->createIdentifier(L"_");
     }
     unexpected(token);
@@ -254,12 +272,12 @@ ExpressionNode* Parser::parseSelfExpression()
 {
     Token token;
     this->expect_identifier(token);
-    CHECK_EOF(tokenizer->next(token));
+    next(token);
     Identifier* self = nodeFactory->createIdentifier(L"self");
     if(token == L".")
     {
         expect_identifier(token);
-        Identifier* field = nodeFactory->createIdentifier(token.c_str());
+        Identifier* field = nodeFactory->createIdentifier(token.token);
         MemberAccess* ret = nodeFactory->createMemberAccess(self, field);
         return ret;
     }
@@ -285,12 +303,12 @@ ExpressionNode* Parser::parseSuperExpression()
 {
     Token token;
     this->expect_identifier(token);
-    CHECK_EOF(tokenizer->next(token));
+    next(token);
     Identifier* super = nodeFactory->createIdentifier(L"super");
     if(token == L".")
     {
         expect_identifier(token);
-        Identifier* field = nodeFactory->createIdentifier(token.c_str());
+        Identifier* field = nodeFactory->createIdentifier(token.token);
         MemberAccess* ret = nodeFactory->createMemberAccess(super, field);
         return ret;
     }
@@ -308,7 +326,7 @@ Identifier* Parser::parseIdentifier()
 {
     Token token;
     expect_identifier(token);
-    Identifier* ret = nodeFactory->createIdentifier(token.c_str());
+    Identifier* ret = nodeFactory->createIdentifier(token.token);
     return ret;
 }
 
@@ -327,7 +345,7 @@ Identifier* Parser::parseIdentifier()
 ExpressionNode* Parser::parseLiteralExpression()
 {
     Token token;
-    tokenizer->next(token);
+    next(token);
     // literal-expression → literal
     if(token.type == TokenType::Integer || token.type == TokenType::Float || token.type == TokenType::String)
     {
@@ -338,7 +356,7 @@ ExpressionNode* Parser::parseLiteralExpression()
 
     if(token.type == TokenType::OpenBracket)
     {
-        tokenizer->next(token);
+        next(token);
         if(token.type == TokenType::CloseBracket)
         {
             //[] detected, empty array
@@ -355,7 +373,7 @@ ExpressionNode* Parser::parseLiteralExpression()
         
         ExpressionNode* tmp = parseExpression();
         tassert(token, tmp != NULL);
-        tokenizer->peek(token);
+        peek(token);
         if(token.type == TokenType::Comma || token.type == TokenType::CloseBracket)//array
         {
             ArrayLiteral* array = nodeFactory->createArrayLiteral();
@@ -425,18 +443,18 @@ ExpressionNode* Parser::parseLiteralExpression()
 ExpressionNode* Parser::parseLiteral()
 {
     Token token;
-    tokenizer->next(token);
+    next(token);
     ExpressionNode* ret = NULL;
     switch(token.type)
     {
         case TokenType::Integer:
-            ret = nodeFactory->createInteger(token.c_str());
+            ret = nodeFactory->createInteger(token.token);
             break;
         case TokenType::String:
-            ret = nodeFactory->createString(token.c_str());
+            ret = nodeFactory->createString(token.token);
             break;
         case TokenType::Float:
-            ret = nodeFactory->createFloat(token.c_str());
+            ret = nodeFactory->createFloat(token.token);
             break;
         default:
             unexpected(token);
@@ -452,22 +470,153 @@ std::pair<ExpressionNode*, ExpressionNode*> Parser::parseDictionaryLiteralItem()
     return std::make_pair(key, value);
 }
 
+static inline bool isBinaryExpr(const Token& token)
+{
+    if(token.type == TokenType::Identifier)
+    {
+        return token.identifier.keyword == Keyword::Is || token.identifier.keyword == Keyword::As;
+    }
+    if(token.type != TokenType::Operator)
+        return false;
+    if(token.operators.type == OperatorType::InfixBinary)
+        return true;
+    if(token == L"=")
+        return true;
+    if(token == L"?")
+        return true;
+    return false;
+}
+/**
+ * Rotate the AST tree if required
+ */
+static int rotateRequired(OperatorNode* lhs, OperatorNode* rhs)
+{
+    if(lhs->getPrecedence() == rhs->getPrecedence())
+    {
+        //only right associativity is required because it's left associativity
+        return lhs->getAssociativity() == Associativity::Right;
+    }
+    return lhs->getPrecedence() < rhs->getPrecedence();
+}
+/**
+ * Sort the AST tree by precedence, if the precedence is the same, sort by associativity
+ */
+static OperatorNode* sortExpression(OperatorNode* op)
+{
+    OperatorNode* root = op;
+    OperatorNode* c;
+    if(op->numChildren() != 2)
+        return op;
+    Node* left = op->get(0);
+    Node* right = op->get(1);
+    if(left && (c = dynamic_cast<OperatorNode*>(left)))
+    {
+        left = c = sortExpression(c);
+        if(rotateRequired(c, root))
+        {
+            //make c the root
+            Node* r = c->get(1);
+            c->set(1, root);
+            root->set(0, r);
+            root = c;
+            //sort new right child
+            Node* r2 = sortExpression(static_cast<OperatorNode*>(c->get(1)));
+            c->set(1, r2);
+            return root;
+        }
+    }
+    //sort old right child
+    c = dynamic_cast<OperatorNode*>(right);
+    if(c != NULL)
+        sortExpression(c);
+    return root;
+}
 /*
  expression → prefix-expression binary-expressions opt
-‌ expression-list → expression  expression,expression-list
+‌ expression-list → expression | expression,expression-list
 */
 ExpressionNode* Parser::parseExpression()
 {
     Token token;
-    ExpressionNode* lhs = parsePrefixExpression();
-    CHECK_EOF(tokenizer->next(token));
-    std::wstring op = token.c_str();
-    if(token.type == TokenType::Operator && token.operators.type == OperatorType::InfixBinary)
+    ExpressionNode* ret = parsePrefixExpression();
+    peek(token);
+    
+    //‌ binary-expressions → binary-expressionbinary-expressionsopt
+    if(isBinaryExpr(token))
     {
-        ExpressionNode* rhs = parsePostfixExpression();
-        BinaryOperator* ret = nodeFactory->createBinary(op, lhs, rhs);
-        return ret;
+        ret = parseBinaryExpression(ret);
+        for(bool succ = peek(token); succ && isBinaryExpr(token); succ = peek(token))
+        {
+            ret = parseBinaryExpression(ret);
+        }
     }
-    tokenizer->restore(token);
-    return lhs;
+    if(OperatorNode* op = dynamic_cast<OperatorNode*>(ret))
+    {
+        //sort the tree by associativity and precedence
+        ret = sortExpression(op);
+    }
+    return ret;
+}
+/*
+  GRAMMAR OF A BINARY EXPRESSION
+ 
+ ‌ binary-expression → binary-operatorprefix-expression
+ ‌ binary-expression → assignment-operatorprefix-expression
+ ‌ binary-expression → conditional-operatorprefix-expression
+ ‌ binary-expression → type-casting-operator
+ */
+ExpressionNode* Parser::parseBinaryExpression(ExpressionNode* lhs)
+{
+    Token token;
+    next(token);
+    if(token.type == TokenType::Identifier)
+    {
+        if(token.identifier.keyword == Keyword::Is)
+        {
+            TypeNode* typeNode = parseType();
+            ExpressionNode* ret = nodeFactory->createTypeCheck(lhs, typeNode);
+            return ret;
+        }
+        else if(token.identifier.keyword == Keyword::As)
+        {
+            TypeNode* typeNode = parseType();
+            ExpressionNode* ret = nodeFactory->createTypeCast(lhs, typeNode);
+            return ret;
+        }
+    }
+    if(token.type == TokenType::Operator)
+    {
+        if(token.operators.type == OperatorType::InfixBinary)
+        {
+            Operator* op = symbolRegistry->getOperator(token.token);
+            tassert(token, op != NULL);
+            ExpressionNode* rhs = parsePrefixExpression();
+            BinaryOperator* ret = nodeFactory->createBinary(op->name, op->associativity, op->precedence);
+            ret->setLHS(lhs);
+            ret->setRHS(rhs);
+            return ret;
+        }
+        if(token == L"=")
+        {
+            ExpressionNode* rhs = parsePrefixExpression();
+            ExpressionNode* ret = nodeFactory->createAssignment(lhs, rhs);
+            return ret;
+        }
+        if(token == L"?")
+        {
+            // binary-expression → conditional-operatorprefix-expression
+            ExpressionNode* expr = parseExpression();
+            ExpressionNode* ret = nodeFactory->createConditionalOperator(lhs, expr, NULL);
+            return ret;
+        }
+    }
+    unexpected(token);
+    return NULL;
+}
+
+TypeNode* Parser::parseType()
+{
+    Token token;
+    tassert(token, false);
+    return NULL;//TODO not implemented
 }

@@ -571,7 +571,6 @@ bool Tokenizer::next(Token& token)
     resetToken(token);
     skipSpaces();
     bool ret = nextImpl(token);
-    token.append(0);
     return ret;
 }
 bool Tokenizer::nextImpl(Token& token)

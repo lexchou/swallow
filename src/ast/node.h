@@ -2,6 +2,7 @@
 #define NODE_H
 #include "swift_conf.h"
 #include <vector>
+#include <sstream>
 
 SWIFT_NS_BEGIN
 
@@ -13,9 +14,11 @@ public:
     virtual ~Node();
 public:
     Node* get(int index);
-    int numChildren() const;
-protected:
     void set(int index, Node* val);
+    int numChildren() const;
+public:
+    virtual void serialize(std::wostream& out) {};
+protected:
 
 protected:
     std::vector<Node*> children;

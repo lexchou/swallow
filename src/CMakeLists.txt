@@ -36,6 +36,12 @@ SET(SWIFT_PARSER_SRC ${SWIFT_TOKENIZER_SRC}
     ast/unary-operator.cpp
 	ast/member-access.cpp
 	ast/subscript.cpp
+	ast/type-check.cpp
+	ast/type-cast.cpp
+	ast/assignment.cpp
+	ast/conditional-operator.cpp
+	ast/type-node.cpp
+	ast/operator-node.cpp
 
     ast/literal-nodes.cpp
     ast/dictionary-literal.cpp
