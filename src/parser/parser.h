@@ -32,6 +32,7 @@ private:
     ExpressionNode* parsePostfixExpression();
     ExpressionNode* parsePrimaryExpression();
     ExpressionNode* parseLiteralExpression();
+    ExpressionNode* parseParenthesizedExpression();
     ExpressionNode* parseLiteral();
     
     ExpressionNode* parseSelfExpression();

@@ -242,23 +242,55 @@ ExpressionNode* Parser::parsePrimaryExpression()
     // primary-expression → superclass-expression
     if(token.type == TokenType::Identifier && token.identifier.keyword == Keyword::Super)
         return parseSuperExpression();
-    // primary-expression → closure-expression
-    //TODO : not implemeneted
-    
+
     // primary-expression → parenthesized-expression
-    //TODO : not implemeneted
-    
-    // primary-expression → implicit-member-expression
-    //TODO : not implemeneted
-    
+    if(token.type == TokenType::OpenParen)
+        return parseParenthesizedExpression();
     // primary-expression → wildcard-expression
     if(token == L"_")
     {
         next(token);
         return nodeFactory->createIdentifier(L"_");
     }
+    
+    // primary-expression → closure-expression
+    //TODO : not implemeneted
+    
+    // primary-expression → implicit-member-expression
+    //TODO : not implemeneted
+    
+    
     unexpected(token);
     return NULL;
+}
+/*
+ GRAMMAR OF A PARENTHESIZED EXPRESSION
+
+‌ parenthesized-expression → (expression-element-list opt)
+‌ expression-element-list → expression-element | expression-element,expression-element-list
+‌ expression-element → expression | identifier:expression
+*/
+ExpressionNode* Parser::parseParenthesizedExpression()
+{
+    Token token;
+    ParenthesizedExpression* ret = nodeFactory->createParenthesizedExpression();
+    match(L"(");
+    while(!match(L")"))
+    {
+        next(token);
+        if(token.type == TokenType::Identifier && token.identifier.keyword == Keyword::_ && match(L":"))
+        {
+            //identifier:expression
+            ExpressionNode* expr = parseExpression();
+            ret->append(token.token, expr);
+            continue;
+        }
+        //rollback and parse exception
+        tokenizer->restore(token);
+        ExpressionNode* expr = parseExpression();
+        ret->append(expr);
+    }
+    return ret;
 }
 /*
   GRAMMAR OF A SELF EXPRESSION

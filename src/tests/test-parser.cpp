@@ -34,7 +34,7 @@ public:
         SymbolRegistry sregistry;
         NodeFactory nodeFactory;
         Parser parser(&nodeFactory, &sregistry);
-        Node* root = parser.parse(L"a=4+1*3");
+        Node* root = parser.parse(L"a=4+1*(3+1*4)");
         CPPUNIT_ASSERT(root != NULL);
         root->serialize(std::wcout);
         std::wcout<<std::endl;
@@ -56,6 +56,22 @@ public:
         CPPUNIT_ASSERT(mul != NULL);
         ASSERT_EQUALS(L"*", mul->getOperator().c_str());
         
+        ParenthesizedExpression* p = dynamic_cast<ParenthesizedExpression*>(mul->getRHS());
+        CPPUNIT_ASSERT(p != NULL);
+        CPPUNIT_ASSERT_EQUAL(1, p->numChildren());
+        
+        add = dynamic_cast<BinaryOperator*>(p->get(0));
+        CPPUNIT_ASSERT(add != NULL);
+        ASSERT_EQUALS(L"+", add->getOperator().c_str());
+        
+        mul = dynamic_cast<BinaryOperator*>(add->getRHS());
+        CPPUNIT_ASSERT(mul != NULL);
+        ASSERT_EQUALS(L"*", mul->getOperator().c_str());
+        
+        
+    }
+    void testParenthesizedExpr()
+    {
         
     }
 };

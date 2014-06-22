@@ -80,4 +80,7 @@ ConditionalOperator* NodeFactory::createConditionalOperator(ExpressionNode* cond
 {
     return new ConditionalOperator(cond, trueExpr, falseExpr);
 }
-
+ParenthesizedExpression* NodeFactory::createParenthesizedExpression()
+{
+    return new ParenthesizedExpression();
+}

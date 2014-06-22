@@ -42,6 +42,7 @@ SET(SWIFT_PARSER_SRC ${SWIFT_TOKENIZER_SRC}
 	ast/conditional-operator.cpp
 	ast/type-node.cpp
 	ast/operator-node.cpp
+	ast/parenthesized-expression.cpp
 
     ast/literal-nodes.cpp
     ast/dictionary-literal.cpp

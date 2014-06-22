@@ -26,6 +26,7 @@ class TypeCheck;
 class TypeCast;
 class Assignment;
 class ConditionalOperator;
+class ParenthesizedExpression;
 
 class NodeFactory
 {
@@ -53,6 +54,7 @@ public:
     virtual TypeCast* createTypeCast(ExpressionNode* expr, TypeNode* type);
     virtual Assignment* createAssignment(ExpressionNode* lhs, ExpressionNode* rhs);
     virtual ConditionalOperator* createConditionalOperator(ExpressionNode* cond, ExpressionNode* trueExpr, ExpressionNode* falseExpr);
+    virtual ParenthesizedExpression* createParenthesizedExpression();
 };
 
 
