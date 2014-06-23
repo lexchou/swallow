@@ -630,7 +630,7 @@ static OperatorNode* sortExpression(OperatorNode* op)
         return op;
     Node* left = op->get(0);
     Node* right = op->get(1);
-    if(left && (c = dynamic_cast<OperatorNode*>(left)))
+    if(left && (c = dynamic_cast<OperatorNode*>(left)) && c->numChildren() == 2)
     {
         left = c = sortExpression(c);
         if(rotateRequired(c, root))

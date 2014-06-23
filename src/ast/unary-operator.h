@@ -11,18 +11,13 @@ public:
 public:
     void setOperand(ExpressionNode* node){set(0, node);}
     ExpressionNode* getOperand(){return static_cast<ExpressionNode*>(get(0));}
+    
+    const std::wstring& getOperator() const { return op;}
+    void setOperator(const std::wstring& op) { this->op = op;}
 public:
     virtual void serialize(std::wostream& out);
 private:
     std::wstring op;
-};
-
-
-class Identifier;
-class InOutParameter : public UnaryOperator
-{
-public:
-    InOutParameter(Identifier* identifier);
 };
 
 SWIFT_NS_END

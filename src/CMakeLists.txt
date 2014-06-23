@@ -28,12 +28,13 @@ cmake_policy(SET CMP0015 OLD)
 SET(SWIFT_TOKENIZER_SRC tokenizer/tokenizer.cpp)
 SET(SWIFT_PARSER_SRC ${SWIFT_TOKENIZER_SRC}
     parser/parser.cpp
-    ast/nodes.cpp
+    ast/node.cpp
     ast/expression-node.cpp
     ast/comment-node.cpp
     ast/node-factory.cpp
     ast/binary-operator.cpp
     ast/unary-operator.cpp
+    ast/in-out-parameter.cpp
 	ast/member-access.cpp
 	ast/subscript.cpp
 	ast/type-check.cpp

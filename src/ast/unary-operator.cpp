@@ -23,9 +23,3 @@ void UnaryOperator::serialize(std::wostream& out)
     }
 }
 
-
-InOutParameter::InOutParameter(Identifier* identifier)
-    :UnaryOperator(L"&", OperatorType::PrefixUnary)
-{
-    setOperand(identifier);
-}

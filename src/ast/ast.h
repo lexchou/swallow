@@ -2,6 +2,8 @@
 #define AST_H
 #include "unary-operator.h"
 #include "binary-operator.h"
+#include "in-out-parameter.h"
+
 
 #include "literal-nodes.h"
 #include "integer-literal.h"
