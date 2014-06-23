@@ -14,6 +14,7 @@ class SymbolRegistry;
 class Identifier;
 class NodeFactory;
 class ClosureExpression;
+class ParenthesizedExpression;
 class TypeNode;
 class Parser
 {
@@ -36,6 +37,7 @@ private:
     ExpressionNode* parsePrimaryExpression();
     ExpressionNode* parseLiteralExpression();
     ExpressionNode* parseParenthesizedExpression();
+    void parseExpressionItem(ParenthesizedExpression* parent);
     ExpressionNode* parseLiteral();
     
     ExpressionNode* parseSelfExpression();

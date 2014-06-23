@@ -175,6 +175,7 @@ ExpressionNode* Parser::parsePostfixExpression()
             if(token == L".")
             {
                 next(token);
+                expect_identifier(token);
                 // postfix-expression → initializer-expression
                 if(token == L"init")
                 {
@@ -182,7 +183,6 @@ ExpressionNode* Parser::parsePostfixExpression()
                     continue;
                 }
                 // postfix-expression → postfix-self-expression
-                tassert(token, token.type == TokenType::Identifier);
                 if(token.identifier.keyword == Keyword::Self)
                 {
                     ret = nodeFactory->createSelfExpression(ret);
@@ -224,7 +224,7 @@ ExpressionNode* Parser::parsePostfixExpression()
             break;
         }
         // postfix-expression → function-call-expression
-        if(token.type == TokenType::OpenBrace)
+        if(token.type == TokenType::OpenParen)
         {
             FunctionCall* call = parseFunctionCallExpression();
             call->setFunction(ret);
@@ -262,11 +262,10 @@ ExpressionNode* Parser::parsePostfixExpression()
 FunctionCall* Parser::parseFunctionCallExpression()
 {
     FunctionCall* ret = nodeFactory->createFunctionCall();
-    if(match(L"("))
+    if(predicate(L"("))
     {
         ParenthesizedExpression* p = static_cast<ParenthesizedExpression*>(this->parseParenthesizedExpression());
         ret->setArguments(p);
-        match(L")");
     }
     if(predicate(L"{"))
     {
@@ -343,13 +342,19 @@ ExpressionNode* Parser::parsePrimaryExpression()
     }
     
     // primary-expression → closure-expression
-    //TODO : not implemeneted
+    if(token.type == TokenType::OpenBrace)
+    {
+        return parseClosureExpression();
+    }
     
     // primary-expression → implicit-member-expression
-    //TODO : not implemeneted
-    
-    
-    unexpected(token);
+    if(token == L".")
+    {
+        next(token);
+        expect_identifier(token);
+        Identifier* field = nodeFactory->createIdentifier(token.token);
+        return nodeFactory->createMemberAccess(NULL, field);
+    }
     return NULL;
 }
 /*
@@ -364,23 +369,37 @@ ExpressionNode* Parser::parseParenthesizedExpression()
     Token token;
     ParenthesizedExpression* ret = nodeFactory->createParenthesizedExpression();
     match(L"(");
-    while(!match(L")"))
+    if(!predicate(L")"))
     {
-        next(token);
-        if(token.type == TokenType::Identifier && token.identifier.keyword == Keyword::_ && match(L":"))
-        {
-            //identifier:expression
-            ExpressionNode* expr = parseExpression();
-            ret->append(token.token, expr);
-            continue;
-        }
-        //rollback and parse exception
-        tokenizer->restore(token);
-        ExpressionNode* expr = parseExpression();
-        ret->append(expr);
+        parseExpressionItem(ret);
     }
+    while(match(L","))
+    {
+        if(predicate(L")"))
+            break;
+        parseExpressionItem(ret);
+    }
+    match(L")");
     return ret;
 }
+
+void Parser::parseExpressionItem(ParenthesizedExpression* parent)
+{
+    Token token;
+    next(token);
+    if(token.type == TokenType::Identifier && token.identifier.keyword == Keyword::_ && match(L":"))
+    {
+        //identifier:expression
+        ExpressionNode* expr = parseExpression();
+        parent->append(token.token, expr);
+        return;
+    }
+    //rollback and parse exception
+    tokenizer->restore(token);
+    ExpressionNode* expr = parseExpression();
+    parent->append(expr);
+}
+
 /*
   GRAMMAR OF A SELF EXPRESSION
  
