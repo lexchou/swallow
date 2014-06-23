@@ -4,9 +4,12 @@
 USE_SWIFT_NS
 
 Node::Node(int numChildren)
-    :children(numChildren)
 {
     assert(numChildren >= 0);
+    for(int i = 0; i < numChildren; i++)
+    {
+        children.push_back(NULL);
+    }
 }
 Node::~Node()
 {

@@ -9,9 +9,11 @@ SWIFT_NS_BEGIN
 class Tokenizer;
 class Node;
 class ExpressionNode;
+class FunctionCall;
 class SymbolRegistry;
 class Identifier;
 class NodeFactory;
+class ClosureExpression;
 class TypeNode;
 class Parser
 {
@@ -30,6 +32,7 @@ private:
     ExpressionNode* parseBinaryExpression(ExpressionNode* lhs);
     ExpressionNode* parsePrefixExpression();
     ExpressionNode* parsePostfixExpression();
+    FunctionCall* parseFunctionCallExpression();
     ExpressionNode* parsePrimaryExpression();
     ExpressionNode* parseLiteralExpression();
     ExpressionNode* parseParenthesizedExpression();
@@ -38,6 +41,7 @@ private:
     ExpressionNode* parseSelfExpression();
     ExpressionNode* parseSuperExpression();
     Identifier* parseIdentifier();
+    ClosureExpression* parseClosureExpression();
     TypeNode* parseType();
     
     std::pair<ExpressionNode*, ExpressionNode*> parseDictionaryLiteralItem();

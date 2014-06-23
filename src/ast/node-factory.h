@@ -27,6 +27,12 @@ class TypeCast;
 class Assignment;
 class ConditionalOperator;
 class ParenthesizedExpression;
+class Initializer;
+class SelfExpression;
+class DynamicType;
+class ForcedValue;
+class OptionalChaining;
+class FunctionCall;
 
 class NodeFactory
 {
@@ -47,14 +53,23 @@ public:
     virtual ArrayLiteral* createArrayLiteral();
     virtual DictionaryLiteral* createDictionaryLiteral();
     virtual CompileConstant* createCompilecConstant(const std::wstring& name, const std::wstring& value);
-    virtual MemberAccess* createMemberAccess(Identifier* self, Identifier* field);
-    virtual Subscript* createSubscript(Identifier* self, ExpressionNode* index);
+    virtual MemberAccess* createMemberAccess(ExpressionNode* self, Identifier* field);
+    virtual Subscript* createSubscript(ExpressionNode* self, ExpressionNode* index);
     
     virtual TypeCheck* createTypeCheck(ExpressionNode* expr, TypeNode* type);
     virtual TypeCast* createTypeCast(ExpressionNode* expr, TypeNode* type);
     virtual Assignment* createAssignment(ExpressionNode* lhs, ExpressionNode* rhs);
     virtual ConditionalOperator* createConditionalOperator(ExpressionNode* cond, ExpressionNode* trueExpr, ExpressionNode* falseExpr);
     virtual ParenthesizedExpression* createParenthesizedExpression();
+    
+    virtual Initializer* createInitializer(ExpressionNode*);
+    virtual SelfExpression* createSelfExpression(ExpressionNode* expr);
+    virtual DynamicType* createDynamicType(ExpressionNode* expr);
+    virtual ForcedValue* createForcedValue(ExpressionNode* expr);
+    virtual OptionalChaining* createOptionalChaining(ExpressionNode* expr);
+    virtual FunctionCall* createFunctionCall();
+    
+
 };
 
 

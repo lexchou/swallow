@@ -6,3 +6,9 @@ CommentNode::CommentNode(const std::wstring& comment)
 {
 
 }
+
+void CommentNode::serialize(std::wostream& out)
+{
+    out<<L"/*"<<comment<<L"*/";
+}
+

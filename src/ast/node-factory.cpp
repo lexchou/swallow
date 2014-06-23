@@ -55,11 +55,11 @@ CompileConstant* NodeFactory::createCompilecConstant(const std::wstring& name, c
     return new CompileConstant(name, value);
 }
 
-MemberAccess* NodeFactory::createMemberAccess(Identifier* self, Identifier* field)
+MemberAccess* NodeFactory::createMemberAccess(ExpressionNode* self, Identifier* field)
 {
     return new MemberAccess(self, field);
 }
-Subscript* NodeFactory::createSubscript(Identifier* self, ExpressionNode* index)
+Subscript* NodeFactory::createSubscript(ExpressionNode* self, ExpressionNode* index)
 {
     return new Subscript(self, index);
 }
@@ -83,4 +83,29 @@ ConditionalOperator* NodeFactory::createConditionalOperator(ExpressionNode* cond
 ParenthesizedExpression* NodeFactory::createParenthesizedExpression()
 {
     return new ParenthesizedExpression();
+}
+
+Initializer* NodeFactory::createInitializer(ExpressionNode* expr)
+{
+    return new Initializer(expr);
+}
+SelfExpression* NodeFactory::createSelfExpression(ExpressionNode* expr)
+{
+    return new SelfExpression(expr);
+}
+DynamicType* NodeFactory::createDynamicType(ExpressionNode* expr)
+{
+    return new DynamicType(expr);
+}
+ForcedValue* NodeFactory::createForcedValue(ExpressionNode* expr)
+{
+    return new ForcedValue(expr);
+}
+OptionalChaining* NodeFactory::createOptionalChaining(ExpressionNode* expr)
+{
+    return new OptionalChaining(expr);
+}
+FunctionCall* NodeFactory::createFunctionCall()
+{
+    return new FunctionCall();
 }

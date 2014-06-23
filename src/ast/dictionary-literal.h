@@ -10,6 +10,8 @@ public:
 	DictionaryLiteral();
 public:
 	void insert(ExpressionNode* key, ExpressionNode* value);
+public:
+    virtual void serialize(std::wostream& out);
 };
 
 SWIFT_NS_END

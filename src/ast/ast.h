@@ -4,6 +4,11 @@
 #include "binary-operator.h"
 
 #include "literal-nodes.h"
+#include "integer-literal.h"
+#include "float-literal.h"
+#include "string-literal.h"
+#include "compile-constant.h"
+
 #include "array-literal.h"
 #include "dictionary-literal.h"
 
@@ -18,4 +23,12 @@
 #include "assignment.h"
 #include "conditional-operator.h"
 #include "parenthesized-expression.h"
+#include "function-call.h"
+#include "initializer.h"
+#include "self-expression.h"
+#include "dynamic-type.h"
+#include "forced-value.h"
+#include "optional-chaining.h"
+#include "closure-expression.h"
+
 #endif//AST_H

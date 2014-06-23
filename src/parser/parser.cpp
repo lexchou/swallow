@@ -165,28 +165,117 @@ GRAMMAR OF A POSTFIX EXPRESSION
 */
 ExpressionNode* Parser::parsePostfixExpression()
 {
+    Token token;
     // postfix-expression → primary-expression
-    return parsePrimaryExpression();
-    // postfix-expression → postfix-expression postfix-operator
-    //TODO
-    // postfix-expression → function-call-expression
-    //TODO
-    // postfix-expression → initializer-expression
-    //TODO
-    // postfix-expression → explicit-member-expression
-    //TODO
-    // postfix-expression → postfix-self-expression
-    //TODO
-    // postfix-expression → dynamic-type-expression
-    //TODO
-    // postfix-expression → subscript-expression
-    //TODO
-    // postfix-expression → forced-value-expression
-    //TODO
-    // postfix-expression → optional-chaining-expression
-    //TODO
-
+    ExpressionNode* ret =  parsePrimaryExpression();
+    while(peek(token))
+    {
+        if(token.type == TokenType::Operator)
+        {
+            if(token == L".")
+            {
+                next(token);
+                // postfix-expression → initializer-expression
+                if(token == L"init")
+                {
+                    ret = nodeFactory->createInitializer(ret);
+                    continue;
+                }
+                // postfix-expression → postfix-self-expression
+                tassert(token, token.type == TokenType::Identifier);
+                if(token.identifier.keyword == Keyword::Self)
+                {
+                    ret = nodeFactory->createSelfExpression(ret);
+                    continue;
+                }
+                // postfix-expression → dynamic-type-expression
+                if(token.identifier.keyword == Keyword::DynamicType)
+                {
+                    ret = nodeFactory->createDynamicType(ret);
+                    continue;
+                }
+                tassert(token, token.identifier.keyword == Keyword::_);
+                // postfix-expression → explicit-member-expression
+                Identifier* field = nodeFactory->createIdentifier(token.token);
+                ret = nodeFactory->createMemberAccess(ret, field);
+                continue;
+            }
+            if(token == L"!")
+            {
+                // postfix-expression → forced-value-expression
+                ret = nodeFactory->createForcedValue(ret);
+                continue;
+            }
+            if(token == L"?")
+            {
+                // postfix-expression → optional-chaining-expression
+                ret = nodeFactory->createOptionalChaining(ret);
+                continue;
+            }
+            // postfix-expression → postfix-expression postfix-operator
+            if(symbolRegistry->isPostfixOperator(token.token))
+            {
+                next(token);
+                UnaryOperator* postfix = nodeFactory->createUnary(token.token, OperatorType::PostfixUnary);
+                postfix->setOperand(ret);
+                ret = postfix;
+                continue;
+            }
+            break;
+        }
+        // postfix-expression → function-call-expression
+        if(token.type == TokenType::OpenBrace)
+        {
+            FunctionCall* call = parseFunctionCallExpression();
+            call->setFunction(ret);
+            ret = call;
+            continue;
+        }
+        // postfix-expression → subscript-expression
+        if(token.type == TokenType::OpenBracket)
+        {
+            // subscript-expression → postfix-expression[expression-list]
+            match(L"[");
+            ExpressionNode* expr = parseExpression();
+            Subscript* subscript = nodeFactory->createSubscript(ret, expr);
+            while(match(L","))
+            {
+                expr = parseExpression();
+                subscript->addIndex(expr);
+            }
+            match(L"]");
+            ret = subscript;
+            continue;
+        }
+        break;
+    }
+    return ret;
 }
+
+/*
+ GRAMMAR OF A FUNCTION CALL EXPRESSION
+
+‌ function-call-expression → postfix-expression parenthesized-expression
+‌ function-call-expression → postfix-expression parenthesized-expression opt trailing-closure
+‌ trailing-closure → closure-expression
+*/
+FunctionCall* Parser::parseFunctionCallExpression()
+{
+    FunctionCall* ret = nodeFactory->createFunctionCall();
+    if(match(L"("))
+    {
+        ParenthesizedExpression* p = static_cast<ParenthesizedExpression*>(this->parseParenthesizedExpression());
+        ret->setArguments(p);
+        match(L")");
+    }
+    if(predicate(L"{"))
+    {
+        ClosureExpression* closure = parseClosureExpression();
+        ret->setTrailingClosure(closure);
+    }
+    return ret;
+}
+
 
 /*
 GRAMMAR OF A PRIMARY EXPRESSION
@@ -644,6 +733,13 @@ ExpressionNode* Parser::parseBinaryExpression(ExpressionNode* lhs)
         }
     }
     unexpected(token);
+    return NULL;
+}
+
+ClosureExpression* Parser::parseClosureExpression()
+{
+    Token token;
+    tassert(token, 0);
     return NULL;
 }
 

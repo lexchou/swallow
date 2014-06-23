@@ -8,10 +8,15 @@ class Identifier;
 class MemberAccess : public ExpressionNode
 {
 public:
-    MemberAccess(Identifier* self, Identifier* field);
-protected:
-    Identifier* self;
-    Identifier* field;
+    MemberAccess(ExpressionNode* self, Identifier* field);
+public:
+    void setSelf(ExpressionNode* self);
+    void setField(Identifier* field);
+    
+    ExpressionNode* getSelf();
+    Identifier* getField();
+public:
+    virtual void serialize(std::wostream& out);
 };
 
 SWIFT_NS_END

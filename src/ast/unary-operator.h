@@ -11,6 +11,8 @@ public:
 public:
     void setOperand(ExpressionNode* node){set(0, node);}
     ExpressionNode* getOperand(){return static_cast<ExpressionNode*>(get(0));}
+public:
+    virtual void serialize(std::wostream& out);
 private:
     std::wstring op;
 };

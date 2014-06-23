@@ -128,10 +128,10 @@ struct OperatorType
     enum T
     {
         _,
-        PrefixUnary,
-        InfixBinary,
-        PostfixUnary,
-        Ternary
+        PrefixUnary = 1,
+        InfixBinary = 2,
+        PostfixUnary = 4,
+        Ternary = 8
     };
 };
 

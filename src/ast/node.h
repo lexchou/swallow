@@ -21,7 +21,8 @@ public:
 protected:
 
 protected:
-    std::vector<Node*> children;
+    typedef std::vector<Node*> Children;
+    Children children;
 };
 
 

@@ -10,6 +10,8 @@ public:
 	ArrayLiteral();
 public:
 	void push(ExpressionNode* item);
+public:
+    virtual void serialize(std::wostream& out);
 };
 SWIFT_NS_END
 

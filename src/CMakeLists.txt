@@ -43,6 +43,18 @@ SET(SWIFT_PARSER_SRC ${SWIFT_TOKENIZER_SRC}
 	ast/type-node.cpp
 	ast/operator-node.cpp
 	ast/parenthesized-expression.cpp
+	ast/function-call.cpp
+	ast/initializer.cpp
+	ast/self-expression.cpp
+	ast/dynamic-type.cpp
+	ast/forced-value.cpp
+	ast/optional-chaining.cpp
+	ast/integer-literal.cpp
+	ast/float-literal.cpp
+	ast/string-literal.cpp
+	ast/compile-constant.cpp
+
+
 
     ast/literal-nodes.cpp
     ast/dictionary-literal.cpp
