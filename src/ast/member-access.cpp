@@ -32,7 +32,8 @@ Identifier* MemberAccess::getField()
 
 void MemberAccess::serialize(std::wostream& out)
 {
-    getSelf()->serialize(out);
+    if(getSelf())
+        getSelf()->serialize(out);
     out<<L".";
     getSelf()->serialize(out);
 }

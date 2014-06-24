@@ -385,6 +385,7 @@ class TestNumberToken : public CppUnit::TestFixture
 {
     CPPUNIT_TEST_SUITE(TestNumberToken);
     CPPUNIT_TEST(testDecimal);
+    CPPUNIT_TEST(testNumberSelf);
     CPPUNIT_TEST(testBinary);
     CPPUNIT_TEST(testHexadecimal);
     CPPUNIT_TEST(testOctal);
@@ -392,6 +393,28 @@ class TestNumberToken : public CppUnit::TestFixture
     CPPUNIT_TEST(testHexadecimalFloat);
     CPPUNIT_TEST_SUITE_END();
 public:
+    void testNumberSelf()
+    {
+        Tokenizer tokenizer(L"3.self");
+        Token token;
+        
+        
+        CPPUNIT_ASSERT(tokenizer.next(token));
+        CPPUNIT_ASSERT_EQUAL(TokenType::Integer, token.type);
+        CPPUNIT_ASSERT_EQUAL(10, token.number.base);
+        ASSERT_EQUALS(L"3", token.c_str());
+        
+        
+        CPPUNIT_ASSERT(tokenizer.next(token));
+        CPPUNIT_ASSERT_EQUAL(TokenType::Operator, token.type);
+        ASSERT_EQUALS(L".", token.c_str());
+        
+        
+        CPPUNIT_ASSERT(tokenizer.next(token));
+        CPPUNIT_ASSERT_EQUAL(TokenType::Identifier, token.type);
+        ASSERT_EQUALS(L"self", token.c_str());
+        
+    }
     void testDecimal()
     {
         

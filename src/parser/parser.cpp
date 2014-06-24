@@ -174,8 +174,10 @@ ExpressionNode* Parser::parsePostfixExpression()
         {
             if(token == L".")
             {
-                next(token);
-                expect_identifier(token);
+                next(token);//skip .
+                next(token);//read identifier
+                tassert(token, token.type == TokenType::Identifier);
+                
                 // postfix-expression → initializer-expression
                 if(token == L"init")
                 {
@@ -203,13 +205,8 @@ ExpressionNode* Parser::parsePostfixExpression()
             if(token == L"!")
             {
                 // postfix-expression → forced-value-expression
+                next(token);
                 ret = nodeFactory->createForcedValue(ret);
-                continue;
-            }
-            if(token == L"?")
-            {
-                // postfix-expression → optional-chaining-expression
-                ret = nodeFactory->createOptionalChaining(ret);
                 continue;
             }
             // postfix-expression → postfix-expression postfix-operator
@@ -222,6 +219,13 @@ ExpressionNode* Parser::parsePostfixExpression()
                 continue;
             }
             break;
+        }
+        if(token.type == TokenType::Optional)
+        {
+            // postfix-expression → optional-chaining-expression
+            next(token);
+            ret = nodeFactory->createOptionalChaining(ret);
+            continue;
         }
         // postfix-expression → function-call-expression
         if(token.type == TokenType::OpenParen)
@@ -240,6 +244,8 @@ ExpressionNode* Parser::parsePostfixExpression()
             Subscript* subscript = nodeFactory->createSubscript(ret, expr);
             while(match(L","))
             {
+                if(predicate(L"]"))
+                    break;
                 expr = parseExpression();
                 subscript->addIndex(expr);
             }

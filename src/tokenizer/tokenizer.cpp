@@ -453,8 +453,16 @@ bool Tokenizer::readNumber(Token& token)
         readNumberLiteral(token, base);
     if(peek(ch) && ch == '.')//read fraction part
     {
+        //check next digit
+        wchar_t dot = must_get();
+        if(!peek(ch) || !check_digit(base, ch))
+        {
+            unget();//rollback .
+            return true;
+        }
+        
         token.type = TokenType::Float;
-        token.append(must_get());
+        token.append(dot);
         readNumberLiteral(token, base);
     }
     if(peek(ch))

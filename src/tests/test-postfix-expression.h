@@ -15,8 +15,9 @@ class TestPostfixExpression : public CppUnit::TestFixture
     CPPUNIT_TEST(testInit);
     CPPUNIT_TEST(testSelf);
     CPPUNIT_TEST(testDynamicType);
-    CPPUNIT_TEST(testExplicitMember);
     CPPUNIT_TEST(testSubscript);
+    CPPUNIT_TEST(testSubscript2);
+    CPPUNIT_TEST(testSubscript3);
     CPPUNIT_TEST(testForcedValue);
     CPPUNIT_TEST(testOptionalChaining);
     CPPUNIT_TEST_SUITE_END();
@@ -46,7 +47,7 @@ public:
     
     void testFunctionCall()
     {
-        Node* root = parse(L"foo.bar(1,2)");
+        Node* root = parse(L"foo.bar(1, 2 + 3, id : 5)");
         CPPUNIT_ASSERT(root != NULL);
         FunctionCall* call = dynamic_cast<FunctionCall*>(root);
         CPPUNIT_ASSERT(call != NULL);
@@ -61,6 +62,38 @@ public:
         CPPUNIT_ASSERT(id != NULL);
         ASSERT_EQUALS(L"bar", id->getIdentifier().c_str());
         
+        ParenthesizedExpression* args = call->getArguments();
+        CPPUNIT_ASSERT(args != NULL);
+        CPPUNIT_ASSERT_EQUAL(3, args->numChildren());
+        
+        Node* n = args->get(0);
+        CPPUNIT_ASSERT(n != NULL);
+        IntegerLiteral* i = dynamic_cast<IntegerLiteral*>(n);
+        CPPUNIT_ASSERT(i != NULL);
+        ASSERT_EQUALS(L"1", i->toString().c_str());
+        
+        n = args->get(1);
+        CPPUNIT_ASSERT(n != NULL);
+        BinaryOperator* op = dynamic_cast<BinaryOperator*>(n);
+        CPPUNIT_ASSERT(op != NULL);
+        ASSERT_EQUALS(L"+", op->getOperator().c_str());
+        
+        CPPUNIT_ASSERT(i = dynamic_cast<IntegerLiteral*>(op->getLHS()));
+        ASSERT_EQUALS(L"2", i->toString().c_str());
+        
+        
+        CPPUNIT_ASSERT(i = dynamic_cast<IntegerLiteral*>(op->getRHS()));
+        ASSERT_EQUALS(L"3", i->toString().c_str());
+        
+        
+
+        std::wstring name = args->getName(2);
+        ASSERT_EQUALS(L"id", name.c_str());
+        
+        n = args->get(2);
+        CPPUNIT_ASSERT(n != NULL);
+        CPPUNIT_ASSERT(i = dynamic_cast<IntegerLiteral*>(n));
+        ASSERT_EQUALS(L"5", i->toString().c_str());
         
         
     }
@@ -68,35 +101,153 @@ public:
     void testInit()
     {
         
+        Node* root = parse(L"Shape.init(id : 5)");
+        root->serialize(std::wcout);
+        std::wcout<<std::endl;
+        CPPUNIT_ASSERT(root != NULL);
+        FunctionCall* call = dynamic_cast<FunctionCall*>(root);
+        CPPUNIT_ASSERT(call != NULL);
+        CPPUNIT_ASSERT(call->getFunction() != NULL);
+        Initializer* init = dynamic_cast<Initializer*>(call->getFunction());
+        CPPUNIT_ASSERT(init != NULL);
+
+        Identifier* id = dynamic_cast<Identifier*>(init->getExpression());
+        CPPUNIT_ASSERT(id != NULL);
+        ASSERT_EQUALS(L"Shape", id->getIdentifier().c_str());
+        
+        ParenthesizedExpression* args = call->getArguments();
+        CPPUNIT_ASSERT(args != NULL);
+        CPPUNIT_ASSERT_EQUAL(1, args->numChildren());
+        
+        Node* n = args->get(0);
+        CPPUNIT_ASSERT(n != NULL);
+        IntegerLiteral* i = dynamic_cast<IntegerLiteral*>(n);
+        CPPUNIT_ASSERT(i != NULL);
+        ASSERT_EQUALS(L"5", i->toString().c_str());
+        
+        std::wstring name = args->getName(0);
+        ASSERT_EQUALS(L"id", name.c_str());
     }
     
     void testSelf()
     {
-        
+        Node* root = parse(L"Shape.self");
+        root->serialize(std::wcout);
+        std::wcout<<std::endl;
+        CPPUNIT_ASSERT(root != NULL);
+        SelfExpression* self = dynamic_cast<SelfExpression*>(root);
+        CPPUNIT_ASSERT(self != NULL);
+        CPPUNIT_ASSERT(self->getExpression());
+        Identifier* id = dynamic_cast<Identifier*>(self->getExpression());
+        CPPUNIT_ASSERT(id != NULL);
+        ASSERT_EQUALS(L"Shape", id->getIdentifier().c_str());
     }
     
     void testDynamicType()
     {
+        Node* root = parse(L"345.dynamicType");
+        root->serialize(std::wcout);
+        std::wcout<<std::endl;
+        CPPUNIT_ASSERT(root != NULL);
+        DynamicType* dyn = dynamic_cast<DynamicType*>(root);
+        CPPUNIT_ASSERT(dyn != NULL);
+        CPPUNIT_ASSERT(dyn->getExpression());
+        IntegerLiteral* id = dynamic_cast<IntegerLiteral*>(dyn->getExpression());
+        CPPUNIT_ASSERT(id != NULL);
+        ASSERT_EQUALS(L"345", id->toString().c_str());
         
     }
     
-    void testExplicitMember()
-    {
-        
-    }
     
     void testSubscript()
     {
+        {
+            Node* root = parse(L"matrix[0, 1] = 2");
+            root->serialize(std::wcout);
+            
+            std::wcout<<std::endl;
+            CPPUNIT_ASSERT(root != NULL);
+            Assignment* eq = dynamic_cast<Assignment*>(root);
+            CPPUNIT_ASSERT(eq != NULL);
+            CPPUNIT_ASSERT(eq->getLHS());
+            Subscript* sub = dynamic_cast<Subscript*>(eq->getLHS());
+            CPPUNIT_ASSERT(eq != NULL);
+            CPPUNIT_ASSERT_EQUAL(2, sub->numIndices());
+            IntegerLiteral* i;
+            
+            CPPUNIT_ASSERT(i = dynamic_cast<IntegerLiteral*>(sub->getIndex(0)));
+            ASSERT_EQUALS(L"0", i->toString().c_str());
+            CPPUNIT_ASSERT(i = dynamic_cast<IntegerLiteral*>(sub->getIndex(1)));
+            ASSERT_EQUALS(L"1", i->toString().c_str());
+        }
         
     }
-    
+    void testSubscript2()
+    {
+        Node* root = parse(L"matrix[0, ] = 2");
+        root->serialize(std::wcout);
+        
+        std::wcout<<std::endl;
+        CPPUNIT_ASSERT(root != NULL);
+        Assignment* eq = dynamic_cast<Assignment*>(root);
+        CPPUNIT_ASSERT(eq != NULL);
+        CPPUNIT_ASSERT(eq->getLHS());
+        Subscript* sub = dynamic_cast<Subscript*>(eq->getLHS());
+        CPPUNIT_ASSERT(eq != NULL);
+        CPPUNIT_ASSERT_EQUAL(1, sub->numIndices());
+        IntegerLiteral* i;
+        
+        CPPUNIT_ASSERT(i = dynamic_cast<IntegerLiteral*>(sub->getIndex(0)));
+        ASSERT_EQUALS(L"0", i->toString().c_str());
+    }
+    void testSubscript3()
+    {
+        Node* root = parse(L"matrix[0 ] = 2");
+        root->serialize(std::wcout);
+        
+        std::wcout<<std::endl;
+        CPPUNIT_ASSERT(root != NULL);
+        Assignment* eq = dynamic_cast<Assignment*>(root);
+        CPPUNIT_ASSERT(eq != NULL);
+        CPPUNIT_ASSERT(eq->getLHS());
+        Subscript* sub = dynamic_cast<Subscript*>(eq->getLHS());
+        CPPUNIT_ASSERT(eq != NULL);
+        CPPUNIT_ASSERT_EQUAL(1, sub->numIndices());
+        IntegerLiteral* i;
+        
+        CPPUNIT_ASSERT(i = dynamic_cast<IntegerLiteral*>(sub->getIndex(0)));
+        ASSERT_EQUALS(L"0", i->toString().c_str());
+    }
     void testForcedValue()
     {
-        
+        Node* root = parse(L"val!");
+        root->serialize(std::wcout);
+        std::wcout<<std::endl;
+        CPPUNIT_ASSERT(root != NULL);
+        ForcedValue* val = dynamic_cast<ForcedValue*>(root);
+        CPPUNIT_ASSERT(val != NULL);
+        CPPUNIT_ASSERT(val->getExpression());
+        Identifier* id = dynamic_cast<Identifier*>(val->getExpression());
+        CPPUNIT_ASSERT(id != NULL);
+        ASSERT_EQUALS(L"val", id->getIdentifier().c_str());
     }
     
     void testOptionalChaining()
     {
+        Node* root = parse(L"c?.performAction()");
+        root->serialize(std::wcout);
+        std::wcout<<std::endl;
+        CPPUNIT_ASSERT(root != NULL);
+        FunctionCall* call = dynamic_cast<FunctionCall*>(root);
+        CPPUNIT_ASSERT(call != NULL);
+        CPPUNIT_ASSERT(call->getFunction());
+        MemberAccess* mem = dynamic_cast<MemberAccess*>(call->getFunction());
+        CPPUNIT_ASSERT(mem != NULL);
+        OptionalChaining* optional = dynamic_cast<OptionalChaining*>(mem->getSelf());
+        CPPUNIT_ASSERT(optional != NULL);
+        Identifier* id = dynamic_cast<Identifier*>(optional->getExpression());
+        CPPUNIT_ASSERT(id != NULL);
+        ASSERT_EQUALS(L"c", id->getIdentifier().c_str());
         
     }
     

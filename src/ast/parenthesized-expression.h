@@ -12,6 +12,7 @@ public:
 public:
     void append(const std::wstring& name, ExpressionNode* expr);
     void append(ExpressionNode* expr);
+    std::wstring getName(int idx);
 public:
     virtual void serialize(std::wostream& out);
 private:

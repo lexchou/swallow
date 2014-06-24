@@ -33,3 +33,9 @@ void ParenthesizedExpression::serialize(std::wostream& out)
     
     out<<L")";
 }
+std::wstring ParenthesizedExpression::getName(int idx)
+{
+    if(idx <0 || idx >= names.size())
+        return L"";
+    return names[idx];
+}
