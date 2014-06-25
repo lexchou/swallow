@@ -33,4 +33,18 @@
 #include "optional-chaining.h"
 #include "closure-expression.h"
 
+#include "ast/break-statement.h"
+#include "ast/code-block.h"
+#include "ast/continue-statement.h"
+#include "ast/do-loop.h"
+#include "ast/fallthrough-statement.h"
+#include "ast/for-loop.h"
+#include "ast/if-statement.h"
+#include "ast/labeled-statement.h"
+#include "ast/return-statement.h"
+#include "ast/statement.h"
+#include "ast/switch-case.h"
+#include "ast/case-statement.h"
+#include "ast/while-loop.h"
+
 #endif//AST_H

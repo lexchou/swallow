@@ -1,0 +1,27 @@
+#ifndef DO_LOOP_H
+#define DO_LOOP_H
+#include "statement.h"
+#include <string>
+
+SWIFT_NS_BEGIN
+
+class ExpressionNode;
+class CodeBlock;
+class DoLoop : public Statement
+{
+public:
+    DoLoop();
+public:
+    void setCodeBlock(CodeBlock* codeBlock);
+    CodeBlock* getCodeBlock();
+    
+    void setCondition(ExpressionNode* expression);
+    ExpressionNode* getCondition();
+public:
+    virtual void serialize(std::wostream& out);
+private:
+};
+
+SWIFT_NS_END
+
+#endif//DO_LOOP_H

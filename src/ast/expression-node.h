@@ -1,10 +1,10 @@
 #ifndef EXPRESSION_NODE_H
 #define EXPRESSION_NODE_H
-#include "node.h"
+#include "statement.h"
 SWIFT_NS_BEGIN
 
 
-class ExpressionNode : public Node
+class ExpressionNode : public Statement
 {
 protected:
 	ExpressionNode(int numChildren);

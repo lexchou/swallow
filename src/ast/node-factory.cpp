@@ -109,3 +109,55 @@ FunctionCall* NodeFactory::createFunctionCall()
 {
     return new FunctionCall();
 }
+
+
+ForLoop* NodeFactory::createForLoop()
+{
+    return new ForLoop();
+}
+WhileLoop* NodeFactory::createWhileLoop()
+{
+    return new WhileLoop();
+}
+IfStatement* NodeFactory::createIf()
+{
+    return new IfStatement();
+}
+DoLoop* NodeFactory::createDoLoop()
+{
+    return new DoLoop();
+}
+SwitchCase* NodeFactory::createSwitch()
+{
+    return new SwitchCase();
+}
+CaseStatement* NodeFactory::createCase()
+{
+    return new CaseStatement();
+}
+BreakStatement* NodeFactory::createBreak()
+{
+    return new BreakStatement();
+}
+ContinueStatement* NodeFactory::createContinue()
+{
+    return new ContinueStatement();
+}
+FallthroughStatement* NodeFactory::createFallthrough()
+{
+    return new FallthroughStatement();
+}
+ReturnStatement* NodeFactory::createReturn()
+{
+    return new ReturnStatement();
+}
+LabeledStatement* NodeFactory::createLabel()
+{
+    return new LabeledStatement();
+}
+CodeBlock* NodeFactory::createCodeBlock()
+{
+    return new CodeBlock();
+}
+
+

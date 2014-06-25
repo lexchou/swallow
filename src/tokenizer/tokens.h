@@ -64,6 +64,13 @@ struct Token
     {
         return token.c_str();
     }
+    Keyword::T getKeyword() const
+    {
+        if(type != TokenType::Identifier)
+            return Keyword::_;
+        return identifier.keyword;
+    }
+    
     bool operator ==(const wchar_t*str) const
     {   
         return wcscmp(c_str(), str) == 0;

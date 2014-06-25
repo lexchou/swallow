@@ -28,6 +28,11 @@ cmake_policy(SET CMP0015 OLD)
 SET(SWIFT_TOKENIZER_SRC tokenizer/tokenizer.cpp)
 SET(SWIFT_PARSER_SRC ${SWIFT_TOKENIZER_SRC}
     parser/parser.cpp
+    parser/parser_expression.cpp
+    parser/parser_statement.cpp
+    parser/parser_declaration.cpp
+	parser/parser_pattern.cpp
+
     ast/node.cpp
     ast/expression-node.cpp
     ast/comment-node.cpp
@@ -55,6 +60,19 @@ SET(SWIFT_PARSER_SRC ${SWIFT_TOKENIZER_SRC}
 	ast/string-literal.cpp
 	ast/compile-constant.cpp
 
+	ast/break-statement.cpp
+	ast/continue-statement.cpp
+	ast/do-loop.cpp
+	ast/fallthrough-statement.cpp
+	ast/for-loop.cpp
+	ast/if-statement.cpp
+	ast/labeled-statement.cpp
+	ast/return-statement.cpp
+	ast/statement.cpp
+	ast/switch-case.cpp
+	ast/case-statement.cpp
+	ast/while-loop.cpp
+	ast/code-block.cpp
 
 
     ast/literal-nodes.cpp
@@ -67,7 +85,13 @@ SET(SWIFT_PARSER_SRC ${SWIFT_TOKENIZER_SRC}
 SET(SWIFT_SRC main.cpp tokenizer/tokenizer.cpp)
 
 enable_testing()
-ADD_EXECUTABLE(TestParser tests/test-parser.cpp ${SWIFT_TOKENIZER_SRC} ${SWIFT_PARSER_SRC})
+ADD_EXECUTABLE(TestParser
+		tests/test-parser.cpp 
+		tests/test-operator-expression.h
+		tests/test-literal-expression.h
+		tests/test-postfix-expression.h
+		tests/test-statement.h
+		${SWIFT_TOKENIZER_SRC} ${SWIFT_PARSER_SRC})
 target_link_libraries(TestParser cppunit)
 
 ADD_EXECUTABLE(TestTokenizer tests/test-tokenizer.cpp ${SWIFT_TOKENIZER_SRC})

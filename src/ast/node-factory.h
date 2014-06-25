@@ -33,6 +33,18 @@ class DynamicType;
 class ForcedValue;
 class OptionalChaining;
 class FunctionCall;
+class ForLoop;
+class WhileLoop;
+class DoLoop;
+class IfStatement;
+class SwitchCase;
+class CaseStatement;
+class ReturnStatement;
+class BreakStatement;
+class ContinueStatement;
+class FallthroughStatement;
+class LabeledStatement;
+class CodeBlock;
 
 class NodeFactory
 {
@@ -68,7 +80,19 @@ public:
     virtual ForcedValue* createForcedValue(ExpressionNode* expr);
     virtual OptionalChaining* createOptionalChaining(ExpressionNode* expr);
     virtual FunctionCall* createFunctionCall();
-    
+
+    virtual ForLoop* createForLoop();
+    virtual WhileLoop* createWhileLoop();
+    virtual IfStatement* createIf();
+    virtual DoLoop* createDoLoop();
+    virtual SwitchCase* createSwitch();
+    virtual CaseStatement* createCase();
+    virtual BreakStatement* createBreak();
+    virtual ContinueStatement* createContinue();
+    virtual FallthroughStatement* createFallthrough();
+    virtual ReturnStatement* createReturn();
+    virtual LabeledStatement* createLabel();
+    virtual CodeBlock* createCodeBlock();
 
 };
 

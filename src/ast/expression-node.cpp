@@ -2,7 +2,7 @@
 USE_SWIFT_NS
 
 ExpressionNode::ExpressionNode(int numChildren)
-    :Node(numChildren)
+    :Statement(numChildren)
 {
 
 }

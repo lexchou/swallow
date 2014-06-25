@@ -14,8 +14,11 @@ class SymbolRegistry;
 class Identifier;
 class NodeFactory;
 class ClosureExpression;
+class CodeBlock;
+class Statement;
 class ParenthesizedExpression;
 class TypeNode;
+class CaseStatement;
 class Parser
 {
 public:
@@ -25,7 +28,29 @@ public:
     Node* parse(const wchar_t* code);
     void setFileName(const wchar_t* fileName);
     void setFunctionName(const wchar_t* function);
-private:
+private://statement
+    Statement* parseStatement();
+    Statement* parseLoopStatement();
+    Statement* parseForLoop();
+    Statement* parseWhileLoop();
+    Statement* parseDoLoop();
+    Statement* parseIf();
+    Statement* parseSwitch();
+    void parseSwitchStatements(CaseStatement* case_);
+    Statement* parseBreak();
+    Statement* parseContinue();
+    Statement* parseFallthrough();
+    Statement* parseReturn();
+    Statement* parseLabeledStatement();
+    ExpressionNode* parseConditionExpression();
+    
+    CodeBlock* parseCodeBlock();
+private://pattern
+    ExpressionNode* parsePattern();
+    
+private://declaration
+    Node* parseDeclaration();
+private://expression
     ExpressionNode* parseFloat();
     ExpressionNode* parseInteger();
     ExpressionNode* parseString();
@@ -64,6 +89,10 @@ private:
      * Check if the following token is the specified one, throw exception if not matched
      */
     void expect(const wchar_t* token);
+    /**
+     * Check if the following token is the specified keyword, throw exception if not matched
+     */
+    void expect(Keyword::T keyword);
 
     /**
      * Throw an exception with the unexpected token
@@ -74,6 +103,11 @@ private:
      * Check if the following token is the specified one, consume the token and return true if matched or return false if not.
      */
     bool match(const wchar_t* token);
+    /**
+     * Check if the following token is an identifier(keywords included), consume the token and return true if matched or rollback and return false
+     */
+    bool match_identifier(Token& token);
+    
     /**
      * Return true if the next token is the specified one, no token will be consumed
      */
