@@ -21,6 +21,18 @@ class TypeNode;
 class CaseStatement;
 class Parser
 {
+    enum
+    {
+        ENABLE_GENERIC=1,
+    };
+    struct Flag
+    {
+        Flag(Parser* parser):parser(parser), flags(parser->flags){}
+        ~Flag(){parser->flags = flags;};
+        
+        Parser* parser;
+        int flags;
+    };
 public:
     Parser(NodeFactory* nodeFactory, SymbolRegistry* symbolRegistry);
     ~Parser();
@@ -120,6 +132,7 @@ private:
     SymbolRegistry* symbolRegistry;
     std::wstring fileName;
     std::wstring functionName;
+    int flags;
 };
 
 

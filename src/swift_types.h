@@ -19,6 +19,7 @@ struct TokenType
         Attribute, // @
         Colon, // :
         Comma, // ,
+        Semicolon, // ;
         Operator,
         OpenParen, // (
         CloseParen, // )

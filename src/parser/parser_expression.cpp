@@ -222,6 +222,10 @@ ExpressionNode* Parser::parsePrimaryExpression()
                 break;
         }
         Identifier* identifier = parseIdentifier();
+        
+        if((!this->flags & ENABLE_GENERIC))
+            return identifier;
+
         if(!predicate(L"<"))
             return identifier;
         tassert(token, false);//TODO unsupported genetic expression

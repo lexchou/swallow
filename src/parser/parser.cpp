@@ -15,6 +15,7 @@ Parser::Parser(NodeFactory* nodeFactory, SymbolRegistry* symbolRegistry)
 {
     tokenizer = new Tokenizer(NULL);
     functionName = L"<top>";
+    flags = 0;
 }
 Parser::~Parser()
 {
@@ -52,7 +53,8 @@ bool Parser::peek(Token& token)
 bool Parser::match(const wchar_t* token)
 {
     Token t;
-    tokenizer->next(t);
+    if(!tokenizer->next(t))
+        return false;
     if(t == token)
         return true;
     tokenizer->restore(t);

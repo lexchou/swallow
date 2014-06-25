@@ -109,13 +109,15 @@ Statement* Parser::parseForLoop()
     bool parenthesized = match(L"(");
     if(!predicate(L";"))
     {
-        while(match(L","))
+        do
         {
             if(predicate(L";"))
                 break;
             ExpressionNode* init = parseExpression();
             ret->addInit(init);
         }
+        while(match(L","));
+
     }
     expect(L";");
     if(!predicate(L";"))
@@ -124,7 +126,9 @@ Statement* Parser::parseForLoop()
         ret->setCondition(cond);
     }
     expect(L";");
-    ExpressionNode* step = parseExpression();
+    ExpressionNode* step = NULL;
+    if(!predicate(L"{"))
+        step = parseExpression();
     ret->setStep(step);
     
     if(parenthesized)

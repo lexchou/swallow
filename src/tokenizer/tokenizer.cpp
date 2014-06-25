@@ -624,6 +624,8 @@ bool Tokenizer::nextImpl(Token& token)
             return readSymbol(token, TokenType::Optional);
         case ',':
             return readSymbol(token, TokenType::Comma);
+        case ';':
+            return readSymbol(token, TokenType::Semicolon);
     }
     if(isdigit(ch))
         return readNumber(token);
