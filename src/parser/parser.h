@@ -19,11 +19,13 @@ class Statement;
 class ParenthesizedExpression;
 class TypeNode;
 class CaseStatement;
+class Tuple;
 class Parser
 {
     enum
     {
-        ENABLE_GENERIC=1,
+        ENABLE_GENERIC = 1,
+        UNDER_SWITCH_CASE = 2,
     };
     struct Flag
     {
@@ -59,7 +61,9 @@ private://statement
     CodeBlock* parseCodeBlock();
 private://pattern
     ExpressionNode* parsePattern();
-    
+    ExpressionNode* parseTuple();
+    ExpressionNode* parseEnumPattern();
+    ExpressionNode* parseTypeCastingPattern();
 private://declaration
     Node* parseDeclaration();
 private://expression

@@ -32,6 +32,7 @@ SET(SWIFT_PARSER_SRC ${SWIFT_TOKENIZER_SRC}
     parser/parser_statement.cpp
     parser/parser_declaration.cpp
 	parser/parser_pattern.cpp
+	parser/parser_type.cpp
 
     ast/node.cpp
     ast/expression-node.cpp
@@ -73,6 +74,8 @@ SET(SWIFT_PARSER_SRC ${SWIFT_TOKENIZER_SRC}
 	ast/case-statement.cpp
 	ast/while-loop.cpp
 	ast/code-block.cpp
+	ast/value-binding.cpp
+    ast/tuple.cpp
 
 
     ast/literal-nodes.cpp

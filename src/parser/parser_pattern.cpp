@@ -10,9 +10,111 @@
 #include <iostream>
 using namespace Swift;
 
+/*
+  GRAMMAR OF A PATTERN
+ 
+ ‌ pattern → wildcard-pattern type-annotationopt
+ ‌ pattern → identifier-pattern type-annotationopt
+ ‌ pattern → value-binding-pattern
+ ‌ pattern → tuple-patterntype-annotationopt
+ ‌ pattern → enum-case-pattern
+ ‌ pattern → type-casting-pattern
+ ‌ pattern → expression-pattern
+*/
 ExpressionNode* Parser::parsePattern()
 {
     Token token;
-    tassert(token, 0);
-    return NULL;
+    next(token);
+    if(token.type == TokenType::Identifier)
+    {
+        if(token.identifier.keyword == Keyword::_)
+        switch(token.identifier.keyword)
+        {
+            //‌ pattern → wildcard-pattern type-annotationopt
+            // pattern → identifier-pattern type-annotationopt
+            //TODO : read type-annotation
+            case Keyword::_:
+                return nodeFactory->createIdentifier(token.token);
+                break;
+            // pattern → value-binding-pattern
+            case Keyword::Var:
+            {
+                VarBinding* let = nodeFactory->createVarBinding();
+                Statement* binding = parsePattern();
+                let->setBinding(binding);
+                return let;
+            }
+            case Keyword::Let:
+            {
+                LetBinding* let = nodeFactory->createLetBinding();
+                Statement* binding = parsePattern();
+                let->setBinding(binding);
+                return let;
+            }
+            default:
+                break;
+        }
+    }
+    
+    tokenizer->restore(token);
+    if(token.type == TokenType::OpenParen)
+    {
+        return parseTuple();
+    }
+    if(!(this->flags & UNDER_SWITCH_CASE))
+    {
+        unexpected(token);
+        return NULL;
+    }
+    //the following patterns are only exists in switch/case statement
+    // pattern → enum-case-pattern
+    if(token.type == TokenType::Attribute || token == L".")
+    {
+        return parseEnumPattern();
+    }
+    // pattern → type-casting-pattern
+    if(token.type == TokenType::Identifier)
+    {
+        return parseTypeCastingPattern();
+    }
+    //‌ pattern → expression-pattern
+    return parseExpression();
+}
+
+/*
+  “enum-case-pattern → type-identifier opt . enum-case-name tuple-pattern opt
+*/
+ExpressionNode* Parser::parseEnumPattern()
+{
+    
+}
+/*
+  type-casting-pattern → is-pattern  as-pattern
+ ‌ is-pattern → istype
+ ‌ as-pattern → patternastype”
+*/
+ExpressionNode* Parser::parseTypeCastingPattern()
+{
+    
+}
+/*
+  tuple-pattern → (tuple-pattern-element-list opt)
+ ‌ tuple-pattern-element-list → tuple-pattern-element | tuple-pattern-element,tuple-pattern-element-list
+ ‌ tuple-pattern-element → pattern
+ */
+ExpressionNode* Parser::parseTuple()
+{
+    Tuple* ret = nodeFactory->createTuple();
+    expect(L"(");
+    if(!predicate(L")"))
+    {
+        do
+        {
+            Statement* pattern = parsePattern();
+            ret->add(pattern);
+        }while(match(L","));
+        
+    }
+    expect(L")");
+    return ret;
 }

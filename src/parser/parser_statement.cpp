@@ -361,7 +361,7 @@ Statement* Parser::parseFallthrough()
 Statement* Parser::parseReturn()
 {
     Token token;
-    expect(Keyword::Continue);
+    expect(Keyword::Return);
     ReturnStatement* ret = nodeFactory->createReturn();
     
     if(peek(token))
@@ -427,7 +427,8 @@ CodeBlock* Parser::parseCodeBlock()
     while(!match(L"}"))
     {
         Statement* st = parseStatement();
-        ret->addStatement(st);
+        if(st != NULL)
+            ret->addStatement(st);
     }
     return ret;
 }
