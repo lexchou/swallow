@@ -22,8 +22,6 @@ public:
         Parser parser(&nodeFactory, &sregistry);
         Node* root = parser.parse(L"a=4+1*(3+1*4)");
         CPPUNIT_ASSERT(root != NULL);
-        root->serialize(std::wcout);
-        std::wcout<<std::endl;
         Assignment* eq = dynamic_cast<Assignment*>(root);
         
         CPPUNIT_ASSERT(eq != NULL);
@@ -54,6 +52,9 @@ public:
         CPPUNIT_ASSERT(mul != NULL);
         ASSERT_EQUALS(L"*", mul->getOperator().c_str());
         
+        
+        delete root;
+        CPPUNIT_ASSERT_EQUAL(0, Node::NodeCount);
         
     }
     void testParenthesizedExpr()

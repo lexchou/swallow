@@ -3,6 +3,11 @@
 #include <cassert>
 USE_SWIFT_NS
 
+#ifdef TRACE_NODE
+int Node::NodeCount = 0;
+#endif
+
+
 Node::Node(int numChildren)
 {
     assert(numChildren >= 0);
@@ -10,9 +15,28 @@ Node::Node(int numChildren)
     {
         children.push_back(NULL);
     }
+#ifdef TRACE_NODE
+    NodeCount++;
+#endif
 }
 Node::~Node()
 {
+    Children::iterator iter = children.begin();
+    for(; iter != children.end(); iter++)
+    {
+        Node* n = *iter;
+        if(n)
+            delete n;
+    }
+    children.clear();
+#ifdef TRACE_NODE
+    NodeCount--;
+#endif
+}
+
+SourceInfo* Node::getSourceInfo()
+{
+    return &sourceInfo;
 }
 void Node::set(int index, Node* val)
 {

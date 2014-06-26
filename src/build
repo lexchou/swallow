@@ -1,3 +1,3 @@
 #!/bin/bash
-cmake .
-sed -i -E 's/LIBRARY_SEARCH_PATHS.*/LIBRARY_SEARCH_PATHS = \/usr\/local\/lib;/g' swift.xcodeproj/project.pbxproj
+/usr/local/bin/cmake .
+#sed -i -E 's/LIBRARY_SEARCH_PATHS.*/LIBRARY_SEARCH_PATHS = \/usr\/local\/lib;/g' swift.xcodeproj/project.pbxproj
