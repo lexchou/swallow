@@ -12,20 +12,24 @@ using namespace Swift;
 class TestType : public CppUnit::TestFixture
 {
     CPPUNIT_TEST_SUITE(TestType);
+    CPPUNIT_TEST(testArrayType);
     CPPUNIT_TEST_SUITE_END();
 public:
     
-    Node* parse(const wchar_t* str)
+    TypeNode* parse(const wchar_t* str)
     {
         SymbolRegistry sregistry;
         NodeFactory nodeFactory;
         Parser parser(&nodeFactory, &sregistry);
-        return parser.parse(str);
+        return static_cast<TypeNode*>(parser.parseType(str));
     }
     
-    void testFor()
+    void testArrayType()
     {
+        TypeNode* arrayType = parse(L"Int[]");
         
+        delete arrayType;
+        CPPUNIT_ASSERT_EQUAL(0, Node::NodeCount);
     }
 };
 CPPUNIT_TEST_SUITE_NAMED_REGISTRATION(TestType, "alltest");

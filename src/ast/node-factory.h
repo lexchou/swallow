@@ -52,6 +52,9 @@ class FunctionType;
 class ArrayType;
 class OptionalType;
 class ImplicitlyUnwrappedOptional;
+class TypeIdentifier;
+class ProtocolComposition;
+class TupleType;
 
 class NodeFactory
 {
@@ -108,7 +111,10 @@ public:
     virtual ArrayType* createArrayType(TypeNode* innerType);
     virtual OptionalType* createOptionalType(TypeNode* innerType);
     virtual ImplicitlyUnwrappedOptional* createImplicitlyUnwrappedOptional(TypeNode* innerType);
-    
+    virtual TypeIdentifier* createTypeIdentifier(const std::wstring& typeName);
+    virtual ProtocolComposition* createProtocolComposition();
+    virtual TupleType* createTupleType();
+
 };
 
 

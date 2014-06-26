@@ -76,18 +76,69 @@ TypeNode* Parser::parseType()
     return ret;
 }
 
+/*
+  GRAMMAR OF A TUPLE TYPE
+ 
+ ‌ tuple-type → (tuple-type-bodyopt)
+ ‌ tuple-type-body → tuple-type-element-list...opt
+ ‌ tuple-type-element-list → tuple-type-element  tuple-type-element,tuple-type-element-list
+ ‌ tuple-type-element → attributesoptinoutopttype inoutoptelement-nametype-annotation
+ ‌ element-name → identifier
+*/
 TupleType* Parser::parseTupleType()
 {
+    TupleType* ret = nodeFactory->createTupleType();
+    expect(L"(");
+    if(!predicate(L")"))
+    {
+        do
+        {
+            //‌ tuple-type-element → attributes opt inout opt type inoutoptelement-nametype-annotation
+        
+        }while(match(L","));
+        if(match(L"..."))
+        {
+            ret->setVariadicParameters(true);
+        }
+    }
     
+    expect(L")");
+    return ret;
 }
 TypeIdentifier* Parser::parseTypeIdentifier()
 {
-    
+    Token token;
+    match_identifier(token);
+    TypeIdentifier* ret = nodeFactory->createTypeIdentifier(token.token);
+    if(match(L"<"))
+    {
+        do
+        {
+            TypeNode* arg = parseType();
+            ret->addGenericArgument(arg);
+        }while(match(L","));
+
+        expect(L">");
+    }
+    return ret;
 }
 ProtocolComposition* Parser::parseProtocolComposition()
 {
-    
+    expect(L"protocol");
+    expect(L"<");
+    ProtocolComposition* ret = nodeFactory->createProtocolComposition();
+    if(!predicate(L">"))
+    {
+        do
+        {
+            TypeIdentifier* protocol = parseTypeIdentifier();
+            ret->addProtocol(protocol);
+        }while(match(L","));
+    }
+    expect(L">");
+    return ret;
 }
+
 /*
  “GRAMMAR OF A GENERIC PARAMETER CLAUSE
  

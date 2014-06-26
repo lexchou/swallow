@@ -10,8 +10,16 @@ class TypeIdentifier : public TypeNode
 public:
     TypeIdentifier();
 public:
+    void setName(const std::wstring& name);
+    const std::wstring& getName() const;
+    
+    void addGenericArgument(TypeNode* argument);
+    int numGenericArguments();
+    TypeNode* getGenericArgument(int idx);
+public:
     virtual void serialize(std::wostream& out);
 private:
+    std::wstring name;
 };
 
 SWIFT_NS_END

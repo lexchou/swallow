@@ -198,4 +198,17 @@ ImplicitlyUnwrappedOptional* NodeFactory::createImplicitlyUnwrappedOptional(Type
     ret->setInnerType(innerType);
     return ret;
 }
-
+TypeIdentifier* NodeFactory::createTypeIdentifier(const std::wstring& typeName)
+{
+    TypeIdentifier* ret = new TypeIdentifier();
+    ret->setName(typeName);
+    return ret;
+}
+ProtocolComposition* NodeFactory::createProtocolComposition()
+{
+    return new ProtocolComposition();
+}
+TupleType* NodeFactory::createTupleType()
+{
+    return new TupleType();
+}
