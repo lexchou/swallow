@@ -248,7 +248,7 @@ Statement* Parser::parseSwitch()
             //“case-item-list → pattern guard-clause opt | pattern guard-clause opt , case-item-list”
             do
             {
-                ExpressionNode* pattern = parsePattern();
+                Statement* pattern = parsePattern();
                 ExpressionNode* guard = NULL;
                 if(match(L"where"))
                     guard = parseExpression();

@@ -120,10 +120,3 @@ Node* Parser::parse(const wchar_t* code)
     tokenizer->set(code);
     return parseStatement();
 }
-
-TypeNode* Parser::parseType()
-{
-    Token token;
-    tassert(token, false);
-    return NULL;//TODO not implemented
-}

@@ -11,8 +11,8 @@ class CaseStatement : public Statement
 public:
     CaseStatement();
 public:
-    void setCondition(ExpressionNode* exr);
-    ExpressionNode* getCondition();
+    void setCondition(Statement* exr);
+    Statement* getCondition();
     
     void setGuard(ExpressionNode* expr);
     ExpressionNode* getGuard();

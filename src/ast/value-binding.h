@@ -10,8 +10,21 @@ class ValueBinding : public Statement
 public:
     ValueBinding();
 public:
-    virtual void serialize(std::wostream& out);
+    void setBinding(Statement* st);
+    Statement* getBinding();
 private:
+};
+
+class LetBinding : public ValueBinding
+{
+public:
+    virtual void serialize(std::wostream& out);
+};
+
+class VarBinding : public ValueBinding
+{
+public:
+    virtual void serialize(std::wostream& out);
 };
 
 SWIFT_NS_END

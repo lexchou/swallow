@@ -20,6 +20,9 @@ class ParenthesizedExpression;
 class TypeNode;
 class CaseStatement;
 class Tuple;
+class TupleType;
+class TypeIdentifier;
+class ProtocolComposition;
 class Parser
 {
     enum
@@ -42,6 +45,14 @@ public:
     Node* parse(const wchar_t* code);
     void setFileName(const wchar_t* fileName);
     void setFunctionName(const wchar_t* function);
+public:
+    Node* parseType(const wchar_t* code);
+private:
+    TypeNode* parseType();
+    
+    TupleType* parseTupleType();
+    TypeIdentifier* parseTypeIdentifier();
+    ProtocolComposition* parseProtocolComposition();
 private://statement
     Statement* parseStatement();
     Statement* parseLoopStatement();
@@ -60,7 +71,7 @@ private://statement
     
     CodeBlock* parseCodeBlock();
 private://pattern
-    ExpressionNode* parsePattern();
+    Statement* parsePattern();
     ExpressionNode* parseTuple();
     ExpressionNode* parseEnumPattern();
     ExpressionNode* parseTypeCastingPattern();
@@ -85,7 +96,6 @@ private://expression
     ExpressionNode* parseSuperExpression();
     Identifier* parseIdentifier();
     ClosureExpression* parseClosureExpression();
-    TypeNode* parseType();
     
     std::pair<ExpressionNode*, ExpressionNode*> parseDictionaryLiteralItem();
 private:

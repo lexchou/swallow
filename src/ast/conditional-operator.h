@@ -14,7 +14,7 @@ public:
     ExpressionNode* getFalseExpression() { return static_cast<ExpressionNode*>(get(1));}
     
     
-    void setCondition(ExpressionNode* v) { set(0, v);}
+    void setCondition(Statement* v) { set(0, v);}
     void setTrueExpression(ExpressionNode* v) { set(2, v);}
     void setFalseExpression(ExpressionNode* v) { set(1, v);}
     

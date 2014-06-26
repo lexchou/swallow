@@ -47,4 +47,16 @@
 #include "ast/case-statement.h"
 #include "ast/while-loop.h"
 
+#include "ast/value-binding.h"
+#include "ast/tuple.h"
+
+#include "ast/type-node.h"
+#include "ast/tuple-type.h"
+#include "ast/type-identifier.h"
+#include "ast/function-type.h"
+#include "ast/array-type.h"
+#include "ast/optional-type.h"
+#include "ast/implicitly-unwrapped-optional.h"
+#include "ast/protocol-composition.h"
+
 #endif//AST_H

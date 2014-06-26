@@ -72,8 +72,12 @@ struct Token
     }
     
     bool operator ==(const wchar_t*str) const
-    {   
+    {
         return wcscmp(c_str(), str) == 0;
+    }
+    bool operator ==(TokenType::T type) const
+    {
+        return this->type == type;
     }
 };
 

@@ -26,13 +26,13 @@ void CaseStatement::serialize(std::wostream& out)
     }
 }
 
-void CaseStatement::setCondition(ExpressionNode* expr)
+void CaseStatement::setCondition(Statement* expr)
 {
     set(0, expr);
 }
-ExpressionNode* CaseStatement::getCondition()
+Statement* CaseStatement::getCondition()
 {
-    return static_cast<ExpressionNode*>(get(0));
+    return static_cast<Statement*>(get(0));
 }
 
 void CaseStatement::setGuard(ExpressionNode* expr)

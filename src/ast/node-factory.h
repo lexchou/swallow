@@ -45,6 +45,13 @@ class ContinueStatement;
 class FallthroughStatement;
 class LabeledStatement;
 class CodeBlock;
+class Tuple;
+class LetBinding;
+class VarBinding;
+class FunctionType;
+class ArrayType;
+class OptionalType;
+class ImplicitlyUnwrappedOptional;
 
 class NodeFactory
 {
@@ -93,7 +100,15 @@ public:
     virtual ReturnStatement* createReturn();
     virtual LabeledStatement* createLabel();
     virtual CodeBlock* createCodeBlock();
-
+    virtual LetBinding* createLetBinding();
+    virtual VarBinding* createVarBinding();
+    virtual Tuple* createTuple();
+    
+    virtual FunctionType* createFunctionType(TypeNode* argumentsType, TypeNode* retType);
+    virtual ArrayType* createArrayType(TypeNode* innerType);
+    virtual OptionalType* createOptionalType(TypeNode* innerType);
+    virtual ImplicitlyUnwrappedOptional* createImplicitlyUnwrappedOptional(TypeNode* innerType);
+    
 };
 
 

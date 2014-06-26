@@ -1,17 +1,17 @@
 #ifndef TYPE_NODE_H
 #define TYPE_NODE_H
-#include "node.h"
+#include "statement.h"
+#include <string>
 
 SWIFT_NS_BEGIN
 
-class TypeNode : public Node
+class TypeNode : public Statement
 {
-protected:
+public:
     TypeNode(int numChildren);
-    
+private:
 };
 
 SWIFT_NS_END
-
 
 #endif//TYPE_NODE_H

@@ -4,11 +4,28 @@ USE_SWIFT_NS
 
 
 ValueBinding::ValueBinding()
-    :Statement(0)
+    :Statement(1)
 {
-}
-void ValueBinding::serialize(std::wostream& out)
-{
-    out<<value;
 }
 
+void ValueBinding::setBinding(Statement* st)
+{
+    set(0, st);
+}
+Statement* ValueBinding::getBinding()
+{
+    return static_cast<Statement*>(get(0));
+}
+
+void LetBinding::serialize(std::wostream& out)
+{
+    out<<L"let ";
+    getBinding()->serialize(out);
+}
+
+
+void VarBinding::serialize(std::wostream& out)
+{
+    out<<L"var ";
+    getBinding()->serialize(out);
+}

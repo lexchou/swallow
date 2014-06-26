@@ -159,5 +159,43 @@ CodeBlock* NodeFactory::createCodeBlock()
 {
     return new CodeBlock();
 }
+LetBinding* NodeFactory::createLetBinding()
+{
+    return new LetBinding();
+}
+VarBinding* NodeFactory::createVarBinding()
+{
+    return new VarBinding();
+}
+Tuple* NodeFactory::createTuple()
+{
+    return new Tuple();
+}
 
+
+FunctionType* NodeFactory::createFunctionType(TypeNode* argumentsType, TypeNode* retType)
+{
+    FunctionType* ret = new FunctionType();
+    ret->setArgumentsType(argumentsType);
+    ret->setReturnType(retType);
+    return ret;
+}
+ArrayType* NodeFactory::createArrayType(TypeNode* innerType)
+{
+    ArrayType* ret = new ArrayType();
+    ret->setInnerType(innerType);
+    return ret;
+}
+OptionalType* NodeFactory::createOptionalType(TypeNode* innerType)
+{
+    OptionalType* ret = new OptionalType();
+    ret->setInnerType(innerType);
+    return ret;
+}
+ImplicitlyUnwrappedOptional* NodeFactory::createImplicitlyUnwrappedOptional(TypeNode* innerType)
+{
+    ImplicitlyUnwrappedOptional* ret = new ImplicitlyUnwrappedOptional();
+    ret->setInnerType(innerType);
+    return ret;
+}
 

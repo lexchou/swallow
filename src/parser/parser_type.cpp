@@ -10,6 +10,84 @@
 #include <iostream>
 using namespace Swift;
 
+Node* Parser::parseType(const wchar_t* code)
+{
+    tokenizer->set(code);
+    return parseType();
+}
+TypeNode* Parser::parseType()
+{
+    Token token;
+    TypeNode* ret = NULL;
+    next(token);
+    
+    if(token == TokenType::OpenParen)
+    {
+        tokenizer->restore(token);
+        ret = parseTupleType();
+    }
+    else if(token.type == TokenType::Identifier && token.identifier.keyword == Keyword::_)
+    {
+        ret = parseTypeIdentifier();
+    }
+    else if(token.getKeyword() == Keyword::Protocol)
+    {
+        tokenizer->restore(token);
+        ret = parseProtocolComposition();
+    }
+    else
+    {
+        unexpected(token);
+    }
+    do
+    {
+        next(token);
+        
+        //type chaining
+        if(token == L"->")
+        {
+            //function-type → type->type
+            TypeNode* retType = parseType();
+            ret = nodeFactory->createFunctionType(ret, retType);
+            continue;
+        }
+        if(token == TokenType::OpenBracket)
+        {
+            expect(L"]");
+            ret = nodeFactory->createArrayType(ret);
+            continue;
+        }
+        if(token == L"?")
+        {
+            //optional-type → type?
+            ret = nodeFactory->createOptionalType(ret);
+            continue;
+        }
+        if(token == L"!")
+        {
+            //implicitly-unwrapped-optional-type → type!
+            ret = nodeFactory->createImplicitlyUnwrappedOptional(ret);
+            continue;
+        }
+        // ‌ metatype-type → type.Type  type.Protocol
+        //TODO meta type is not supported
+        tokenizer->restore(token);
+    }while(false);
+    return ret;
+}
+
+TupleType* Parser::parseTupleType()
+{
+    
+}
+TypeIdentifier* Parser::parseTypeIdentifier()
+{
+    
+}
+ProtocolComposition* Parser::parseProtocolComposition()
+{
+    
+}
 /*
  “GRAMMAR OF A GENERIC PARAMETER CLAUSE
  

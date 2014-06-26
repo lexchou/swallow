@@ -77,6 +77,14 @@ SET(SWIFT_PARSER_SRC ${SWIFT_TOKENIZER_SRC}
 	ast/value-binding.cpp
     ast/tuple.cpp
 
+    ast/type-node.cpp
+    ast/type-identifier.cpp
+    ast/function-type.cpp
+    ast/array-type.cpp
+    ast/optional-type.cpp
+    ast/implicitly-unwrapped-optional.cpp
+    ast/tuple-type.cpp
+    ast/protocol-composition.cpp
 
     ast/literal-nodes.cpp
     ast/dictionary-literal.cpp

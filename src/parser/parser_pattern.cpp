@@ -21,7 +21,7 @@ using namespace Swift;
  ‌ pattern → type-casting-pattern
  ‌ pattern → expression-pattern
 */
-ExpressionNode* Parser::parsePattern()
+Statement* Parser::parsePattern()
 {
     Token token;
     next(token);
@@ -86,7 +86,9 @@ ExpressionNode* Parser::parsePattern()
 */
 ExpressionNode* Parser::parseEnumPattern()
 {
-    
+    Token token;
+    tassert(token, NULL);
+    return NULL;
 }
 /*
   type-casting-pattern → is-pattern  as-pattern
@@ -95,7 +97,9 @@ ExpressionNode* Parser::parseEnumPattern()
 */
 ExpressionNode* Parser::parseTypeCastingPattern()
 {
-    
+    Token token;
+    tassert(token, NULL);
+    return NULL;
 }
 /*
   tuple-pattern → (tuple-pattern-element-list opt)
