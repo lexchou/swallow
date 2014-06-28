@@ -11,3 +11,12 @@ void StructDef::serialize(std::wostream& out)
 {
 }
 
+
+void StructDef::setName(const std::wstring& name)
+{
+    this->name = name;
+}
+const std::wstring& StructDef::getName()const
+{
+    return name;
+}

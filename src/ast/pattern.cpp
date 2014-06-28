@@ -3,12 +3,8 @@
 USE_SWIFT_NS
 
 
-Pattern::Pattern()
-    :Statement(0)
+Pattern::Pattern(int numChildren)
+    :Statement(numChildren)
 {
-}
-void Pattern::serialize(std::wostream& out)
-{
-    out<<value;
 }
 

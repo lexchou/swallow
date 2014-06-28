@@ -15,7 +15,7 @@ public:
     using Declaration::setSpecifiers;
     void add(Pattern* pattern, Expression* initializer);
     int numPairs();
-    std::pair<Pattern*, Expression*> get(int i);
+    std::pair<Pattern*, Expression*> getPair(int i);
 public:
     virtual void serialize(std::wostream& out);
 private:

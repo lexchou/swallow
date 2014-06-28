@@ -38,6 +38,7 @@ SET(SWIFT_PARSER_SRC ${SWIFT_TOKENIZER_SRC}
 
     ast/node.cpp
     ast/expression.cpp
+    ast/pattern.cpp
     ast/comment.cpp
     ast/node-factory.cpp
     ast/binary-operator.cpp

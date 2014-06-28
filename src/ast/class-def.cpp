@@ -11,3 +11,12 @@ void ClassDef::serialize(std::wostream& out)
 {
 }
 
+
+void ClassDef::setName(const std::wstring& name)
+{
+    this->name = name;
+}
+const std::wstring& ClassDef::getName()const
+{
+    return name;
+}
