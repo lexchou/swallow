@@ -4,7 +4,7 @@ USE_SWIFT_NS
 
 
 Tuple::Tuple()
-    :ExpressionNode(0)
+    :Expression(0)
 {
 }
 void Tuple::serialize(std::wostream& out)
@@ -19,7 +19,7 @@ void Tuple::serialize(std::wostream& out)
 }
 
 
-void Tuple::add(Statement* st)
+void Tuple::add(Pattern* st)
 {
     children.push_back(st);
 }
@@ -27,7 +27,7 @@ int Tuple::numElements()
 {
     return children.size();
 }
-Statement* Tuple::getElement(int i)
+Pattern* Tuple::getElement(int i)
 {
-    return static_cast<Statement*>(get(i));
+    return static_cast<Pattern*>(get(i));
 }

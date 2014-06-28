@@ -15,9 +15,9 @@
 #include "dictionary-literal.h"
 
 #include "identifier.h"
-#include "comment-node.h"
+#include "comment.h"
 #include "member-access.h"
-#include "subscript.h"
+#include "subscript-access.h"
 
 
 #include "type-check.h"
@@ -26,7 +26,7 @@
 #include "conditional-operator.h"
 #include "parenthesized-expression.h"
 #include "function-call.h"
-#include "initializer.h"
+#include "initializer-reference.h"
 #include "self-expression.h"
 #include "dynamic-type.h"
 #include "forced-value.h"
@@ -58,5 +58,23 @@
 #include "ast/optional-type.h"
 #include "ast/implicitly-unwrapped-optional.h"
 #include "ast/protocol-composition.h"
+#include "ast/attribute.h"
+
+#include "ast/declaration.h"
+
+#include "ast/import.h"
+#include "ast/constant.h"
+#include "ast/variable.h"
+#include "ast/type-alias.h"
+#include "ast/function-def.h"
+#include "ast/enum-def.h"
+#include "ast/struct-def.h"
+#include "ast/class-def.h"
+#include "ast/protocol-def.h"
+#include "ast/initializer-def.h"
+#include "ast/deinitializer-def.h"
+#include "ast/extension-def.h"
+#include "ast/subscript-def.h"
+#include "ast/operator-def.h"
 
 #endif//AST_H

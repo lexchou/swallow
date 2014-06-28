@@ -1,11 +1,11 @@
 #ifndef COMPILE_CONSTANT_H
 #define COMPILE_CONSTANT_H
-#include "expression-node.h"
+#include "expression.h"
 #include <string>
 
 SWIFT_NS_BEGIN
 
-class CompileConstant : public ExpressionNode
+class CompileConstant : public Expression
 {
 public:
     CompileConstant(const std::wstring& name, const std::wstring& value);

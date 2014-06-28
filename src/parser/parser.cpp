@@ -60,6 +60,16 @@ bool Parser::match(const wchar_t* token)
     tokenizer->restore(t);
     return false;
 }
+bool Parser::match(Keyword::T keyword)
+{
+    Token t;
+    if(!tokenizer->next(t))
+        return false;
+    if(t.getKeyword() == keyword)
+        return true;
+    tokenizer->restore(t);
+    return false;
+}
 /**
  * Check if the following token is an identifier(keywords included), consume the token and return true if matched or rollback and return false
  */

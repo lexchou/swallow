@@ -1,15 +1,15 @@
 #ifndef DICTIONARY_LITERAL_H
 #define DICTIONARY_LITERAL_H
-#include "expression-node.h"
+#include "expression.h"
 
 SWIFT_NS_BEGIN
 
-class DictionaryLiteral : public ExpressionNode
+class DictionaryLiteral : public Expression
 {
 public:
 	DictionaryLiteral();
 public:
-	void insert(ExpressionNode* key, ExpressionNode* value);
+	void insert(Expression* key, Expression* value);
 public:
     virtual void serialize(std::wostream& out);
 };

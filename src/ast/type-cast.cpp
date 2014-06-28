@@ -2,7 +2,7 @@
 #include "type-node.h"
 USE_SWIFT_NS
 
-TypeCast::TypeCast(ExpressionNode* expr, TypeNode* type)
+TypeCast::TypeCast(Expression* expr, TypeNode* type)
 :BinaryOperator(L"as", Associativity::None, 132)
 {
     setLHS(expr);

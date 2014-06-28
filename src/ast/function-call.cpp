@@ -5,18 +5,18 @@ USE_SWIFT_NS
 
 
 FunctionCall::FunctionCall()
-:ExpressionNode(3)
+:Expression(3)
 {
     
 }
 
-void FunctionCall::setFunction(ExpressionNode* expr)
+void FunctionCall::setFunction(Expression* expr)
 {
     set(0, expr);
 }
-ExpressionNode* FunctionCall::getFunction()
+Expression* FunctionCall::getFunction()
 {
-    return static_cast<ExpressionNode*>(get(0));
+    return static_cast<Expression*>(get(0));
 }
 void FunctionCall::setArguments(ParenthesizedExpression* arguments)
 {

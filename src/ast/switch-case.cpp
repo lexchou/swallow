@@ -1,6 +1,6 @@
 
 #include "switch-case.h"
-#include "expression-node.h"
+#include "expression.h"
 #include "case-statement.h"
 USE_SWIFT_NS
 
@@ -17,13 +17,13 @@ void SwitchCase::serialize(std::wostream& out)
     out<<L"}"<<std::endl;
 }
 
-void SwitchCase::setControlExpression(ExpressionNode* expr)
+void SwitchCase::setControlExpression(Expression* expr)
 {
     set(0, expr);
 }
-ExpressionNode* SwitchCase::getControlExpression()
+Expression* SwitchCase::getControlExpression()
 {
-    return static_cast<ExpressionNode*>(get(0));
+    return static_cast<Expression*>(get(0));
 }
 
 void SwitchCase::addCase(CaseStatement* c)

@@ -7,7 +7,7 @@ SWIFT_NS_BEGIN
 class Assignment : public BinaryOperator
 {
 public:
-	Assignment(ExpressionNode* lhs, ExpressionNode* rhs);
+	Assignment(Expression* lhs, Expression* rhs);
 public:
 };
 SWIFT_NS_END

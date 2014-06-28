@@ -1,6 +1,6 @@
 
 #include "case-statement.h"
-#include "expression-node.h"
+#include "expression.h"
 USE_SWIFT_NS
 
 
@@ -26,22 +26,22 @@ void CaseStatement::serialize(std::wostream& out)
     }
 }
 
-void CaseStatement::setCondition(Statement* expr)
+void CaseStatement::setCondition(Pattern* expr)
 {
     set(0, expr);
 }
-Statement* CaseStatement::getCondition()
+Pattern* CaseStatement::getCondition()
 {
-    return static_cast<Statement*>(get(0));
+    return static_cast<Pattern*>(get(0));
 }
 
-void CaseStatement::setGuard(ExpressionNode* expr)
+void CaseStatement::setGuard(Expression* expr)
 {
     set(1, expr);
 }
-ExpressionNode* CaseStatement::getGuard()
+Expression* CaseStatement::getGuard()
 {
-    return static_cast<ExpressionNode*>(get(1));
+    return static_cast<Expression*>(get(1));
 }
 
 void CaseStatement::addStatement(Statement* statement)

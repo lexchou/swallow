@@ -2,19 +2,19 @@
 USE_SWIFT_NS
 
 
-ForcedValue::ForcedValue(ExpressionNode* expr)
-    :ExpressionNode(1)
+ForcedValue::ForcedValue(Expression* expr)
+    :Expression(1)
 {
     setExpression(expr);
 }
 
-void ForcedValue::setExpression(ExpressionNode* expr)
+void ForcedValue::setExpression(Expression* expr)
 {
     set(0, expr);
 }
-ExpressionNode* ForcedValue::getExpression()
+Expression* ForcedValue::getExpression()
 {
-    return static_cast<ExpressionNode*>(get(0));
+    return static_cast<Expression*>(get(0));
 }
 
 void ForcedValue::serialize(std::wostream& out)

@@ -1,17 +1,17 @@
 #ifndef VALUE_BINDING_H
 #define VALUE_BINDING_H
-#include "statement.h"
+#include "pattern.h"
 #include <string>
 
 SWIFT_NS_BEGIN
 
-class ValueBinding : public Statement
+class ValueBinding : public Pattern
 {
 public:
     ValueBinding();
 public:
-    void setBinding(Statement* st);
-    Statement* getBinding();
+    void setBinding(Pattern* st);
+    Pattern* getBinding();
 private:
 };
 

@@ -8,7 +8,7 @@ class TypeNode;
 class TypeCast : public BinaryOperator
 {
 public:
-    TypeCast(ExpressionNode* expr, TypeNode* type);
+    TypeCast(Expression* expr, TypeNode* type);
 public:
     TypeNode* getType();
     void setType(TypeNode* type);

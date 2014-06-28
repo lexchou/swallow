@@ -1,5 +1,5 @@
 #include "if-statement.h"
-#include "expression-node.h"
+#include "expression.h"
 #include "code-block.h"
 USE_SWIFT_NS
 
@@ -23,13 +23,13 @@ void IfStatement::serialize(std::wostream& out)
 
 
 
-void IfStatement::setCondition(ExpressionNode* expr)
+void IfStatement::setCondition(Expression* expr)
 {
     set(0, expr);
 }
-ExpressionNode* IfStatement::getCondition()
+Expression* IfStatement::getCondition()
 {
-    return static_cast<ExpressionNode*>(get(0));
+    return static_cast<Expression*>(get(0));
 }
 
 void IfStatement::setThen(CodeBlock* thenPart)

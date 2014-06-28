@@ -1,6 +1,6 @@
 
 #include "while-loop.h"
-#include "expression-node.h"
+#include "expression.h"
 #include "code-block.h"
 USE_SWIFT_NS
 
@@ -28,11 +28,11 @@ CodeBlock* WhileLoop::getCodeBlock()
     return static_cast<CodeBlock*>(get(1));
 }
 
-void WhileLoop::setCondition(ExpressionNode* expression)
+void WhileLoop::setCondition(Expression* expression)
 {
     set(0, expression);
 }
-ExpressionNode* WhileLoop::getCondition()
+Expression* WhileLoop::getCondition()
 {
-    return static_cast<ExpressionNode*>(get(0));
+    return static_cast<Expression*>(get(0));
 }

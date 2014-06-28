@@ -1,11 +1,11 @@
 #ifndef IDENTIFIER_H
 #define IDENTIFIER_H
-#include "expression-node.h"
+#include "expression.h"
 #include <string>
 
 SWIFT_NS_BEGIN
 
-class Identifier : public ExpressionNode
+class Identifier : public Expression
 {
 public:
     Identifier(const std::wstring& identifier);

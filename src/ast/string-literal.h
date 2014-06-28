@@ -1,11 +1,11 @@
 #ifndef STRING_LITERAL_H
 #define STRING_LITERAL_H
-#include "expression-node.h"
+#include "expression.h"
 #include <string>
 
 SWIFT_NS_BEGIN
 
-class StringLiteral : public ExpressionNode
+class StringLiteral : public Expression
 {
 public:
     StringLiteral(const std::wstring& val);

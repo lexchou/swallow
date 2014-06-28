@@ -29,16 +29,259 @@ using namespace Swift;
  ‌ declaration → subscript-declaration
  ‌ declaration → operator-declaration
  ‌ declarations → declarationdeclarationsopt
- ‌ declaration-specifiers → declaration-specifierdeclaration-specifiersopt
+ ‌ declaration-specifiers → declaration-specifier declaration-specifiersopt
  ‌ declaration-specifier → class  mutating  nonmutating  override  static  unowned  unowned(safe) unowned(unsafe)  weak”
 */
-Node* Parser::parseDeclaration()
+Declaration* Parser::parseDeclaration()
 {
     Token token;
-    tassert(token, 0);
-    //TODO
+    std::vector<Attribute*> attrs;
+    if(predicate(L"@"))
+        parseAttributes(attrs);
+    int specifiers = 0;
+    if((flags & UNDER_CLASS) || (flags & UNDER_PROTOCOL))
+    {
+        //read declaration specifiers
+        specifiers = parseDeclarationSpecifiers();
+    }
+    match_identifier(token);
+    switch(token.identifier.keyword)
+    {
+        case Keyword::Import://declaration → import-declaration
+            return parseImport(attrs);
+        case Keyword::Let://declaration → constant-declaration
+            return parseLet(attrs, specifiers);
+        case Keyword::Var://declaration → variable-declaration
+            return parseVar(attrs, specifiers);
+        case Keyword::Typealias://declaration → typealias-declaration    ‌
+            return parseTypealias(attrs);
+        case Keyword::Func://declaration → function-declaration
+            return parseFunc(attrs, specifiers);
+        case Keyword::Enum://declaration → enum-declaration
+            return parseEnum(attrs);
+        case Keyword::Struct://declaration → struct-declaration
+            return parseStruct(attrs);
+        case Keyword::Class://declaration → class-declaration
+            return parseClass(attrs);
+        case Keyword::Protocol://declaration → protocol-declaration
+            return parseProtocol(attrs);
+        case Keyword::Init://declaration → initializer-declaration
+            return parseInit(attrs, specifiers);
+        case Keyword::Deinit://declaration → deinitializer-declaration
+            return parseDeinit(attrs, specifiers);
+        case Keyword::Extension://declaration → extension-declaration
+            return parseExtension(attrs);
+        case Keyword::Subscript://declaration → subscript-declaration
+            return parseSubscript(attrs, specifiers);
+        case Keyword::Operator://declaration → operator-declaration
+            return parseOperator(attrs);
+        default:
+            //destroy attributes before reporting an issue
+            std::vector<Attribute*>::iterator iter = attrs.begin();
+            for(; iter != attrs.end(); iter++)
+            {
+                Attribute* attr = *iter;
+                delete attr;
+            }
+            verifyDeclarationSpecifiers(token, specifiers, 0);
+            unexpected(token);
+            return NULL;
+    }
+
     return NULL;
 }
+// declaration-specifiers → declaration-specifierdeclaration-specifiersopt
+// declaration-specifier → class  mutating  nonmutating  override  static  unowned  unowned(safe) unowned(unsafe)  weak”
+
+int Parser::parseDeclarationSpecifiers()
+{
+    //class  mutating  nonmutating  override  static  unowned  unowned(safe) unowned(unsafe)  weak”
+    Token token;
+    int ret = 0;
+    while(match_identifier(token))
+    {
+        switch(token.identifier.keyword)
+        {
+            case Keyword::Class:
+                ret |= SPECIFIER_CLASS;
+                continue;
+            case Keyword::Mutating:
+                ret |= SPECIFIER_MUTATING;
+                continue;
+            case Keyword::Nonmutating:
+                ret |= SPECIFIER_NONMUTATING;
+                continue;
+            case Keyword::Override:
+                ret |= SPECIFIER_OVERRIDE;
+                continue;
+            case Keyword::Static:
+                ret |= SPECIFIER_STATIC;
+                continue;
+            case Keyword::Unowned:
+                ret |= SPECIFIER_UNOWNED;
+                if(match(L"("))
+                {
+                    expect_identifier(token);
+                    if(token == L"safe")
+                        ret |= SPECIFIER_UNOWNED_SAFE;
+                    else if(token == L"unsafe")
+                        ret |= SPECIFIER_UNOWNED_UNSAFE;
+                    else
+                        unexpected(token);
+                    expect(L")");
+                }
+                break;
+            case Keyword::Weak:
+                ret |= SPECIFIER_WEAK;
+                continue;
+            default:
+                tokenizer->restore(token);
+                break;
+        }
+        break;
+    }
+    return ret;
+}
+void Parser::verifyDeclarationSpecifiers(const Token& token, int actualSpecifiers, int expectedSpecifiers)
+{
+    
+}
+/*
+  GRAMMAR OF AN IMPORT DECLARATION
+ 
+ ‌ import-declaration → attributesoptimportimport-kindoptimport-path
+ ‌ import-kind → typealias  struct  class  enum protocol  var  func
+ ‌ import-path → import-path-identifier | import-path-identifier.import-path
+ ‌ import-path-identifier → identifier | operator”
+*/
+Declaration* Parser::parseImport(const std::vector<Attribute*>& attrs)
+{
+    Token token;
+    expect(Keyword::Import);
+    next(token);
+    tassert(token, token.type == TokenType::Identifier);
+    Import::Kind kind = Import::_;
+    switch(token.identifier.keyword)
+    {
+        case Keyword::_:
+            tokenizer->restore(token);
+        case Keyword::Typealias:
+            kind = Import::Typealias;
+            break;
+        case Keyword::Struct:
+            kind = Import::Struct;
+            break;
+        case Keyword::Class:
+            kind = Import::Class;
+            break;
+        case Keyword::Enum:
+            kind = Import::Enum;
+            break;
+        case Keyword::Protocol:
+            kind = Import::Protocol;
+            break;
+        case Keyword::Var:
+            kind = Import::Var;
+            break;
+        case Keyword::Func:
+            kind = Import::Func;
+            break;
+        default:
+            unexpected(token);
+            break;
+    }
+    std::wstring path;
+    int n = 0;
+    do
+    {
+        next(token);
+        if(token.type != TokenType::Identifier && token.type != TokenType::Operator)
+            unexpected(token);
+        if(n)
+            path += L".";
+        path += token.token;
+        n++;
+    } while (match(L"."));
+    Import* ret = nodeFactory->createImport(attrs);
+    ret->setPath(path);
+    ret->setKind(kind);
+    return ret;
+}
+/*
+  GRAMMAR OF A CONSTANT DECLARATION
+ 
+ ‌ constant-declaration → attributes opt declaration-specifiers opt let pattern-initializer-list
+ ‌ pattern-initializer-list → pattern-initializer | pattern-initializer,pattern-initializer-list
+ ‌ pattern-initializer → pattern initializer opt
+ ‌ initializer → =expression
+*/
+Declaration* Parser::parseLet(const std::vector<Attribute*>& attrs, int specifiers)
+{
+    Constant* ret = nodeFactory->createConstant(attrs, specifiers);
+    expect(Keyword::Let);
+    do
+    {
+        Pattern* pattern = parsePattern();
+        Expression* initializer = NULL;
+        if(match(L"="))
+        {
+            initializer = parseExpression();
+        }
+        ret->add(pattern, initializer);
+    }while(match(L","));
+    return ret;
+}
+Declaration* Parser::parseVar(const std::vector<Attribute*>& attrs, int specifiers)
+{
+    
+}
+Declaration* Parser::parseTypealias(const std::vector<Attribute*>& attrs)
+{
+    
+}
+Declaration* Parser::parseFunc(const std::vector<Attribute*>& attrs, int specifiers)
+{
+    
+}
+Declaration* Parser::parseEnum(const std::vector<Attribute*>& attrs)
+{
+    
+}
+Declaration* Parser::parseStruct(const std::vector<Attribute*>& attrs)
+{
+    
+}
+Declaration* Parser::parseClass(const std::vector<Attribute*>& attrs)
+{
+    
+}
+Declaration* Parser::parseProtocol(const std::vector<Attribute*>& attrs)
+{
+    
+}
+Declaration* Parser::parseInit(const std::vector<Attribute*>& attrs, int specifiers)
+{
+    
+}
+Declaration* Parser::parseDeinit(const std::vector<Attribute*>& attrs, int specifiers)
+{
+    
+}
+Declaration* Parser::parseExtension(const std::vector<Attribute*>& attrs)
+{
+    
+}
+Declaration* Parser::parseSubscript(const std::vector<Attribute*>& attrs, int specifiers)
+{
+    
+}
+Declaration* Parser::parseOperator(const std::vector<Attribute*>& attrs)
+{
+    
+}
+
+
+
 /*
  “ import-declaration → attributesoptimportimport-kindoptimport-path
  ‌ import-kind → typealias  struct  class  enum protocol  var  func

@@ -3,12 +3,12 @@ USE_SWIFT_NS
 
 
 DictionaryLiteral::DictionaryLiteral()
-	:ExpressionNode(0)
+	:Expression(0)
 {
 
 }
 
-void DictionaryLiteral::insert(ExpressionNode* key, ExpressionNode* value)
+void DictionaryLiteral::insert(Expression* key, Expression* value)
 {
 	children.push_back(key);
 	children.push_back(value);

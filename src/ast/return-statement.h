@@ -5,14 +5,14 @@
 
 SWIFT_NS_BEGIN
 
-class ExpressionNode;
+class Expression;
 class ReturnStatement : public Statement
 {
 public:
     ReturnStatement();
 public:
-    void setExpression(ExpressionNode* expr);
-    ExpressionNode* getExpression();
+    void setExpression(Expression* expr);
+    Expression* getExpression();
 public:
     virtual void serialize(std::wostream& out);
 private:

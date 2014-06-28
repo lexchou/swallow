@@ -55,28 +55,28 @@ CompileConstant* NodeFactory::createCompilecConstant(const std::wstring& name, c
     return new CompileConstant(name, value);
 }
 
-MemberAccess* NodeFactory::createMemberAccess(ExpressionNode* self, Identifier* field)
+MemberAccess* NodeFactory::createMemberAccess(Expression* self, Identifier* field)
 {
     return new MemberAccess(self, field);
 }
-Subscript* NodeFactory::createSubscript(ExpressionNode* self, ExpressionNode* index)
+SubscriptAccess* NodeFactory::createSubscriptAccess(Expression* self, Expression* index)
 {
-    return new Subscript(self, index);
+    return new SubscriptAccess(self, index);
 }
 
-TypeCheck* NodeFactory::createTypeCheck(ExpressionNode* expr, TypeNode* type)
+TypeCheck* NodeFactory::createTypeCheck(Expression* expr, TypeNode* type)
 {
     return new TypeCheck(expr, type);
 }
-TypeCast* NodeFactory::createTypeCast(ExpressionNode* expr, TypeNode* type)
+TypeCast* NodeFactory::createTypeCast(Expression* expr, TypeNode* type)
 {
     return new TypeCast(expr, type);
 }
-Assignment* NodeFactory::createAssignment(ExpressionNode* lhs, ExpressionNode* rhs)
+Assignment* NodeFactory::createAssignment(Expression* lhs, Expression* rhs)
 {
     return new Assignment(lhs, rhs);
 }
-ConditionalOperator* NodeFactory::createConditionalOperator(ExpressionNode* cond, ExpressionNode* trueExpr, ExpressionNode* falseExpr)
+ConditionalOperator* NodeFactory::createConditionalOperator(Expression* cond, Expression* trueExpr, Expression* falseExpr)
 {
     return new ConditionalOperator(cond, trueExpr, falseExpr);
 }
@@ -85,23 +85,23 @@ ParenthesizedExpression* NodeFactory::createParenthesizedExpression()
     return new ParenthesizedExpression();
 }
 
-Initializer* NodeFactory::createInitializer(ExpressionNode* expr)
+InitializerReference* NodeFactory::createInitializerReference(Expression* expr)
 {
-    return new Initializer(expr);
+    return new InitializerReference(expr);
 }
-SelfExpression* NodeFactory::createSelfExpression(ExpressionNode* expr)
+SelfExpression* NodeFactory::createSelfExpression(Expression* expr)
 {
     return new SelfExpression(expr);
 }
-DynamicType* NodeFactory::createDynamicType(ExpressionNode* expr)
+DynamicType* NodeFactory::createDynamicType(Expression* expr)
 {
     return new DynamicType(expr);
 }
-ForcedValue* NodeFactory::createForcedValue(ExpressionNode* expr)
+ForcedValue* NodeFactory::createForcedValue(Expression* expr)
 {
     return new ForcedValue(expr);
 }
-OptionalChaining* NodeFactory::createOptionalChaining(ExpressionNode* expr)
+OptionalChaining* NodeFactory::createOptionalChaining(Expression* expr)
 {
     return new OptionalChaining(expr);
 }
@@ -212,3 +212,108 @@ TupleType* NodeFactory::createTupleType()
 {
     return new TupleType();
 }
+Attribute* NodeFactory::createAttribute(const std::wstring& name)
+{
+    Attribute* ret = new Attribute();
+    ret->setName(name);
+    return ret;
+}
+
+
+
+Import* NodeFactory::createImport(const std::vector<Attribute*>& attrs)
+{
+    Import* ret = new Import();
+    ret->setAttributes(attrs);
+    return ret;
+}
+Constant* NodeFactory::createConstant(const std::vector<Attribute*>& attrs, int specifiers)
+{
+    Constant* ret = new Constant();
+    ret->setAttributes(attrs);
+    ret->setSpecifiers(specifiers);
+    return ret;
+}
+Variable* NodeFactory::createVariable(const std::vector<Attribute*>& attrs, int specifiers)
+{
+    Variable* ret = new Variable();
+    ret->setAttributes(attrs);
+    ret->setSpecifiers(specifiers);
+    return ret;
+    return ret;
+}
+TypeAlias* NodeFactory::createTypealias(const std::vector<Attribute*>& attrs)
+{
+    TypeAlias* ret = new TypeAlias();
+    ret->setAttributes(attrs);
+    return ret;
+}
+FunctionDef* NodeFactory::createFunction(const std::wstring& name, const std::vector<Attribute*>& attrs)
+{
+    FunctionDef* ret = new FunctionDef();
+    ret->setAttributes(attrs);
+    ret->setName(name);
+    return ret;
+}
+EnumDef* NodeFactory::createEnum(const std::wstring& name, const std::vector<Attribute*>& attrs)
+{
+    EnumDef* ret = new EnumDef();
+    ret->setAttributes(attrs);
+    ret->setName(name);
+    return ret;
+}
+StructDef* NodeFactory::createStruct(const std::wstring& name, const std::vector<Attribute*>& attrs)
+{
+    StructDef* ret = new StructDef();
+    ret->setName(name);
+    ret->setAttributes(attrs);
+    return ret;
+}
+ClassDef* NodeFactory::createClass(const std::wstring& name, const std::vector<Attribute*>& attrs)
+{
+    ClassDef* ret = new ClassDef();
+    ret->setName(name);
+    ret->setAttributes(attrs);
+    return ret;
+}
+ProtocolDef* NodeFactory::createProtocol(const std::wstring& name, const std::vector<Attribute*>& attrs)
+{
+    ProtocolDef* ret = new ProtocolDef();
+    ret->setName(name);
+    ret->setAttributes(attrs);
+    return ret;
+}
+InitializerDef* NodeFactory::createInitializer(const std::vector<Attribute*>& attrs)
+{
+    InitializerDef* ret = new InitializerDef();
+    ret->setAttributes(attrs);
+    return ret;
+}
+DeinitializerDef* NodeFactory::createDeinitializer(const std::vector<Attribute*>& attrs)
+{
+    DeinitializerDef* ret = new DeinitializerDef();
+    ret->setAttributes(attrs);
+    return ret;
+}
+ExtensionDef* NodeFactory::createExtension(const std::vector<Attribute*>& attrs)
+{
+    ExtensionDef* ret = new ExtensionDef();
+    ret->setAttributes(attrs);
+    return ret;
+}
+SubscriptDef* NodeFactory::createSubscript(const std::vector<Attribute*>& attrs, int specifiers)
+{
+    SubscriptDef* ret = new SubscriptDef();
+    ret->setAttributes(attrs);
+    ret->setSpecifiers(specifiers);
+    return ret;
+}
+OperatorDef* NodeFactory::createOperator(const std::vector<Attribute*>& attrs)
+{
+    OperatorDef* ret = new OperatorDef();
+    ret->setAttributes(attrs);
+    return ret;
+}
+
+
+

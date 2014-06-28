@@ -2,6 +2,7 @@
 #define NODE_FACTORY_H
 #include "swift_types.h"
 #include <string>
+#include <vector>
 
 SWIFT_NS_BEGIN
 
@@ -14,20 +15,20 @@ class UnaryOperator;
 class BinaryOperator;
 class Identifier;
 class Node;
-class ExpressionNode;
+class Expression;
 class InOutParameter;
 class ArrayLiteral;
 class DictionaryLiteral;
 class CompileConstant;
 class MemberAccess;
-class Subscript;
+class SubscriptAccess;
 class TypeNode;
 class TypeCheck;
 class TypeCast;
 class Assignment;
 class ConditionalOperator;
 class ParenthesizedExpression;
-class Initializer;
+class InitializerReference;
 class SelfExpression;
 class DynamicType;
 class ForcedValue;
@@ -55,6 +56,24 @@ class ImplicitlyUnwrappedOptional;
 class TypeIdentifier;
 class ProtocolComposition;
 class TupleType;
+class Attribute;
+
+
+
+class Import;
+class Constant;
+class Variable;
+class TypeAlias;
+class FunctionDef;
+class EnumDef;
+class StructDef;
+class ClassDef;
+class ProtocolDef;
+class InitializerDef;
+class DeinitializerDef;
+class ExtensionDef;
+class SubscriptDef;
+class OperatorDef;
 
 class NodeFactory
 {
@@ -75,20 +94,20 @@ public:
     virtual ArrayLiteral* createArrayLiteral();
     virtual DictionaryLiteral* createDictionaryLiteral();
     virtual CompileConstant* createCompilecConstant(const std::wstring& name, const std::wstring& value);
-    virtual MemberAccess* createMemberAccess(ExpressionNode* self, Identifier* field);
-    virtual Subscript* createSubscript(ExpressionNode* self, ExpressionNode* index);
+    virtual MemberAccess* createMemberAccess(Expression* self, Identifier* field);
+    virtual SubscriptAccess* createSubscriptAccess(Expression* self, Expression* index);
     
-    virtual TypeCheck* createTypeCheck(ExpressionNode* expr, TypeNode* type);
-    virtual TypeCast* createTypeCast(ExpressionNode* expr, TypeNode* type);
-    virtual Assignment* createAssignment(ExpressionNode* lhs, ExpressionNode* rhs);
-    virtual ConditionalOperator* createConditionalOperator(ExpressionNode* cond, ExpressionNode* trueExpr, ExpressionNode* falseExpr);
+    virtual TypeCheck* createTypeCheck(Expression* expr, TypeNode* type);
+    virtual TypeCast* createTypeCast(Expression* expr, TypeNode* type);
+    virtual Assignment* createAssignment(Expression* lhs, Expression* rhs);
+    virtual ConditionalOperator* createConditionalOperator(Expression* cond, Expression* trueExpr, Expression* falseExpr);
     virtual ParenthesizedExpression* createParenthesizedExpression();
     
-    virtual Initializer* createInitializer(ExpressionNode*);
-    virtual SelfExpression* createSelfExpression(ExpressionNode* expr);
-    virtual DynamicType* createDynamicType(ExpressionNode* expr);
-    virtual ForcedValue* createForcedValue(ExpressionNode* expr);
-    virtual OptionalChaining* createOptionalChaining(ExpressionNode* expr);
+    virtual InitializerReference* createInitializerReference(Expression*);
+    virtual SelfExpression* createSelfExpression(Expression* expr);
+    virtual DynamicType* createDynamicType(Expression* expr);
+    virtual ForcedValue* createForcedValue(Expression* expr);
+    virtual OptionalChaining* createOptionalChaining(Expression* expr);
     virtual FunctionCall* createFunctionCall();
 
     virtual ForLoop* createForLoop();
@@ -114,7 +133,26 @@ public:
     virtual TypeIdentifier* createTypeIdentifier(const std::wstring& typeName);
     virtual ProtocolComposition* createProtocolComposition();
     virtual TupleType* createTupleType();
+    virtual Attribute* createAttribute(const std::wstring& name);
 
+    
+    
+    virtual Import* createImport(const std::vector<Attribute*>& attrs);
+    virtual Constant* createConstant(const std::vector<Attribute*>& attrs, int specifiers);
+    virtual Variable* createVariable(const std::vector<Attribute*>& attrs, int specifiers);
+    virtual TypeAlias* createTypealias(const std::vector<Attribute*>& attrs);
+    virtual FunctionDef* createFunction(const std::wstring& name, const std::vector<Attribute*>& attrs);
+    virtual EnumDef* createEnum(const std::wstring& name, const std::vector<Attribute*>& attrs);
+    virtual StructDef* createStruct(const std::wstring& name, const std::vector<Attribute*>& attrs);
+    virtual ClassDef* createClass(const std::wstring& name, const std::vector<Attribute*>& attrs);
+    virtual ProtocolDef* createProtocol(const std::wstring& name, const std::vector<Attribute*>& attrs);
+    virtual InitializerDef* createInitializer(const std::vector<Attribute*>& attrs);
+    virtual DeinitializerDef* createDeinitializer(const std::vector<Attribute*>& attrs);
+    virtual ExtensionDef* createExtension(const std::vector<Attribute*>& attrs);
+    virtual SubscriptDef* createSubscript(const std::vector<Attribute*>& attrs, int specifiers);
+    virtual OperatorDef* createOperator(const std::vector<Attribute*>& attrs);
+    
+    
 };
 
 

@@ -5,22 +5,22 @@
 
 SWIFT_NS_BEGIN
 
-class ExpressionNode;
+class Expression;
 class CodeBlock;
 class ForLoop : public Statement
 {
 public:
     ForLoop();
 public:
-    void addInit(ExpressionNode* init);
+    void addInit(Expression* init);
     int numInit();
-    ExpressionNode* getInit(int idx);
+    Expression* getInit(int idx);
     
-    void setCondition(ExpressionNode* cond);
-    ExpressionNode* getCondition();
+    void setCondition(Expression* cond);
+    Expression* getCondition();
     
-    void setStep(ExpressionNode* step);
-    ExpressionNode* getStep();
+    void setStep(Expression* step);
+    Expression* getStep();
     
     void setCodeBlock(CodeBlock* codeBlock);
     CodeBlock* getCodeBlock();

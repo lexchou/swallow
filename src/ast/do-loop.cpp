@@ -1,7 +1,7 @@
 
 #include "do-loop.h"
 #include "code-block.h"
-#include "expression-node.h"
+#include "expression.h"
 USE_SWIFT_NS
 
 
@@ -28,11 +28,11 @@ CodeBlock* DoLoop::getCodeBlock()
     return static_cast<CodeBlock*>(get(0));
 }
 
-void DoLoop::setCondition(ExpressionNode* expression)
+void DoLoop::setCondition(Expression* expression)
 {
     set(1, expression);
 }
-ExpressionNode* DoLoop::getCondition()
+Expression* DoLoop::getCondition()
 {
-    return static_cast<ExpressionNode*>(get(1));
+    return static_cast<Expression*>(get(1));
 }

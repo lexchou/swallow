@@ -1,19 +1,19 @@
 #ifndef BINARY_OPERATOR_H
 #define BINARY_OPERATOR_H
-#include "operator-node.h"
+#include "operator.h"
 #include <string>
 SWIFT_NS_BEGIN
 
-class BinaryOperator : public OperatorNode
+class BinaryOperator : public Operator
 {
 public:
     BinaryOperator(const std::wstring& op, Associativity::T associativity, int precedence);
 public:
-    void setLHS(ExpressionNode* node){set(0, node);}
-    ExpressionNode* getLHS(){return static_cast<ExpressionNode*>(get(0));}
+    void setLHS(Expression* node){set(0, node);}
+    Expression* getLHS(){return static_cast<Expression*>(get(0));}
 
-    void setRHS(ExpressionNode* node){set(1, node);}
-    ExpressionNode* getRHS(){return static_cast<ExpressionNode*>(get(1));}
+    void setRHS(Expression* node){set(1, node);}
+    Expression* getRHS(){return static_cast<Expression*>(get(1));}
     
     const std::wstring& getOperator() const { return op;}
 public:

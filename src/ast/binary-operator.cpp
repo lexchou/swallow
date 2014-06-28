@@ -2,7 +2,7 @@
 USE_SWIFT_NS;
 
 BinaryOperator::BinaryOperator(const std::wstring& op, Associativity::T associativity, int precedence)
-:OperatorNode(2, OperatorType::InfixBinary, associativity, precedence), op(op)
+:Operator(2, OperatorType::InfixBinary, associativity, precedence), op(op)
 {
 }
 void BinaryOperator::serialize(std::wostream& out)

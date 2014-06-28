@@ -1,16 +1,16 @@
 #ifndef DYNAMIC_TYPE_H
 #define DYNAMIC_TYPE_H
-#include "expression-node.h"
+#include "expression.h"
 
 SWIFT_NS_BEGIN
 
-class DynamicType : public ExpressionNode
+class DynamicType : public Expression
 {
 public:
-    DynamicType(ExpressionNode* expr);
+    DynamicType(Expression* expr);
 public:
-    void setExpression(ExpressionNode* expr);
-    ExpressionNode* getExpression();
+    void setExpression(Expression* expr);
+    Expression* getExpression();
 public:
     virtual void serialize(std::wostream& out);
 };

@@ -1,19 +1,19 @@
 #ifndef FUNCTION_CALL_H
 #define FUNCTION_CALL_H
-#include "expression-node.h"
+#include "expression.h"
 
 SWIFT_NS_BEGIN
 
 class ParenthesizedExpression;
 class ClosureExpression;
-class FunctionCall : public ExpressionNode
+class FunctionCall : public Expression
 {
 public:
     FunctionCall();
 public:
     
-    void setFunction(ExpressionNode* expr);
-    ExpressionNode* getFunction();
+    void setFunction(Expression* expr);
+    Expression* getFunction();
     
     void setArguments(ParenthesizedExpression* arguments);
     ParenthesizedExpression* getArguments();

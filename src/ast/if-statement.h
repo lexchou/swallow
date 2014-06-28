@@ -5,15 +5,15 @@
 
 SWIFT_NS_BEGIN
 
-class ExpressionNode;
+class Expression;
 class CodeBlock;
 class IfStatement : public Statement
 {
 public:
     IfStatement();
 public:
-    void setCondition(ExpressionNode* expr);
-    ExpressionNode* getCondition();
+    void setCondition(Expression* expr);
+    Expression* getCondition();
     
     void setThen(CodeBlock* thenPart);
     CodeBlock* getThen();

@@ -5,7 +5,7 @@
 
 SWIFT_NS_BEGIN
 
-class ExpressionNode;
+class Expression;
 class CodeBlock;
 class WhileLoop : public Statement
 {
@@ -15,8 +15,8 @@ public:
     void setCodeBlock(CodeBlock* codeBlock);
     CodeBlock* getCodeBlock();
     
-    void setCondition(ExpressionNode* expression);
-    ExpressionNode* getCondition();
+    void setCondition(Expression* expression);
+    Expression* getCondition();
 public:
     virtual void serialize(std::wostream& out);
 private:

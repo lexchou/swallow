@@ -4,19 +4,19 @@ USE_SWIFT_NS
 
 
 
-SelfExpression::SelfExpression(ExpressionNode* expr)
-:ExpressionNode(1)
+SelfExpression::SelfExpression(Expression* expr)
+:Expression(1)
 {
     setExpression(expr);
 }
 
-void SelfExpression::setExpression(ExpressionNode* expr)
+void SelfExpression::setExpression(Expression* expr)
 {
     set(0, expr);
 }
-ExpressionNode* SelfExpression::getExpression()
+Expression* SelfExpression::getExpression()
 {
-    return static_cast<ExpressionNode*>(get(0));
+    return static_cast<Expression*>(get(0));
 }
 
 

@@ -5,15 +5,15 @@
 
 SWIFT_NS_BEGIN
 
-class ExpressionNode;
+class Expression;
 class CaseStatement;
 class SwitchCase : public Statement
 {
 public:
     SwitchCase();
 public:
-    void setControlExpression(ExpressionNode* expr);
-    ExpressionNode* getControlExpression();
+    void setControlExpression(Expression* expr);
+    Expression* getControlExpression();
     
     void addCase(CaseStatement* c);
     int numCases();

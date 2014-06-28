@@ -1,19 +1,19 @@
 #include "parenthesized-expression.h"
-#include "expression-node.h"
+#include "expression.h"
 USE_SWIFT_NS
 
 
 ParenthesizedExpression::ParenthesizedExpression()
-    :ExpressionNode(0)
+    :Expression(0)
 {
     
 }
-void ParenthesizedExpression::append(const std::wstring& name, ExpressionNode* expr)
+void ParenthesizedExpression::append(const std::wstring& name, Expression* expr)
 {
     names.push_back(name);
     children.push_back(expr);
 }
-void ParenthesizedExpression::append(ExpressionNode* expr)
+void ParenthesizedExpression::append(Expression* expr)
 {
     append(L"", expr);
 }

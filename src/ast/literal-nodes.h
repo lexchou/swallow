@@ -1,11 +1,11 @@
 #ifndef LITERAL_NODES_H
 #define LITERAL_NODES_H
-#include "expression-node.h"
+#include "expression.h"
 #include <string>
 
 SWIFT_NS_BEGIN
 
-class BooleanLiteral : public ExpressionNode
+class BooleanLiteral : public Expression
 {
 public:
     BooleanLiteral(bool val);

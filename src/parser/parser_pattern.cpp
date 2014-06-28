@@ -21,7 +21,7 @@ using namespace Swift;
  ‌ pattern → type-casting-pattern
  ‌ pattern → expression-pattern
 */
-Statement* Parser::parsePattern()
+Pattern* Parser::parsePattern()
 {
     Token token;
     next(token);
@@ -40,14 +40,14 @@ Statement* Parser::parsePattern()
             case Keyword::Var:
             {
                 VarBinding* let = nodeFactory->createVarBinding();
-                Statement* binding = parsePattern();
+                Pattern* binding = parsePattern();
                 let->setBinding(binding);
                 return let;
             }
             case Keyword::Let:
             {
                 LetBinding* let = nodeFactory->createLetBinding();
-                Statement* binding = parsePattern();
+                Pattern* binding = parsePattern();
                 let->setBinding(binding);
                 return let;
             }
@@ -84,7 +84,7 @@ Statement* Parser::parsePattern()
 /*
   “enum-case-pattern → type-identifier opt . enum-case-name tuple-pattern opt
 */
-ExpressionNode* Parser::parseEnumPattern()
+Pattern* Parser::parseEnumPattern()
 {
     Token token;
     tassert(token, NULL);
@@ -95,7 +95,7 @@ ExpressionNode* Parser::parseEnumPattern()
  ‌ is-pattern → istype
  ‌ as-pattern → patternastype”
 */
-ExpressionNode* Parser::parseTypeCastingPattern()
+Pattern* Parser::parseTypeCastingPattern()
 {
     Token token;
     tassert(token, NULL);
@@ -106,7 +106,7 @@ ExpressionNode* Parser::parseTypeCastingPattern()
  ‌ tuple-pattern-element-list → tuple-pattern-element | tuple-pattern-element,tuple-pattern-element-list
  ‌ tuple-pattern-element → pattern
  */
-ExpressionNode* Parser::parseTuple()
+Pattern* Parser::parseTuple()
 {
     Tuple* ret = nodeFactory->createTuple();
     expect(L"(");
@@ -114,7 +114,7 @@ ExpressionNode* Parser::parseTuple()
     {
         do
         {
-            Statement* pattern = parsePattern();
+            Pattern* pattern = parsePattern();
             ret->add(pattern);
         }while(match(L","));
         

@@ -1,11 +1,11 @@
 #ifndef CLOSURE_EXPRESSION_H
 #define CLOSURE_EXPRESSION_H
-#include "expression-node.h"
+#include "expression.h"
 
 SWIFT_NS_BEGIN
 
 
-class ClosureExpression : public ExpressionNode
+class ClosureExpression : public Expression
 {
 public:
     ClosureExpression();

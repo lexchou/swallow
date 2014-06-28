@@ -8,7 +8,7 @@ SWIFT_NS_BEGIN
 
 class Tokenizer;
 class Node;
-class ExpressionNode;
+class Expression;
 class FunctionCall;
 class SymbolRegistry;
 class Identifier;
@@ -23,12 +23,30 @@ class Tuple;
 class TupleType;
 class TypeIdentifier;
 class ProtocolComposition;
+class Attribute;
+class Declaration;
+class Pattern;
 class Parser
 {
     enum
     {
-        ENABLE_GENERIC = 1,
-        UNDER_SWITCH_CASE = 2,
+        ENABLE_GENERIC      = 1,
+        UNDER_SWITCH_CASE   = 2,
+        UNDER_PROTOCOL      = 4,
+        UNDER_CLASS         = 8,
+        UNDER_STRUCT        = 0x10
+    };
+    enum
+    {
+        SPECIFIER_CLASS         =   1,
+        SPECIFIER_MUTATING      =   2,
+        SPECIFIER_NONMUTATING   =   4,
+        SPECIFIER_OVERRIDE      =   8,
+        SPECIFIER_STATIC        =   0x10,
+        SPECIFIER_UNOWNED       =   0x20,
+        SPECIFIER_UNOWNED_SAFE  =   0x20 | 0x40,
+        SPECIFIER_UNOWNED_UNSAFE=   0x20 | 0x80,
+        SPECIFIER_WEAK          =   0x100
     };
     struct Flag
     {
@@ -67,37 +85,59 @@ private://statement
     Statement* parseFallthrough();
     Statement* parseReturn();
     Statement* parseLabeledStatement();
-    ExpressionNode* parseConditionExpression();
+    Expression* parseConditionExpression();
     
     CodeBlock* parseCodeBlock();
 private://pattern
-    Statement* parsePattern();
-    ExpressionNode* parseTuple();
-    ExpressionNode* parseEnumPattern();
-    ExpressionNode* parseTypeCastingPattern();
-private://declaration
-    Node* parseDeclaration();
-private://expression
-    ExpressionNode* parseFloat();
-    ExpressionNode* parseInteger();
-    ExpressionNode* parseString();
-    ExpressionNode* parseExpression();
-    ExpressionNode* parseBinaryExpression(ExpressionNode* lhs);
-    ExpressionNode* parsePrefixExpression();
-    ExpressionNode* parsePostfixExpression();
-    FunctionCall* parseFunctionCallExpression();
-    ExpressionNode* parsePrimaryExpression();
-    ExpressionNode* parseLiteralExpression();
-    ExpressionNode* parseParenthesizedExpression();
-    void parseExpressionItem(ParenthesizedExpression* parent);
-    ExpressionNode* parseLiteral();
+    Pattern* parsePattern();
+    Pattern* parseTuple();
+    Pattern* parseEnumPattern();
+    Pattern* parseTypeCastingPattern();
+private://Attribute
+    void parseAttributes(std::vector<Attribute*>& attributes);
+    Attribute* parseAttribute();
+    void parseBalancedToken(Attribute* attr);
+    void parseBalancedTokens(Attribute* attr, const wchar_t* end);
     
-    ExpressionNode* parseSelfExpression();
-    ExpressionNode* parseSuperExpression();
+private://declaration
+    Declaration* parseDeclaration();
+    int parseDeclarationSpecifiers();
+    void verifyDeclarationSpecifiers(const Token& token, int actualSpecifiers, int expectedSpecifiers);
+    Declaration* parseImport(const std::vector<Attribute*>& attrs);
+    Declaration* parseLet(const std::vector<Attribute*>& attrs, int specifiers);
+    Declaration* parseVar(const std::vector<Attribute*>& attrs, int specifiers);
+    Declaration* parseTypealias(const std::vector<Attribute*>& attrs);
+    Declaration* parseFunc(const std::vector<Attribute*>& attrs, int specifiers);
+    Declaration* parseEnum(const std::vector<Attribute*>& attrs);
+    Declaration* parseStruct(const std::vector<Attribute*>& attrs);
+    Declaration* parseClass(const std::vector<Attribute*>& attrs);
+    Declaration* parseProtocol(const std::vector<Attribute*>& attrs);
+    Declaration* parseInit(const std::vector<Attribute*>& attrs, int specifiers);
+    Declaration* parseDeinit(const std::vector<Attribute*>& attrs, int specifiers);
+    Declaration* parseExtension(const std::vector<Attribute*>& attrs);
+    Declaration* parseSubscript(const std::vector<Attribute*>& attrs, int specifiers);
+    Declaration* parseOperator(const std::vector<Attribute*>& attrs);
+private://expression
+    Expression* parseFloat();
+    Expression* parseInteger();
+    Expression* parseString();
+    Expression* parseExpression();
+    Expression* parseBinaryExpression(Expression* lhs);
+    Expression* parsePrefixExpression();
+    Expression* parsePostfixExpression();
+    FunctionCall* parseFunctionCallExpression();
+    Expression* parsePrimaryExpression();
+    Expression* parseLiteralExpression();
+    Expression* parseParenthesizedExpression();
+    void parseExpressionItem(ParenthesizedExpression* parent);
+    Expression* parseLiteral();
+    
+    Expression* parseSelfExpression();
+    Expression* parseSuperExpression();
     Identifier* parseIdentifier();
     ClosureExpression* parseClosureExpression();
     
-    std::pair<ExpressionNode*, ExpressionNode*> parseDictionaryLiteralItem();
+    std::pair<Expression*, Expression*> parseDictionaryLiteralItem();
 private:
     /**
      * Read next token from tokenizer, throw exception if EOF reached.
@@ -129,6 +169,7 @@ private:
      * Check if the following token is the specified one, consume the token and return true if matched or return false if not.
      */
     bool match(const wchar_t* token);
+    bool match(Keyword::T keyword);
     /**
      * Check if the following token is an identifier(keywords included), consume the token and return true if matched or rollback and return false
      */

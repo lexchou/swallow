@@ -77,24 +77,51 @@ TypeNode* Parser::parseType()
 }
 
 /*
-  GRAMMAR OF A TUPLE TYPE
+ GRAMMAR OF A TUPLE TYPE
  
  ‌ tuple-type → (tuple-type-bodyopt)
  ‌ tuple-type-body → tuple-type-element-list...opt
  ‌ tuple-type-element-list → tuple-type-element  tuple-type-element,tuple-type-element-list
  ‌ tuple-type-element → attributesoptinoutopttype inoutoptelement-nametype-annotation
  ‌ element-name → identifier
-*/
+ */
 TupleType* Parser::parseTupleType()
 {
     TupleType* ret = nodeFactory->createTupleType();
+    Token token, token2;
     expect(L"(");
+    std::vector<Attribute*> attributes;
     if(!predicate(L")"))
     {
         do
         {
             //‌ tuple-type-element → attributes opt inout opt type inoutoptelement-nametype-annotation
-        
+            attributes.clear();
+            bool inout = false;
+            if(predicate(L"@"))
+            {
+                parseAttributes(attributes);
+            }
+            inout = match(Keyword::Inout);
+            next(token);
+            if(attributes.empty() && token.type == TokenType::Identifier && token.identifier.keyword == Keyword::_ && peek(token2) && token2.type == TokenType::Colon)
+            {
+                //type-annotation → :attributes opt type
+                if(predicate(L"@"))
+                {
+                    parseAttributes(attributes);
+                }
+                TypeNode* type = parseType();
+                type->setAttributes(attributes);
+                ret->add(inout, token.token, type);
+            }
+            else
+            {
+                tokenizer->restore(token);
+                TypeNode* type = parseType();
+                type->setAttributes(attributes);
+                ret->add(inout, L"", type);
+            }
         }while(match(L","));
         if(match(L"..."))
         {
@@ -117,7 +144,7 @@ TypeIdentifier* Parser::parseTypeIdentifier()
             TypeNode* arg = parseType();
             ret->addGenericArgument(arg);
         }while(match(L","));
-
+        
         expect(L">");
     }
     return ret;
@@ -206,4 +233,4 @@ ProtocolComposition* Parser::parseProtocolComposition()
  ‌ type-inheritance-list → type-identifier  type-identifier,type-inheritance-list”
  
  摘录来自: Apple Inc. “The Swift Programming Language”。 iBooks. https://itun.es/cn/jEUH0.l
-*/
+ */

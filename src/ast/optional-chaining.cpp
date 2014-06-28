@@ -3,19 +3,19 @@ USE_SWIFT_NS
 
 
 
-OptionalChaining::OptionalChaining(ExpressionNode* expr)
-:ExpressionNode(1)
+OptionalChaining::OptionalChaining(Expression* expr)
+:Expression(1)
 {
     setExpression(expr);
 }
 
-void OptionalChaining::setExpression(ExpressionNode* expr)
+void OptionalChaining::setExpression(Expression* expr)
 {
     set(0, expr);
 }
-ExpressionNode* OptionalChaining::getExpression()
+Expression* OptionalChaining::getExpression()
 {
-    return static_cast<ExpressionNode*>(get(0));
+    return static_cast<Expression*>(get(0));
 }
 
 

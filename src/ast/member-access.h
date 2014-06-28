@@ -1,19 +1,19 @@
 #ifndef MEMBER_ACCESS_H
 #define MEMBER_ACCESS_H
-#include "expression-node.h"
+#include "expression.h"
 #include <string>
 
 SWIFT_NS_BEGIN
 class Identifier;
-class MemberAccess : public ExpressionNode
+class MemberAccess : public Expression
 {
 public:
-    MemberAccess(ExpressionNode* self, Identifier* field);
+    MemberAccess(Expression* self, Identifier* field);
 public:
-    void setSelf(ExpressionNode* self);
+    void setSelf(Expression* self);
     void setField(Identifier* field);
     
-    ExpressionNode* getSelf();
+    Expression* getSelf();
     Identifier* getField();
 public:
     virtual void serialize(std::wostream& out);

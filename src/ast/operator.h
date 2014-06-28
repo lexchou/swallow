@@ -1,13 +1,13 @@
-#ifndef OPERATOR_NODE_H
-#define OPERATOR_NODE_H
-#include "expression-node.h"
+#ifndef OPERATOR_H
+#define OPERATOR_H
+#include "expression.h"
 #include "tokenizer/tokens.h"
 SWIFT_NS_BEGIN
 
-class OperatorNode : public ExpressionNode
+class Operator : public Expression
 {
 protected:
-    OperatorNode(int numChildren, OperatorType::T type, Associativity::T associativity, int precedence);
+    Operator(int numChildren, OperatorType::T type, Associativity::T associativity, int precedence);
 public:
     
     OperatorType::T getType() const { return type;}
@@ -24,4 +24,4 @@ protected:
 SWIFT_NS_END
 
 
-#endif//OPERATOR_NODE_H
+#endif//OPERATOR_H

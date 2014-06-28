@@ -1,15 +1,15 @@
 #ifndef ARRAY_LITERAL_H
 #define ARRAY_LITERAL_H
-#include "expression-node.h"
+#include "expression.h"
 
 SWIFT_NS_BEGIN
 
-class ArrayLiteral : public ExpressionNode
+class ArrayLiteral : public Expression
 {
 public:
 	ArrayLiteral();
 public:
-	void push(ExpressionNode* item);
+	void push(Expression* item);
 public:
     virtual void serialize(std::wostream& out);
 };

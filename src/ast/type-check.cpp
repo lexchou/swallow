@@ -2,7 +2,7 @@
 #include "type-node.h"
 USE_SWIFT_NS
 
-TypeCheck::TypeCheck(ExpressionNode* expr, TypeNode* type)
+TypeCheck::TypeCheck(Expression* expr, TypeNode* type)
 :BinaryOperator(L"is", Associativity::None, 132)
 {
     setLHS(expr);

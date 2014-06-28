@@ -1,7 +1,7 @@
 #include "assignment.h"
 USE_SWIFT_NS
 
-Assignment::Assignment(ExpressionNode* lhs, ExpressionNode* rhs)
+Assignment::Assignment(Expression* lhs, Expression* rhs)
     :BinaryOperator(L"=", Associativity::Right, 90)
 {
     setLHS(lhs);

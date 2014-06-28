@@ -74,10 +74,10 @@ bool SymbolRegistry::registerOperator(const std::wstring& name, OperatorType::T 
     OperatorMap::iterator iter = operators.find(name);
     if(iter != operators.end())
         return false;//already registered the same operator before
-    operators.insert(std::make_pair(name, Operator(name, type, associativity, precedence)));
+    operators.insert(std::make_pair(name, OperatorInfo(name, type, associativity, precedence)));
     return true;
 }
-Operator* SymbolRegistry::getOperator(const std::wstring& name)
+OperatorInfo* SymbolRegistry::getOperator(const std::wstring& name)
 {
     OperatorMap::iterator iter = operators.find(name);
     if(iter == operators.end())
@@ -86,17 +86,17 @@ Operator* SymbolRegistry::getOperator(const std::wstring& name)
 }
 bool SymbolRegistry::isPrefixOperator(const std::wstring& name)
 {
-    Operator* op = getOperator(name);
+    OperatorInfo* op = getOperator(name);
     return op && (op->type & OperatorType::PrefixUnary);
 }
 bool SymbolRegistry::isPostfixOperator(const std::wstring& name)
 {
-    Operator* op = getOperator(name);
+    OperatorInfo* op = getOperator(name);
     return op && (op->type & OperatorType::PostfixUnary);
 }
 bool SymbolRegistry::isInfixOperator(const std::wstring& name)
 {
-    Operator* op = getOperator(name);
+    OperatorInfo* op = getOperator(name);
     return op && (op->type & OperatorType::InfixBinary);
 }
 

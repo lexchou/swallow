@@ -1,16 +1,16 @@
 #ifndef FORCED_VALUE_H
 #define FORCED_VALUE_H
-#include "expression-node.h"
+#include "expression.h"
 
 SWIFT_NS_BEGIN
 
-class ForcedValue : public ExpressionNode
+class ForcedValue : public Expression
 {
 public:
-    ForcedValue(ExpressionNode* expr);
+    ForcedValue(Expression* expr);
 public:
-    void setExpression(ExpressionNode* expr);
-    ExpressionNode* getExpression();
+    void setExpression(Expression* expr);
+    Expression* getExpression();
 public:
     virtual void serialize(std::wostream& out);
 };

@@ -1,16 +1,16 @@
 #ifndef SELF_EXPRESSION_H
 #define SELF_EXPRESSION_H
-#include "expression-node.h"
+#include "expression.h"
 
 SWIFT_NS_BEGIN
 
-class SelfExpression : public ExpressionNode
+class SelfExpression : public Expression
 {
 public:
-    SelfExpression(ExpressionNode* expr);
+    SelfExpression(Expression* expr);
 public:
-    void setExpression(ExpressionNode* expr);
-    ExpressionNode* getExpression();
+    void setExpression(Expression* expr);
+    Expression* getExpression();
 public:
     virtual void serialize(std::wostream& out);
 };

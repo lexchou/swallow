@@ -33,25 +33,27 @@ SET(SWIFT_PARSER_SRC ${SWIFT_TOKENIZER_SRC}
     parser/parser_declaration.cpp
 	parser/parser_pattern.cpp
 	parser/parser_type.cpp
+    parser/parser_attribute.cpp
+    parser/parser_generic.cpp
 
     ast/node.cpp
-    ast/expression-node.cpp
-    ast/comment-node.cpp
+    ast/expression.cpp
+    ast/comment.cpp
     ast/node-factory.cpp
     ast/binary-operator.cpp
     ast/unary-operator.cpp
     ast/in-out-parameter.cpp
 	ast/member-access.cpp
-	ast/subscript.cpp
+	ast/subscript-access.cpp
 	ast/type-check.cpp
 	ast/type-cast.cpp
 	ast/assignment.cpp
 	ast/conditional-operator.cpp
 	ast/type-node.cpp
-	ast/operator-node.cpp
+	ast/operator.cpp
 	ast/parenthesized-expression.cpp
 	ast/function-call.cpp
-	ast/initializer.cpp
+	ast/initializer-reference.cpp
 	ast/self-expression.cpp
 	ast/dynamic-type.cpp
 	ast/forced-value.cpp
@@ -89,7 +91,23 @@ SET(SWIFT_PARSER_SRC ${SWIFT_TOKENIZER_SRC}
     ast/literal-nodes.cpp
     ast/dictionary-literal.cpp
     ast/array-literal.cpp
+    ast/attribute.cpp
 
+    ast/class-def.cpp
+    ast/constant.cpp
+    ast/declaration.cpp
+    ast/deinitializer-def.cpp
+    ast/initializer-def.cpp
+    ast/enum-def.cpp
+    ast/extension-def.cpp
+    ast/function-def.cpp
+    ast/import.cpp
+    ast/operator-def.cpp
+    ast/protocol-def.cpp
+    ast/struct-def.cpp
+    ast/subscript-def.cpp
+    ast/type-alias.cpp
+    ast/variable.cpp
     ast/identifier.cpp
     parser/symbol-registry.cpp
     )

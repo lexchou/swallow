@@ -1,16 +1,16 @@
 #ifndef OPTIONAL_CHAINING_H
 #define OPTIONAL_CHAINING_H
-#include "expression-node.h"
+#include "expression.h"
 
 SWIFT_NS_BEGIN
 
-class OptionalChaining : public ExpressionNode
+class OptionalChaining : public Expression
 {
 public:
-    OptionalChaining(ExpressionNode* expr);
+    OptionalChaining(Expression* expr);
 public:
-    void setExpression(ExpressionNode* expr);
-    ExpressionNode* getExpression();
+    void setExpression(Expression* expr);
+    Expression* getExpression();
 public:
     virtual void serialize(std::wostream& out);
 };

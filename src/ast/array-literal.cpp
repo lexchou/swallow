@@ -2,11 +2,11 @@
 USE_SWIFT_NS
 
 ArrayLiteral::ArrayLiteral()
-	:ExpressionNode(0)
+	:Expression(0)
 {
 
 }
-void ArrayLiteral::push(ExpressionNode* item)
+void ArrayLiteral::push(Expression* item)
 {
 	children.push_back(item);
 }

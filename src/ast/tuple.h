@@ -1,19 +1,19 @@
 #ifndef TUPLE_H
 #define TUPLE_H
-#include "expression-node.h"
+#include "expression.h"
 #include <string>
 
 SWIFT_NS_BEGIN
 
-class Tuple : public ExpressionNode
+class Tuple : public Expression
 {
 public:
     Tuple();
 public:
     virtual void serialize(std::wostream& out);
-    void add(Statement* st);
+    void add(Pattern* pattern);
     int numElements();
-    Statement* getElement(int i);
+    Pattern* getElement(int i);
     
 private:
 };

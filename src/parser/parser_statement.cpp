@@ -64,7 +64,7 @@ Statement* Parser::parseStatement()
         }
         
     }
-    ExpressionNode* ret = parseExpression();
+    Expression* ret = parseExpression();
     match(L";");
     return ret;
 }
@@ -113,7 +113,7 @@ Statement* Parser::parseForLoop()
         {
             if(predicate(L";"))
                 break;
-            ExpressionNode* init = parseExpression();
+            Expression* init = parseExpression();
             ret->addInit(init);
         }
         while(match(L","));
@@ -122,11 +122,11 @@ Statement* Parser::parseForLoop()
     expect(L";");
     if(!predicate(L";"))
     {
-        ExpressionNode* cond = parseExpression();
+        Expression* cond = parseExpression();
         ret->setCondition(cond);
     }
     expect(L";");
-    ExpressionNode* step = NULL;
+    Expression* step = NULL;
     if(!predicate(L"{"))
         step = parseExpression();
     ret->setStep(step);
@@ -150,7 +150,7 @@ Statement* Parser::parseWhileLoop()
 {
     expect(Keyword::While);
     WhileLoop* ret = nodeFactory->createWhileLoop();
-    ExpressionNode* condition = parseConditionExpression();
+    Expression* condition = parseConditionExpression();
     //TODO: The condition can also be an optional binding declaration, as discussed in Optional Binding.
     ret->setCondition(condition);
     CodeBlock* codeBlock = parseCodeBlock();
@@ -158,7 +158,7 @@ Statement* Parser::parseWhileLoop()
     return ret;
 }
 //“while-condition → expression  declaration”
-ExpressionNode* Parser::parseConditionExpression()
+Expression* Parser::parseConditionExpression()
 {
     return parseExpression();
 }
@@ -174,7 +174,7 @@ Statement* Parser::parseDoLoop()
     CodeBlock* codeBlock = parseCodeBlock();
     ret->setCodeBlock(codeBlock);
     expect(Keyword::While);
-    ExpressionNode* condition = parseConditionExpression();
+    Expression* condition = parseConditionExpression();
     ret->setCondition(condition);
     return ret;
 }
@@ -189,7 +189,7 @@ Statement* Parser::parseIf()
 {
     expect(Keyword::If);
     IfStatement* ret = nodeFactory->createIf();
-    ExpressionNode* cond = parseConditionExpression();
+    Expression* cond = parseConditionExpression();
     ret->setCondition(cond);
     CodeBlock* thenPart = parseCodeBlock();
     ret->setThen(thenPart);
@@ -233,7 +233,7 @@ Statement* Parser::parseSwitch()
     Token token;
     expect(Keyword::Switch);
     SwitchCase* ret = nodeFactory->createSwitch();
-    ExpressionNode* controlExpr = parseExpression();
+    Expression* controlExpr = parseExpression();
     ret->setControlExpression(controlExpr);
     expect(L"{");
     // ‌ switch-cases → switch-case switch-cases opt
@@ -248,8 +248,8 @@ Statement* Parser::parseSwitch()
             //“case-item-list → pattern guard-clause opt | pattern guard-clause opt , case-item-list”
             do
             {
-                Statement* pattern = parsePattern();
-                ExpressionNode* guard = NULL;
+                Pattern* pattern = parsePattern();
+                Expression* guard = NULL;
                 if(match(L"where"))
                     guard = parseExpression();
                 CaseStatement* caseCond = nodeFactory->createCase();
@@ -368,7 +368,7 @@ Statement* Parser::parseReturn()
     {
         //try to read an expression
         try {
-            ExpressionNode* expr = parseExpression();
+            Expression* expr = parseExpression();
             ret->setExpression(expr);
         } catch (...) {
             //TODO: clean all node created during parsing the expression

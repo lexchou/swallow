@@ -1,11 +1,11 @@
 #ifndef FLOAT_LITERAL_H
 #define FLOAT_LITERAL_H
-#include "expression-node.h"
+#include "expression.h"
 #include <string>
 
 SWIFT_NS_BEGIN
 
-class FloatLiteral : public ExpressionNode
+class FloatLiteral : public Expression
 {
 public:
     FloatLiteral(const std::wstring& val);

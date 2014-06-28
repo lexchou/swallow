@@ -1,22 +1,22 @@
 #ifndef CONDITIONAL_OPERATOR_H
 #define CONDITIONAL_OPERATOR_H
-#include "operator-node.h"
+#include "operator.h"
 #include <string>
 
 SWIFT_NS_BEGIN
-class ConditionalOperator : public OperatorNode
+class ConditionalOperator : public Operator
 {
 public:
-    ConditionalOperator(ExpressionNode* expr, ExpressionNode* trueExpr, ExpressionNode* falseExpr);
+    ConditionalOperator(Expression* expr, Expression* trueExpr, Expression* falseExpr);
 public:
-    ExpressionNode* getCondition() { return static_cast<ExpressionNode*>(get(0));}
-    ExpressionNode* getTrueExpression() { return static_cast<ExpressionNode*>(get(2));}
-    ExpressionNode* getFalseExpression() { return static_cast<ExpressionNode*>(get(1));}
+    Expression* getCondition() { return static_cast<Expression*>(get(0));}
+    Expression* getTrueExpression() { return static_cast<Expression*>(get(2));}
+    Expression* getFalseExpression() { return static_cast<Expression*>(get(1));}
     
     
-    void setCondition(Statement* v) { set(0, v);}
-    void setTrueExpression(ExpressionNode* v) { set(2, v);}
-    void setFalseExpression(ExpressionNode* v) { set(1, v);}
+    void setCondition(Pattern* v) { set(0, v);}
+    void setTrueExpression(Expression* v) { set(2, v);}
+    void setFalseExpression(Expression* v) { set(1, v);}
     
 public:
     virtual void serialize(std::wostream& out);

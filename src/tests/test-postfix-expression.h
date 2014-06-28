@@ -112,7 +112,7 @@ public:
         FunctionCall* call = dynamic_cast<FunctionCall*>(root);
         CPPUNIT_ASSERT(call != NULL);
         CPPUNIT_ASSERT(call->getFunction() != NULL);
-        Initializer* init = dynamic_cast<Initializer*>(call->getFunction());
+        InitializerReference* init = dynamic_cast<InitializerReference*>(call->getFunction());
         CPPUNIT_ASSERT(init != NULL);
 
         Identifier* id = dynamic_cast<Identifier*>(init->getExpression());
@@ -176,7 +176,7 @@ public:
             Assignment* eq = dynamic_cast<Assignment*>(root);
             CPPUNIT_ASSERT(eq != NULL);
             CPPUNIT_ASSERT(eq->getLHS());
-            Subscript* sub = dynamic_cast<Subscript*>(eq->getLHS());
+            SubscriptAccess* sub = dynamic_cast<SubscriptAccess*>(eq->getLHS());
             CPPUNIT_ASSERT(eq != NULL);
             CPPUNIT_ASSERT_EQUAL(2, sub->numIndices());
             IntegerLiteral* i;
@@ -198,7 +198,7 @@ public:
         Assignment* eq = dynamic_cast<Assignment*>(root);
         CPPUNIT_ASSERT(eq != NULL);
         CPPUNIT_ASSERT(eq->getLHS());
-        Subscript* sub = dynamic_cast<Subscript*>(eq->getLHS());
+        SubscriptAccess* sub = dynamic_cast<SubscriptAccess*>(eq->getLHS());
         CPPUNIT_ASSERT(eq != NULL);
         CPPUNIT_ASSERT_EQUAL(1, sub->numIndices());
         IntegerLiteral* i;
@@ -216,7 +216,7 @@ public:
         Assignment* eq = dynamic_cast<Assignment*>(root);
         CPPUNIT_ASSERT(eq != NULL);
         CPPUNIT_ASSERT(eq->getLHS());
-        Subscript* sub = dynamic_cast<Subscript*>(eq->getLHS());
+        SubscriptAccess* sub = dynamic_cast<SubscriptAccess*>(eq->getLHS());
         CPPUNIT_ASSERT(eq != NULL);
         CPPUNIT_ASSERT_EQUAL(1, sub->numIndices());
         IntegerLiteral* i;

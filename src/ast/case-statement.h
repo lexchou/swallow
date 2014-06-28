@@ -5,17 +5,18 @@
 
 SWIFT_NS_BEGIN
 
-class ExpressionNode;
+class Expression;
+class Pattern;
 class CaseStatement : public Statement
 {
 public:
     CaseStatement();
 public:
-    void setCondition(Statement* exr);
-    Statement* getCondition();
+    void setCondition(Pattern* exr);
+    Pattern* getCondition();
     
-    void setGuard(ExpressionNode* expr);
-    ExpressionNode* getGuard();
+    void setGuard(Expression* expr);
+    Expression* getGuard();
     
     void addStatement(Statement* statement);
     Statement* getStatement(int idx);

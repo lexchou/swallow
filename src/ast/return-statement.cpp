@@ -1,6 +1,6 @@
 
 #include "return-statement.h"
-#include "expression-node.h"
+#include "expression.h"
 USE_SWIFT_NS
 
 
@@ -18,11 +18,11 @@ void ReturnStatement::serialize(std::wostream& out)
     }
 }
 
-void ReturnStatement::setExpression(ExpressionNode* expr)
+void ReturnStatement::setExpression(Expression* expr)
 {
     set(0, expr);
 }
-ExpressionNode* ReturnStatement::getExpression()
+Expression* ReturnStatement::getExpression()
 {
-    return static_cast<ExpressionNode*>(get(0));
+    return static_cast<Expression*>(get(0));
 }
