@@ -315,11 +315,10 @@ ExtensionDef* NodeFactory::createExtension(const std::vector<Attribute*>& attrs)
     ret->setAttributes(attrs);
     return ret;
 }
-SubscriptDef* NodeFactory::createSubscript(const std::vector<Attribute*>& attrs, int specifiers)
+SubscriptDef* NodeFactory::createSubscript(const std::vector<Attribute*>& attrs)
 {
     SubscriptDef* ret = new SubscriptDef();
     ret->setAttributes(attrs);
-    ret->setSpecifiers(specifiers);
     return ret;
 }
 OperatorDef* NodeFactory::createOperator(const std::vector<Attribute*>& attrs)

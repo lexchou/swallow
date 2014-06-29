@@ -294,12 +294,17 @@ Declaration* Parser::parseVar(const std::vector<Attribute*>& attrs, int specifie
                 {
                     // variable-declaration → variable-declaration-head variable-name type-annotation getter-setter-keyword-block
                     //no code block for getter/setter for protocol
-                    parseGetterSetterKeywordBlock(var);
+                    std::pair<CodeBlock*, CodeBlock*> r = parseGetterSetterKeywordBlock();
+                    var->setGetter(r.first);
+                    var->setSetter(r.second);
                 }
                 else
                 {
                     //  variable-declaration → variable-declaration-head variable-name type-annotation getter-setter-block
-                    parseGetterSetterBlock(var);
+                    std::pair<CodeBlock*, std::pair<std::wstring, CodeBlock*> > r = parseGetterSetterBlock();
+                    var->setGetter(r.first);
+                    var->setSetterName(r.second.first);
+                    var->setSetter(r.second.second);
                 }
                 break;
             case Keyword::WillSet:
@@ -380,51 +385,53 @@ void Parser::parseWillSetDidSetBlock(Variable* variable)
  ‌ setter-clause → attributes opt set setter-name opt code-block
  ‌ setter-name → (identifier)
 */
-void Parser::parseGetterSetterBlock(Variable* variable)
+std::pair<CodeBlock*, std::pair<std::wstring, CodeBlock*> > Parser::parseGetterSetterBlock()
 {
     Token token;
     std::vector<Attribute*> attrs;
     parseAttributes(attrs);
     peek(token);
+    CodeBlock* getter = NULL;
+    std::pair<std::wstring, CodeBlock*> setter = std::make_pair(std::wstring(), (CodeBlock*)NULL);
     if(token.getKeyword() == Keyword::Get)
     {
         next(token);
-        CodeBlock* getter = parseCodeBlock();
-        variable->setGetter(getter);
+        getter = parseCodeBlock();
         getter->setAttributes(attrs);
         peek(token);
         if(token == L"@" || token.getKeyword() == Keyword::Set)
         {
-            parseSetterClause(variable);
+            setter = parseSetterClause();
         }
     }
     else if(token.getKeyword() == Keyword::Set)
     {
-        parseSetterClause(variable);
-        variable->getSetter()->setAttributes(attrs);
+        setter = parseSetterClause();
+        setter.second->setAttributes(attrs);
         parseAttributes(attrs);
         expect(Keyword::Get);
-        CodeBlock* getter = parseCodeBlock();
-        variable->setGetter(getter);
+        getter = parseCodeBlock();
         getter->setAttributes(attrs);
     }
+    return std::make_pair(getter, setter);
 }
 /*
  ‌ setter-clause → attributes opt set setter-name opt code-block
 */
-void Parser::parseSetterClause(Variable* variable)
+std::pair<std::wstring, CodeBlock*> Parser::parseSetterClause()
 {
     Token token;
     std::vector<Attribute*> attrs;
     expect(Keyword::Set);
+    std::wstring name;
     if(match(L"("))
     {
         expect_identifier(token);
         expect(L")");
-        variable->setSetterName(token.token);
+        name = token.token;
     }
     CodeBlock* setter = parseCodeBlock();
-    variable->setSetter(setter);
+    return std::make_pair(name, setter);
 }
 /*
  ‌ getter-setter-keyword-block → {getter-keyword-clause setter-keyword-clause opt}
@@ -432,38 +439,40 @@ void Parser::parseSetterClause(Variable* variable)
  ‌ getter-keyword-clause → attributes opt get
  ‌ setter-keyword-clause → attributes opt set
 */
-void Parser::parseGetterSetterKeywordBlock(Variable* variable)
+std::pair<CodeBlock*, CodeBlock*> Parser::parseGetterSetterKeywordBlock()
 {
     Attributes attributes;
     parseAttributes(attributes);
+    CodeBlock* getter = NULL;
+    CodeBlock* setter = NULL;
     if(match(Keyword::Get))
     {
-        CodeBlock* getter = nodeFactory->createCodeBlock();
+        getter = nodeFactory->createCodeBlock();
         getter->setAttributes(attributes);
-        variable->setGetter(getter);
-
-        
         parseAttributes(attributes);
         if(match(Keyword::Set))
         {
-            CodeBlock* setter = nodeFactory->createCodeBlock();
+            setter = nodeFactory->createCodeBlock();
             setter->setAttributes(attributes);
-            variable->setSetter(setter);
+        }
+        else if(!attributes.empty())//attributes defined for setter but setter is not found
+        {
+            Token token;
+            next(token);
+            unexpected(token);
         }
     }
     else if(match(Keyword::Set))
     {
-        CodeBlock* setter = nodeFactory->createCodeBlock();
+        setter = nodeFactory->createCodeBlock();
         setter->setAttributes(attributes);
-        variable->setSetter(setter);
         
         parseAttributes(attributes);
         expect(Keyword::Get);
-        CodeBlock* getter = nodeFactory->createCodeBlock();
+        getter = nodeFactory->createCodeBlock();
         getter->setAttributes(attributes);
-        variable->setGetter(getter);
     }
-
+    return std::make_pair(getter, setter);
 }
 
 /*
@@ -735,7 +744,26 @@ Declaration* Parser::parseDeinit(const std::vector<Attribute*>& attrs)
 */
 Declaration* Parser::parseExtension(const std::vector<Attribute*>& attrs)
 {
-    
+    expect(Keyword::Extension);
+    TypeIdentifier* id = parseTypeIdentifier();
+    ExtensionDef* ret = nodeFactory->createExtension(attrs);
+    ret->setIdentifier(id);
+    if(match(L":"))
+    {
+        // type-inheritance-list → type-identifier  type-identifier,type-inheritance-list
+        do
+        {
+            TypeIdentifier* protocol = parseTypeIdentifier();
+            ret->addAdoptedProtocol(protocol);
+        }while(match(L","));
+    }
+    expect(L"{");
+    while(!predicate(L"}"))
+    {
+        Declaration* decl = parseDeclaration();
+        ret->addDeclaration(decl);
+    }
+    return ret;
 }
 /*
  “GRAMMAR OF A SUBSCRIPT DECLARATION
@@ -749,7 +777,31 @@ Declaration* Parser::parseExtension(const std::vector<Attribute*>& attrs)
 */
 Declaration* Parser::parseSubscript(const std::vector<Attribute*>& attrs)
 {
+    expect(Keyword::Subscript);
+    Parameters* params = parseParameterClause();
+    expect(L"->");
+    Attributes typeAttrs;
+    parseAttributes(typeAttrs);
+    TypeNode* retType = parseType();
+    SubscriptDef* ret = nodeFactory->createSubscript(attrs);
+    ret->setParameters(params);
+    ret->setReturnType(retType);
+    ret->setReturnTypeAttributes(typeAttrs);
     
+    if(flags & UNDER_PROTOCOL)
+    {
+        std::pair<CodeBlock*, CodeBlock*> accessors = parseGetterSetterKeywordBlock();
+        ret->setGetter(accessors.first);
+        ret->setSetter(accessors.second);
+    }
+    else
+    {
+        std::pair<CodeBlock*, std::pair<std::wstring, CodeBlock*> > accessors = parseGetterSetterBlock();
+        ret->setGetter(accessors.first);
+        ret->setSetter(accessors.second.second);
+        ret->setSetterName(accessors.second.first);
+    }
+    return ret;
 }
 /*
   GRAMMAR OF AN OPERATOR DECLARATION

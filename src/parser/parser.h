@@ -110,9 +110,9 @@ private://declaration
     Declaration* parseVar(const std::vector<Attribute*>& attrs, int specifiers);
     Variable* parseVariableDeclaration();
     void parseWillSetDidSetBlock(Variable* variable);
-    void parseGetterSetterBlock(Variable* variable);
-    void parseSetterClause(Variable* variable);
-    void parseGetterSetterKeywordBlock(Variable* variable);
+    std::pair<CodeBlock*, std::pair<std::wstring, CodeBlock*> > parseGetterSetterBlock();
+    std::pair<std::wstring, CodeBlock*> parseSetterClause();
+    std::pair<CodeBlock*, CodeBlock*> parseGetterSetterKeywordBlock();
     
     Declaration* parseTypealias(const std::vector<Attribute*>& attrs);
     Declaration* parseFunc(const std::vector<Attribute*>& attrs, int specifiers);

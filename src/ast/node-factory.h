@@ -155,7 +155,7 @@ public:
     virtual InitializerDef* createInitializer(const std::vector<Attribute*>& attrs);
     virtual DeinitializerDef* createDeinitializer(const std::vector<Attribute*>& attrs);
     virtual ExtensionDef* createExtension(const std::vector<Attribute*>& attrs);
-    virtual SubscriptDef* createSubscript(const std::vector<Attribute*>& attrs, int specifiers);
+    virtual SubscriptDef* createSubscript(const std::vector<Attribute*>& attrs);
     virtual OperatorDef* createOperator(const std::vector<Attribute*>& attrs);
     
     
