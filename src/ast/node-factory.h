@@ -62,6 +62,7 @@ class Attribute;
 
 class Import;
 class Constant;
+class Variables;
 class Variable;
 class TypeAlias;
 class FunctionDef;
@@ -139,7 +140,8 @@ public:
     
     virtual Import* createImport(const std::vector<Attribute*>& attrs);
     virtual Constant* createConstant(const std::vector<Attribute*>& attrs, int specifiers);
-    virtual Variable* createVariable(const std::vector<Attribute*>& attrs, int specifiers);
+    virtual Variables* createVariables(const std::vector<Attribute*>& attrs, int specifiers);
+    virtual Variable* createVariable();
     virtual TypeAlias* createTypealias(const std::vector<Attribute*>& attrs);
     virtual FunctionDef* createFunction(const std::wstring& name, const std::vector<Attribute*>& attrs);
     virtual EnumDef* createEnum(const std::wstring& name, const std::vector<Attribute*>& attrs);

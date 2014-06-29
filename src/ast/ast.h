@@ -65,6 +65,7 @@
 #include "ast/import.h"
 #include "ast/constant.h"
 #include "ast/variable.h"
+#include "ast/variables.h"
 #include "ast/type-alias.h"
 #include "ast/function-def.h"
 #include "ast/enum-def.h"

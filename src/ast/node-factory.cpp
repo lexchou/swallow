@@ -234,12 +234,17 @@ Constant* NodeFactory::createConstant(const std::vector<Attribute*>& attrs, int 
     ret->setSpecifiers(specifiers);
     return ret;
 }
-Variable* NodeFactory::createVariable(const std::vector<Attribute*>& attrs, int specifiers)
+Variables* NodeFactory::createVariables(const std::vector<Attribute*>& attrs, int specifiers)
 {
-    Variable* ret = new Variable();
+    Variables* ret = new Variables();
     ret->setAttributes(attrs);
     ret->setSpecifiers(specifiers);
     return ret;
+}
+
+Variable* NodeFactory::createVariable()
+{
+    Variable* ret = new Variable();
     return ret;
 }
 TypeAlias* NodeFactory::createTypealias(const std::vector<Attribute*>& attrs)

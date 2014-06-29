@@ -5,13 +5,16 @@
 
 SWIFT_NS_BEGIN
 
+class CodeBlock;
 class DeinitializerDef : public Declaration
 {
 public:
     DeinitializerDef();
 public:
+    CodeBlock* getBody();
+    void setBody(CodeBlock* body);
+public:
     virtual void serialize(std::wostream& out);
-private:
 };
 
 SWIFT_NS_END

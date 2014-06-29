@@ -32,3 +32,13 @@ Statement* CodeBlock::getStatement(int idx)
 {
     return static_cast<Statement*>(get(idx));
 }
+
+
+void CodeBlock::setAttributes(const Attributes& attrs)
+{
+    attributes = attrs;
+}
+const Attributes& CodeBlock::getAttributes()const
+{
+    return attributes;
+}

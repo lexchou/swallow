@@ -23,3 +23,16 @@ void Attribute::addBalancedToken(const std::wstring& token)
 {
     balancedTokens.push_back(token);
 }
+
+
+
+
+void Attribute::disposeAll(std::vector<Attribute*>& attributes)
+{
+    std::vector<Attribute*>::iterator iter = attributes.begin();
+    for(; iter != attributes.end(); iter++)
+    {
+        delete *iter;
+    }
+    attributes.clear();
+}

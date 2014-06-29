@@ -26,6 +26,7 @@ class ProtocolComposition;
 class Attribute;
 class Declaration;
 class Pattern;
+class Variable;
 class Parser
 {
     enum
@@ -106,16 +107,22 @@ private://declaration
     Declaration* parseImport(const std::vector<Attribute*>& attrs);
     Declaration* parseLet(const std::vector<Attribute*>& attrs, int specifiers);
     Declaration* parseVar(const std::vector<Attribute*>& attrs, int specifiers);
+    Variable* parseVariableDeclaration();
+    void parseWillSetDidSetBlock(Variable* variable);
+    void parseGetterSetterBlock(Variable* variable);
+    void parseSetterClause(Variable* variable);
+    void parseGetterSetterKeywordBlock(Variable* variable);
+    
     Declaration* parseTypealias(const std::vector<Attribute*>& attrs);
     Declaration* parseFunc(const std::vector<Attribute*>& attrs, int specifiers);
     Declaration* parseEnum(const std::vector<Attribute*>& attrs);
     Declaration* parseStruct(const std::vector<Attribute*>& attrs);
     Declaration* parseClass(const std::vector<Attribute*>& attrs);
     Declaration* parseProtocol(const std::vector<Attribute*>& attrs);
-    Declaration* parseInit(const std::vector<Attribute*>& attrs, int specifiers);
-    Declaration* parseDeinit(const std::vector<Attribute*>& attrs, int specifiers);
+    Declaration* parseInit(const std::vector<Attribute*>& attrs);
+    Declaration* parseDeinit(const std::vector<Attribute*>& attrs);
     Declaration* parseExtension(const std::vector<Attribute*>& attrs);
-    Declaration* parseSubscript(const std::vector<Attribute*>& attrs, int specifiers);
+    Declaration* parseSubscript(const std::vector<Attribute*>& attrs);
     Declaration* parseOperator(const std::vector<Attribute*>& attrs);
 private://expression
     Expression* parseFloat();

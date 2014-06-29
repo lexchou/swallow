@@ -45,6 +45,7 @@ struct Token
             bool sign;
             bool fraction;
             bool exponent;
+            int64_t value;
         } number;
         struct
         {
