@@ -68,6 +68,8 @@
 #include "ast/variables.h"
 #include "ast/type-alias.h"
 #include "ast/function-def.h"
+#include "ast/parameters.h"
+#include "ast/parameter.h"
 #include "ast/enum-def.h"
 #include "ast/struct-def.h"
 #include "ast/class-def.h"

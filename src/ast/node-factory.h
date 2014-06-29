@@ -75,6 +75,8 @@ class DeinitializerDef;
 class ExtensionDef;
 class SubscriptDef;
 class OperatorDef;
+class Parameters;
+class Parameter;
 
 class NodeFactory
 {
@@ -143,7 +145,9 @@ public:
     virtual Variables* createVariables(const std::vector<Attribute*>& attrs, int specifiers);
     virtual Variable* createVariable();
     virtual TypeAlias* createTypealias(const std::vector<Attribute*>& attrs);
-    virtual FunctionDef* createFunction(const std::wstring& name, const std::vector<Attribute*>& attrs);
+    virtual FunctionDef* createFunction(const std::wstring& name, const std::vector<Attribute*>& attrs, int specifiers);
+    virtual Parameters* createParameters();
+    virtual Parameter* createParameter();
     virtual EnumDef* createEnum(const std::wstring& name, const std::vector<Attribute*>& attrs);
     virtual StructDef* createStruct(const std::wstring& name, const std::vector<Attribute*>& attrs);
     virtual ClassDef* createClass(const std::wstring& name, const std::vector<Attribute*>& attrs);

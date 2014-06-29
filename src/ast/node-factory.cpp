@@ -253,12 +253,21 @@ TypeAlias* NodeFactory::createTypealias(const std::vector<Attribute*>& attrs)
     ret->setAttributes(attrs);
     return ret;
 }
-FunctionDef* NodeFactory::createFunction(const std::wstring& name, const std::vector<Attribute*>& attrs)
+FunctionDef* NodeFactory::createFunction(const std::wstring& name, const std::vector<Attribute*>& attrs, int specifiers)
 {
     FunctionDef* ret = new FunctionDef();
     ret->setAttributes(attrs);
     ret->setName(name);
+    ret->setSpecifiers(specifiers);
     return ret;
+}
+Parameters* NodeFactory::createParameters()
+{
+    return new Parameters();
+}
+Parameter* NodeFactory::createParameter()
+{
+    return new Parameter();
 }
 EnumDef* NodeFactory::createEnum(const std::wstring& name, const std::vector<Attribute*>& attrs)
 {

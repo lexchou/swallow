@@ -27,6 +27,7 @@ class Attribute;
 class Declaration;
 class Pattern;
 class Variable;
+class Parameters;
 class Parser
 {
     enum
@@ -115,6 +116,8 @@ private://declaration
     
     Declaration* parseTypealias(const std::vector<Attribute*>& attrs);
     Declaration* parseFunc(const std::vector<Attribute*>& attrs, int specifiers);
+    Parameters* parseParameterClause();
+
     Declaration* parseEnum(const std::vector<Attribute*>& attrs);
     Declaration* parseStruct(const std::vector<Attribute*>& attrs);
     Declaration* parseClass(const std::vector<Attribute*>& attrs);

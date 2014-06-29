@@ -495,19 +495,111 @@ Declaration* Parser::parseTypealias(const std::vector<Attribute*>& attrs)
  ‌ function-signature → parameter-clauses function-result opt
  ‌ function-result → ->attributes opt type
  ‌ function-body → code-block
+*/
+Declaration* Parser::parseFunc(const std::vector<Attribute*>& attrs, int specifiers)
+{
+    Token token;
+    expect(Keyword::Func);
+    next(token);
+    if(token.type != TokenType::Identifier && token.type != TokenType::Operator)
+        unexpected(token);
+    FunctionDef* ret = nodeFactory->createFunction(token.token, attrs, specifiers);
+    if(predicate(L"<"))
+    {
+        //TODO: parseGenericParameterClause();
+    }
+    do
+    {
+        Parameters* parameters = parseParameterClause();
+        ret->addParameters(parameters);
+    }while(predicate(L"("));
+    if(match(L"->"))
+    {
+        //function-result → ->attributes opt type
+        Attributes retAttrs;
+        parseAttributes(retAttrs);
+        TypeNode* retType = parseType();
+        ret->setReturnTypeAttributes(retAttrs);
+        ret->setReturnType(retType);
+    }
+    CodeBlock* body = parseCodeBlock();
+    ret->setBody(body);
+    return ret;
+}
+
+/*
  ‌ parameter-clauses → parameter-clause parameter-clauses opt
- ‌ parameter-clause → ()  (parameter-list...opt)
+ ‌ parameter-clause → () | (parameter-list...opt)
  ‌ parameter-list → parameter | parameter,parameter-list
  ‌ parameter → inout opt let opt#opt parameter-name local-parameter-name opt type-annotation default-argument-clause opt
  ‌ parameter → inout opt var #opt parameter-name local-parameter-name opt type-annotation default-argument-clause opt
  ‌ parameter → attributes opt type
- ‌ parameter-name → identifier  _
- ‌ local-parameter-name → identifier  _
- ‌ default-argument-clause → =expression”
+ ‌ parameter-name → identifier | _
+ ‌ local-parameter-name → identifier | _
+ ‌ default-argument-clause → =expression
 */
-Declaration* Parser::parseFunc(const std::vector<Attribute*>& attrs, int specifiers)
+Parameters* Parser::parseParameterClause()
 {
-    
+    Token token;
+    Parameters* ret = nodeFactory->createParameters();
+    expect(L"(");
+    if(match(L")"))
+        return ret;
+    do
+    {
+        bool inout = match(Keyword::Inout);
+        Parameter::Accessibility accessibility = Parameter::None;
+        next(token);
+        if(token.type == TokenType::Identifier)
+        {
+            if(token.identifier.keyword == Keyword::Var)
+            {
+                next(token);
+                accessibility = Parameter::Variable;
+            }
+            else if(token.identifier.keyword == Keyword::Let)
+            {
+                next(token);
+                accessibility = Parameter::Constant;
+            }
+        }
+        bool shorthandExternalName = match(L"#");
+        expect_identifier(token);
+        std::wstring name = token.token;
+        std::wstring localName;
+        if(match_identifier(token))
+        {
+            localName = token.token;
+        }
+        else
+        {
+            localName = name;
+            name.clear();
+        }
+        expect(L":");
+        Attributes attrs;
+        parseAttributes(attrs);
+        TypeNode* type = parseType();
+        Expression* def = NULL;
+        if(match(L"="))
+        {
+            def = parseExpression();
+        }
+        Parameter* param = nodeFactory->createParameter();
+        param->setInout(inout);
+        param->setAccessibility(accessibility);
+        param->setExternalName(name);
+        param->setLocalName(name);
+        param->setShorthandExternalName(shorthandExternalName);
+        param->setTypeAttributes(attrs);
+        param->setType(type);
+        param->setDefaultValue(def);
+        ret->addParameter(param);
+    }while(match(L","));
+    bool variadicParameters = match(L"...");
+    ret->setVariadicParameters(variadicParameters);
+    expect(L")");
+    return ret;
 }
 /*
   GRAMMAR OF AN ENUMERATION DECLARATION
@@ -608,7 +700,19 @@ Declaration* Parser::parseProtocol(const std::vector<Attribute*>& attrs)
 */
 Declaration* Parser::parseInit(const std::vector<Attribute*>& attrs)
 {
-    
+    bool convenience = match(L"convenience");
+    expect(Keyword::Init);
+    if(predicate(L"<"))
+    {
+        //TODO: generic-parameter-clause
+    }
+    Parameters* parameters = parseParameterClause();
+    CodeBlock* body = parseCodeBlock();
+    InitializerDef* ret = nodeFactory->createInitializer(attrs);
+    ret->setConvenience(convenience);
+    ret->setParameters(parameters);
+    ret->setBody(body);
+    return ret;
 }
 /*
   GRAMMAR OF A DEINITIALIZER DECLARATION

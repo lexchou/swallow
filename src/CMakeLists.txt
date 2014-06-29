@@ -111,6 +111,8 @@ SET(SWIFT_PARSER_SRC ${SWIFT_TOKENIZER_SRC}
     ast/variable.cpp
     ast/variables.cpp
     ast/identifier.cpp
+    ast/parameters.cpp
+    ast/parameter.cpp
     parser/symbol-registry.cpp
     )
 SET(SWIFT_SRC main.cpp tokenizer/tokenizer.cpp)
