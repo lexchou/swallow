@@ -1,17 +1,14 @@
 #ifndef CLASS_DEF_H
 #define CLASS_DEF_H
-#include "declaration.h"
+#include "type-declaration.h"
 #include <string>
 
 SWIFT_NS_BEGIN
 
-class ClassDef : public Declaration
+class ClassDef : public TypeDeclaration
 {
 public:
     ClassDef();
-public:
-    void setName(const std::wstring& name);
-    const std::wstring& getName()const;
 public:
     virtual void serialize(std::wostream& out);
 private:

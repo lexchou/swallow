@@ -644,7 +644,36 @@ Declaration* Parser::parseEnum(const std::vector<Attribute*>& attrs)
 */
 Declaration* Parser::parseStruct(const std::vector<Attribute*>& attrs)
 {
+    Token token;
+    expect(Keyword::Struct);
+    expect_identifier(token);
+    StructDef* ret = nodeFactory->createStruct(token.token, attrs);
+    if(predicate(L"<"))
+    {
+        //TODO: parse generic parameter clause
+    }
     
+    
+    if(match(L":"))
+    {
+        do
+        {
+            TypeIdentifier* protocol = parseTypeIdentifier();
+            ret->addParent(protocol);
+        }while(match(L","));
+    }
+    
+    Flag f(this);
+    this->flags |= UNDER_STRUCT;
+    
+    expect(L"{");
+    while(!predicate(L"}"))
+    {
+        Declaration* decl = parseDeclaration();
+        ret->addDeclaration(decl);
+    }
+    expect(L"}");
+    return ret;
 }
 /*
  “GRAMMAR OF A CLASS DECLARATION
@@ -656,7 +685,34 @@ Declaration* Parser::parseStruct(const std::vector<Attribute*>& attrs)
 */
 Declaration* Parser::parseClass(const std::vector<Attribute*>& attrs)
 {
+    Token token;
+    expect(Keyword::Struct);
+    expect_identifier(token);
+    ClassDef* ret = nodeFactory->createClass(token.token, attrs);
+    if(predicate(L"<"))
+    {
+        //TODO: parse generic parameter clause
+    }
+    if(match(L":"))
+    {
+        do
+        {
+            TypeIdentifier* protocol = parseTypeIdentifier();
+            ret->addParent(protocol);
+        }while(match(L","));
+    }
     
+    Flag f(this);
+    this->flags |= UNDER_CLASS;
+    
+    expect(L"{");
+    while(!predicate(L"}"))
+    {
+        Declaration* decl = parseDeclaration();
+        ret->addDeclaration(decl);
+    }
+    expect(L"}");
+    return ret;
 }
 /*
  “GRAMMAR OF A PROTOCOL DECLARATION
@@ -697,7 +753,35 @@ Declaration* Parser::parseClass(const std::vector<Attribute*>& attrs)
 */
 Declaration* Parser::parseProtocol(const std::vector<Attribute*>& attrs)
 {
+    Token token;
+    expect(Keyword::Struct);
+    expect_identifier(token);
+    ProtocolDef* ret = nodeFactory->createProtocol(token.token, attrs);
+    if(predicate(L"<"))
+    {
+        //TODO: parse generic parameter clause
+    }
+    if(match(L":"))
+    {
+        do
+        {
+            TypeIdentifier* protocol = parseTypeIdentifier();
+            ret->addParent(protocol);
+        }while(match(L","));
+    }
+    expect(L"{");
     
+    Flag f(this);
+    this->flags |= UNDER_PROTOCOL;
+    
+    
+    while(!predicate(L"}"))
+    {
+        Declaration* decl = parseDeclaration();
+        ret->addDeclaration(decl);
+    }
+    expect(L"}");
+    return ret;
 }
 /*
   GRAMMAR OF AN INITIALIZER DECLARATION
@@ -754,7 +838,7 @@ Declaration* Parser::parseExtension(const std::vector<Attribute*>& attrs)
         do
         {
             TypeIdentifier* protocol = parseTypeIdentifier();
-            ret->addAdoptedProtocol(protocol);
+            ret->addParent(protocol);
         }while(match(L","));
     }
     expect(L"{");

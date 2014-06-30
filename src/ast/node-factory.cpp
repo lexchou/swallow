@@ -279,21 +279,21 @@ EnumDef* NodeFactory::createEnum(const std::wstring& name, const std::vector<Att
 StructDef* NodeFactory::createStruct(const std::wstring& name, const std::vector<Attribute*>& attrs)
 {
     StructDef* ret = new StructDef();
-    ret->setName(name);
+    ret->setIdentifier(createTypeIdentifier(name));
     ret->setAttributes(attrs);
     return ret;
 }
 ClassDef* NodeFactory::createClass(const std::wstring& name, const std::vector<Attribute*>& attrs)
 {
     ClassDef* ret = new ClassDef();
-    ret->setName(name);
+    ret->setIdentifier(createTypeIdentifier(name));
     ret->setAttributes(attrs);
     return ret;
 }
 ProtocolDef* NodeFactory::createProtocol(const std::wstring& name, const std::vector<Attribute*>& attrs)
 {
     ProtocolDef* ret = new ProtocolDef();
-    ret->setName(name);
+    ret->setIdentifier(createTypeIdentifier(name));
     ret->setAttributes(attrs);
     return ret;
 }
