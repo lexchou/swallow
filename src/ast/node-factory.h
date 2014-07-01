@@ -77,6 +77,9 @@ class SubscriptDef;
 class OperatorDef;
 class Parameters;
 class Parameter;
+class GenericConstraint;
+class GenericParameters;
+class Pattern;
 
 class NodeFactory
 {
@@ -100,7 +103,7 @@ public:
     virtual MemberAccess* createMemberAccess(Expression* self, Identifier* field);
     virtual SubscriptAccess* createSubscriptAccess(Expression* self, Expression* index);
     
-    virtual TypeCheck* createTypeCheck(Expression* expr, TypeNode* type);
+    virtual TypeCheck* createTypeCheck(Pattern* expr, TypeNode* type);
     virtual TypeCast* createTypeCast(Expression* expr, TypeNode* type);
     virtual Assignment* createAssignment(Expression* lhs, Expression* rhs);
     virtual ConditionalOperator* createConditionalOperator(Expression* cond, Expression* trueExpr, Expression* falseExpr);
@@ -157,6 +160,8 @@ public:
     virtual ExtensionDef* createExtension(const std::vector<Attribute*>& attrs);
     virtual SubscriptDef* createSubscript(const std::vector<Attribute*>& attrs);
     virtual OperatorDef* createOperator(const std::vector<Attribute*>& attrs);
+    virtual GenericConstraint* createGenericConstraint();
+    virtual GenericParameters* createGenericParameters();
     
     
 };

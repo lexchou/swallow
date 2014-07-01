@@ -614,14 +614,31 @@ Parameters* Parser::parseParameterClause()
   GRAMMAR OF AN ENUMERATION DECLARATION
  
  ‌ enum-declaration → attributes opt union-style-enum | attributes opt raw-value-style-enum
- ‌ union-style-enum → enum-name generic-parameter-clause opt{union-style-enum-members opt}
- ‌ union-style-enum-members → union-style-enum-member union-style-enum-members opt
- ‌ union-style-enum-member → declaration | union-style-enum-case-clause
- ‌ union-style-enum-case-clause → attributes opt case union-style-enum-case-list
- ‌ union-style-enum-case-list → union-style-enum-case | union-style-enum-case,union-style-enum-case-list
- ‌ union-style-enum-case → enum-case-name tuple-type opt
  ‌ enum-name → identifier
  ‌ enum-case-name → identifier
+ 
+*/
+Declaration* Parser::parseEnum(const std::vector<Attribute*>& attrs)
+{
+    Token token;
+    expect(Keyword::Enum);
+    expect_identifier(token);
+    if(predicate(L"<"))
+    {
+        //TODO: read generic-parameter-clause
+    }
+    if(match(L":"))
+    {
+        //this is a raw-value-style-enum
+        TypeIdentifier* baseType = parseTypeIdentifier();
+        return parseRawValueEnum(attrs, token.token, baseType);
+    }
+    else
+    {
+        return parseUnionEnum(attrs, token.token);
+    }
+}
+/*
  ‌ raw-value-style-enum → enum-name generic-parameter-clause opt : type-identifier{raw-value-style-enum-members opt}
  ‌ raw-value-style-enum-members → raw-value-style-enum-member raw-value-style-enum-members opt
  ‌ raw-value-style-enum-member → declaration | raw-value-style-enum-case-clause
@@ -629,12 +646,73 @@ Parameters* Parser::parseParameterClause()
  ‌ raw-value-style-enum-case-list → raw-value-style-enum-case | raw-value-style-enum-case,raw-value-style-enum-case-list
  ‌ raw-value-style-enum-case → enum-case-name raw-value-assignment opt
  ‌ raw-value-assignment → =literal
- 
 */
-Declaration* Parser::parseEnum(const std::vector<Attribute*>& attrs)
+Declaration* Parser::parseRawValueEnum(const std::vector<Attribute*>& attrs, const std::wstring& name, TypeIdentifier* baseType)
 {
-    
+    Token token;
+    EnumDef* ret = nodeFactory->createEnum(name, attrs);
+    ret->addParent(baseType);
+    while(!predicate(L"}"))
+    {
+        if(match(Keyword::Case))
+        {
+            do
+            {
+                expect_identifier(token);
+                Expression* val = NULL;
+                if(match(L"="))
+                {
+                    val = parseLiteral();
+                }
+                ret->addConstant(token.token, val);
+            }while(match(L","));
+        }
+        else
+        {
+            Declaration* decl = parseDeclaration();
+            ret->addDeclaration(decl);
+        }
+    }
+    expect(L"}");
+    return ret;
 }
+/*
+ ‌ union-style-enum → enum-name generic-parameter-clause opt{union-style-enum-members opt}
+ ‌ union-style-enum-members → union-style-enum-member union-style-enum-members opt
+ ‌ union-style-enum-member → declaration | union-style-enum-case-clause
+ ‌ union-style-enum-case-clause → attributes opt case union-style-enum-case-list
+ ‌ union-style-enum-case-list → union-style-enum-case | union-style-enum-case,union-style-enum-case-list
+ ‌ union-style-enum-case → enum-case-name tuple-type opt
+*/
+Declaration* Parser::parseUnionEnum(const std::vector<Attribute*>& attrs, const std::wstring& name)
+{
+    Token token;
+    EnumDef* ret = nodeFactory->createEnum(name, attrs);
+    while(!predicate(L"}"))
+    {
+        if(match(Keyword::Case))
+        {
+            do
+            {
+                expect_identifier(token);
+                TupleType* associatedType = NULL;
+                if(predicate(L"("))
+                {
+                    associatedType = parseTupleType();
+                }
+                ret->addAssociatedType(token.token, associatedType);
+            }while(match(L","));
+        }
+        else
+        {
+            Declaration* decl = parseDeclaration();
+            ret->addDeclaration(decl);
+        }
+    }
+    expect(L"}");
+    return ret;
+}
+
 /*
  “GRAMMAR OF A STRUCTURE DECLARATION
  

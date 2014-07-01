@@ -24,4 +24,6 @@ void wcs_assertEquals(const wchar_t* expected, const wchar_t* actual, const char
     CPPUNIT_NS::Asserter::failNotEqual( expected2, actual2, CPPUNIT_NS::SourceLine(file, line), "");
 }
 
+#define DESTROY(n) delete n; CPPUNIT_ASSERT_EQUAL(0, Node::NodeCount);
+
 #endif//TEST_UTILS_H

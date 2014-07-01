@@ -9,11 +9,11 @@ class BinaryOperator : public Operator
 public:
     BinaryOperator(const std::wstring& op, Associativity::T associativity, int precedence);
 public:
-    void setLHS(Expression* node){set(0, node);}
-    Expression* getLHS(){return static_cast<Expression*>(get(0));}
+    void setLHS(Pattern* node){set(0, node);}
+    Pattern* getLHS(){return static_cast<Pattern*>(get(0));}
 
-    void setRHS(Expression* node){set(1, node);}
-    Expression* getRHS(){return static_cast<Expression*>(get(1));}
+    void setRHS(Pattern* node){set(1, node);}
+    Pattern* getRHS(){return static_cast<Pattern*>(get(1));}
     
     const std::wstring& getOperator() const { return op;}
 public:

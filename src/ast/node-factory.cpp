@@ -64,7 +64,7 @@ SubscriptAccess* NodeFactory::createSubscriptAccess(Expression* self, Expression
     return new SubscriptAccess(self, index);
 }
 
-TypeCheck* NodeFactory::createTypeCheck(Expression* expr, TypeNode* type)
+TypeCheck* NodeFactory::createTypeCheck(Pattern* expr, TypeNode* type)
 {
     return new TypeCheck(expr, type);
 }
@@ -273,7 +273,7 @@ EnumDef* NodeFactory::createEnum(const std::wstring& name, const std::vector<Att
 {
     EnumDef* ret = new EnumDef();
     ret->setAttributes(attrs);
-    ret->setName(name);
+    ret->setIdentifier(createTypeIdentifier(name));
     return ret;
 }
 StructDef* NodeFactory::createStruct(const std::wstring& name, const std::vector<Attribute*>& attrs)
@@ -326,6 +326,14 @@ OperatorDef* NodeFactory::createOperator(const std::vector<Attribute*>& attrs)
     OperatorDef* ret = new OperatorDef();
     ret->setAttributes(attrs);
     return ret;
+}
+GenericConstraint* NodeFactory::createGenericConstraint()
+{
+    return new GenericConstraint();
+}
+GenericParameters* NodeFactory::createGenericParameters()
+{
+    return new GenericParameters();
 }
 
 

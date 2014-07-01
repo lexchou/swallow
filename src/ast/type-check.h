@@ -8,7 +8,7 @@ class TypeNode;
 class TypeCheck : public BinaryOperator
 {
 public:
-    TypeCheck(Expression* expr, TypeNode* type);
+    TypeCheck(Pattern* expr, TypeNode* type);
 public:
     TypeNode* getType();
     void setType(TypeNode* type);

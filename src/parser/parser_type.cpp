@@ -167,14 +167,14 @@ ProtocolComposition* Parser::parseProtocolComposition()
 }
 
 /*
- “GRAMMAR OF A GENERIC PARAMETER CLAUSE
+  GRAMMAR OF A GENERIC PARAMETER CLAUSE
  
- ‌ generic-parameter-clause → <generic-parameter-listrequirement-clauseopt>
+ ‌ generic-parameter-clause → <generic-parameter-list requirement-clause opt>
  ‌ generic-parameter-list → generic-parameter | generic-parameter,generic-parameter-list
  ‌ generic-parameter → type-name
  ‌ generic-parameter → type-name:type-identifier
  ‌ generic-parameter → type-name:protocol-composition-type
- ‌ requirement-clause → whererequirement-list
+ ‌ requirement-clause → where requirement-list
  ‌ requirement-list → requirement | requirement,requirement-list
  ‌ requirement → conformance-requirement | same-type-requirement
  ‌ conformance-requirement → type-identifier:type-identifier
@@ -184,53 +184,72 @@ ProtocolComposition* Parser::parseProtocolComposition()
  
  ‌ generic-argument-clause → <generic-argument-list>
  ‌ generic-argument-list → generic-argument | generic-argument,generic-argument-list
- ‌ generic-argument → type”
- 
- 
- “GRAMMAR OF A TYPE
- 
- ‌ type → array-type  function-type  type-identifier tuple-type  optional-type  implicitly-unwrapped-optional-type  protocol-composition-type  metatype-type
- GRAMMAR OF A TYPE ANNOTATION
- 
- ‌ type-annotation → :attributesopttype
- GRAMMAR OF A TYPE IDENTIFIER
- 
- ‌ type-identifier → type-namegeneric-argument-clauseopt type-namegeneric-argument-clauseopt.type-identifier
- ‌ type-name → identifier
- GRAMMAR OF A TUPLE TYPE
- 
- ‌ tuple-type → (tuple-type-bodyopt)
- ‌ tuple-type-body → tuple-type-element-list...opt
- ‌ tuple-type-element-list → tuple-type-element  tuple-type-element,tuple-type-element-list
- ‌ tuple-type-element → attributesoptinoutopttype inoutoptelement-nametype-annotation
- ‌ element-name → identifier
- GRAMMAR OF A FUNCTION TYPE
- 
- ‌ function-type → type->type
- GRAMMAR OF AN ARRAY TYPE
- 
- ‌ array-type → type[]  array-type[]”
- 
- 摘录来自: Apple Inc. “The Swift Programming Language”。 iBooks. https://itun.es/cn/jEUH0.l
- 
- “GRAMMAR OF AN OPTIONAL TYPE
- 
- ‌ optional-type → type?
- GRAMMAR OF AN IMPLICITLY UNWRAPPED OPTIONAL TYPE
- 
- ‌ implicitly-unwrapped-optional-type → type!
- GRAMMAR OF A PROTOCOL COMPOSITION TYPE
- 
- ‌ protocol-composition-type → protocol<protocol-identifier-listopt>
- ‌ protocol-identifier-list → protocol-identifier  protocol-identifier,protocol-identifier-list
- ‌ protocol-identifier → type-identifier
- GRAMMAR OF A METATYPE TYPE
- 
- ‌ metatype-type → type.Type  type.Protocol
- GRAMMAR OF A TYPE INHERITANCE CLAUSE
- 
- ‌ type-inheritance-clause → :type-inheritance-list
- ‌ type-inheritance-list → type-identifier  type-identifier,type-inheritance-list”
- 
- 摘录来自: Apple Inc. “The Swift Programming Language”。 iBooks. https://itun.es/cn/jEUH0.l
+ ‌ generic-argument → type
  */
+
+GenericParameters* Parser::parseGenericParameters()
+{
+    Token token;
+    GenericParameters* ret = nodeFactory->createGenericParameters();
+    expect(L"<");
+    // ‌ generic-parameter-list → generic-parameter | generic-parameter,generic-parameter-list
+    do
+    {
+        // generic-parameter → type-name
+        // generic-parameter → type-name:type-identifier
+        //‌ generic-parameter → type-name:protocol-composition-type
+        expect_identifier(token);
+        std::wstring typeName = token.token;
+        ret->addGenericType(nodeFactory->createTypeIdentifier(typeName));
+        if(match(L":"))
+        {
+            do
+            {
+                TypeIdentifier* expectedType = parseTypeIdentifier();
+                
+                GenericConstraint* c = nodeFactory->createGenericConstraint();
+                c->setIdentifier(nodeFactory->createTypeIdentifier(typeName));
+                c->setConstraintType(GenericConstraint::DerivedFrom);
+                c->addExpectedType(expectedType);
+                ret->addConstraint(c);
+                
+            } while (match(L","));
+            
+        }
+    } while (match(L","));
+    // ‌ requirement-clause → where requirement-list
+    if(match(Keyword::Where))
+    {
+        // requirement-list → requirement | requirement,requirement-list
+        do
+        {
+            TypeIdentifier* type = parseTypeIdentifier();
+            // requirement → conformance-requirement | same-type-requirement
+            GenericConstraint* c = nodeFactory->createGenericConstraint();
+            ret->addConstraint(c);
+            c->setIdentifier(type);
+            if(match(L":"))
+            {
+                // conformance-requirement → type-identifier:type-identifier
+                // conformance-requirement → type-identifier:protocol-composition-type
+                c->setConstraintType(GenericConstraint::DerivedFrom);
+                do
+                {
+                    TypeIdentifier* expectedType = parseTypeIdentifier();
+                    c->addExpectedType(expectedType);
+                } while (match(L","));
+            }
+            else if(match(L"=="))
+            {
+                // same-type-requirement → type-identifier==type-identifier
+                TypeIdentifier* expectedType = parseTypeIdentifier();
+                c->setConstraintType(GenericConstraint::EqualsTo);
+                c->addExpectedType(expectedType);
+            }
+        } while (match(L","));
+
+    }
+    expect(L">");
+    return ret;
+}
+

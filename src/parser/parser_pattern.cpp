@@ -92,14 +92,23 @@ Pattern* Parser::parseEnumPattern()
 }
 /*
   type-casting-pattern → is-pattern  as-pattern
- ‌ is-pattern → istype
- ‌ as-pattern → patternastype”
+ ‌ is-pattern → is type
+ ‌ as-pattern → pattern as type
 */
 Pattern* Parser::parseTypeCastingPattern()
 {
     Token token;
-    tassert(token, NULL);
-    return NULL;
+    if(match(Keyword::Is))
+    {
+        //is-pattern → is type
+        TypeNode* type = parseType();
+        return nodeFactory->createTypeCheck(NULL, type);
+    }
+    // as-pattern → pattern as type
+    Pattern* pat = parsePattern();
+    expect(Keyword::As);
+    TypeNode* type = parseType();
+    return nodeFactory->createTypeCheck(pat, type);
 }
 /*
   tuple-pattern → (tuple-pattern-element-list opt)

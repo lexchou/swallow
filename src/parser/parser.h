@@ -28,6 +28,7 @@ class Declaration;
 class Pattern;
 class Variable;
 class Parameters;
+class GenericParameters;
 class Parser
 {
     enum
@@ -73,6 +74,7 @@ private:
     TupleType* parseTupleType();
     TypeIdentifier* parseTypeIdentifier();
     ProtocolComposition* parseProtocolComposition();
+    GenericParameters* parseGenericParameters();
 private://statement
     Statement* parseStatement();
     Statement* parseLoopStatement();
@@ -119,6 +121,10 @@ private://declaration
     Parameters* parseParameterClause();
 
     Declaration* parseEnum(const std::vector<Attribute*>& attrs);
+    Declaration* parseRawValueEnum(const std::vector<Attribute*>& attrs, const std::wstring& name, TypeIdentifier* baseType);
+    Declaration* parseUnionEnum(const std::vector<Attribute*>& attrs, const std::wstring& name);
+
+    
     Declaration* parseStruct(const std::vector<Attribute*>& attrs);
     Declaration* parseClass(const std::vector<Attribute*>& attrs);
     Declaration* parseProtocol(const std::vector<Attribute*>& attrs);

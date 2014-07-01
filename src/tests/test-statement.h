@@ -67,8 +67,7 @@ public:
         CPPUNIT_ASSERT(func = dynamic_cast<Identifier*>(call->getFunction()));
         ASSERT_EQUALS(L"println", func->getIdentifier().c_str());
         
-        delete root;
-        CPPUNIT_ASSERT_EQUAL(0, Node::NodeCount);
+        DESTROY(root);
     }
     
     void testFor2()
@@ -88,8 +87,7 @@ public:
         
         CPPUNIT_ASSERT_EQUAL(0, body->numStatements());
         
-        delete root;
-        CPPUNIT_ASSERT_EQUAL(0, Node::NodeCount);
+        DESTROY(root);
         
     }
     void testForIn()
@@ -117,8 +115,7 @@ public:
         CPPUNIT_ASSERT(func = dynamic_cast<Identifier*>(call->getFunction()));
         ASSERT_EQUALS(L"println", func->getIdentifier().c_str());
         
-        delete root;
-        CPPUNIT_ASSERT_EQUAL(0, Node::NodeCount);
+        DESTROY(root);
     }
     void testDo()
     {
@@ -140,8 +137,7 @@ public:
         CPPUNIT_ASSERT(func = dynamic_cast<Identifier*>(call->getFunction()));
         ASSERT_EQUALS(L"println", func->getIdentifier().c_str());
         
-        delete root;
-        CPPUNIT_ASSERT_EQUAL(0, Node::NodeCount);
+        DESTROY(root);
     }
     void testIf()
     {
@@ -161,8 +157,7 @@ public:
         ASSERT_EQUALS(L"-1", id->toString().c_str());
         CPPUNIT_ASSERT(_if->getElse() == NULL);
         
-        delete root;
-        CPPUNIT_ASSERT_EQUAL(0, Node::NodeCount);
+        DESTROY(root);
     }
     
     void testIf2()
@@ -190,8 +185,7 @@ public:
         CPPUNIT_ASSERT(id = dynamic_cast<IntegerLiteral*>(ret->getExpression()));
         ASSERT_EQUALS(L"1", id->toString().c_str());
         
-        delete root;
-        CPPUNIT_ASSERT_EQUAL(0, Node::NodeCount);
+        DESTROY(root);
     }
     
     void testIf3()
@@ -231,8 +225,7 @@ public:
         CPPUNIT_ASSERT(id = dynamic_cast<IntegerLiteral*>(ret->getExpression()));
         ASSERT_EQUALS(L"1", id->toString().c_str());
         
-        delete root;
-        CPPUNIT_ASSERT_EQUAL(0, Node::NodeCount);
+        DESTROY(root);
     }
     void testSwitch()
     {
@@ -241,16 +234,14 @@ public:
         CPPUNIT_ASSERT(sc = dynamic_cast<SwitchCase*>(root));
         CPPUNIT_ASSERT_EQUAL(0, sc->numCases());
         
-        delete sc;
-        CPPUNIT_ASSERT_EQUAL(0, Node::NodeCount);
+        DESTROY(root);
     }
     
     void testSwitch1()
     {
         Node* root = parse(L"switch i{}");
         
-        delete root;
-        CPPUNIT_ASSERT_EQUAL(0, Node::NodeCount);
+        DESTROY(root);
     }
     
     void testSwitch2()
@@ -258,16 +249,14 @@ public:
         Node* root = parse(L"switch i{}");
         
         
-        delete root;
-        CPPUNIT_ASSERT_EQUAL(0, Node::NodeCount);
+        DESTROY(root);
     }
     
     void testSwitch3()
     {
         Node* root = parse(L"switch i{}");
         
-        delete root;
-        CPPUNIT_ASSERT_EQUAL(0, Node::NodeCount);
+        DESTROY(root);
         
     }
     void testLabeledWhile()

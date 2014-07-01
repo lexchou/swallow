@@ -79,5 +79,7 @@
 #include "ast/extension-def.h"
 #include "ast/subscript-def.h"
 #include "ast/operator-def.h"
+#include "ast/generic-parameters.h"
+#include "ast/generic-constraint.h"
 
 #endif//AST_H
