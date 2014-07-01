@@ -9,7 +9,7 @@
 
 using namespace Swift;
 
-class TestOperatorExpression : public CppUnit::TestFixture
+class TestOperatorExpression : public SwiftTestCase
 {
     CPPUNIT_TEST_SUITE(TestOperatorExpression);
     CPPUNIT_TEST(testExpr1);
@@ -17,10 +17,7 @@ class TestOperatorExpression : public CppUnit::TestFixture
 public:
     void testExpr1()
     {
-        SymbolRegistry sregistry;
-        NodeFactory nodeFactory;
-        Parser parser(&nodeFactory, &sregistry);
-        Node* root = parser.parse(L"a=4+1*(3+1*4)");
+        Node* root = parse(L"a=4+1*(3+1*4)");
         CPPUNIT_ASSERT(root != NULL);
         Assignment* eq = dynamic_cast<Assignment*>(root);
         

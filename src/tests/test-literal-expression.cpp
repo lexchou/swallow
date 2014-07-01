@@ -6,7 +6,7 @@
 
 using namespace Swift;
 
-class TestLiteralExpression : public CppUnit::TestFixture
+class TestLiteralExpression : public SwiftTestCase
 {
     CPPUNIT_TEST_SUITE(TestLiteralExpression);
     CPPUNIT_TEST(testLiteral);
@@ -25,16 +25,6 @@ class TestLiteralExpression : public CppUnit::TestFixture
     CPPUNIT_TEST(testDictionaryLiteral2);
     CPPUNIT_TEST_SUITE_END();
 public:
-    
-    Node* parse(const wchar_t* code)
-    {
-        SymbolRegistry sregistry;
-        NodeFactory nodeFactory;
-        Parser parser(&nodeFactory, &sregistry);
-        parser.setFileName(L"<file>");
-        return parser.parse(code);
-    }
-    
     void testLiteral()
     {
         

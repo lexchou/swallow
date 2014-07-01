@@ -126,11 +126,11 @@ add_definitions(-DTRACE_NODE)
 enable_testing()
 ADD_EXECUTABLE(TestParser
 		tests/test-parser.cpp 
-		tests/test-operator-expression.h
-		tests/test-literal-expression.h
-		tests/test-postfix-expression.h
-		tests/test-type.h
-		tests/test-statement.h
+		tests/test-operator-expression.cpp
+		tests/test-literal-expression.cpp
+		tests/test-postfix-expression.cpp
+		tests/test-type.cpp
+		tests/test-statement.cpp
 		${SWIFT_TOKENIZER_SRC} ${SWIFT_PARSER_SRC})
 target_link_libraries(TestParser cppunit)
 

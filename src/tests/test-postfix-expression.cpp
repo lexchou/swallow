@@ -7,7 +7,7 @@
 
 using namespace Swift;
 
-class TestPostfixExpression : public CppUnit::TestFixture
+class TestPostfixExpression : public SwiftTestCase
 {
     CPPUNIT_TEST_SUITE(TestPostfixExpression);
     CPPUNIT_TEST(testPostfixOperator);
@@ -22,13 +22,6 @@ class TestPostfixExpression : public CppUnit::TestFixture
     CPPUNIT_TEST(testOptionalChaining);
     CPPUNIT_TEST_SUITE_END();
 public:
-    Node* parse(const wchar_t* str)
-    {
-        SymbolRegistry sregistry;
-        NodeFactory nodeFactory;
-        Parser parser(&nodeFactory, &sregistry);
-        return parser.parse(str);
-    }
     
     void testPostfixOperator()
     {
