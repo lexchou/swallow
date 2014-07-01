@@ -359,11 +359,28 @@ public:
     }
     void testSwitch_ValueBindings()
     {
+        Node* root = parse(L"switch anotherPoint {"
+                           L"case (let x, 0):"
+                           L"println(\"on the x-axis with an x value of \(x)\")"
+                           L"case (0, let y):"
+                           L"println(\"on the y-axis with a y value of \(y)\")"
+                           L"case let (x, y):"
+                           L"println(\"somewhere else at (\(x), \(y))\")"
+                           L"}");
         
+        DESTROY(root);
     }
     void testSwitch_Where()
     {
-        
+        Node* root = parse(L"switch yetAnotherPoint {"
+                           L"case let (x, y) where x == y:"
+                           L"println(\"(\(x), \(y)) is on the line x == y\")"
+                           L"case let (x, y) where x == -y:"
+                           L"println(\"(\(x), \(y)) is on the line x == -y\")"
+                           L"case let (x, y):"
+                           L"println(\"(\(x), \(y)) is just some arbitrary point\")"
+                           L"}");
+        DESTROY(root);
     }
     
     void testLabeledWhile()

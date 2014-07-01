@@ -29,8 +29,8 @@ SymbolRegistry::SymbolRegistry()
     registerOperator(L"++", (OperatorType::T)(OperatorType::PostfixUnary | OperatorType::PrefixUnary));
     registerOperator(L"--", (OperatorType::T)(OperatorType::PostfixUnary | OperatorType::PrefixUnary));
     //Unary minus operator
-    registerOperator(L"-", OperatorType::InfixBinary, Associativity::None, 100);
-    registerOperator(L"+", OperatorType::InfixBinary, Associativity::None, 100);
+    registerOperator(L"-", OperatorType::PrefixUnary, Associativity::None, 100);
+    registerOperator(L"+", OperatorType::PrefixUnary, Associativity::None, 100);
     //Comparison operators
     registerOperator(L"==", OperatorType::InfixBinary, Associativity::None, 130);
     registerOperator(L"===", OperatorType::InfixBinary, Associativity::None, 130);
@@ -72,9 +72,17 @@ SymbolRegistry::SymbolRegistry()
 bool SymbolRegistry::registerOperator(const std::wstring& name, OperatorType::T type, Associativity::T associativity, int precedence)
 {
     OperatorMap::iterator iter = operators.find(name);
-    if(iter != operators.end())
-        return false;//already registered the same operator before
-    operators.insert(std::make_pair(name, OperatorInfo(name, type, associativity, precedence)));
+    if(iter == operators.end())
+    {
+        iter = operators.insert(std::make_pair(name, OperatorInfo(name, associativity))).first;
+    }
+    
+    if(type & OperatorType::PrefixUnary)
+        iter->second.precedence.prefix = precedence;
+    if(type & OperatorType::InfixBinary)
+        iter->second.precedence.infix = precedence;
+    if(type & OperatorType::PostfixUnary)
+        iter->second.precedence.postfix = precedence;
     return true;
 }
 OperatorInfo* SymbolRegistry::getOperator(const std::wstring& name)
@@ -87,16 +95,16 @@ OperatorInfo* SymbolRegistry::getOperator(const std::wstring& name)
 bool SymbolRegistry::isPrefixOperator(const std::wstring& name)
 {
     OperatorInfo* op = getOperator(name);
-    return op && (op->type & OperatorType::PrefixUnary);
+    return op && (op->precedence.prefix > 0);
 }
 bool SymbolRegistry::isPostfixOperator(const std::wstring& name)
 {
     OperatorInfo* op = getOperator(name);
-    return op && (op->type & OperatorType::PostfixUnary);
+    return op && (op->precedence.postfix > 0);
 }
 bool SymbolRegistry::isInfixOperator(const std::wstring& name)
 {
     OperatorInfo* op = getOperator(name);
-    return op && (op->type & OperatorType::InfixBinary);
+    return op && (op->precedence.infix > 0);
 }
 

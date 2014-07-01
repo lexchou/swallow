@@ -667,7 +667,8 @@ Expression* Parser::parseBinaryExpression(Expression* lhs)
             OperatorInfo* op = symbolRegistry->getOperator(token.token);
             tassert(token, op != NULL);
             Expression* rhs = parsePrefixExpression();
-            BinaryOperator* ret = nodeFactory->createBinary(op->name, op->associativity, op->precedence);
+            int precedence = op->precedence.infix > 0 ? op->precedence.infix : 100;
+            BinaryOperator* ret = nodeFactory->createBinary(op->name, op->associativity, precedence);
             ret->setLHS(lhs);
             ret->setRHS(rhs);
             return ret;

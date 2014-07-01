@@ -13,6 +13,7 @@ class TestOperatorExpression : public SwiftTestCase
 {
     CPPUNIT_TEST_SUITE(TestOperatorExpression);
     CPPUNIT_TEST(testExpr1);
+    CPPUNIT_TEST(testMinus);
     CPPUNIT_TEST_SUITE_END();
 public:
     void testExpr1()
@@ -50,9 +51,13 @@ public:
         ASSERT_EQUALS(L"*", mul->getOperator().c_str());
         
         
-        delete root;
-        CPPUNIT_ASSERT_EQUAL(0, Node::NodeCount);
+        DESTROY(root);
+    }
+    void testMinus()
+    {
+        Node* root = parse(L"-y");
         
+        DESTROY(root);
     }
     void testParenthesizedExpr()
     {

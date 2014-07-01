@@ -25,9 +25,8 @@ Pattern* Parser::parsePattern()
 {
     Token token;
     next(token);
-    if(token.type == TokenType::Identifier)
+    if(token.type == TokenType::Identifier && token.identifier.keyword != Keyword::_)
     {
-        if(token.identifier.keyword == Keyword::_)
         switch(token.identifier.keyword)
         {
             //‌ pattern → wildcard-pattern type-annotationopt
@@ -73,12 +72,19 @@ Pattern* Parser::parsePattern()
         return parseEnumPattern();
     }
     // pattern → type-casting-pattern
-    if(token.type == TokenType::Identifier)
+    if(token.getKeyword() == Keyword::Is)
     {
         return parseTypeCastingPattern();
     }
     //‌ pattern → expression-pattern
-    return parseExpression();
+    Pattern* ret = parseExpression();
+    if(predicate(L"as"))
+    {
+        tokenizer->restore(token);
+        delete ret;
+        return parseTypeCastingPattern();
+    }
+    return ret;
 }
 
 /*

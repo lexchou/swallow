@@ -12,12 +12,20 @@ SWIFT_NS_BEGIN
 struct OperatorInfo
 {
     std::wstring name;
-    OperatorType::T type;
     Associativity::T associativity;
-    int precedence;
-    OperatorInfo(const std::wstring& name, OperatorType::T type, Associativity::T associativity, int precedence)
-        :name(name), type(type), associativity(associativity), precedence(precedence)
-    {}
+    struct
+    {
+        int prefix;
+        int infix;
+        int postfix;
+    } precedence;
+    OperatorInfo(const std::wstring& name, Associativity::T associativity)
+        :name(name), associativity(associativity)
+    {
+        this->precedence.prefix = -1;
+        this->precedence.infix = -1;
+        this->precedence.postfix = -1;
+    }
 };
 class SymbolRegistry
 {
