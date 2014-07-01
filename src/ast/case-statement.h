@@ -10,13 +10,21 @@ class Pattern;
 class CaseStatement : public Statement
 {
 public:
-    CaseStatement();
+    struct Condition
+    {
+        Pattern* condition;
+        Expression* guard;
+        Condition(Pattern* condition, Expression* guard)
+        :condition(condition), guard(guard)
+        {}
+    };
 public:
-    void setCondition(Pattern* exr);
-    Pattern* getCondition();
-    
-    void setGuard(Expression* expr);
-    Expression* getGuard();
+    CaseStatement();
+    ~CaseStatement();
+public:
+    void addCondition(Pattern* condition, Expression* guard);
+    int numConditions()const;
+    const Condition& getCondition(int i);
     
     void addStatement(Statement* statement);
     Statement* getStatement(int idx);
@@ -24,6 +32,7 @@ public:
 public:
     virtual void serialize(std::wostream& out);
 private:
+    std::vector<Condition> conditions;
 };
 
 SWIFT_NS_END

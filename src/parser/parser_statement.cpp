@@ -231,6 +231,9 @@ Statement* Parser::parseIf()
 Statement* Parser::parseSwitch()
 {
     Token token;
+    Flag flag(this);
+    flags |= UNDER_SWITCH_CASE;
+    
     expect(Keyword::Switch);
     SwitchCase* ret = nodeFactory->createSwitch();
     Expression* controlExpr = parseExpression();
@@ -246,25 +249,25 @@ Statement* Parser::parseSwitch()
         if(token.identifier.keyword == Keyword::Case)
         {
             //“case-item-list → pattern guard-clause opt | pattern guard-clause opt , case-item-list”
+            CaseStatement* caseCond = nodeFactory->createCase();
             do
             {
                 Pattern* pattern = parsePattern();
                 Expression* guard = NULL;
                 if(match(L"where"))
                     guard = parseExpression();
-                CaseStatement* caseCond = nodeFactory->createCase();
-                caseCond->setCondition(pattern);
-                caseCond->setGuard(guard);
-                parseSwitchStatements(caseCond);
-                ret->addCase(caseCond);
+                caseCond->addCondition(pattern, guard);
             }
             while(match(L","));
+            expect(L":");
+            ret->addCase(caseCond);
+            parseSwitchStatements(caseCond);
             
         }
         else if(token.identifier.keyword == Keyword::Default)
         {
+            expect(L":");
             CaseStatement* caseCond = nodeFactory->createCase();
-            caseCond->setCondition(NULL);
             parseSwitchStatements(caseCond);
             ret->setDefaultCase(caseCond);
         }
@@ -284,12 +287,10 @@ void Parser::parseSwitchStatements(CaseStatement* case_)
     while(true)
     {
         next(token);
-        if(token.type == TokenType::CloseBrace)
-            break;
+        tokenizer->restore(token);
         Keyword::T k = token.getKeyword();
-        if(k == Keyword::Case || k == Keyword::Default)
+        if(token.type == TokenType::CloseBrace || (k == Keyword::Case || k == Keyword::Default))
         {
-            tokenizer->restore(token);
             break;
         }
         Statement* st = parseStatement();

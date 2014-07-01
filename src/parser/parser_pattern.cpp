@@ -87,7 +87,16 @@ Pattern* Parser::parsePattern()
 Pattern* Parser::parseEnumPattern()
 {
     Token token;
-    tassert(token, NULL);
+    expect(L".");
+    expect_identifier(token);
+//    CaseStatement* ret = nodeFactory->createCase();
+
+
+    if(match(L"("))
+    {
+        parseTuple();
+
+    }
     return NULL;
 }
 /*

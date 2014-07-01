@@ -2,14 +2,10 @@
 #define TEST_STATEMENT_H
 
 #include "utils.h"
-#include "parser/parser.h"
-#include "parser/symbol-registry.h"
-#include "ast/ast.h"
-#include "ast/node-factory.h"
 
 using namespace Swift;
 
-class TestStatement : public CppUnit::TestFixture
+class TestStatement : public SwiftTestCase
 {
     CPPUNIT_TEST_SUITE(TestStatement);
     CPPUNIT_TEST(testFor);
@@ -20,22 +16,18 @@ class TestStatement : public CppUnit::TestFixture
     CPPUNIT_TEST(testIf);
     CPPUNIT_TEST(testIf2);
     CPPUNIT_TEST(testIf3);
-    CPPUNIT_TEST(testSwitch);
-    CPPUNIT_TEST(testSwitch2);
-    CPPUNIT_TEST(testSwitch3);
+    CPPUNIT_TEST(testSwitch_Empty);
+    CPPUNIT_TEST(testSwitch_MultipleCases);
+    CPPUNIT_TEST(testSwitch_NoExplicitFallthrough);
+    CPPUNIT_TEST(testSwitch_RangeMatching);
+    CPPUNIT_TEST(testSwitch_Tuple);
+    CPPUNIT_TEST(testSwitch_ValueBindings);
+    CPPUNIT_TEST(testSwitch_Where);
     CPPUNIT_TEST(testLabeledWhile);
     CPPUNIT_TEST(testLabeledDo);
     CPPUNIT_TEST(testLabeledFor);
     CPPUNIT_TEST_SUITE_END();
 public:
-    
-    Node* parse(const wchar_t* str)
-    {
-        SymbolRegistry sregistry;
-        NodeFactory nodeFactory;
-        Parser parser(&nodeFactory, &sregistry);
-        return parser.parse(str);
-    }
     
     void testFor()
     {
@@ -227,38 +219,153 @@ public:
         
         DESTROY(root);
     }
-    void testSwitch()
+    void testSwitch_Empty()
     {
         Node* root = parse(L"switch i{}");
         SwitchCase* sc = NULL;
         CPPUNIT_ASSERT(sc = dynamic_cast<SwitchCase*>(root));
         CPPUNIT_ASSERT_EQUAL(0, sc->numCases());
+        CPPUNIT_ASSERT(sc->getDefaultCase() == NULL);
+
+        DESTROY(root);
+    }
+    
+    void testSwitch_MultipleCases()
+    {
+        Node* root = parse(L"switch someCharacter{"
+                           L"case \"a\", \"e\", \"i\", \"o\", \"u\":"
+                           L"print(\"vowel\")"
+                           L"case \"b\", \"c\", \"d\":"
+                           L"print(\"consonant\")"
+                           L"default:"
+                           L"print(\"other\")"
+                           L"}");
+        SwitchCase* sc = NULL;
+        CaseStatement* c = NULL;
+        Statement* st = NULL;
+        CPPUNIT_ASSERT(sc = dynamic_cast<SwitchCase*>(root));
+        CPPUNIT_ASSERT_EQUAL(2, sc->numCases());
+        CPPUNIT_ASSERT(sc->getDefaultCase() != NULL);
+        
+        CPPUNIT_ASSERT(c = sc->getCase(0));
+        CPPUNIT_ASSERT_EQUAL(5, c->numConditions());
+        CPPUNIT_ASSERT_EQUAL(1, c->numStatements());
+        CPPUNIT_ASSERT(st = c->getStatement(0));
+        CPPUNIT_ASSERT(dynamic_cast<FunctionCall*>(st));
+        
+        CPPUNIT_ASSERT(c = sc->getCase(1));
+        CPPUNIT_ASSERT_EQUAL(3, c->numConditions());
+        CPPUNIT_ASSERT_EQUAL(1, c->numStatements());
+        CPPUNIT_ASSERT(st = c->getStatement(0));
+        CPPUNIT_ASSERT(dynamic_cast<FunctionCall*>(st));
+        
+        CPPUNIT_ASSERT(c = sc->getDefaultCase());
+        CPPUNIT_ASSERT_EQUAL(1, c->numStatements());
+        CPPUNIT_ASSERT(st = c->getStatement(0));
+        CPPUNIT_ASSERT(dynamic_cast<FunctionCall*>(st));
         
         DESTROY(root);
     }
     
-    void testSwitch1()
+    void testSwitch_NoExplicitFallthrough()
     {
-        Node* root = parse(L"switch i{}");
+        Node* root = parse(L"switch anotherCharacter {"
+                           L"case \"a\":"
+                           L"case \"A\":"
+                           L"println(\"The letter A\")"
+                           L"default:"
+                           L"println(\"Not the letter A\")"
+                           L"}");
+        
+        SwitchCase* sc = NULL;
+        CaseStatement* c = NULL;
+        Statement* st = NULL;
+        CPPUNIT_ASSERT(sc = dynamic_cast<SwitchCase*>(root));
+        CPPUNIT_ASSERT_EQUAL(2, sc->numCases());
+        CPPUNIT_ASSERT(sc->getDefaultCase() != NULL);
+        
+        CPPUNIT_ASSERT(c = sc->getCase(0));
+        CPPUNIT_ASSERT_EQUAL(1, c->numConditions());
+        CPPUNIT_ASSERT_EQUAL(0, c->numStatements());
+
+        CPPUNIT_ASSERT(c = sc->getCase(1));
+        CPPUNIT_ASSERT_EQUAL(1, c->numConditions());
+        CPPUNIT_ASSERT_EQUAL(1, c->numStatements());
+        CPPUNIT_ASSERT(st = c->getStatement(0));
+        CPPUNIT_ASSERT(dynamic_cast<FunctionCall*>(st));
+        
+        CPPUNIT_ASSERT(c = sc->getDefaultCase());
+        CPPUNIT_ASSERT_EQUAL(1, c->numStatements());
+        CPPUNIT_ASSERT(st = c->getStatement(0));
+        CPPUNIT_ASSERT(dynamic_cast<FunctionCall*>(st));
+        
         
         DESTROY(root);
     }
     
-    void testSwitch2()
+    void testSwitch_RangeMatching()
     {
-        Node* root = parse(L"switch i{}");
+        Node* root = parse(L"switch count {"
+                           L"case 0:"
+                           L"naturalCount = \"no\""
+                           L"case 1...3:"
+                           L"naturalCount = \"a few\""
+                           L"default:"
+                           L"naturalCount = \"millions and millions of\""
+                           L"}");
         
+        SwitchCase* sc = NULL;
+        CaseStatement* c = NULL;
+        Statement* st = NULL;
+        Pattern* p = NULL;
+        CPPUNIT_ASSERT(sc = dynamic_cast<SwitchCase*>(root));
+        CPPUNIT_ASSERT_EQUAL(2, sc->numCases());
+        CPPUNIT_ASSERT(sc->getDefaultCase() != NULL);
+        
+        CPPUNIT_ASSERT(c = sc->getCase(0));
+        CPPUNIT_ASSERT_EQUAL(1, c->numConditions());
+        CPPUNIT_ASSERT_EQUAL(1, c->numStatements());
+        CPPUNIT_ASSERT(st = c->getStatement(0));
+        CPPUNIT_ASSERT(dynamic_cast<Assignment*>(st));
+        
+        CPPUNIT_ASSERT(c = sc->getCase(1));
+        CPPUNIT_ASSERT_EQUAL(1, c->numConditions());
+        CPPUNIT_ASSERT_EQUAL(1, c->numStatements());
+        CPPUNIT_ASSERT(st = c->getStatement(0));
+        CPPUNIT_ASSERT(p = c->getCondition(0).condition);
+        CPPUNIT_ASSERT(dynamic_cast<Assignment*>(st));
+        
+        CPPUNIT_ASSERT(c = sc->getDefaultCase());
+        CPPUNIT_ASSERT_EQUAL(1, c->numStatements());
+        CPPUNIT_ASSERT(st = c->getStatement(0));
+        CPPUNIT_ASSERT(dynamic_cast<Assignment*>(st));
         
         DESTROY(root);
+        
     }
     
-    void testSwitch3()
+    void testSwitch_Tuple()
     {
-        Node* root = parse(L"switch i{}");
+        
+        Node* root = parse(L"switch somePoint {"
+                           L"case (0, 0):"
+                           L"println(\"(0, 0) is at the origin\")"
+                           L"case (_, 0):"
+                           L"println(\"(\(somePoint.0), 0) is on the x-axis\")"
+                           L"}");
+                           
         
         DESTROY(root);
+    }
+    void testSwitch_ValueBindings()
+    {
         
     }
+    void testSwitch_Where()
+    {
+        
+    }
+    
     void testLabeledWhile()
     {
         
