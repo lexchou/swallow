@@ -353,7 +353,32 @@ public:
                            L"case (_, 0):"
                            L"println(\"(\(somePoint.0), 0) is on the x-axis\")"
                            L"}");
-                           
+        
+        SwitchCase* sc = NULL;
+        CaseStatement* c = NULL;
+        Statement* st = NULL;
+        Tuple* tuple = NULL;
+        CPPUNIT_ASSERT(sc = dynamic_cast<SwitchCase*>(root));
+        CPPUNIT_ASSERT_EQUAL(2, sc->numCases());
+        
+        CPPUNIT_ASSERT(c = sc->getCase(0));
+        CPPUNIT_ASSERT_EQUAL(1, c->numConditions());
+        CPPUNIT_ASSERT_EQUAL(1, c->numStatements());
+        CPPUNIT_ASSERT(tuple = dynamic_cast<Tuple*>(c->getCondition(0).condition));
+        CPPUNIT_ASSERT_EQUAL(2, tuple->numElements());
+        CPPUNIT_ASSERT(dynamic_cast<IntegerLiteral*>(tuple->getElement(0)));
+        CPPUNIT_ASSERT(dynamic_cast<IntegerLiteral*>(tuple->getElement(1)));
+        
+        
+        CPPUNIT_ASSERT(c = sc->getCase(1));
+        CPPUNIT_ASSERT_EQUAL(1, c->numConditions());
+        CPPUNIT_ASSERT_EQUAL(1, c->numStatements());
+        CPPUNIT_ASSERT(st = c->getStatement(0));
+        CPPUNIT_ASSERT(tuple = dynamic_cast<Tuple*>(c->getCondition(0).condition));
+        CPPUNIT_ASSERT_EQUAL(2, tuple->numElements());
+        CPPUNIT_ASSERT(dynamic_cast<Identifier*>(tuple->getElement(0)));
+        CPPUNIT_ASSERT(dynamic_cast<IntegerLiteral*>(tuple->getElement(1)));
+        
         
         DESTROY(root);
     }
@@ -380,6 +405,58 @@ public:
                            L"case let (x, y):"
                            L"println(\"(\(x), \(y)) is just some arbitrary point\")"
                            L"}");
+        
+        SwitchCase* sc = NULL;
+        CaseStatement* c = NULL;
+        Statement* st = NULL;
+        Tuple* tuple = NULL;
+        ValueBinding* vb = NULL;
+        BinaryOperator* eq;
+        UnaryOperator* u = NULL;
+        CPPUNIT_ASSERT(sc = dynamic_cast<SwitchCase*>(root));
+        CPPUNIT_ASSERT_EQUAL(3, sc->numCases());
+        
+        CPPUNIT_ASSERT(c = sc->getCase(0));
+        CPPUNIT_ASSERT_EQUAL(1, c->numConditions());
+        CPPUNIT_ASSERT_EQUAL(1, c->numStatements());
+        CPPUNIT_ASSERT(vb = dynamic_cast<ValueBinding*>(c->getCondition(0).condition));
+        CPPUNIT_ASSERT(tuple = dynamic_cast<Tuple*>(vb->getBinding()));
+        CPPUNIT_ASSERT_EQUAL(2, tuple->numElements());
+        CPPUNIT_ASSERT(dynamic_cast<Identifier*>(tuple->getElement(0)));
+        CPPUNIT_ASSERT(dynamic_cast<Identifier*>(tuple->getElement(1)));
+        //where
+        CPPUNIT_ASSERT(eq = dynamic_cast<BinaryOperator*>(c->getCondition(0).guard));
+        ASSERT_EQUALS(L"==", eq->getOperator().c_str());
+        
+        
+        CPPUNIT_ASSERT(c = sc->getCase(1));
+        CPPUNIT_ASSERT_EQUAL(1, c->numConditions());
+        CPPUNIT_ASSERT_EQUAL(1, c->numStatements());
+        CPPUNIT_ASSERT(st = c->getStatement(0));
+        CPPUNIT_ASSERT(vb = dynamic_cast<ValueBinding*>(c->getCondition(0).condition));
+        CPPUNIT_ASSERT(tuple = dynamic_cast<Tuple*>(vb->getBinding()));
+        CPPUNIT_ASSERT_EQUAL(2, tuple->numElements());
+        CPPUNIT_ASSERT(dynamic_cast<Identifier*>(tuple->getElement(0)));
+        CPPUNIT_ASSERT(dynamic_cast<Identifier*>(tuple->getElement(1)));
+        //where
+        CPPUNIT_ASSERT(eq = dynamic_cast<BinaryOperator*>(c->getCondition(0).guard));
+        ASSERT_EQUALS(L"==", eq->getOperator().c_str());
+        CPPUNIT_ASSERT(u = dynamic_cast<UnaryOperator*>(eq->getRHS()));
+        CPPUNIT_ASSERT_EQUAL(OperatorType::PrefixUnary, u->getType());
+        ASSERT_EQUALS(L"-", u->getOperator().c_str());
+        
+        CPPUNIT_ASSERT(c = sc->getCase(2));
+        CPPUNIT_ASSERT_EQUAL(1, c->numConditions());
+        CPPUNIT_ASSERT_EQUAL(1, c->numStatements());
+        CPPUNIT_ASSERT(st = c->getStatement(0));
+        CPPUNIT_ASSERT(vb = dynamic_cast<ValueBinding*>(c->getCondition(0).condition));
+        CPPUNIT_ASSERT(tuple = dynamic_cast<Tuple*>(vb->getBinding()));
+        CPPUNIT_ASSERT_EQUAL(2, tuple->numElements());
+        CPPUNIT_ASSERT(dynamic_cast<Identifier*>(tuple->getElement(0)));
+        CPPUNIT_ASSERT(dynamic_cast<Identifier*>(tuple->getElement(1)));
+        CPPUNIT_ASSERT(NULL == dynamic_cast<BinaryOperator*>(c->getCondition(0).guard));
+
+        
         DESTROY(root);
     }
     
