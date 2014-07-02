@@ -37,7 +37,9 @@ class Parser
         UNDER_SWITCH_CASE   = 2,
         UNDER_PROTOCOL      = 4,
         UNDER_CLASS         = 8,
-        UNDER_STRUCT        = 0x10
+        UNDER_STRUCT        = 0x10,
+        UNDER_LET           = 0x20,
+        UNDER_VAR           = 0x40
     };
     enum
     {
@@ -70,6 +72,7 @@ public:
     Node* parseType(const wchar_t* code);
 private:
     TypeNode* parseType();
+    TypeNode* parseTypeAnnotation();
     
     TupleType* parseTupleType();
     TypeIdentifier* parseTypeIdentifier();

@@ -4,7 +4,7 @@
 #include <string>
 
 SWIFT_NS_BEGIN
-
+class TypeNode;
 class Identifier : public Expression
 {
 public:
@@ -12,6 +12,9 @@ public:
 public:
     void serialize(std::wostream& out);
     const std::wstring& getIdentifier() const { return identifier;}
+    
+    void setType(TypeNode* type);
+    TypeNode* getType();
 private:
     std::wstring identifier;
 };

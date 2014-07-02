@@ -55,14 +55,30 @@ Statement* Parser::parseStatement()
                     next(token);
                     //‌ statement → labeled-statement
                     if(predicate(L":"))
+                    {
+                        tokenizer->restore(token);
                         return parseLabeledStatement();
+                    }
                     tokenizer->restore(token);
                     break;
+                case Keyword::Import:
+                case Keyword::Let:
+                case Keyword::Var:
+                case Keyword::Typealias:
+                case Keyword::Func:
+                case Keyword::Class:
+                case Keyword::Enum:
+                case Keyword::Struct:
+                case Keyword::Protocol:
+                case Keyword::Extension:
+                case Keyword::Operator:
+                    return parseDeclaration();
                 default:
                     break;
             }
         }
-        
+        else if(token == L"@")
+            return parseDeclaration();
     }
     Expression* ret = parseExpression();
     match(L";");
@@ -393,6 +409,7 @@ Statement* Parser::parseLabeledStatement()
     next(token);
     if(token.type == TokenType::Identifier)
     {
+        tokenizer->restore(token);
         switch(token.identifier.keyword)
         {
             case Keyword::Switch:

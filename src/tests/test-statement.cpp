@@ -462,15 +462,88 @@ public:
     
     void testLabeledWhile()
     {
+        Node* root = parse(L"gameLoop: while square != finalSquare {"
+                           L"break gameLoop "
+                           L"continue gameLoop"
+                           L"}");
+        LabeledStatement* label = NULL;
+        WhileLoop* w = NULL;
+        BinaryOperator* op = NULL;
+        CodeBlock* cb = NULL;
         
+        CPPUNIT_ASSERT(label = dynamic_cast<LabeledStatement*>(root));
+        ASSERT_EQUALS(L"gameLoop", label->getLabel().c_str());
+        CPPUNIT_ASSERT(w = dynamic_cast<WhileLoop*>(label->getStatement()));
+        CPPUNIT_ASSERT(op = dynamic_cast<BinaryOperator*>(w->getCondition()));
+        CPPUNIT_ASSERT(cb = dynamic_cast<CodeBlock*>(w->getCodeBlock()));
+        ASSERT_EQUALS(L"!=", op->getOperator().c_str());
+        CPPUNIT_ASSERT_EQUAL(2, cb->numStatements());
+        BreakStatement* bs = dynamic_cast<BreakStatement*>(cb->getStatement(0));
+        ContinueStatement* cs = dynamic_cast<ContinueStatement*>(cb->getStatement(1));
+        CPPUNIT_ASSERT(bs);
+        CPPUNIT_ASSERT(cs);
+        ASSERT_EQUALS(L"gameLoop", bs->getLoop().c_str());
+        ASSERT_EQUALS(L"gameLoop", cs->getLoop().c_str());
+        
+        
+        
+        DESTROY(root);
     }
     void testLabeledDo()
     {
         
+        Node* root = parse(L"gameLoop: do {"
+                           L"break gameLoop "
+                           L"continue gameLoop"
+                           L"} while square != finalSquare");
+        LabeledStatement* label = NULL;
+        DoLoop* w = NULL;
+        BinaryOperator* op = NULL;
+        CodeBlock* cb = NULL;
+        
+        CPPUNIT_ASSERT(label = dynamic_cast<LabeledStatement*>(root));
+        ASSERT_EQUALS(L"gameLoop", label->getLabel().c_str());
+        CPPUNIT_ASSERT(w = dynamic_cast<DoLoop*>(label->getStatement()));
+        CPPUNIT_ASSERT(op = dynamic_cast<BinaryOperator*>(w->getCondition()));
+        CPPUNIT_ASSERT(cb = dynamic_cast<CodeBlock*>(w->getCodeBlock()));
+        ASSERT_EQUALS(L"!=", op->getOperator().c_str());
+        CPPUNIT_ASSERT_EQUAL(2, cb->numStatements());
+        BreakStatement* bs = dynamic_cast<BreakStatement*>(cb->getStatement(0));
+        ContinueStatement* cs = dynamic_cast<ContinueStatement*>(cb->getStatement(1));
+        CPPUNIT_ASSERT(bs);
+        CPPUNIT_ASSERT(cs);
+        ASSERT_EQUALS(L"gameLoop", bs->getLoop().c_str());
+        ASSERT_EQUALS(L"gameLoop", cs->getLoop().c_str());
+        
+        
+        DESTROY(root);
     }
     void testLabeledFor()
     {
+        Node* root = parse(L"gameLoop: for ;square != finalSquare; {"
+                           L"break gameLoop "
+                           L"continue gameLoop"
+                           L"}");
+        LabeledStatement* label = NULL;
+        ForLoop* w = NULL;
+        BinaryOperator* op = NULL;
+        CodeBlock* cb = NULL;
         
+        CPPUNIT_ASSERT(label = dynamic_cast<LabeledStatement*>(root));
+        ASSERT_EQUALS(L"gameLoop", label->getLabel().c_str());
+        CPPUNIT_ASSERT(w = dynamic_cast<ForLoop*>(label->getStatement()));
+        CPPUNIT_ASSERT(op = dynamic_cast<BinaryOperator*>(w->getCondition()));
+        CPPUNIT_ASSERT(cb = dynamic_cast<CodeBlock*>(w->getCodeBlock()));
+        ASSERT_EQUALS(L"!=", op->getOperator().c_str());
+        CPPUNIT_ASSERT_EQUAL(2, cb->numStatements());
+        BreakStatement* bs = dynamic_cast<BreakStatement*>(cb->getStatement(0));
+        ContinueStatement* cs = dynamic_cast<ContinueStatement*>(cb->getStatement(1));
+        CPPUNIT_ASSERT(bs);
+        CPPUNIT_ASSERT(cs);
+        ASSERT_EQUALS(L"gameLoop", bs->getLoop().c_str());
+        ASSERT_EQUALS(L"gameLoop", cs->getLoop().c_str());
+        
+        DESTROY(root);
     }
 };
 CPPUNIT_TEST_SUITE_NAMED_REGISTRATION(TestStatement, "alltest");

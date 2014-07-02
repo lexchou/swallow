@@ -13,10 +13,10 @@ using namespace Swift;
 /*
   GRAMMAR OF A PATTERN
  
- ‌ pattern → wildcard-pattern type-annotationopt
- ‌ pattern → identifier-pattern type-annotationopt
+ ‌ pattern → wildcard-pattern type-annotation opt
+ ‌ pattern → identifier-pattern type-annotation opt
  ‌ pattern → value-binding-pattern
- ‌ pattern → tuple-patterntype-annotationopt
+ ‌ pattern → tuple-pattern type-annotation opt
  ‌ pattern → enum-case-pattern
  ‌ pattern → type-casting-pattern
  ‌ pattern → expression-pattern
@@ -25,7 +25,7 @@ Pattern* Parser::parsePattern()
 {
     Token token;
     next(token);
-    if(token.type == TokenType::Identifier && token.identifier.keyword != Keyword::_)
+    if(token.type == TokenType::Identifier)
     {
         switch(token.identifier.keyword)
         {
@@ -33,8 +33,15 @@ Pattern* Parser::parsePattern()
             // pattern → identifier-pattern type-annotationopt
             //TODO : read type-annotation
             case Keyword::_:
-                return nodeFactory->createIdentifier(token.token);
-                break;
+            {
+                Identifier* ret = nodeFactory->createIdentifier(token.token);
+                if(match(L":"))
+                {
+                    TypeNode* type = parseTypeAnnotation();
+                    ret->setType(type);
+                }
+                return ret;
+            }
             // pattern → value-binding-pattern
             case Keyword::Var:
             {
@@ -58,31 +65,43 @@ Pattern* Parser::parsePattern()
     tokenizer->restore(token);
     if(token.type == TokenType::OpenParen)
     {
-        return parseTuple();
+        //pattern → tuple-pattern type-annotation opt
+        Tuple* ret = static_cast<Tuple*>(parseTuple());
+        if(flags & (UNDER_LET | UNDER_VAR))
+        {
+            //type-annotation only exists under let/var statement
+            if(match(L":"))
+            {
+                TypeNode* type = parseTypeAnnotation();
+                ret->setType(type);
+            }
+        }
+        return ret;
     }
-    if(!(this->flags & UNDER_SWITCH_CASE))
+    if(this->flags & UNDER_SWITCH_CASE)
     {
-        unexpected(token);
-        return NULL;
-    }
-    //the following patterns are only exists in switch/case statement
-    // pattern → enum-case-pattern
-    if(token.type == TokenType::Attribute || token == L".")
-    {
-        return parseEnumPattern();
-    }
-    // pattern → type-casting-pattern
-    if(token.getKeyword() == Keyword::Is)
-    {
-        return parseTypeCastingPattern();
+        //the following patterns are only exists in switch/case statement
+        // pattern → enum-case-pattern
+        if(token.type == TokenType::Attribute || token == L".")
+        {
+            return parseEnumPattern();
+        }
+        // pattern → type-casting-pattern
+        if(token.getKeyword() == Keyword::Is)
+        {
+            return parseTypeCastingPattern();
+        }
     }
     //‌ pattern → expression-pattern
     Pattern* ret = parseExpression();
-    if(predicate(L"as"))
+    if(this->flags & UNDER_SWITCH_CASE)
     {
-        tokenizer->restore(token);
-        delete ret;
-        return parseTypeCastingPattern();
+        if(predicate(L"as"))
+        {
+            tokenizer->restore(token);
+            delete ret;
+            return parseTypeCastingPattern();
+        }
     }
     return ret;
 }

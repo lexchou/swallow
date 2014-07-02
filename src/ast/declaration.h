@@ -1,13 +1,13 @@
 #ifndef DECLARATION_H
 #define DECLARATION_H
-#include "node.h"
+#include "statement.h"
 #include <string>
 #include <vector>
 
 SWIFT_NS_BEGIN
 
 class Attribute;
-class Declaration : public Node
+class Declaration : public Statement
 {
 public:
     Declaration(int numChildren);

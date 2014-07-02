@@ -33,6 +33,7 @@ SymbolRegistry::SymbolRegistry()
     registerOperator(L"+", OperatorType::PrefixUnary, Associativity::None, 100);
     //Comparison operators
     registerOperator(L"==", OperatorType::InfixBinary, Associativity::None, 130);
+    registerOperator(L"!=", OperatorType::InfixBinary, Associativity::None, 130);
     registerOperator(L"===", OperatorType::InfixBinary, Associativity::None, 130);
     registerOperator(L"!==", OperatorType::InfixBinary, Associativity::None, 130);
     registerOperator(L"!===", OperatorType::InfixBinary, Associativity::None, 130);
@@ -64,7 +65,7 @@ SymbolRegistry::SymbolRegistry()
     registerOperator(L"&*", OperatorType::InfixBinary, Associativity::Left, 150);
     registerOperator(L"&/", OperatorType::InfixBinary, Associativity::Left, 150);
     registerOperator(L"&%", OperatorType::InfixBinary, Associativity::Left, 150);
-
+    
 
     //?:  Right associative, precedence level 100
 }

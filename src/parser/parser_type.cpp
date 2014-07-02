@@ -15,15 +15,26 @@ Node* Parser::parseType(const wchar_t* code)
     tokenizer->set(code);
     return parseType();
 }
+TypeNode* Parser::parseTypeAnnotation()
+{
+    Attributes attrs;
+    if(predicate(L"@"))
+    {
+        parseAttributes(attrs);
+    }
+    TypeNode* ret = parseType();
+    ret->setAttributes(attrs);
+    return ret;
+}
 TypeNode* Parser::parseType()
 {
     Token token;
     TypeNode* ret = NULL;
     next(token);
-    
+    tokenizer->restore(token);
+
     if(token == TokenType::OpenParen)
     {
-        tokenizer->restore(token);
         ret = parseTupleType();
     }
     else if(token.type == TokenType::Identifier && token.identifier.keyword == Keyword::_)
@@ -32,7 +43,6 @@ TypeNode* Parser::parseType()
     }
     else if(token.getKeyword() == Keyword::Protocol)
     {
-        tokenizer->restore(token);
         ret = parseProtocolComposition();
     }
     else

@@ -5,6 +5,7 @@
 
 SWIFT_NS_BEGIN
 
+class TypeNode;
 class Tuple : public Expression
 {
 public:
@@ -15,6 +16,8 @@ public:
     int numElements();
     Pattern* getElement(int i);
     
+    TypeNode* getType();
+    void setType(TypeNode* type);
 private:
 };
 

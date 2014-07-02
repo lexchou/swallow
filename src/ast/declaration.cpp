@@ -6,7 +6,7 @@ USE_SWIFT_NS
 
 
 Declaration::Declaration(int numChildren)
-    :Node(numChildren)
+    :Statement(numChildren)
 {
 }
 Declaration::~Declaration()

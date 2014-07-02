@@ -44,7 +44,10 @@ Declaration* Parser::parseDeclaration()
         //read declaration specifiers
         specifiers = parseDeclarationSpecifiers();
     }
-    match_identifier(token);
+    next(token);
+    tokenizer->restore(token);
+    if(token.type != TokenType::Identifier)
+        unexpected(token);
     switch(token.identifier.keyword)
     {
         case Keyword::Import://declaration → import-declaration
@@ -218,6 +221,8 @@ Declaration* Parser::parseImport(const std::vector<Attribute*>& attrs)
 Declaration* Parser::parseLet(const std::vector<Attribute*>& attrs, int specifiers)
 {
     Constant* ret = nodeFactory->createConstant(attrs, specifiers);
+    Flag flag(this);
+    this->flags |= UNDER_LET;
     expect(Keyword::Let);
     do
     {
@@ -267,6 +272,8 @@ Declaration* Parser::parseVar(const std::vector<Attribute*>& attrs, int specifie
 {
     Token token;
     expect(Keyword::Var);
+    Flag flag(this);
+    this->flags |= UNDER_VAR;
     //try read it as pattern-initializer-list
     Variables* ret = nodeFactory->createVariables(attrs, specifiers);
     Variable* var = parseVariableDeclaration();
