@@ -621,7 +621,11 @@ bool Tokenizer::nextImpl(Token& token)
         case '@':
             return readSymbol(token, TokenType::Attribute);
         case '?':
+        {
+            bool whiteLeft = hasWhiteLeft(state.cursor);
+            token.operators.type = whiteLeft ? OperatorType::InfixBinary : OperatorType::PostfixUnary;
             return readSymbol(token, TokenType::Optional);
+        }
         case ',':
             return readSymbol(token, TokenType::Comma);
         case ';':

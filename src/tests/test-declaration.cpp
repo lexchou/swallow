@@ -22,6 +22,7 @@ class TestDeclaration : public SwiftTestCase
     CPPUNIT_TEST(testLet_Tuple);
     
     CPPUNIT_TEST(testFunc);
+    CPPUNIT_TEST(testFunc_ReturnFunc);
     CPPUNIT_TEST_SUITE_END();
 public:
     
@@ -224,6 +225,14 @@ public:
         ASSERT_EQUALS(L"input", id->getIdentifier().c_str());
         ASSERT_EQUALS(L"1", i->toString().c_str());
         
+        
+        DESTROY(root);
+    }
+    void testFunc_ReturnFunc()
+    {
+        Node* root = parse(L"func chooseStepFunction(backwards: Bool) -> (Int) -> Int {"
+                           L"return backwards ? stepBackward : stepForward"
+                           L"}");
         
         DESTROY(root);
     }

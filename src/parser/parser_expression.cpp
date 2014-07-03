@@ -131,8 +131,9 @@ Expression* Parser::parsePostfixExpression()
             }
             break;
         }
-        if(token.type == TokenType::Optional)
+        if(token.type == TokenType::Optional && token.operators.type == OperatorType::PostfixUnary)
         {
+            //? used as post unary operator will treated as optional chaining expression, not ternary expression
             // postfix-expression → optional-chaining-expression
             next(token);
             ret = nodeFactory->createOptionalChaining(ret);
@@ -538,6 +539,8 @@ static inline bool isBinaryExpr(const Token& token)
     {
         return token.identifier.keyword == Keyword::Is || token.identifier.keyword == Keyword::As;
     }
+    if(token.type == TokenType::Optional && token.operators.type == OperatorType::InfixBinary)
+        return true;
     if(token.type != TokenType::Operator)
         return false;
     if(token.operators.type == OperatorType::InfixBinary)
@@ -654,13 +657,6 @@ Expression* Parser::parseBinaryExpression(Expression* lhs)
             Expression* ret = nodeFactory->createAssignment(lhs, rhs);
             return ret;
         }
-        if(token == L"?")
-        {
-            // binary-expression → conditional-operatorprefix-expression
-            Expression* expr = parseExpression();
-            Expression* ret = nodeFactory->createConditionalOperator(lhs, expr, NULL);
-            return ret;
-        }
         
         if(token.operators.type == OperatorType::InfixBinary)
         {
@@ -673,6 +669,15 @@ Expression* Parser::parseBinaryExpression(Expression* lhs)
             ret->setRHS(rhs);
             return ret;
         }
+    }
+    if(token.type == TokenType::Optional)
+    {
+        // binary-expression → conditional-operator prefix-expression
+        Expression* expr = parseExpression();
+        expect(L":");
+        Expression* expr2 = parsePrefixExpression();
+        Expression* ret = nodeFactory->createConditionalOperator(lhs, expr, expr2);
+        return ret;
     }
     unexpected(token);
     return NULL;
