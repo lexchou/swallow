@@ -168,6 +168,7 @@ Declaration* Parser::parseImport(const std::vector<Attribute*>& attrs)
     {
         case Keyword::_:
             tokenizer->restore(token);
+            break;
         case Keyword::Typealias:
             kind = Import::Typealias;
             break;
@@ -579,8 +580,8 @@ Parameters* Parser::parseParameterClause()
                 accessibility = Parameter::Constant;
             }
         }
+        tassert(token, token.type = TokenType::Identifier);
         bool shorthandExternalName = match(L"#");
-        expect_identifier(token);
         std::wstring name = token.token;
         std::wstring localName;
         if(match_identifier(token))
@@ -605,7 +606,7 @@ Parameters* Parser::parseParameterClause()
         param->setInout(inout);
         param->setAccessibility(accessibility);
         param->setExternalName(name);
-        param->setLocalName(name);
+        param->setLocalName(localName);
         param->setShorthandExternalName(shorthandExternalName);
         param->setTypeAttributes(attrs);
         param->setType(type);

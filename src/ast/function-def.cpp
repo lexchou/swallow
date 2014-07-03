@@ -10,6 +10,12 @@ FunctionDef::FunctionDef()
     :Declaration(2)
 {
 }
+
+FunctionDef::~FunctionDef()
+{
+    Attribute::disposeAll(returnAttributes);
+}
+
 void FunctionDef::serialize(std::wostream& out)
 {
 }

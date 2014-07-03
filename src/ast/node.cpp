@@ -1,10 +1,13 @@
 #include "node.h"
 #include <cstdlib>
 #include <cassert>
+#include <set>
 USE_SWIFT_NS
 
 #ifdef TRACE_NODE
 int Node::NodeCount = 0;
+std::set<Node*> Node::UnreleasedNodes;
+
 #endif
 
 
@@ -17,6 +20,7 @@ Node::Node(int numChildren)
     }
 #ifdef TRACE_NODE
     NodeCount++;
+    UnreleasedNodes.insert(this);
 #endif
 }
 Node::~Node()
@@ -31,6 +35,7 @@ Node::~Node()
     children.clear();
 #ifdef TRACE_NODE
     NodeCount--;
+    UnreleasedNodes.erase(this);
 #endif
 }
 
@@ -40,8 +45,8 @@ SourceInfo* Node::getSourceInfo()
 }
 void Node::set(int index, Node* val)
 {
-    if(index >=0 && index < children.size())
-        children[index] = val;
+    assert(index >=0 && index < children.size());
+    children[index] = val;
 }
 Node* Node::get(int index)
 {

@@ -3,6 +3,9 @@
 #include "swift_conf.h"
 #include <vector>
 #include <sstream>
+#ifdef TRACE_NODE
+#include <set>
+#endif//TRACE_NODE
 
 SWIFT_NS_BEGIN
 
@@ -41,6 +44,7 @@ protected:
     
 #ifdef TRACE_NODE
 public:
+    static std::set<Node*> UnreleasedNodes;
     static int NodeCount;
 #endif
 };

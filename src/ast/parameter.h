@@ -19,6 +19,7 @@ public:
     };
 public:
     Parameter();
+    ~Parameter();
 public:
     virtual void serialize(std::wostream& out);
 public:

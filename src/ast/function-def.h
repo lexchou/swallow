@@ -13,6 +13,7 @@ class FunctionDef : public Declaration
 {
 public:
     FunctionDef();
+    ~FunctionDef();
 public:
     using Declaration::setSpecifiers;
     using Declaration::setAttributes;

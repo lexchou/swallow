@@ -6,11 +6,15 @@ USE_SWIFT_NS
 
 
 Parameter::Parameter()
-    :Node(0)
+    :Node(2)
 {
     inout = false;
     accessibility = None;
     shorthandExternalName = false;
+}
+Parameter::~Parameter()
+{
+    Attribute::disposeAll(typeAttributes);
 }
 void Parameter::serialize(std::wostream& out)
 {
