@@ -121,6 +121,7 @@ TupleType* Parser::parseTupleType()
                 {
                     parseAttributes(attributes);
                 }
+                expect(L":");
                 TypeNode* type = parseType();
                 type->setAttributes(attributes);
                 ret->add(inout, token.token, type);

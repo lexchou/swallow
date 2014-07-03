@@ -245,17 +245,21 @@ Variable* Parser::parseVariableDeclaration()
     Attributes attrs;
     
     Pattern* key = parsePattern();
-    expect(L":");
-    if(predicate(L"@"))
+    TypeNode* type = NULL;
+    Expression* val = NULL;
+    if(match(L":"))
     {
-        parseAttributes(attrs);
+        type = parseTypeAnnotation();
     }
-    TypeNode* type = parseType();
-    
+    if(match(L"="))
+    {
+        val = parseExpression();
+    }
     Variable* ret = nodeFactory->createVariable();
     ret->setName(key);
     ret->setTypeAttributes(attrs);
     ret->setType(type);
+    ret->setInitializer(val);
     return ret;
 }
 /*

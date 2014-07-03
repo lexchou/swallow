@@ -23,6 +23,10 @@ class TestDeclaration : public SwiftTestCase
     
     CPPUNIT_TEST(testFunc);
     CPPUNIT_TEST(testFunc_ReturnFunc);
+    CPPUNIT_TEST(testFunc_MultipleParameters);
+    CPPUNIT_TEST(testFunc_NoParameters);
+    CPPUNIT_TEST(testFunc_NoReturn);
+    CPPUNIT_TEST(testFunc_ReturnTuple);
     CPPUNIT_TEST_SUITE_END();
 public:
     
@@ -234,6 +238,36 @@ public:
                            L"return backwards ? stepBackward : stepForward"
                            L"}");
         
+        DESTROY(root);
+    }
+    void testFunc_MultipleParameters()
+    {
+        Node* root = parse(L"func halfOpenRangeLength(start: Int, end: Int) -> Int {"
+                          L"return end - start"
+                          L"}");
+        DESTROY(root);
+    }
+    
+    void testFunc_NoParameters()
+    {
+        Node* root = parse(L"func sayHelloWorld() -> String {"
+                           L"return \"hello, world\""
+                           L"}");
+        DESTROY(root);
+    }
+    void testFunc_NoReturn()
+    {
+        Node* root = parse(L"func sayGoodbye(personName: String) {"
+                           L"println(\"Goodbye, \(personName)!\")"
+                           L"}");
+        DESTROY(root);
+    }
+    void testFunc_ReturnTuple()
+    {
+        Node* root = parse(L"func count(string: String) -> (vowels: Int, consonants: Int, others: Int) {"
+                           L"var vowels = 0, consonants = 0, others = 0"
+                           L"return (vowels, consonants, others)"
+                           L"}");
         DESTROY(root);
     }
 };
