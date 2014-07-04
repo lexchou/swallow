@@ -49,6 +49,7 @@
 
 #include "ast/value-binding.h"
 #include "ast/tuple.h"
+#include "ast/enum-case-pattern.h"
 
 #include "ast/type-node.h"
 #include "ast/tuple-type.h"

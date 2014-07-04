@@ -27,6 +27,7 @@ public:
     typedef KeyValue<Expression*> Constant;
 public:
     EnumDef();
+    ~EnumDef();
 public:
     Type getType()const;
     

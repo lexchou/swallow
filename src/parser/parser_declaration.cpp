@@ -669,6 +669,7 @@ Declaration* Parser::parseEnum(const std::vector<Attribute*>& attrs)
 Declaration* Parser::parseRawValueEnum(const std::vector<Attribute*>& attrs, const std::wstring& name, TypeIdentifier* baseType)
 {
     Token token;
+    expect(L"{");
     EnumDef* ret = nodeFactory->createEnum(name, attrs);
     ret->addParent(baseType);
     while(!predicate(L"}"))
@@ -707,6 +708,7 @@ Declaration* Parser::parseUnionEnum(const std::vector<Attribute*>& attrs, const 
 {
     Token token;
     EnumDef* ret = nodeFactory->createEnum(name, attrs);
+    expect(L"{");
     while(!predicate(L"}"))
     {
         if(match(Keyword::Case))

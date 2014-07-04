@@ -80,6 +80,7 @@ class Parameter;
 class GenericConstraint;
 class GenericParameters;
 class Pattern;
+class EnumCasePattern;
 
 class NodeFactory
 {
@@ -131,6 +132,7 @@ public:
     virtual LetBinding* createLetBinding();
     virtual VarBinding* createVarBinding();
     virtual Tuple* createTuple();
+    virtual EnumCasePattern* createEnumCasePattern(const std::wstring& name);
     
     virtual FunctionType* createFunctionType(TypeNode* argumentsType, TypeNode* retType);
     virtual ArrayType* createArrayType(TypeNode* innerType);

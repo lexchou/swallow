@@ -31,7 +31,6 @@ Pattern* Parser::parsePattern()
         {
             //‌ pattern → wildcard-pattern type-annotationopt
             // pattern → identifier-pattern type-annotationopt
-            //TODO : read type-annotation
             case Keyword::_:
             {
                 Identifier* ret = nodeFactory->createIdentifier(token.token);
@@ -114,15 +113,16 @@ Pattern* Parser::parseEnumPattern()
     Token token;
     expect(L".");
     expect_identifier(token);
-//    CaseStatement* ret = nodeFactory->createCase();
+    EnumCasePattern* ret = nodeFactory->createEnumCasePattern(token.token);
 
 
-    if(match(L"("))
+    if(predicate(L"("))
     {
-        parseTuple();
+        Tuple* t = static_cast<Tuple*>(parseTuple());
+        ret->setAssociatedBinding(t);
 
     }
-    return NULL;
+    return ret;
 }
 /*
   type-casting-pattern → is-pattern  as-pattern

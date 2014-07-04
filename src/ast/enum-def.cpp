@@ -1,10 +1,31 @@
 
 #include "enum-def.h"
+#include "tuple-type.h"
+#include "expression.h"
 USE_SWIFT_NS
 
 
 EnumDef::EnumDef()
 {
+}
+EnumDef::~EnumDef()
+{
+    {
+        std::vector<AssociatedType>::iterator iter = associatedTypes.begin();
+        for(; iter != associatedTypes.end(); iter++)
+        {
+            if(iter->value)
+                delete iter->value;
+        }
+    }
+    {
+        std::vector<Constant>::iterator iter = constants.begin();
+        for(; iter != constants.end(); iter++)
+        {
+            if(iter->value)
+                delete iter->value;
+        }
+    }
 }
 void EnumDef::serialize(std::wostream& out)
 {

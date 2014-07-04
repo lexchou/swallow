@@ -171,6 +171,12 @@ Tuple* NodeFactory::createTuple()
 {
     return new Tuple();
 }
+EnumCasePattern* NodeFactory::createEnumCasePattern(const std::wstring& name)
+{
+    EnumCasePattern* ret = new EnumCasePattern();
+    ret->setName(name);
+    return ret;
+}
 
 
 FunctionType* NodeFactory::createFunctionType(TypeNode* argumentsType, TypeNode* retType)

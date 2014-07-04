@@ -23,6 +23,8 @@ class TestStatement : public SwiftTestCase
     CPPUNIT_TEST(testSwitch_Tuple);
     CPPUNIT_TEST(testSwitch_ValueBindings);
     CPPUNIT_TEST(testSwitch_Where);
+    CPPUNIT_TEST(testSwitch_Enum);
+    CPPUNIT_TEST(testSwitch_AssociatedValues);
     CPPUNIT_TEST(testLabeledWhile);
     CPPUNIT_TEST(testLabeledDo);
     CPPUNIT_TEST(testLabeledFor);
@@ -456,6 +458,114 @@ public:
         CPPUNIT_ASSERT(dynamic_cast<Identifier*>(tuple->getElement(1)));
         CPPUNIT_ASSERT(NULL == dynamic_cast<BinaryOperator*>(c->getCondition(0).guard));
 
+        
+        DESTROY(root);
+    }
+    
+    void testSwitch_Enum()
+    {
+        Node* root = parse(L"switch directionToHead { "
+                           L"case .North: "
+                           L"println(\"Lots of planets have a north\") "
+                           L"case .South: "
+                           L"println(\"Watch out for penguins\") "
+                           L"case .East: "
+                           L"println(\"Where the sun rises\") "
+                           L"case .West: "
+                           L"println(\"Where the skies are blue\") "
+                           L"}");
+        
+        
+        SwitchCase* sc = NULL;
+        CaseStatement* c = NULL;
+        EnumCasePattern* e = NULL;
+        CPPUNIT_ASSERT(sc = dynamic_cast<SwitchCase*>(root));
+        CPPUNIT_ASSERT_EQUAL(4, sc->numCases());
+        
+        CPPUNIT_ASSERT(c = sc->getCase(0));
+        CPPUNIT_ASSERT_EQUAL(1, c->numConditions());
+        CPPUNIT_ASSERT(e = dynamic_cast<EnumCasePattern*>(c->getCondition(0).condition));
+        CPPUNIT_ASSERT(NULL == c->getCondition(0).guard);
+        ASSERT_EQUALS(L"North", e->getName().c_str());
+        CPPUNIT_ASSERT(e->getAssociatedBinding() == NULL);
+        
+        
+        CPPUNIT_ASSERT(c = sc->getCase(1));
+        CPPUNIT_ASSERT_EQUAL(1, c->numConditions());
+        CPPUNIT_ASSERT(e = dynamic_cast<EnumCasePattern*>(c->getCondition(0).condition));
+        CPPUNIT_ASSERT(NULL == c->getCondition(0).guard);
+        ASSERT_EQUALS(L"South", e->getName().c_str());
+        CPPUNIT_ASSERT(e->getAssociatedBinding() == NULL);
+        
+        
+        CPPUNIT_ASSERT(c = sc->getCase(2));
+        CPPUNIT_ASSERT_EQUAL(1, c->numConditions());
+        CPPUNIT_ASSERT(e = dynamic_cast<EnumCasePattern*>(c->getCondition(0).condition));
+        CPPUNIT_ASSERT(NULL == c->getCondition(0).guard);
+        ASSERT_EQUALS(L"East", e->getName().c_str());
+        CPPUNIT_ASSERT(e->getAssociatedBinding() == NULL);
+        
+        
+        CPPUNIT_ASSERT(c = sc->getCase(3));
+        CPPUNIT_ASSERT_EQUAL(1, c->numConditions());
+        CPPUNIT_ASSERT(e = dynamic_cast<EnumCasePattern*>(c->getCondition(0).condition));
+        CPPUNIT_ASSERT(NULL == c->getCondition(0).guard);
+        ASSERT_EQUALS(L"West", e->getName().c_str());
+        CPPUNIT_ASSERT(e->getAssociatedBinding() == NULL);
+        
+        DESTROY(root);
+    }
+    
+    void testSwitch_AssociatedValues()
+    {
+        Node* root = parse(L"switch productBarcode { "
+                           L"case .UPCA(let numberSystem, let identifier, let check): "
+                           L"println(\"UPC-A with value of \(numberSystem), \(identifier), \(check).\") "
+                           L"case .QRCode(productCode): "
+                           L"println(\"QR code with value of \(productCode).\") "
+                           L"}");
+        
+        SwitchCase* sc = NULL;
+        CaseStatement* c = NULL;
+        EnumCasePattern* e = NULL;
+        Tuple* t = NULL;
+        LetBinding* let = NULL;
+        Identifier* id = NULL;
+        CPPUNIT_ASSERT(sc = dynamic_cast<SwitchCase*>(root));
+        CPPUNIT_ASSERT_EQUAL(2, sc->numCases());
+        
+        CPPUNIT_ASSERT(c = sc->getCase(0));
+        CPPUNIT_ASSERT_EQUAL(1, c->numConditions());
+        CPPUNIT_ASSERT(e = dynamic_cast<EnumCasePattern*>(c->getCondition(0).condition));
+        CPPUNIT_ASSERT(NULL == c->getCondition(0).guard);
+        ASSERT_EQUALS(L"UPCA", e->getName().c_str());
+        CPPUNIT_ASSERT(t = e->getAssociatedBinding());
+        CPPUNIT_ASSERT_EQUAL(3, t->numElements());
+        
+        CPPUNIT_ASSERT(let = dynamic_cast<LetBinding*>(t->getElement(0)));
+        CPPUNIT_ASSERT(id = dynamic_cast<Identifier*>(let->getBinding()));
+        ASSERT_EQUALS(L"numberSystem", id->getIdentifier().c_str());
+        
+        CPPUNIT_ASSERT(let = dynamic_cast<LetBinding*>(t->getElement(1)));
+        CPPUNIT_ASSERT(id = dynamic_cast<Identifier*>(let->getBinding()));
+        ASSERT_EQUALS(L"identifier", id->getIdentifier().c_str());
+        
+        CPPUNIT_ASSERT(let = dynamic_cast<LetBinding*>(t->getElement(2)));
+        CPPUNIT_ASSERT(id = dynamic_cast<Identifier*>(let->getBinding()));
+        ASSERT_EQUALS(L"check", id->getIdentifier().c_str());
+        
+        
+        CPPUNIT_ASSERT(c = sc->getCase(1));
+        CPPUNIT_ASSERT_EQUAL(1, c->numConditions());
+        CPPUNIT_ASSERT(e = dynamic_cast<EnumCasePattern*>(c->getCondition(0).condition));
+        CPPUNIT_ASSERT(NULL == c->getCondition(0).guard);
+        ASSERT_EQUALS(L"QRCode", e->getName().c_str());
+        CPPUNIT_ASSERT(t = e->getAssociatedBinding());
+        CPPUNIT_ASSERT_EQUAL(1, t->numElements());
+        
+        
+        CPPUNIT_ASSERT(id = dynamic_cast<Identifier*>(t->getElement(0)));
+        ASSERT_EQUALS(L"productCode", id->getIdentifier().c_str());
         
         DESTROY(root);
     }

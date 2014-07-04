@@ -12,11 +12,12 @@ TypeDeclaration::TypeDeclaration()
 
 TypeDeclaration::~TypeDeclaration()
 {
-    Children::iterator iter = children.begin();
-    for(; iter != children.end(); iter++)
+    std::vector<TypeIdentifier*>::iterator iter = parents.begin();
+    for(; iter != parents.end(); iter++)
     {
         delete *iter;
     }
+
 }
 
 
