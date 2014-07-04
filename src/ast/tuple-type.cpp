@@ -7,6 +7,7 @@ USE_SWIFT_NS
 TupleType::TupleType()
     :TypeNode(0)
 {
+    variadicParameters = false;
 }
 static void serializeAttributes(TypeNode* type, std::wostream& out)
 {
@@ -65,7 +66,10 @@ TypeNode* TupleType::getElementType(int i)
 {
     return static_cast<TypeNode*>(get(i));
 }
-
+const TupleType::TupleElementMeta& TupleType::getElement(int i)
+{
+    return metas[i];
+}
 
 void TupleType::setVariadicParameters(bool val)
 {

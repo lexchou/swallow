@@ -20,13 +20,6 @@ class TestDeclaration : public SwiftTestCase
     CPPUNIT_TEST(testLet);
     CPPUNIT_TEST(testLet_Multiple);
     CPPUNIT_TEST(testLet_Tuple);
-    
-    CPPUNIT_TEST(testFunc);
-    CPPUNIT_TEST(testFunc_ReturnFunc);
-    CPPUNIT_TEST(testFunc_MultipleParameters);
-    CPPUNIT_TEST(testFunc_NoParameters);
-    CPPUNIT_TEST(testFunc_NoReturn);
-    CPPUNIT_TEST(testFunc_ReturnTuple);
     CPPUNIT_TEST_SUITE_END();
 public:
     
@@ -184,92 +177,6 @@ public:
         DESTROY(root);
     }
     
-    void testFunc()
-    {
-        Node* root = parse(L"func stepForward(input: Int) -> Int {"
-                           L"return input + 1"
-                           L"}");
-        FunctionDef* func = NULL;
-        Parameters* params = NULL;
-        Parameter* param = NULL;
-        TypeIdentifier* type = NULL;
-        CodeBlock* cb = NULL;
-        ReturnStatement* ret = NULL;
-        BinaryOperator* add = NULL;
-        Identifier* id = NULL;
-        IntegerLiteral* i = NULL;
-        CPPUNIT_ASSERT(func = dynamic_cast<FunctionDef*>(root));
-        ASSERT_EQUALS(L"stepForward", func->getName().c_str());
-        CPPUNIT_ASSERT_EQUAL(1, func->numParameters());
-        CPPUNIT_ASSERT(params = func->getParameters(0));
-        CPPUNIT_ASSERT_EQUAL(1, params->numParameters());
-        CPPUNIT_ASSERT(param = params->getParameter(0));
-        CPPUNIT_ASSERT_EQUAL(Parameter::None, param->getAccessibility());
-        CPPUNIT_ASSERT(!param->isShorthandExternalName());
-        CPPUNIT_ASSERT(!param->isInout());
-        CPPUNIT_ASSERT(NULL == param->getDefaultValue());
-        ASSERT_EQUALS(L"", param->getExternalName().c_str());
-        ASSERT_EQUALS(L"input", param->getLocalName().c_str());
-        CPPUNIT_ASSERT(type = dynamic_cast<TypeIdentifier*>(param->getType()));
-        ASSERT_EQUALS(L"Int", type->getName().c_str());
-        
-        CPPUNIT_ASSERT(type = dynamic_cast<TypeIdentifier*>(func->getReturnType()));
-        ASSERT_EQUALS(L"Int", type->getName().c_str());
-        
-        CPPUNIT_ASSERT(cb = func->getBody());
-        CPPUNIT_ASSERT_EQUAL(1, cb->numStatements());
-
-        CPPUNIT_ASSERT(ret = dynamic_cast<ReturnStatement*>(cb->getStatement(0)));
-        CPPUNIT_ASSERT(add = dynamic_cast<BinaryOperator*>(ret->getExpression()));
-        ASSERT_EQUALS(L"+", add->getOperator().c_str());
-        
-        CPPUNIT_ASSERT(id = dynamic_cast<Identifier*>(add->getLHS()));
-        CPPUNIT_ASSERT(i = dynamic_cast<IntegerLiteral*>(add->getRHS()));
-        
-        ASSERT_EQUALS(L"input", id->getIdentifier().c_str());
-        ASSERT_EQUALS(L"1", i->toString().c_str());
-        
-        
-        DESTROY(root);
-    }
-    void testFunc_ReturnFunc()
-    {
-        Node* root = parse(L"func chooseStepFunction(backwards: Bool) -> (Int) -> Int {"
-                           L"return backwards ? stepBackward : stepForward"
-                           L"}");
-        
-        DESTROY(root);
-    }
-    void testFunc_MultipleParameters()
-    {
-        Node* root = parse(L"func halfOpenRangeLength(start: Int, end: Int) -> Int {"
-                          L"return end - start"
-                          L"}");
-        DESTROY(root);
-    }
-    
-    void testFunc_NoParameters()
-    {
-        Node* root = parse(L"func sayHelloWorld() -> String {"
-                           L"return \"hello, world\""
-                           L"}");
-        DESTROY(root);
-    }
-    void testFunc_NoReturn()
-    {
-        Node* root = parse(L"func sayGoodbye(personName: String) {"
-                           L"println(\"Goodbye, \(personName)!\")"
-                           L"}");
-        DESTROY(root);
-    }
-    void testFunc_ReturnTuple()
-    {
-        Node* root = parse(L"func count(string: String) -> (vowels: Int, consonants: Int, others: Int) {"
-                           L"var vowels = 0, consonants = 0, others = 0"
-                           L"return (vowels, consonants, others)"
-                           L"}");
-        DESTROY(root);
-    }
 };
 CPPUNIT_TEST_SUITE_NAMED_REGISTRATION(TestDeclaration, "alltest");
 

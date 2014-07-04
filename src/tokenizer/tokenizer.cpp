@@ -620,6 +620,8 @@ bool Tokenizer::nextImpl(Token& token)
             return readSymbol(token, TokenType::CloseBrace);
         case '@':
             return readSymbol(token, TokenType::Attribute);
+        case '#':
+            return readSymbol(token, TokenType::Sharp);
         case '?':
         {
             bool whiteLeft = hasWhiteLeft(state.cursor);

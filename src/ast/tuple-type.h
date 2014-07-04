@@ -22,7 +22,7 @@ public:
     void add(bool inout, const std::wstring& name, TypeNode* type);
     int numElements();
     TypeNode* getElementType(int i);
-    
+    const TupleElementMeta& getElement(int i);
     
     void setVariadicParameters(bool val);
     bool getVariadicParameters()const;

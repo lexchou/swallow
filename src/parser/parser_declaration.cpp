@@ -584,8 +584,13 @@ Parameters* Parser::parseParameterClause()
                 accessibility = Parameter::Constant;
             }
         }
+        bool shorthandExternalName = false;
+        if(token == L"#")
+        {
+            shorthandExternalName = true;
+            next(token);
+        }
         tassert(token, token.type = TokenType::Identifier);
-        bool shorthandExternalName = match(L"#");
         std::wstring name = token.token;
         std::wstring localName;
         if(match_identifier(token))
@@ -604,7 +609,9 @@ Parameters* Parser::parseParameterClause()
         Expression* def = NULL;
         if(match(L"="))
         {
+            peek(token);
             def = parseExpression();
+            tassert(token, def != NULL);
         }
         Parameter* param = nodeFactory->createParameter();
         param->setInout(inout);

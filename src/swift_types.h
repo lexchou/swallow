@@ -17,6 +17,7 @@ struct TokenType
         
         Optional, // ?
         Attribute, // @
+        Sharp, // #
         Colon, // :
         Comma, // ,
         Semicolon, // ;

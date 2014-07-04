@@ -131,6 +131,7 @@ ADD_EXECUTABLE(TestParser
 		tests/test-postfix-expression.cpp
 		tests/test-type.cpp
 		tests/test-declaration.cpp
+		tests/test-func.cpp
 		tests/test-statement.cpp
 		${SWIFT_TOKENIZER_SRC} ${SWIFT_PARSER_SRC})
 target_link_libraries(TestParser cppunit)
