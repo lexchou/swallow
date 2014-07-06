@@ -14,6 +14,8 @@ public:
 public:
     using Declaration::setAttributes;
     using Declaration::setSpecifiers;
+    using Declaration::getAttributes;
+    using Declaration::getSpecifiers;
 public:
     void addVariable(Variable* var);
     Variable* getVariable(int i);

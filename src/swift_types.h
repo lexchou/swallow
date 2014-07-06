@@ -147,6 +147,21 @@ struct Associativity
     };
 };
 
+struct TypeSpecifier
+{
+    enum T
+    {
+        Class         =   1,
+        Mutating      =   2,
+        NonMutating   =   4,
+        Override      =   8,
+        Static        =   0x10,
+        Unowned       =   0x20,
+        Unowned_Safe  =   0x20 | 0x40,
+        Unowned_Unsafe=   0x20 | 0x80,
+        Weak          =   0x100
+    };
+};
 
 SWIFT_NS_END
 

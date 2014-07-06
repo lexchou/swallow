@@ -33,9 +33,9 @@ void Parser::setFunctionName(const wchar_t* function)
 /**
  * Read next token from tokenizer, throw exception if EOF reached.
  */
-void Parser::next(Token& token)
+void Parser::expect_next(Token& token)
 {
-    if(tokenizer->next(token))
+    if(next(token))
         return;
     throw 0;
 }
@@ -45,7 +45,34 @@ void Parser::next(Token& token)
 bool Parser::peek(Token& token)
 {
     token.type = TokenType::_;
-    return tokenizer->peek(token);
+    while(tokenizer->next(token))
+    {
+        if(token.type == TokenType::Comment)
+            continue;
+        tokenizer->restore(token);
+        return true;
+    }
+    return false;
+}
+/**
+ * Read next token from tokenizer, return false if EOF reached.
+ */
+bool Parser::next(Token& token)
+{
+    while(tokenizer->next(token))
+    {
+        if(token.type == TokenType::Comment)
+            continue;
+        return true;
+    }
+    return false;
+}
+/**
+ * Restore the position of tokenizer to specified token
+ */
+void Parser::restore(Token& token)
+{
+    tokenizer->restore(token);
 }
 /**
  * Check if the following token is the specified one, consume the token and return true if matched or return false if not.
@@ -53,21 +80,21 @@ bool Parser::peek(Token& token)
 bool Parser::match(const wchar_t* token)
 {
     Token t;
-    if(!tokenizer->next(t))
+    if(!next(t))
         return false;
     if(t == token)
         return true;
-    tokenizer->restore(t);
+    restore(t);
     return false;
 }
 bool Parser::match(Keyword::T keyword)
 {
     Token t;
-    if(!tokenizer->next(t))
+    if(!next(t))
         return false;
     if(t.getKeyword() == keyword)
         return true;
-    tokenizer->restore(t);
+    restore(t);
     return false;
 }
 /**
@@ -75,11 +102,11 @@ bool Parser::match(Keyword::T keyword)
  */
 bool Parser::match_identifier(Token& token)
 {
-    if(!tokenizer->next(token))
+    if(!next(token))
         return false;
     if(token.type == TokenType::Identifier)
         return true;
-    tokenizer->restore(token);
+    restore(token);
     return false;
 }
 /**
@@ -95,19 +122,19 @@ bool Parser::predicate(const wchar_t* token)
 void Parser::expect(const wchar_t* str)
 {
     Token token;
-    next(token);
+    expect_next(token);
     tassert(token, token == str);
 }
 void Parser::expect(Keyword::T keyword)
 {
     Token token;
-    next(token);
+    expect_next(token);
     tassert(token, token.type == TokenType::Identifier);
     tassert(token, token.identifier.keyword == keyword);
 }
 void Parser::expect_identifier(Token& token)
 {
-    next(token);
+    expect_next(token);
     tassert(token, token.type == TokenType::Identifier);
     tassert(token, token.identifier.keyword == Keyword::_);
 }

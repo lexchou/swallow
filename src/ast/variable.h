@@ -43,15 +43,22 @@ public:
     
     void setWillSet(CodeBlock* willSet);
     CodeBlock* getWillSet();
+    void setWillSetSetter(const std::wstring& name);
+    const std::wstring& getWillSetSetter()const;
     
     void setDidSet(CodeBlock* didSet);
     CodeBlock* getDidSet();
+    
+    void setDidSetSetter(const std::wstring& name);
+    const std::wstring& getDidSetSetter()const;
 
 public:
     virtual void serialize(std::wostream& out);
 private:
     std::wstring name;
     std::wstring setterName;
+    std::wstring willSetSetter;
+    std::wstring didSetSetter;
     Attributes typeAttributes;
 };
 

@@ -49,7 +49,7 @@ Attribute* Parser::parseAttribute()
 void Parser::parseBalancedToken(Attribute* attr)
 {
     Token token;
-    next(token);
+    expect_next(token);
     switch(token.type)
     {
         case TokenType::OpenBrace:

@@ -20,6 +20,9 @@ class TestDeclaration : public SwiftTestCase
     CPPUNIT_TEST(testLet);
     CPPUNIT_TEST(testLet_Multiple);
     CPPUNIT_TEST(testLet_Tuple);
+    CPPUNIT_TEST(testVar);
+    CPPUNIT_TEST(testVar_Multiple);
+    CPPUNIT_TEST(testVar_Typed);
     CPPUNIT_TEST_SUITE_END();
 public:
     
@@ -173,6 +176,81 @@ public:
         CPPUNIT_ASSERT(type = dynamic_cast<TypeIdentifier*>(tuple->getType()));
         CPPUNIT_ASSERT(p = dynamic_cast<ParenthesizedExpression*>(c->getPair(0).second));
         CPPUNIT_ASSERT_EQUAL(2, p->numChildren());
+        
+        DESTROY(root);
+    }
+    
+    void testVar()
+    {
+        Node* root = parse(L"var currentLoginAttempt = 0");
+        Variables* vars = NULL;
+        Variable* var = NULL;
+        Identifier* id = NULL;
+        IntegerLiteral* i = NULL;
+        
+        CPPUNIT_ASSERT(vars = dynamic_cast<Variables*>(root));
+        CPPUNIT_ASSERT_EQUAL(1, vars->numVariables());
+        CPPUNIT_ASSERT(var = dynamic_cast<Variable*>(vars->getVariable(0)));
+        CPPUNIT_ASSERT(id = dynamic_cast<Identifier*>(var->getName()));
+        ASSERT_EQUALS(L"currentLoginAttempt", id->getIdentifier().c_str());
+        
+        CPPUNIT_ASSERT(i = dynamic_cast<IntegerLiteral*>(var->getInitializer()));
+        ASSERT_EQUALS(L"0", i->toString().c_str());
+        
+        
+        DESTROY(root);
+    }
+    void testVar_Multiple()
+    {
+        Node* root = parse(L"var x = 0.0, y = 0.0, z = 0.0");
+        Variables* vars = NULL;
+        Variable* var = NULL;
+        Identifier* id = NULL;
+        FloatLiteral* f = NULL;
+        
+        CPPUNIT_ASSERT(vars = dynamic_cast<Variables*>(root));
+        CPPUNIT_ASSERT_EQUAL(3, vars->numVariables());
+        
+        CPPUNIT_ASSERT(var = dynamic_cast<Variable*>(vars->getVariable(0)));
+        CPPUNIT_ASSERT(id = dynamic_cast<Identifier*>(var->getName()));
+        ASSERT_EQUALS(L"x", id->getIdentifier().c_str());
+        CPPUNIT_ASSERT(f = dynamic_cast<FloatLiteral*>(var->getInitializer()));
+        ASSERT_EQUALS(L"0.0", f->toString().c_str());
+        
+        
+        CPPUNIT_ASSERT(var = dynamic_cast<Variable*>(vars->getVariable(1)));
+        CPPUNIT_ASSERT(id = dynamic_cast<Identifier*>(var->getName()));
+        ASSERT_EQUALS(L"y", id->getIdentifier().c_str());
+        CPPUNIT_ASSERT(f = dynamic_cast<FloatLiteral*>(var->getInitializer()));
+        ASSERT_EQUALS(L"0.0", f->toString().c_str());
+        
+        
+        CPPUNIT_ASSERT(var = dynamic_cast<Variable*>(vars->getVariable(2)));
+        CPPUNIT_ASSERT(id = dynamic_cast<Identifier*>(var->getName()));
+        ASSERT_EQUALS(L"z", id->getIdentifier().c_str());
+        CPPUNIT_ASSERT(f = dynamic_cast<FloatLiteral*>(var->getInitializer()));
+        ASSERT_EQUALS(L"0.0", f->toString().c_str());
+        
+        
+    }
+    
+    void testVar_Typed()
+    {
+        Node* root = parse(L"var welcomeMessage: String");
+        Variables* vars = NULL;
+        Variable* var = NULL;
+        Identifier* id = NULL;
+        TypeIdentifier* t = NULL;
+        
+        CPPUNIT_ASSERT(vars = dynamic_cast<Variables*>(root));
+        CPPUNIT_ASSERT_EQUAL(1, vars->numVariables());
+        CPPUNIT_ASSERT(var = dynamic_cast<Variable*>(vars->getVariable(0)));
+        CPPUNIT_ASSERT(id = dynamic_cast<Identifier*>(var->getName()));
+        ASSERT_EQUALS(L"welcomeMessage", id->getIdentifier().c_str());
+        
+        CPPUNIT_ASSERT(t = dynamic_cast<TypeIdentifier*>(var->getType()));
+        ASSERT_EQUALS(L"String", t->getName().c_str());
+        
         
         DESTROY(root);
     }

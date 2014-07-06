@@ -13,21 +13,21 @@ using namespace Swift;
 Expression* Parser::parseFloat()
 {
     Token token;
-    next(token);
+    expect_next(token);
     Expression* ret = nodeFactory->createFloat(token.token);
     return ret;
 }
 Expression* Parser::parseInteger()
 {
     Token token;
-    next(token);
+    expect_next(token);
     Expression* ret = nodeFactory->createInteger(token.token);
     return ret;
 }
 Expression* Parser::parseString()
 {
     Token token;
-    next(token);
+    expect_next(token);
     Expression* ret = nodeFactory->createString(token.token);
     return ret;
 }
@@ -49,7 +49,7 @@ Expression* Parser::parsePrefixExpression()
         return ret;
     }
     
-    next(token);
+    expect_next(token);
     if(symbolRegistry->isPrefixOperator(token.token))
     {
         Expression* postfixExpression = parsePostfixExpression();
@@ -57,7 +57,7 @@ Expression* Parser::parsePrefixExpression()
         op->setOperand(postfixExpression);
         return op;
     }
-    tokenizer->restore(token);
+    restore(token);
     Expression* ret = parsePostfixExpression();
     return ret;
 }
@@ -85,8 +85,8 @@ Expression* Parser::parsePostfixExpression()
         {
             if(token == L".")
             {
-                next(token);//skip .
-                next(token);//read identifier
+                expect_next(token);//skip .
+                expect_next(token);//read identifier
                 tassert(token, token.type == TokenType::Identifier);
                 
                 // postfix-expression → initializer-expression
@@ -116,14 +116,14 @@ Expression* Parser::parsePostfixExpression()
             if(token == L"!")
             {
                 // postfix-expression → forced-value-expression
-                next(token);
+                expect_next(token);
                 ret = nodeFactory->createForcedValue(ret);
                 continue;
             }
             // postfix-expression → postfix-expression postfix-operator
             if(symbolRegistry->isPostfixOperator(token.token))
             {
-                next(token);
+                expect_next(token);
                 UnaryOperator* postfix = nodeFactory->createUnary(token.token, OperatorType::PostfixUnary);
                 postfix->setOperand(ret);
                 ret = postfix;
@@ -135,7 +135,7 @@ Expression* Parser::parsePostfixExpression()
         {
             //? used as post unary operator will treated as optional chaining expression, not ternary expression
             // postfix-expression → optional-chaining-expression
-            next(token);
+            expect_next(token);
             ret = nodeFactory->createOptionalChaining(ret);
             continue;
         }
@@ -259,7 +259,7 @@ Expression* Parser::parsePrimaryExpression()
     // primary-expression → wildcard-expression
     if(token == L"_")
     {
-        next(token);
+        expect_next(token);
         return nodeFactory->createIdentifier(L"_");
     }
     
@@ -272,7 +272,7 @@ Expression* Parser::parsePrimaryExpression()
     // primary-expression → implicit-member-expression
     if(token == L".")
     {
-        next(token);
+        expect_next(token);
         expect_identifier(token);
         Identifier* field = nodeFactory->createIdentifier(token.token);
         return nodeFactory->createMemberAccess(NULL, field);
@@ -308,7 +308,7 @@ Expression* Parser::parseParenthesizedExpression()
 void Parser::parseExpressionItem(ParenthesizedExpression* parent)
 {
     Token token;
-    next(token);
+    expect_next(token);
     if(token.type == TokenType::Identifier && token.identifier.keyword == Keyword::_ && match(L":"))
     {
         //identifier:expression
@@ -317,7 +317,7 @@ void Parser::parseExpressionItem(ParenthesizedExpression* parent)
         return;
     }
     //rollback and parse exception
-    tokenizer->restore(token);
+    restore(token);
     Expression* expr = parseExpression();
     parent->append(expr);
 }
@@ -334,7 +334,7 @@ Expression* Parser::parseSelfExpression()
 {
     Token token;
     this->expect_identifier(token);
-    next(token);
+    expect_next(token);
     Identifier* self = nodeFactory->createIdentifier(L"self");
     if(token == L".")
     {
@@ -351,7 +351,7 @@ Expression* Parser::parseSelfExpression()
     }
     else
     {
-        tokenizer->restore(token);
+        restore(token);
         return self;
     }
 }
@@ -365,7 +365,7 @@ Expression* Parser::parseSuperExpression()
 {
     Token token;
     this->expect_identifier(token);
-    next(token);
+    expect_next(token);
     Identifier* super = nodeFactory->createIdentifier(L"super");
     if(token == L".")
     {
@@ -408,18 +408,18 @@ Identifier* Parser::parseIdentifier()
 Expression* Parser::parseLiteralExpression()
 {
     Token token;
-    next(token);
+    expect_next(token);
     // literal-expression → literal
     if(token.type == TokenType::Integer || token.type == TokenType::Float || token.type == TokenType::String)
     {
-        tokenizer->restore(token);
+        restore(token);
         return parseLiteral();
     }
     // literal-expression → array-literal dictionary-literal
     
     if(token.type == TokenType::OpenBracket)
     {
-        next(token);
+        expect_next(token);
         if(token.type == TokenType::CloseBracket)
         {
             //[] detected, empty array
@@ -431,7 +431,7 @@ Expression* Parser::parseLiteralExpression()
             expect(L"]");
             return nodeFactory->createDictionaryLiteral();
         }
-        tokenizer->restore(token);
+        restore(token);
         //check if there's a colon after an expression
         
         Expression* tmp = parseExpression();
@@ -506,7 +506,7 @@ Expression* Parser::parseLiteralExpression()
 Expression* Parser::parseLiteral()
 {
     Token token;
-    next(token);
+    expect_next(token);
     Expression* ret = NULL;
     switch(token.type)
     {
@@ -633,7 +633,7 @@ Expression* Parser::parseExpression()
 Expression* Parser::parseBinaryExpression(Expression* lhs)
 {
     Token token;
-    next(token);
+    expect_next(token);
     if(token.type == TokenType::Identifier)
     {
         if(token.identifier.keyword == Keyword::Is)

@@ -30,8 +30,8 @@ TypeNode* Parser::parseType()
 {
     Token token;
     TypeNode* ret = NULL;
-    next(token);
-    tokenizer->restore(token);
+    expect_next(token);
+    restore(token);
 
     if(token == TokenType::OpenParen)
     {
@@ -51,7 +51,8 @@ TypeNode* Parser::parseType()
     }
     do
     {
-        next(token);
+        if(!next(token))
+            break;
         
         //type chaining
         if(token == L"->")
@@ -81,7 +82,7 @@ TypeNode* Parser::parseType()
         }
         // ‌ metatype-type → type.Type  type.Protocol
         //TODO meta type is not supported
-        tokenizer->restore(token);
+        restore(token);
     }while(false);
     return ret;
 }
@@ -113,7 +114,7 @@ TupleType* Parser::parseTupleType()
                 parseAttributes(attributes);
             }
             inout = match(Keyword::Inout);
-            next(token);
+            expect_next(token);
             if(attributes.empty() && token.type == TokenType::Identifier && token.identifier.keyword == Keyword::_ && peek(token2) && token2.type == TokenType::Colon)
             {
                 //type-annotation → :attributes opt type
@@ -128,7 +129,7 @@ TupleType* Parser::parseTupleType()
             }
             else
             {
-                tokenizer->restore(token);
+                restore(token);
                 TypeNode* type = parseType();
                 type->setAttributes(attributes);
                 ret->add(inout, L"", type);

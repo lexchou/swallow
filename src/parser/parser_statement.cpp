@@ -52,14 +52,14 @@ Statement* Parser::parseStatement()
                     return parseReturn();
                     break;
                 case Keyword::_:
-                    next(token);
+                    expect_next(token);
                     //‌ statement → labeled-statement
                     if(predicate(L":"))
                     {
-                        tokenizer->restore(token);
+                        restore(token);
                         return parseLabeledStatement();
                     }
-                    tokenizer->restore(token);
+                    restore(token);
                     break;
                 case Keyword::Import:
                 case Keyword::Let:
@@ -212,8 +212,8 @@ Statement* Parser::parseIf()
     if(match(L"else"))
     {
         Token token;
-        next(token);
-        tokenizer->restore(token);
+        expect_next(token);
+        restore(token);
         if(token.type == TokenType::OpenBrace)
         {
             CodeBlock* elsePart = parseCodeBlock();
@@ -259,7 +259,7 @@ Statement* Parser::parseSwitch()
     while(!predicate(L"}"))
     {
         //switch-case → case-label statements  |default-label statements
-        next(token);
+        expect_next(token);
         tassert(token, token.type == TokenType::Identifier);
         // case-label → casecase-item-list:
         if(token.identifier.keyword == Keyword::Case)
@@ -302,8 +302,8 @@ void Parser::parseSwitchStatements(CaseStatement* case_)
     Token token;
     while(true)
     {
-        next(token);
-        tokenizer->restore(token);
+        expect_next(token);
+        restore(token);
         Keyword::T k = token.getKeyword();
         if(token.type == TokenType::CloseBrace || (k == Keyword::Case || k == Keyword::Default))
         {
@@ -332,7 +332,7 @@ Statement* Parser::parseBreak()
     }
     else
     {
-        tokenizer->restore(token);
+        restore(token);
     }
     return ret;
 }
@@ -354,7 +354,7 @@ Statement* Parser::parseContinue()
     }
     else
     {
-        tokenizer->restore(token);
+        restore(token);
     }
     return ret;
     
@@ -406,10 +406,10 @@ Statement* Parser::parseLabeledStatement()
     expect_identifier(token);
     std::wstring label = token.token;
     expect(L":");
-    next(token);
+    expect_next(token);
     if(token.type == TokenType::Identifier)
     {
-        tokenizer->restore(token);
+        restore(token);
         switch(token.identifier.keyword)
         {
             case Keyword::Switch:

@@ -101,3 +101,25 @@ CodeBlock* Variable::getDidSet()
     return static_cast<CodeBlock*>(get(6));
 }
 
+
+void Variable::setWillSetSetter(const std::wstring& name)
+{
+    willSetSetter = name;
+}
+const std::wstring& Variable::getWillSetSetter()const
+{
+    return willSetSetter;
+}
+
+
+void Variable::setDidSetSetter(const std::wstring& name)
+{
+    didSetSetter = name;
+}
+const std::wstring& Variable::getDidSetSetter()const
+{
+    return didSetSetter;
+}
+
+
+

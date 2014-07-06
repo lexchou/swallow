@@ -24,7 +24,7 @@ using namespace Swift;
 Pattern* Parser::parsePattern()
 {
     Token token;
-    next(token);
+    expect_next(token);
     if(token.type == TokenType::Identifier)
     {
         switch(token.identifier.keyword)
@@ -34,10 +34,13 @@ Pattern* Parser::parsePattern()
             case Keyword::_:
             {
                 Identifier* ret = nodeFactory->createIdentifier(token.token);
-                if(match(L":"))
+                if((flags & UNDER_VAR) == 0)//type annotation is not parsed when it's inside a let/var
                 {
-                    TypeNode* type = parseTypeAnnotation();
-                    ret->setType(type);
+                    if(match(L":"))
+                    {
+                        TypeNode* type = parseTypeAnnotation();
+                        ret->setType(type);
+                    }
                 }
                 return ret;
             }
@@ -61,7 +64,7 @@ Pattern* Parser::parsePattern()
         }
     }
     
-    tokenizer->restore(token);
+    restore(token);
     if(token.type == TokenType::OpenParen)
     {
         //pattern → tuple-pattern type-annotation opt
@@ -97,7 +100,7 @@ Pattern* Parser::parsePattern()
     {
         if(predicate(L"as"))
         {
-            tokenizer->restore(token);
+            restore(token);
             delete ret;
             return parseTypeCastingPattern();
         }

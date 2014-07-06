@@ -30,6 +30,10 @@ public:
         parser.setFileName(L"<file>");
         return parser.parse(str);
     }
+    void wcs_assertEquals(const wchar_t* expected, const std::wstring& actual, const char* file, int line)
+    {
+        wcs_assertEquals(expected, actual.c_str(), file, line);
+    }
     void wcs_assertEquals(const wchar_t* expected, const wchar_t* actual, const char* file, int line)
     {
         if(!wcscmp(expected, actual))

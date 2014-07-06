@@ -135,6 +135,7 @@ ADD_EXECUTABLE(TestParser
 		tests/test-func.cpp
 		tests/test-statement.cpp
 		tests/test-enum.cpp
+		tests/test-class.cpp
 		${SWIFT_TOKENIZER_SRC} ${SWIFT_PARSER_SRC})
 target_link_libraries(TestParser cppunit)
 

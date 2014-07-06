@@ -38,20 +38,9 @@ class Parser
         UNDER_PROTOCOL      = 4,
         UNDER_CLASS         = 8,
         UNDER_STRUCT        = 0x10,
-        UNDER_LET           = 0x20,
-        UNDER_VAR           = 0x40
-    };
-    enum
-    {
-        SPECIFIER_CLASS         =   1,
-        SPECIFIER_MUTATING      =   2,
-        SPECIFIER_NONMUTATING   =   4,
-        SPECIFIER_OVERRIDE      =   8,
-        SPECIFIER_STATIC        =   0x10,
-        SPECIFIER_UNOWNED       =   0x20,
-        SPECIFIER_UNOWNED_SAFE  =   0x20 | 0x40,
-        SPECIFIER_UNOWNED_UNSAFE=   0x20 | 0x80,
-        SPECIFIER_WEAK          =   0x100
+        UNDER_ENUM          = 0x20,
+        UNDER_LET           = 0x40,
+        UNDER_VAR           = 0x80
     };
     struct Flag
     {
@@ -115,6 +104,9 @@ private://declaration
     Declaration* parseVar(const std::vector<Attribute*>& attrs, int specifiers);
     Variable* parseVariableDeclaration();
     void parseWillSetDidSetBlock(Variable* variable);
+    void parseWillSetClause(Variable* variable);
+    void parseDidSetClause(Variable* variable, bool opt);
+    
     std::pair<CodeBlock*, std::pair<std::wstring, CodeBlock*> > parseGetterSetterBlock();
     std::pair<std::wstring, CodeBlock*> parseSetterClause();
     std::pair<CodeBlock*, CodeBlock*> parseGetterSetterKeywordBlock();
@@ -161,7 +153,15 @@ private:
     /**
      * Read next token from tokenizer, throw exception if EOF reached.
      */
-    void next(Token& token);
+    void expect_next(Token& token);
+    /**
+     * Restore the position of tokenizer to specified token
+     */
+    void restore(Token& token);
+    /**
+     * Read next token from tokenizer, return false if EOF reached.
+     */
+    bool next(Token& token);
     /**
      * Peek next token from tokenizer, return false if EOF reached.
      */

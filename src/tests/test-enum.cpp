@@ -136,7 +136,7 @@ public:
         TypeIdentifier* t = NULL;
         IntegerLiteral* i = NULL;
         CPPUNIT_ASSERT(e = dynamic_cast<EnumDef*>(root));
-        CPPUNIT_ASSERT_EQUAL(3, e->numConstants());
+        CPPUNIT_ASSERT_EQUAL(8, e->numConstants());
         CPPUNIT_ASSERT_EQUAL(1, e->numParents());
         CPPUNIT_ASSERT(t = dynamic_cast<TypeIdentifier*>(e->getIdentifier()));
         ASSERT_EQUALS(L"Planet", t->getName().c_str());
@@ -147,8 +147,6 @@ public:
         CPPUNIT_ASSERT(i = dynamic_cast<IntegerLiteral*>(e->getConstant(0).value));
         ASSERT_EQUALS(L"1", i->toString().c_str());
         
-        ASSERT_EQUALS(L"LineFeed", e->getConstant(1).name.c_str());
-        CPPUNIT_ASSERT(e->getConstant(1).value == NULL);
     }
     
 };

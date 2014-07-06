@@ -28,7 +28,7 @@ using namespace Swift;
  ‌ declaration → extension-declaration
  ‌ declaration → subscript-declaration
  ‌ declaration → operator-declaration
- ‌ declarations → declarationdeclarationsopt
+ ‌ declarations → declaration declarations opt
  ‌ declaration-specifiers → declaration-specifier declaration-specifiersopt
  ‌ declaration-specifier → class  mutating  nonmutating  override  static  unowned  unowned(safe) unowned(unsafe)  weak”
 */
@@ -39,13 +39,13 @@ Declaration* Parser::parseDeclaration()
     if(predicate(L"@"))
         parseAttributes(attrs);
     int specifiers = 0;
-    if((flags & UNDER_CLASS) || (flags & UNDER_PROTOCOL))
+    if(flags & (UNDER_CLASS | UNDER_STRUCT | UNDER_ENUM | UNDER_PROTOCOL))
     {
         //read declaration specifiers
         specifiers = parseDeclarationSpecifiers();
     }
-    next(token);
-    tokenizer->restore(token);
+    expect_next(token);
+    restore(token);
     if(token.type != TokenType::Identifier)
         unexpected(token);
     switch(token.identifier.keyword)
@@ -106,39 +106,39 @@ int Parser::parseDeclarationSpecifiers()
         switch(token.identifier.keyword)
         {
             case Keyword::Class:
-                ret |= SPECIFIER_CLASS;
+                ret |= TypeSpecifier::Class;
                 continue;
             case Keyword::Mutating:
-                ret |= SPECIFIER_MUTATING;
+                ret |= TypeSpecifier::Mutating;
                 continue;
             case Keyword::Nonmutating:
-                ret |= SPECIFIER_NONMUTATING;
+                ret |= TypeSpecifier::NonMutating;
                 continue;
             case Keyword::Override:
-                ret |= SPECIFIER_OVERRIDE;
+                ret |= TypeSpecifier::Override;
                 continue;
             case Keyword::Static:
-                ret |= SPECIFIER_STATIC;
+                ret |= TypeSpecifier::Static;
                 continue;
             case Keyword::Unowned:
-                ret |= SPECIFIER_UNOWNED;
+                ret |= TypeSpecifier::Unowned;
                 if(match(L"("))
                 {
                     expect_identifier(token);
                     if(token == L"safe")
-                        ret |= SPECIFIER_UNOWNED_SAFE;
+                        ret |= TypeSpecifier::Unowned_Safe;
                     else if(token == L"unsafe")
-                        ret |= SPECIFIER_UNOWNED_UNSAFE;
+                        ret |= TypeSpecifier::Unowned_Unsafe;
                     else
                         unexpected(token);
                     expect(L")");
                 }
                 break;
             case Keyword::Weak:
-                ret |= SPECIFIER_WEAK;
+                ret |= TypeSpecifier::Weak;
                 continue;
             default:
-                tokenizer->restore(token);
+                restore(token);
                 break;
         }
         break;
@@ -161,13 +161,13 @@ Declaration* Parser::parseImport(const std::vector<Attribute*>& attrs)
 {
     Token token;
     expect(Keyword::Import);
-    next(token);
+    expect_next(token);
     tassert(token, token.type == TokenType::Identifier);
     Import::Kind kind = Import::_;
     switch(token.identifier.keyword)
     {
         case Keyword::_:
-            tokenizer->restore(token);
+            restore(token);
             break;
         case Keyword::Typealias:
             kind = Import::Typealias;
@@ -198,7 +198,7 @@ Declaration* Parser::parseImport(const std::vector<Attribute*>& attrs)
     int n = 0;
     do
     {
-        next(token);
+        expect_next(token);
         if(token.type != TokenType::Identifier && token.type != TokenType::Operator)
             unexpected(token);
         if(n)
@@ -340,53 +340,69 @@ Declaration* Parser::parseVar(const std::vector<Attribute*>& attrs, int specifie
     expect(L"}");
     return ret;
 }
+
+/*
+willSet-clause → attributes opt willSet setter-name opt code-block
+*/
+void Parser::parseWillSetClause(Variable* variable)
+{
+    Token token;
+    Attributes attrs;
+    parseAttributes(attrs);
+    expect(Keyword::WillSet);
+    if(match(L"("))
+    {
+        expect_identifier(token);
+        variable->setWillSetSetter(token.token);
+        expect(L")");
+    }
+    CodeBlock* cb = parseCodeBlock();
+    variable->setWillSet(cb);
+}
+/*
+ ‌ didSet-clause → attributes opt didSet setter-name opt code-block
+*/
+void Parser::parseDidSetClause(Variable* variable, bool opt)
+{
+    Token token;
+    if(!peek(token))
+        return;
+    if(opt && token.type == TokenType::CloseBrace)
+        return;
+    Attributes attrs;
+    parseAttributes(attrs);
+    expect(Keyword::DidSet);
+    if(match(L"("))
+    {
+        expect_identifier(token);
+        variable->setDidSetSetter(token.token);
+        expect(L")");
+    }
+    CodeBlock* cb = parseCodeBlock();
+    variable->setDidSet(cb);
+}
+
 /*
  ‌ willSet-didSet-block → {willSet-clause didSet-clause opt}
  ‌ willSet-didSet-block → {didSet-clause willSet-clause}
- ‌ willSet-clause → attributes opt willSet setter-name opt code-block
- ‌ didSet-clause → attributes opt didSet setter-name opt code-block
-*/
-
+ */
 void Parser::parseWillSetDidSetBlock(Variable* variable)
 {
     Token token;
     Attributes attrs;
 
     parseAttributes(attrs);
-    if(match(Keyword::WillSet))
+    if(predicate(L"willSet"))
     {
         //willSet-didSet-block → {willSet-clause didSet-clause opt}
-        CodeBlock* willSet = parseCodeBlock();
-        willSet->setAttributes(attrs);
-        attrs.clear();
-        
-        parseAttributes(attrs);
-        variable->setWillSet(willSet);
-        if(match(Keyword::DidSet))
-        {
-            if(match_identifier(token))
-                variable->setSetterName(token.token);
-            CodeBlock* didSet = parseCodeBlock();
-            didSet->setAttributes(attrs);
-            variable->setDidSet(didSet);
-        }
-        else if(!attrs.empty())
-            expect(Keyword::DidSet);
+        parseWillSetClause(variable);
+        parseDidSetClause(variable, true);
         return;
     }
-    if(match(Keyword::DidSet))
+    if(predicate(L"didSet"))
     {
-        //willSet-didSet-block → {didSet-clause willSet-clause}
-        if(match_identifier(token))
-            variable->setSetterName(token.token);
-        CodeBlock* didSet = parseCodeBlock();
-        didSet->setAttributes(attrs);
-        variable->setDidSet(didSet);
-        parseAttributes(attrs);
-        expect(Keyword::WillSet);
-        CodeBlock* willSet = parseCodeBlock();
-        variable->setWillSet(willSet);
-        willSet->setAttributes(attrs);
+        parseDidSetClause(variable, false);
+        parseWillSetClause(variable);
     }
 }
 
@@ -407,7 +423,7 @@ std::pair<CodeBlock*, std::pair<std::wstring, CodeBlock*> > Parser::parseGetterS
     std::pair<std::wstring, CodeBlock*> setter = std::make_pair(std::wstring(), (CodeBlock*)NULL);
     if(token.getKeyword() == Keyword::Get)
     {
-        next(token);
+        expect_next(token);
         getter = parseCodeBlock();
         getter->setAttributes(attrs);
         peek(token);
@@ -470,7 +486,7 @@ std::pair<CodeBlock*, CodeBlock*> Parser::parseGetterSetterKeywordBlock()
         else if(!attributes.empty())//attributes defined for setter but setter is not found
         {
             Token token;
-            next(token);
+            expect_next(token);
             unexpected(token);
         }
     }
@@ -521,7 +537,7 @@ Declaration* Parser::parseFunc(const std::vector<Attribute*>& attrs, int specifi
 {
     Token token;
     expect(Keyword::Func);
-    next(token);
+    expect_next(token);
     if(token.type != TokenType::Identifier && token.type != TokenType::Operator)
         unexpected(token);
     FunctionDef* ret = nodeFactory->createFunction(token.token, attrs, specifiers);
@@ -570,17 +586,17 @@ Parameters* Parser::parseParameterClause()
     {
         bool inout = match(Keyword::Inout);
         Parameter::Accessibility accessibility = Parameter::None;
-        next(token);
+        expect_next(token);
         if(token.type == TokenType::Identifier)
         {
             if(token.identifier.keyword == Keyword::Var)
             {
-                next(token);
+                expect_next(token);
                 accessibility = Parameter::Variable;
             }
             else if(token.identifier.keyword == Keyword::Let)
             {
-                next(token);
+                expect_next(token);
                 accessibility = Parameter::Constant;
             }
         }
@@ -588,7 +604,7 @@ Parameters* Parser::parseParameterClause()
         if(token == L"#")
         {
             shorthandExternalName = true;
-            next(token);
+            expect_next(token);
         }
         tassert(token, token.type = TokenType::Identifier);
         std::wstring name = token.token;
@@ -641,6 +657,8 @@ Declaration* Parser::parseEnum(const std::vector<Attribute*>& attrs)
 {
     Token token;
     expect(Keyword::Enum);
+    Flag flag(this);
+    this->flags |= UNDER_ENUM;
     expect_identifier(token);
     if(predicate(L"<"))
     {
@@ -785,7 +803,7 @@ Declaration* Parser::parseStruct(const std::vector<Attribute*>& attrs)
 Declaration* Parser::parseClass(const std::vector<Attribute*>& attrs)
 {
     Token token;
-    expect(Keyword::Struct);
+    expect(Keyword::Class);
     expect_identifier(token);
     ClassDef* ret = nodeFactory->createClass(token.token, attrs);
     if(predicate(L"<"))
@@ -1004,7 +1022,7 @@ Declaration* Parser::parseOperator(const std::vector<Attribute*>& attrs)
     Token token;
     OperatorType::T type = OperatorType::_;
     expect(Keyword::Operator);
-    next(token);
+    expect_next(token);
     switch(token.getKeyword())
     {
         case Keyword::Prefix:
@@ -1020,24 +1038,24 @@ Declaration* Parser::parseOperator(const std::vector<Attribute*>& attrs)
             unexpected(token);
             break;
     }
-    next(token);
+    expect_next(token);
     tassert(token, token.type == TokenType::Operator);
     OperatorDef* op = nodeFactory->createOperator(attrs);
     op->setName(token.token);
     expect(L"{");
     while(!match(L"}"))
     {
-        next(token);
+        expect_next(token);
         switch(token.getKeyword())
         {
             case Keyword::Precedence:
-                next(token);
+                expect_next(token);
                 tassert(token, token.type == TokenType::Integer);
                 tassert(token, token.number.value >= 0 && token.number.value <= 255);
                 op->setPrecedence(token.number.value);
                 break;
             case Keyword::Associativity:
-                next(token);
+                expect_next(token);
                 switch(token.getKeyword())
                 {
                     case Keyword::None:
