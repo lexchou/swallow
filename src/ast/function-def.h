@@ -16,7 +16,9 @@ public:
     ~FunctionDef();
 public:
     using Declaration::setSpecifiers;
+    using Declaration::getSpecifiers;
     using Declaration::setAttributes;
+    using Declaration::getAttributes;
 public:
     void setName(const std::wstring& name);
     const std::wstring& getName()const;

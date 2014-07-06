@@ -1,4 +1,5 @@
 #include "parser.h"
+#include "parser_details.h"
 #include "ast/node.h"
 #include "tokenizer/tokenizer.h"
 #include "symbol-registry.h"
@@ -34,7 +35,7 @@ Pattern* Parser::parsePattern()
             case Keyword::_:
             {
                 Identifier* ret = nodeFactory->createIdentifier(token.token);
-                if((flags & UNDER_VAR) == 0)//type annotation is not parsed when it's inside a let/var
+                if((flags & (UNDER_VAR | UNDER_CASE)) == 0)//type annotation is not parsed when it's inside a let/var
                 {
                     if(match(L":"))
                     {

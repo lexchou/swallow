@@ -1,4 +1,5 @@
 #include "parser.h"
+#include "parser_details.h"
 #include "ast/node.h"
 #include "tokenizer/tokenizer.h"
 #include "symbol-registry.h"
@@ -219,6 +220,12 @@ Expression* Parser::parsePrimaryExpression()
             case Keyword::Column:
             case Keyword::Function:
                 return parseLiteralExpression();
+            case Keyword::Self:
+                // primary-expression → self-expression
+                return parseSelfExpression();
+            case Keyword::Super:
+                // primary-expression → superclass-expression
+                return parseSuperExpression();
             default:
                 break;
         }
@@ -246,12 +253,6 @@ Expression* Parser::parsePrimaryExpression()
         default:
             break;
     }
-    // primary-expression → self-expression
-    if(token.type == TokenType::Identifier && token.identifier.keyword == Keyword::Self)
-        return parseSelfExpression();
-    // primary-expression → superclass-expression
-    if(token.type == TokenType::Identifier && token.identifier.keyword == Keyword::Super)
-        return parseSuperExpression();
     
     // primary-expression → parenthesized-expression
     if(token.type == TokenType::OpenParen)
@@ -333,7 +334,7 @@ void Parser::parseExpressionItem(ParenthesizedExpression* parent)
 Expression* Parser::parseSelfExpression()
 {
     Token token;
-    this->expect_identifier(token);
+    expect(Keyword::Self);
     expect_next(token);
     Identifier* self = nodeFactory->createIdentifier(L"self");
     if(token == L".")
@@ -364,12 +365,16 @@ Expression* Parser::parseSelfExpression()
 Expression* Parser::parseSuperExpression()
 {
     Token token;
-    this->expect_identifier(token);
+    expect(Keyword::Super);
     expect_next(token);
     Identifier* super = nodeFactory->createIdentifier(L"super");
     if(token == L".")
     {
-        expect_identifier(token);
+        expect_next(token);
+        if(token.type != TokenType::Identifier)
+            unexpected(token);
+        if(token.identifier.keyword != Keyword::_ && token.identifier.keyword != Keyword::Init)
+            unexpected(token);
         Identifier* field = nodeFactory->createIdentifier(token.token);
         MemberAccess* ret = nodeFactory->createMemberAccess(super, field);
         return ret;

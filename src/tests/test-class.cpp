@@ -22,6 +22,13 @@ class TestClass : public SwiftTestCase
     CPPUNIT_TEST(testTypeProperty_Class);
     CPPUNIT_TEST(testTypeProperty_Enum);
     CPPUNIT_TEST(testMethod);
+    CPPUNIT_TEST(testMethod_Enum);
+    CPPUNIT_TEST(testTypeMethod_Struct);
+    CPPUNIT_TEST(testTypeMethod_Enum);
+    CPPUNIT_TEST(testTypeMethod_Class);
+    CPPUNIT_TEST(testSubscript_Struct);
+    CPPUNIT_TEST(testSubscriptOptions);
+    CPPUNIT_TEST(testSubclass);
     CPPUNIT_TEST_SUITE_END();
 public:
     
@@ -494,8 +501,206 @@ public:
                            L"    y += deltaY "
                            L"} "
                            L"}");
+        
+        StructDef* s = NULL;
+        Variables* vars = NULL;
+        FunctionDef* f = NULL;
+        CPPUNIT_ASSERT(s = dynamic_cast<StructDef*>(root));
+        CPPUNIT_ASSERT_EQUAL(2, s->numDeclarations());
+        
+        CPPUNIT_ASSERT(vars = dynamic_cast<Variables*>(s->getDeclaration(0)));
+        CPPUNIT_ASSERT_EQUAL(0, vars->getSpecifiers());
+        
+        CPPUNIT_ASSERT(f = dynamic_cast<FunctionDef*>(s->getDeclaration(1)));
+        CPPUNIT_ASSERT_EQUAL((int)TypeSpecifier::Mutating, f->getSpecifiers());
+        
         DESTROY(root);
     }
+    
+    void testMethod_Enum()
+    {
+        Node* root = parse(L"enum TriStateSwitch { "
+                           L"case Off, Low, High "
+                           L"mutating func next() { "
+                           L"    switch self { "
+                           L"    case Off: "
+                           L"        self = Low "
+                           L"    case Low: "
+                           L"        self = High "
+                           L"    case High: "
+                           L"        self = Off "
+                           L"    } "
+                           L"} "
+                           L"}");
+        
+        EnumDef* s = NULL;
+        FunctionDef* f = NULL;
+        CPPUNIT_ASSERT(s = dynamic_cast<EnumDef*>(root));
+        CPPUNIT_ASSERT_EQUAL(1, s->numDeclarations());
+        
+        
+        CPPUNIT_ASSERT(f = dynamic_cast<FunctionDef*>(s->getDeclaration(0)));
+        CPPUNIT_ASSERT_EQUAL((int)TypeSpecifier::Mutating, f->getSpecifiers());
+        
+        
+        DESTROY(root);
+    }
+    
+    void testTypeMethod_Struct()
+    {
+        Node* root = parse(L"struct SomeClass {\n"
+                           L"static func someTypeMethod() {\n"
+                           L"    // type method implementation goes here\n"
+                           L"}\n"
+                           L"}");
+        
+        StructDef* s = NULL;
+        FunctionDef* f = NULL;
+        CPPUNIT_ASSERT(s = dynamic_cast<StructDef*>(root));
+        CPPUNIT_ASSERT_EQUAL(1, s->numDeclarations());
+        
+        
+        CPPUNIT_ASSERT(f = dynamic_cast<FunctionDef*>(s->getDeclaration(0)));
+        CPPUNIT_ASSERT_EQUAL((int)TypeSpecifier::Static, f->getSpecifiers());
+        
+        DESTROY(root);
+    }
+    
+    void testTypeMethod_Enum()
+    {
+        Node* root = parse(L"enum SomeClass {\n"
+                           L"static func someTypeMethod() {\n"
+                           L"    // type method implementation goes here\n"
+                           L"}\n"
+                           L"}");
+        
+        EnumDef* s = NULL;
+        FunctionDef* f = NULL;
+        CPPUNIT_ASSERT(s = dynamic_cast<EnumDef*>(root));
+        CPPUNIT_ASSERT_EQUAL(1, s->numDeclarations());
+        
+        
+        CPPUNIT_ASSERT(f = dynamic_cast<FunctionDef*>(s->getDeclaration(0)));
+        CPPUNIT_ASSERT_EQUAL((int)TypeSpecifier::Static, f->getSpecifiers());
+        
+        DESTROY(root);
+    }
+    
+    void testTypeMethod_Class()
+    {
+        Node* root = parse(L"class SomeClass {\n"
+                           L"class func someTypeMethod() {\n"
+                           L"    // type method implementation goes here\n"
+                           L"}\n"
+                           L"}");
+        
+        ClassDef* s = NULL;
+        FunctionDef* f = NULL;
+        CPPUNIT_ASSERT(s = dynamic_cast<ClassDef*>(root));
+        CPPUNIT_ASSERT_EQUAL(1, s->numDeclarations());
+        
+        
+        CPPUNIT_ASSERT(f = dynamic_cast<FunctionDef*>(s->getDeclaration(0)));
+        CPPUNIT_ASSERT_EQUAL((int)TypeSpecifier::Class, f->getSpecifiers());
+        
+        DESTROY(root);
+    }
+    
+    void testSubscript_Struct()
+    {
+        Node* root = parse(L"struct TimesTable {\n"
+                           L"let multiplier: Int\n"
+                           L"subscript(index: Int) -> Int {\n"
+                           L"    return multiplier * index\n"
+                           L"}\n"
+                           L"}");
+        
+        StructDef* s = NULL;
+        CPPUNIT_ASSERT(s = dynamic_cast<StructDef*>(root));
+        CPPUNIT_ASSERT_EQUAL(2, s->numDeclarations());
+        SubscriptDef* sub = NULL;
+        
+        CPPUNIT_ASSERT(sub = dynamic_cast<SubscriptDef*>(s->getDeclaration(1)));
+        
+        DESTROY(root);
+    }
+    void testSubscriptOptions()
+    {
+        Node* root = parse(
+                           L"struct Matrix {\n"
+                           L"    subscript(row: Int, column: Int) -> Double {\n"
+                           L"        get {\n"
+                           L"            return grid[(row * columns) + column]\n"
+                           L"        }\n"
+                           L"        set {\n"
+                           L"            grid[(row * columns) + column] = newValue\n"
+                           L"        }\n"
+                           L"    }\n"
+                           L"}\n");
+        
+        StructDef* s = NULL;
+        Parameter* p = NULL;
+        Parameters* args = NULL;
+        CPPUNIT_ASSERT(s = dynamic_cast<StructDef*>(root));
+        CPPUNIT_ASSERT_EQUAL(1, s->numDeclarations());
+        SubscriptDef* sub = NULL;
+        
+        CPPUNIT_ASSERT(sub = dynamic_cast<SubscriptDef*>(s->getDeclaration(0)));
+        CPPUNIT_ASSERT(args = sub->getParameters());
+        CPPUNIT_ASSERT_EQUAL(2, args->numParameters());
+        CPPUNIT_ASSERT(p =  args->getParameter(0));
+        ASSERT_EQUALS(L"row", p->getLocalName());
+        CPPUNIT_ASSERT(p =  args->getParameter(1));
+        ASSERT_EQUALS(L"column", p->getLocalName());
+        
+        DESTROY(root);
+    }
+    
+    void testSubclass()
+    {
+        Node* root = parse(L"class Bicycle: Vehicle {"
+                           L"init() {"
+                           L"    super.init()"
+                           L"    numberOfWheels = 2"
+                           L"}"
+                           L"}");
+        ClassDef* c = NULL;
+        TypeIdentifier* t = NULL;
+        CPPUNIT_ASSERT(c = dynamic_cast<ClassDef*>(root));
+        CPPUNIT_ASSERT_EQUAL(1, c->numParents());
+        CPPUNIT_ASSERT(t = dynamic_cast<TypeIdentifier*>(c->getParent(0)));
+        InitializerDef* init = NULL;
+        CPPUNIT_ASSERT_EQUAL(1, c->numDeclarations());
+        CPPUNIT_ASSERT(init = dynamic_cast<InitializerDef*>(c->getDeclaration(0)));
+        
+        
+        
+        DESTROY(root);
+    }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     
 };
 CPPUNIT_TEST_SUITE_NAMED_REGISTRATION(TestClass, "alltest");

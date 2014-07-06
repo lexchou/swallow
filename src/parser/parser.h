@@ -31,25 +31,7 @@ class Parameters;
 class GenericParameters;
 class Parser
 {
-    enum
-    {
-        ENABLE_GENERIC      = 1,
-        UNDER_SWITCH_CASE   = 2,
-        UNDER_PROTOCOL      = 4,
-        UNDER_CLASS         = 8,
-        UNDER_STRUCT        = 0x10,
-        UNDER_ENUM          = 0x20,
-        UNDER_LET           = 0x40,
-        UNDER_VAR           = 0x80
-    };
-    struct Flag
-    {
-        Flag(Parser* parser):parser(parser), flags(parser->flags){}
-        ~Flag(){parser->flags = flags;};
-        
-        Parser* parser;
-        int flags;
-    };
+    friend struct Flags;
 public:
     Parser(NodeFactory* nodeFactory, SymbolRegistry* symbolRegistry);
     ~Parser();

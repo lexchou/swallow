@@ -4,6 +4,7 @@
 #include "symbol-registry.h"
 #include "ast/node-factory.h"
 #include "ast/ast.h"
+#include "parser_details.h"
 #include <cstdlib>
 #include <stack>
 #include <sstream>
@@ -222,8 +223,8 @@ Declaration* Parser::parseImport(const std::vector<Attribute*>& attrs)
 Declaration* Parser::parseLet(const std::vector<Attribute*>& attrs, int specifiers)
 {
     Constant* ret = nodeFactory->createConstant(attrs, specifiers);
-    Flag flag(this);
-    this->flags |= UNDER_LET;
+    Flags flag(this);
+    flags += UNDER_LET;
     expect(Keyword::Let);
     do
     {
@@ -277,8 +278,8 @@ Declaration* Parser::parseVar(const std::vector<Attribute*>& attrs, int specifie
 {
     Token token;
     expect(Keyword::Var);
-    Flag flag(this);
-    this->flags |= UNDER_VAR;
+    Flags flags(this);
+    flags += UNDER_VAR;
     //try read it as pattern-initializer-list
     Variables* ret = nodeFactory->createVariables(attrs, specifiers);
     Variable* var = parseVariableDeclaration();
@@ -302,7 +303,7 @@ Declaration* Parser::parseVar(const std::vector<Attribute*>& attrs, int specifie
         {
             case Keyword::Get:
             case Keyword::Set:
-                if(flags & UNDER_PROTOCOL)
+                if(this->flags & UNDER_PROTOCOL)
                 {
                     // variable-declaration → variable-declaration-head variable-name type-annotation getter-setter-keyword-block
                     //no code block for getter/setter for protocol
@@ -657,8 +658,8 @@ Declaration* Parser::parseEnum(const std::vector<Attribute*>& attrs)
 {
     Token token;
     expect(Keyword::Enum);
-    Flag flag(this);
-    this->flags |= UNDER_ENUM;
+    Flags flag(this);
+    flags += UNDER_ENUM;
     expect_identifier(token);
     if(predicate(L"<"))
     {
@@ -780,8 +781,8 @@ Declaration* Parser::parseStruct(const std::vector<Attribute*>& attrs)
         }while(match(L","));
     }
     
-    Flag f(this);
-    this->flags |= UNDER_STRUCT;
+    Flags f(this);
+    flags += UNDER_STRUCT;
     
     expect(L"{");
     while(!predicate(L"}"))
@@ -819,8 +820,8 @@ Declaration* Parser::parseClass(const std::vector<Attribute*>& attrs)
         }while(match(L","));
     }
     
-    Flag f(this);
-    this->flags |= UNDER_CLASS;
+    Flags f(this);
+    flags += UNDER_CLASS;
     
     expect(L"{");
     while(!predicate(L"}"))
@@ -888,8 +889,8 @@ Declaration* Parser::parseProtocol(const std::vector<Attribute*>& attrs)
     }
     expect(L"{");
     
-    Flag f(this);
-    this->flags |= UNDER_PROTOCOL;
+    Flags f(this);
+    f += UNDER_PROTOCOL;
     
     
     while(!predicate(L"}"))
@@ -997,10 +998,25 @@ Declaration* Parser::parseSubscript(const std::vector<Attribute*>& attrs)
     }
     else
     {
-        std::pair<CodeBlock*, std::pair<std::wstring, CodeBlock*> > accessors = parseGetterSetterBlock();
-        ret->setGetter(accessors.first);
-        ret->setSetter(accessors.second.second);
-        ret->setSetterName(accessors.second.first);
+        Token token;
+        TokenizerState s = tokenizer->save();
+        expect(L"{");
+        expect_next(token);
+        restore(token);
+        if(token.getKeyword() == Keyword::Set || token.getKeyword() == Keyword::Get)
+        {
+            std::pair<CodeBlock*, std::pair<std::wstring, CodeBlock*> > accessors = parseGetterSetterBlock();
+            ret->setGetter(accessors.first);
+            ret->setSetter(accessors.second.second);
+            ret->setSetterName(accessors.second.first);
+            expect(L"}");
+        }
+        else
+        {
+            tokenizer->restore(s);
+            CodeBlock* cb = parseCodeBlock();
+            ret->setGetter(cb);
+        }
     }
     return ret;
 }

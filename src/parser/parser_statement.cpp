@@ -1,4 +1,5 @@
 #include "parser.h"
+#include "parser_details.h"
 #include "ast/node.h"
 #include "tokenizer/tokenizer.h"
 #include "symbol-registry.h"
@@ -247,8 +248,8 @@ Statement* Parser::parseIf()
 Statement* Parser::parseSwitch()
 {
     Token token;
-    Flag flag(this);
-    flags |= UNDER_SWITCH_CASE;
+    Flags flags(this);
+    flags += UNDER_SWITCH_CASE;
     
     expect(Keyword::Switch);
     SwitchCase* ret = nodeFactory->createSwitch();
@@ -264,6 +265,9 @@ Statement* Parser::parseSwitch()
         // case-label → casecase-item-list:
         if(token.identifier.keyword == Keyword::Case)
         {
+            Flags fcase(flags);
+            fcase += UNDER_CASE;
+            
             //“case-item-list → pattern guard-clause opt | pattern guard-clause opt , case-item-list”
             CaseStatement* caseCond = nodeFactory->createCase();
             do
