@@ -8,11 +8,14 @@ class OptionalChaining : public Expression
 {
 public:
     OptionalChaining(Expression* expr);
+    ~OptionalChaining();
 public:
     void setExpression(Expression* expr);
     Expression* getExpression();
 public:
     virtual void serialize(std::wostream& out);
+private:
+    Expression* expression;
 };
 
 SWIFT_NS_END

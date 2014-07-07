@@ -9,6 +9,7 @@ class FunctionType : public TypeNode
 {
 public:
     FunctionType();
+    ~FunctionType();
 public:
     void setArgumentsType(TypeNode* argumentsType);
     void setReturnType(TypeNode* retType);
@@ -19,6 +20,8 @@ public:
 public:
     virtual void serialize(std::wostream& out);
 private:
+    TypeNode* argumentsType;
+    TypeNode* returnType;
 };
 
 SWIFT_NS_END

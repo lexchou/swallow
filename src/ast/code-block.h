@@ -10,6 +10,7 @@ class CodeBlock : public Statement
 {
 public:
     CodeBlock();
+    ~CodeBlock();
 public:
     void addStatement(Statement* st);
     int numStatements();
@@ -21,6 +22,7 @@ public:
     virtual void serialize(std::wostream& out);
 private:
     Attributes attributes;
+    std::vector<Statement*> statements;
 };
 
 SWIFT_NS_END

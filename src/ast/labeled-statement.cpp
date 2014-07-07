@@ -4,8 +4,12 @@ USE_SWIFT_NS
 
 
 LabeledStatement::LabeledStatement()
-    :Statement(1)
+    :statement(NULL)
 {
+}
+LabeledStatement::~LabeledStatement()
+{
+    SafeDelete(statement);
 }
 void LabeledStatement::serialize(std::wostream& out)
 {
@@ -26,10 +30,10 @@ const std::wstring& LabeledStatement::getLabel() const
 
 void LabeledStatement::setStatement(Statement* statement)
 {
-    set(0, statement);
+    this->statement = statement;
 }
 
 Statement* LabeledStatement::getStatement()
 {
-    return static_cast<Statement*>(get(0));
+    return statement;
 }

@@ -10,6 +10,7 @@ class Tuple : public Expression
 {
 public:
     Tuple();
+    ~Tuple();
 public:
     virtual void serialize(std::wostream& out);
     void add(Pattern* pattern);
@@ -19,6 +20,8 @@ public:
     TypeNode* getType();
     void setType(TypeNode* type);
 private:
+    TypeNode* type;
+    std::vector<Pattern*> elements;
 };
 
 SWIFT_NS_END

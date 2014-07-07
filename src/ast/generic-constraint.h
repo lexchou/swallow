@@ -16,6 +16,7 @@ public:
     };
 public:
     GenericConstraint();
+    ~GenericConstraint();
 public:
     void setIdentifier(TypeIdentifier* identifier);
     TypeIdentifier* getIdentifier();
@@ -31,6 +32,8 @@ public:
     virtual void serialize(std::wostream& out);
 private:
     ConstraintType type;
+    TypeIdentifier* identifier;
+    std::vector<TypeIdentifier*> expectedTypes;
 };
 
 SWIFT_NS_END

@@ -4,8 +4,12 @@ USE_SWIFT_NS
 
 
 ArrayType::ArrayType()
-    :TypeNode(1)
+    :innerType(NULL)
 {
+}
+ArrayType::~ArrayType()
+{
+    SafeDelete(innerType);
 }
 void ArrayType::serialize(std::wostream& out)
 {
@@ -15,9 +19,9 @@ void ArrayType::serialize(std::wostream& out)
 
 void ArrayType::setInnerType(TypeNode* innerType)
 {
-    set(0, innerType);
+    this->innerType = innerType;
 }
 TypeNode* ArrayType::getInnerType()
 {
-    return static_cast<TypeNode*>(get(0));
+    return innerType;
 }

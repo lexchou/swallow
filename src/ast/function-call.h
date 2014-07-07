@@ -10,6 +10,7 @@ class FunctionCall : public Expression
 {
 public:
     FunctionCall();
+    ~FunctionCall();
 public:
     
     void setFunction(Expression* expr);
@@ -22,6 +23,10 @@ public:
     ClosureExpression* getTrailingClosure();
 public:
     virtual void serialize(std::wostream& out);
+private:
+    Expression* function;
+    ParenthesizedExpression* arguments;
+    ClosureExpression* trailingClosure;
 };
 
 SWIFT_NS_END

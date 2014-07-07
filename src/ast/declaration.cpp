@@ -5,8 +5,8 @@
 USE_SWIFT_NS
 
 
-Declaration::Declaration(int numChildren)
-    :Statement(numChildren)
+Declaration::Declaration()
+    :specifiers(0)
 {
 }
 Declaration::~Declaration()

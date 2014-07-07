@@ -4,9 +4,14 @@ USE_SWIFT_NS
 
 
 FunctionType::FunctionType()
-    :TypeNode(2)
 {
 }
+FunctionType::~FunctionType()
+{
+    SafeDelete(returnType);
+    SafeDelete(argumentsType);
+}
+
 void FunctionType::serialize(std::wostream& out)
 {
     getArgumentsType()->serialize(out);
@@ -16,20 +21,20 @@ void FunctionType::serialize(std::wostream& out)
 
 void FunctionType::setArgumentsType(TypeNode* argumentsType)
 {
-    set(0, argumentsType);
+    this->argumentsType = argumentsType;
 }
 
 TypeNode* FunctionType::getArgumentsType()
 {
-    return static_cast<TypeNode*>(get(0));
+    return argumentsType;
 }
 void FunctionType::setReturnType(TypeNode* retType)
 {
-    set(1, retType);
+    this->returnType = retType;
 }
 
 
 TypeNode* FunctionType::getReturnType()
 {
-    return static_cast<TypeNode*>(get(1));
+    return returnType;
 }

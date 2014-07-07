@@ -10,11 +10,14 @@ class DeinitializerDef : public Declaration
 {
 public:
     DeinitializerDef();
+    ~DeinitializerDef();
 public:
     CodeBlock* getBody();
     void setBody(CodeBlock* body);
 public:
     virtual void serialize(std::wostream& out);
+private:
+    CodeBlock* body;
 };
 
 SWIFT_NS_END

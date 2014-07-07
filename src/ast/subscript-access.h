@@ -9,6 +9,7 @@ class SubscriptAccess : public Expression
 {
 public:
     SubscriptAccess(Expression* self, Expression* index);
+    ~SubscriptAccess();
 public:
     void setSelf(Expression* self);
     Expression* getSelf();
@@ -23,6 +24,9 @@ public:
     int numIndices();
 public:
     virtual void serialize(std::wostream& out);
+private:
+    Expression* self;
+    std::vector<Expression*> indices;
     
 };
 

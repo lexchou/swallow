@@ -10,7 +10,7 @@ class Attribute;
 class Declaration : public Statement
 {
 public:
-    Declaration(int numChildren);
+    Declaration();
     ~Declaration();
 public:
     void setAttributes(const std::vector<Attribute*>& attrs);

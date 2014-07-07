@@ -8,11 +8,14 @@ class InitializerReference : public Expression
 {
 public:
     InitializerReference(Expression* expr);
+    ~InitializerReference();
 public:
     void setExpression(Expression* expr);
     Expression* getExpression();
 public:
     virtual void serialize(std::wostream& out);
+private:
+    Expression* expression;
 };
 
 SWIFT_NS_END

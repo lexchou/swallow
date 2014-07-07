@@ -55,11 +55,18 @@ public:
 public:
     virtual void serialize(std::wostream& out);
 private:
-    std::wstring name;
     std::wstring setterName;
     std::wstring willSetSetter;
     std::wstring didSetSetter;
     Attributes typeAttributes;
+    
+    Pattern* name;
+    TypeNode* type;
+    Expression* initializer;
+    CodeBlock* getter;
+    CodeBlock* setter;
+    CodeBlock* willSet;
+    CodeBlock* didSet;
 };
 
 SWIFT_NS_END

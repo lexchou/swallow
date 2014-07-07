@@ -9,6 +9,7 @@ class MemberAccess : public Expression
 {
 public:
     MemberAccess(Expression* self, Identifier* field);
+    ~MemberAccess();
 public:
     void setSelf(Expression* self);
     void setField(Identifier* field);
@@ -17,6 +18,10 @@ public:
     Identifier* getField();
 public:
     virtual void serialize(std::wostream& out);
+public:
+    Expression* self;
+    Identifier* field;
+    
 };
 
 SWIFT_NS_END

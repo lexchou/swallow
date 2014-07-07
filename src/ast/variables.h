@@ -11,6 +11,7 @@ class Variables : public Declaration
 {
 public:
     Variables();
+    ~Variables();
 public:
     using Declaration::setAttributes;
     using Declaration::setSpecifiers;
@@ -24,6 +25,7 @@ public:
 public:
     virtual void serialize(std::wostream& out);
 private:
+    std::vector<Variable*> variables;
 };
 
 SWIFT_NS_END

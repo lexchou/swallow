@@ -11,6 +11,7 @@ class DoLoop : public Statement
 {
 public:
     DoLoop();
+    ~DoLoop();
 public:
     void setCodeBlock(CodeBlock* codeBlock);
     CodeBlock* getCodeBlock();
@@ -20,6 +21,8 @@ public:
 public:
     virtual void serialize(std::wostream& out);
 private:
+    CodeBlock* codeBlock;
+    Expression* condition;
 };
 
 SWIFT_NS_END

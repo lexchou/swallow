@@ -4,7 +4,7 @@ USE_SWIFT_NS
 
 
 Import::Import()
-    :Declaration(0), kind(_)
+    :kind(_)
 {
 }
 void Import::serialize(std::wostream& out)

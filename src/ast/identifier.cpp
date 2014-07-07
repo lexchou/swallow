@@ -3,8 +3,13 @@
 USE_SWIFT_NS
 
 Identifier::Identifier(const std::wstring& identifier)
-    :Expression(1), identifier(identifier)
+    :identifier(identifier), type(NULL)
 {
+}
+
+Identifier::~Identifier()
+{
+    SafeDelete(type);
 }
 
 void Identifier::serialize(std::wostream& out)
@@ -15,9 +20,9 @@ void Identifier::serialize(std::wostream& out)
 
 void Identifier::setType(TypeNode* type)
 {
-    set(0, type);
+    this->type = type;
 }
 TypeNode* Identifier::getType()
 {
-    return static_cast<TypeNode*>(get(0));
+    return type;
 }

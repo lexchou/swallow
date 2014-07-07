@@ -5,9 +5,14 @@ USE_SWIFT_NS
 
 
 ReturnStatement::ReturnStatement()
-    :Statement(1)
+    :expression(NULL)
 {
 }
+ReturnStatement::~ReturnStatement()
+{
+    SafeDelete(expression);
+}
+
 void ReturnStatement::serialize(std::wostream& out)
 {
     out<<L"return";
@@ -20,9 +25,9 @@ void ReturnStatement::serialize(std::wostream& out)
 
 void ReturnStatement::setExpression(Expression* expr)
 {
-    set(0, expr);
+    this->expression = expr;
 }
 Expression* ReturnStatement::getExpression()
 {
-    return static_cast<Expression*>(get(0));
+    return expression;
 }

@@ -3,18 +3,20 @@ USE_SWIFT_NS
 
 
 ForcedValue::ForcedValue(Expression* expr)
-    :Expression(1)
 {
     setExpression(expr);
 }
-
+ForcedValue::~ForcedValue()
+{
+    SafeDelete(expression);
+}
 void ForcedValue::setExpression(Expression* expr)
 {
-    set(0, expr);
+    this->expression = expr;
 }
 Expression* ForcedValue::getExpression()
 {
-    return static_cast<Expression*>(get(0));
+    return expression;
 }
 
 void ForcedValue::serialize(std::wostream& out)

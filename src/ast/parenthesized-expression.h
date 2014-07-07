@@ -9,14 +9,17 @@ class ParenthesizedExpression : public Expression
 {
 public:
     ParenthesizedExpression();
+    ~ParenthesizedExpression();
 public:
     void append(const std::wstring& name, Expression* expr);
     void append(Expression* expr);
+    int numExpressions()const;
     std::wstring getName(int idx);
+    Expression* get(int idx);
 public:
     virtual void serialize(std::wostream& out);
 private:
-    std::vector<std::wstring> names;
+    std::vector<std::pair<std::wstring, Expression*> > expressions;
 };
 
 SWIFT_NS_END

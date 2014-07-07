@@ -5,9 +5,14 @@ USE_SWIFT_NS
 
 
 DeinitializerDef::DeinitializerDef()
-    :Declaration(1)
+:body(NULL)
 {
 }
+DeinitializerDef::~DeinitializerDef()
+{
+    SafeDelete(body);
+}
+
 void DeinitializerDef::serialize(std::wostream& out)
 {
     out<<L"deinit ";
@@ -17,9 +22,9 @@ void DeinitializerDef::serialize(std::wostream& out)
 
 CodeBlock* DeinitializerDef::getBody()
 {
-    return static_cast<CodeBlock*>(get(0));
+    return body;
 }
 void DeinitializerDef::setBody(CodeBlock* body)
 {
-    set(0, body);
+    this->body = body;
 }

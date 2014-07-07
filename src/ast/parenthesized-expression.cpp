@@ -4,38 +4,57 @@ USE_SWIFT_NS
 
 
 ParenthesizedExpression::ParenthesizedExpression()
-    :Expression(0)
 {
     
 }
+
+ParenthesizedExpression::~ParenthesizedExpression()
+{
+    std::vector<std::pair<std::wstring, Expression*> >::iterator iter = expressions.begin();
+    for(; iter != expressions.end(); iter++)
+    {
+        delete iter->second;
+    }
+    expressions.clear();
+}
+
 void ParenthesizedExpression::append(const std::wstring& name, Expression* expr)
 {
-    names.push_back(name);
-    children.push_back(expr);
+    expressions.push_back(std::make_pair(name, expr));
 }
 void ParenthesizedExpression::append(Expression* expr)
 {
     append(L"", expr);
 }
+int ParenthesizedExpression::numExpressions()const
+{
+    return expressions.size();
+}
 void ParenthesizedExpression::serialize(std::wostream& out)
 {
     out<<L"(";
-    std::vector<Node*>::iterator iter = children.begin();
-    std::vector<std::wstring>::iterator name = names.begin();
-    for(; iter != children.end(); iter++, name++)
+    std::vector<std::pair<std::wstring, Expression*> >::iterator iter = expressions.begin();
+    for(; iter != expressions.end(); iter++)
     {
-        if(iter != children.begin())
+        if(iter != expressions.begin())
             out<<L", ";
-        if(!name->empty())
-            out<<*name<<" : ";
-        (*iter)->serialize(out);
+        if(!iter->first.empty())
+            out<<iter->first<<" : ";
+        (iter->second)->serialize(out);
     }
     
     out<<L")";
 }
+
 std::wstring ParenthesizedExpression::getName(int idx)
 {
-    if(idx <0 || idx >= names.size())
+    if(idx <0 || idx >= expressions.size())
         return L"";
-    return names[idx];
+    return expressions[idx].first;
+}
+Expression* ParenthesizedExpression::get(int idx)
+{
+    if(idx <0 || idx >= expressions.size())
+        return NULL;
+    return expressions[idx].second;
 }

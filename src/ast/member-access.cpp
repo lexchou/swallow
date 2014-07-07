@@ -4,29 +4,32 @@ USE_SWIFT_NS
 
 
 MemberAccess::MemberAccess(Expression* self, Identifier* field)
-    :Expression(2)
 {
     setSelf(self);
     setField(field);
 }
-
+MemberAccess::~MemberAccess()
+{
+    SafeDelete(self);
+    SafeDelete(field);
+}
 void MemberAccess::setSelf(Expression* self)
 {
-    set(0, self);
+    this->self = self;
 }
 void MemberAccess::setField(Identifier* field)
 {
-    set(1, field);
+    this->field = field;
 }
 
 Expression* MemberAccess::getSelf()
 {
-    return static_cast<Expression*>(get(0));
+    return self;
     
 }
 Identifier* MemberAccess::getField()
 {
-    return static_cast<Identifier*>(get(1));
+    return field;
 }
 
 

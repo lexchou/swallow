@@ -25,7 +25,7 @@ public:
     
     void testPostfixOperator()
     {
-        Node* root = parse(L"i++ % 3");
+        PARSE_STATEMENT(L"i++ % 3");
         CPPUNIT_ASSERT(root != NULL);
         BinaryOperator* mod = dynamic_cast<BinaryOperator*>(root);
         CPPUNIT_ASSERT(mod != NULL);
@@ -36,14 +36,13 @@ public:
         ASSERT_EQUALS(L"++", inc->getOperator().c_str());
         CPPUNIT_ASSERT_EQUAL(OperatorType::PostfixUnary, inc->getType());
         
-        delete root;
-        CPPUNIT_ASSERT_EQUAL(0, Node::NodeCount);
+        DESTROY(root);
     }
     
     
     void testFunctionCall()
     {
-        Node* root = parse(L"foo.bar(1, 2 + 3, id : 5)");
+        PARSE_STATEMENT(L"foo.bar(1, 2 + 3, id : 5)");
         CPPUNIT_ASSERT(root != NULL);
         FunctionCall* call = dynamic_cast<FunctionCall*>(root);
         CPPUNIT_ASSERT(call != NULL);
@@ -60,7 +59,7 @@ public:
         
         ParenthesizedExpression* args = call->getArguments();
         CPPUNIT_ASSERT(args != NULL);
-        CPPUNIT_ASSERT_EQUAL(3, args->numChildren());
+        CPPUNIT_ASSERT_EQUAL(3, args->numExpressions());
         
         Node* n = args->get(0);
         CPPUNIT_ASSERT(n != NULL);
@@ -92,15 +91,14 @@ public:
         ASSERT_EQUALS(L"5", i->toString().c_str());
         
         
-        delete root;
-        CPPUNIT_ASSERT_EQUAL(0, Node::NodeCount);
+        DESTROY(root);
         
     }
     
     void testInit()
     {
         
-        Node* root = parse(L"Shape.init(id : 5)");
+        PARSE_STATEMENT(L"Shape.init(id : 5)");
         CPPUNIT_ASSERT(root != NULL);
         FunctionCall* call = dynamic_cast<FunctionCall*>(root);
         CPPUNIT_ASSERT(call != NULL);
@@ -114,7 +112,7 @@ public:
         
         ParenthesizedExpression* args = call->getArguments();
         CPPUNIT_ASSERT(args != NULL);
-        CPPUNIT_ASSERT_EQUAL(1, args->numChildren());
+        CPPUNIT_ASSERT_EQUAL(1, args->numExpressions());
         
         Node* n = args->get(0);
         CPPUNIT_ASSERT(n != NULL);
@@ -125,13 +123,12 @@ public:
         std::wstring name = args->getName(0);
         ASSERT_EQUALS(L"id", name.c_str());
         
-        delete root;
-        CPPUNIT_ASSERT_EQUAL(0, Node::NodeCount);
+        DESTROY(root);
     }
     
     void testSelf()
     {
-        Node* root = parse(L"Shape.self");
+        PARSE_STATEMENT(L"Shape.self");
         CPPUNIT_ASSERT(root != NULL);
         SelfExpression* self = dynamic_cast<SelfExpression*>(root);
         CPPUNIT_ASSERT(self != NULL);
@@ -140,13 +137,12 @@ public:
         CPPUNIT_ASSERT(id != NULL);
         ASSERT_EQUALS(L"Shape", id->getIdentifier().c_str());
         
-        delete root;
-        CPPUNIT_ASSERT_EQUAL(0, Node::NodeCount);
+        DESTROY(root);
     }
     
     void testDynamicType()
     {
-        Node* root = parse(L"345.dynamicType");
+        PARSE_STATEMENT(L"345.dynamicType");
         CPPUNIT_ASSERT(root != NULL);
         DynamicType* dyn = dynamic_cast<DynamicType*>(root);
         CPPUNIT_ASSERT(dyn != NULL);
@@ -155,16 +151,14 @@ public:
         CPPUNIT_ASSERT(id != NULL);
         ASSERT_EQUALS(L"345", id->toString().c_str());
         
-        delete root;
-        CPPUNIT_ASSERT_EQUAL(0, Node::NodeCount);
-        
+        DESTROY(root);
     }
     
     
     void testSubscript()
     {
         {
-            Node* root = parse(L"matrix[0, 1] = 2");
+            PARSE_STATEMENT(L"matrix[0, 1] = 2");
             CPPUNIT_ASSERT(root != NULL);
             Assignment* eq = dynamic_cast<Assignment*>(root);
             CPPUNIT_ASSERT(eq != NULL);
@@ -179,14 +173,13 @@ public:
             CPPUNIT_ASSERT(i = dynamic_cast<IntegerLiteral*>(sub->getIndex(1)));
             ASSERT_EQUALS(L"1", i->toString().c_str());
             
-            delete root;
-            CPPUNIT_ASSERT_EQUAL(0, Node::NodeCount);
+            DESTROY(root);
         }
         
     }
     void testSubscript2()
     {
-        Node* root = parse(L"matrix[0, ] = 2");
+        PARSE_STATEMENT(L"matrix[0, ] = 2");
         CPPUNIT_ASSERT(root != NULL);
         Assignment* eq = dynamic_cast<Assignment*>(root);
         CPPUNIT_ASSERT(eq != NULL);
@@ -199,12 +192,11 @@ public:
         CPPUNIT_ASSERT(i = dynamic_cast<IntegerLiteral*>(sub->getIndex(0)));
         ASSERT_EQUALS(L"0", i->toString().c_str());
         
-        delete root;
-        CPPUNIT_ASSERT_EQUAL(0, Node::NodeCount);
+        DESTROY(root);
     }
     void testSubscript3()
     {
-        Node* root = parse(L"matrix[0 ] = 2");
+        PARSE_STATEMENT(L"matrix[0 ] = 2");
         CPPUNIT_ASSERT(root != NULL);
         Assignment* eq = dynamic_cast<Assignment*>(root);
         CPPUNIT_ASSERT(eq != NULL);
@@ -217,13 +209,12 @@ public:
         CPPUNIT_ASSERT(i = dynamic_cast<IntegerLiteral*>(sub->getIndex(0)));
         ASSERT_EQUALS(L"0", i->toString().c_str());
         
-        delete root;
-        CPPUNIT_ASSERT_EQUAL(0, Node::NodeCount);
+        DESTROY(root);
         
     }
     void testForcedValue()
     {
-        Node* root = parse(L"val!");
+        PARSE_STATEMENT(L"val!");
         CPPUNIT_ASSERT(root != NULL);
         ForcedValue* val = dynamic_cast<ForcedValue*>(root);
         CPPUNIT_ASSERT(val != NULL);
@@ -232,13 +223,12 @@ public:
         CPPUNIT_ASSERT(id != NULL);
         ASSERT_EQUALS(L"val", id->getIdentifier().c_str());
         
-        delete root;
-        CPPUNIT_ASSERT_EQUAL(0, Node::NodeCount);
+        DESTROY(root);
     }
     
     void testOptionalChaining()
     {
-        Node* root = parse(L"c?.performAction()");
+        PARSE_STATEMENT(L"c?.performAction()");
         CPPUNIT_ASSERT(root != NULL);
         FunctionCall* call = dynamic_cast<FunctionCall*>(root);
         CPPUNIT_ASSERT(call != NULL);
@@ -251,8 +241,7 @@ public:
         CPPUNIT_ASSERT(id != NULL);
         ASSERT_EQUALS(L"c", id->getIdentifier().c_str());
         
-        delete root;
-        CPPUNIT_ASSERT_EQUAL(0, Node::NodeCount);
+        DESTROY(root);
         
     }
     

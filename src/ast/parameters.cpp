@@ -5,10 +5,14 @@ USE_SWIFT_NS
 
 
 Parameters::Parameters()
-    :Node(0)
 {
     variadicParameters = false;
 }
+Parameters::~Parameters()
+{
+    SafeDeleteAll(parameters);
+}
+
 void Parameters::serialize(std::wostream& out)
 {
 }
@@ -25,13 +29,13 @@ bool Parameters::isVariadicParameters()const
 
 void Parameters::addParameter(Parameter* parameter)
 {
-    children.push_back(parameter);
+    parameters.push_back(parameter);
 }
 int Parameters::numParameters()const
 {
-    return children.size();
+    return parameters.size();
 }
 Parameter* Parameters::getParameter(int i)
 {
-    return static_cast<Parameter*>(get(i));
+    return static_cast<Parameter*>(parameters[i]);
 }

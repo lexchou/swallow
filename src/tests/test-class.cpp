@@ -34,7 +34,7 @@ public:
     
     void testStruct()
     {
-        Node* root = parse(L"struct Resolution {"
+        PARSE_STATEMENT(L"struct Resolution {"
                            L"var width = 0"
                            L"var height = 0"
                            L"}");
@@ -46,7 +46,7 @@ public:
     }
     void testClass()
     {
-        Node* root = parse(L"class VideoMode { "
+        PARSE_STATEMENT(L"class VideoMode { "
                            L"var resolution = Resolution() "
                            L"var interlaced = false "
                            L"var frameRate = 0.0 "
@@ -69,7 +69,7 @@ public:
     }
     void testComputedProperty()
     {
-        Node* root = parse(L"struct Rect {"
+        PARSE_STATEMENT(L"struct Rect {"
                            L"var origin = Point()"
                            L"var center: Point {"
                            L"    get {"
@@ -93,7 +93,7 @@ public:
         CPPUNIT_ASSERT(var = vars->getVariable(0));
         ASSERT_EQUALS(L"origin", dynamic_cast<Identifier*>(var->getName())->getIdentifier().c_str());
         CPPUNIT_ASSERT(call = dynamic_cast<FunctionCall*>(var->getInitializer()));
-        CPPUNIT_ASSERT_EQUAL(0, call->getArguments()->numChildren());
+        CPPUNIT_ASSERT_EQUAL(0, call->getArguments()->numExpressions());
         CPPUNIT_ASSERT(id = dynamic_cast<Identifier*>(call->getFunction()));
         ASSERT_EQUALS(L"Point", id->getIdentifier().c_str());
         
@@ -122,7 +122,7 @@ public:
     
     void testShorthandSetter()
     {
-        Node* root = parse(L"struct Rect {"
+        PARSE_STATEMENT(L"struct Rect {"
                            L"var origin = Point()"
                            L"var center: Point {"
                            L"    get {"
@@ -146,7 +146,7 @@ public:
         CPPUNIT_ASSERT(var = vars->getVariable(0));
         ASSERT_EQUALS(L"origin", dynamic_cast<Identifier*>(var->getName())->getIdentifier().c_str());
         CPPUNIT_ASSERT(call = dynamic_cast<FunctionCall*>(var->getInitializer()));
-        CPPUNIT_ASSERT_EQUAL(0, call->getArguments()->numChildren());
+        CPPUNIT_ASSERT_EQUAL(0, call->getArguments()->numExpressions());
         CPPUNIT_ASSERT(id = dynamic_cast<Identifier*>(call->getFunction()));
         ASSERT_EQUALS(L"Point", id->getIdentifier().c_str());
         
@@ -174,7 +174,7 @@ public:
     
     void testShorthandSetter2()
     {
-        Node* root = parse(L"struct Rect {"
+        PARSE_STATEMENT(L"struct Rect {"
                            L"var origin = Point()"
                            L"var center: Point {"
                            L"    set {"
@@ -198,7 +198,7 @@ public:
         CPPUNIT_ASSERT(var = vars->getVariable(0));
         ASSERT_EQUALS(L"origin", dynamic_cast<Identifier*>(var->getName())->getIdentifier().c_str());
         CPPUNIT_ASSERT(call = dynamic_cast<FunctionCall*>(var->getInitializer()));
-        CPPUNIT_ASSERT_EQUAL(0, call->getArguments()->numChildren());
+        CPPUNIT_ASSERT_EQUAL(0, call->getArguments()->numExpressions());
         CPPUNIT_ASSERT(id = dynamic_cast<Identifier*>(call->getFunction()));
         ASSERT_EQUALS(L"Point", id->getIdentifier().c_str());
         
@@ -226,7 +226,7 @@ public:
     
     void testShorthandSetter3()
     {
-        Node* root = parse(L"struct Rect {"
+        PARSE_STATEMENT(L"struct Rect {"
                            L"var origin = Point()"
                            L"var center: Point {"
                            L"    get {"
@@ -247,7 +247,7 @@ public:
         CPPUNIT_ASSERT(var = vars->getVariable(0));
         ASSERT_EQUALS(L"origin", dynamic_cast<Identifier*>(var->getName())->getIdentifier().c_str());
         CPPUNIT_ASSERT(call = dynamic_cast<FunctionCall*>(var->getInitializer()));
-        CPPUNIT_ASSERT_EQUAL(0, call->getArguments()->numChildren());
+        CPPUNIT_ASSERT_EQUAL(0, call->getArguments()->numExpressions());
         CPPUNIT_ASSERT(id = dynamic_cast<Identifier*>(call->getFunction()));
         ASSERT_EQUALS(L"Point", id->getIdentifier().c_str());
         
@@ -271,7 +271,7 @@ public:
     
     void testReadonlyComputedProperty()
     {
-        Node* root = parse(L"struct Cuboid { "
+        PARSE_STATEMENT(L"struct Cuboid { "
                            L"var width = 0.0, height = 0.0, depth = 0.0 "
                            L"var volume: Double { "
                            L"    return width * height * depth "
@@ -301,7 +301,7 @@ public:
     }
     void testPropertyObservers()
     {
-        Node* root = parse(L"class StepCounter { "
+        PARSE_STATEMENT(L"class StepCounter { "
                            L"var totalSteps: Int = 0 { "
                            L"    willSet(newTotalSteps) { "
                            L"        println(\"About to set totalSteps to \(newTotalSteps)\") "
@@ -346,7 +346,7 @@ public:
     
     void testPropertyObservers2()
     {
-        Node* root = parse(L"class StepCounter { "
+        PARSE_STATEMENT(L"class StepCounter { "
                            L"var totalSteps: Int = 0 { "
                            L"    didSet { "
                            L"        if totalSteps > oldValue  { "
@@ -391,7 +391,7 @@ public:
     
     void testPropertyObservers3()
     {
-        Node* root = parse(L"class StepCounter { "
+        PARSE_STATEMENT(L"class StepCounter { "
                            L"var totalSteps: Int = 0 { "
                            L"    willSet(newTotalSteps) { "
                            L"        println(\"About to set totalSteps to \(newTotalSteps)\") "
@@ -428,7 +428,7 @@ public:
     
     void testTypeProperty_Struct()
     {
-        Node* root = parse(L"struct SomeStructure {"
+        PARSE_STATEMENT(L"struct SomeStructure {"
                            L"static var storedTypeProperty = \"Some value.\""
                            L"static var computedTypeProperty: Int {"
                            L"    // return an Int value here\n"
@@ -450,7 +450,7 @@ public:
     
     void testTypeProperty_Class()
     {
-        Node* root = parse(L"class SomeStructure {"
+        PARSE_STATEMENT(L"class SomeStructure {"
                            L"static var storedTypeProperty = \"Some value.\""
                            L"static var computedTypeProperty: Int {"
                            L"    // return an Int value here\n"
@@ -472,7 +472,7 @@ public:
     
     void testTypeProperty_Enum()
     {
-        Node* root = parse(L"enum SomeStructure {"
+        PARSE_STATEMENT(L"enum SomeStructure {"
                            L"static var storedTypeProperty = \"Some value.\""
                            L"static var computedTypeProperty: Int {"
                            L"    // return an Int value here\n"
@@ -494,7 +494,7 @@ public:
     
     void testMethod()
     {
-        Node* root = parse(L"struct Point { "
+        PARSE_STATEMENT(L"struct Point { "
                            L"var x = 0.0, y = 0.0 "
                            L"mutating func moveByX(deltaX: Double, y deltaY: Double) { "
                            L"    x += deltaX "
@@ -519,7 +519,7 @@ public:
     
     void testMethod_Enum()
     {
-        Node* root = parse(L"enum TriStateSwitch { "
+        PARSE_STATEMENT(L"enum TriStateSwitch { "
                            L"case Off, Low, High "
                            L"mutating func next() { "
                            L"    switch self { "
@@ -548,7 +548,7 @@ public:
     
     void testTypeMethod_Struct()
     {
-        Node* root = parse(L"struct SomeClass {\n"
+        PARSE_STATEMENT(L"struct SomeClass {\n"
                            L"static func someTypeMethod() {\n"
                            L"    // type method implementation goes here\n"
                            L"}\n"
@@ -568,7 +568,7 @@ public:
     
     void testTypeMethod_Enum()
     {
-        Node* root = parse(L"enum SomeClass {\n"
+        PARSE_STATEMENT(L"enum SomeClass {\n"
                            L"static func someTypeMethod() {\n"
                            L"    // type method implementation goes here\n"
                            L"}\n"
@@ -588,7 +588,7 @@ public:
     
     void testTypeMethod_Class()
     {
-        Node* root = parse(L"class SomeClass {\n"
+        PARSE_STATEMENT(L"class SomeClass {\n"
                            L"class func someTypeMethod() {\n"
                            L"    // type method implementation goes here\n"
                            L"}\n"
@@ -608,7 +608,7 @@ public:
     
     void testSubscript_Struct()
     {
-        Node* root = parse(L"struct TimesTable {\n"
+        PARSE_STATEMENT(L"struct TimesTable {\n"
                            L"let multiplier: Int\n"
                            L"subscript(index: Int) -> Int {\n"
                            L"    return multiplier * index\n"
@@ -626,7 +626,7 @@ public:
     }
     void testSubscriptOptions()
     {
-        Node* root = parse(
+        PARSE_STATEMENT(
                            L"struct Matrix {\n"
                            L"    subscript(row: Int, column: Int) -> Double {\n"
                            L"        get {\n"
@@ -658,7 +658,7 @@ public:
     
     void testSubclass()
     {
-        Node* root = parse(L"class Bicycle: Vehicle {"
+        PARSE_STATEMENT(L"class Bicycle: Vehicle {"
                            L"init() {"
                            L"    super.init()"
                            L"    numberOfWheels = 2"

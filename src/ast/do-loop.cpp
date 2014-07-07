@@ -6,9 +6,15 @@ USE_SWIFT_NS
 
 
 DoLoop::DoLoop()
-    :Statement(2)
+    :codeBlock(NULL), condition(NULL)
 {
 }
+DoLoop::~DoLoop()
+{
+    SafeDelete(codeBlock);
+    SafeDelete(condition);
+}
+
 void DoLoop::serialize(std::wostream& out)
 {
     using std::endl;
@@ -21,18 +27,18 @@ void DoLoop::serialize(std::wostream& out)
 
 void DoLoop::setCodeBlock(CodeBlock* codeBlock)
 {
-    set(0, codeBlock);
+    this->codeBlock = codeBlock;
 }
 CodeBlock* DoLoop::getCodeBlock()
 {
-    return static_cast<CodeBlock*>(get(0));
+    return codeBlock;
 }
 
 void DoLoop::setCondition(Expression* expression)
 {
-    set(1, expression);
+    this->condition = expression;
 }
 Expression* DoLoop::getCondition()
 {
-    return static_cast<Expression*>(get(1));
+    return condition;
 }

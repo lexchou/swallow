@@ -18,7 +18,7 @@ class TestOperatorExpression : public SwiftTestCase
 public:
     void testExpr1()
     {
-        Node* root = parse(L"a=4+1*(3+1*4)");
+        PARSE_STATEMENT(L"a=4+1*(3+1*4)");
         CPPUNIT_ASSERT(root != NULL);
         Assignment* eq = dynamic_cast<Assignment*>(root);
         
@@ -40,7 +40,7 @@ public:
         
         ParenthesizedExpression* p = dynamic_cast<ParenthesizedExpression*>(mul->getRHS());
         CPPUNIT_ASSERT(p != NULL);
-        CPPUNIT_ASSERT_EQUAL(1, p->numChildren());
+        CPPUNIT_ASSERT_EQUAL(1, p->numExpressions());
         
         add = dynamic_cast<BinaryOperator*>(p->get(0));
         CPPUNIT_ASSERT(add != NULL);
@@ -55,7 +55,7 @@ public:
     }
     void testMinus()
     {
-        Node* root = parse(L"-y");
+        PARSE_STATEMENT(L"-y");
         
         DESTROY(root);
     }

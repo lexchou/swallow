@@ -11,6 +11,7 @@ class Constant : public Declaration
 {
 public:
     Constant();
+    ~Constant();
 public:
     using Declaration::setSpecifiers;
     void add(Pattern* pattern, Expression* initializer);
@@ -19,6 +20,7 @@ public:
 public:
     virtual void serialize(std::wostream& out);
 private:
+    std::vector<Pattern*> pairs;
 };
 
 SWIFT_NS_END

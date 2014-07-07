@@ -33,6 +33,7 @@ public:
     virtual void serialize(std::wostream& out);
 private:
     std::vector<Condition> conditions;
+    std::vector<Statement*> statements;
 };
 
 SWIFT_NS_END

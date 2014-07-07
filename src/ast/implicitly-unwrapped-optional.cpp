@@ -4,8 +4,12 @@ USE_SWIFT_NS
 
 
 ImplicitlyUnwrappedOptional::ImplicitlyUnwrappedOptional()
-    :TypeNode(1)
+    :innerType(NULL)
 {
+}
+ImplicitlyUnwrappedOptional::~ImplicitlyUnwrappedOptional()
+{
+    SafeDelete(innerType);
 }
 
 void ImplicitlyUnwrappedOptional::serialize(std::wostream& out)
@@ -18,9 +22,9 @@ void ImplicitlyUnwrappedOptional::serialize(std::wostream& out)
 
 void ImplicitlyUnwrappedOptional::setInnerType(TypeNode* innerType)
 {
-    set(0, innerType);
+    this->innerType = innerType;
 }
 TypeNode* ImplicitlyUnwrappedOptional::getInnerType()
 {
-    return static_cast<TypeNode*>(get(0));
+    return innerType;
 }

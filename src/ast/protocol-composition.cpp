@@ -5,16 +5,21 @@ USE_SWIFT_NS
 
 
 ProtocolComposition::ProtocolComposition()
-    :TypeNode(0)
 {
 }
+
+ProtocolComposition::~ProtocolComposition()
+{
+    SafeDeleteAll(protocols);
+}
+
 void ProtocolComposition::serialize(std::wostream& out)
 {
     out<<L"protocol<";
-    Children::iterator iter = children.begin();
-    for(; iter != children.end(); iter++)
+    std::vector<TypeIdentifier*>::iterator iter = protocols.begin();
+    for(; iter != protocols.end(); iter++)
     {
-        if(iter != children.begin())
+        if(iter != protocols.begin())
             out<<L", ";
         (*iter)->serialize(out);
     }
@@ -24,13 +29,13 @@ void ProtocolComposition::serialize(std::wostream& out)
 
 void ProtocolComposition::addProtocol(TypeIdentifier* protocol)
 {
-    children.push_back(protocol);
+    protocols.push_back(protocol);
 }
 TypeIdentifier* ProtocolComposition::getProtocol(int i)
 {
-    return static_cast<TypeIdentifier*>(get(i));
+    return protocols[i];
 }
 int ProtocolComposition::numProtocols()
 {
-    return children.size();
+    return protocols.size();
 }

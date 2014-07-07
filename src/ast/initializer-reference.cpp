@@ -3,18 +3,21 @@ USE_SWIFT_NS
 
 
 InitializerReference::InitializerReference(Expression* expr)
-:Expression(1)
 {
     setExpression(expr);
+}
+InitializerReference::~InitializerReference()
+{
+    SafeDelete(expression);
 }
 
 void InitializerReference::setExpression(Expression* expr)
 {
-    set(0, expr);
+    this->expression = expr;
 }
 Expression* InitializerReference::getExpression()
 {
-    return static_cast<Expression*>(get(0));
+    return expression;
 }
 
 

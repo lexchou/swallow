@@ -28,171 +28,157 @@ public:
     void testLiteral()
     {
         
-        Node* root = parse(L"3");
+        PARSE_STATEMENT(L"3");
         CPPUNIT_ASSERT(root != NULL);
         IntegerLiteral* n = dynamic_cast<IntegerLiteral*>(root);
         CPPUNIT_ASSERT(n != NULL);
         ASSERT_EQUALS(L"3", n->toString().c_str());
         
-        delete root;
-        CPPUNIT_ASSERT_EQUAL(0, Node::NodeCount);
+        DESTROY(root);
     }
     void testLiteral2()
     {
-        Node* root = parse(L"3.45e4");
+        PARSE_STATEMENT(L"3.45e4");
         CPPUNIT_ASSERT(root != NULL);
         FloatLiteral* f = dynamic_cast<FloatLiteral*>(root);
         CPPUNIT_ASSERT(f != NULL);
         ASSERT_EQUALS(L"3.45e4", f->toString().c_str());
         
-        delete root;
-        CPPUNIT_ASSERT_EQUAL(0, Node::NodeCount);
+        DESTROY(root);
     }
     
     void testLiteral3()
     {
-        Node* root = parse(L"\"str\\thello\"");
+        PARSE_STATEMENT(L"\"str\\thello\"");
         CPPUNIT_ASSERT(root != NULL);
         StringLiteral* str = dynamic_cast<StringLiteral*>(root);
         CPPUNIT_ASSERT(str != NULL);
         ASSERT_EQUALS(L"str\thello", str->toString().c_str());
         
-        delete root;
-        CPPUNIT_ASSERT_EQUAL(0, Node::NodeCount);
+        DESTROY(root);
         
     }
     void testArrayLiteral()
     {
-        Node* root = parse(L"[]");
+        PARSE_STATEMENT(L"[]");
         CPPUNIT_ASSERT(root != NULL);
         ArrayLiteral* a = dynamic_cast<ArrayLiteral*>(root);
         CPPUNIT_ASSERT(a != NULL);
-        CPPUNIT_ASSERT_EQUAL(0, a->numChildren());
+        CPPUNIT_ASSERT_EQUAL(0, a->numElements());
         
         
-        delete root;
-        CPPUNIT_ASSERT_EQUAL(0, Node::NodeCount);
+        DESTROY(root);
     }
     
     void testArrayLiteral2()
     {
-        Node* root = parse(L"[5]");
+        PARSE_STATEMENT(L"[5]");
         CPPUNIT_ASSERT(root != NULL);
         ArrayLiteral* a = dynamic_cast<ArrayLiteral*>(root);
         CPPUNIT_ASSERT(a != NULL);
-        CPPUNIT_ASSERT_EQUAL(1, a->numChildren());
-        IntegerLiteral* i = dynamic_cast<IntegerLiteral*>(a->get(0));
+        CPPUNIT_ASSERT_EQUAL(1, a->numElements());
+        IntegerLiteral* i = dynamic_cast<IntegerLiteral*>(a->getElement(0));
         CPPUNIT_ASSERT(i != NULL);
         ASSERT_EQUALS(L"5", i->toString().c_str());
         
         
-        delete root;
-        CPPUNIT_ASSERT_EQUAL(0, Node::NodeCount);
+        DESTROY(root);
     }
     void testArrayLiteral3()
     {
-        Node* root = parse(L"[\"a\",]");
+        PARSE_STATEMENT(L"[\"a\",]");
         CPPUNIT_ASSERT(root != NULL);
         ArrayLiteral* a = dynamic_cast<ArrayLiteral*>(root);
         CPPUNIT_ASSERT(a != NULL);
-        CPPUNIT_ASSERT_EQUAL(1, a->numChildren());
-        StringLiteral* s = dynamic_cast<StringLiteral*>(a->get(0));
+        CPPUNIT_ASSERT_EQUAL(1, a->numElements());
+        StringLiteral* s = dynamic_cast<StringLiteral*>(a->getElement(0));
         CPPUNIT_ASSERT(s != NULL);
         ASSERT_EQUALS(L"a", s->toString().c_str());
         
-        delete root;
-        CPPUNIT_ASSERT_EQUAL(0, Node::NodeCount);
+        DESTROY(root);
     }
     void testArrayLiteral4()
     {
-        Node* root = parse(L"[5,6]");
+        PARSE_STATEMENT(L"[5,6]");
         CPPUNIT_ASSERT(root != NULL);
         ArrayLiteral* a = dynamic_cast<ArrayLiteral*>(root);
         CPPUNIT_ASSERT(a);
-        CPPUNIT_ASSERT_EQUAL(2, a->numChildren());
+        CPPUNIT_ASSERT_EQUAL(2, a->numElements());
         
-        delete root;
-        CPPUNIT_ASSERT_EQUAL(0, Node::NodeCount);
+        DESTROY(root);
     }
     void testArrayLiteral5()
     {
-        Node* root = parse(L"[5,6, [5]]");
+        PARSE_STATEMENT(L"[5,6, [5]]");
         CPPUNIT_ASSERT(root != NULL);
         ArrayLiteral*a = dynamic_cast<ArrayLiteral*>(root);
         CPPUNIT_ASSERT(a);
-        CPPUNIT_ASSERT_EQUAL(3, a->numChildren());
+        CPPUNIT_ASSERT_EQUAL(3, a->numElements());
         
-        delete root;
-        CPPUNIT_ASSERT_EQUAL(0, Node::NodeCount);
+        DESTROY(root);
         
     }
     void testDictionaryLiteral()
     {
-        Node* root = parse(L"[:]");
+        PARSE_STATEMENT(L"[:]");
         CPPUNIT_ASSERT(root != NULL);
         DictionaryLiteral* d = dynamic_cast<DictionaryLiteral*>(root);
         CPPUNIT_ASSERT(d != NULL);
-        CPPUNIT_ASSERT_EQUAL(0, d->numChildren());
+        CPPUNIT_ASSERT_EQUAL(0, d->numElements());
         
-        delete root;
-        CPPUNIT_ASSERT_EQUAL(0, Node::NodeCount);
+        DESTROY(root);
     }
     void testDictionaryLiteral2()
     {
-        Node* root = parse(L"[5 : 1]");
+        PARSE_STATEMENT(L"[5 : 1]");
         CPPUNIT_ASSERT(root != NULL);
         DictionaryLiteral* d = dynamic_cast<DictionaryLiteral*>(root);
         CPPUNIT_ASSERT(d != NULL);
-        CPPUNIT_ASSERT_EQUAL(2, d->numChildren());
+        CPPUNIT_ASSERT_EQUAL(1, d->numElements());
         
-        delete root;
-        CPPUNIT_ASSERT_EQUAL(0, Node::NodeCount);
+        DESTROY(root);
     }
     void testCompileConstants()
     {
-        Node* root = parse(L"__FILE__");
+        PARSE_STATEMENT(L"__FILE__");
         CPPUNIT_ASSERT(root != NULL);
         CompileConstant* c = dynamic_cast<CompileConstant*>(root);
         CPPUNIT_ASSERT(c != NULL);
         ASSERT_EQUALS(L"<file>", c->getValue().c_str());
         
-        delete root;
-        CPPUNIT_ASSERT_EQUAL(0, Node::NodeCount);
+        DESTROY(root);
     }
     void testCompileConstants2()
     {
-        Node* root = parse(L"__LINE__");
+        PARSE_STATEMENT(L"__LINE__");
         CPPUNIT_ASSERT(root != NULL);
         CompileConstant* c = dynamic_cast<CompileConstant*>(root);
         CPPUNIT_ASSERT(c != NULL);
         ASSERT_EQUALS(L"1", c->getValue().c_str());
         
         
-        delete root;
-        CPPUNIT_ASSERT_EQUAL(0, Node::NodeCount);
+        DESTROY(root);
     }
     void testCompileConstants3()
     {
-        Node* root = parse(L"__COLUMN__");
+        PARSE_STATEMENT(L"__COLUMN__");
         CPPUNIT_ASSERT(root != NULL);
         CompileConstant* c = dynamic_cast<CompileConstant*>(root);
         CPPUNIT_ASSERT(c != NULL);
         ASSERT_EQUALS(L"1", c->getValue().c_str());
         
         
-        delete root;
-        CPPUNIT_ASSERT_EQUAL(0, Node::NodeCount);
+        DESTROY(root);
     }
     void testCompileConstants4()
     {
-        Node* root = parse(L"__FUNCTION__");
+        PARSE_STATEMENT(L"__FUNCTION__");
         CPPUNIT_ASSERT(root != NULL);
         CompileConstant* c = dynamic_cast<CompileConstant*>(root);
         CPPUNIT_ASSERT(c != NULL);
         ASSERT_EQUALS(L"<top>", c->getValue().c_str());
         
-        delete root;
-        CPPUNIT_ASSERT_EQUAL(0, Node::NodeCount);
+        DESTROY(root);
     }
 };
 ;

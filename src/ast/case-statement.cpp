@@ -5,11 +5,11 @@ USE_SWIFT_NS
 
 
 CaseStatement::CaseStatement()
-    :Statement(0)
 {
 }
 CaseStatement::~CaseStatement()
 {
+    SafeDeleteAll(statements);
     std::vector<Condition>::iterator iter = conditions.begin();
     for(; iter != conditions.end(); iter++)
     {
@@ -64,15 +64,15 @@ const CaseStatement::Condition& CaseStatement::getCondition(int i)
 
 void CaseStatement::addStatement(Statement* statement)
 {
-    children.push_back(statement);
+    statements.push_back(statement);
 }
 Statement* CaseStatement::getStatement(int idx)
 {
-    return static_cast<Statement*>(get(idx));
+    return statements[idx];
 }
 int CaseStatement::numStatements()
 {
-    return children.size();
+    return statements.size();
 }
 
 

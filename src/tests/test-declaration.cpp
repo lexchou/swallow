@@ -28,7 +28,7 @@ public:
     
     void testImport()
     {
-        Node* root = parse(L"import Foundation");
+        PARSE_STATEMENT(L"import Foundation");
         Import* import = NULL;
         CPPUNIT_ASSERT(import = dynamic_cast<Import*>(root));
         ASSERT_EQUALS(L"Foundation", import->getPath().c_str());
@@ -38,7 +38,7 @@ public:
     }
     void testImportSubModule()
     {
-        Node* root = parse(L"import Foundation.SubModule");
+        PARSE_STATEMENT(L"import Foundation.SubModule");
         Import* import = NULL;
         CPPUNIT_ASSERT(import = dynamic_cast<Import*>(root));
         ASSERT_EQUALS(L"Foundation.SubModule", import->getPath().c_str());
@@ -48,7 +48,7 @@ public:
     
     void testImportKind_Class()
     {
-        Node* root = parse(L"import class Foundation.NSFileManager");
+        PARSE_STATEMENT(L"import class Foundation.NSFileManager");
         Import* import = NULL;
         CPPUNIT_ASSERT(import = dynamic_cast<Import*>(root));
         ASSERT_EQUALS(L"Foundation.NSFileManager", import->getPath().c_str());
@@ -58,7 +58,7 @@ public:
     
     void testImportKind_TypeAlias()
     {
-        Node* root = parse(L"import typealias Foundation.NSFileManager");
+        PARSE_STATEMENT(L"import typealias Foundation.NSFileManager");
         Import* import = NULL;
         CPPUNIT_ASSERT(import = dynamic_cast<Import*>(root));
         ASSERT_EQUALS(L"Foundation.NSFileManager", import->getPath().c_str());
@@ -68,7 +68,7 @@ public:
     
     void testImportKind_Struct()
     {
-        Node* root = parse(L"import struct Foundation.NSFileManager");
+        PARSE_STATEMENT(L"import struct Foundation.NSFileManager");
         Import* import = NULL;
         CPPUNIT_ASSERT(import = dynamic_cast<Import*>(root));
         ASSERT_EQUALS(L"Foundation.NSFileManager", import->getPath().c_str());
@@ -78,7 +78,7 @@ public:
     
     void testImportKind_Enum()
     {
-        Node* root = parse(L"import enum Foundation.NSFileManager");
+        PARSE_STATEMENT(L"import enum Foundation.NSFileManager");
         Import* import = NULL;
         CPPUNIT_ASSERT(import = dynamic_cast<Import*>(root));
         ASSERT_EQUALS(L"Foundation.NSFileManager", import->getPath().c_str());
@@ -88,7 +88,7 @@ public:
     
     void testImportKind_Protocol()
     {
-        Node* root = parse(L"import protocol Foundation.NSFileManager");
+        PARSE_STATEMENT(L"import protocol Foundation.NSFileManager");
         Import* import = NULL;
         CPPUNIT_ASSERT(import = dynamic_cast<Import*>(root));
         ASSERT_EQUALS(L"Foundation.NSFileManager", import->getPath().c_str());
@@ -98,7 +98,7 @@ public:
     
     void testImportKind_Var()
     {
-        Node* root = parse(L"import var Foundation.NSFileManager");
+        PARSE_STATEMENT(L"import var Foundation.NSFileManager");
         Import* import = NULL;
         CPPUNIT_ASSERT(import = dynamic_cast<Import*>(root));
         ASSERT_EQUALS(L"Foundation.NSFileManager", import->getPath().c_str());
@@ -108,7 +108,7 @@ public:
     
     void testImportKind_Func()
     {
-        Node* root = parse(L"import func Foundation.NSFileManager");
+        PARSE_STATEMENT(L"import func Foundation.NSFileManager");
         Import* import = NULL;
         CPPUNIT_ASSERT(import = dynamic_cast<Import*>(root));
         ASSERT_EQUALS(L"Foundation.NSFileManager", import->getPath().c_str());
@@ -118,7 +118,7 @@ public:
     
     void testLet()
     {
-        Node* root = parse(L"let a : Int[] = [1, 2, 3]");
+        PARSE_STATEMENT(L"let a : Int[] = [1, 2, 3]");
         Constant* c = NULL;
         Identifier* id = NULL;
         ArrayLiteral* value = NULL;
@@ -133,17 +133,17 @@ public:
         ASSERT_EQUALS(L"Int", Int->getName().c_str());
         
         CPPUNIT_ASSERT(value = dynamic_cast<ArrayLiteral*>(c->getPair(0).second));
-        CPPUNIT_ASSERT_EQUAL(3, value->numChildren());
-        ASSERT_EQUALS(L"1", dynamic_cast<IntegerLiteral*>(value->get(0))->toString().c_str());
-        ASSERT_EQUALS(L"2", dynamic_cast<IntegerLiteral*>(value->get(1))->toString().c_str());
-        ASSERT_EQUALS(L"3", dynamic_cast<IntegerLiteral*>(value->get(2))->toString().c_str());
+        CPPUNIT_ASSERT_EQUAL(3, value->numElements());
+        ASSERT_EQUALS(L"1", dynamic_cast<IntegerLiteral*>(value->getElement(0))->toString().c_str());
+        ASSERT_EQUALS(L"2", dynamic_cast<IntegerLiteral*>(value->getElement(1))->toString().c_str());
+        ASSERT_EQUALS(L"3", dynamic_cast<IntegerLiteral*>(value->getElement(2))->toString().c_str());
 
         DESTROY(root);
     }
     
     void testLet_Multiple()
     {
-        Node* root = parse(L"let a=[k1 : 1, k2 : 2], b : Int = 2");
+        PARSE_STATEMENT(L"let a=[k1 : 1, k2 : 2], b : Int = 2");
         Constant* c = NULL;
         Identifier* id = NULL;
         TypeIdentifier* Int = NULL;
@@ -153,7 +153,7 @@ public:
         CPPUNIT_ASSERT(id = dynamic_cast<Identifier*>(c->getPair(0).first));
         ASSERT_EQUALS(L"a", id->getIdentifier().c_str());
         CPPUNIT_ASSERT(dict = dynamic_cast<DictionaryLiteral*>(c->getPair(0).second));
-        CPPUNIT_ASSERT_EQUAL(4, dict->numChildren());
+        CPPUNIT_ASSERT_EQUAL(2, dict->numElements());
         
         CPPUNIT_ASSERT(id = dynamic_cast<Identifier*>(c->getPair(1).first));
         ASSERT_EQUALS(L"b", id->getIdentifier().c_str());
@@ -165,7 +165,7 @@ public:
     
     void testLet_Tuple()
     {
-        Node* root = parse(L"let (a, b) : Int = (1, 2)");
+        PARSE_STATEMENT(L"let (a, b) : Int = (1, 2)");
         Constant* c = NULL;
         Tuple* tuple = NULL;
         TypeIdentifier* type = NULL;
@@ -175,14 +175,14 @@ public:
         CPPUNIT_ASSERT_EQUAL(2, tuple->numElements());
         CPPUNIT_ASSERT(type = dynamic_cast<TypeIdentifier*>(tuple->getType()));
         CPPUNIT_ASSERT(p = dynamic_cast<ParenthesizedExpression*>(c->getPair(0).second));
-        CPPUNIT_ASSERT_EQUAL(2, p->numChildren());
+        CPPUNIT_ASSERT_EQUAL(2, p->numExpressions());
         
         DESTROY(root);
     }
     
     void testVar()
     {
-        Node* root = parse(L"var currentLoginAttempt = 0");
+        PARSE_STATEMENT(L"var currentLoginAttempt = 0");
         Variables* vars = NULL;
         Variable* var = NULL;
         Identifier* id = NULL;
@@ -202,7 +202,7 @@ public:
     }
     void testVar_Multiple()
     {
-        Node* root = parse(L"var x = 0.0, y = 0.0, z = 0.0");
+        PARSE_STATEMENT(L"var x = 0.0, y = 0.0, z = 0.0");
         Variables* vars = NULL;
         Variable* var = NULL;
         Identifier* id = NULL;
@@ -231,12 +231,13 @@ public:
         CPPUNIT_ASSERT(f = dynamic_cast<FloatLiteral*>(var->getInitializer()));
         ASSERT_EQUALS(L"0.0", f->toString().c_str());
         
+        DESTROY(root);
         
     }
     
     void testVar_Typed()
     {
-        Node* root = parse(L"var welcomeMessage: String");
+        PARSE_STATEMENT(L"var welcomeMessage: String");
         Variables* vars = NULL;
         Variable* var = NULL;
         Identifier* id = NULL;

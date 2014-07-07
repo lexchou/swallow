@@ -8,13 +8,20 @@ USE_SWIFT_NS
 
 
 Variable::Variable()
-    :Declaration(7)
+    :name(NULL), type(NULL), initializer(NULL), getter(NULL), setter(NULL), willSet(NULL), didSet(NULL)
 {
 }
 
 Variable::~Variable()
 {
-    Attribute::disposeAll(typeAttributes);
+    SafeDeleteAll(typeAttributes);
+    SafeDelete(name);
+    SafeDelete(type);
+    SafeDelete(initializer);
+    SafeDelete(getter);
+    SafeDelete(setter);
+    SafeDelete(willSet);
+    SafeDelete(didSet);
 }
 void Variable::serialize(std::wostream& out)
 {
@@ -23,11 +30,11 @@ void Variable::serialize(std::wostream& out)
 
 void Variable::setName(Pattern* pattern)
 {
-    set(0, pattern);
+    this->name = pattern;
 }
 Pattern* Variable::getName()
 {
-    return static_cast<Pattern*>(get(0));
+    return name;
 }
 
 void Variable::setTypeAttributes(const Attributes& attrs)
@@ -40,28 +47,28 @@ const Attributes& Variable::getTypeAttributes() const
 }
 void Variable::setType(TypeNode* t)
 {
-    set(1, t);
+    this->type = t;
 }
 TypeNode* Variable::getType()
 {
-    return static_cast<TypeNode*>(get(1));
+    return type;
 }
 void Variable::setInitializer(Expression* expr)
 {
-    set(2, expr);
+    this->initializer = expr;
 }
 Expression* Variable::getInitializer()
 {
-    return static_cast<Expression*>(get(2));
+    return initializer;
 }
 
 void Variable::setSetter(CodeBlock* setter)
 {
-    set(3, setter);
+    this->setter = setter;
 }
 CodeBlock* Variable::getSetter()
 {
-    return static_cast<CodeBlock*>(get(3));
+    return setter;
 }
 
 void Variable::setSetterName(const std::wstring& name)
@@ -75,30 +82,30 @@ const std::wstring& Variable::getSetterName()
 
 void Variable::setGetter(CodeBlock* getter)
 {
-    set(4, getter);
+    this->getter = getter;
 }
 CodeBlock* Variable::getGetter()
 {
-    return static_cast<CodeBlock*>(get(4));
+    return getter;
 }
 
 
 void Variable::setWillSet(CodeBlock* willSet)
 {
-    set(5, willSet);
+    this->willSet = willSet;
 }
 CodeBlock* Variable::getWillSet()
 {
-    return static_cast<CodeBlock*>(get(5));
+    return willSet;
 }
 
 void Variable::setDidSet(CodeBlock* didSet)
 {
-    set(6, didSet);
+    this->didSet = didSet;
 }
 CodeBlock* Variable::getDidSet()
 {
-    return static_cast<CodeBlock*>(get(6));
+    return didSet;
 }
 
 

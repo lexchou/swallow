@@ -4,8 +4,11 @@ USE_SWIFT_NS
 
 
 TypeIdentifier::TypeIdentifier()
-    :TypeNode(0)
 {
+}
+TypeIdentifier::~TypeIdentifier()
+{
+    SafeDeleteAll(genericArguments);
 }
 void TypeIdentifier::serialize(std::wostream& out)
 {
@@ -13,10 +16,10 @@ void TypeIdentifier::serialize(std::wostream& out)
     if(numGenericArguments())
     {
         out<<L"<";
-        Children::iterator iter = children.begin();
-        for(; iter != children.end(); iter++)
+        std::vector<TypeNode*>::iterator iter = genericArguments.begin();
+        for(; iter != genericArguments.end(); iter++)
         {
-            if(iter != children.begin())
+            if(iter != genericArguments.begin())
                 out<<L", ";
             (*iter)->serialize(out);
         }
@@ -36,13 +39,13 @@ const std::wstring& TypeIdentifier::getName() const
 
 void TypeIdentifier::addGenericArgument(TypeNode* argument)
 {
-    children.push_back(argument);
+    genericArguments.push_back(argument);
 }
 int TypeIdentifier::numGenericArguments()
 {
-    return children.size();
+    return genericArguments.size();
 }
 TypeNode* TypeIdentifier::getGenericArgument(int idx)
 {
-    return static_cast<TypeNode*>(get(idx));
+    return genericArguments[idx];
 }

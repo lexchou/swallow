@@ -4,7 +4,7 @@ USE_SWIFT_NS
 
 
 Attribute::Attribute()
-    :Node(0)
+    :Node()
 {
 }
 void Attribute::serialize(std::wostream& out)
@@ -29,10 +29,13 @@ void Attribute::addBalancedToken(const std::wstring& token)
 
 void Attribute::disposeAll(std::vector<Attribute*>& attributes)
 {
+    /*
     std::vector<Attribute*>::iterator iter = attributes.begin();
     for(; iter != attributes.end(); iter++)
     {
         delete *iter;
     }
     attributes.clear();
+     */
+    SafeDeleteAll(attributes);
 }

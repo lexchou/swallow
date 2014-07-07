@@ -8,10 +8,14 @@ class DictionaryLiteral : public Expression
 {
 public:
 	DictionaryLiteral();
+    ~DictionaryLiteral();
 public:
 	void insert(Expression* key, Expression* value);
+    int numElements()const;
 public:
     virtual void serialize(std::wostream& out);
+private:
+    std::vector<std::pair<Expression*, Expression*> > items;
 };
 
 SWIFT_NS_END

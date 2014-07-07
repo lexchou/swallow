@@ -6,15 +6,18 @@ USE_SWIFT_NS
 
 
 Parameter::Parameter()
-    :Node(2)
 {
     inout = false;
     accessibility = None;
     shorthandExternalName = false;
+    type = NULL;
+    defaultValue = NULL;
 }
 Parameter::~Parameter()
 {
     Attribute::disposeAll(typeAttributes);
+    SafeDelete(type);
+    SafeDelete(defaultValue);
 }
 void Parameter::serialize(std::wostream& out)
 {
@@ -77,17 +80,17 @@ const Attributes& Parameter::getTypeAttributes()const
 
 void Parameter::setType(TypeNode* type)
 {
-    set(0, type);
+    this->type = type;
 }
 TypeNode* Parameter::getType()
 {
-    return static_cast<TypeNode*>(get(0));
+    return type;
 }
 void Parameter::setDefaultValue(Expression* def)
 {
-    set(1, def);
+    this->defaultValue = def;
 }
 Expression* Parameter::getDefaultValue()
 {
-    return static_cast<Expression*>(get(1));
+    return defaultValue;
 }

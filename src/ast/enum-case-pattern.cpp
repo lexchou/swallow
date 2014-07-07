@@ -5,8 +5,12 @@ USE_SWIFT_NS
 
 
 EnumCasePattern::EnumCasePattern()
-    :Pattern(1)
+    :associatedBinding(NULL)
 {
+}
+EnumCasePattern::~EnumCasePattern()
+{
+    SafeDelete(associatedBinding);
 }
 void EnumCasePattern::serialize(std::wostream& out)
 {
@@ -24,9 +28,9 @@ const std::wstring& EnumCasePattern::getName()const
 
 void EnumCasePattern::setAssociatedBinding(Tuple* tuple)
 {
-    set(0, tuple);
+    associatedBinding = tuple;
 }
 Tuple* EnumCasePattern::getAssociatedBinding()
 {
-    return static_cast<Tuple*>(get(0));
+    return associatedBinding;
 }

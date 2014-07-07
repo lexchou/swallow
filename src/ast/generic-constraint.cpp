@@ -5,9 +5,15 @@ USE_SWIFT_NS
 
 
 GenericConstraint::GenericConstraint()
-    :Node(1)
+:identifier(NULL)
 {
 }
+GenericConstraint::~GenericConstraint()
+{
+    SafeDelete(identifier);
+    SafeDeleteAll(expectedTypes);
+}
+
 void GenericConstraint::serialize(std::wostream& out)
 {
     
@@ -16,11 +22,11 @@ void GenericConstraint::serialize(std::wostream& out)
 
 void GenericConstraint::setIdentifier(TypeIdentifier* identifier)
 {
-    set(0, identifier);
+    this->identifier = identifier;
 }
 TypeIdentifier* GenericConstraint::getIdentifier()
 {
-    return static_cast<TypeIdentifier*>(get(0));
+    return identifier;
 }
 
 void GenericConstraint::setConstraintType(ConstraintType constraint)
@@ -34,13 +40,13 @@ GenericConstraint::ConstraintType GenericConstraint::getConstraintType()const
 
 void GenericConstraint::addExpectedType(TypeIdentifier* expectedIdentifier)
 {
-    children.push_back(expectedIdentifier);
+    expectedTypes.push_back(expectedIdentifier);
 }
 int GenericConstraint::numExpectedTypes()const
 {
-    return children.size() - 1;
+    return expectedTypes.size();
 }
 TypeIdentifier* GenericConstraint::getExpectedType(int i)
 {
-    return static_cast<TypeIdentifier*>(get(i + 1));
+    return expectedTypes[i];
 }

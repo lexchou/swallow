@@ -10,6 +10,7 @@ class ProtocolComposition : public TypeNode
 {
 public:
     ProtocolComposition();
+    ~ProtocolComposition();
 public:
     void addProtocol(TypeIdentifier* protocol);
     TypeIdentifier* getProtocol(int i);
@@ -17,6 +18,7 @@ public:
 public:
     virtual void serialize(std::wostream& out);
 private:
+    std::vector<TypeIdentifier*> protocols;
 };
 
 SWIFT_NS_END

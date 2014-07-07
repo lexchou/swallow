@@ -5,18 +5,21 @@ USE_SWIFT_NS
 
 
 SelfExpression::SelfExpression(Expression* expr)
-:Expression(1)
+:expression(expr)
 {
-    setExpression(expr);
+}
+SelfExpression::~SelfExpression()
+{
+    SafeDelete(expression);
 }
 
 void SelfExpression::setExpression(Expression* expr)
 {
-    set(0, expr);
+    this->expression = expr;
 }
 Expression* SelfExpression::getExpression()
 {
-    return static_cast<Expression*>(get(0));
+    return expression;
 }
 
 

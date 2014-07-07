@@ -15,15 +15,13 @@
 
 #define ASSERT_EQUALS(E, A) wcs_assertEquals((E), (A), __FILE__, __LINE__)
 
-
 class SwiftTestCase : public CppUnit::TestFixture
 {
 public:
     
-    Swift::Node* parse(const wchar_t* str)
+    Swift::Node* parseStatement(const wchar_t* str)
     {
         using namespace Swift;
-        Node::NodeCount = 0;
         SymbolRegistry sregistry;
         NodeFactory nodeFactory;
         Parser parser(&nodeFactory, &sregistry);
@@ -46,18 +44,34 @@ public:
         
         CPPUNIT_NS::Asserter::failNotEqual( expected2, actual2, CPPUNIT_NS::SourceLine(file, line), "");
     }
-    
-    void assertNodesEmpty(const char* file, int line)
+};
+
+struct Tracer
+{
+    Tracer(const char* file, int line, const char* func)
+    {
+        strcpy(this->file, file);
+        strcpy(this->func, func);
+        this->line = line;
+#ifdef TRACE_NODE
+        using namespace Swift;
+//        Node::UnreleasedNodes.clear();
+//        Node::NodeCount = 0;
+#endif
+    }
+    ~Tracer()
     {
 #ifdef TRACE_NODE
         using namespace Swift;
         using namespace std;
+        list<Node*>& nodes = Node::UnreleasedNodes;
+        int unreleasedNodes = nodes.size();
         if(Node::NodeCount != 0)
         {
             stringstream ss;
-            set<Node*>::iterator iter = Node::UnreleasedNodes.begin();
-            ss<<Node::NodeCount<<" unreleased AST nodes detected:";
-            for(; iter != Node::UnreleasedNodes.end(); iter++)
+            list<Node*>::iterator iter = nodes.begin();
+            ss<<unreleasedNodes<<" unreleased AST nodes detected in [" << func << "]:";
+            for(; iter != nodes.end(); iter++)
             {
                 Node* node = *iter;
                 ss << static_cast<const void*>(node) <<", ";
@@ -66,8 +80,17 @@ public:
         }
 #endif//TRACE_NODE
     }
+    
+    
+    char file[1024];
+    int line;
+    char func[100];
+    
 };
+#define PARSE_STATEMENT(s) Tracer tracer(__FILE__, __LINE__, __FUNCTION__);Node* root = parseStatement((s));
 
-#define DESTROY(n) delete n; assertNodesEmpty(__FILE__, __LINE__);
+
+
+#define DESTROY(n) delete n;
 
 #endif//TEST_UTILS_H

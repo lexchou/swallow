@@ -9,7 +9,7 @@ class Attribute;
 class TypeNode : public Statement
 {
 public:
-    TypeNode(int numChildren);
+    TypeNode();
     ~TypeNode();
 public:
     void addAttribute(Attribute* attr);

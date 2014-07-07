@@ -5,19 +5,16 @@ USE_SWIFT_NS
 
 
 TypeDeclaration::TypeDeclaration()
-    :Declaration(1)
+    :identifier(NULL)
 {
 }
 
 
 TypeDeclaration::~TypeDeclaration()
 {
-    std::vector<TypeIdentifier*>::iterator iter = parents.begin();
-    for(; iter != parents.end(); iter++)
-    {
-        delete *iter;
-    }
-
+    SafeDeleteAll(declarations);
+    SafeDeleteAll(parents);
+    SafeDelete(identifier);
 }
 
 
@@ -40,23 +37,23 @@ TypeIdentifier* TypeDeclaration::getParent(int i)
 
 void TypeDeclaration::setIdentifier(TypeIdentifier* id)
 {
-    set(0, id);
+    this->identifier = id;
 }
 TypeIdentifier* TypeDeclaration::getIdentifier()
 {
-    return static_cast<TypeIdentifier*>(get(0));
+    return identifier;
 }
 
 
 void TypeDeclaration::addDeclaration(Declaration* decl)
 {
-    children.push_back(decl);
+    declarations.push_back(decl);
 }
 int TypeDeclaration::numDeclarations()const
 {
-    return children.size() - 1;
+    return declarations.size();
 }
 Declaration* TypeDeclaration::getDeclaration(int i)
 {
-    return static_cast<Declaration*>(get(i + 1));
+    return declarations[i];
 }

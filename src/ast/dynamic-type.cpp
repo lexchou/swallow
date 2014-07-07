@@ -2,18 +2,21 @@
 USE_SWIFT_NS
 
 DynamicType::DynamicType(Expression* expr)
-:Expression(1)
 {
     setExpression(expr);
+}
+DynamicType::~DynamicType()
+{
+    SafeDelete(expression);
 }
 
 void DynamicType::setExpression(Expression* expr)
 {
-    set(0, expr);
+    this->expression = expr;
 }
 Expression* DynamicType::getExpression()
 {
-    return static_cast<Expression*>(get(0));
+    return expression;
 }
 
 void DynamicType::serialize(std::wostream& out)

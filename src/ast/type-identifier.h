@@ -9,6 +9,7 @@ class TypeIdentifier : public TypeNode
 {
 public:
     TypeIdentifier();
+    ~TypeIdentifier();
 public:
     void setName(const std::wstring& name);
     const std::wstring& getName() const;
@@ -20,6 +21,7 @@ public:
     virtual void serialize(std::wostream& out);
 private:
     std::wstring name;
+    std::vector<TypeNode*> genericArguments;
 };
 
 SWIFT_NS_END

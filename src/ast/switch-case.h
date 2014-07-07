@@ -11,6 +11,7 @@ class SwitchCase : public Statement
 {
 public:
     SwitchCase();
+    ~SwitchCase();
 public:
     void setControlExpression(Expression* expr);
     Expression* getControlExpression();
@@ -24,6 +25,9 @@ public:
 public:
     virtual void serialize(std::wostream& out);
 private:
+    Expression* controlExpression;
+    std::vector<CaseStatement*> cases;
+    CaseStatement* defaultCase;
 };
 
 SWIFT_NS_END

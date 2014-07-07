@@ -8,11 +8,14 @@ class ForcedValue : public Expression
 {
 public:
     ForcedValue(Expression* expr);
+    ~ForcedValue();
 public:
     void setExpression(Expression* expr);
     Expression* getExpression();
 public:
     virtual void serialize(std::wostream& out);
+private:
+    Expression* expression;
 };
 
 SWIFT_NS_END

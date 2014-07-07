@@ -28,7 +28,7 @@ class TestFunc : public SwiftTestCase
 public:
     void testFunc()
     {
-        Node* root = parse(L"func stepForward(input: Int) -> Int {"
+        PARSE_STATEMENT(L"func stepForward(input: Int) -> Int {"
                            L"return input + 1"
                            L"}");
         FunctionDef* func = NULL;
@@ -76,7 +76,7 @@ public:
     }
     void testFunc_ReturnFunc()
     {
-        Node* root = parse(L"func chooseStepFunction(backwards: Bool) -> (Int) -> Int {"
+        PARSE_STATEMENT(L"func chooseStepFunction(backwards: Bool) -> (Int) -> Int {"
                            L"return backwards ? stepBackward : stepForward"
                            L"}");
         
@@ -119,7 +119,7 @@ public:
     }
     void testFunc_MultipleParameters()
     {
-        Node* root = parse(L"func halfOpenRangeLength(start: Int, end: Int) -> Int {"
+        PARSE_STATEMENT(L"func halfOpenRangeLength(start: Int, end: Int) -> Int {"
                           L"return end - start"
                           L"}");
         
@@ -162,7 +162,7 @@ public:
     
     void testFunc_NoParameters()
     {
-        Node* root = parse(L"func sayHelloWorld() -> String {"
+        PARSE_STATEMENT(L"func sayHelloWorld() -> String {"
                            L"return \"hello, world\""
                            L"}");
         
@@ -180,7 +180,7 @@ public:
     }
     void testFunc_NoReturn()
     {
-        Node* root = parse(L"func sayGoodbye(personName: String) {"
+        PARSE_STATEMENT(L"func sayGoodbye(personName: String) {"
                            L"println(\"Goodbye, \(personName)!\")"
                            L"}");
         FunctionDef* func = NULL;
@@ -198,7 +198,7 @@ public:
     }
     void testFunc_ReturnTuple()
     {
-        Node* root = parse(L"func count(string: String) -> (vowels: Int, consonants: Int, others: Int) {"
+        PARSE_STATEMENT(L"func count(string: String) -> (vowels: Int, consonants: Int, others: Int) {"
                            L"var vowels = 0, consonants = 0, others = 0"
                            L"return (vowels, consonants, others)"
                            L"}");
@@ -236,7 +236,7 @@ public:
     }
     void testFunc_ExtParamNam()
     {
-        Node* root = parse(L"func someFunction(externalParameterName localParameterName: Int) {"
+        PARSE_STATEMENT(L"func someFunction(externalParameterName localParameterName: Int) {"
                            L"}");
         FunctionDef* func = NULL;
         Parameters* params = NULL;
@@ -264,7 +264,7 @@ public:
     }
     void testFunc_ShorthandExtParamName()
     {
-        Node* root = parse(L"func containsCharacter(#string: String, #characterToFind: Character) -> Bool {"
+        PARSE_STATEMENT(L"func containsCharacter(#string: String, #characterToFind: Character) -> Bool {"
                            L"return false"
                            L"}");
         FunctionDef* func = NULL;
@@ -303,7 +303,7 @@ public:
     }
     void testFunc_DefParam()
     {
-        Node* root = parse(L"func join(string s1: String, toString s2: String,"
+        PARSE_STATEMENT(L"func join(string s1: String, toString s2: String,"
                            L"withJoiner joiner: String = \" \") -> String {"
                            L"return s1 + joiner + s2"
                            L"}");
@@ -336,7 +336,7 @@ public:
     }
     void testFunc_VariadicParams()
     {
-        Node* root = parse(L"func arithmeticMean(numbers: Double...) -> Double {"
+        PARSE_STATEMENT(L"func arithmeticMean(numbers: Double...) -> Double {"
                            L"}");
         
         FunctionDef* func = NULL;
@@ -365,7 +365,7 @@ public:
     }
     void testFunc_VariableParam()
     {
-        Node* root = parse(L"func alignRight(var string: String, count: Int, pad: Character) -> String {"
+        PARSE_STATEMENT(L"func alignRight(var string: String, count: Int, pad: Character) -> String {"
                            L"}");
         FunctionDef* func = NULL;
         Parameters* params = NULL;
@@ -392,7 +392,7 @@ public:
     }
     void testFunc_Inout()
     {
-        Node* root = parse(L"func swapTwoInts(inout a: Int, inout b: Int) {"
+        PARSE_STATEMENT(L"func swapTwoInts(inout a: Int, inout b: Int) {"
                            L"}");
         
         FunctionDef* func = NULL;
@@ -432,7 +432,7 @@ public:
     }
     void testFunc_FuncType()
     {
-        Node* root = parse(L"func printMathResult(mathFunction: (Int, Int) -> Int, a: Int, b: Int) {"
+        PARSE_STATEMENT(L"func printMathResult(mathFunction: (Int, Int) -> Int, a: Int, b: Int) {"
                            L"}");
         
         FunctionDef* func = NULL;
@@ -473,7 +473,7 @@ public:
     }
     void testFunc_NestedFunc()
     {
-        Node* root = parse(L"func chooseStepFunction(backwards: Bool) -> (Int) -> Int {"
+        PARSE_STATEMENT(L"func chooseStepFunction(backwards: Bool) -> (Int) -> Int {"
                            L"func stepForward(input: Int) -> Int { return input + 1 }"
                            L"func stepBackward(input: Int) -> Int { return input - 1 }"
                            L"return backwards ? stepBackward : stepForward"
@@ -500,7 +500,7 @@ public:
     }
     void testFunc_CurriedFunc()
     {
-        Node* root = parse(L"func addTwoNumbers(a: Int)(b: Int) -> Int {"
+        PARSE_STATEMENT(L"func addTwoNumbers(a: Int)(b: Int) -> Int {"
                            L"return a + b"
                            L"}");
         FunctionDef* func = NULL;

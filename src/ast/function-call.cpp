@@ -5,37 +5,45 @@ USE_SWIFT_NS
 
 
 FunctionCall::FunctionCall()
-:Expression(3)
+:function(NULL), arguments(NULL), trailingClosure(NULL)
 {
     
 }
 
+
+FunctionCall::~FunctionCall()
+{
+    SafeDelete(function);
+    SafeDelete(arguments);
+    SafeDelete(trailingClosure);
+}
+
 void FunctionCall::setFunction(Expression* expr)
 {
-    set(0, expr);
+    function = expr;
 }
 Expression* FunctionCall::getFunction()
 {
-    return static_cast<Expression*>(get(0));
+    return function;
 }
 void FunctionCall::setArguments(ParenthesizedExpression* arguments)
 {
-    set(1, arguments);
+    this->arguments = arguments;
 }
 ParenthesizedExpression* FunctionCall::getArguments()
 {
-    return static_cast<ParenthesizedExpression*>(get(1));
+    return arguments;
 }
 
 void FunctionCall::setTrailingClosure(ClosureExpression* trailingClosure)
 {
-    set(2, trailingClosure);
+    this->trailingClosure = trailingClosure;
 }
 
 
 ClosureExpression* FunctionCall::getTrailingClosure()
 {
-    return static_cast<ClosureExpression*>(get(2));
+    return trailingClosure;
 }
 
 

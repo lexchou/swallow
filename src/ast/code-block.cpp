@@ -4,8 +4,12 @@ USE_SWIFT_NS
 
 
 CodeBlock::CodeBlock()
-    :Statement(0)
 {
+}
+CodeBlock::~CodeBlock()
+{
+    SafeDeleteAll(statements);
+    SafeDeleteAll(attributes);
 }
 void CodeBlock::serialize(std::wostream& out)
 {
@@ -22,15 +26,15 @@ void CodeBlock::serialize(std::wostream& out)
 
 void CodeBlock::addStatement(Statement* st)
 {
-    children.push_back(st);
+    statements.push_back(st);
 }
 int CodeBlock::numStatements()
 {
-    return children.size();
+    return statements.size();
 }
 Statement* CodeBlock::getStatement(int idx)
 {
-    return static_cast<Statement*>(get(idx));
+    return statements[idx];
 }
 
 

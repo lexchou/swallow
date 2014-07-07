@@ -3,11 +3,33 @@
 USE_SWIFT_NS;
 
 UnaryOperator::UnaryOperator(const std::wstring& op, OperatorType::T type)
-    :Operator(1, type, Associativity::None ,precedence), op(op)
+    :Operator(type, Associativity::None ,precedence), op(op)
 {
 }
+UnaryOperator::~UnaryOperator()
+{
+    SafeDelete(operand);
+}
 
-
+int UnaryOperator::numChildren()
+{
+    return 1;
+}
+Node* UnaryOperator::get(int i)
+{
+    switch(i)
+    {
+        case 0:
+            return operand;
+        default:
+            return NULL;
+    }
+}
+void UnaryOperator::set(int i, Node* val)
+{
+    if(i == 0)
+        operand = dynamic_cast<Expression*>(val);
+}
 
 void UnaryOperator::serialize(std::wostream& out)
 {

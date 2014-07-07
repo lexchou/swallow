@@ -5,8 +5,12 @@ USE_SWIFT_NS
 
 
 TypeAlias::TypeAlias()
-    :Declaration(1)
+    :type(NULL)
 {
+}
+TypeAlias::~TypeAlias()
+{
+    SafeDelete(type);
 }
 void TypeAlias::serialize(std::wostream& out)
 {
@@ -26,9 +30,9 @@ void TypeAlias::setName(const std::wstring& name)
 
 void TypeAlias::setType(TypeNode* type)
 {
-    set(0, type);
+    this->type = type;
 }
 TypeNode* TypeAlias::getType()
 {
-    return static_cast<TypeNode*>(get(0));
+    return type;
 }

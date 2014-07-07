@@ -9,6 +9,7 @@ class LabeledStatement : public Statement
 {
 public:
     LabeledStatement();
+    ~LabeledStatement();
 public:
     void setLabel(const std::wstring& label);
     const std::wstring& getLabel() const;
@@ -19,6 +20,7 @@ public:
     virtual void serialize(std::wostream& out);
 private:
     std::wstring label;
+    Statement* statement;
 };
 
 SWIFT_NS_END

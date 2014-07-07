@@ -5,10 +5,19 @@ USE_SWIFT_NS
 
 
 TupleType::TupleType()
-    :TypeNode(0)
 {
     variadicParameters = false;
 }
+TupleType::~TupleType()
+{
+    std::vector<TupleElement>::iterator iter = elements.begin();
+    for(; iter != elements.end(); iter++)
+    {
+        delete iter->type;
+    }
+    elements.clear();
+}
+
 static void serializeAttributes(TypeNode* type, std::wostream& out)
 {
     const std::vector<Attribute*>& attrs = type->getAttributes();
@@ -24,29 +33,28 @@ static void serializeAttributes(TypeNode* type, std::wostream& out)
 void TupleType::serialize(std::wostream& out)
 {
     out<<L"(";
-    Children::iterator itype = children.begin();
-    std::vector<TupleElementMeta>::iterator imeta = metas.begin();
-    for(; itype != children.end(); itype++, imeta++)
+    std::vector<TupleElement>::iterator iter = elements.begin();
+    for(; iter != elements.end(); iter++)
     {
-        TypeNode* type = static_cast<TypeNode*>(*itype);
-        if(itype != children.begin())
+        TypeNode* type = iter->type;
+        if(iter != elements.begin())
         {
             out<<L", ";
         }
-        if(imeta->name.empty())
+        if(iter->name.empty())
         {
             serializeAttributes(type, out);
-            if(imeta->inout)
+            if(iter->inout)
                 out<<L"inout ";
-            (*itype)->serialize(out);
+            iter->type->serialize(out);
         }
         else
         {
-            if(imeta->inout)
+            if(iter->inout)
                 out<<L"inout ";
-            out<<imeta->name<<L" : ";
+            out<<iter->name<<L" : ";
             serializeAttributes(type, out);
-            (*itype)->serialize(out);
+            iter->type->serialize(out);
         }
     }
     
@@ -55,20 +63,19 @@ void TupleType::serialize(std::wostream& out)
 
 void TupleType::add(bool inout, const std::wstring& name, TypeNode* type)
 {
-    children.push_back(type);
-    metas.push_back(TupleElementMeta(inout, name));
+    elements.push_back(TupleElement(inout, name, type));
 }
 int TupleType::numElements()
 {
-    return children.size();
+    return elements.size();
 }
 TypeNode* TupleType::getElementType(int i)
 {
-    return static_cast<TypeNode*>(get(i));
+    return elements[i].type;
 }
-const TupleType::TupleElementMeta& TupleType::getElement(int i)
+const TupleType::TupleElement& TupleType::getElement(int i)
 {
-    return metas[i];
+    return elements[i];
 }
 
 void TupleType::setVariadicParameters(bool val)

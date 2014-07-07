@@ -9,9 +9,16 @@ class TypeCast : public BinaryOperator
 {
 public:
     TypeCast(Expression* expr, TypeNode* type);
+    ~TypeCast();
 public:
     TypeNode* getType();
     void setType(TypeNode* type);
+public:
+    virtual int numChildren();
+    virtual Node* get(int i);
+    virtual void set(int i, Node* val);
+private:
+    TypeNode* type;
 };
 
 SWIFT_NS_END

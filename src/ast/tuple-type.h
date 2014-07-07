@@ -9,20 +9,22 @@ class Attribute;
 class TupleType : public TypeNode
 {
 protected:
-    struct TupleElementMeta
+    struct TupleElement
     {
         bool inout;
         std::wstring name;
-        TupleElementMeta(bool inout, const std::wstring& name)
-        :inout(inout), name(name){}
+        TypeNode* type;
+        TupleElement(bool inout, const std::wstring& name, TypeNode* type)
+        :inout(inout), name(name), type(type){}
     };
 public:
     TupleType();
+    ~TupleType();
 public:
     void add(bool inout, const std::wstring& name, TypeNode* type);
     int numElements();
     TypeNode* getElementType(int i);
-    const TupleElementMeta& getElement(int i);
+    const TupleElement& getElement(int i);
     
     void setVariadicParameters(bool val);
     bool getVariadicParameters()const;
@@ -30,7 +32,7 @@ public:
     virtual void serialize(std::wostream& out);
 private:
     bool variadicParameters;
-    std::vector<TupleElementMeta> metas;
+    std::vector<TupleElement> elements;
 };
 
 SWIFT_NS_END

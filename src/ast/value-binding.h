@@ -9,10 +9,12 @@ class ValueBinding : public Pattern
 {
 public:
     ValueBinding();
+    ~ValueBinding();
 public:
     void setBinding(Pattern* st);
     Pattern* getBinding();
-private:
+protected:
+    Pattern* binding;
 };
 
 class LetBinding : public ValueBinding

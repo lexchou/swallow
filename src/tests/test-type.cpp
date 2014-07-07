@@ -26,10 +26,7 @@ public:
     
     void testArrayType()
     {
-        TypeNode* arrayType = parse(L"Int[]");
         
-        delete arrayType;
-        CPPUNIT_ASSERT_EQUAL(0, Node::NodeCount);
     }
 };
 CPPUNIT_TEST_SUITE_NAMED_REGISTRATION(TestType, "alltest");

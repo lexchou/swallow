@@ -6,9 +6,16 @@ USE_SWIFT_NS
 
 
 InitializerDef::InitializerDef()
-    :Declaration(2), convenience(false)
+    :convenience(false), parameters(NULL), body(NULL)
 {
 }
+
+InitializerDef::~InitializerDef()
+{
+    SafeDelete(body);
+    SafeDelete(parameters);
+}
+
 void InitializerDef::serialize(std::wostream& out)
 {
 }
@@ -26,18 +33,18 @@ bool InitializerDef::isConvenience()const
 
 void InitializerDef::setParameters(Parameters* parameters)
 {
-    set(0, parameters);
+    this->parameters = parameters;
 }
 Parameters* InitializerDef::getParameters()
 {
-    return static_cast<Parameters*>(get(0));
+    return parameters;
 }
 
 void InitializerDef::setBody(CodeBlock* body)
 {
-    set(1, body);
+    this->body = body;
 }
 CodeBlock* InitializerDef::getBody()
 {
-    return static_cast<CodeBlock*>(get(1));
+    return body;
 }

@@ -6,9 +6,16 @@ USE_SWIFT_NS
 
 
 WhileLoop::WhileLoop()
-    :Statement(2)
+    :codeBlock(NULL), condition(NULL)
 {
 }
+
+WhileLoop::~WhileLoop()
+{
+    SafeDelete(codeBlock);
+    SafeDelete(condition);
+}
+
 void WhileLoop::serialize(std::wostream& out)
 {
     out<<L"while ";
@@ -21,18 +28,18 @@ void WhileLoop::serialize(std::wostream& out)
 
 void WhileLoop::setCodeBlock(CodeBlock* codeBlock)
 {
-    set(1, codeBlock);
+    this->codeBlock = codeBlock;
 }
 CodeBlock* WhileLoop::getCodeBlock()
 {
-    return static_cast<CodeBlock*>(get(1));
+    return codeBlock;
 }
 
 void WhileLoop::setCondition(Expression* expression)
 {
-    set(0, expression);
+    this->condition = expression;
 }
 Expression* WhileLoop::getCondition()
 {
-    return static_cast<Expression*>(get(0));
+    return condition;
 }

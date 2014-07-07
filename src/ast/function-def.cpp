@@ -7,13 +7,17 @@ USE_SWIFT_NS
 
 
 FunctionDef::FunctionDef()
-    :Declaration(2)
+    :returnType(NULL), body(NULL)
 {
 }
 
 FunctionDef::~FunctionDef()
 {
-    Attribute::disposeAll(returnAttributes);
+    SafeDeleteAll(returnAttributes);
+    SafeDeleteAll(parametersList);
+    SafeDelete(returnType);
+    SafeDelete(body);
+    
 }
 
 void FunctionDef::serialize(std::wostream& out)
@@ -34,24 +38,24 @@ const std::wstring& FunctionDef::getName()const
 
 void FunctionDef::addParameters(Parameters* parameters)
 {
-    children.push_back(parameters);
+    parametersList.push_back(parameters);
 }
 int FunctionDef::numParameters()
 {
-    return numChildren() - 2;
+    return parametersList.size();
 }
 Parameters* FunctionDef::getParameters(int i)
 {
-    return static_cast<Parameters*>(get(i + 2));
+    return parametersList[i];
 }
 
 void FunctionDef::setReturnType(TypeNode* type)
 {
-    set(0, type);
+    returnType = type;
 }
 TypeNode* FunctionDef::getReturnType()
 {
-    return static_cast<TypeNode*>(get(0));
+    return returnType;
 }
 
 void FunctionDef::setReturnTypeAttributes(const Attributes& attrs)
@@ -65,9 +69,9 @@ const Attributes& FunctionDef::getReturnTypeAttributes()const
 
 void FunctionDef::setBody(CodeBlock* body)
 {
-    set(1, body);
+    this->body = body;
 }
 CodeBlock* FunctionDef::getBody()
 {
-    return static_cast<CodeBlock*>(get(1));
+    return body;
 }

@@ -24,6 +24,8 @@ public:
     Declaration* getDeclaration(int i);
 private:
     std::vector<TypeIdentifier*> parents;
+    TypeIdentifier* identifier;
+    std::vector<Declaration*> declarations;
 };
 
 SWIFT_NS_END

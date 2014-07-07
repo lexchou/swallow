@@ -11,6 +11,7 @@ class IfStatement : public Statement
 {
 public:
     IfStatement();
+    ~IfStatement();
 public:
     void setCondition(Expression* expr);
     Expression* getCondition();
@@ -24,6 +25,9 @@ public:
 public:
     virtual void serialize(std::wostream& out);
 private:
+    Expression* condition;
+    CodeBlock* thenPart;
+    Statement* elsePart;
 };
 
 SWIFT_NS_END

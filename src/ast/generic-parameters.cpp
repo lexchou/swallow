@@ -6,17 +6,12 @@ USE_SWIFT_NS
 
 
 GenericParameters::GenericParameters()
-    :Node(0)
 {
 }
 GenericParameters::~GenericParameters()
 {
-    std::vector<GenericConstraint*>::iterator iter = constraints.begin();
-    for(; iter != constraints.end(); iter++)
-    {
-        delete *iter;
-    }
-    constraints.clear();
+    SafeDeleteAll(genericTypes);
+    SafeDeleteAll(constraints);
 }
 void GenericParameters::serialize(std::wostream& out)
 {
@@ -26,15 +21,15 @@ void GenericParameters::serialize(std::wostream& out)
 
 void GenericParameters::addGenericType(TypeIdentifier* type)
 {
-    children.push_back(type);
+    genericTypes.push_back(type);
 }
 int GenericParameters::numGenericTypes()const
 {
-    return children.size();
+    return genericTypes.size();
 }
 TypeIdentifier* GenericParameters::getGenericType(int i)
 {
-    return static_cast<TypeIdentifier*>(get(i));
+    return static_cast<TypeIdentifier*>(genericTypes[i]);
 }
 
 

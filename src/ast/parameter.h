@@ -54,6 +54,8 @@ private:
     std::wstring externalName;
     std::wstring localName;
     Attributes typeAttributes;
+    TypeNode* type;
+    Expression* defaultValue;
 };
 
 SWIFT_NS_END

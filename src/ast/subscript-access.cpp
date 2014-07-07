@@ -3,44 +3,53 @@ USE_SWIFT_NS
 
 
 SubscriptAccess::SubscriptAccess(Expression* self, Expression* index)
-    :Expression(2)
 {
     setSelf(self);
     setIndex(index);
 }
+
+SubscriptAccess::~SubscriptAccess()
+{
+    SafeDelete(self);
+    SafeDeleteAll(indices);
+}
+
 void SubscriptAccess::setSelf(Expression* self)
 {
-    set(0, self);
+    this->self = self;
 }
 Expression* SubscriptAccess::getSelf()
 {
-    return static_cast<Expression*>(get(0));
+    return self;
 }
 
 void SubscriptAccess::setIndex(Expression* index)
 {
-    set(1, index);
+    SafeDeleteAll(indices);
+    addIndex(index);
 }
 Expression* SubscriptAccess::getIndex()
 {
-    return static_cast<Expression*>(get(1));
+    if(indices.empty())
+        return NULL;
+    return indices.front();
 }
 void SubscriptAccess::setIndex(int idx, Expression* index)
 {
-    set(idx + 1, index);
+    indices[idx] = index;
 }
 Expression* SubscriptAccess::getIndex(int idx)
 {
-    return static_cast<Expression*>(get(idx + 1));
+    return indices[idx];
 }
 
 void SubscriptAccess::addIndex(Expression* index)
 {
-    children.push_back(index);
+    indices.push_back(index);
 }
 int SubscriptAccess::numIndices()
 {
-    return children.size() - 1;
+    return indices.size();
 }
 
 

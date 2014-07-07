@@ -6,8 +6,11 @@ USE_SWIFT_NS
 
 
 Constant::Constant()
-    :Declaration(0)
 {
+}
+Constant::~Constant()
+{
+    SafeDeleteAll(pairs);
 }
 void Constant::serialize(std::wostream& out)
 {
@@ -15,16 +18,16 @@ void Constant::serialize(std::wostream& out)
 
 void Constant::add(Pattern* pattern, Expression* initializer)
 {
-    children.push_back(pattern);
-    children.push_back(initializer);
+    pairs.push_back(pattern);
+    pairs.push_back(initializer);
 }
 int Constant::numPairs()
 {
-    return numChildren() >> 1;
+    return pairs.size() >> 1;
 }
 std::pair<Pattern*, Expression*> Constant::getPair(int i)
 {
-    Pattern* p = static_cast<Pattern*>(get(i << 1));
-    Expression* expr = static_cast<Expression*>(get((i << 1) + 1));
+    Pattern* p = static_cast<Pattern*>(pairs[i << 1]);
+    Expression* expr = static_cast<Expression*>(pairs[(i << 1) + 1]);
     return std::make_pair(p, expr);
 }

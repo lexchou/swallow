@@ -7,9 +7,19 @@ USE_SWIFT_NS
 
 
 SubscriptDef::SubscriptDef()
-    :Declaration(4)
+    :parameters(NULL), returnType(NULL), getter(NULL), setter(NULL)
 {
 }
+
+SubscriptDef::~SubscriptDef()
+{
+    SafeDelete(parameters);
+    SafeDelete(returnType);
+    SafeDelete(getter);
+    SafeDelete(setter);
+    SafeDeleteAll(returnTypeAttributes);
+}
+
 void SubscriptDef::serialize(std::wostream& out)
 {
 //    out<<value;
@@ -18,24 +28,25 @@ void SubscriptDef::serialize(std::wostream& out)
 
 void SubscriptDef::setParameters(Parameters* params)
 {
-    set(0, params);
+    this->parameters = params;
 }
 Parameters* SubscriptDef::getParameters()
 {
-    return static_cast<Parameters*>(get(0));
+    return parameters;
 }
 
 void SubscriptDef::setReturnType(TypeNode* type)
 {
-    set(1, type);
+    this->returnType = type;
 }
 TypeNode* SubscriptDef::getReturnType()
 {
-    return static_cast<TypeNode*>(get(1));
+    return returnType;
 }
 
 void SubscriptDef::setReturnTypeAttributes(const Attributes& attrs)
 {
+    SafeDeleteAll(returnTypeAttributes);
     returnTypeAttributes = attrs;
 }
 const Attributes& SubscriptDef::getReturnTypeAttributes()const
@@ -45,20 +56,20 @@ const Attributes& SubscriptDef::getReturnTypeAttributes()const
 
 void SubscriptDef::setGetter(CodeBlock* getter)
 {
-    set(2, getter);
+    this->getter = getter;
 }
 CodeBlock* SubscriptDef::getGetter()
 {
-    return static_cast<CodeBlock*>(get(2));
+    return getter;
 }
 
 void SubscriptDef::setSetter(CodeBlock* setter)
 {
-    set(3, setter);
+    this->setter = setter;
 }
 CodeBlock* SubscriptDef::getSetter()
 {
-    return static_cast<CodeBlock*>(get(3));
+    return setter;
 }
 
 void SubscriptDef::setSetterName(const std::wstring& name)

@@ -2,7 +2,7 @@
 USE_SWIFT_NS
 
 CompileConstant::CompileConstant(const std::wstring& name, const std::wstring& value)
-:Expression(0), name(name), value(value)
+:name(name), value(value)
 {
     
 }

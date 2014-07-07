@@ -2,8 +2,13 @@
 USE_SWIFT_NS;
 
 BinaryOperator::BinaryOperator(const std::wstring& op, Associativity::T associativity, int precedence)
-:Operator(2, OperatorType::InfixBinary, associativity, precedence), op(op)
+:Operator(OperatorType::InfixBinary, associativity, precedence), op(op), lhs(NULL), rhs(NULL)
 {
+}
+BinaryOperator::~BinaryOperator()
+{
+    SafeDelete(lhs);
+    SafeDelete(rhs);
 }
 void BinaryOperator::serialize(std::wostream& out)
 {
@@ -12,4 +17,36 @@ void BinaryOperator::serialize(std::wostream& out)
     out<<op;
     getRHS()->serialize(out);
     out<<L")";    
+}
+
+
+int BinaryOperator::numChildren()
+{
+    return 2;
+}
+Node* BinaryOperator::get(int i)
+{
+    switch(i)
+    {
+        case 0:
+            return lhs;
+        case 1:
+            return rhs;
+        default:
+            return NULL;
+    }
+}
+void BinaryOperator::set(int i, Node* val)
+{
+    switch(i)
+    {
+        case 0:
+            lhs = dynamic_cast<Pattern*>(val);
+            break;
+        case 1:
+            rhs = dynamic_cast<Pattern*>(val);
+            break;
+        default:
+            break;
+    }
 }

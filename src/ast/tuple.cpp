@@ -5,14 +5,20 @@ USE_SWIFT_NS
 
 
 Tuple::Tuple()
-    :Expression(1)
+    :type(NULL)
 {
 }
+Tuple::~Tuple()
+{
+    SafeDelete(type);
+    SafeDeleteAll(elements);
+}
+
 void Tuple::serialize(std::wostream& out)
 {
     out<<L"(";
-    Children::iterator iter = children.begin();
-    for(; iter != children.end(); iter++)
+    std::vector<Pattern*>::iterator iter = elements.begin();
+    for(; iter != elements.end(); iter++)
     {
         (*iter)->serialize(out);
     }
@@ -22,22 +28,22 @@ void Tuple::serialize(std::wostream& out)
 
 TypeNode* Tuple::getType()
 {
-    return static_cast<TypeNode*>(get(0));
+    return type;
 }
 void Tuple::setType(TypeNode* type)
 {
-    set(0, type);
+    this->type = type;
 }
 
 void Tuple::add(Pattern* st)
 {
-    children.push_back(st);
+    elements.push_back(st);
 }
 int Tuple::numElements()
 {
-    return children.size() - 1;
+    return elements.size();
 }
 Pattern* Tuple::getElement(int i)
 {
-    return static_cast<Pattern*>(get(i + 1));
+    return elements[i];
 }

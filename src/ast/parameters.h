@@ -10,6 +10,7 @@ class Parameters : public Node
 {
 public:
     Parameters();
+    ~Parameters();
 public:
     virtual void serialize(std::wostream& out);
 public:
@@ -21,6 +22,7 @@ public:
     Parameter* getParameter(int i);
 private:
     bool variadicParameters;
+    std::vector<Parameter*> parameters;
 };
 
 SWIFT_NS_END

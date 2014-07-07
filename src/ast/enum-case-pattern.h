@@ -10,6 +10,7 @@ class EnumCasePattern : public Pattern
 {
 public:
     EnumCasePattern();
+    ~EnumCasePattern();
 public:
     void setName(const std::wstring& name);
     const std::wstring& getName()const;
@@ -20,6 +21,7 @@ public:
     virtual void serialize(std::wostream& out);
 private:
     std::wstring name;
+    Tuple* associatedBinding;
 };
 
 SWIFT_NS_END

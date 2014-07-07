@@ -5,16 +5,19 @@ USE_SWIFT_NS
 
 
 Variables::Variables()
-    :Declaration(0)
 {
+}
+Variables::~Variables()
+{
+    SafeDeleteAll(variables);
 }
 void Variables::serialize(std::wostream& out)
 {
     out<<L"let ";
-    Children::iterator iter = children.begin();
-    for(; iter != children.end(); iter++)
+    std::vector<Variable*>::iterator iter = variables.begin();
+    for(; iter != variables.end(); iter++)
     {
-        if(iter != children.begin())
+        if(iter != variables.begin())
             out<<L", ";
         (*iter)->serialize(out);
     }
@@ -23,13 +26,13 @@ void Variables::serialize(std::wostream& out)
 
 void Variables::addVariable(Variable* var)
 {
-    children.push_back(var);
+    variables.push_back(var);
 }
 Variable* Variables::getVariable(int i)
 {
-    return static_cast<Variable*>(get(i));
+    return variables[i];
 }
 int Variables::numVariables()
 {
-    return children.size();
+    return variables.size();
 }

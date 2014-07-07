@@ -11,6 +11,7 @@ class InitializerDef : public Declaration
 {
 public:
     InitializerDef();
+    ~InitializerDef();
 public:
     void setConvenience(bool convenience);
     bool isConvenience()const;
@@ -25,6 +26,8 @@ public:
     virtual void serialize(std::wostream& out);
 private:
     bool convenience;
+    Parameters* parameters;
+    CodeBlock* body;
 };
 
 SWIFT_NS_END

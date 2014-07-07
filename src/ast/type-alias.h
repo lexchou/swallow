@@ -10,6 +10,7 @@ class TypeAlias : public Declaration
 {
 public:
     TypeAlias();
+    ~TypeAlias();
 public:
     const std::wstring& getName()const;
     void setName(const std::wstring& name);
@@ -21,6 +22,7 @@ public:
     virtual void serialize(std::wostream& out);
 private:
     std::wstring name;
+    TypeNode* type;
 };
 
 SWIFT_NS_END

@@ -5,17 +5,12 @@
 USE_SWIFT_NS
 
 
-TypeNode::TypeNode(int numChildren)
-    :Statement(numChildren)
+TypeNode::TypeNode()
 {
 }
 TypeNode::~TypeNode()
 {
-    std::vector<Attribute*>::iterator iter = attributes.begin();
-    for(; iter != attributes.end(); iter++)
-    {
-        delete (*iter);
-    }
+    SafeDeleteAll(attributes);
 }
 
 void TypeNode::addAttribute(Attribute* attr)

@@ -4,17 +4,21 @@ USE_SWIFT_NS
 
 
 ValueBinding::ValueBinding()
-    :Pattern(1)
+    :binding(NULL)
 {
+}
+ValueBinding::~ValueBinding()
+{
+    SafeDelete(binding);
 }
 
 void ValueBinding::setBinding(Pattern* st)
 {
-    set(0, st);
+    this->binding = st;
 }
 Pattern* ValueBinding::getBinding()
 {
-    return static_cast<Pattern*>(get(0));
+    return binding;
 }
 
 void LetBinding::serialize(std::wostream& out)

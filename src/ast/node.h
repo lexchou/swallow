@@ -4,7 +4,7 @@
 #include <vector>
 #include <sstream>
 #ifdef TRACE_NODE
-#include <set>
+#include <list>
 #endif//TRACE_NODE
 
 SWIFT_NS_BEGIN
@@ -23,13 +23,9 @@ struct SourceInfo
 class Node
 {
 protected:
-    Node(int numChildren);
+    Node();
 public:
     virtual ~Node();
-public://children management
-    Node* get(int index);
-    void set(int index, Node* val);
-    int numChildren() const;
 public:
     SourceInfo* getSourceInfo();
     
@@ -38,13 +34,11 @@ public:
 protected:
 
 protected:
-    typedef std::vector<Node*> Children;
-    Children children;
     SourceInfo sourceInfo;
     
 #ifdef TRACE_NODE
 public:
-    static std::set<Node*> UnreleasedNodes;
+    static std::list<Node*> UnreleasedNodes;
     static int NodeCount;
 #endif
 };

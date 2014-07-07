@@ -8,11 +8,46 @@ TypeCheck::TypeCheck(Pattern* expr, TypeNode* type)
     setLHS(expr);
     setType(type);
 }
+TypeCheck::~TypeCheck()
+{
+    SafeDelete(type);
+}
+
 TypeNode* TypeCheck::getType()
 {
-    return static_cast<TypeNode*>(get(1));
+    return type;
 }
 void TypeCheck::setType(TypeNode* type)
 {
-    set(1, type);
+    this->type = type;
+}
+int TypeCheck::numChildren()
+{
+    return 2;
+}
+Node* TypeCheck::get(int i)
+{
+    switch(i)
+    {
+        case 0:
+            return lhs;
+        case 1:
+            return type;
+        default:
+            return NULL;
+    }
+}
+void TypeCheck::set(int i, Node* val)
+{
+    switch(i)
+    {
+        case 0:
+            lhs = dynamic_cast<Pattern*>(val);
+            break;
+        case 1:
+            type = dynamic_cast<TypeNode*>(val);
+            break;
+        default:
+            break;
+    }
 }

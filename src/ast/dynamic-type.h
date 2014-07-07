@@ -8,11 +8,14 @@ class DynamicType : public Expression
 {
 public:
     DynamicType(Expression* expr);
+    ~DynamicType();
 public:
     void setExpression(Expression* expr);
     Expression* getExpression();
 public:
     virtual void serialize(std::wostream& out);
+private:
+    Expression* expression;
 };
 
 SWIFT_NS_END

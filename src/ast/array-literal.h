@@ -8,10 +8,15 @@ class ArrayLiteral : public Expression
 {
 public:
 	ArrayLiteral();
+    ~ArrayLiteral();
 public:
 	void push(Expression* item);
+    Expression* getElement(int i);
+    int numElements()const;
 public:
     virtual void serialize(std::wostream& out);
+private:
+    std::vector<Expression*> elements;
 };
 SWIFT_NS_END
 

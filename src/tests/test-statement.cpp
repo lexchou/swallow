@@ -33,7 +33,7 @@ public:
     
     void testFor()
     {
-        Node* root = parse(L"for i = 0;i < 10; i++{a = i * 2;println(a);}");
+        PARSE_STATEMENT(L"for i = 0;i < 10; i++{a = i * 2;println(a);}");
         CPPUNIT_ASSERT(root != NULL);
         ForLoop* loop = dynamic_cast<ForLoop*>(root);
         CPPUNIT_ASSERT(loop != NULL);
@@ -66,7 +66,7 @@ public:
     
     void testFor2()
     {
-        Node* root = parse(L"for ;; {}");
+        PARSE_STATEMENT(L"for ;; {}");
         CPPUNIT_ASSERT(root != NULL);
         ForLoop* loop = dynamic_cast<ForLoop*>(root);
         CPPUNIT_ASSERT(loop != NULL);
@@ -90,7 +90,7 @@ public:
     }
     void testWhile()
     {
-        Node* root = parse(L"while notTrue {println(a);}");
+        PARSE_STATEMENT(L"while notTrue {println(a);}");
         CPPUNIT_ASSERT(root != NULL);
         WhileLoop* loop = dynamic_cast<WhileLoop*>(root);
         CPPUNIT_ASSERT(loop != NULL);
@@ -113,7 +113,7 @@ public:
     }
     void testDo()
     {
-        Node* root = parse(L"do{println(a);}while read(a)");
+        PARSE_STATEMENT(L"do{println(a);}while read(a)");
         CPPUNIT_ASSERT(root != NULL);
         DoLoop* loop = dynamic_cast<DoLoop*>(root);
         CPPUNIT_ASSERT(loop != NULL);
@@ -135,7 +135,7 @@ public:
     }
     void testIf()
     {
-        Node* root = parse(L"if a<0 {return -1}");
+        PARSE_STATEMENT(L"if a<0 {return -1}");
         IfStatement* _if;
         BinaryOperator* op;
         CPPUNIT_ASSERT(_if = dynamic_cast<IfStatement*>(root));
@@ -156,7 +156,7 @@ public:
     
     void testIf2()
     {
-        Node* root = parse(L"if a<0 {return -1}else{return 1;}");
+        PARSE_STATEMENT(L"if a<0 {return -1}else{return 1;}");
         IfStatement* _if;
         BinaryOperator* op;
         CPPUNIT_ASSERT(_if = dynamic_cast<IfStatement*>(root));
@@ -184,7 +184,7 @@ public:
     
     void testIf3()
     {
-        Node* root = parse(L"if a<0 {return -1}else if a == 0 {return 0;} else {return 1}");
+        PARSE_STATEMENT(L"if a<0 {return -1}else if a == 0 {return 0;} else {return 1}");
         
         
         IfStatement* _if;
@@ -223,7 +223,7 @@ public:
     }
     void testSwitch_Empty()
     {
-        Node* root = parse(L"switch i{}");
+        PARSE_STATEMENT(L"switch i{}");
         SwitchCase* sc = NULL;
         CPPUNIT_ASSERT(sc = dynamic_cast<SwitchCase*>(root));
         CPPUNIT_ASSERT_EQUAL(0, sc->numCases());
@@ -234,7 +234,7 @@ public:
     
     void testSwitch_MultipleCases()
     {
-        Node* root = parse(L"switch someCharacter{"
+        PARSE_STATEMENT(L"switch someCharacter{"
                            L"case \"a\", \"e\", \"i\", \"o\", \"u\":"
                            L"print(\"vowel\")"
                            L"case \"b\", \"c\", \"d\":"
@@ -271,7 +271,7 @@ public:
     
     void testSwitch_NoExplicitFallthrough()
     {
-        Node* root = parse(L"switch anotherCharacter {"
+        PARSE_STATEMENT(L"switch anotherCharacter {"
                            L"case \"a\":"
                            L"case \"A\":"
                            L"println(\"The letter A\")"
@@ -307,7 +307,7 @@ public:
     
     void testSwitch_RangeMatching()
     {
-        Node* root = parse(L"switch count {"
+        PARSE_STATEMENT(L"switch count {"
                            L"case 0:"
                            L"naturalCount = \"no\""
                            L"case 1...3:"
@@ -349,7 +349,7 @@ public:
     void testSwitch_Tuple()
     {
         
-        Node* root = parse(L"switch somePoint {"
+        PARSE_STATEMENT(L"switch somePoint {"
                            L"case (0, 0):"
                            L"println(\"(0, 0) is at the origin\")"
                            L"case (_, 0):"
@@ -386,7 +386,7 @@ public:
     }
     void testSwitch_ValueBindings()
     {
-        Node* root = parse(L"switch anotherPoint {"
+        PARSE_STATEMENT(L"switch anotherPoint {"
                            L"case (let x, 0):"
                            L"println(\"on the x-axis with an x value of \(x)\")"
                            L"case (0, let y):"
@@ -399,7 +399,7 @@ public:
     }
     void testSwitch_Where()
     {
-        Node* root = parse(L"switch yetAnotherPoint {"
+        PARSE_STATEMENT(L"switch yetAnotherPoint {"
                            L"case let (x, y) where x == y:"
                            L"println(\"(\(x), \(y)) is on the line x == y\")"
                            L"case let (x, y) where x == -y:"
@@ -464,7 +464,7 @@ public:
     
     void testSwitch_Enum()
     {
-        Node* root = parse(L"switch directionToHead { "
+        PARSE_STATEMENT(L"switch directionToHead { "
                            L"case .North: "
                            L"println(\"Lots of planets have a north\") "
                            L"case .South: "
@@ -518,7 +518,7 @@ public:
     
     void testSwitch_AssociatedValues()
     {
-        Node* root = parse(L"switch productBarcode { "
+        PARSE_STATEMENT(L"switch productBarcode { "
                            L"case .UPCA(let numberSystem, let identifier, let check): "
                            L"println(\"UPC-A with value of \(numberSystem), \(identifier), \(check).\") "
                            L"case .QRCode(productCode): "
@@ -572,7 +572,7 @@ public:
     
     void testLabeledWhile()
     {
-        Node* root = parse(L"gameLoop: while square != finalSquare {"
+        PARSE_STATEMENT(L"gameLoop: while square != finalSquare {"
                            L"break gameLoop "
                            L"continue gameLoop"
                            L"}");
@@ -602,7 +602,7 @@ public:
     void testLabeledDo()
     {
         
-        Node* root = parse(L"gameLoop: do {"
+        PARSE_STATEMENT(L"gameLoop: do {"
                            L"break gameLoop "
                            L"continue gameLoop"
                            L"} while square != finalSquare");
@@ -630,7 +630,7 @@ public:
     }
     void testLabeledFor()
     {
-        Node* root = parse(L"gameLoop: for ;square != finalSquare; {"
+        PARSE_STATEMENT(L"gameLoop: for ;square != finalSquare; {"
                            L"break gameLoop "
                            L"continue gameLoop"
                            L"}");

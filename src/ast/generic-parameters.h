@@ -27,6 +27,8 @@ public:
     
 private:
     std::vector<GenericConstraint*> constraints;
+    std::vector<TypeIdentifier*> genericTypes;
+    
 };
 
 SWIFT_NS_END

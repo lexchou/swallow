@@ -11,6 +11,7 @@ class ForLoop : public Statement
 {
 public:
     ForLoop();
+    ~ForLoop();
 public:
     void addInit(Expression* init);
     int numInit();
@@ -28,6 +29,10 @@ public:
 public:
     virtual void serialize(std::wostream& out);
 private:
+    std::vector<Expression*> inits;
+    Expression* condition;
+    Expression* step;
+    CodeBlock* codeBlock;
 };
 
 SWIFT_NS_END

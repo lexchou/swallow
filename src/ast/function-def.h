@@ -43,6 +43,9 @@ public:
 private:
     std::wstring name;
     Attributes returnAttributes;
+    std::vector<Parameters*> parametersList;
+    TypeNode* returnType;
+    CodeBlock* body;
 };
 
 SWIFT_NS_END

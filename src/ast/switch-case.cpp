@@ -6,9 +6,18 @@ USE_SWIFT_NS
 
 
 SwitchCase::SwitchCase()
-    :Statement(2)
+    :controlExpression(NULL), defaultCase(NULL)
 {
 }
+
+SwitchCase::~SwitchCase()
+{
+    
+    SafeDelete(controlExpression);
+    SafeDeleteAll(cases);
+    SafeDelete(defaultCase);
+}
+
 void SwitchCase::serialize(std::wostream& out)
 {
     out<<L"switch ";
@@ -19,31 +28,31 @@ void SwitchCase::serialize(std::wostream& out)
 
 void SwitchCase::setControlExpression(Expression* expr)
 {
-    set(0, expr);
+    this->controlExpression = expr;
 }
 Expression* SwitchCase::getControlExpression()
 {
-    return static_cast<Expression*>(get(0));
+    return controlExpression;
 }
 
 void SwitchCase::addCase(CaseStatement* c)
 {
-    children.push_back(c);
+    cases.push_back(c);
 }
 int SwitchCase::numCases()
 {
-    return children.size() - 2;
+    return cases.size();
 }
 CaseStatement* SwitchCase::getCase(int idx)
 {
-    return static_cast<CaseStatement*>(get(idx + 2));
+    return cases[idx];
 }
 
 void SwitchCase::setDefaultCase(CaseStatement* c)
 {
-    set(1, c);
+    this->defaultCase = c;
 }
 CaseStatement* SwitchCase::getDefaultCase()
 {
-    return static_cast<CaseStatement*>(get(1));
+    return defaultCase;
 }

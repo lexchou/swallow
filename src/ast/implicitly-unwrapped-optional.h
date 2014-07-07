@@ -9,12 +9,14 @@ class ImplicitlyUnwrappedOptional : public TypeNode
 {
 public:
     ImplicitlyUnwrappedOptional();
+    ~ImplicitlyUnwrappedOptional();
 public:
     void setInnerType(TypeNode* innerType);
     TypeNode* getInnerType();
 public:
     virtual void serialize(std::wostream& out);
 private:
+    TypeNode* innerType;
 };
 
 SWIFT_NS_END

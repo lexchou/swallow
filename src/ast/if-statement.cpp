@@ -5,9 +5,17 @@ USE_SWIFT_NS
 
 
 IfStatement::IfStatement()
-    :Statement(3)
+    :condition(NULL), thenPart(NULL), elsePart(NULL)
 {
 }
+
+IfStatement::~IfStatement()
+{
+    SafeDelete(condition);
+    SafeDelete(thenPart);
+    SafeDelete(elsePart);
+}
+
 void IfStatement::serialize(std::wostream& out)
 {
     out<<L"if ";
@@ -25,27 +33,27 @@ void IfStatement::serialize(std::wostream& out)
 
 void IfStatement::setCondition(Expression* expr)
 {
-    set(0, expr);
+    this->condition = expr;
 }
 Expression* IfStatement::getCondition()
 {
-    return static_cast<Expression*>(get(0));
+    return condition;
 }
 
 void IfStatement::setThen(CodeBlock* thenPart)
 {
-    set(1, thenPart);
+    this->thenPart = thenPart;
 }
 CodeBlock* IfStatement::getThen()
 {
-    return static_cast<CodeBlock*>(get(1));
+    return thenPart;
 }
 
 void IfStatement::setElse(Statement* elsePart)
 {
-    set(2, elsePart);
+    this->elsePart = elsePart;
 }
 Statement* IfStatement::getElse()
 {
-    return static_cast<Statement*>(get(2));
+    return elsePart;
 }

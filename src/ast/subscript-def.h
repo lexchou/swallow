@@ -12,6 +12,7 @@ class SubscriptDef : public Declaration
 {
 public:
     SubscriptDef();
+    ~SubscriptDef();
 public:
     void setParameters(Parameters* params);
     Parameters* getParameters();
@@ -36,6 +37,10 @@ public:
 private:
     std::wstring setterName;
     Attributes returnTypeAttributes;
+    Parameters* parameters;
+    TypeNode* returnType;
+    CodeBlock* getter;
+    CodeBlock* setter;
 };
 
 SWIFT_NS_END

@@ -19,7 +19,7 @@ public:
     
     void testEnum()
     {
-        Node* root = parse(L"enum SomeEnumeration {"
+        PARSE_STATEMENT(L"enum SomeEnumeration {"
                            L"}");
         EnumDef* e = NULL;
         CPPUNIT_ASSERT(e = dynamic_cast<EnumDef*>(root));
@@ -31,7 +31,7 @@ public:
     
     void testEnum2()
     {
-        Node* root = parse(L"enum CompassPoint {"
+        PARSE_STATEMENT(L"enum CompassPoint {"
                            L"case North "
                            L"case South "
                            L"case East "
@@ -49,7 +49,7 @@ public:
     }
     void testEnum3()
     {
-        Node* root = parse(L"enum Planet {"
+        PARSE_STATEMENT(L"enum Planet {"
                            L"case Mercury, Venus, Earth, Mars, Jupiter, Saturn, Uranus, Neptune"
                            L"}");
         EnumDef* e = NULL;
@@ -65,7 +65,7 @@ public:
     
     void testAssociatedValues()
     {
-        Node* root = parse(L"enum Barcode {"
+        PARSE_STATEMENT(L"enum Barcode {"
                            L"case UPCA(Int, Int, Int)"
                            L"case QRCode(String)"
                            L"}");
@@ -95,7 +95,7 @@ public:
     }
     void testRawValues()
     {
-        Node* root = parse(L"enum ASCIIControlCharacter: Character {"
+        PARSE_STATEMENT(L"enum ASCIIControlCharacter: Character {"
                            L"case Tab = \"\\t\""
                            L"case LineFeed = \"\\n\""
                            L"case CarriageReturn = \"\\r\""
@@ -128,7 +128,7 @@ public:
     
     void testRawValues2()
     {
-        Node* root = parse(L"enum Planet: Int {"
+        PARSE_STATEMENT(L"enum Planet: Int {"
                            L"case Mercury = 1, Venus, Earth, Mars, Jupiter, Saturn, Uranus, Neptune"
                            L"}");
         
@@ -147,6 +147,7 @@ public:
         CPPUNIT_ASSERT(i = dynamic_cast<IntegerLiteral*>(e->getConstant(0).value));
         ASSERT_EQUALS(L"1", i->toString().c_str());
         
+        DESTROY(root);
     }
     
 };
