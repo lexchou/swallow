@@ -8,14 +8,12 @@
 
 SWIFT_NS_BEGIN
 
-struct TokenizerState
+struct TokenizerState : SourceInfo
 {
 
-    const wchar_t* cursor;
+    int cursor;
     bool hasSpace;
     bool inStringExpression;
-    int line;
-    int column;
 };
 
 struct Token

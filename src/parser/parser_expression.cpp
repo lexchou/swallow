@@ -15,21 +15,21 @@ Expression* Parser::parseFloat()
 {
     Token token;
     expect_next(token);
-    Expression* ret = nodeFactory->createFloat(token.token);
+    Expression* ret = nodeFactory->createFloat(token.state, token.token);
     return ret;
 }
 Expression* Parser::parseInteger()
 {
     Token token;
     expect_next(token);
-    Expression* ret = nodeFactory->createInteger(token.token);
+    Expression* ret = nodeFactory->createInteger(token.state, token.token);
     return ret;
 }
 Expression* Parser::parseString()
 {
     Token token;
     expect_next(token);
-    Expression* ret = nodeFactory->createString(token.token);
+    Expression* ret = nodeFactory->createString(token.state, token.token);
     return ret;
 }
 /*
@@ -45,8 +45,8 @@ Expression* Parser::parsePrefixExpression()
     {
         //in-out-expression → & identifier
         expect_identifier(token);
-        Identifier* identifier = nodeFactory->createIdentifier(token.token);
-        InOutParameter* ret = nodeFactory->createInOutParameter(identifier);
+        Identifier* identifier = nodeFactory->createIdentifier(token.state, token.token);
+        InOutParameter* ret = nodeFactory->createInOutParameter(token.state, identifier);
         return ret;
     }
     
@@ -54,7 +54,7 @@ Expression* Parser::parsePrefixExpression()
     if(symbolRegistry->isPrefixOperator(token.token))
     {
         Expression* postfixExpression = parsePostfixExpression();
-        UnaryOperator* op = nodeFactory->createUnary(token.token, token.operators.type);
+        UnaryOperator* op = nodeFactory->createUnary(token.state, token.token, token.operators.type);
         op->setOperand(postfixExpression);
         return op;
     }
@@ -93,39 +93,39 @@ Expression* Parser::parsePostfixExpression()
                 // postfix-expression → initializer-expression
                 if(token == L"init")
                 {
-                    ret = nodeFactory->createInitializerReference(ret);
+                    ret = nodeFactory->createInitializerReference(token.state, ret);
                     continue;
                 }
                 // postfix-expression → postfix-self-expression
                 if(token.identifier.keyword == Keyword::Self)
                 {
-                    ret = nodeFactory->createSelfExpression(ret);
+                    ret = nodeFactory->createSelfExpression(token.state, ret);
                     continue;
                 }
                 // postfix-expression → dynamic-type-expression
                 if(token.identifier.keyword == Keyword::DynamicType)
                 {
-                    ret = nodeFactory->createDynamicType(ret);
+                    ret = nodeFactory->createDynamicType(token.state, ret);
                     continue;
                 }
                 tassert(token, token.identifier.keyword == Keyword::_);
                 // postfix-expression → explicit-member-expression
-                Identifier* field = nodeFactory->createIdentifier(token.token);
-                ret = nodeFactory->createMemberAccess(ret, field);
+                Identifier* field = nodeFactory->createIdentifier(token.state, token.token);
+                ret = nodeFactory->createMemberAccess(token.state, ret, field);
                 continue;
             }
             if(token == L"!")
             {
                 // postfix-expression → forced-value-expression
                 expect_next(token);
-                ret = nodeFactory->createForcedValue(ret);
+                ret = nodeFactory->createForcedValue(token.state, ret);
                 continue;
             }
             // postfix-expression → postfix-expression postfix-operator
             if(symbolRegistry->isPostfixOperator(token.token))
             {
                 expect_next(token);
-                UnaryOperator* postfix = nodeFactory->createUnary(token.token, OperatorType::PostfixUnary);
+                UnaryOperator* postfix = nodeFactory->createUnary(token.state, token.token, OperatorType::PostfixUnary);
                 postfix->setOperand(ret);
                 ret = postfix;
                 continue;
@@ -137,7 +137,7 @@ Expression* Parser::parsePostfixExpression()
             //? used as post unary operator will treated as optional chaining expression, not ternary expression
             // postfix-expression → optional-chaining-expression
             expect_next(token);
-            ret = nodeFactory->createOptionalChaining(ret);
+            ret = nodeFactory->createOptionalChaining(token.state, ret);
             continue;
         }
         // postfix-expression → function-call-expression
@@ -152,9 +152,9 @@ Expression* Parser::parsePostfixExpression()
         if(token.type == TokenType::OpenBracket)
         {
             // subscript-expression → postfix-expression[expression-list]
-            match(L"[");
+            match(L"[", token);
             Expression* expr = parseExpression();
-            SubscriptAccess* subscript = nodeFactory->createSubscriptAccess(ret, expr);
+            SubscriptAccess* subscript = nodeFactory->createSubscriptAccess(token.state, ret, expr);
             while(match(L","))
             {
                 if(predicate(L"]"))
@@ -180,7 +180,7 @@ Expression* Parser::parsePostfixExpression()
  */
 FunctionCall* Parser::parseFunctionCallExpression()
 {
-    FunctionCall* ret = nodeFactory->createFunctionCall();
+    FunctionCall* ret = nodeFactory->createFunctionCall(tokenizer->save());
     if(predicate(L"("))
     {
         ParenthesizedExpression* p = static_cast<ParenthesizedExpression*>(this->parseParenthesizedExpression());
@@ -188,7 +188,7 @@ FunctionCall* Parser::parseFunctionCallExpression()
     }
     if(predicate(L"{"))
     {
-        ClosureExpression* closure = parseClosureExpression();
+        Closure* closure = parseClosureExpression();
         ret->setTrailingClosure(closure);
     }
     return ret;
@@ -261,7 +261,7 @@ Expression* Parser::parsePrimaryExpression()
     if(token == L"_")
     {
         expect_next(token);
-        return nodeFactory->createIdentifier(L"_");
+        return nodeFactory->createIdentifier(token.state, L"_");
     }
     
     // primary-expression → closure-expression
@@ -275,8 +275,8 @@ Expression* Parser::parsePrimaryExpression()
     {
         expect_next(token);
         expect_identifier(token);
-        Identifier* field = nodeFactory->createIdentifier(token.token);
-        return nodeFactory->createMemberAccess(NULL, field);
+        Identifier* field = nodeFactory->createIdentifier(token.state, token.token);
+        return nodeFactory->createMemberAccess(token.state, NULL, field);
     }
     return NULL;
 }
@@ -290,8 +290,8 @@ Expression* Parser::parsePrimaryExpression()
 Expression* Parser::parseParenthesizedExpression()
 {
     Token token;
-    ParenthesizedExpression* ret = nodeFactory->createParenthesizedExpression();
-    match(L"(");
+    match(L"(", token);
+    ParenthesizedExpression* ret = nodeFactory->createParenthesizedExpression(token.state);
     if(!predicate(L")"))
     {
         parseExpressionItem(ret);
@@ -336,18 +336,21 @@ Expression* Parser::parseSelfExpression()
     Token token;
     expect(Keyword::Self);
     expect_next(token);
-    Identifier* self = nodeFactory->createIdentifier(L"self");
+    Identifier* self = nodeFactory->createIdentifier(token.state, L"self");
     if(token == L".")
     {
-        expect_identifier(token);
-        Identifier* field = nodeFactory->createIdentifier(token.token);
-        MemberAccess* ret = nodeFactory->createMemberAccess(self, field);
+        expect_next(token);
+        tassert(token, token.type == TokenType::Identifier);
+        if(token.identifier.keyword != Keyword::_ && token.identifier.keyword != Keyword::Init)
+            unexpected(token);
+        Identifier* field = nodeFactory->createIdentifier(token.state, token.token);
+        MemberAccess* ret = nodeFactory->createMemberAccess(token.state, self, field);
         return ret;
     }
     else if(token == L"[")
     {
         Expression* expr = this->parseExpression();
-        SubscriptAccess* sub = nodeFactory->createSubscriptAccess(self, expr);
+        SubscriptAccess* sub = nodeFactory->createSubscriptAccess(token.state, self, expr);
         return sub;
     }
     else
@@ -365,9 +368,9 @@ Expression* Parser::parseSelfExpression()
 Expression* Parser::parseSuperExpression()
 {
     Token token;
-    expect(Keyword::Super);
+    expect(Keyword::Super, token);
+    Identifier* super = nodeFactory->createIdentifier(token.state, L"super");
     expect_next(token);
-    Identifier* super = nodeFactory->createIdentifier(L"super");
     if(token == L".")
     {
         expect_next(token);
@@ -375,15 +378,15 @@ Expression* Parser::parseSuperExpression()
             unexpected(token);
         if(token.identifier.keyword != Keyword::_ && token.identifier.keyword != Keyword::Init)
             unexpected(token);
-        Identifier* field = nodeFactory->createIdentifier(token.token);
-        MemberAccess* ret = nodeFactory->createMemberAccess(super, field);
+        Identifier* field = nodeFactory->createIdentifier(token.state, token.token);
+        MemberAccess* ret = nodeFactory->createMemberAccess(token.state, super, field);
         return ret;
     }
     else if(token == L"[")
     {
         Expression* expr = this->parseExpression();
-        expect(L"]");
-        SubscriptAccess* sub = nodeFactory->createSubscriptAccess(super, expr);
+        expect(L"]", token);
+        SubscriptAccess* sub = nodeFactory->createSubscriptAccess(token.state, super, expr);
         return sub;
     }
     unexpected(token);
@@ -394,7 +397,7 @@ Identifier* Parser::parseIdentifier()
 {
     Token token;
     expect_identifier(token);
-    Identifier* ret = nodeFactory->createIdentifier(token.token);
+    Identifier* ret = nodeFactory->createIdentifier(token.state, token.token);
     return ret;
 }
 
@@ -428,13 +431,13 @@ Expression* Parser::parseLiteralExpression()
         if(token.type == TokenType::CloseBracket)
         {
             //[] detected, empty array
-            return nodeFactory->createArrayLiteral();
+            return nodeFactory->createArrayLiteral(token.state);
         }
         if(token.type == TokenType::Colon)
         {
             //[: detected, empty dictionary
-            expect(L"]");
-            return nodeFactory->createDictionaryLiteral();
+            expect(L"]", token);
+            return nodeFactory->createDictionaryLiteral(token.state);
         }
         restore(token);
         //check if there's a colon after an expression
@@ -444,7 +447,7 @@ Expression* Parser::parseLiteralExpression()
         peek(token);
         if(token.type == TokenType::Comma || token.type == TokenType::CloseBracket)//array
         {
-            ArrayLiteral* array = nodeFactory->createArrayLiteral();
+            ArrayLiteral* array = nodeFactory->createArrayLiteral(token.state);
             array->push(tmp);
             while(match(L","))
             {
@@ -460,7 +463,7 @@ Expression* Parser::parseLiteralExpression()
         else if(token.type == TokenType::Colon)//dictionary
         {
             match(L":");
-            DictionaryLiteral* dict = nodeFactory->createDictionaryLiteral();
+            DictionaryLiteral* dict = nodeFactory->createDictionaryLiteral(token.state);
             Expression* key = tmp;
             Expression* value = parseExpression();
             tassert(token, value != NULL);
@@ -485,21 +488,21 @@ Expression* Parser::parseLiteralExpression()
         switch(token.identifier.keyword)
         {
             case Keyword::File:
-                return nodeFactory->createCompilecConstant(L"__FILE__", fileName);
+                return nodeFactory->createCompilecConstant(token.state, L"__FILE__", fileName);
             case Keyword::Line:
             {
                 std::wstringstream ss;
                 ss<<token.state.column;
-                return nodeFactory->createCompilecConstant(L"__LINE__", ss.str());
+                return nodeFactory->createCompilecConstant(token.state, L"__LINE__", ss.str());
             }
             case Keyword::Column:
             {
                 std::wstringstream ss;
                 ss<<token.state.line;
-                return nodeFactory->createCompilecConstant(L"__COLUMN__", ss.str());
+                return nodeFactory->createCompilecConstant(token.state, L"__COLUMN__", ss.str());
             }
             case Keyword::Function:
-                return nodeFactory->createCompilecConstant(L"__FUNCTION__", functionName);
+                return nodeFactory->createCompilecConstant(token.state, L"__FUNCTION__", functionName);
             default:
                 break;
         }
@@ -516,13 +519,13 @@ Expression* Parser::parseLiteral()
     switch(token.type)
     {
         case TokenType::Integer:
-            ret = nodeFactory->createInteger(token.token);
+            ret = nodeFactory->createInteger(token.state, token.token);
             break;
         case TokenType::String:
-            ret = nodeFactory->createString(token.token);
+            ret = nodeFactory->createString(token.state, token.token);
             break;
         case TokenType::Float:
-            ret = nodeFactory->createFloat(token.token);
+            ret = nodeFactory->createFloat(token.state, token.token);
             break;
         default:
             unexpected(token);
@@ -644,13 +647,13 @@ Expression* Parser::parseBinaryExpression(Expression* lhs)
         if(token.identifier.keyword == Keyword::Is)
         {
             TypeNode* typeNode = parseType();
-            Expression* ret = nodeFactory->createTypeCheck(lhs, typeNode);
+            Expression* ret = nodeFactory->createTypeCheck(token.state, lhs, typeNode);
             return ret;
         }
         else if(token.identifier.keyword == Keyword::As)
         {
             TypeNode* typeNode = parseType();
-            Expression* ret = nodeFactory->createTypeCast(lhs, typeNode);
+            Expression* ret = nodeFactory->createTypeCast(token.state, lhs, typeNode);
             return ret;
         }
     }
@@ -659,7 +662,7 @@ Expression* Parser::parseBinaryExpression(Expression* lhs)
         if(token == L"=")
         {
             Expression* rhs = parsePrefixExpression();
-            Expression* ret = nodeFactory->createAssignment(lhs, rhs);
+            Expression* ret = nodeFactory->createAssignment(token.state, lhs, rhs);
             return ret;
         }
         
@@ -669,7 +672,7 @@ Expression* Parser::parseBinaryExpression(Expression* lhs)
             tassert(token, op != NULL);
             Expression* rhs = parsePrefixExpression();
             int precedence = op->precedence.infix > 0 ? op->precedence.infix : 100;
-            BinaryOperator* ret = nodeFactory->createBinary(op->name, op->associativity, precedence);
+            BinaryOperator* ret = nodeFactory->createBinary(token.state, op->name, op->associativity, precedence);
             ret->setLHS(lhs);
             ret->setRHS(rhs);
             return ret;
@@ -681,17 +684,103 @@ Expression* Parser::parseBinaryExpression(Expression* lhs)
         Expression* expr = parseExpression();
         expect(L":");
         Expression* expr2 = parsePrefixExpression();
-        Expression* ret = nodeFactory->createConditionalOperator(lhs, expr, expr2);
+        Expression* ret = nodeFactory->createConditionalOperator(token.state, lhs, expr, expr2);
         return ret;
     }
     unexpected(token);
     return NULL;
 }
-
-ClosureExpression* Parser::parseClosureExpression()
+/*
+  GRAMMAR OF A CLOSURE EXPRESSION
+ 
+ ‌ closure-expression → {closure-signature opt statements}
+ ‌ closure-signature → parameter-clause function-result opt in
+ ‌ closure-signature → identifier-list function-result opt in
+ ‌ closure-signature → capture-list parameter-clause function-result opt in
+ ‌ closure-signature → capture-list identifier-list function-result opt in
+ ‌ closure-signature → capture-list in
+ ‌ capture-list → [capture-specifier expression]
+ ‌ capture-specifier → weak  unowned  unowned(safe) unowned(unsafe)
+*/
+Closure* Parser::parseClosureExpression()
 {
     Token token;
-    tassert(token, 0);
-    return NULL;
+    expect(L"{", token);
+    Closure* ret = nodeFactory->createClosure(token.state);
+    TokenizerState s = tokenizer->save();
+    bool hasSignature = false;
+    //look for keyword "in"
+    while(next(token))
+    {
+        Keyword::T keyword = token.getKeyword();
+        if(keyword == Keyword::In)
+        {
+            hasSignature = true;
+            break;
+        }
+        if(token == L"}")
+            break;
+    }
+    tokenizer->restore(s);
+    if(hasSignature)
+    {
+        if(match(L"["))
+        {
+            //read capture-list
+            expect_next(token);
+            Keyword::T k = token.getKeyword();
+            tassert(token, k == Keyword::Weak || k == Keyword::Unowned || k == Keyword::Unowned_safe || k == Keyword::Unowned_unsafe);
+            switch(token.getKeyword())
+            {
+                case Keyword::Weak:
+                    ret->setCaptureSpecifier(Closure::Weak);
+                    break;
+                case Keyword::Unowned:
+                    ret->setCaptureSpecifier(Closure::Unowned);
+                    break;
+                case Keyword::Unowned_safe:
+                    ret->setCaptureSpecifier(Closure::Unowned_Safe);
+                    break;
+                case Keyword::Unowned_unsafe:
+                    ret->setCaptureSpecifier(Closure::Unowned_Unsafe);
+                    break;
+                default:
+                    unexpected(token);
+                    break;
+            }
+            Expression* capture = parseExpression();
+            ret->setCapture(capture);
+        }
+        if(predicate(L"("))
+        {
+            Parameters* params = parseParameterClause();
+            ret->setParameters(params);
+        }
+        else
+        {
+            Parameters* params = nodeFactory->createParameters(tokenizer->save());
+            do
+            {
+                expect_identifier(token);
+                Parameter* param = nodeFactory->createParameter(token.state);
+                param->setLocalName(token.token);
+                params->addParameter(param);
+            } while (match(L","));
+            ret->setParameters(params);
+        }
+        if(match(L"->"))
+        {
+            TypeNode* t = parseType();
+            ret->setReturnType(t);
+        }
+        expect(Keyword::In);
+    }
+    while(!predicate(L"}"))
+    {
+        Statement* s = parseStatement();
+        ret->addStatement(s);
+    }
+    expect(L"}");
+    return ret;
 }
 

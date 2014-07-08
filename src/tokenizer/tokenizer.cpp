@@ -66,6 +66,7 @@ Tokenizer::Tokenizer(const wchar_t* data)
         {L"__LINE__",       E, Keyword::Line},
         //Reserved keywords
         {L"associativity",  R, Keyword::Associativity},
+        {L"convenience",    R, Keyword::Convenience},
         {L"didSet",         R, Keyword::DidSet},
         {L"get",            R, Keyword::Get},
         {L"infix",          R, Keyword::Infix},
@@ -117,9 +118,10 @@ void Tokenizer::set(const wchar_t* data)
         size = wcslen(data);
         this->data = new wchar_t[size + 1];
         memcpy(this->data, data, (size + 1) * sizeof(wchar_t));
-        state.cursor = this->data;
-        end = state.cursor + size;
+        state.cursor = 0;
+        end = this->data + size;
     }
+    memset(positions, 0, sizeof(positions));
 }
 Tokenizer::~Tokenizer()
 {
@@ -129,7 +131,7 @@ Tokenizer::~Tokenizer()
 /**
  * Save current state for restoring later
  */
-TokenizerState Tokenizer::save()
+const TokenizerState& Tokenizer::save()
 {
     return state;
 }
@@ -152,7 +154,6 @@ void Tokenizer::resetToken(Token& token)
     token.type = TokenType::_;
     token.token.clear();
     token.size = 0;
-    token.state = state;
 }
 bool Tokenizer::peek(wchar_t &ch)
 {
@@ -163,14 +164,34 @@ bool Tokenizer::peek(wchar_t &ch)
 }
 bool Tokenizer::get(wchar_t &ch)
 {
-    if(state.cursor >= end)
+    if(state.cursor >= size)
         return false;
-    ch = *state.cursor++;
+    //save line and column
+    int p = (state.cursor << 1) & 0xf;
+    positions[p] = state.line;
+    positions[p | 1] = state.column;
+    
+    
+    ch = data[state.cursor++];
+    if(ch == '\n')
+    {
+        //move to next line
+        state.line++;
+        state.column = 1;
+    }
+    else
+    {
+        //move to next column
+        state.column++;
+    }
     return true;
 }
 void Tokenizer::unget()
 {
     state.cursor--;
+    int p = (state.cursor << 1) & 0xf;
+    state.line = positions[p];
+    state.column = positions[p | 1];
 }
 bool Tokenizer::skipSpaces()
 {
@@ -213,8 +234,9 @@ bool Tokenizer::readOperator(Token& token, int max)
     wchar_t ch;
     token.type = TokenType::Operator;
     token.operators.type = OperatorType::_;
-    bool whiteLeft = hasWhiteLeft(state.cursor);
-    const wchar_t* begin = state.cursor;
+    const wchar_t* cursor = data + state.cursor;
+    bool whiteLeft = hasWhiteLeft(cursor);
+    const wchar_t* begin = cursor;
     
     while(get(ch) && (!max || token.token.size() < max))
     {
@@ -586,6 +608,8 @@ bool Tokenizer::nextImpl(Token& token)
     wchar_t ch;
     if(!peek(ch))
         return false;
+    
+    token.state = state;
 
     switch(ch)
     {
@@ -624,7 +648,7 @@ bool Tokenizer::nextImpl(Token& token)
             return readSymbol(token, TokenType::Sharp);
         case '?':
         {
-            bool whiteLeft = hasWhiteLeft(state.cursor);
+            bool whiteLeft = hasWhiteLeft(data + state.cursor);
             token.operators.type = whiteLeft ? OperatorType::InfixBinary : OperatorType::PostfixUnary;
             return readSymbol(token, TokenType::Optional);
         }
@@ -637,7 +661,7 @@ bool Tokenizer::nextImpl(Token& token)
         return readNumber(token);
     if(ch == '+' || ch == '-')
     {
-        bool whiteLeft = hasWhiteLeft(state.cursor);
+        bool whiteLeft = hasWhiteLeft(data +state.cursor);
         must_get();
         if(whiteLeft && peek(ch) && isdigit(ch))
         {
@@ -645,7 +669,7 @@ bool Tokenizer::nextImpl(Token& token)
             return readNumber(token);
         }
         unget();
-        ch = *state.cursor;
+        ch = data[state.cursor];
     }
     
     if(isOperator(ch))

@@ -57,6 +57,7 @@ class TypeIdentifier;
 class ProtocolComposition;
 class TupleType;
 class Attribute;
+class Closure;
 
 
 
@@ -81,89 +82,91 @@ class GenericConstraint;
 class GenericParameters;
 class Pattern;
 class EnumCasePattern;
+struct SourceInfo;
 
 class NodeFactory
 {
 public:
     virtual ~NodeFactory(){}
 public:
-    virtual CommentNode* createComment(const std::wstring& comment);
-    virtual BooleanLiteral* createBoolean(bool value);
-    virtual IntegerLiteral* createInteger(const std::wstring& value);
-    virtual FloatLiteral* createFloat(const std::wstring& value);
-    virtual StringLiteral* createString(const std::wstring& value);
-    virtual UnaryOperator* createUnary(const std::wstring& op, OperatorType::T type);
-    virtual BinaryOperator* createBinary(const std::wstring& op, Associativity::T associativity, int precedence);
+    virtual CommentNode* createComment(const SourceInfo& state, const std::wstring& comment);
+    virtual BooleanLiteral* createBoolean(const SourceInfo& state, bool value);
+    virtual IntegerLiteral* createInteger(const SourceInfo& state, const std::wstring& value);
+    virtual FloatLiteral* createFloat(const SourceInfo& state, const std::wstring& value);
+    virtual StringLiteral* createString(const SourceInfo& state, const std::wstring& value);
+    virtual UnaryOperator* createUnary(const SourceInfo& state, const std::wstring& op, OperatorType::T type);
+    virtual BinaryOperator* createBinary(const SourceInfo& state, const std::wstring& op, Associativity::T associativity, int precedence);
 
-    virtual Identifier* createIdentifier(const std::wstring& op);
-    virtual InOutParameter* createInOutParameter(Identifier* identifier);
+    virtual Identifier* createIdentifier(const SourceInfo& state, const std::wstring& op);
+    virtual InOutParameter* createInOutParameter(const SourceInfo& state, Identifier* identifier);
 
-    virtual ArrayLiteral* createArrayLiteral();
-    virtual DictionaryLiteral* createDictionaryLiteral();
-    virtual CompileConstant* createCompilecConstant(const std::wstring& name, const std::wstring& value);
-    virtual MemberAccess* createMemberAccess(Expression* self, Identifier* field);
-    virtual SubscriptAccess* createSubscriptAccess(Expression* self, Expression* index);
+    virtual ArrayLiteral* createArrayLiteral(const SourceInfo& state);
+    virtual DictionaryLiteral* createDictionaryLiteral(const SourceInfo& state);
+    virtual CompileConstant* createCompilecConstant(const SourceInfo& state, const std::wstring& name, const std::wstring& value);
+    virtual MemberAccess* createMemberAccess(const SourceInfo& state, Expression* self, Identifier* field);
+    virtual SubscriptAccess* createSubscriptAccess(const SourceInfo& state, Expression* self, Expression* index);
     
-    virtual TypeCheck* createTypeCheck(Pattern* expr, TypeNode* type);
-    virtual TypeCast* createTypeCast(Expression* expr, TypeNode* type);
-    virtual Assignment* createAssignment(Expression* lhs, Expression* rhs);
-    virtual ConditionalOperator* createConditionalOperator(Expression* cond, Expression* trueExpr, Expression* falseExpr);
-    virtual ParenthesizedExpression* createParenthesizedExpression();
+    virtual TypeCheck* createTypeCheck(const SourceInfo& state, Pattern* expr, TypeNode* type);
+    virtual TypeCast* createTypeCast(const SourceInfo& state, Expression* expr, TypeNode* type);
+    virtual Assignment* createAssignment(const SourceInfo& state, Expression* lhs, Expression* rhs);
+    virtual ConditionalOperator* createConditionalOperator(const SourceInfo& state, Expression* cond, Expression* trueExpr, Expression* falseExpr);
+    virtual ParenthesizedExpression* createParenthesizedExpression(const SourceInfo& state);
     
-    virtual InitializerReference* createInitializerReference(Expression*);
-    virtual SelfExpression* createSelfExpression(Expression* expr);
-    virtual DynamicType* createDynamicType(Expression* expr);
-    virtual ForcedValue* createForcedValue(Expression* expr);
-    virtual OptionalChaining* createOptionalChaining(Expression* expr);
-    virtual FunctionCall* createFunctionCall();
+    virtual InitializerReference* createInitializerReference(const SourceInfo& state, Expression*);
+    virtual SelfExpression* createSelfExpression(const SourceInfo& state, Expression* expr);
+    virtual DynamicType* createDynamicType(const SourceInfo& state, Expression* expr);
+    virtual ForcedValue* createForcedValue(const SourceInfo& state, Expression* expr);
+    virtual OptionalChaining* createOptionalChaining(const SourceInfo& state, Expression* expr);
+    virtual FunctionCall* createFunctionCall(const SourceInfo& state);
 
-    virtual ForLoop* createForLoop();
-    virtual WhileLoop* createWhileLoop();
-    virtual IfStatement* createIf();
-    virtual DoLoop* createDoLoop();
-    virtual SwitchCase* createSwitch();
-    virtual CaseStatement* createCase();
-    virtual BreakStatement* createBreak();
-    virtual ContinueStatement* createContinue();
-    virtual FallthroughStatement* createFallthrough();
-    virtual ReturnStatement* createReturn();
-    virtual LabeledStatement* createLabel();
-    virtual CodeBlock* createCodeBlock();
-    virtual LetBinding* createLetBinding();
-    virtual VarBinding* createVarBinding();
-    virtual Tuple* createTuple();
-    virtual EnumCasePattern* createEnumCasePattern(const std::wstring& name);
+    virtual ForLoop* createForLoop(const SourceInfo& state);
+    virtual WhileLoop* createWhileLoop(const SourceInfo& state);
+    virtual IfStatement* createIf(const SourceInfo& state);
+    virtual DoLoop* createDoLoop(const SourceInfo& state);
+    virtual SwitchCase* createSwitch(const SourceInfo& state);
+    virtual CaseStatement* createCase(const SourceInfo& state);
+    virtual BreakStatement* createBreak(const SourceInfo& state);
+    virtual ContinueStatement* createContinue(const SourceInfo& state);
+    virtual FallthroughStatement* createFallthrough(const SourceInfo& state);
+    virtual ReturnStatement* createReturn(const SourceInfo& state);
+    virtual LabeledStatement* createLabel(const SourceInfo& state);
+    virtual CodeBlock* createCodeBlock(const SourceInfo& state);
+    virtual LetBinding* createLetBinding(const SourceInfo& state);
+    virtual VarBinding* createVarBinding(const SourceInfo& state);
+    virtual Tuple* createTuple(const SourceInfo& state);
+    virtual Closure* createClosure(const SourceInfo& state);
+    virtual EnumCasePattern* createEnumCasePattern(const SourceInfo& state, const std::wstring& name);
     
-    virtual FunctionType* createFunctionType(TypeNode* argumentsType, TypeNode* retType);
-    virtual ArrayType* createArrayType(TypeNode* innerType);
-    virtual OptionalType* createOptionalType(TypeNode* innerType);
-    virtual ImplicitlyUnwrappedOptional* createImplicitlyUnwrappedOptional(TypeNode* innerType);
-    virtual TypeIdentifier* createTypeIdentifier(const std::wstring& typeName);
-    virtual ProtocolComposition* createProtocolComposition();
-    virtual TupleType* createTupleType();
-    virtual Attribute* createAttribute(const std::wstring& name);
+    virtual FunctionType* createFunctionType(const SourceInfo& state, TypeNode* argumentsType, TypeNode* retType);
+    virtual ArrayType* createArrayType(const SourceInfo& state, TypeNode* innerType);
+    virtual OptionalType* createOptionalType(const SourceInfo& state, TypeNode* innerType);
+    virtual ImplicitlyUnwrappedOptional* createImplicitlyUnwrappedOptional(const SourceInfo& state, TypeNode* innerType);
+    virtual TypeIdentifier* createTypeIdentifier(const SourceInfo& state, const std::wstring& typeName);
+    virtual ProtocolComposition* createProtocolComposition(const SourceInfo& state);
+    virtual TupleType* createTupleType(const SourceInfo& state);
+    virtual Attribute* createAttribute(const SourceInfo& state);
 
     
     
-    virtual Import* createImport(const std::vector<Attribute*>& attrs);
-    virtual Constant* createConstant(const std::vector<Attribute*>& attrs, int specifiers);
-    virtual Variables* createVariables(const std::vector<Attribute*>& attrs, int specifiers);
-    virtual Variable* createVariable();
-    virtual TypeAlias* createTypealias(const std::vector<Attribute*>& attrs);
-    virtual FunctionDef* createFunction(const std::wstring& name, const std::vector<Attribute*>& attrs, int specifiers);
-    virtual Parameters* createParameters();
-    virtual Parameter* createParameter();
-    virtual EnumDef* createEnum(const std::wstring& name, const std::vector<Attribute*>& attrs);
-    virtual StructDef* createStruct(const std::wstring& name, const std::vector<Attribute*>& attrs);
-    virtual ClassDef* createClass(const std::wstring& name, const std::vector<Attribute*>& attrs);
-    virtual ProtocolDef* createProtocol(const std::wstring& name, const std::vector<Attribute*>& attrs);
-    virtual InitializerDef* createInitializer(const std::vector<Attribute*>& attrs);
-    virtual DeinitializerDef* createDeinitializer(const std::vector<Attribute*>& attrs);
-    virtual ExtensionDef* createExtension(const std::vector<Attribute*>& attrs);
-    virtual SubscriptDef* createSubscript(const std::vector<Attribute*>& attrs);
-    virtual OperatorDef* createOperator(const std::vector<Attribute*>& attrs);
-    virtual GenericConstraint* createGenericConstraint();
-    virtual GenericParameters* createGenericParameters();
+    virtual Import* createImport(const SourceInfo& state, const std::vector<Attribute*>& attrs);
+    virtual Constant* createConstant(const SourceInfo& state, const std::vector<Attribute*>& attrs, int specifiers);
+    virtual Variables* createVariables(const SourceInfo& state, const std::vector<Attribute*>& attrs, int specifiers);
+    virtual Variable* createVariable(const SourceInfo& state);
+    virtual TypeAlias* createTypealias(const SourceInfo& state, const std::vector<Attribute*>& attrs);
+    virtual FunctionDef* createFunction(const SourceInfo& state, const std::vector<Attribute*>& attrs, int specifiers);
+    virtual Parameters* createParameters(const SourceInfo& state);
+    virtual Parameter* createParameter(const SourceInfo& state);
+    virtual EnumDef* createEnum(const SourceInfo& state, const std::vector<Attribute*>& attrs);
+    virtual StructDef* createStruct(const SourceInfo& state, const std::vector<Attribute*>& attrs);
+    virtual ClassDef* createClass(const SourceInfo& state, const std::vector<Attribute*>& attrs);
+    virtual ProtocolDef* createProtocol(const SourceInfo& state, const std::vector<Attribute*>& attrs);
+    virtual InitializerDef* createInitializer(const SourceInfo& state, const std::vector<Attribute*>& attrs);
+    virtual DeinitializerDef* createDeinitializer(const SourceInfo& state, const std::vector<Attribute*>& attrs);
+    virtual ExtensionDef* createExtension(const SourceInfo& state, const std::vector<Attribute*>& attrs);
+    virtual SubscriptDef* createSubscript(const SourceInfo& state, const std::vector<Attribute*>& attrs);
+    virtual OperatorDef* createOperator(const SourceInfo& state, const std::vector<Attribute*>& attrs);
+    virtual GenericConstraint* createGenericConstraint(const SourceInfo& state);
+    virtual GenericParameters* createGenericParameters(const SourceInfo& state);
     
     
 };

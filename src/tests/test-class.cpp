@@ -29,6 +29,13 @@ class TestClass : public SwiftTestCase
     CPPUNIT_TEST(testSubscript_Struct);
     CPPUNIT_TEST(testSubscriptOptions);
     CPPUNIT_TEST(testSubclass);
+    CPPUNIT_TEST(testOverride_Func);
+    CPPUNIT_TEST(testOverride_Var);
+    CPPUNIT_TEST(testOverride_PropertyObservers);
+    CPPUNIT_TEST(testFinalAttribute);
+    CPPUNIT_TEST(testInit);
+    CPPUNIT_TEST(testConvenienceInitializer);
+    CPPUNIT_TEST(testDefaultValueWithClosure);
     CPPUNIT_TEST_SUITE_END();
 public:
     
@@ -669,6 +676,9 @@ public:
         CPPUNIT_ASSERT(c = dynamic_cast<ClassDef*>(root));
         CPPUNIT_ASSERT_EQUAL(1, c->numParents());
         CPPUNIT_ASSERT(t = dynamic_cast<TypeIdentifier*>(c->getParent(0)));
+        ASSERT_EQUALS(L"Vehicle", t->getName().c_str());
+        
+        
         InitializerDef* init = NULL;
         CPPUNIT_ASSERT_EQUAL(1, c->numDeclarations());
         CPPUNIT_ASSERT(init = dynamic_cast<InitializerDef*>(c->getDeclaration(0)));
@@ -678,17 +688,220 @@ public:
         DESTROY(root);
     }
     
+    void testOverride_Func()
+    {
+        PARSE_STATEMENT(L"class Car: Vehicle {\n"
+                        L"var speed: Double = 0.0\n"
+                        L"init() {\n"
+                        L"    super.init()\n"
+                        L"    maxPassengers = 5\n"
+                        L"    numberOfWheels = 4\n"
+                        L"}\n"
+                        L"override func description() -> String {\n"
+                        L"    return super.description() + \"; \"\n"
+                        L"    + \"traveling at \(speed) mph\"\n"
+                        L"}\n"
+                        L"}");
+        
+        ClassDef* c = NULL;
+        TypeIdentifier* t = NULL;
+        CPPUNIT_ASSERT(c = dynamic_cast<ClassDef*>(root));
+        CPPUNIT_ASSERT_EQUAL(1, c->numParents());
+        CPPUNIT_ASSERT(t = dynamic_cast<TypeIdentifier*>(c->getParent(0)));
+        ASSERT_EQUALS(L"Vehicle", t->getName().c_str());
+        
+        
+        FunctionDef* f = NULL;
+        CPPUNIT_ASSERT_EQUAL(3, c->numDeclarations());
+        CPPUNIT_ASSERT(f = dynamic_cast<FunctionDef*>(c->getDeclaration(2)));
+        ASSERT_EQUALS(L"description", f->getName().c_str());
+        CPPUNIT_ASSERT_EQUAL((int)TypeSpecifier::Override, f->getSpecifiers());
+        
+        
+    
+        DESTROY(root);
+    }
+    void testOverride_Var()
+    {
+        PARSE_STATEMENT(L"class SpeedLimitedCar: Car {\n"
+                        L"override var speed: Double  {\n"
+                        L"    get {\n"
+                        L"        return super.speed\n"
+                        L"    }\n"
+                        L"    set {\n"
+                        L"        super.speed = min(newValue, 40.0)\n"
+                        L"    }\n"
+                        L"}\n"
+                        L"}");
+        
+        
+        ClassDef* c = NULL;
+        TypeIdentifier* t = NULL;
+        CPPUNIT_ASSERT(c = dynamic_cast<ClassDef*>(root));
+        CPPUNIT_ASSERT_EQUAL(1, c->numParents());
+        CPPUNIT_ASSERT(t = dynamic_cast<TypeIdentifier*>(c->getParent(0)));
+        ASSERT_EQUALS(L"Car", t->getName().c_str());
+        
+        
+        Variables* vars = NULL;
+        CPPUNIT_ASSERT_EQUAL(1, c->numDeclarations());
+        CPPUNIT_ASSERT(vars = dynamic_cast<Variables*>(c->getDeclaration(0)));
+        CPPUNIT_ASSERT_EQUAL(1, vars->numVariables());
+        Variable* var = NULL;
+        CPPUNIT_ASSERT(var = vars->getVariable(0));
+        Identifier* id = NULL;
+        CPPUNIT_ASSERT(id = dynamic_cast<Identifier*>(var->getName()));
+        ASSERT_EQUALS(L"speed", id->getIdentifier().c_str());
+        CPPUNIT_ASSERT_EQUAL((int)TypeSpecifier::Override, var->getSpecifiers());
+        
+        
+        DESTROY(root);
+    }
+    
+    void testOverride_PropertyObservers()
+    {
+        PARSE_STATEMENT(L"class AutomaticCar: Car {\n"
+                        L"var gear = 1\n"
+                        L"override var speed: Double {\n"
+                        L"    didSet {\n"
+                        L"        gear = Int(speed / 10.0) + 1\n"
+                        L"    }\n"
+                        L"}\n"
+                        L"override func description() -> String {\n"
+                        L"    return super.description() + \" in gear \(gear)\"\n"
+                        L"}\n"
+                        L"}");
+        
+        
+        ClassDef* c = NULL;
+        TypeIdentifier* t = NULL;
+        CPPUNIT_ASSERT(c = dynamic_cast<ClassDef*>(root));
+        CPPUNIT_ASSERT_EQUAL(1, c->numParents());
+        CPPUNIT_ASSERT(t = dynamic_cast<TypeIdentifier*>(c->getParent(0)));
+        ASSERT_EQUALS(L"Car", t->getName().c_str());
+        
+        
+        Variables* vars = NULL;
+        CPPUNIT_ASSERT_EQUAL(3, c->numDeclarations());
+        CPPUNIT_ASSERT(vars = dynamic_cast<Variables*>(c->getDeclaration(1)));
+        CPPUNIT_ASSERT_EQUAL(1, vars->numVariables());
+        Variable* var = NULL;
+        CPPUNIT_ASSERT(var = vars->getVariable(0));
+        Identifier* id = NULL;
+        CPPUNIT_ASSERT(id = dynamic_cast<Identifier*>(var->getName()));
+        ASSERT_EQUALS(L"speed", id->getIdentifier().c_str());
+        CPPUNIT_ASSERT_EQUAL((int)TypeSpecifier::Override, var->getSpecifiers());
+        
+        
+        
+        DESTROY(root);
+    }
+    
+    
+    void testFinalAttribute()
+    {
+        PARSE_STATEMENT(L"@final class AutomaticCar: Car {\n"
+                        L"@final var gear = 1\n"
+                        L"@final func description() -> String {\n"
+                        L"    return super.description() + \" in gear \(gear)\"\n"
+                        L"}\n"
+                        L"@final subscript(index: Int) -> Int {\n"
+                        L"    return multiplier * index\n"
+                        L"}\n"
+                        L"}");
+        
+        
+        ClassDef* c = NULL;
+        TypeIdentifier* t = NULL;
+        CPPUNIT_ASSERT(c = dynamic_cast<ClassDef*>(root));
+        
+        CPPUNIT_ASSERT_EQUAL(1, (int)c->getAttributes().size());
+        ASSERT_EQUALS(L"final", c->getAttributes().front()->getName());
+        
+        
+        CPPUNIT_ASSERT_EQUAL(1, c->numParents());
+        CPPUNIT_ASSERT(t = dynamic_cast<TypeIdentifier*>(c->getParent(0)));
+        ASSERT_EQUALS(L"Car", t->getName().c_str());
+        
+        CPPUNIT_ASSERT_EQUAL(3, c->numDeclarations());
+        Variables* vars = NULL;
+        FunctionDef* func = NULL;
+        SubscriptDef* sub = NULL;
+        
+        CPPUNIT_ASSERT(vars = dynamic_cast<Variables*>(c->getDeclaration(0)));
+        CPPUNIT_ASSERT_EQUAL(1, (int)vars->getAttributes().size());
+        ASSERT_EQUALS(L"final", vars->getAttributes().front()->getName());
+        
+        
+        CPPUNIT_ASSERT(func = dynamic_cast<FunctionDef*>(c->getDeclaration(1)));
+        CPPUNIT_ASSERT_EQUAL(1, (int)func->getAttributes().size());
+        ASSERT_EQUALS(L"final", func->getAttributes().front()->getName());
+        
+        
+        CPPUNIT_ASSERT(sub = dynamic_cast<SubscriptDef*>(c->getDeclaration(2)));
+        CPPUNIT_ASSERT_EQUAL(1, (int)sub->getAttributes().size());
+        ASSERT_EQUALS(L"final", sub->getAttributes().front()->getName());
+        
+        
+        DESTROY(root);
+    }
+    void testInit()
+    {
+        PARSE_STATEMENT(L"struct Color {\n"
+                        L"let red = 0.0, green = 0.0, blue = 0.0\n"
+                        L"init(red: Double, green: Double, blue: Double) {\n"
+                        L"  self.red   = red\n"
+                        L"  self.green = green\n"
+                        L"  self.blue  = blue\n"
+                        L"}\n"
+                        L"}\n");
+        StructDef* s = NULL;
+        Constant* let = NULL;
+        InitializerDef* init = NULL;
+        Parameters* params = NULL;
+        
+        CPPUNIT_ASSERT(s = dynamic_cast<StructDef*>(root));
+        CPPUNIT_ASSERT_EQUAL(2, s->numDeclarations());
+        
+        CPPUNIT_ASSERT(let = dynamic_cast<Constant*>(s->getDeclaration(0)));
+        CPPUNIT_ASSERT(init = dynamic_cast<InitializerDef*>(s->getDeclaration(1)));
+        CPPUNIT_ASSERT(params = dynamic_cast<Parameters*>(init->getParameters()));
+        CPPUNIT_ASSERT_EQUAL(3, params->numParameters());
+        
+        
+        DESTROY(root);
+    }
     
     
     
+    void testConvenienceInitializer()
+    {
+        PARSE_STATEMENT(L"class Food {\n"
+                        L"  var name: String\n"
+                        L"  init(name: String) {\n"
+                        L"      self.name = name\n"
+                        L"  }\n"
+                        L"  convenience init() {\n"
+                        L"      self.init(name: \"[Unnamed]\")\n"
+                        L"  }\n"
+                        L"}");
+        
+        DESTROY(root);
+    }
     
     
-    
-    
-    
-    
-    
-    
+    void testDefaultValueWithClosure()
+    {
+        /*
+        PARSE_STATEMENT(L"class SomeClass {\n"
+                        L"let someProperty: SomeType = {\n"
+                        L"    return someValue\n"
+                        L"}()\n"
+                        L"}");
+        
+        DESTROY(root);
+         */
+    }
     
     
     

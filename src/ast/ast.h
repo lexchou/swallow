@@ -31,7 +31,7 @@
 #include "dynamic-type.h"
 #include "forced-value.h"
 #include "optional-chaining.h"
-#include "closure-expression.h"
+#include "closure.h"
 
 #include "ast/break-statement.h"
 #include "ast/code-block.h"

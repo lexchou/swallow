@@ -32,7 +32,7 @@ public:
     /**
      * Save current state for restoring later
      */
-    TokenizerState save();
+    const TokenizerState& save();
     /**
      * Restore the specified state
      */
@@ -71,6 +71,7 @@ private:
     const wchar_t* end;
     size_t size;
     TokenizerState state;
+    int positions[16];
     std::map<std::wstring, KeywordInfo> keywords;
 };
 

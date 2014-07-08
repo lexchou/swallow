@@ -5,7 +5,7 @@
 SWIFT_NS_BEGIN
 
 class ParenthesizedExpression;
-class ClosureExpression;
+class Closure;
 class FunctionCall : public Expression
 {
 public:
@@ -19,14 +19,14 @@ public:
     void setArguments(ParenthesizedExpression* arguments);
     ParenthesizedExpression* getArguments();
     
-    void setTrailingClosure(ClosureExpression* trailingClosure);
-    ClosureExpression* getTrailingClosure();
+    void setTrailingClosure(Closure* trailingClosure);
+    Closure* getTrailingClosure();
 public:
     virtual void serialize(std::wostream& out);
 private:
     Expression* function;
     ParenthesizedExpression* arguments;
-    ClosureExpression* trailingClosure;
+    Closure* trailingClosure;
 };
 
 SWIFT_NS_END

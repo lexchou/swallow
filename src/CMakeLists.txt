@@ -79,6 +79,7 @@ SET(SWIFT_PARSER_SRC ${SWIFT_TOKENIZER_SRC}
 	ast/code-block.cpp
 	ast/value-binding.cpp
     ast/tuple.cpp
+    ast/closure.cpp
     ast/enum-case-pattern.cpp
 
     ast/type-node.cpp
@@ -136,6 +137,7 @@ ADD_EXECUTABLE(TestParser
 		tests/test-statement.cpp
 		tests/test-enum.cpp
 		tests/test-class.cpp
+		tests/test-closure.cpp
 		${SWIFT_TOKENIZER_SRC} ${SWIFT_PARSER_SRC})
 target_link_libraries(TestParser cppunit)
 

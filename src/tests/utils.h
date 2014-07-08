@@ -55,8 +55,8 @@ struct Tracer
         this->line = line;
 #ifdef TRACE_NODE
         using namespace Swift;
-//        Node::UnreleasedNodes.clear();
-//        Node::NodeCount = 0;
+        Node::UnreleasedNodes.clear();
+        Node::NodeCount = 0;
 #endif
     }
     ~Tracer()
@@ -70,13 +70,13 @@ struct Tracer
         {
             stringstream ss;
             list<Node*>::iterator iter = nodes.begin();
-            ss<<unreleasedNodes<<" unreleased AST nodes detected in [" << func << "]:";
+            ss<<unreleasedNodes<<" unreleased AST nodes detected in [" << file << ":" << func << "]:";
             for(; iter != nodes.end(); iter++)
             {
                 Node* node = *iter;
                 ss << static_cast<const void*>(node) <<", ";
             }
-            CPPUNIT_NS::Asserter::fail(ss.str(), CPPUNIT_NS::SourceLine(file, line));
+            std::cout<<ss.str()<<std::endl;
         }
 #endif//TRACE_NODE
     }

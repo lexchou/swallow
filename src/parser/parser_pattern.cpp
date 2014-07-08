@@ -34,7 +34,7 @@ Pattern* Parser::parsePattern()
             // pattern → identifier-pattern type-annotationopt
             case Keyword::_:
             {
-                Identifier* ret = nodeFactory->createIdentifier(token.token);
+                Identifier* ret = nodeFactory->createIdentifier(token.state, token.token);
                 if((flags & (UNDER_VAR | UNDER_CASE)) == 0)//type annotation is not parsed when it's inside a let/var
                 {
                     if(match(L":"))
@@ -48,14 +48,14 @@ Pattern* Parser::parsePattern()
             // pattern → value-binding-pattern
             case Keyword::Var:
             {
-                VarBinding* let = nodeFactory->createVarBinding();
+                VarBinding* let = nodeFactory->createVarBinding(token.state);
                 Pattern* binding = parsePattern();
                 let->setBinding(binding);
                 return let;
             }
             case Keyword::Let:
             {
-                LetBinding* let = nodeFactory->createLetBinding();
+                LetBinding* let = nodeFactory->createLetBinding(token.state);
                 Pattern* binding = parsePattern();
                 let->setBinding(binding);
                 return let;
@@ -117,7 +117,7 @@ Pattern* Parser::parseEnumPattern()
     Token token;
     expect(L".");
     expect_identifier(token);
-    EnumCasePattern* ret = nodeFactory->createEnumCasePattern(token.token);
+    EnumCasePattern* ret = nodeFactory->createEnumCasePattern(token.state, token.token);
 
 
     if(predicate(L"("))
@@ -136,17 +136,17 @@ Pattern* Parser::parseEnumPattern()
 Pattern* Parser::parseTypeCastingPattern()
 {
     Token token;
-    if(match(Keyword::Is))
+    if(match(Keyword::Is, token))
     {
         //is-pattern → is type
         TypeNode* type = parseType();
-        return nodeFactory->createTypeCheck(NULL, type);
+        return nodeFactory->createTypeCheck(token.state, NULL, type);
     }
     // as-pattern → pattern as type
     Pattern* pat = parsePattern();
-    expect(Keyword::As);
+    expect(Keyword::As, token);
     TypeNode* type = parseType();
-    return nodeFactory->createTypeCheck(pat, type);
+    return nodeFactory->createTypeCheck(token.state, pat, type);
 }
 /*
   tuple-pattern → (tuple-pattern-element-list opt)
@@ -155,8 +155,9 @@ Pattern* Parser::parseTypeCastingPattern()
  */
 Pattern* Parser::parseTuple()
 {
-    Tuple* ret = nodeFactory->createTuple();
-    expect(L"(");
+    Token token;
+    expect(L"(", token);
+    Tuple* ret = nodeFactory->createTuple(token.state);
     if(!predicate(L")"))
     {
         do

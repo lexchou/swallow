@@ -1,6 +1,6 @@
 #include "function-call.h"
 #include "parenthesized-expression.h"
-#include "closure-expression.h"
+#include "closure.h"
 USE_SWIFT_NS
 
 
@@ -35,13 +35,13 @@ ParenthesizedExpression* FunctionCall::getArguments()
     return arguments;
 }
 
-void FunctionCall::setTrailingClosure(ClosureExpression* trailingClosure)
+void FunctionCall::setTrailingClosure(Closure* trailingClosure)
 {
     this->trailingClosure = trailingClosure;
 }
 
 
-ClosureExpression* FunctionCall::getTrailingClosure()
+Closure* FunctionCall::getTrailingClosure()
 {
     return trailingClosure;
 }

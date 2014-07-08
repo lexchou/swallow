@@ -59,25 +59,25 @@ TypeNode* Parser::parseType()
         {
             //function-type → type->type
             TypeNode* retType = parseType();
-            ret = nodeFactory->createFunctionType(ret, retType);
+            ret = nodeFactory->createFunctionType(token.state, ret, retType);
             continue;
         }
         if(token == TokenType::OpenBracket)
         {
             expect(L"]");
-            ret = nodeFactory->createArrayType(ret);
+            ret = nodeFactory->createArrayType(token.state, ret);
             continue;
         }
         if(token == L"?")
         {
             //optional-type → type?
-            ret = nodeFactory->createOptionalType(ret);
+            ret = nodeFactory->createOptionalType(token.state, ret);
             continue;
         }
         if(token == L"!")
         {
             //implicitly-unwrapped-optional-type → type!
-            ret = nodeFactory->createImplicitlyUnwrappedOptional(ret);
+            ret = nodeFactory->createImplicitlyUnwrappedOptional(token.state, ret);
             continue;
         }
         // ‌ metatype-type → type.Type  type.Protocol
@@ -98,9 +98,9 @@ TypeNode* Parser::parseType()
  */
 TupleType* Parser::parseTupleType()
 {
-    TupleType* ret = nodeFactory->createTupleType();
     Token token, token2;
-    expect(L"(");
+    expect(L"(", token);
+    TupleType* ret = nodeFactory->createTupleType(token.state);
     std::vector<Attribute*> attributes;
     if(!predicate(L")"))
     {
@@ -148,7 +148,7 @@ TypeIdentifier* Parser::parseTypeIdentifier()
 {
     Token token;
     match_identifier(token);
-    TypeIdentifier* ret = nodeFactory->createTypeIdentifier(token.token);
+    TypeIdentifier* ret = nodeFactory->createTypeIdentifier(token.state, token.token);
     if(match(L"<"))
     {
         do
@@ -163,9 +163,10 @@ TypeIdentifier* Parser::parseTypeIdentifier()
 }
 ProtocolComposition* Parser::parseProtocolComposition()
 {
-    expect(L"protocol");
+    Token token;
+    expect(L"protocol", token);
     expect(L"<");
-    ProtocolComposition* ret = nodeFactory->createProtocolComposition();
+    ProtocolComposition* ret = nodeFactory->createProtocolComposition(token.state);
     if(!predicate(L">"))
     {
         do
@@ -202,8 +203,8 @@ ProtocolComposition* Parser::parseProtocolComposition()
 GenericParameters* Parser::parseGenericParameters()
 {
     Token token;
-    GenericParameters* ret = nodeFactory->createGenericParameters();
-    expect(L"<");
+    expect(L"<", token);
+    GenericParameters* ret = nodeFactory->createGenericParameters(token.state);
     // ‌ generic-parameter-list → generic-parameter | generic-parameter,generic-parameter-list
     do
     {
@@ -212,15 +213,15 @@ GenericParameters* Parser::parseGenericParameters()
         //‌ generic-parameter → type-name:protocol-composition-type
         expect_identifier(token);
         std::wstring typeName = token.token;
-        ret->addGenericType(nodeFactory->createTypeIdentifier(typeName));
+        ret->addGenericType(nodeFactory->createTypeIdentifier(token.state, typeName));
         if(match(L":"))
         {
             do
             {
                 TypeIdentifier* expectedType = parseTypeIdentifier();
                 
-                GenericConstraint* c = nodeFactory->createGenericConstraint();
-                c->setIdentifier(nodeFactory->createTypeIdentifier(typeName));
+                GenericConstraint* c = nodeFactory->createGenericConstraint(token.state);
+                c->setIdentifier(nodeFactory->createTypeIdentifier(token.state, typeName));
                 c->setConstraintType(GenericConstraint::DerivedFrom);
                 c->addExpectedType(expectedType);
                 ret->addConstraint(c);
@@ -237,7 +238,7 @@ GenericParameters* Parser::parseGenericParameters()
         {
             TypeIdentifier* type = parseTypeIdentifier();
             // requirement → conformance-requirement | same-type-requirement
-            GenericConstraint* c = nodeFactory->createGenericConstraint();
+            GenericConstraint* c = nodeFactory->createGenericConstraint(*type->getSourceInfo());
             ret->addConstraint(c);
             c->setIdentifier(type);
             if(match(L":"))

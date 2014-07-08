@@ -77,25 +77,35 @@ void Parser::restore(Token& token)
 /**
  * Check if the following token is the specified one, consume the token and return true if matched or return false if not.
  */
+bool Parser::match(const wchar_t* str, Token& token)
+{
+    if(!next(token))
+        return false;
+    if(token == str)
+        return true;
+    restore(token);
+    return false;
+}
+bool Parser::match(Keyword::T keyword, Token& token)
+{
+    if(!next(token))
+        return false;
+    if(token.getKeyword() == keyword)
+        return true;
+    restore(token);
+    return false;
+}
+
 bool Parser::match(const wchar_t* token)
 {
     Token t;
-    if(!next(t))
-        return false;
-    if(t == token)
-        return true;
-    restore(t);
-    return false;
+    return match(token, t);
+    
 }
 bool Parser::match(Keyword::T keyword)
 {
     Token t;
-    if(!next(t))
-        return false;
-    if(t.getKeyword() == keyword)
-        return true;
-    restore(t);
-    return false;
+    return match(keyword, t);
 }
 /**
  * Check if the following token is an identifier(keywords included), consume the token and return true if matched or rollback and return false
@@ -122,12 +132,22 @@ bool Parser::predicate(const wchar_t* token)
 void Parser::expect(const wchar_t* str)
 {
     Token token;
+    expect(str, token);
+}
+void Parser::expect(const wchar_t* str, Token& token)
+{
     expect_next(token);
     tassert(token, token == str);
 }
+
 void Parser::expect(Keyword::T keyword)
 {
     Token token;
+    expect(keyword, token);
+}
+
+void Parser::expect(Keyword::T keyword, Token& token)
+{
     expect_next(token);
     tassert(token, token.type == TokenType::Identifier);
     tassert(token, token.identifier.keyword == keyword);

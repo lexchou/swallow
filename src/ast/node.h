@@ -1,6 +1,7 @@
 #ifndef NODE_H
 #define NODE_H
 #include "swift_conf.h"
+#include "swift_types.h"
 #include <vector>
 #include <sstream>
 #ifdef TRACE_NODE
@@ -8,17 +9,6 @@
 #endif//TRACE_NODE
 
 SWIFT_NS_BEGIN
-
-
-struct SourceInfo
-{
-    int fileHash;
-    int line;
-    int column;
-    SourceInfo()
-    :fileHash(0), line(0), column(0)
-    {}
-};
 
 class Node
 {

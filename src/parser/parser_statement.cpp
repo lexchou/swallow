@@ -117,12 +117,12 @@ Statement* Parser::parseLoopStatement()
 Statement* Parser::parseForLoop()
 {
     std::vector<ExpressionNode*> inits;
-    ForLoop* ret = nodeFactory->createForLoop();
 
     //‌ for-statement → forfor-initopt;expressionopt;expressionoptcode-block
     //‌ for-statement → for(for-initopt;expressionopt;expressionopt)code-block
-
-    expect(Keyword::For);
+    Token token;
+    expect(Keyword::For, token);
+    ForLoop* ret = nodeFactory->createForLoop(token.state);
     bool parenthesized = match(L"(");
     if(!predicate(L";"))
     {
@@ -165,8 +165,9 @@ Statement* Parser::parseForLoop()
 */
 Statement* Parser::parseWhileLoop()
 {
-    expect(Keyword::While);
-    WhileLoop* ret = nodeFactory->createWhileLoop();
+    Token token;
+    expect(Keyword::While, token);
+    WhileLoop* ret = nodeFactory->createWhileLoop(token.state);
     Expression* condition = parseConditionExpression();
     //TODO: The condition can also be an optional binding declaration, as discussed in Optional Binding.
     ret->setCondition(condition);
@@ -186,8 +187,9 @@ Expression* Parser::parseConditionExpression()
 */
 Statement* Parser::parseDoLoop()
 {
-    expect(Keyword::Do);
-    DoLoop* ret = nodeFactory->createDoLoop();
+    Token token;
+    expect(Keyword::Do, token);
+    DoLoop* ret = nodeFactory->createDoLoop(token.state);
     CodeBlock* codeBlock = parseCodeBlock();
     ret->setCodeBlock(codeBlock);
     expect(Keyword::While);
@@ -204,8 +206,9 @@ Statement* Parser::parseDoLoop()
  */
 Statement* Parser::parseIf()
 {
-    expect(Keyword::If);
-    IfStatement* ret = nodeFactory->createIf();
+    Token token;
+    expect(Keyword::If, token);
+    IfStatement* ret = nodeFactory->createIf(token.state);
     Expression* cond = parseConditionExpression();
     ret->setCondition(cond);
     CodeBlock* thenPart = parseCodeBlock();
@@ -251,8 +254,8 @@ Statement* Parser::parseSwitch()
     Flags flags(this);
     flags += UNDER_SWITCH_CASE;
     
-    expect(Keyword::Switch);
-    SwitchCase* ret = nodeFactory->createSwitch();
+    expect(Keyword::Switch, token);
+    SwitchCase* ret = nodeFactory->createSwitch(token.state);
     Expression* controlExpr = parseExpression();
     ret->setControlExpression(controlExpr);
     expect(L"{");
@@ -269,7 +272,7 @@ Statement* Parser::parseSwitch()
             fcase += UNDER_CASE;
             
             //“case-item-list → pattern guard-clause opt | pattern guard-clause opt , case-item-list”
-            CaseStatement* caseCond = nodeFactory->createCase();
+            CaseStatement* caseCond = nodeFactory->createCase(token.state);
             do
             {
                 Pattern* pattern = parsePattern();
@@ -287,7 +290,7 @@ Statement* Parser::parseSwitch()
         else if(token.identifier.keyword == Keyword::Default)
         {
             expect(L":");
-            CaseStatement* caseCond = nodeFactory->createCase();
+            CaseStatement* caseCond = nodeFactory->createCase(token.state);
             parseSwitchStatements(caseCond);
             ret->setDefaultCase(caseCond);
         }
@@ -326,8 +329,8 @@ void Parser::parseSwitchStatements(CaseStatement* case_)
 Statement* Parser::parseBreak()
 {
     Token token;
-    expect(Keyword::Break);
-    BreakStatement* ret = nodeFactory->createBreak();
+    expect(Keyword::Break, token);
+    BreakStatement* ret = nodeFactory->createBreak(token.state);
     
     if(match_identifier(token) && token.identifier.keyword == Keyword::_)
     {
@@ -348,8 +351,8 @@ Statement* Parser::parseBreak()
 Statement* Parser::parseContinue()
 {
     Token token;
-    expect(Keyword::Continue);
-    ContinueStatement* ret = nodeFactory->createContinue();
+    expect(Keyword::Continue, token);
+    ContinueStatement* ret = nodeFactory->createContinue(token.state);
     
     if(match_identifier(token) && token.identifier.keyword == Keyword::_)
     {
@@ -370,8 +373,9 @@ Statement* Parser::parseContinue()
 */
 Statement* Parser::parseFallthrough()
 {
-    expect(Keyword::Fallthrough);
-    FallthroughStatement* ret = nodeFactory->createFallthrough();
+    Token token;
+    expect(Keyword::Fallthrough, token);
+    FallthroughStatement* ret = nodeFactory->createFallthrough(token.state);
     return ret;
 }
 /*
@@ -382,8 +386,8 @@ Statement* Parser::parseFallthrough()
 Statement* Parser::parseReturn()
 {
     Token token;
-    expect(Keyword::Return);
-    ReturnStatement* ret = nodeFactory->createReturn();
+    expect(Keyword::Return, token);
+    ReturnStatement* ret = nodeFactory->createReturn(token.state);
     
     if(peek(token))
     {
@@ -419,7 +423,7 @@ Statement* Parser::parseLabeledStatement()
             case Keyword::Switch:
             {
                 Statement* statement = parseSwitch();
-                LabeledStatement* ret = nodeFactory->createLabel();
+                LabeledStatement* ret = nodeFactory->createLabel(token.state);
                 ret->setLabel(label);
                 ret->setStatement(statement);
                 return ret;
@@ -429,7 +433,7 @@ Statement* Parser::parseLabeledStatement()
             case Keyword::While:
             {
                 Statement* statement = parseLoopStatement();
-                LabeledStatement* ret = nodeFactory->createLabel();
+                LabeledStatement* ret = nodeFactory->createLabel(token.state);
                 ret->setLabel(label);
                 ret->setStatement(statement);
                 return ret;
@@ -444,8 +448,9 @@ Statement* Parser::parseLabeledStatement()
 
 CodeBlock* Parser::parseCodeBlock()
 {
-    expect(L"{");
-    CodeBlock* ret = nodeFactory->createCodeBlock();
+    Token token;
+    expect(L"{", token);
+    CodeBlock* ret = nodeFactory->createCodeBlock(token.state);
     while(!match(L"}"))
     {
         Statement* st = parseStatement();

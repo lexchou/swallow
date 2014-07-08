@@ -70,6 +70,7 @@ Declaration* Parser::parseDeclaration()
         case Keyword::Protocol://declaration → protocol-declaration
             return parseProtocol(attrs);
         case Keyword::Init://declaration → initializer-declaration
+        case Keyword::Convenience:
             return parseInit(attrs);
         case Keyword::Deinit://declaration → deinitializer-declaration
             return parseDeinit(attrs);
@@ -161,7 +162,8 @@ void Parser::verifyDeclarationSpecifiers(const Token& token, int actualSpecifier
 Declaration* Parser::parseImport(const std::vector<Attribute*>& attrs)
 {
     Token token;
-    expect(Keyword::Import);
+    expect(Keyword::Import, token);
+    Import* ret = nodeFactory->createImport(token.state, attrs);
     expect_next(token);
     tassert(token, token.type == TokenType::Identifier);
     Import::Kind kind = Import::_;
@@ -207,7 +209,6 @@ Declaration* Parser::parseImport(const std::vector<Attribute*>& attrs)
         path += token.token;
         n++;
     } while (match(L"."));
-    Import* ret = nodeFactory->createImport(attrs);
     ret->setPath(path);
     ret->setKind(kind);
     return ret;
@@ -222,10 +223,11 @@ Declaration* Parser::parseImport(const std::vector<Attribute*>& attrs)
 */
 Declaration* Parser::parseLet(const std::vector<Attribute*>& attrs, int specifiers)
 {
-    Constant* ret = nodeFactory->createConstant(attrs, specifiers);
+    Token token;
     Flags flag(this);
     flags += UNDER_LET;
-    expect(Keyword::Let);
+    expect(Keyword::Let, token);
+    Constant* ret = nodeFactory->createConstant(token.state, attrs, specifiers);
     do
     {
         Pattern* pattern = parsePattern();
@@ -256,7 +258,7 @@ Variable* Parser::parseVariableDeclaration()
     {
         val = parseExpression();
     }
-    Variable* ret = nodeFactory->createVariable();
+    Variable* ret = nodeFactory->createVariable(*key->getSourceInfo());
     ret->setName(key);
     ret->setTypeAttributes(attrs);
     ret->setType(type);
@@ -277,18 +279,20 @@ Variable* Parser::parseVariableDeclaration()
 Declaration* Parser::parseVar(const std::vector<Attribute*>& attrs, int specifiers)
 {
     Token token;
-    expect(Keyword::Var);
+    expect(Keyword::Var, token);
     Flags flags(this);
     flags += UNDER_VAR;
     //try read it as pattern-initializer-list
-    Variables* ret = nodeFactory->createVariables(attrs, specifiers);
+    Variables* ret = nodeFactory->createVariables(token.state, attrs, specifiers);
     Variable* var = parseVariableDeclaration();
     ret->addVariable(var);
+    var->setSpecifiers(specifiers);
     if(predicate(L","))
     {
         while(match(L","))
         {
             var = parseVariableDeclaration();
+            var->setSpecifiers(specifiers);
             ret->addVariable(var);
         }
         return ret;
@@ -327,7 +331,7 @@ Declaration* Parser::parseVar(const std::vector<Attribute*>& attrs, int specifie
                 break;
             default:
                 //‌ variable-declaration → variable-declaration-head variable-name type-annotation code-block
-                CodeBlock* getter = nodeFactory->createCodeBlock();
+                CodeBlock* getter = nodeFactory->createCodeBlock(token.state);
                 var->setGetter(getter);
                 do
                 {
@@ -345,9 +349,13 @@ Declaration* Parser::parseVar(const std::vector<Attribute*>& attrs, int specifie
 /*
 willSet-clause → attributes opt willSet setter-name opt code-block
 */
-void Parser::parseWillSetClause(Variable* variable)
+void Parser::parseWillSetClause(Variable* variable, bool opt)
 {
     Token token;
+    if(!peek(token))
+        return;
+    if(opt && token.type == TokenType::CloseBrace)
+        return;
     Attributes attrs;
     parseAttributes(attrs);
     expect(Keyword::WillSet);
@@ -396,14 +404,14 @@ void Parser::parseWillSetDidSetBlock(Variable* variable)
     if(predicate(L"willSet"))
     {
         //willSet-didSet-block → {willSet-clause didSet-clause opt}
-        parseWillSetClause(variable);
+        parseWillSetClause(variable, false);
         parseDidSetClause(variable, true);
         return;
     }
     if(predicate(L"didSet"))
     {
         parseDidSetClause(variable, false);
-        parseWillSetClause(variable);
+        parseWillSetClause(variable, true);
     }
 }
 
@@ -470,18 +478,19 @@ std::pair<std::wstring, CodeBlock*> Parser::parseSetterClause()
 */
 std::pair<CodeBlock*, CodeBlock*> Parser::parseGetterSetterKeywordBlock()
 {
+    Token token;
     Attributes attributes;
     parseAttributes(attributes);
     CodeBlock* getter = NULL;
     CodeBlock* setter = NULL;
-    if(match(Keyword::Get))
+    if(match(Keyword::Get, token))
     {
-        getter = nodeFactory->createCodeBlock();
+        getter = nodeFactory->createCodeBlock(token.state);
         getter->setAttributes(attributes);
         parseAttributes(attributes);
-        if(match(Keyword::Set))
+        if(match(Keyword::Set, token))
         {
-            setter = nodeFactory->createCodeBlock();
+            setter = nodeFactory->createCodeBlock(token.state);
             setter->setAttributes(attributes);
         }
         else if(!attributes.empty())//attributes defined for setter but setter is not found
@@ -491,14 +500,14 @@ std::pair<CodeBlock*, CodeBlock*> Parser::parseGetterSetterKeywordBlock()
             unexpected(token);
         }
     }
-    else if(match(Keyword::Set))
+    else if(match(Keyword::Set, token))
     {
-        setter = nodeFactory->createCodeBlock();
+        setter = nodeFactory->createCodeBlock(token.state);
         setter->setAttributes(attributes);
         
         parseAttributes(attributes);
-        expect(Keyword::Get);
-        getter = nodeFactory->createCodeBlock();
+        expect(Keyword::Get, token);
+        getter = nodeFactory->createCodeBlock(token.state);
         getter->setAttributes(attributes);
     }
     return std::make_pair(getter, setter);
@@ -515,11 +524,11 @@ std::pair<CodeBlock*, CodeBlock*> Parser::parseGetterSetterKeywordBlock()
 Declaration* Parser::parseTypealias(const std::vector<Attribute*>& attrs)
 {
     Token token;
-    expect(Keyword::Typealias);
+    expect(Keyword::Typealias, token);
     expect_identifier(token);
     expect(L"=");
     TypeNode* type = parseType();
-    TypeAlias* ret = nodeFactory->createTypealias(attrs);
+    TypeAlias* ret = nodeFactory->createTypealias(token.state, attrs);
     ret->setName(token.token);
     ret->setType(type);
     return ret;
@@ -537,11 +546,12 @@ Declaration* Parser::parseTypealias(const std::vector<Attribute*>& attrs)
 Declaration* Parser::parseFunc(const std::vector<Attribute*>& attrs, int specifiers)
 {
     Token token;
-    expect(Keyword::Func);
+    expect(Keyword::Func, token);
+    FunctionDef* ret = nodeFactory->createFunction(token.state, attrs, specifiers);
     expect_next(token);
     if(token.type != TokenType::Identifier && token.type != TokenType::Operator)
         unexpected(token);
-    FunctionDef* ret = nodeFactory->createFunction(token.token, attrs, specifiers);
+    ret->setName(token.token);
     if(predicate(L"<"))
     {
         //TODO: parseGenericParameterClause();
@@ -579,8 +589,8 @@ Declaration* Parser::parseFunc(const std::vector<Attribute*>& attrs, int specifi
 Parameters* Parser::parseParameterClause()
 {
     Token token;
-    Parameters* ret = nodeFactory->createParameters();
-    expect(L"(");
+    expect(L"(", token);
+    Parameters* ret = nodeFactory->createParameters(token.state);
     if(match(L")"))
         return ret;
     do
@@ -619,6 +629,7 @@ Parameters* Parser::parseParameterClause()
             localName = name;
             name.clear();
         }
+        Parameter* param = nodeFactory->createParameter(token.state);
         expect(L":");
         Attributes attrs;
         parseAttributes(attrs);
@@ -630,7 +641,6 @@ Parameters* Parser::parseParameterClause()
             def = parseExpression();
             tassert(token, def != NULL);
         }
-        Parameter* param = nodeFactory->createParameter();
         param->setInout(inout);
         param->setAccessibility(accessibility);
         param->setExternalName(name);
@@ -688,8 +698,9 @@ Declaration* Parser::parseEnum(const std::vector<Attribute*>& attrs)
 Declaration* Parser::parseRawValueEnum(const std::vector<Attribute*>& attrs, const std::wstring& name, TypeIdentifier* baseType)
 {
     Token token;
-    expect(L"{");
-    EnumDef* ret = nodeFactory->createEnum(name, attrs);
+    expect(L"{", token);
+    EnumDef* ret = nodeFactory->createEnum(token.state, attrs);
+    ret->setIdentifier(nodeFactory->createTypeIdentifier(token.state, name));
     ret->addParent(baseType);
     while(!predicate(L"}"))
     {
@@ -726,8 +737,9 @@ Declaration* Parser::parseRawValueEnum(const std::vector<Attribute*>& attrs, con
 Declaration* Parser::parseUnionEnum(const std::vector<Attribute*>& attrs, const std::wstring& name)
 {
     Token token;
-    EnumDef* ret = nodeFactory->createEnum(name, attrs);
-    expect(L"{");
+    expect(L"{", token);
+    EnumDef* ret = nodeFactory->createEnum(token.state, attrs);
+    ret->setIdentifier(nodeFactory->createTypeIdentifier(token.state, name));
     while(!predicate(L"}"))
     {
         if(match(Keyword::Case))
@@ -764,8 +776,9 @@ Declaration* Parser::parseStruct(const std::vector<Attribute*>& attrs)
 {
     Token token;
     expect(Keyword::Struct);
+    StructDef* ret = nodeFactory->createStruct(token.state, attrs);
     expect_identifier(token);
-    StructDef* ret = nodeFactory->createStruct(token.token, attrs);
+    ret->setIdentifier(nodeFactory->createTypeIdentifier(token.state, token.token));
     if(predicate(L"<"))
     {
         //TODO: parse generic parameter clause
@@ -804,9 +817,10 @@ Declaration* Parser::parseStruct(const std::vector<Attribute*>& attrs)
 Declaration* Parser::parseClass(const std::vector<Attribute*>& attrs)
 {
     Token token;
-    expect(Keyword::Class);
+    expect(Keyword::Class, token);
+    ClassDef* ret = nodeFactory->createClass(token.state, attrs);
     expect_identifier(token);
-    ClassDef* ret = nodeFactory->createClass(token.token, attrs);
+    ret->setIdentifier(nodeFactory->createTypeIdentifier(token.state, token.token));
     if(predicate(L"<"))
     {
         //TODO: parse generic parameter clause
@@ -821,7 +835,7 @@ Declaration* Parser::parseClass(const std::vector<Attribute*>& attrs)
     }
     
     Flags f(this);
-    flags += UNDER_CLASS;
+    f += UNDER_CLASS;
     
     expect(L"{");
     while(!predicate(L"}"))
@@ -873,8 +887,9 @@ Declaration* Parser::parseProtocol(const std::vector<Attribute*>& attrs)
 {
     Token token;
     expect(Keyword::Struct);
+    ProtocolDef* ret = nodeFactory->createProtocol(token.state, attrs);
     expect_identifier(token);
-    ProtocolDef* ret = nodeFactory->createProtocol(token.token, attrs);
+    ret->setIdentifier(nodeFactory->createTypeIdentifier(token.state, token.token));
     if(predicate(L"<"))
     {
         //TODO: parse generic parameter clause
@@ -911,15 +926,16 @@ Declaration* Parser::parseProtocol(const std::vector<Attribute*>& attrs)
 */
 Declaration* Parser::parseInit(const std::vector<Attribute*>& attrs)
 {
+    Token token;
     bool convenience = match(L"convenience");
-    expect(Keyword::Init);
+    expect(Keyword::Init, token);
     if(predicate(L"<"))
     {
         //TODO: generic-parameter-clause
     }
     Parameters* parameters = parseParameterClause();
     CodeBlock* body = parseCodeBlock();
-    InitializerDef* ret = nodeFactory->createInitializer(attrs);
+    InitializerDef* ret = nodeFactory->createInitializer(token.state, attrs);
     ret->setConvenience(convenience);
     ret->setParameters(parameters);
     ret->setBody(body);
@@ -932,8 +948,9 @@ Declaration* Parser::parseInit(const std::vector<Attribute*>& attrs)
 */
 Declaration* Parser::parseDeinit(const std::vector<Attribute*>& attrs)
 {
-    expect(Keyword::Deinit);
-    DeinitializerDef* ret = nodeFactory->createDeinitializer(attrs);
+    Token token;
+    expect(Keyword::Deinit, token);
+    DeinitializerDef* ret = nodeFactory->createDeinitializer(token.state, attrs);
     CodeBlock* body = parseCodeBlock();
     ret->setBody(body);
     return ret;
@@ -946,9 +963,10 @@ Declaration* Parser::parseDeinit(const std::vector<Attribute*>& attrs)
 */
 Declaration* Parser::parseExtension(const std::vector<Attribute*>& attrs)
 {
-    expect(Keyword::Extension);
+    Token token;
+    expect(Keyword::Extension, token);
     TypeIdentifier* id = parseTypeIdentifier();
-    ExtensionDef* ret = nodeFactory->createExtension(attrs);
+    ExtensionDef* ret = nodeFactory->createExtension(token.state, attrs);
     ret->setIdentifier(id);
     if(match(L":"))
     {
@@ -979,13 +997,14 @@ Declaration* Parser::parseExtension(const std::vector<Attribute*>& attrs)
 */
 Declaration* Parser::parseSubscript(const std::vector<Attribute*>& attrs)
 {
-    expect(Keyword::Subscript);
+    Token token;
+    expect(Keyword::Subscript, token);
     Parameters* params = parseParameterClause();
     expect(L"->");
     Attributes typeAttrs;
     parseAttributes(typeAttrs);
     TypeNode* retType = parseType();
-    SubscriptDef* ret = nodeFactory->createSubscript(attrs);
+    SubscriptDef* ret = nodeFactory->createSubscript(token.state, attrs);
     ret->setParameters(params);
     ret->setReturnType(retType);
     ret->setReturnTypeAttributes(typeAttrs);
@@ -1037,7 +1056,8 @@ Declaration* Parser::parseOperator(const std::vector<Attribute*>& attrs)
 {
     Token token;
     OperatorType::T type = OperatorType::_;
-    expect(Keyword::Operator);
+    expect(Keyword::Operator, token);
+    OperatorDef* op = nodeFactory->createOperator(token.state, attrs);
     expect_next(token);
     switch(token.getKeyword())
     {
@@ -1056,7 +1076,6 @@ Declaration* Parser::parseOperator(const std::vector<Attribute*>& attrs)
     }
     expect_next(token);
     tassert(token, token.type == TokenType::Operator);
-    OperatorDef* op = nodeFactory->createOperator(attrs);
     op->setName(token.token);
     expect(L"{");
     while(!match(L"}"))

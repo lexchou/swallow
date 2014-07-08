@@ -36,9 +36,10 @@ void Parser::parseAttributes(std::vector<Attribute*>& attributes)
 Attribute* Parser::parseAttribute()
 {
     Token token;
-    expect(L"@");
+    expect(L"@", token);
+    Attribute* ret = nodeFactory->createAttribute(token.state);
     expect_identifier(token);
-    Attribute* ret = nodeFactory->createAttribute(token.token);
+    ret->setName(token.token);
     if(match(L"("))
     {
         //read

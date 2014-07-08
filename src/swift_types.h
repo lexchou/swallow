@@ -92,6 +92,7 @@ struct Keyword
         
         //Keywords reserved in particular contexts, Outside the context in which they appear in the grammar, they can be used as identifiers.
         Associativity,
+        Convenience,
         DidSet,
         Get,
         Infix,
@@ -162,6 +163,18 @@ struct TypeSpecifier
         Weak          =   0x100
     };
 };
+
+
+struct SourceInfo
+{
+    int fileHash;
+    int line;
+    int column;
+    SourceInfo()
+    :fileHash(0), line(0), column(0)
+    {}
+};
+
 
 SWIFT_NS_END
 

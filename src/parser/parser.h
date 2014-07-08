@@ -13,7 +13,7 @@ class FunctionCall;
 class SymbolRegistry;
 class Identifier;
 class NodeFactory;
-class ClosureExpression;
+class Closure;
 class CodeBlock;
 class Statement;
 class ParenthesizedExpression;
@@ -86,7 +86,7 @@ private://declaration
     Declaration* parseVar(const std::vector<Attribute*>& attrs, int specifiers);
     Variable* parseVariableDeclaration();
     void parseWillSetDidSetBlock(Variable* variable);
-    void parseWillSetClause(Variable* variable);
+    void parseWillSetClause(Variable* variable, bool opt);
     void parseDidSetClause(Variable* variable, bool opt);
     
     std::pair<CodeBlock*, std::pair<std::wstring, CodeBlock*> > parseGetterSetterBlock();
@@ -128,7 +128,7 @@ private://expression
     Expression* parseSelfExpression();
     Expression* parseSuperExpression();
     Identifier* parseIdentifier();
-    ClosureExpression* parseClosureExpression();
+    Closure* parseClosureExpression();
     
     std::pair<Expression*, Expression*> parseDictionaryLiteralItem();
 private:
@@ -156,10 +156,12 @@ private:
      * Check if the following token is the specified one, throw exception if not matched
      */
     void expect(const wchar_t* token);
+    void expect(const wchar_t* token, Token&);
     /**
      * Check if the following token is the specified keyword, throw exception if not matched
      */
     void expect(Keyword::T keyword);
+    void expect(Keyword::T keyword, Token&);
 
     /**
      * Throw an exception with the unexpected token
@@ -171,6 +173,8 @@ private:
      */
     bool match(const wchar_t* token);
     bool match(Keyword::T keyword);
+    bool match(const wchar_t* token, Token&);
+    bool match(Keyword::T keyword, Token&);
     /**
      * Check if the following token is an identifier(keywords included), consume the token and return true if matched or rollback and return false
      */
@@ -187,6 +191,7 @@ private:
     NodeFactory* nodeFactory;
     SymbolRegistry* symbolRegistry;
     std::wstring fileName;
+    int fileHash;
     std::wstring functionName;
     int flags;
 };

@@ -1,345 +1,352 @@
 #include "node-factory.h"
 #include "ast/ast.h"
+#include "tokenizer/tokens.h"
 USE_SWIFT_NS;
 
-CommentNode* NodeFactory::createComment(const std::wstring& comment)
+template<class T>
+inline T* _(const SourceInfo& s, T* n)
 {
-    return new CommentNode(comment);
+    SourceInfo* si = static_cast<Node*>(n)->getSourceInfo();
+    *si = s;
+    return n;
 }
-BooleanLiteral* NodeFactory::createBoolean(bool value)
+
+
+CommentNode* NodeFactory::createComment(const SourceInfo& state, const std::wstring& comment)
 {
-    return new BooleanLiteral(value);
+    return _(state, new CommentNode(comment));
 }
-IntegerLiteral* NodeFactory::createInteger(const std::wstring& value)
+BooleanLiteral* NodeFactory::createBoolean(const SourceInfo& state, bool value)
 {
-    return new IntegerLiteral(value);
+    return _(state, new BooleanLiteral(value));
 }
-FloatLiteral* NodeFactory::createFloat(const std::wstring& value)
+IntegerLiteral* NodeFactory::createInteger(const SourceInfo& state, const std::wstring& value)
 {
-    return new FloatLiteral(value);
+    return _(state, new IntegerLiteral(value));
 }
-StringLiteral* NodeFactory::createString(const std::wstring& value)
+FloatLiteral* NodeFactory::createFloat(const SourceInfo& state, const std::wstring& value)
 {
-    return new StringLiteral(value);
+    return _(state, new FloatLiteral(value));
 }
-UnaryOperator* NodeFactory::createUnary(const std::wstring& op, OperatorType::T type)
+StringLiteral* NodeFactory::createString(const SourceInfo& state, const std::wstring& value)
 {
-    UnaryOperator* ret = new UnaryOperator(op, type);
+    return _(state, new StringLiteral(value));
+}
+UnaryOperator* NodeFactory::createUnary(const SourceInfo& state, const std::wstring& op, OperatorType::T type)
+{
+    return _(state, new UnaryOperator(op, type));
+}
+Identifier* NodeFactory::createIdentifier(const SourceInfo& state, const std::wstring& op)
+{
+    return _(state, new Identifier(op));
+}
+InOutParameter* NodeFactory::createInOutParameter(const SourceInfo& state, Identifier* identifier)
+{
+    InOutParameter* ret = _(state, new InOutParameter(identifier));
     return ret;
 }
-Identifier* NodeFactory::createIdentifier(const std::wstring& op)
+BinaryOperator* NodeFactory::createBinary(const SourceInfo& state, const std::wstring& op, Associativity::T associativity, int precedence)
 {
-    return new Identifier(op);
-}
-InOutParameter* NodeFactory::createInOutParameter(Identifier* identifier)
-{
-    InOutParameter* ret = new InOutParameter(identifier);
-    return ret;
-}
-BinaryOperator* NodeFactory::createBinary(const std::wstring& op, Associativity::T associativity, int precedence)
-{
-    BinaryOperator* ret = new BinaryOperator(op, associativity, precedence);
+    BinaryOperator* ret = _(state, new BinaryOperator(op, associativity, precedence));
     return ret;
 }
 
-ArrayLiteral* NodeFactory::createArrayLiteral()
+ArrayLiteral* NodeFactory::createArrayLiteral(const SourceInfo& state)
 {
-    return new ArrayLiteral();
+    return _(state, new ArrayLiteral());
 }
-DictionaryLiteral* NodeFactory::createDictionaryLiteral()
+DictionaryLiteral* NodeFactory::createDictionaryLiteral(const SourceInfo& state)
 {
-    return new DictionaryLiteral();
+    return _(state, new DictionaryLiteral());
 }
-CompileConstant* NodeFactory::createCompilecConstant(const std::wstring& name, const std::wstring& value)
+CompileConstant* NodeFactory::createCompilecConstant(const SourceInfo& state, const std::wstring& name, const std::wstring& value)
 {
-    return new CompileConstant(name, value);
-}
-
-MemberAccess* NodeFactory::createMemberAccess(Expression* self, Identifier* field)
-{
-    return new MemberAccess(self, field);
-}
-SubscriptAccess* NodeFactory::createSubscriptAccess(Expression* self, Expression* index)
-{
-    return new SubscriptAccess(self, index);
+    return _(state, new CompileConstant(name, value));
 }
 
-TypeCheck* NodeFactory::createTypeCheck(Pattern* expr, TypeNode* type)
+MemberAccess* NodeFactory::createMemberAccess(const SourceInfo& state, Expression* self, Identifier* field)
 {
-    return new TypeCheck(expr, type);
+    return _(state, new MemberAccess(self, field));
 }
-TypeCast* NodeFactory::createTypeCast(Expression* expr, TypeNode* type)
+SubscriptAccess* NodeFactory::createSubscriptAccess(const SourceInfo& state, Expression* self, Expression* index)
 {
-    return new TypeCast(expr, type);
-}
-Assignment* NodeFactory::createAssignment(Expression* lhs, Expression* rhs)
-{
-    return new Assignment(lhs, rhs);
-}
-ConditionalOperator* NodeFactory::createConditionalOperator(Expression* cond, Expression* trueExpr, Expression* falseExpr)
-{
-    return new ConditionalOperator(cond, trueExpr, falseExpr);
-}
-ParenthesizedExpression* NodeFactory::createParenthesizedExpression()
-{
-    return new ParenthesizedExpression();
+    return _(state, new SubscriptAccess(self, index));
 }
 
-InitializerReference* NodeFactory::createInitializerReference(Expression* expr)
+TypeCheck* NodeFactory::createTypeCheck(const SourceInfo& state, Pattern* expr, TypeNode* type)
 {
-    return new InitializerReference(expr);
+    return _(state, new TypeCheck(expr, type));
 }
-SelfExpression* NodeFactory::createSelfExpression(Expression* expr)
+TypeCast* NodeFactory::createTypeCast(const SourceInfo& state, Expression* expr, TypeNode* type)
 {
-    return new SelfExpression(expr);
+    return _(state, new TypeCast(expr, type));
 }
-DynamicType* NodeFactory::createDynamicType(Expression* expr)
+Assignment* NodeFactory::createAssignment(const SourceInfo& state, Expression* lhs, Expression* rhs)
 {
-    return new DynamicType(expr);
+    return _(state, new Assignment(lhs, rhs));
 }
-ForcedValue* NodeFactory::createForcedValue(Expression* expr)
+ConditionalOperator* NodeFactory::createConditionalOperator(const SourceInfo& state, Expression* cond, Expression* trueExpr, Expression* falseExpr)
 {
-    return new ForcedValue(expr);
+    return _(state, new ConditionalOperator(cond, trueExpr, falseExpr));
 }
-OptionalChaining* NodeFactory::createOptionalChaining(Expression* expr)
+ParenthesizedExpression* NodeFactory::createParenthesizedExpression(const SourceInfo& state)
 {
-    return new OptionalChaining(expr);
+    return _(state, new ParenthesizedExpression());
 }
-FunctionCall* NodeFactory::createFunctionCall()
+
+InitializerReference* NodeFactory::createInitializerReference(const SourceInfo& state, Expression* expr)
 {
-    return new FunctionCall();
+    return _(state, new InitializerReference(expr));
+}
+SelfExpression* NodeFactory::createSelfExpression(const SourceInfo& state, Expression* expr)
+{
+    return _(state, new SelfExpression(expr));
+}
+DynamicType* NodeFactory::createDynamicType(const SourceInfo& state, Expression* expr)
+{
+    return _(state, new DynamicType(expr));
+}
+ForcedValue* NodeFactory::createForcedValue(const SourceInfo& state, Expression* expr)
+{
+    return _(state, new ForcedValue(expr));
+}
+OptionalChaining* NodeFactory::createOptionalChaining(const SourceInfo& state, Expression* expr)
+{
+    return _(state, new OptionalChaining(expr));
+}
+FunctionCall* NodeFactory::createFunctionCall(const SourceInfo& state)
+{
+    return _(state, new FunctionCall());
 }
 
 
-ForLoop* NodeFactory::createForLoop()
+ForLoop* NodeFactory::createForLoop(const SourceInfo& state)
 {
-    return new ForLoop();
+    return _(state, new ForLoop());
 }
-WhileLoop* NodeFactory::createWhileLoop()
+WhileLoop* NodeFactory::createWhileLoop(const SourceInfo& state)
 {
-    return new WhileLoop();
+    return _(state, new WhileLoop());
 }
-IfStatement* NodeFactory::createIf()
+IfStatement* NodeFactory::createIf(const SourceInfo& state)
 {
-    return new IfStatement();
+    return _(state, new IfStatement());
 }
-DoLoop* NodeFactory::createDoLoop()
+DoLoop* NodeFactory::createDoLoop(const SourceInfo& state)
 {
-    return new DoLoop();
+    return _(state, new DoLoop());
 }
-SwitchCase* NodeFactory::createSwitch()
+SwitchCase* NodeFactory::createSwitch(const SourceInfo& state)
 {
-    return new SwitchCase();
+    return _(state, new SwitchCase());
 }
-CaseStatement* NodeFactory::createCase()
+CaseStatement* NodeFactory::createCase(const SourceInfo& state)
 {
-    return new CaseStatement();
+    return _(state, new CaseStatement());
 }
-BreakStatement* NodeFactory::createBreak()
+BreakStatement* NodeFactory::createBreak(const SourceInfo& state)
 {
-    return new BreakStatement();
+    return _(state, new BreakStatement());
 }
-ContinueStatement* NodeFactory::createContinue()
+ContinueStatement* NodeFactory::createContinue(const SourceInfo& state)
 {
-    return new ContinueStatement();
+    return _(state, new ContinueStatement());
 }
-FallthroughStatement* NodeFactory::createFallthrough()
+FallthroughStatement* NodeFactory::createFallthrough(const SourceInfo& state)
 {
-    return new FallthroughStatement();
+    return _(state, new FallthroughStatement());
 }
-ReturnStatement* NodeFactory::createReturn()
+ReturnStatement* NodeFactory::createReturn(const SourceInfo& state)
 {
-    return new ReturnStatement();
+    return _(state, new ReturnStatement());
 }
-LabeledStatement* NodeFactory::createLabel()
+LabeledStatement* NodeFactory::createLabel(const SourceInfo& state)
 {
-    return new LabeledStatement();
+    return _(state, new LabeledStatement());
 }
-CodeBlock* NodeFactory::createCodeBlock()
+CodeBlock* NodeFactory::createCodeBlock(const SourceInfo& state)
 {
-    return new CodeBlock();
+    return _(state, new CodeBlock());
 }
-LetBinding* NodeFactory::createLetBinding()
+LetBinding* NodeFactory::createLetBinding(const SourceInfo& state)
 {
-    return new LetBinding();
+    return _(state, new LetBinding());
 }
-VarBinding* NodeFactory::createVarBinding()
+VarBinding* NodeFactory::createVarBinding(const SourceInfo& state)
 {
-    return new VarBinding();
+    return _(state, new VarBinding());
 }
-Tuple* NodeFactory::createTuple()
+Tuple* NodeFactory::createTuple(const SourceInfo& state)
 {
-    return new Tuple();
+    return _(state, new Tuple());
 }
-EnumCasePattern* NodeFactory::createEnumCasePattern(const std::wstring& name)
+Closure* NodeFactory::createClosure(const SourceInfo& state)
 {
-    EnumCasePattern* ret = new EnumCasePattern();
+    return _(state, new Closure());
+}
+EnumCasePattern* NodeFactory::createEnumCasePattern(const SourceInfo& state, const std::wstring& name)
+{
+    EnumCasePattern* ret = _(state, new EnumCasePattern());
     ret->setName(name);
     return ret;
 }
 
 
-FunctionType* NodeFactory::createFunctionType(TypeNode* argumentsType, TypeNode* retType)
+FunctionType* NodeFactory::createFunctionType(const SourceInfo& state, TypeNode* argumentsType, TypeNode* retType)
 {
-    FunctionType* ret = new FunctionType();
+    FunctionType* ret = _(state, new FunctionType());
     ret->setArgumentsType(argumentsType);
     ret->setReturnType(retType);
     return ret;
 }
-ArrayType* NodeFactory::createArrayType(TypeNode* innerType)
+ArrayType* NodeFactory::createArrayType(const SourceInfo& state, TypeNode* innerType)
 {
-    ArrayType* ret = new ArrayType();
+    ArrayType* ret = _(state, new ArrayType());
     ret->setInnerType(innerType);
     return ret;
 }
-OptionalType* NodeFactory::createOptionalType(TypeNode* innerType)
+OptionalType* NodeFactory::createOptionalType(const SourceInfo& state, TypeNode* innerType)
 {
-    OptionalType* ret = new OptionalType();
+    OptionalType* ret = _(state, new OptionalType());
     ret->setInnerType(innerType);
     return ret;
 }
-ImplicitlyUnwrappedOptional* NodeFactory::createImplicitlyUnwrappedOptional(TypeNode* innerType)
+ImplicitlyUnwrappedOptional* NodeFactory::createImplicitlyUnwrappedOptional(const SourceInfo& state, TypeNode* innerType)
 {
-    ImplicitlyUnwrappedOptional* ret = new ImplicitlyUnwrappedOptional();
+    ImplicitlyUnwrappedOptional* ret = _(state, new ImplicitlyUnwrappedOptional());
     ret->setInnerType(innerType);
     return ret;
 }
-TypeIdentifier* NodeFactory::createTypeIdentifier(const std::wstring& typeName)
+TypeIdentifier* NodeFactory::createTypeIdentifier(const SourceInfo& state, const std::wstring& typeName)
 {
-    TypeIdentifier* ret = new TypeIdentifier();
+    TypeIdentifier* ret = _(state, new TypeIdentifier());
     ret->setName(typeName);
     return ret;
 }
-ProtocolComposition* NodeFactory::createProtocolComposition()
+ProtocolComposition* NodeFactory::createProtocolComposition(const SourceInfo& state)
 {
-    return new ProtocolComposition();
+    return _(state, new ProtocolComposition());
 }
-TupleType* NodeFactory::createTupleType()
+TupleType* NodeFactory::createTupleType(const SourceInfo& state)
 {
-    return new TupleType();
+    return _(state, new TupleType());
 }
-Attribute* NodeFactory::createAttribute(const std::wstring& name)
+Attribute* NodeFactory::createAttribute(const SourceInfo& state)
 {
-    Attribute* ret = new Attribute();
-    ret->setName(name);
+    Attribute* ret = _(state, new Attribute());
     return ret;
 }
 
 
 
-Import* NodeFactory::createImport(const std::vector<Attribute*>& attrs)
+Import* NodeFactory::createImport(const SourceInfo& state, const std::vector<Attribute*>& attrs)
 {
-    Import* ret = new Import();
+    Import* ret = _(state, new Import());
     ret->setAttributes(attrs);
     return ret;
 }
-Constant* NodeFactory::createConstant(const std::vector<Attribute*>& attrs, int specifiers)
+Constant* NodeFactory::createConstant(const SourceInfo& state, const std::vector<Attribute*>& attrs, int specifiers)
 {
-    Constant* ret = new Constant();
+    Constant* ret = _(state, new Constant());
     ret->setAttributes(attrs);
     ret->setSpecifiers(specifiers);
     return ret;
 }
-Variables* NodeFactory::createVariables(const std::vector<Attribute*>& attrs, int specifiers)
+Variables* NodeFactory::createVariables(const SourceInfo& state, const std::vector<Attribute*>& attrs, int specifiers)
 {
-    Variables* ret = new Variables();
+    Variables* ret = _(state, new Variables());
     ret->setAttributes(attrs);
     ret->setSpecifiers(specifiers);
     return ret;
 }
 
-Variable* NodeFactory::createVariable()
+Variable* NodeFactory::createVariable(const SourceInfo& state)
 {
-    Variable* ret = new Variable();
+    Variable* ret = _(state, new Variable());
     return ret;
 }
-TypeAlias* NodeFactory::createTypealias(const std::vector<Attribute*>& attrs)
+TypeAlias* NodeFactory::createTypealias(const SourceInfo& state, const std::vector<Attribute*>& attrs)
 {
-    TypeAlias* ret = new TypeAlias();
+    TypeAlias* ret = _(state, new TypeAlias());
     ret->setAttributes(attrs);
     return ret;
 }
-FunctionDef* NodeFactory::createFunction(const std::wstring& name, const std::vector<Attribute*>& attrs, int specifiers)
+FunctionDef* NodeFactory::createFunction(const SourceInfo& state, const std::vector<Attribute*>& attrs, int specifiers)
 {
-    FunctionDef* ret = new FunctionDef();
+    FunctionDef* ret = _(state, new FunctionDef());
     ret->setAttributes(attrs);
-    ret->setName(name);
     ret->setSpecifiers(specifiers);
     return ret;
 }
-Parameters* NodeFactory::createParameters()
+Parameters* NodeFactory::createParameters(const SourceInfo& state)
 {
-    return new Parameters();
+    return _(state, new Parameters());
 }
-Parameter* NodeFactory::createParameter()
+Parameter* NodeFactory::createParameter(const SourceInfo& state)
 {
-    return new Parameter();
+    return _(state, new Parameter());
 }
-EnumDef* NodeFactory::createEnum(const std::wstring& name, const std::vector<Attribute*>& attrs)
+EnumDef* NodeFactory::createEnum(const SourceInfo& state, const std::vector<Attribute*>& attrs)
 {
-    EnumDef* ret = new EnumDef();
-    ret->setAttributes(attrs);
-    ret->setIdentifier(createTypeIdentifier(name));
-    return ret;
-}
-StructDef* NodeFactory::createStruct(const std::wstring& name, const std::vector<Attribute*>& attrs)
-{
-    StructDef* ret = new StructDef();
-    ret->setIdentifier(createTypeIdentifier(name));
+    EnumDef* ret = _(state, new EnumDef());
     ret->setAttributes(attrs);
     return ret;
 }
-ClassDef* NodeFactory::createClass(const std::wstring& name, const std::vector<Attribute*>& attrs)
+StructDef* NodeFactory::createStruct(const SourceInfo& state, const std::vector<Attribute*>& attrs)
 {
-    ClassDef* ret = new ClassDef();
-    ret->setIdentifier(createTypeIdentifier(name));
+    StructDef* ret = _(state, new StructDef());
     ret->setAttributes(attrs);
     return ret;
 }
-ProtocolDef* NodeFactory::createProtocol(const std::wstring& name, const std::vector<Attribute*>& attrs)
+ClassDef* NodeFactory::createClass(const SourceInfo& state, const std::vector<Attribute*>& attrs)
 {
-    ProtocolDef* ret = new ProtocolDef();
-    ret->setIdentifier(createTypeIdentifier(name));
+    ClassDef* ret = _(state, new ClassDef());
     ret->setAttributes(attrs);
     return ret;
 }
-InitializerDef* NodeFactory::createInitializer(const std::vector<Attribute*>& attrs)
+ProtocolDef* NodeFactory::createProtocol(const SourceInfo& state, const std::vector<Attribute*>& attrs)
 {
-    InitializerDef* ret = new InitializerDef();
+    ProtocolDef* ret = _(state, new ProtocolDef());
     ret->setAttributes(attrs);
     return ret;
 }
-DeinitializerDef* NodeFactory::createDeinitializer(const std::vector<Attribute*>& attrs)
+InitializerDef* NodeFactory::createInitializer(const SourceInfo& state, const std::vector<Attribute*>& attrs)
 {
-    DeinitializerDef* ret = new DeinitializerDef();
+    InitializerDef* ret = _(state, new InitializerDef());
     ret->setAttributes(attrs);
     return ret;
 }
-ExtensionDef* NodeFactory::createExtension(const std::vector<Attribute*>& attrs)
+DeinitializerDef* NodeFactory::createDeinitializer(const SourceInfo& state, const std::vector<Attribute*>& attrs)
 {
-    ExtensionDef* ret = new ExtensionDef();
+    DeinitializerDef* ret = _(state, new DeinitializerDef());
     ret->setAttributes(attrs);
     return ret;
 }
-SubscriptDef* NodeFactory::createSubscript(const std::vector<Attribute*>& attrs)
+ExtensionDef* NodeFactory::createExtension(const SourceInfo& state, const std::vector<Attribute*>& attrs)
 {
-    SubscriptDef* ret = new SubscriptDef();
+    ExtensionDef* ret = _(state, new ExtensionDef());
     ret->setAttributes(attrs);
     return ret;
 }
-OperatorDef* NodeFactory::createOperator(const std::vector<Attribute*>& attrs)
+SubscriptDef* NodeFactory::createSubscript(const SourceInfo& state, const std::vector<Attribute*>& attrs)
 {
-    OperatorDef* ret = new OperatorDef();
+    SubscriptDef* ret = _(state, new SubscriptDef());
     ret->setAttributes(attrs);
     return ret;
 }
-GenericConstraint* NodeFactory::createGenericConstraint()
+OperatorDef* NodeFactory::createOperator(const SourceInfo& state, const std::vector<Attribute*>& attrs)
 {
-    return new GenericConstraint();
+    OperatorDef* ret = _(state, new OperatorDef());
+    ret->setAttributes(attrs);
+    return ret;
 }
-GenericParameters* NodeFactory::createGenericParameters()
+GenericConstraint* NodeFactory::createGenericConstraint(const SourceInfo& state)
 {
-    return new GenericParameters();
+    return _(state, new GenericConstraint());
+}
+GenericParameters* NodeFactory::createGenericParameters(const SourceInfo& state)
+{
+    return _(state, new GenericParameters());
 }
 
 
