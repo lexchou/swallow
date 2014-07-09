@@ -652,8 +652,22 @@ Expression* Parser::parseBinaryExpression(Expression* lhs)
         }
         else if(token.identifier.keyword == Keyword::As)
         {
+            bool optional = false;
+            Token t;
+            if(match(L"?", t))
+            {
+                if(t.operators.type == OperatorType::PostfixUnary)
+                {
+                    optional = true;
+                }
+                else
+                    restore(t);
+            }
+            
             TypeNode* typeNode = parseType();
-            Expression* ret = nodeFactory->createTypeCast(token.state, lhs, typeNode);
+            
+            TypeCast* ret = nodeFactory->createTypeCast(token.state, lhs, typeNode);
+            ret->setOptional(optional);
             return ret;
         }
     }
@@ -750,6 +764,7 @@ Closure* Parser::parseClosureExpression()
             }
             Expression* capture = parseExpression();
             ret->setCapture(capture);
+            expect(L"]");
         }
         if(predicate(L"("))
         {

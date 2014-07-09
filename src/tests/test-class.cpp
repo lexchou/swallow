@@ -36,6 +36,12 @@ class TestClass : public SwiftTestCase
     CPPUNIT_TEST(testInit);
     CPPUNIT_TEST(testConvenienceInitializer);
     CPPUNIT_TEST(testDefaultValueWithClosure);
+    CPPUNIT_TEST(testDeinit);
+    CPPUNIT_TEST(testWeakReference);
+    CPPUNIT_TEST(testUnownedReference);
+    CPPUNIT_TEST(testNestedType_Struct);
+    CPPUNIT_TEST(testNestedType_Class);
+    CPPUNIT_TEST(testNestedType_Enum);
     CPPUNIT_TEST_SUITE_END();
 public:
     
@@ -865,6 +871,7 @@ public:
         
         CPPUNIT_ASSERT(let = dynamic_cast<Constant*>(s->getDeclaration(0)));
         CPPUNIT_ASSERT(init = dynamic_cast<InitializerDef*>(s->getDeclaration(1)));
+        CPPUNIT_ASSERT(!init->isConvenience());
         CPPUNIT_ASSERT(params = dynamic_cast<Parameters*>(init->getParameters()));
         CPPUNIT_ASSERT_EQUAL(3, params->numParameters());
         
@@ -886,13 +893,25 @@ public:
                         L"  }\n"
                         L"}");
         
+        ClassDef* s = NULL;
+
+        InitializerDef* init = NULL;
+        Parameters* params = NULL;
+        
+        CPPUNIT_ASSERT(s = dynamic_cast<ClassDef*>(root));
+        CPPUNIT_ASSERT_EQUAL(3, s->numDeclarations());
+        
+        CPPUNIT_ASSERT(init = dynamic_cast<InitializerDef*>(s->getDeclaration(2)));
+        CPPUNIT_ASSERT(init->isConvenience());
+        CPPUNIT_ASSERT(params = dynamic_cast<Parameters*>(init->getParameters()));
+        CPPUNIT_ASSERT_EQUAL(0, params->numParameters());
         DESTROY(root);
     }
     
     
     void testDefaultValueWithClosure()
     {
-        /*
+        
         PARSE_STATEMENT(L"class SomeClass {\n"
                         L"let someProperty: SomeType = {\n"
                         L"    return someValue\n"
@@ -900,16 +919,145 @@ public:
                         L"}");
         
         DESTROY(root);
-         */
+         
     }
     
     
     
     
     
+    void testDeinit()
+    {
+        PARSE_STATEMENT(L"class Player {\n"
+                        L"var coinsInPurse: Int\n"
+                        L"init(coins: Int) {\n"
+                        L"    coinsInPurse = Bank.vendCoins(coins)\n"
+                        L"}\n"
+                        L"func winCoins(coins: Int) {\n"
+                        L"    coinsInPurse += Bank.vendCoins(coins)\n"
+                        L"}\n"
+                        L"deinit {\n"
+                        L"    Bank.receiveCoins(coinsInPurse)\n"
+                        L"}\n"
+                        L"}");
+        
+        ClassDef* s = NULL;
+        DeinitializerDef* deinit = NULL;
+        CodeBlock* body = NULL;
+        
+        CPPUNIT_ASSERT(s = dynamic_cast<ClassDef*>(root));
+        CPPUNIT_ASSERT_EQUAL(4, s->numDeclarations());
+        
+        CPPUNIT_ASSERT(deinit = dynamic_cast<DeinitializerDef*>(s->getDeclaration(3)));
+        CPPUNIT_ASSERT(body = deinit->getBody());
+        CPPUNIT_ASSERT_EQUAL(1, body->numStatements());
+        
+        
+        DESTROY(root);
+    }
     
     
+    void testWeakReference()
+    {
+        PARSE_STATEMENT(L"class Apartment {\n"
+                        L"let number: Int\n"
+                        L"init(number: Int) { self.number = number }\n"
+                        L"weak var tenant: Person?\n"
+                        L"deinit { println(\"Apartment #\(number) is being deinitialized\") }\n"
+                        L"}");
+        
+        ClassDef* s = NULL;
+        Variables* vars = NULL;
+        
+        
+        CPPUNIT_ASSERT(s = dynamic_cast<ClassDef*>(root));
+        CPPUNIT_ASSERT_EQUAL(4, s->numDeclarations());
+        
+        CPPUNIT_ASSERT(vars = dynamic_cast<Variables*>(s->getDeclaration(2)));
+        CPPUNIT_ASSERT(vars->getSpecifiers() && TypeSpecifier::Weak);
+
+        DESTROY(root);
+    }
     
+    void testUnownedReference()
+    {
+        PARSE_STATEMENT(L"class CreditCard {\n"
+                        L"let number: Int\n"
+                        L"unowned let customer: Customer\n"
+                        L"init(number: Int, customer: Customer) {\n"
+                        L"    self.number = number\n"
+                        L"    self.customer = customer\n"
+                        L"}\n"
+                        L"deinit { println(\"Card #\(number) is being deinitialized\") }\n"
+                        L"}");
+        
+        ClassDef* s = NULL;
+        Constant* let = NULL;
+        
+        
+        CPPUNIT_ASSERT(s = dynamic_cast<ClassDef*>(root));
+        CPPUNIT_ASSERT_EQUAL(4, s->numDeclarations());
+        
+        CPPUNIT_ASSERT(let = dynamic_cast<Constant*>(s->getDeclaration(1)));
+        CPPUNIT_ASSERT(let->getSpecifiers() && TypeSpecifier::Unowned);
+
+        DESTROY(root);
+    }
+    
+    void testNestedType_Struct()
+    {
+        PARSE_STATEMENT(L"class Foo\n"
+                        L"{\n"
+                        L"  struct Bar\n"
+                        L"  {\n"
+                        L"  }\n"
+                        L"}");
+        ClassDef* c = NULL;
+        StructDef* s = NULL;
+        
+        CPPUNIT_ASSERT(c = dynamic_cast<ClassDef*>(root));
+        CPPUNIT_ASSERT_EQUAL(1, c->numDeclarations());
+        CPPUNIT_ASSERT(s = dynamic_cast<StructDef*>(c->getDeclaration(0)));
+        
+        DESTROY(root);
+    }
+    
+    void testNestedType_Class()
+    {
+        PARSE_STATEMENT(L"struct Foo\n"
+                        L"{\n"
+                        L"  class Bar\n"
+                        L"  {\n"
+                        L"  }\n"
+                        L"}");
+        ClassDef* c = NULL;
+        StructDef* s = NULL;
+        
+        CPPUNIT_ASSERT(s = dynamic_cast<StructDef*>(root));
+        CPPUNIT_ASSERT_EQUAL(1, s->numDeclarations());
+        CPPUNIT_ASSERT(c = dynamic_cast<ClassDef*>(s->getDeclaration(0)));
+        
+        DESTROY(root);
+    }
+    
+    
+    void testNestedType_Enum()
+    {
+        PARSE_STATEMENT(L"struct Foo\n"
+                        L"{\n"
+                        L"  enum Bar\n"
+                        L"  {\n"
+                        L"  }\n"
+                        L"}");
+        EnumDef* c = NULL;
+        StructDef* s = NULL;
+        
+        CPPUNIT_ASSERT(s = dynamic_cast<StructDef*>(root));
+        CPPUNIT_ASSERT_EQUAL(1, s->numDeclarations());
+        CPPUNIT_ASSERT(c = dynamic_cast<EnumDef*>(s->getDeclaration(0)));
+        
+        DESTROY(root);
+    }
     
     
     

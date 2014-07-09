@@ -14,6 +14,8 @@ public:
     ~Constant();
 public:
     using Declaration::setSpecifiers;
+    using Declaration::getSpecifiers;
+    
     void add(Pattern* pattern, Expression* initializer);
     int numPairs();
     std::pair<Pattern*, Expression*> getPair(int i);

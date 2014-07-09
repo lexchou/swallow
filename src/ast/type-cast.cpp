@@ -7,12 +7,22 @@ TypeCast::TypeCast(Expression* expr, TypeNode* type)
 {
     setLHS(expr);
     setType(type);
+    optional = false;
 }
 TypeCast::~TypeCast()
 {
     SafeDelete(type);
 }
 
+void TypeCast::setOptional(bool val)
+{
+    optional = val;
+    this->op = val ? L"as?" : L"as";
+}
+bool TypeCast::isOptional()const
+{
+    return optional;
+}
 TypeNode* TypeCast::getType()
 {
     return type;

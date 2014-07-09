@@ -95,19 +95,27 @@ Declaration* Parser::parseDeclaration()
 
     return NULL;
 }
-// declaration-specifiers → declaration-specifierdeclaration-specifiersopt
+// declaration-specifiers → declaration-specifier declaration-specifiers opt
 // declaration-specifier → class  mutating  nonmutating  override  static  unowned  unowned(safe) unowned(unsafe)  weak”
 
 int Parser::parseDeclarationSpecifiers()
 {
     //class  mutating  nonmutating  override  static  unowned  unowned(safe) unowned(unsafe)  weak”
-    Token token;
+    Token token, t;
     int ret = 0;
     while(match_identifier(token))
     {
         switch(token.identifier.keyword)
         {
             case Keyword::Class:
+                //check next token
+                peek(t);
+                if(t.getKeyword() == Keyword::_)
+                {
+                    //rollback
+                    restore(token);
+                    break;
+                }
                 ret |= TypeSpecifier::Class;
                 continue;
             case Keyword::Mutating:

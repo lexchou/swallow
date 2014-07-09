@@ -14,6 +14,7 @@ class TestClosure : public SwiftTestCase
     CPPUNIT_TEST(testShorthandArgument);
     CPPUNIT_TEST(testOperatorFunction);
     CPPUNIT_TEST(testTrailingClosures);
+    CPPUNIT_TEST(testCaptureList);
     CPPUNIT_TEST_SUITE_END();
 public:
     void testClosure()
@@ -146,6 +147,40 @@ public:
         DESTROY(root);
     }
     
+    void testCaptureList()
+    {
+        
+        PARSE_STATEMENT(L"sort(names, { [unowned self] s1, s2 in s1 > s2 } )");
+        
+        FunctionCall* f = NULL;
+        Closure* c = NULL;
+        Parameter* param = NULL;
+        Identifier* id = NULL;
+        CPPUNIT_ASSERT(f = dynamic_cast<FunctionCall*>(root));
+        CPPUNIT_ASSERT(c = dynamic_cast<Closure*>(f->getArguments()->get(1)));
+        CPPUNIT_ASSERT_EQUAL(Closure::Unowned, c->getCaptureSpecifier());
+        CPPUNIT_ASSERT(id = dynamic_cast<Identifier*>(c->getCapture()));
+        ASSERT_EQUALS(L"self", id->getIdentifier().c_str());
+        
+        
+        CPPUNIT_ASSERT(NULL == c->getReturnType());
+        
+        
+        CPPUNIT_ASSERT_EQUAL(2, c->getParameters()->numParameters());
+        
+        CPPUNIT_ASSERT(param = c->getParameters()->getParameter(0));
+        ASSERT_EQUALS(L"s1", param->getLocalName());
+        CPPUNIT_ASSERT(NULL == param->getType());
+        
+        CPPUNIT_ASSERT(param = c->getParameters()->getParameter(1));
+        ASSERT_EQUALS(L"s2", param->getLocalName());
+        CPPUNIT_ASSERT(NULL == param->getType());
+        
+        CPPUNIT_ASSERT_EQUAL(1, c->numStatement());
+        CPPUNIT_ASSERT(dynamic_cast<BinaryOperator*>(c->getStatement(0)));
+        
+        DESTROY(root);
+    }
     
 };
 CPPUNIT_TEST_SUITE_NAMED_REGISTRATION(TestClosure, "alltest");
