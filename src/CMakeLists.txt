@@ -69,6 +69,7 @@ SET(SWIFT_PARSER_SRC ${SWIFT_TOKENIZER_SRC}
 	ast/do-loop.cpp
 	ast/fallthrough-statement.cpp
 	ast/for-loop.cpp
+	ast/for-in-loop.cpp
 	ast/if-statement.cpp
 	ast/labeled-statement.cpp
 	ast/return-statement.cpp
@@ -138,6 +139,7 @@ ADD_EXECUTABLE(TestParser
 		tests/test-enum.cpp
 		tests/test-class.cpp
 		tests/test-closure.cpp
+        tests/test-extension.cpp
 		${SWIFT_TOKENIZER_SRC} ${SWIFT_PARSER_SRC})
 target_link_libraries(TestParser cppunit)
 

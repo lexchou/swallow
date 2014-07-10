@@ -124,6 +124,10 @@ ForLoop* NodeFactory::createForLoop(const SourceInfo& state)
 {
     return _(state, new ForLoop());
 }
+ForInLoop* NodeFactory::createForInLoop(const SourceInfo& state)
+{
+    return _(state, new ForInLoop());
+}
 WhileLoop* NodeFactory::createWhileLoop(const SourceInfo& state)
 {
     return _(state, new WhileLoop());

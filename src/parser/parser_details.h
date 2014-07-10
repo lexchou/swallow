@@ -15,6 +15,10 @@ enum
     UNDER_LET           = 0x40,
     UNDER_VAR           = 0x80,
     UNDER_CASE          = 0x100,
+    UNDER_IF            = 0x200,
+    UNDER_FOR_LOOP      = 0x400,
+    UNDER_WHILE_LOOP    = 0x800,
+    UNDER_DO_LOOP       = 0x1000
 };
 struct Flags
 {

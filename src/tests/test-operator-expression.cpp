@@ -20,6 +20,8 @@ class TestOperatorExpression : public SwiftTestCase
     CPPUNIT_TEST(testMinus);
     CPPUNIT_TEST_SUITE_END();
 public:
+    
+    
     void testTypeCheck()
     {
         PARSE_STATEMENT(L"if item is Movie {\n"

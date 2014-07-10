@@ -53,6 +53,10 @@ private://statement
     Statement* parseStatement();
     Statement* parseLoopStatement();
     Statement* parseForLoop();
+    
+    Statement* parseForIn();
+    Statement* parseForStatement();
+    
     Statement* parseWhileLoop();
     Statement* parseDoLoop();
     Statement* parseIf();

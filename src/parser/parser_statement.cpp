@@ -112,9 +112,54 @@ Statement* Parser::parseLoopStatement()
 ‌ for-statement → forfor-initopt;expressionopt;expressionoptcode-block
 ‌ for-statement → for(for-initopt;expressionopt;expressionopt)code-block
 ‌ for-init → variable-declaration | expression-list
- for-in-statement → forpatterninexpressioncode-block
+ for-in-statement → for pattern in expression code-block
 */
 Statement* Parser::parseForLoop()
+{
+    //check if it's a for-in loop
+    Token token, t;
+    expect(Keyword::For, token);
+    bool forIn = false;
+    for(;;)
+    {
+        next(t);
+        if(t.getKeyword() == Keyword::In)
+        {
+            forIn = true;
+            break;
+        }
+        if(t.type == TokenType::OpenBrace || t.type == TokenType::Semicolon)
+        {
+            break;
+        }
+    }
+    restore(token);
+    if(forIn)
+        return parseForIn();
+    else
+        return parseForStatement();
+}
+/*
+ for-in-statement → for pattern in expression code-block
+*/
+Statement* Parser::parseForIn()
+{
+    Token token;
+    expect(Keyword::For, token);
+    ForInLoop* ret = nodeFactory->createForInLoop(token.state);
+    Flags flags(this);
+    flags += UNDER_FOR_LOOP;
+    Pattern* loopVars = parsePattern();
+    expect(Keyword::In);
+    Expression* container = parseExpression();
+    flags -= UNDER_FOR_LOOP;
+    CodeBlock* codeBlock = parseCodeBlock();
+    ret->setLoopVars(loopVars);
+    ret->setContainer(container);
+    ret->setCodeBlock(codeBlock);
+    return ret;
+}
+Statement* Parser::parseForStatement()
 {
     std::vector<ExpressionNode*> inits;
 

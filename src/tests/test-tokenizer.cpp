@@ -6,7 +6,7 @@ using namespace Swift;
 
 
 
-class TestTokenizer : public CppUnit::TestFixture
+class TestTokenizer : public SwiftTestCase
 {
     CPPUNIT_TEST_SUITE(TestTokenizer);
     CPPUNIT_TEST(testExpression);
@@ -381,7 +381,7 @@ public:
     }
     
 };
-class TestNumberToken : public CppUnit::TestFixture
+class TestNumberToken : public SwiftTestCase
 {
     CPPUNIT_TEST_SUITE(TestNumberToken);
     CPPUNIT_TEST(testDecimal);
@@ -391,8 +391,29 @@ class TestNumberToken : public CppUnit::TestFixture
     CPPUNIT_TEST(testOctal);
     CPPUNIT_TEST(testDecimal);
     CPPUNIT_TEST(testHexadecimalFloat);
+    CPPUNIT_TEST(testExpression);
     CPPUNIT_TEST_SUITE_END();
 public:
+    
+    void testExpression()
+    {
+        Tokenizer tokenizer(L"self * 1_000.0");
+        Token token;
+        
+        CPPUNIT_ASSERT(tokenizer.next(token));
+        ASSERT_EQUALS(L"self", token.token);
+        
+        CPPUNIT_ASSERT(tokenizer.next(token));
+        ASSERT_EQUALS(L"*", token.token);
+        
+        
+        CPPUNIT_ASSERT(tokenizer.next(token));
+        ASSERT_EQUALS(L"1_000.0", token.token);
+        
+        
+        CPPUNIT_ASSERT(!tokenizer.next(token));
+    }
+    
     void testNumberSelf()
     {
         Tokenizer tokenizer(L"3.self");
@@ -545,7 +566,14 @@ public:
     void testDecimalFloat()
     {
         Token token;
-        Tokenizer tokenizer(L"345 345.543 -345.6e78 +3e4");
+        Tokenizer tokenizer(L"1_000.0 345 345.543 -345.6e78 +3e4 ");
+        
+        CPPUNIT_ASSERT(tokenizer.next(token));
+        CPPUNIT_ASSERT_EQUAL(TokenType::Float, token.type);
+        CPPUNIT_ASSERT_EQUAL(10, token.number.base);
+        ASSERT_EQUALS(L"1_000.0", token.c_str());
+        
+        
         CPPUNIT_ASSERT(tokenizer.next(token));
         CPPUNIT_ASSERT_EQUAL(TokenType::Integer, token.type);
         CPPUNIT_ASSERT_EQUAL(10, token.number.base);

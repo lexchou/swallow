@@ -86,7 +86,23 @@ public:
     }
     void testForIn()
     {
+        PARSE_STATEMENT(L"for index in 1...5 {\n"
+                        L"println(\"\(index) times 5 is \(index * 5)\")\n"
+                        L"}");
+        ForInLoop* f = NULL;
+        BinaryOperator* op = NULL;
+        Identifier* id = NULL;
         
+        CPPUNIT_ASSERT(f = dynamic_cast<ForInLoop*>(root));
+        CPPUNIT_ASSERT(id = dynamic_cast<Identifier*>(f->getLoopVars()));
+        ASSERT_EQUALS(L"index", id->getIdentifier());
+        CPPUNIT_ASSERT(op = dynamic_cast<BinaryOperator*>(f->getContainer()));
+        ASSERT_EQUALS(L"...", op->getOperator());
+        
+        
+        
+        
+        DESTROY(root);
     }
     void testWhile()
     {

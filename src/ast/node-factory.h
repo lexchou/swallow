@@ -35,6 +35,7 @@ class ForcedValue;
 class OptionalChaining;
 class FunctionCall;
 class ForLoop;
+class ForInLoop;
 class WhileLoop;
 class DoLoop;
 class IfStatement;
@@ -120,6 +121,7 @@ public:
     virtual FunctionCall* createFunctionCall(const SourceInfo& state);
 
     virtual ForLoop* createForLoop(const SourceInfo& state);
+    virtual ForInLoop* createForInLoop(const SourceInfo& state);
     virtual WhileLoop* createWhileLoop(const SourceInfo& state);
     virtual IfStatement* createIf(const SourceInfo& state);
     virtual DoLoop* createDoLoop(const SourceInfo& state);

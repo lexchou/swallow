@@ -39,6 +39,7 @@
 #include "ast/do-loop.h"
 #include "ast/fallthrough-statement.h"
 #include "ast/for-loop.h"
+#include "ast/for-in-loop.h"
 #include "ast/if-statement.h"
 #include "ast/labeled-statement.h"
 #include "ast/return-statement.h"

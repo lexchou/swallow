@@ -13,7 +13,8 @@ class TestClosure : public SwiftTestCase
     CPPUNIT_TEST(testImplicitReturn);
     CPPUNIT_TEST(testShorthandArgument);
     CPPUNIT_TEST(testOperatorFunction);
-    CPPUNIT_TEST(testTrailingClosures);
+    CPPUNIT_TEST(testTrailingClosure);
+    CPPUNIT_TEST(testTrailingClosure2);
     CPPUNIT_TEST(testCaptureList);
     CPPUNIT_TEST_SUITE_END();
 public:
@@ -134,9 +135,25 @@ public:
     }
     
     
-    void testTrailingClosures()
+    void testTrailingClosure()
     {
         PARSE_STATEMENT(L"sort(names) { $0 > $1 }");
+        
+        FunctionCall* f = NULL;
+        Closure* c = NULL;
+        CPPUNIT_ASSERT(f = dynamic_cast<FunctionCall*>(root));
+        CPPUNIT_ASSERT(c = dynamic_cast<Closure*>(f->getTrailingClosure()));
+
+        
+        DESTROY(root);
+    }
+    
+    
+    void testTrailingClosure2()
+    {
+        PARSE_STATEMENT(L"3.repetitions {\n"
+                        L"println(\"Goodbye!\")\n"
+                        L"}");
         
         FunctionCall* f = NULL;
         Closure* c = NULL;

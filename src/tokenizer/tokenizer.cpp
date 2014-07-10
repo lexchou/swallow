@@ -468,7 +468,7 @@ bool Tokenizer::readNumber(Token& token)
         case 'o': base = 8; token.append(must_get()); break;
         case 'x': base = 16; token.append(must_get()); break;
         case '.': break;
-        default: if(!isdigit(ch)) return true;
+        default: if(!isdigit(ch) && ch != '_') return true;
     }
     token.number.base = base;
     if(ch != '.')
