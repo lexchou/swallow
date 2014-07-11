@@ -19,6 +19,9 @@ public:
     using Declaration::getSpecifiers;
     using Declaration::setAttributes;
     using Declaration::getAttributes;
+    
+    using Declaration::setGenericParameters;
+    using Declaration::getGenericParameters;
 public:
     void setName(const std::wstring& name);
     const std::wstring& getName()const;

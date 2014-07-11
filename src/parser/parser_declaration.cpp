@@ -232,8 +232,7 @@ Declaration* Parser::parseImport(const std::vector<Attribute*>& attrs)
 Declaration* Parser::parseLet(const std::vector<Attribute*>& attrs, int specifiers)
 {
     Token token;
-    Flags flag(this);
-    flags += UNDER_LET;
+    Flags flag(this, UNDER_LET);
     expect(Keyword::Let, token);
     Constant* ret = nodeFactory->createConstant(token.state, attrs, specifiers);
     do
@@ -264,6 +263,7 @@ Variable* Parser::parseVariableDeclaration()
     }
     if(match(L"="))
     {
+        Flags flags(this, SUPPRESS_TRAILING_CLOSURE);
         val = parseExpression();
     }
     Variable* ret = nodeFactory->createVariable(*key->getSourceInfo());
@@ -288,8 +288,7 @@ Declaration* Parser::parseVar(const std::vector<Attribute*>& attrs, int specifie
 {
     Token token;
     expect(Keyword::Var, token);
-    Flags flags(this);
-    flags += UNDER_VAR;
+    Flags flags(this, UNDER_VAR);
     //try read it as pattern-initializer-list
     Variables* ret = nodeFactory->createVariables(token.state, attrs, specifiers);
     Variable* var = parseVariableDeclaration();
@@ -311,6 +310,7 @@ Declaration* Parser::parseVar(const std::vector<Attribute*>& attrs, int specifie
     peek(token);
     if(token.type != TokenType::CloseBrace)
     {
+        Flags flags(this, SUPPRESS_TRAILING_CLOSURE);
         switch(token.getKeyword())
         {
             case Keyword::Get:
@@ -562,7 +562,8 @@ Declaration* Parser::parseFunc(const std::vector<Attribute*>& attrs, int specifi
     ret->setName(token.token);
     if(predicate(L"<"))
     {
-        //TODO: parseGenericParameterClause();
+        GenericParameters* params = this->parseGenericParameters();
+        ret->setGenericParameters(params);
     }
     do
     {
@@ -789,7 +790,8 @@ Declaration* Parser::parseStruct(const std::vector<Attribute*>& attrs)
     ret->setIdentifier(nodeFactory->createTypeIdentifier(token.state, token.token));
     if(predicate(L"<"))
     {
-        //TODO: parse generic parameter clause
+        GenericParameters* params = parseGenericParameters();
+        ret->setGenericParameters(params);
     }
     
     
@@ -831,7 +833,8 @@ Declaration* Parser::parseClass(const std::vector<Attribute*>& attrs)
     ret->setIdentifier(nodeFactory->createTypeIdentifier(token.state, token.token));
     if(predicate(L"<"))
     {
-        //TODO: parse generic parameter clause
+        GenericParameters* params = parseGenericParameters();
+        ret->setGenericParameters(params);
     }
     if(match(L":"))
     {

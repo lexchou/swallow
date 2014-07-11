@@ -40,6 +40,10 @@ Identifier* NodeFactory::createIdentifier(const SourceInfo& state, const std::ws
 {
     return _(state, new Identifier(op));
 }
+GenericArgument* NodeFactory::createGenericArgument(const SourceInfo& state)
+{
+    return _(state, new GenericArgument());
+}
 InOutParameter* NodeFactory::createInOutParameter(const SourceInfo& state, Identifier* identifier)
 {
     InOutParameter* ret = _(state, new InOutParameter(identifier));

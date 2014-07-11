@@ -61,7 +61,6 @@ public:
         CPPUNIT_ASSERT(func = dynamic_cast<Identifier*>(call->getFunction()));
         ASSERT_EQUALS(L"println", func->getIdentifier().c_str());
         
-        DESTROY(root);
     }
     
     void testFor2()
@@ -81,7 +80,6 @@ public:
         
         CPPUNIT_ASSERT_EQUAL(0, body->numStatements());
         
-        DESTROY(root);
         
     }
     void testForIn()
@@ -102,7 +100,6 @@ public:
         
         
         
-        DESTROY(root);
     }
     void testWhile()
     {
@@ -125,7 +122,6 @@ public:
         CPPUNIT_ASSERT(func = dynamic_cast<Identifier*>(call->getFunction()));
         ASSERT_EQUALS(L"println", func->getIdentifier().c_str());
         
-        DESTROY(root);
     }
     void testDo()
     {
@@ -147,7 +143,6 @@ public:
         CPPUNIT_ASSERT(func = dynamic_cast<Identifier*>(call->getFunction()));
         ASSERT_EQUALS(L"println", func->getIdentifier().c_str());
         
-        DESTROY(root);
     }
     void testIf()
     {
@@ -167,7 +162,6 @@ public:
         ASSERT_EQUALS(L"-1", id->toString().c_str());
         CPPUNIT_ASSERT(_if->getElse() == NULL);
         
-        DESTROY(root);
     }
     
     void testIf2()
@@ -195,7 +189,6 @@ public:
         CPPUNIT_ASSERT(id = dynamic_cast<IntegerLiteral*>(ret->getExpression()));
         ASSERT_EQUALS(L"1", id->toString().c_str());
         
-        DESTROY(root);
     }
     
     void testIf3()
@@ -235,7 +228,6 @@ public:
         CPPUNIT_ASSERT(id = dynamic_cast<IntegerLiteral*>(ret->getExpression()));
         ASSERT_EQUALS(L"1", id->toString().c_str());
         
-        DESTROY(root);
     }
     void testSwitch_Empty()
     {
@@ -245,7 +237,6 @@ public:
         CPPUNIT_ASSERT_EQUAL(0, sc->numCases());
         CPPUNIT_ASSERT(sc->getDefaultCase() == NULL);
 
-        DESTROY(root);
     }
     
     void testSwitch_MultipleCases()
@@ -282,7 +273,6 @@ public:
         CPPUNIT_ASSERT(st = c->getStatement(0));
         CPPUNIT_ASSERT(dynamic_cast<FunctionCall*>(st));
         
-        DESTROY(root);
     }
     
     void testSwitch_NoExplicitFallthrough()
@@ -318,7 +308,6 @@ public:
         CPPUNIT_ASSERT(dynamic_cast<FunctionCall*>(st));
         
         
-        DESTROY(root);
     }
     
     void testSwitch_RangeMatching()
@@ -358,7 +347,6 @@ public:
         CPPUNIT_ASSERT(st = c->getStatement(0));
         CPPUNIT_ASSERT(dynamic_cast<Assignment*>(st));
         
-        DESTROY(root);
         
     }
     
@@ -398,7 +386,6 @@ public:
         CPPUNIT_ASSERT(dynamic_cast<IntegerLiteral*>(tuple->getElement(1)));
         
         
-        DESTROY(root);
     }
     void testSwitch_ValueBindings()
     {
@@ -411,7 +398,6 @@ public:
                            L"println(\"somewhere else at (\(x), \(y))\")"
                            L"}");
         
-        DESTROY(root);
     }
     void testSwitch_Where()
     {
@@ -475,7 +461,6 @@ public:
         CPPUNIT_ASSERT(NULL == dynamic_cast<BinaryOperator*>(c->getCondition(0).guard));
 
         
-        DESTROY(root);
     }
     
     void testSwitch_Enum()
@@ -529,7 +514,6 @@ public:
         ASSERT_EQUALS(L"West", e->getName().c_str());
         CPPUNIT_ASSERT(e->getAssociatedBinding() == NULL);
         
-        DESTROY(root);
     }
     
     void testSwitch_AssociatedValues()
@@ -583,7 +567,6 @@ public:
         CPPUNIT_ASSERT(id = dynamic_cast<Identifier*>(t->getElement(0)));
         ASSERT_EQUALS(L"productCode", id->getIdentifier().c_str());
         
-        DESTROY(root);
     }
     
     void testLabeledWhile()
@@ -613,7 +596,6 @@ public:
         
         
         
-        DESTROY(root);
     }
     void testLabeledDo()
     {
@@ -642,7 +624,6 @@ public:
         ASSERT_EQUALS(L"gameLoop", cs->getLoop().c_str());
         
         
-        DESTROY(root);
     }
     void testLabeledFor()
     {
@@ -669,7 +650,6 @@ public:
         ASSERT_EQUALS(L"gameLoop", bs->getLoop().c_str());
         ASSERT_EQUALS(L"gameLoop", cs->getLoop().c_str());
         
-        DESTROY(root);
     }
 };
 CPPUNIT_TEST_SUITE_NAMED_REGISTRATION(TestStatement, "alltest");

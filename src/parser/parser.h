@@ -29,6 +29,7 @@ class Pattern;
 class Variable;
 class Parameters;
 class GenericParameters;
+class GenericArgument;
 class Parser
 {
     friend struct Flags;
@@ -133,6 +134,9 @@ private://expression
     Expression* parseSuperExpression();
     Identifier* parseIdentifier();
     Closure* parseClosureExpression();
+    bool isGenericArgument();
+    GenericArgument* parseGenericArgument();
+    
     
     std::pair<Expression*, Expression*> parseDictionaryLiteralItem();
 private:

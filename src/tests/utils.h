@@ -53,6 +53,7 @@ struct Tracer
         strcpy(this->file, file);
         strcpy(this->func, func);
         this->line = line;
+        node = NULL;
 #ifdef TRACE_NODE
         using namespace Swift;
         Node::UnreleasedNodes.clear();
@@ -61,6 +62,7 @@ struct Tracer
     }
     ~Tracer()
     {
+        delete node;
 #ifdef TRACE_NODE
         using namespace Swift;
         using namespace std;
@@ -81,16 +83,13 @@ struct Tracer
 #endif//TRACE_NODE
     }
     
-    
+    Swift::Node* node;
     char file[1024];
     int line;
     char func[100];
     
 };
-#define PARSE_STATEMENT(s) Tracer tracer(__FILE__, __LINE__, __FUNCTION__);Node* root = parseStatement((s));
+#define PARSE_STATEMENT(s) Tracer tracer(__FILE__, __LINE__, __FUNCTION__);Node* root = parseStatement((s));tracer.node = root;
 
-
-
-#define DESTROY(n) delete n;
 
 #endif//TEST_UTILS_H

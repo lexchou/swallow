@@ -72,7 +72,6 @@ public:
         ASSERT_EQUALS(L"1", i->toString().c_str());
         
         
-        DESTROY(root);
     }
     void testFunc_ReturnFunc()
     {
@@ -115,7 +114,6 @@ public:
         CPPUNIT_ASSERT(type = dynamic_cast<TypeIdentifier*>(rettype->getReturnType()));
         ASSERT_EQUALS(L"Int", type->getName().c_str());
         
-        DESTROY(root);
     }
     void testFunc_MultipleParameters()
     {
@@ -157,7 +155,6 @@ public:
         ASSERT_EQUALS(L"Int", type->getName().c_str());
         
         
-        DESTROY(root);
     }
     
     void testFunc_NoParameters()
@@ -176,7 +173,6 @@ public:
         CPPUNIT_ASSERT_EQUAL(0, params->numParameters());
         CPPUNIT_ASSERT(!params->isVariadicParameters());
         
-        DESTROY(root);
     }
     void testFunc_NoReturn()
     {
@@ -194,7 +190,6 @@ public:
         CPPUNIT_ASSERT(!params->isVariadicParameters());
         CPPUNIT_ASSERT(NULL == func->getReturnType());
         
-        DESTROY(root);
     }
     void testFunc_ReturnTuple()
     {
@@ -232,7 +227,6 @@ public:
         CPPUNIT_ASSERT(id = dynamic_cast<TypeIdentifier*>(rettype->getElementType(2)));
         ASSERT_EQUALS(L"Int", id->getName().c_str());
         
-        DESTROY(root);
     }
     void testFunc_ExtParamNam()
     {
@@ -260,7 +254,6 @@ public:
         CPPUNIT_ASSERT(type = dynamic_cast<TypeIdentifier*>(param->getType()));
         ASSERT_EQUALS(L"Int", type->getName().c_str());
         
-        DESTROY(root);
     }
     void testFunc_ShorthandExtParamName()
     {
@@ -299,7 +292,6 @@ public:
         CPPUNIT_ASSERT(type = dynamic_cast<TypeIdentifier*>(param->getType()));
         ASSERT_EQUALS(L"Character", type->getName().c_str());
         
-        DESTROY(root);
     }
     void testFunc_DefParam()
     {
@@ -332,7 +324,6 @@ public:
         CPPUNIT_ASSERT(str = dynamic_cast<StringLiteral*>(param->getDefaultValue()));
         ASSERT_EQUALS(L" ", str->toString().c_str());
         
-        DESTROY(root);
     }
     void testFunc_VariadicParams()
     {
@@ -361,7 +352,6 @@ public:
         ASSERT_EQUALS(L"Double", type->getName().c_str());
         CPPUNIT_ASSERT(NULL == param->getDefaultValue());
         
-        DESTROY(root);
     }
     void testFunc_VariableParam()
     {
@@ -388,7 +378,6 @@ public:
         CPPUNIT_ASSERT(type = dynamic_cast<TypeIdentifier*>(param->getType()));
         ASSERT_EQUALS(L"String", type->getName().c_str());
         CPPUNIT_ASSERT(NULL == param->getDefaultValue());
-        DESTROY(root);
     }
     void testFunc_Inout()
     {
@@ -428,7 +417,6 @@ public:
         ASSERT_EQUALS(L"Int", type->getName().c_str());
         CPPUNIT_ASSERT(NULL == param->getDefaultValue());
         
-        DESTROY(root);
     }
     void testFunc_FuncType()
     {
@@ -469,7 +457,6 @@ public:
         CPPUNIT_ASSERT(t = dynamic_cast<TypeIdentifier*>(type->getReturnType()));
         ASSERT_EQUALS(L"Int", t->getName().c_str());
         
-        DESTROY(root);
     }
     void testFunc_NestedFunc()
     {
@@ -496,7 +483,6 @@ public:
         CPPUNIT_ASSERT_EQUAL(1, func->numParameters());
         CPPUNIT_ASSERT_EQUAL(1, func->getParameters(0)->numParameters());
         
-        DESTROY(root);
     }
     void testFunc_CurriedFunc()
     {
@@ -539,7 +525,6 @@ public:
         CPPUNIT_ASSERT(t = dynamic_cast<TypeIdentifier*>(param->getType()));
         ASSERT_EQUALS(L"Int", t->getName().c_str());
         
-        DESTROY(root);
     }
 };
 CPPUNIT_TEST_SUITE_NAMED_REGISTRATION(TestFunc, "alltest");

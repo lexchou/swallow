@@ -10,6 +10,9 @@ class StructDef : public TypeDeclaration
 public:
     StructDef();
 public:
+    using Declaration::setGenericParameters;
+    using Declaration::getGenericParameters;
+public:
     virtual void serialize(std::wostream& out);
 };
 

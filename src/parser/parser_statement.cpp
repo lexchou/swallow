@@ -148,11 +148,11 @@ Statement* Parser::parseForIn()
     expect(Keyword::For, token);
     ForInLoop* ret = nodeFactory->createForInLoop(token.state);
     Flags flags(this);
-    flags += UNDER_FOR_LOOP;
+    flags += SUPPRESS_TRAILING_CLOSURE;
     Pattern* loopVars = parsePattern();
     expect(Keyword::In);
     Expression* container = parseExpression();
-    flags -= UNDER_FOR_LOOP;
+    flags -= SUPPRESS_TRAILING_CLOSURE;
     CodeBlock* codeBlock = parseCodeBlock();
     ret->setLoopVars(loopVars);
     ret->setContainer(container);
@@ -167,6 +167,8 @@ Statement* Parser::parseForStatement()
     //‌ for-statement → for(for-initopt;expressionopt;expressionopt)code-block
     Token token;
     expect(Keyword::For, token);
+    Flags flags(this);
+    flags += SUPPRESS_TRAILING_CLOSURE;
     ForLoop* ret = nodeFactory->createForLoop(token.state);
     bool parenthesized = match(L"(");
     if(!predicate(L";"))
@@ -211,6 +213,7 @@ Statement* Parser::parseForStatement()
 Statement* Parser::parseWhileLoop()
 {
     Token token;
+    Flags flags(this, SUPPRESS_TRAILING_CLOSURE);
     expect(Keyword::While, token);
     WhileLoop* ret = nodeFactory->createWhileLoop(token.state);
     Expression* condition = parseConditionExpression();
@@ -233,6 +236,7 @@ Expression* Parser::parseConditionExpression()
 Statement* Parser::parseDoLoop()
 {
     Token token;
+    Flags flags(this, SUPPRESS_TRAILING_CLOSURE);
     expect(Keyword::Do, token);
     DoLoop* ret = nodeFactory->createDoLoop(token.state);
     CodeBlock* codeBlock = parseCodeBlock();
@@ -254,8 +258,12 @@ Statement* Parser::parseIf()
     Token token;
     expect(Keyword::If, token);
     IfStatement* ret = nodeFactory->createIf(token.state);
-    Expression* cond = parseConditionExpression();
-    ret->setCondition(cond);
+    {
+        Flags flags(this);
+        flags += SUPPRESS_TRAILING_CLOSURE;
+        Expression* cond = parseConditionExpression();
+        ret->setCondition(cond);
+    }
     CodeBlock* thenPart = parseCodeBlock();
     ret->setThen(thenPart);
     if(match(L"else"))
@@ -296,13 +304,16 @@ Statement* Parser::parseIf()
 Statement* Parser::parseSwitch()
 {
     Token token;
-    Flags flags(this);
-    flags += UNDER_SWITCH_CASE;
+    Flags flags(this, UNDER_SWITCH_CASE | SUPPRESS_TRAILING_CLOSURE);
     
     expect(Keyword::Switch, token);
     SwitchCase* ret = nodeFactory->createSwitch(token.state);
-    Expression* controlExpr = parseExpression();
-    ret->setControlExpression(controlExpr);
+    {
+        Flags f(flags);
+        f += SUPPRESS_TRAILING_CLOSURE;
+        Expression* controlExpr = parseExpression();
+        ret->setControlExpression(controlExpr);
+    }
     expect(L"{");
     // ‌ switch-cases → switch-case switch-cases opt
     while(!predicate(L"}"))
@@ -352,6 +363,8 @@ Statement* Parser::parseSwitch()
 void Parser::parseSwitchStatements(CaseStatement* case_)
 {
     Token token;
+    Flags flags(this);
+    flags -= SUPPRESS_TRAILING_CLOSURE;
     while(true)
     {
         expect_next(token);
@@ -494,6 +507,8 @@ Statement* Parser::parseLabeledStatement()
 CodeBlock* Parser::parseCodeBlock()
 {
     Token token;
+    Flags flags(this);
+    flags -= SUPPRESS_TRAILING_CLOSURE;
     expect(L"{", token);
     CodeBlock* ret = nodeFactory->createCodeBlock(token.state);
     while(!match(L"}"))

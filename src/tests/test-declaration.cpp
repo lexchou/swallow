@@ -33,7 +33,6 @@ public:
         CPPUNIT_ASSERT(import = dynamic_cast<Import*>(root));
         ASSERT_EQUALS(L"Foundation", import->getPath().c_str());
         CPPUNIT_ASSERT_EQUAL(Import::_, import->getKind());
-        DESTROY(root);
         
     }
     void testImportSubModule()
@@ -43,7 +42,6 @@ public:
         CPPUNIT_ASSERT(import = dynamic_cast<Import*>(root));
         ASSERT_EQUALS(L"Foundation.SubModule", import->getPath().c_str());
         CPPUNIT_ASSERT_EQUAL(Import::_, import->getKind());
-        DESTROY(root);
     }
     
     void testImportKind_Class()
@@ -53,7 +51,6 @@ public:
         CPPUNIT_ASSERT(import = dynamic_cast<Import*>(root));
         ASSERT_EQUALS(L"Foundation.NSFileManager", import->getPath().c_str());
         CPPUNIT_ASSERT_EQUAL(Import::Class, import->getKind());
-        DESTROY(root);
     }
     
     void testImportKind_TypeAlias()
@@ -63,7 +60,6 @@ public:
         CPPUNIT_ASSERT(import = dynamic_cast<Import*>(root));
         ASSERT_EQUALS(L"Foundation.NSFileManager", import->getPath().c_str());
         CPPUNIT_ASSERT_EQUAL(Import::Typealias, import->getKind());
-        DESTROY(root);
     }
     
     void testImportKind_Struct()
@@ -73,7 +69,6 @@ public:
         CPPUNIT_ASSERT(import = dynamic_cast<Import*>(root));
         ASSERT_EQUALS(L"Foundation.NSFileManager", import->getPath().c_str());
         CPPUNIT_ASSERT_EQUAL(Import::Struct, import->getKind());
-        DESTROY(root);
     }
     
     void testImportKind_Enum()
@@ -83,7 +78,6 @@ public:
         CPPUNIT_ASSERT(import = dynamic_cast<Import*>(root));
         ASSERT_EQUALS(L"Foundation.NSFileManager", import->getPath().c_str());
         CPPUNIT_ASSERT_EQUAL(Import::Enum, import->getKind());
-        DESTROY(root);
     }
     
     void testImportKind_Protocol()
@@ -93,7 +87,6 @@ public:
         CPPUNIT_ASSERT(import = dynamic_cast<Import*>(root));
         ASSERT_EQUALS(L"Foundation.NSFileManager", import->getPath().c_str());
         CPPUNIT_ASSERT_EQUAL(Import::Protocol, import->getKind());
-        DESTROY(root);
     }
     
     void testImportKind_Var()
@@ -103,7 +96,6 @@ public:
         CPPUNIT_ASSERT(import = dynamic_cast<Import*>(root));
         ASSERT_EQUALS(L"Foundation.NSFileManager", import->getPath().c_str());
         CPPUNIT_ASSERT_EQUAL(Import::Var, import->getKind());
-        DESTROY(root);
     }
     
     void testImportKind_Func()
@@ -113,7 +105,6 @@ public:
         CPPUNIT_ASSERT(import = dynamic_cast<Import*>(root));
         ASSERT_EQUALS(L"Foundation.NSFileManager", import->getPath().c_str());
         CPPUNIT_ASSERT_EQUAL(Import::Func, import->getKind());
-        DESTROY(root);
     }
     
     void testLet()
@@ -138,7 +129,6 @@ public:
         ASSERT_EQUALS(L"2", dynamic_cast<IntegerLiteral*>(value->getElement(1))->toString().c_str());
         ASSERT_EQUALS(L"3", dynamic_cast<IntegerLiteral*>(value->getElement(2))->toString().c_str());
 
-        DESTROY(root);
     }
     
     void testLet_Multiple()
@@ -160,7 +150,6 @@ public:
         CPPUNIT_ASSERT(Int = dynamic_cast<TypeIdentifier*>(id->getType()));
         ASSERT_EQUALS(L"Int", Int->getName().c_str());
         
-        DESTROY(root);
     }
     
     void testLet_Tuple()
@@ -177,7 +166,6 @@ public:
         CPPUNIT_ASSERT(p = dynamic_cast<ParenthesizedExpression*>(c->getPair(0).second));
         CPPUNIT_ASSERT_EQUAL(2, p->numExpressions());
         
-        DESTROY(root);
     }
     
     void testVar()
@@ -198,7 +186,6 @@ public:
         ASSERT_EQUALS(L"0", i->toString().c_str());
         
         
-        DESTROY(root);
     }
     void testVar_Multiple()
     {
@@ -231,7 +218,6 @@ public:
         CPPUNIT_ASSERT(f = dynamic_cast<FloatLiteral*>(var->getInitializer()));
         ASSERT_EQUALS(L"0.0", f->toString().c_str());
         
-        DESTROY(root);
         
     }
     
@@ -253,7 +239,6 @@ public:
         ASSERT_EQUALS(L"String", t->getName().c_str());
         
         
-        DESTROY(root);
     }
     
 };

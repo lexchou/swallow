@@ -48,7 +48,6 @@ public:
         CPPUNIT_ASSERT(ret = dynamic_cast<ReturnStatement*>(c->getStatement(0)));
         CPPUNIT_ASSERT(dynamic_cast<BinaryOperator*>(ret->getExpression()));
         
-        DESTROY(root);
     }
     
     void testInferringType()
@@ -77,7 +76,6 @@ public:
         CPPUNIT_ASSERT(ret = dynamic_cast<ReturnStatement*>(c->getStatement(0)));
         CPPUNIT_ASSERT(dynamic_cast<BinaryOperator*>(ret->getExpression()));
         
-        DESTROY(root);
     }
     
     void testImplicitReturn()
@@ -104,7 +102,6 @@ public:
         CPPUNIT_ASSERT_EQUAL(1, c->numStatement());
         CPPUNIT_ASSERT(dynamic_cast<BinaryOperator*>(c->getStatement(0)));
         
-        DESTROY(root);
     }
     void testShorthandArgument()
     {
@@ -120,7 +117,6 @@ public:
         CPPUNIT_ASSERT_EQUAL(1, c->numStatement());
         CPPUNIT_ASSERT(dynamic_cast<BinaryOperator*>(c->getStatement(0)));
         
-        DESTROY(root);
     }
     
     void testOperatorFunction()
@@ -131,7 +127,6 @@ public:
         CPPUNIT_ASSERT(f = dynamic_cast<FunctionCall*>(root));
         CPPUNIT_ASSERT(dynamic_cast<BinaryOperator*>(f->getArguments()->get(1)));
         
-        DESTROY(root);
     }
     
     
@@ -145,7 +140,6 @@ public:
         CPPUNIT_ASSERT(c = dynamic_cast<Closure*>(f->getTrailingClosure()));
 
         
-        DESTROY(root);
     }
     
     
@@ -161,7 +155,6 @@ public:
         CPPUNIT_ASSERT(c = dynamic_cast<Closure*>(f->getTrailingClosure()));
 
         
-        DESTROY(root);
     }
     
     void testCaptureList()
@@ -196,7 +189,6 @@ public:
         CPPUNIT_ASSERT_EQUAL(1, c->numStatement());
         CPPUNIT_ASSERT(dynamic_cast<BinaryOperator*>(c->getStatement(0)));
         
-        DESTROY(root);
     }
     
 };

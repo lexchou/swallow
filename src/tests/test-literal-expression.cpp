@@ -34,7 +34,6 @@ public:
         CPPUNIT_ASSERT(n != NULL);
         ASSERT_EQUALS(L"3", n->toString().c_str());
         
-        DESTROY(root);
     }
     void testLiteral2()
     {
@@ -44,7 +43,6 @@ public:
         CPPUNIT_ASSERT(f != NULL);
         ASSERT_EQUALS(L"3.45e4", f->toString().c_str());
         
-        DESTROY(root);
     }
     
     void testLiteral3()
@@ -55,7 +53,6 @@ public:
         CPPUNIT_ASSERT(str != NULL);
         ASSERT_EQUALS(L"str\thello", str->toString().c_str());
         
-        DESTROY(root);
         
     }
     void testArrayLiteral()
@@ -67,7 +64,6 @@ public:
         CPPUNIT_ASSERT_EQUAL(0, a->numElements());
         
         
-        DESTROY(root);
     }
     
     void testArrayLiteral2()
@@ -82,7 +78,6 @@ public:
         ASSERT_EQUALS(L"5", i->toString().c_str());
         
         
-        DESTROY(root);
     }
     void testArrayLiteral3()
     {
@@ -95,7 +90,6 @@ public:
         CPPUNIT_ASSERT(s != NULL);
         ASSERT_EQUALS(L"a", s->toString().c_str());
         
-        DESTROY(root);
     }
     void testArrayLiteral4()
     {
@@ -105,7 +99,6 @@ public:
         CPPUNIT_ASSERT(a);
         CPPUNIT_ASSERT_EQUAL(2, a->numElements());
         
-        DESTROY(root);
     }
     void testArrayLiteral5()
     {
@@ -115,7 +108,6 @@ public:
         CPPUNIT_ASSERT(a);
         CPPUNIT_ASSERT_EQUAL(3, a->numElements());
         
-        DESTROY(root);
         
     }
     void testDictionaryLiteral()
@@ -126,7 +118,6 @@ public:
         CPPUNIT_ASSERT(d != NULL);
         CPPUNIT_ASSERT_EQUAL(0, d->numElements());
         
-        DESTROY(root);
     }
     void testDictionaryLiteral2()
     {
@@ -136,7 +127,6 @@ public:
         CPPUNIT_ASSERT(d != NULL);
         CPPUNIT_ASSERT_EQUAL(1, d->numElements());
         
-        DESTROY(root);
     }
     void testCompileConstants()
     {
@@ -146,7 +136,6 @@ public:
         CPPUNIT_ASSERT(c != NULL);
         ASSERT_EQUALS(L"<file>", c->getValue().c_str());
         
-        DESTROY(root);
     }
     void testCompileConstants2()
     {
@@ -157,7 +146,6 @@ public:
         ASSERT_EQUALS(L"1", c->getValue().c_str());
         
         
-        DESTROY(root);
     }
     void testCompileConstants3()
     {
@@ -168,7 +156,6 @@ public:
         ASSERT_EQUALS(L"1", c->getValue().c_str());
         
         
-        DESTROY(root);
     }
     void testCompileConstants4()
     {
@@ -178,7 +165,6 @@ public:
         CPPUNIT_ASSERT(c != NULL);
         ASSERT_EQUALS(L"<top>", c->getValue().c_str());
         
-        DESTROY(root);
     }
 };
 ;

@@ -14,6 +14,7 @@ class CommentNode;
 class UnaryOperator;
 class BinaryOperator;
 class Identifier;
+class GenericArgument;
 class Node;
 class Expression;
 class InOutParameter;
@@ -99,6 +100,7 @@ public:
     virtual BinaryOperator* createBinary(const SourceInfo& state, const std::wstring& op, Associativity::T associativity, int precedence);
 
     virtual Identifier* createIdentifier(const SourceInfo& state, const std::wstring& op);
+    virtual GenericArgument* createGenericArgument(const SourceInfo& state);
     virtual InOutParameter* createInOutParameter(const SourceInfo& state, Identifier* identifier);
 
     virtual ArrayLiteral* createArrayLiteral(const SourceInfo& state);

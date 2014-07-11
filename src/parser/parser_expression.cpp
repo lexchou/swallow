@@ -141,12 +141,16 @@ Expression* Parser::parsePostfixExpression()
             continue;
         }
         // postfix-expression → function-call-expression
-        if(token.type == TokenType::OpenParen)
+        if(token.type == TokenType::OpenParen || token.type == TokenType::OpenBrace)
         {
-            FunctionCall* call = parseFunctionCallExpression();
-            call->setFunction(ret);
-            ret = call;
-            continue;
+            bool suppressTrailingClosure = (this->flags & SUPPRESS_TRAILING_CLOSURE) != 0;
+            if(!(token.type == TokenType::OpenBrace && suppressTrailingClosure))
+            {
+                FunctionCall* call = parseFunctionCallExpression();
+                call->setFunction(ret);
+                ret = call;
+                continue;
+            }
         }
         // postfix-expression → subscript-expression
         if(token.type == TokenType::OpenBracket)
@@ -230,17 +234,7 @@ Expression* Parser::parsePrimaryExpression()
                 break;
         }
         Identifier* identifier = parseIdentifier();
-        
-        if((!this->flags & ENABLE_GENERIC))
-            return identifier;
-
-        if(!predicate(L"<"))
-            return identifier;
-        tassert(token, false);//TODO unsupported genetic expression
-        return NULL;
-        //GeneticArgument* geneticArgument = parseGenericArgument();
-        //GeneticType* geneticType = nodeFactory->createGeneticType(identifier, geneticArgument);
-        //return geneticType;
+        return identifier;
     }
     // primary-expression → literal-expression
     switch(token.type)
@@ -280,6 +274,65 @@ Expression* Parser::parsePrimaryExpression()
     }
     return NULL;
 }
+
+bool Parser::isGenericArgument()
+{
+    /*
+    if(!(this->flags & ENABLE_GENERIC))
+        return false;
+    */
+    Token token, t;
+    if(!match(L"<", token))
+    {
+        restore(token);
+        return false;
+    }
+    int nestedLevel = 1;
+    bool ret = false;
+    while(true)
+    {
+        if(!next(t))
+            break;
+        if(t == L"<")
+            nestedLevel ++;
+        else if(t == L">")
+        {
+            nestedLevel --;
+            if(nestedLevel == 0)
+            {
+                ret = true;
+                break;
+            }
+        }
+        else if(t.type == TokenType::OpenBrace)
+            break;
+    }
+    restore(token);
+    return ret;
+}
+/*
+  GRAMMAR OF A GENERIC ARGUMENT CLAUSE
+ 
+ ‌ generic-argument-clause → <generic-argument-list>
+ ‌ generic-argument-list → generic-argument | generic-argument,generic-argument-list
+ ‌ generic-argument → type
+*/
+GenericArgument* Parser::parseGenericArgument()
+{
+    Token token;
+    expect(L"<", token);
+    GenericArgument* ret = nodeFactory->createGenericArgument(token.state);
+    do
+    {
+        TypeNode* argument = parseType();
+        ret->addArgument(argument);
+    } while(match(L","));
+    expect(L">");
+    return ret;
+}
+
+
+
 /*
  GRAMMAR OF A PARENTHESIZED EXPRESSION
  
@@ -398,6 +451,12 @@ Identifier* Parser::parseIdentifier()
     Token token;
     expect_identifier(token);
     Identifier* ret = nodeFactory->createIdentifier(token.state, token.token);
+    
+    if(isGenericArgument())
+    {
+        GenericArgument* arg = static_cast<GenericArgument*>(parseGenericArgument());
+        ret->setGenericArgument(arg);
+    }
     return ret;
 }
 

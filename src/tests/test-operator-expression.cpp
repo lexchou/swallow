@@ -46,7 +46,6 @@ public:
         
         
         
-        DESTROY(root);
     }
     
     void testTypeCast()
@@ -68,7 +67,6 @@ public:
         ASSERT_EQUALS(L"item", id->getIdentifier());
         ASSERT_EQUALS(L"Movie", type->getName());
         
-        DESTROY(root);
     }
     
     void testTypeCast2()
@@ -90,14 +88,12 @@ public:
         ASSERT_EQUALS(L"item", id->getIdentifier());
         ASSERT_EQUALS(L"Movie", type->getName());
         
-        DESTROY(root);
     }
     
     void testSubscriptThroughOptionalChaining()
     {
         PARSE_STATEMENT(L"firstRoomName = john.residence?[0].name");
         
-        DESTROY(root);
     }
     
     void testExpr1()
@@ -135,13 +131,11 @@ public:
         ASSERT_EQUALS(L"*", mul->getOperator().c_str());
         
         
-        DESTROY(root);
     }
     void testMinus()
     {
         PARSE_STATEMENT(L"-y");
         
-        DESTROY(root);
     }
     void testParenthesizedExpr()
     {

@@ -36,7 +36,6 @@ public:
         ASSERT_EQUALS(L"++", inc->getOperator().c_str());
         CPPUNIT_ASSERT_EQUAL(OperatorType::PostfixUnary, inc->getType());
         
-        DESTROY(root);
     }
     
     
@@ -91,7 +90,6 @@ public:
         ASSERT_EQUALS(L"5", i->toString().c_str());
         
         
-        DESTROY(root);
         
     }
     
@@ -123,7 +121,6 @@ public:
         std::wstring name = args->getName(0);
         ASSERT_EQUALS(L"id", name.c_str());
         
-        DESTROY(root);
     }
     
     void testSelf()
@@ -137,7 +134,6 @@ public:
         CPPUNIT_ASSERT(id != NULL);
         ASSERT_EQUALS(L"Shape", id->getIdentifier().c_str());
         
-        DESTROY(root);
     }
     
     void testDynamicType()
@@ -151,7 +147,6 @@ public:
         CPPUNIT_ASSERT(id != NULL);
         ASSERT_EQUALS(L"345", id->toString().c_str());
         
-        DESTROY(root);
     }
     
     
@@ -173,7 +168,6 @@ public:
             CPPUNIT_ASSERT(i = dynamic_cast<IntegerLiteral*>(sub->getIndex(1)));
             ASSERT_EQUALS(L"1", i->toString().c_str());
             
-            DESTROY(root);
         }
         
     }
@@ -192,7 +186,6 @@ public:
         CPPUNIT_ASSERT(i = dynamic_cast<IntegerLiteral*>(sub->getIndex(0)));
         ASSERT_EQUALS(L"0", i->toString().c_str());
         
-        DESTROY(root);
     }
     void testSubscript3()
     {
@@ -209,7 +202,6 @@ public:
         CPPUNIT_ASSERT(i = dynamic_cast<IntegerLiteral*>(sub->getIndex(0)));
         ASSERT_EQUALS(L"0", i->toString().c_str());
         
-        DESTROY(root);
         
     }
     void testForcedValue()
@@ -223,7 +215,6 @@ public:
         CPPUNIT_ASSERT(id != NULL);
         ASSERT_EQUALS(L"val", id->getIdentifier().c_str());
         
-        DESTROY(root);
     }
     
     void testOptionalChaining()
@@ -241,7 +232,6 @@ public:
         CPPUNIT_ASSERT(id != NULL);
         ASSERT_EQUALS(L"c", id->getIdentifier().c_str());
         
-        DESTROY(root);
         
     }
     

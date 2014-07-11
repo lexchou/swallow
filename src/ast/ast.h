@@ -15,6 +15,7 @@
 #include "dictionary-literal.h"
 
 #include "identifier.h"
+#include "generic-argument.h"
 #include "comment.h"
 #include "member-access.h"
 #include "subscript-access.h"

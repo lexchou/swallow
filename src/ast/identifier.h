@@ -5,6 +5,7 @@
 
 SWIFT_NS_BEGIN
 class TypeNode;
+class GenericArgument;
 class Identifier : public Expression
 {
 public:
@@ -16,9 +17,13 @@ public:
     
     void setType(TypeNode* type);
     TypeNode* getType();
+    
+    GenericArgument* getGenericArgument();
+    void setGenericArgument(GenericArgument* val);
 private:
     std::wstring identifier;
     TypeNode* type;
+    GenericArgument* genericArgument;
 };
 
 SWIFT_NS_END

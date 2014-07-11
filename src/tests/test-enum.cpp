@@ -26,7 +26,6 @@ public:
         ASSERT_EQUALS(L"SomeEnumeration", static_cast<TypeIdentifier*>(e->getIdentifier())->getName().c_str());
         CPPUNIT_ASSERT_EQUAL(0, e->numConstants());
         CPPUNIT_ASSERT_EQUAL(0, e->numAssociatedTypes());
-        DESTROY(root);
     }
     
     void testEnum2()
@@ -45,7 +44,6 @@ public:
         ASSERT_EQUALS(L"East", e->getAssociatedType(2).name.c_str());
         ASSERT_EQUALS(L"West", e->getAssociatedType(3).name.c_str());
         
-        DESTROY(root);
     }
     void testEnum3()
     {
@@ -60,7 +58,6 @@ public:
         ASSERT_EQUALS(L"Earth", e->getAssociatedType(2).name.c_str());
         ASSERT_EQUALS(L"Mars", e->getAssociatedType(3).name.c_str());
         
-        DESTROY(root);
     }
     
     void testAssociatedValues()
@@ -91,7 +88,6 @@ public:
         CPPUNIT_ASSERT(t = dynamic_cast<TypeIdentifier*>(tuple->getElementType(0)));
         ASSERT_EQUALS(L"String", t->getName().c_str());
         
-        DESTROY(root);
     }
     void testRawValues()
     {
@@ -123,7 +119,6 @@ public:
         CPPUNIT_ASSERT(s = dynamic_cast<StringLiteral*>(e->getConstant(2).value));
         ASSERT_EQUALS(L"\r", s->toString().c_str());
         
-        DESTROY(root);
     }
     
     void testRawValues2()
@@ -147,7 +142,6 @@ public:
         CPPUNIT_ASSERT(i = dynamic_cast<IntegerLiteral*>(e->getConstant(0).value));
         ASSERT_EQUALS(L"1", i->toString().c_str());
         
-        DESTROY(root);
     }
     
 };

@@ -7,6 +7,7 @@
 SWIFT_NS_BEGIN
 
 class Attribute;
+class GenericParameters;
 class Declaration : public Statement
 {
 public:
@@ -19,12 +20,16 @@ protected:
     int getSpecifiers();
     void setSpecifiers(int specifiers);
     
+    GenericParameters* getGenericParameters();
+    void setGenericParameters(GenericParameters* val);
+    
 public:
     virtual void serialize(std::wostream& out);
     
 protected:
     std::vector<Attribute*> attributes;
     int specifiers;
+    GenericParameters* genericParameters;
 };
 
 SWIFT_NS_END

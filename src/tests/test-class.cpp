@@ -55,7 +55,6 @@ public:
         CPPUNIT_ASSERT(s = dynamic_cast<StructDef*>(root));
         ASSERT_EQUALS(L"Resolution", static_cast<TypeIdentifier*>(s->getIdentifier())->getName().c_str());
         CPPUNIT_ASSERT_EQUAL(2, s->numDeclarations());
-        DESTROY(root);
     }
     void testClass()
     {
@@ -78,7 +77,6 @@ public:
         
         
         
-        DESTROY(root);
     }
     void testComputedProperty()
     {
@@ -129,7 +127,6 @@ public:
         CPPUNIT_ASSERT(dynamic_cast<Assignment*>(cb->getStatement(0)));
         
         
-        DESTROY(root);
     }
     
     
@@ -182,7 +179,6 @@ public:
         CPPUNIT_ASSERT(dynamic_cast<Assignment*>(cb->getStatement(0)));
         
         
-        DESTROY(root);
     }
     
     void testShorthandSetter2()
@@ -234,7 +230,6 @@ public:
         CPPUNIT_ASSERT(dynamic_cast<Assignment*>(cb->getStatement(0)));
         
         
-        DESTROY(root);
     }
     
     void testShorthandSetter3()
@@ -279,7 +274,6 @@ public:
         
         CPPUNIT_ASSERT(NULL == var->getSetter());
         
-        DESTROY(root);
     }
     
     void testReadonlyComputedProperty()
@@ -310,7 +304,6 @@ public:
         CPPUNIT_ASSERT_EQUAL(1, cb->numStatements());
         CPPUNIT_ASSERT(dynamic_cast<ReturnStatement*>(cb->getStatement(0)));
         
-        DESTROY(root);
     }
     void testPropertyObservers()
     {
@@ -354,7 +347,6 @@ public:
         CPPUNIT_ASSERT(dynamic_cast<IfStatement*>(cb->getStatement(0)));
         
         
-        DESTROY(root);
     }
     
     void testPropertyObservers2()
@@ -399,7 +391,6 @@ public:
         CPPUNIT_ASSERT(dynamic_cast<IfStatement*>(cb->getStatement(0)));
         
         
-        DESTROY(root);
     }
     
     void testPropertyObservers3()
@@ -436,7 +427,6 @@ public:
         
         CPPUNIT_ASSERT(NULL == var->getDidSet());
         
-        DESTROY(root);
     }
     
     void testTypeProperty_Struct()
@@ -458,7 +448,6 @@ public:
         CPPUNIT_ASSERT(vars = dynamic_cast<Variables*>(s->getDeclaration(1)));
         CPPUNIT_ASSERT_EQUAL((int)TypeSpecifier::Static, vars->getSpecifiers());
         
-        DESTROY(root);
     }
     
     void testTypeProperty_Class()
@@ -480,7 +469,6 @@ public:
         CPPUNIT_ASSERT(vars = dynamic_cast<Variables*>(s->getDeclaration(1)));
         CPPUNIT_ASSERT_EQUAL((int)TypeSpecifier::Static, vars->getSpecifiers());
         
-        DESTROY(root);
     }
     
     void testTypeProperty_Enum()
@@ -502,7 +490,6 @@ public:
         CPPUNIT_ASSERT(vars = dynamic_cast<Variables*>(s->getDeclaration(1)));
         CPPUNIT_ASSERT_EQUAL((int)TypeSpecifier::Static, vars->getSpecifiers());
         
-        DESTROY(root);
     }
     
     void testMethod()
@@ -527,7 +514,6 @@ public:
         CPPUNIT_ASSERT(f = dynamic_cast<FunctionDef*>(s->getDeclaration(1)));
         CPPUNIT_ASSERT_EQUAL((int)TypeSpecifier::Mutating, f->getSpecifiers());
         
-        DESTROY(root);
     }
     
     void testMethod_Enum()
@@ -556,7 +542,6 @@ public:
         CPPUNIT_ASSERT_EQUAL((int)TypeSpecifier::Mutating, f->getSpecifiers());
         
         
-        DESTROY(root);
     }
     
     void testTypeMethod_Struct()
@@ -576,7 +561,6 @@ public:
         CPPUNIT_ASSERT(f = dynamic_cast<FunctionDef*>(s->getDeclaration(0)));
         CPPUNIT_ASSERT_EQUAL((int)TypeSpecifier::Static, f->getSpecifiers());
         
-        DESTROY(root);
     }
     
     void testTypeMethod_Enum()
@@ -596,7 +580,6 @@ public:
         CPPUNIT_ASSERT(f = dynamic_cast<FunctionDef*>(s->getDeclaration(0)));
         CPPUNIT_ASSERT_EQUAL((int)TypeSpecifier::Static, f->getSpecifiers());
         
-        DESTROY(root);
     }
     
     void testTypeMethod_Class()
@@ -616,7 +599,6 @@ public:
         CPPUNIT_ASSERT(f = dynamic_cast<FunctionDef*>(s->getDeclaration(0)));
         CPPUNIT_ASSERT_EQUAL((int)TypeSpecifier::Class, f->getSpecifiers());
         
-        DESTROY(root);
     }
     
     void testSubscript_Struct()
@@ -635,7 +617,6 @@ public:
         
         CPPUNIT_ASSERT(sub = dynamic_cast<SubscriptDef*>(s->getDeclaration(1)));
         
-        DESTROY(root);
     }
     void testSubscriptOptions()
     {
@@ -666,7 +647,6 @@ public:
         CPPUNIT_ASSERT(p =  args->getParameter(1));
         ASSERT_EQUALS(L"column", p->getLocalName());
         
-        DESTROY(root);
     }
     
     void testSubclass()
@@ -691,7 +671,6 @@ public:
         
         
         
-        DESTROY(root);
     }
     
     void testOverride_Func()
@@ -725,7 +704,6 @@ public:
         
         
     
-        DESTROY(root);
     }
     void testOverride_Var()
     {
@@ -761,7 +739,6 @@ public:
         CPPUNIT_ASSERT_EQUAL((int)TypeSpecifier::Override, var->getSpecifiers());
         
         
-        DESTROY(root);
     }
     
     void testOverride_PropertyObservers()
@@ -800,7 +777,6 @@ public:
         
         
         
-        DESTROY(root);
     }
     
     
@@ -849,7 +825,6 @@ public:
         ASSERT_EQUALS(L"final", sub->getAttributes().front()->getName());
         
         
-        DESTROY(root);
     }
     void testInit()
     {
@@ -876,7 +851,6 @@ public:
         CPPUNIT_ASSERT_EQUAL(3, params->numParameters());
         
         
-        DESTROY(root);
     }
     
     
@@ -905,7 +879,6 @@ public:
         CPPUNIT_ASSERT(init->isConvenience());
         CPPUNIT_ASSERT(params = dynamic_cast<Parameters*>(init->getParameters()));
         CPPUNIT_ASSERT_EQUAL(0, params->numParameters());
-        DESTROY(root);
     }
     
     
@@ -918,7 +891,6 @@ public:
                         L"}()\n"
                         L"}");
         
-        DESTROY(root);
          
     }
     
@@ -953,7 +925,6 @@ public:
         CPPUNIT_ASSERT_EQUAL(1, body->numStatements());
         
         
-        DESTROY(root);
     }
     
     
@@ -976,7 +947,6 @@ public:
         CPPUNIT_ASSERT(vars = dynamic_cast<Variables*>(s->getDeclaration(2)));
         CPPUNIT_ASSERT(vars->getSpecifiers() && TypeSpecifier::Weak);
 
-        DESTROY(root);
     }
     
     void testUnownedReference()
@@ -1001,7 +971,6 @@ public:
         CPPUNIT_ASSERT(let = dynamic_cast<Constant*>(s->getDeclaration(1)));
         CPPUNIT_ASSERT(let->getSpecifiers() && TypeSpecifier::Unowned);
 
-        DESTROY(root);
     }
     
     void testNestedType_Struct()
@@ -1019,7 +988,6 @@ public:
         CPPUNIT_ASSERT_EQUAL(1, c->numDeclarations());
         CPPUNIT_ASSERT(s = dynamic_cast<StructDef*>(c->getDeclaration(0)));
         
-        DESTROY(root);
     }
     
     void testNestedType_Class()
@@ -1037,7 +1005,6 @@ public:
         CPPUNIT_ASSERT_EQUAL(1, s->numDeclarations());
         CPPUNIT_ASSERT(c = dynamic_cast<ClassDef*>(s->getDeclaration(0)));
         
-        DESTROY(root);
     }
     
     
@@ -1056,7 +1023,6 @@ public:
         CPPUNIT_ASSERT_EQUAL(1, s->numDeclarations());
         CPPUNIT_ASSERT(c = dynamic_cast<EnumDef*>(s->getDeclaration(0)));
         
-        DESTROY(root);
     }
     
     

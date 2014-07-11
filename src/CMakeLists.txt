@@ -114,6 +114,7 @@ SET(SWIFT_PARSER_SRC ${SWIFT_TOKENIZER_SRC}
     ast/variable.cpp
     ast/variables.cpp
     ast/identifier.cpp
+    ast/generic-argument.cpp
     ast/parameters.cpp
     ast/parameter.cpp
     ast/type-declaration.cpp
@@ -133,6 +134,7 @@ ADD_EXECUTABLE(TestParser
 		tests/test-literal-expression.cpp
 		tests/test-postfix-expression.cpp
 		tests/test-type.cpp
+		tests/test-generic.cpp
 		tests/test-declaration.cpp
 		tests/test-func.cpp
 		tests/test-statement.cpp

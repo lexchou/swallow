@@ -1,21 +1,19 @@
 
 #include "declaration.h"
 #include "attribute.h"
+#include "generic-parameters.h"
 #include <algorithm>
 USE_SWIFT_NS
 
 
 Declaration::Declaration()
-    :specifiers(0)
+    :specifiers(0), genericParameters(NULL)
 {
 }
 Declaration::~Declaration()
 {
-    std::vector<Attribute*>::iterator iter = attributes.begin();
-    for(; iter != attributes.end(); iter++)
-    {
-        delete *iter;
-    }
+    SafeDeleteAll(attributes);
+    SafeDelete(genericParameters);
 }
 void Declaration::serialize(std::wostream& out)
 {
@@ -41,4 +39,14 @@ int Declaration::getSpecifiers()
 void Declaration::setSpecifiers(int specifiers)
 {
     this->specifiers = specifiers;
+}
+
+
+GenericParameters* Declaration::getGenericParameters()
+{
+    return genericParameters;
+}
+void Declaration::setGenericParameters(GenericParameters* val)
+{
+    genericParameters = val;
 }

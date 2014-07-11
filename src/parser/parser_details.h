@@ -18,14 +18,17 @@ enum
     UNDER_IF            = 0x200,
     UNDER_FOR_LOOP      = 0x400,
     UNDER_WHILE_LOOP    = 0x800,
-    UNDER_DO_LOOP       = 0x1000
+    UNDER_DO_LOOP       = 0x1000,
+    SUPPRESS_TRAILING_CLOSURE = 0x2000
 };
 struct Flags
 {
-    Flags(Parser* parser)
+    Flags(Parser* parser, int f = 0)
         :parser(parser), oldFlags(parser->flags)
     {
         parser->flags = flags = 0;
+        if(f)
+            *this += f;
     }
     Flags(const Flags& flags)
         :oldFlags(flags.parser->flags)
