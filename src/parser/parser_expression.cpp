@@ -190,7 +190,8 @@ FunctionCall* Parser::parseFunctionCallExpression()
         ParenthesizedExpression* p = static_cast<ParenthesizedExpression*>(this->parseParenthesizedExpression());
         ret->setArguments(p);
     }
-    if(predicate(L"{"))
+    bool suppressTrailingClosure = (this->flags & SUPPRESS_TRAILING_CLOSURE) != 0;
+    if(!suppressTrailingClosure && predicate(L"{"))
     {
         Closure* closure = parseClosureExpression();
         ret->setTrailingClosure(closure);

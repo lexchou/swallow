@@ -17,11 +17,15 @@ public:
     void addGenericArgument(TypeNode* argument);
     int numGenericArguments();
     TypeNode* getGenericArgument(int idx);
+    
+    void setNestedType(TypeIdentifier* type);
+    TypeIdentifier* getNestedType();
 public:
     virtual void serialize(std::wostream& out);
 private:
     std::wstring name;
     std::vector<TypeNode*> genericArguments;
+    TypeIdentifier* nestedType;
 };
 
 SWIFT_NS_END

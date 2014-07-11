@@ -5,9 +5,11 @@ USE_SWIFT_NS
 
 TypeIdentifier::TypeIdentifier()
 {
+    nestedType = NULL;
 }
 TypeIdentifier::~TypeIdentifier()
 {
+    SafeDelete(nestedType);
     SafeDeleteAll(genericArguments);
 }
 void TypeIdentifier::serialize(std::wostream& out)
@@ -48,4 +50,14 @@ int TypeIdentifier::numGenericArguments()
 TypeNode* TypeIdentifier::getGenericArgument(int idx)
 {
     return genericArguments[idx];
+}
+
+
+void TypeIdentifier::setNestedType(TypeIdentifier* type)
+{
+    this->nestedType = type;
+}
+TypeIdentifier* TypeIdentifier::getNestedType()
+{
+    return nestedType;
 }

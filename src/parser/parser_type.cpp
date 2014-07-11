@@ -144,6 +144,12 @@ TupleType* Parser::parseTupleType()
     expect(L")");
     return ret;
 }
+/*
+  GRAMMAR OF A TYPE IDENTIFIER
+ 
+ ‌ type-identifier → type-name generic-argument-clause opt | type-name generic-argument-clause opt . type-identifier
+ ‌ type-name → identifier
+*/
 TypeIdentifier* Parser::parseTypeIdentifier()
 {
     Token token;
@@ -158,6 +164,12 @@ TypeIdentifier* Parser::parseTypeIdentifier()
         }while(match(L","));
         
         expect(L">");
+    }
+    if(match(L"."))
+    {
+        //read next
+        TypeIdentifier* next = parseTypeIdentifier();
+        ret->setNestedType(next);
     }
     return ret;
 }
@@ -218,18 +230,13 @@ GenericParameters* Parser::parseGenericParameters()
         ret->addGenericType(nodeFactory->createTypeIdentifier(token.state, typeName));
         if(match(L":"))
         {
-            do
-            {
-                TypeIdentifier* expectedType = parseTypeIdentifier();
-                
-                GenericConstraint* c = nodeFactory->createGenericConstraint(token.state);
-                c->setIdentifier(nodeFactory->createTypeIdentifier(token.state, typeName));
-                c->setConstraintType(GenericConstraint::DerivedFrom);
-                c->addExpectedType(expectedType);
-                ret->addConstraint(c);
-                
-            } while (match(L","));
+            TypeIdentifier* expectedType = parseTypeIdentifier();
             
+            GenericConstraint* c = nodeFactory->createGenericConstraint(token.state);
+            c->setIdentifier(nodeFactory->createTypeIdentifier(token.state, typeName));
+            c->setConstraintType(GenericConstraint::DerivedFrom);
+            c->addExpectedType(expectedType);
+            ret->addConstraint(c);
         }
     } while (match(L","));
     // ‌ requirement-clause → where requirement-list
