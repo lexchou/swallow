@@ -14,6 +14,9 @@ class TestExtension : public SwiftTestCase
     CPPUNIT_TEST(testComputedProperty);
     CPPUNIT_TEST(testMethod);
     CPPUNIT_TEST(testInit);
+    CPPUNIT_TEST(testMutatingMethod);
+    CPPUNIT_TEST(testSubscript);
+    CPPUNIT_TEST(testNestedType);
     /*
     CPPUNIT_TEST(testShorthandSetter);
     CPPUNIT_TEST(testShorthandSetter2);
@@ -168,678 +171,89 @@ public:
         
     }
     
-    
-    void testPropertyObservers()
+    void testMutatingMethod()
     {
-        PARSE_STATEMENT(L"class StepCounter { "
-                        L"var totalSteps: Int = 0 { "
-                        L"    willSet(newTotalSteps) { "
-                        L"        println(\"About to set totalSteps to \(newTotalSteps)\") "
-                        L"    } "
-                        L"    didSet { "
-                        L"        if totalSteps > oldValue  { "
-                        L"            println(\"Added \(totalSteps - oldValue) steps\") "
-                        L"        } "
-                        L"    } "
-                        L"} "
-                        L"}");
-        
-        ClassDef* s = NULL;
-        Variables* vars = NULL;
-        Variable* var = NULL;
-        CodeBlock* cb = NULL;
-        IntegerLiteral* i = NULL;
-        CPPUNIT_ASSERT(s = dynamic_cast<ClassDef*>(root));
-        CPPUNIT_ASSERT_EQUAL(1, s->numDeclarations());
-        
-        
-        CPPUNIT_ASSERT(vars = dynamic_cast<Variables*>(s->getDeclaration(0)));
-        CPPUNIT_ASSERT_EQUAL(1, vars->numVariables());
-        CPPUNIT_ASSERT(var = vars->getVariable(0));
-        ASSERT_EQUALS(L"totalSteps", dynamic_cast<Identifier*>(var->getName())->getIdentifier().c_str());
-        CPPUNIT_ASSERT(i = dynamic_cast<IntegerLiteral*>(var->getInitializer()));
-        CPPUNIT_ASSERT(NULL == var->getSetter());
-        CPPUNIT_ASSERT(NULL == var->getGetter());
-        
-        
-        CPPUNIT_ASSERT(cb = var->getWillSet());
-        CPPUNIT_ASSERT_EQUAL(1, cb->numStatements());
-        CPPUNIT_ASSERT(dynamic_cast<FunctionCall*>(cb->getStatement(0)));
-        
-        CPPUNIT_ASSERT(cb = var->getDidSet());
-        CPPUNIT_ASSERT_EQUAL(1, cb->numStatements());
-        CPPUNIT_ASSERT(dynamic_cast<IfStatement*>(cb->getStatement(0)));
-        
-        
-    }
-    
-    void testPropertyObservers2()
-    {
-        PARSE_STATEMENT(L"class StepCounter { "
-                        L"var totalSteps: Int = 0 { "
-                        L"    didSet { "
-                        L"        if totalSteps > oldValue  { "
-                        L"            println(\"Added \(totalSteps - oldValue) steps\") "
-                        L"        } "
-                        L"    } "
-                        L"    willSet(newTotalSteps) { "
-                        L"        println(\"About to set totalSteps to \(newTotalSteps)\") "
-                        L"    } "
-                        L"} "
-                        L"}");
-        
-        ClassDef* s = NULL;
-        Variables* vars = NULL;
-        Variable* var = NULL;
-        CodeBlock* cb = NULL;
-        IntegerLiteral* i = NULL;
-        CPPUNIT_ASSERT(s = dynamic_cast<ClassDef*>(root));
-        CPPUNIT_ASSERT_EQUAL(1, s->numDeclarations());
-        
-        
-        CPPUNIT_ASSERT(vars = dynamic_cast<Variables*>(s->getDeclaration(0)));
-        CPPUNIT_ASSERT_EQUAL(1, vars->numVariables());
-        CPPUNIT_ASSERT(var = vars->getVariable(0));
-        ASSERT_EQUALS(L"totalSteps", dynamic_cast<Identifier*>(var->getName())->getIdentifier().c_str());
-        CPPUNIT_ASSERT(i = dynamic_cast<IntegerLiteral*>(var->getInitializer()));
-        CPPUNIT_ASSERT(NULL == var->getSetter());
-        CPPUNIT_ASSERT(NULL == var->getGetter());
-        
-        
-        CPPUNIT_ASSERT(cb = var->getWillSet());
-        CPPUNIT_ASSERT_EQUAL(1, cb->numStatements());
-        CPPUNIT_ASSERT(dynamic_cast<FunctionCall*>(cb->getStatement(0)));
-        
-        CPPUNIT_ASSERT(cb = var->getDidSet());
-        CPPUNIT_ASSERT_EQUAL(1, cb->numStatements());
-        CPPUNIT_ASSERT(dynamic_cast<IfStatement*>(cb->getStatement(0)));
-        
-        
-    }
-    
-    void testPropertyObservers3()
-    {
-        PARSE_STATEMENT(L"class StepCounter { "
-                        L"var totalSteps: Int = 0 { "
-                        L"    willSet(newTotalSteps) { "
-                        L"        println(\"About to set totalSteps to \(newTotalSteps)\") "
-                        L"    } "
-                        L"} "
-                        L"}");
-        
-        ClassDef* s = NULL;
-        Variables* vars = NULL;
-        Variable* var = NULL;
-        CodeBlock* cb = NULL;
-        IntegerLiteral* i = NULL;
-        CPPUNIT_ASSERT(s = dynamic_cast<ClassDef*>(root));
-        CPPUNIT_ASSERT_EQUAL(1, s->numDeclarations());
-        
-        
-        CPPUNIT_ASSERT(vars = dynamic_cast<Variables*>(s->getDeclaration(0)));
-        CPPUNIT_ASSERT_EQUAL(1, vars->numVariables());
-        CPPUNIT_ASSERT(var = vars->getVariable(0));
-        ASSERT_EQUALS(L"totalSteps", dynamic_cast<Identifier*>(var->getName())->getIdentifier().c_str());
-        CPPUNIT_ASSERT(i = dynamic_cast<IntegerLiteral*>(var->getInitializer()));
-        CPPUNIT_ASSERT(NULL == var->getSetter());
-        CPPUNIT_ASSERT(NULL == var->getGetter());
-        
-        
-        CPPUNIT_ASSERT(cb = var->getWillSet());
-        CPPUNIT_ASSERT_EQUAL(1, cb->numStatements());
-        CPPUNIT_ASSERT(dynamic_cast<FunctionCall*>(cb->getStatement(0)));
-        
-        CPPUNIT_ASSERT(NULL == var->getDidSet());
-        
-    }
-    
-    void testTypeProperty_Struct()
-    {
-        PARSE_STATEMENT(L"struct SomeStructure {"
-                        L"static var storedTypeProperty = \"Some value.\""
-                        L"static var computedTypeProperty: Int {"
-                        L"    // return an Int value here\n"
-                        L"}"
-                        L"}");
-        StructDef* s = NULL;
-        Variables* vars = NULL;
-        CPPUNIT_ASSERT(s = dynamic_cast<StructDef*>(root));
-        CPPUNIT_ASSERT_EQUAL(2, s->numDeclarations());
-        
-        CPPUNIT_ASSERT(vars = dynamic_cast<Variables*>(s->getDeclaration(0)));
-        CPPUNIT_ASSERT_EQUAL((int)TypeSpecifier::Static, vars->getSpecifiers());
-        
-        CPPUNIT_ASSERT(vars = dynamic_cast<Variables*>(s->getDeclaration(1)));
-        CPPUNIT_ASSERT_EQUAL((int)TypeSpecifier::Static, vars->getSpecifiers());
-        
-    }
-    
-    void testTypeProperty_Class()
-    {
-        PARSE_STATEMENT(L"class SomeStructure {"
-                        L"static var storedTypeProperty = \"Some value.\""
-                        L"static var computedTypeProperty: Int {"
-                        L"    // return an Int value here\n"
-                        L"}"
-                        L"}");
-        ClassDef* s = NULL;
-        Variables* vars = NULL;
-        CPPUNIT_ASSERT(s = dynamic_cast<ClassDef*>(root));
-        CPPUNIT_ASSERT_EQUAL(2, s->numDeclarations());
-        
-        CPPUNIT_ASSERT(vars = dynamic_cast<Variables*>(s->getDeclaration(0)));
-        CPPUNIT_ASSERT_EQUAL((int)TypeSpecifier::Static, vars->getSpecifiers());
-        
-        CPPUNIT_ASSERT(vars = dynamic_cast<Variables*>(s->getDeclaration(1)));
-        CPPUNIT_ASSERT_EQUAL((int)TypeSpecifier::Static, vars->getSpecifiers());
-        
-    }
-    
-    void testTypeProperty_Enum()
-    {
-        PARSE_STATEMENT(L"enum SomeStructure {"
-                        L"static var storedTypeProperty = \"Some value.\""
-                        L"static var computedTypeProperty: Int {"
-                        L"    // return an Int value here\n"
-                        L"}"
-                        L"}");
-        EnumDef* s = NULL;
-        Variables* vars = NULL;
-        CPPUNIT_ASSERT(s = dynamic_cast<EnumDef*>(root));
-        CPPUNIT_ASSERT_EQUAL(2, s->numDeclarations());
-        
-        CPPUNIT_ASSERT(vars = dynamic_cast<Variables*>(s->getDeclaration(0)));
-        CPPUNIT_ASSERT_EQUAL((int)TypeSpecifier::Static, vars->getSpecifiers());
-        
-        CPPUNIT_ASSERT(vars = dynamic_cast<Variables*>(s->getDeclaration(1)));
-        CPPUNIT_ASSERT_EQUAL((int)TypeSpecifier::Static, vars->getSpecifiers());
-        
-    }
-    
-    
-    void testMethod_Enum()
-    {
-        PARSE_STATEMENT(L"enum TriStateSwitch { "
-                        L"case Off, Low, High "
-                        L"mutating func next() { "
-                        L"    switch self { "
-                        L"    case Off: "
-                        L"        self = Low "
-                        L"    case Low: "
-                        L"        self = High "
-                        L"    case High: "
-                        L"        self = Off "
-                        L"    } "
-                        L"} "
-                        L"}");
-        
-        EnumDef* s = NULL;
-        FunctionDef* f = NULL;
-        CPPUNIT_ASSERT(s = dynamic_cast<EnumDef*>(root));
-        CPPUNIT_ASSERT_EQUAL(1, s->numDeclarations());
-        
-        
-        CPPUNIT_ASSERT(f = dynamic_cast<FunctionDef*>(s->getDeclaration(0)));
-        CPPUNIT_ASSERT_EQUAL((int)TypeSpecifier::Mutating, f->getSpecifiers());
-        
-        
-    }
-    
-    void testTypeMethod_Struct()
-    {
-        PARSE_STATEMENT(L"struct SomeClass {\n"
-                        L"static func someTypeMethod() {\n"
-                        L"    // type method implementation goes here\n"
+        PARSE_STATEMENT(L"extension Int {\n"
+                        L"mutating func square() {\n"
+                        L"    self = self * self\n"
                         L"}\n"
                         L"}");
         
-        StructDef* s = NULL;
-        FunctionDef* f = NULL;
-        CPPUNIT_ASSERT(s = dynamic_cast<StructDef*>(root));
-        CPPUNIT_ASSERT_EQUAL(1, s->numDeclarations());
-        
-        
-        CPPUNIT_ASSERT(f = dynamic_cast<FunctionDef*>(s->getDeclaration(0)));
-        CPPUNIT_ASSERT_EQUAL((int)TypeSpecifier::Static, f->getSpecifiers());
-        
-    }
-    
-    void testTypeMethod_Enum()
-    {
-        PARSE_STATEMENT(L"enum SomeClass {\n"
-                        L"static func someTypeMethod() {\n"
-                        L"    // type method implementation goes here\n"
-                        L"}\n"
-                        L"}");
-        
-        EnumDef* s = NULL;
-        FunctionDef* f = NULL;
-        CPPUNIT_ASSERT(s = dynamic_cast<EnumDef*>(root));
-        CPPUNIT_ASSERT_EQUAL(1, s->numDeclarations());
-        
-        
-        CPPUNIT_ASSERT(f = dynamic_cast<FunctionDef*>(s->getDeclaration(0)));
-        CPPUNIT_ASSERT_EQUAL((int)TypeSpecifier::Static, f->getSpecifiers());
-        
-    }
-    
-    void testTypeMethod_Class()
-    {
-        PARSE_STATEMENT(L"class SomeClass {\n"
-                        L"class func someTypeMethod() {\n"
-                        L"    // type method implementation goes here\n"
-                        L"}\n"
-                        L"}");
-        
-        ClassDef* s = NULL;
-        FunctionDef* f = NULL;
-        CPPUNIT_ASSERT(s = dynamic_cast<ClassDef*>(root));
-        CPPUNIT_ASSERT_EQUAL(1, s->numDeclarations());
-        
-        
-        CPPUNIT_ASSERT(f = dynamic_cast<FunctionDef*>(s->getDeclaration(0)));
-        CPPUNIT_ASSERT_EQUAL((int)TypeSpecifier::Class, f->getSpecifiers());
-        
-    }
-    
-    void testSubscript_Struct()
-    {
-        PARSE_STATEMENT(L"struct TimesTable {\n"
-                        L"let multiplier: Int\n"
-                        L"subscript(index: Int) -> Int {\n"
-                        L"    return multiplier * index\n"
-                        L"}\n"
-                        L"}");
-        
-        StructDef* s = NULL;
-        CPPUNIT_ASSERT(s = dynamic_cast<StructDef*>(root));
-        CPPUNIT_ASSERT_EQUAL(2, s->numDeclarations());
-        SubscriptDef* sub = NULL;
-        
-        CPPUNIT_ASSERT(sub = dynamic_cast<SubscriptDef*>(s->getDeclaration(1)));
-        
-    }
-    void testSubscriptOptions()
-    {
-        PARSE_STATEMENT(
-                        L"struct Matrix {\n"
-                        L"    subscript(row: Int, column: Int) -> Double {\n"
-                        L"        get {\n"
-                        L"            return grid[(row * columns) + column]\n"
-                        L"        }\n"
-                        L"        set {\n"
-                        L"            grid[(row * columns) + column] = newValue\n"
-                        L"        }\n"
-                        L"    }\n"
-                        L"}\n");
-        
-        StructDef* s = NULL;
-        Parameter* p = NULL;
-        Parameters* args = NULL;
-        CPPUNIT_ASSERT(s = dynamic_cast<StructDef*>(root));
-        CPPUNIT_ASSERT_EQUAL(1, s->numDeclarations());
-        SubscriptDef* sub = NULL;
-        
-        CPPUNIT_ASSERT(sub = dynamic_cast<SubscriptDef*>(s->getDeclaration(0)));
-        CPPUNIT_ASSERT(args = sub->getParameters());
-        CPPUNIT_ASSERT_EQUAL(2, args->numParameters());
-        CPPUNIT_ASSERT(p =  args->getParameter(0));
-        ASSERT_EQUALS(L"row", p->getLocalName());
-        CPPUNIT_ASSERT(p =  args->getParameter(1));
-        ASSERT_EQUALS(L"column", p->getLocalName());
-        
-    }
-    
-    void testSubclass()
-    {
-        PARSE_STATEMENT(L"class Bicycle: Vehicle {"
-                        L"init() {"
-                        L"    super.init()"
-                        L"    numberOfWheels = 2"
-                        L"}"
-                        L"}");
-        ClassDef* c = NULL;
-        TypeIdentifier* t = NULL;
-        CPPUNIT_ASSERT(c = dynamic_cast<ClassDef*>(root));
-        CPPUNIT_ASSERT_EQUAL(1, c->numParents());
-        CPPUNIT_ASSERT(t = dynamic_cast<TypeIdentifier*>(c->getParent(0)));
-        ASSERT_EQUALS(L"Vehicle", t->getName().c_str());
-        
-        
-        InitializerDef* init = NULL;
-        CPPUNIT_ASSERT_EQUAL(1, c->numDeclarations());
-        CPPUNIT_ASSERT(init = dynamic_cast<InitializerDef*>(c->getDeclaration(0)));
-        
-        
-        
-    }
-    
-    void testOverride_Func()
-    {
-        PARSE_STATEMENT(L"class Car: Vehicle {\n"
-                        L"var speed: Double = 0.0\n"
-                        L"init() {\n"
-                        L"    super.init()\n"
-                        L"    maxPassengers = 5\n"
-                        L"    numberOfWheels = 4\n"
-                        L"}\n"
-                        L"override func description() -> String {\n"
-                        L"    return super.description() + \"; \"\n"
-                        L"    + \"traveling at \(speed) mph\"\n"
-                        L"}\n"
-                        L"}");
-        
-        ClassDef* c = NULL;
-        TypeIdentifier* t = NULL;
-        CPPUNIT_ASSERT(c = dynamic_cast<ClassDef*>(root));
-        CPPUNIT_ASSERT_EQUAL(1, c->numParents());
-        CPPUNIT_ASSERT(t = dynamic_cast<TypeIdentifier*>(c->getParent(0)));
-        ASSERT_EQUALS(L"Vehicle", t->getName().c_str());
-        
-        
-        FunctionDef* f = NULL;
-        CPPUNIT_ASSERT_EQUAL(3, c->numDeclarations());
-        CPPUNIT_ASSERT(f = dynamic_cast<FunctionDef*>(c->getDeclaration(2)));
-        ASSERT_EQUALS(L"description", f->getName().c_str());
-        CPPUNIT_ASSERT_EQUAL((int)TypeSpecifier::Override, f->getSpecifiers());
-        
-        
-        
-    }
-    void testOverride_Var()
-    {
-        PARSE_STATEMENT(L"class SpeedLimitedCar: Car {\n"
-                        L"override var speed: Double  {\n"
-                        L"    get {\n"
-                        L"        return super.speed\n"
-                        L"    }\n"
-                        L"    set {\n"
-                        L"        super.speed = min(newValue, 40.0)\n"
-                        L"    }\n"
-                        L"}\n"
-                        L"}");
-        
-        
-        ClassDef* c = NULL;
-        TypeIdentifier* t = NULL;
-        CPPUNIT_ASSERT(c = dynamic_cast<ClassDef*>(root));
-        CPPUNIT_ASSERT_EQUAL(1, c->numParents());
-        CPPUNIT_ASSERT(t = dynamic_cast<TypeIdentifier*>(c->getParent(0)));
-        ASSERT_EQUALS(L"Car", t->getName().c_str());
-        
-        
-        Variables* vars = NULL;
-        CPPUNIT_ASSERT_EQUAL(1, c->numDeclarations());
-        CPPUNIT_ASSERT(vars = dynamic_cast<Variables*>(c->getDeclaration(0)));
-        CPPUNIT_ASSERT_EQUAL(1, vars->numVariables());
-        Variable* var = NULL;
-        CPPUNIT_ASSERT(var = vars->getVariable(0));
-        Identifier* id = NULL;
-        CPPUNIT_ASSERT(id = dynamic_cast<Identifier*>(var->getName()));
-        ASSERT_EQUALS(L"speed", id->getIdentifier().c_str());
-        CPPUNIT_ASSERT_EQUAL((int)TypeSpecifier::Override, var->getSpecifiers());
-        
-        
-    }
-    
-    void testOverride_PropertyObservers()
-    {
-        PARSE_STATEMENT(L"class AutomaticCar: Car {\n"
-                        L"var gear = 1\n"
-                        L"override var speed: Double {\n"
-                        L"    didSet {\n"
-                        L"        gear = Int(speed / 10.0) + 1\n"
-                        L"    }\n"
-                        L"}\n"
-                        L"override func description() -> String {\n"
-                        L"    return super.description() + \" in gear \(gear)\"\n"
-                        L"}\n"
-                        L"}");
-        
-        
-        ClassDef* c = NULL;
-        TypeIdentifier* t = NULL;
-        CPPUNIT_ASSERT(c = dynamic_cast<ClassDef*>(root));
-        CPPUNIT_ASSERT_EQUAL(1, c->numParents());
-        CPPUNIT_ASSERT(t = dynamic_cast<TypeIdentifier*>(c->getParent(0)));
-        ASSERT_EQUALS(L"Car", t->getName().c_str());
-        
-        
-        Variables* vars = NULL;
-        CPPUNIT_ASSERT_EQUAL(3, c->numDeclarations());
-        CPPUNIT_ASSERT(vars = dynamic_cast<Variables*>(c->getDeclaration(1)));
-        CPPUNIT_ASSERT_EQUAL(1, vars->numVariables());
-        Variable* var = NULL;
-        CPPUNIT_ASSERT(var = vars->getVariable(0));
-        Identifier* id = NULL;
-        CPPUNIT_ASSERT(id = dynamic_cast<Identifier*>(var->getName()));
-        ASSERT_EQUALS(L"speed", id->getIdentifier().c_str());
-        CPPUNIT_ASSERT_EQUAL((int)TypeSpecifier::Override, var->getSpecifiers());
-        
-        
-        
-    }
-    
-    
-    void testFinalAttribute()
-    {
-        PARSE_STATEMENT(L"@final class AutomaticCar: Car {\n"
-                        L"@final var gear = 1\n"
-                        L"@final func description() -> String {\n"
-                        L"    return super.description() + \" in gear \(gear)\"\n"
-                        L"}\n"
-                        L"@final subscript(index: Int) -> Int {\n"
-                        L"    return multiplier * index\n"
-                        L"}\n"
-                        L"}");
-        
-        
-        ClassDef* c = NULL;
-        TypeIdentifier* t = NULL;
-        CPPUNIT_ASSERT(c = dynamic_cast<ClassDef*>(root));
-        
-        CPPUNIT_ASSERT_EQUAL(1, (int)c->getAttributes().size());
-        ASSERT_EQUALS(L"final", c->getAttributes().front()->getName());
-        
-        
-        CPPUNIT_ASSERT_EQUAL(1, c->numParents());
-        CPPUNIT_ASSERT(t = dynamic_cast<TypeIdentifier*>(c->getParent(0)));
-        ASSERT_EQUALS(L"Car", t->getName().c_str());
-        
-        CPPUNIT_ASSERT_EQUAL(3, c->numDeclarations());
-        Variables* vars = NULL;
-        FunctionDef* func = NULL;
-        SubscriptDef* sub = NULL;
-        
-        CPPUNIT_ASSERT(vars = dynamic_cast<Variables*>(c->getDeclaration(0)));
-        CPPUNIT_ASSERT_EQUAL(1, (int)vars->getAttributes().size());
-        ASSERT_EQUALS(L"final", vars->getAttributes().front()->getName());
-        
-        
-        CPPUNIT_ASSERT(func = dynamic_cast<FunctionDef*>(c->getDeclaration(1)));
-        CPPUNIT_ASSERT_EQUAL(1, (int)func->getAttributes().size());
-        ASSERT_EQUALS(L"final", func->getAttributes().front()->getName());
-        
-        
-        CPPUNIT_ASSERT(sub = dynamic_cast<SubscriptDef*>(c->getDeclaration(2)));
-        CPPUNIT_ASSERT_EQUAL(1, (int)sub->getAttributes().size());
-        ASSERT_EQUALS(L"final", sub->getAttributes().front()->getName());
-        
-        
-    }
-    
-    
-    
-    void testConvenienceInitializer()
-    {
-        PARSE_STATEMENT(L"class Food {\n"
-                        L"  var name: String\n"
-                        L"  init(name: String) {\n"
-                        L"      self.name = name\n"
-                        L"  }\n"
-                        L"  convenience init() {\n"
-                        L"      self.init(name: \"[Unnamed]\")\n"
-                        L"  }\n"
-                        L"}");
-        
-        ClassDef* s = NULL;
-        
-        InitializerDef* init = NULL;
+        ExtensionDef* s = NULL;
+        FunctionDef* square = NULL;
         Parameters* params = NULL;
         
-        CPPUNIT_ASSERT(s = dynamic_cast<ClassDef*>(root));
-        CPPUNIT_ASSERT_EQUAL(3, s->numDeclarations());
+        CPPUNIT_ASSERT(s = dynamic_cast<ExtensionDef*>(root));
+        CPPUNIT_ASSERT_EQUAL(1, s->numDeclarations());
         
-        CPPUNIT_ASSERT(init = dynamic_cast<InitializerDef*>(s->getDeclaration(2)));
-        CPPUNIT_ASSERT(init->isConvenience());
-        CPPUNIT_ASSERT(params = dynamic_cast<Parameters*>(init->getParameters()));
+        CPPUNIT_ASSERT(square = dynamic_cast<FunctionDef*>(s->getDeclaration(0)));
+        CPPUNIT_ASSERT_EQUAL((int)TypeSpecifier::Mutating, square->getSpecifiers());
+        CPPUNIT_ASSERT(params = dynamic_cast<Parameters*>(square->getParameters(0)));
         CPPUNIT_ASSERT_EQUAL(0, params->numParameters());
-    }
-    
-    
-    void testDefaultValueWithClosure()
-    {
-        
-        PARSE_STATEMENT(L"class SomeClass {\n"
-                        L"let someProperty: SomeType = {\n"
-                        L"    return someValue\n"
-                        L"}()\n"
-                        L"}");
         
         
     }
     
-    
-    
-    
-    
-    void testDeinit()
+    void testSubscript()
     {
-        PARSE_STATEMENT(L"class Player {\n"
-                        L"var coinsInPurse: Int\n"
-                        L"init(coins: Int) {\n"
-                        L"    coinsInPurse = Bank.vendCoins(coins)\n"
-                        L"}\n"
-                        L"func winCoins(coins: Int) {\n"
-                        L"    coinsInPurse += Bank.vendCoins(coins)\n"
-                        L"}\n"
-                        L"deinit {\n"
-                        L"    Bank.receiveCoins(coinsInPurse)\n"
-                        L"}\n"
+        PARSE_STATEMENT(L"extension Int {\n"
+                        L"  subscript(digitIndex: Int) -> Int {\n"
+                        L"    var decimalBase = 1\n"
+                        L"    for _ in 1...digitIndex {\n"
+                        L"        decimalBase *= 10\n"
+                        L"    }\n"
+                        L"    return (self / decimalBase) % 10\n"
+                        L"  }\n"
                         L"}");
+     
+        ExtensionDef* s = NULL;
+        SubscriptDef* subscript = NULL;
+        Parameters* params = NULL;
         
-        ClassDef* s = NULL;
-        DeinitializerDef* deinit = NULL;
-        CodeBlock* body = NULL;
+        CPPUNIT_ASSERT(s = dynamic_cast<ExtensionDef*>(root));
+        CPPUNIT_ASSERT_EQUAL(1, s->numDeclarations());
         
-        CPPUNIT_ASSERT(s = dynamic_cast<ClassDef*>(root));
-        CPPUNIT_ASSERT_EQUAL(4, s->numDeclarations());
-        
-        CPPUNIT_ASSERT(deinit = dynamic_cast<DeinitializerDef*>(s->getDeclaration(3)));
-        CPPUNIT_ASSERT(body = deinit->getBody());
-        CPPUNIT_ASSERT_EQUAL(1, body->numStatements());
-        
-        
+        CPPUNIT_ASSERT(subscript = dynamic_cast<SubscriptDef*>(s->getDeclaration(0)));
+        CPPUNIT_ASSERT(params = dynamic_cast<Parameters*>(subscript->getParameters()));
+        CPPUNIT_ASSERT_EQUAL(1, params->numParameters());
     }
-    
-    
-    void testWeakReference()
+    void testNestedType()
     {
-        PARSE_STATEMENT(L"class Apartment {\n"
-                        L"let number: Int\n"
-                        L"init(number: Int) { self.number = number }\n"
-                        L"weak var tenant: Person?\n"
-                        L"deinit { println(\"Apartment #\(number) is being deinitialized\") }\n"
+        PARSE_STATEMENT(L"extension Character {\n"
+                        L"  enum Kind {\n"
+                        L"      case Vowel, Consonant, Other\n"
+                        L"  }\n"
+                        L"  var kind: Kind {\n"
+                        L"    switch String(self).lowercaseString {\n"
+                        L"    case \"a\", \"e\", \"i\", \"o\", \"u\":\n"
+                        L"        return .Vowel\n"
+                        L"    case \"b\", \"c\", \"d\", \"f\", \"g\", \"h\", \"j\", \"k\", \"l\", \"m\",\n"
+                        L"        \"n\", \"p\", \"q\", \"r\", \"s\", \"t\", \"v\", \"w\", \"x\", \"y\", \"z\":\n"
+                        L"        return .Consonant\n"
+                        L"    default:\n"
+                        L"        return .Other\n"
+                        L"    }\n"
+                        L"  }\n"
                         L"}");
         
-        ClassDef* s = NULL;
+        ExtensionDef* s = NULL;
+        EnumDef* e = NULL;
         Variables* vars = NULL;
+        Variable* kind = NULL;
         
+        CPPUNIT_ASSERT(s = dynamic_cast<ExtensionDef*>(root));
+        CPPUNIT_ASSERT_EQUAL(2, s->numDeclarations());
         
-        CPPUNIT_ASSERT(s = dynamic_cast<ClassDef*>(root));
-        CPPUNIT_ASSERT_EQUAL(4, s->numDeclarations());
+        CPPUNIT_ASSERT(e = dynamic_cast<EnumDef*>(s->getDeclaration(0)));
+        ASSERT_EQUALS(L"Kind", dynamic_cast<TypeIdentifier*>(e->getIdentifier())->getName());
         
-        CPPUNIT_ASSERT(vars = dynamic_cast<Variables*>(s->getDeclaration(2)));
-        CPPUNIT_ASSERT(vars->getSpecifiers() && TypeSpecifier::Weak);
-        
-    }
-    
-    void testUnownedReference()
-    {
-        PARSE_STATEMENT(L"class CreditCard {\n"
-                        L"let number: Int\n"
-                        L"unowned let customer: Customer\n"
-                        L"init(number: Int, customer: Customer) {\n"
-                        L"    self.number = number\n"
-                        L"    self.customer = customer\n"
-                        L"}\n"
-                        L"deinit { println(\"Card #\(number) is being deinitialized\") }\n"
-                        L"}");
-        
-        ClassDef* s = NULL;
-        Constant* let = NULL;
-        
-        
-        CPPUNIT_ASSERT(s = dynamic_cast<ClassDef*>(root));
-        CPPUNIT_ASSERT_EQUAL(4, s->numDeclarations());
-        
-        CPPUNIT_ASSERT(let = dynamic_cast<Constant*>(s->getDeclaration(1)));
-        CPPUNIT_ASSERT(let->getSpecifiers() && TypeSpecifier::Unowned);
+        CPPUNIT_ASSERT(vars = dynamic_cast<Variables*>(s->getDeclaration(1)));
+        CPPUNIT_ASSERT_EQUAL(1, vars->numVariables());
+        CPPUNIT_ASSERT(kind = vars->getVariable(0));
+        ASSERT_EQUALS(L"kind", dynamic_cast<Identifier*>(kind->getName())->getIdentifier());
+	
         
     }
-    
-    void testNestedType_Struct()
-    {
-        PARSE_STATEMENT(L"class Foo\n"
-                        L"{\n"
-                        L"  struct Bar\n"
-                        L"  {\n"
-                        L"  }\n"
-                        L"}");
-        ClassDef* c = NULL;
-        StructDef* s = NULL;
-        
-        CPPUNIT_ASSERT(c = dynamic_cast<ClassDef*>(root));
-        CPPUNIT_ASSERT_EQUAL(1, c->numDeclarations());
-        CPPUNIT_ASSERT(s = dynamic_cast<StructDef*>(c->getDeclaration(0)));
-        
-    }
-    
-    void testNestedType_Class()
-    {
-        PARSE_STATEMENT(L"struct Foo\n"
-                        L"{\n"
-                        L"  class Bar\n"
-                        L"  {\n"
-                        L"  }\n"
-                        L"}");
-        ClassDef* c = NULL;
-        StructDef* s = NULL;
-        
-        CPPUNIT_ASSERT(s = dynamic_cast<StructDef*>(root));
-        CPPUNIT_ASSERT_EQUAL(1, s->numDeclarations());
-        CPPUNIT_ASSERT(c = dynamic_cast<ClassDef*>(s->getDeclaration(0)));
-        
-    }
-    
-    
-    void testNestedType_Enum()
-    {
-        PARSE_STATEMENT(L"struct Foo\n"
-                        L"{\n"
-                        L"  enum Bar\n"
-                        L"  {\n"
-                        L"  }\n"
-                        L"}");
-        EnumDef* c = NULL;
-        StructDef* s = NULL;
-        
-        CPPUNIT_ASSERT(s = dynamic_cast<StructDef*>(root));
-        CPPUNIT_ASSERT_EQUAL(1, s->numDeclarations());
-        CPPUNIT_ASSERT(c = dynamic_cast<EnumDef*>(s->getDeclaration(0)));
-        
-    }
-    
     
     
     

@@ -40,7 +40,7 @@ Declaration* Parser::parseDeclaration()
     if(predicate(L"@"))
         parseAttributes(attrs);
     int specifiers = 0;
-    if(flags & (UNDER_CLASS | UNDER_STRUCT | UNDER_ENUM | UNDER_PROTOCOL))
+    if(flags & (UNDER_CLASS | UNDER_STRUCT | UNDER_ENUM | UNDER_PROTOCOL |UNDER_EXTENSION))
     {
         //read declaration specifiers
         specifiers = parseDeclarationSpecifiers();
@@ -975,6 +975,7 @@ Declaration* Parser::parseDeinit(const std::vector<Attribute*>& attrs)
 Declaration* Parser::parseExtension(const std::vector<Attribute*>& attrs)
 {
     Token token;
+    Flags flags(this, UNDER_EXTENSION);
     expect(Keyword::Extension, token);
     TypeIdentifier* id = parseTypeIdentifier();
     ExtensionDef* ret = nodeFactory->createExtension(token.state, attrs);
