@@ -16,13 +16,7 @@ class TestType : public CppUnit::TestFixture
     CPPUNIT_TEST_SUITE_END();
 public:
     
-    TypeNode* parse(const wchar_t* str)
-    {
-        SymbolRegistry sregistry;
-        NodeFactory nodeFactory;
-        Parser parser(&nodeFactory, &sregistry);
-        return static_cast<TypeNode*>(parser.parseType(str));
-    }
+    
     
     void testArrayType()
     {

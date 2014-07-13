@@ -28,6 +28,7 @@ SET(CMAKE_CXX_FLAGS "$ENV{CXXFLAGS} -O0 -Wall -g -ggdb")
 
 SET(SWIFT_TOKENIZER_SRC tokenizer/tokenizer.cpp)
 SET(SWIFT_PARSER_SRC ${SWIFT_TOKENIZER_SRC}
+    common/compiler_results.cpp
     parser/parser.cpp
     parser/parser_expression.cpp
     parser/parser_statement.cpp
@@ -35,6 +36,7 @@ SET(SWIFT_PARSER_SRC ${SWIFT_TOKENIZER_SRC}
     parser/parser_pattern.cpp
     parser/parser_type.cpp
     parser/parser_attribute.cpp
+    parser/symbol-registry.cpp
 
     ast/node.cpp
     ast/expression.cpp
@@ -120,7 +122,6 @@ SET(SWIFT_PARSER_SRC ${SWIFT_TOKENIZER_SRC}
     ast/type-declaration.cpp
     ast/generic-parameters.cpp
     ast/generic-constraint.cpp
-    parser/symbol-registry.cpp
     )
 SET(SWIFT_SRC main.cpp tokenizer/tokenizer.cpp)
 

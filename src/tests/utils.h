@@ -11,6 +11,7 @@
 #include "parser/symbol-registry.h"
 #include "ast/ast.h"
 #include "ast/node-factory.h"
+#include "common/compiler_results.h"
 
 
 #define ASSERT_EQUALS(E, A) wcs_assertEquals((E), (A), __FILE__, __LINE__)
@@ -24,7 +25,8 @@ public:
         using namespace Swift;
         SymbolRegistry sregistry;
         NodeFactory nodeFactory;
-        Parser parser(&nodeFactory, &sregistry);
+        CompilerResults compilerResults;
+        Parser parser(&nodeFactory, &sregistry, &compilerResults);
         parser.setFileName(L"<file>");
         return parser.parse(str);
     }

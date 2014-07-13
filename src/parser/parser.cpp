@@ -4,14 +4,16 @@
 #include "symbol-registry.h"
 #include "ast/node-factory.h"
 #include "ast/ast.h"
+#include "common/compiler_results.h"
+#include "swift_errors.h"
 #include <cstdlib>
 #include <stack>
 #include <sstream>
 #include <iostream>
 using namespace Swift;
 
-Parser::Parser(NodeFactory* nodeFactory, SymbolRegistry* symbolRegistry)
-    :nodeFactory(nodeFactory), symbolRegistry(symbolRegistry)
+Parser::Parser(NodeFactory* nodeFactory, SymbolRegistry* symbolRegistry, CompilerResults* compilerResults)
+    :nodeFactory(nodeFactory), symbolRegistry(symbolRegistry), compilerResults(compilerResults)
 {
     tokenizer = new Tokenizer(NULL);
     functionName = L"<top>";
@@ -37,6 +39,7 @@ void Parser::expect_next(Token& token)
 {
     if(next(token))
         return;
+    compilerResults->add(ErrorLevel::Fatal, token.state, Errors::E_UNEXPECTED_EOF);
     throw 0;
 }
 /**

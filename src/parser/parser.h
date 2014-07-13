@@ -30,11 +30,12 @@ class Variable;
 class Parameters;
 class GenericParameters;
 class GenericArgument;
+class CompilerResults;
 class Parser
 {
     friend struct Flags;
 public:
-    Parser(NodeFactory* nodeFactory, SymbolRegistry* symbolRegistry);
+    Parser(NodeFactory* nodeFactory, SymbolRegistry* symbolRegistry, CompilerResults* compilerResults);
     ~Parser();
 public:
     Node* parse(const wchar_t* code);
@@ -198,10 +199,12 @@ private:
     Tokenizer* tokenizer;
     NodeFactory* nodeFactory;
     SymbolRegistry* symbolRegistry;
+    CompilerResults* compilerResults;
     std::wstring fileName;
     int fileHash;
     std::wstring functionName;
     int flags;
+
 };
 
 
