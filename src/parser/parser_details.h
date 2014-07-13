@@ -27,7 +27,7 @@ struct Flags
     Flags(Parser* parser, int f = 0)
         :parser(parser), oldFlags(parser->flags)
     {
-        parser->flags = flags = 0;
+        this->flags = parser->flags;
         if(f)
             *this += f;
     }

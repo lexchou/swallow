@@ -30,6 +30,17 @@ const std::vector<Attribute*>& Declaration::getAttributes()
 {
     return attributes;
 }
+Attribute* Declaration::getAttribute(const wchar_t* name)
+{
+    std::vector<Attribute*>::iterator iter = attributes.begin();
+    for(; iter != attributes.end(); iter++)
+    {
+        Attribute* attr = *iter;
+        if(attr->getName() == name)
+            return attr;
+    }
+    return NULL;
+}
 
 
 int Declaration::getSpecifiers()

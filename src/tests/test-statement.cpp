@@ -650,6 +650,7 @@ public:
         ASSERT_EQUALS(L"gameLoop", bs->getLoop().c_str());
         ASSERT_EQUALS(L"gameLoop", cs->getLoop().c_str());
         
+        
     }
 };
 CPPUNIT_TEST_SUITE_NAMED_REGISTRATION(TestStatement, "alltest");

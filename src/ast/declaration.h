@@ -16,6 +16,7 @@ public:
 public:
     void setAttributes(const std::vector<Attribute*>& attrs);
     const std::vector<Attribute*>& getAttributes();
+    Attribute* getAttribute(const wchar_t* name);
 protected:
     int getSpecifiers();
     void setSpecifiers(int specifiers);

@@ -66,7 +66,6 @@ public:
                         L"}");
         ExtensionDef* s = NULL;
         CPPUNIT_ASSERT(s = dynamic_cast<ExtensionDef*>(root));
-        CPPUNIT_ASSERT_EQUAL(2, s->numParents());
     }
     void testComputedProperty()
     {

@@ -13,6 +13,8 @@ public:
     InitializerDef();
     ~InitializerDef();
 public:
+    using Declaration::setGenericParameters;
+    using Declaration::getGenericParameters;
     void setConvenience(bool convenience);
     bool isConvenience()const;
     

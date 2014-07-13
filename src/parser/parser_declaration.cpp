@@ -579,8 +579,11 @@ Declaration* Parser::parseFunc(const std::vector<Attribute*>& attrs, int specifi
         ret->setReturnTypeAttributes(retAttrs);
         ret->setReturnType(retType);
     }
-    CodeBlock* body = parseCodeBlock();
-    ret->setBody(body);
+    if((UNDER_PROTOCOL & flags) == 0)
+    {
+        CodeBlock* body = parseCodeBlock();
+        ret->setBody(body);
+    }
     return ret;
 }
 
@@ -680,10 +683,6 @@ Declaration* Parser::parseEnum(const std::vector<Attribute*>& attrs)
     Flags flag(this);
     flags += UNDER_ENUM;
     expect_identifier(token);
-    if(predicate(L"<"))
-    {
-        //TODO: read generic-parameter-clause
-    }
     if(match(L":"))
     {
         //this is a raw-value-style-enum
@@ -897,14 +896,10 @@ Declaration* Parser::parseClass(const std::vector<Attribute*>& attrs)
 Declaration* Parser::parseProtocol(const std::vector<Attribute*>& attrs)
 {
     Token token;
-    expect(Keyword::Struct);
+    expect(Keyword::Protocol);
     ProtocolDef* ret = nodeFactory->createProtocol(token.state, attrs);
     expect_identifier(token);
     ret->setIdentifier(nodeFactory->createTypeIdentifier(token.state, token.token));
-    if(predicate(L"<"))
-    {
-        //TODO: parse generic parameter clause
-    }
     if(match(L":"))
     {
         do
@@ -940,13 +935,14 @@ Declaration* Parser::parseInit(const std::vector<Attribute*>& attrs)
     Token token;
     bool convenience = match(L"convenience");
     expect(Keyword::Init, token);
+    InitializerDef* ret = nodeFactory->createInitializer(token.state, attrs);
     if(predicate(L"<"))
     {
-        //TODO: generic-parameter-clause
+        GenericParameters* params = this->parseGenericParameters();
+        ret->setGenericParameters(params);   
     }
     Parameters* parameters = parseParameterClause();
     CodeBlock* body = parseCodeBlock();
-    InitializerDef* ret = nodeFactory->createInitializer(token.state, attrs);
     ret->setConvenience(convenience);
     ret->setParameters(parameters);
     ret->setBody(body);
