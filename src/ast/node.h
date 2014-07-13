@@ -10,6 +10,8 @@
 
 SWIFT_NS_BEGIN
 
+class AutoReleasePool;
+
 class Node
 {
 protected:
@@ -18,13 +20,15 @@ public:
     virtual ~Node();
 public:
     SourceInfo* getSourceInfo();
-    
+    void setAutoReleasePool(AutoReleasePool* autoReleasePool);
+    AutoReleasePool* getAutoReleasePool();
 public:
     virtual void serialize(std::wostream& out) {};
 protected:
 
 protected:
     SourceInfo sourceInfo;
+    AutoReleasePool* autoReleasePool;
     
 #ifdef TRACE_NODE
 public:

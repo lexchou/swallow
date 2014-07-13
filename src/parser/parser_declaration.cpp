@@ -9,6 +9,8 @@
 #include <stack>
 #include <sstream>
 #include <iostream>
+#include <swift_errors.h>
+
 using namespace Swift;
 
 
@@ -173,7 +175,7 @@ Declaration* Parser::parseImport(const std::vector<Attribute*>& attrs)
     expect(Keyword::Import, token);
     Import* ret = nodeFactory->createImport(token.state, attrs);
     expect_next(token);
-    tassert(token, token.type == TokenType::Identifier);
+    tassert(token, token.type == TokenType::Identifier, Errors::E_EXPECT_IDENTIFIER, token.token);
     Import::Kind kind = Import::_;
     switch(token.identifier.keyword)
     {
@@ -629,7 +631,7 @@ Parameters* Parser::parseParameterClause()
             shorthandExternalName = true;
             expect_next(token);
         }
-        tassert(token, token.type = TokenType::Identifier);
+        tassert(token, token.type = TokenType::Identifier, Errors::E_EXPECT_IDENTIFIER, token.token);
         std::wstring name = token.token;
         std::wstring localName;
         if(match_identifier(token))
@@ -651,7 +653,7 @@ Parameters* Parser::parseParameterClause()
         {
             peek(token);
             def = parseExpression();
-            tassert(token, def != NULL);
+            tassert(token, def != NULL, Errors::E_EXPECT_EXPRESSION, token.token);
         }
         param->setInout(inout);
         param->setAccessibility(accessibility);
@@ -1083,7 +1085,7 @@ Declaration* Parser::parseOperator(const std::vector<Attribute*>& attrs)
             break;
     }
     expect_next(token);
-    tassert(token, token.type == TokenType::Operator);
+    tassert(token, token.type == TokenType::Operator, Errors::E_EXPECT_OPERATOR, token.token);
     op->setName(token.token);
     expect(L"{");
     while(!match(L"}"))
@@ -1093,8 +1095,8 @@ Declaration* Parser::parseOperator(const std::vector<Attribute*>& attrs)
         {
             case Keyword::Precedence:
                 expect_next(token);
-                tassert(token, token.type == TokenType::Integer);
-                tassert(token, token.number.value >= 0 && token.number.value <= 255);
+                tassert(token, token.type == TokenType::Integer, Errors::E_EXPECT_INTEGER_PRECEDENCE, token.token);
+                tassert(token, token.number.value >= 0 && token.number.value <= 255, Errors::E_INVALID_OPERATOR_PRECEDENCE, token.token);
                 op->setPrecedence(token.number.value);
                 break;
             case Keyword::Associativity:

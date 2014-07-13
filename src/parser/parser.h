@@ -194,7 +194,7 @@ private:
      */
     bool predicate(const wchar_t* token);
 
-    void tassert(Token& token, bool cond);
+    void tassert(Token& token, bool cond, int errorCode, const std::wstring& s = std::wstring());
 private:
     Tokenizer* tokenizer;
     NodeFactory* nodeFactory;

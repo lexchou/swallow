@@ -20,7 +20,7 @@ class SwiftTestCase : public CppUnit::TestFixture
 {
 public:
     
-    Swift::Node* parseStatement(const wchar_t* str)
+    Swift::Node* parseStatement(const char* func, const wchar_t* str)
     {
         using namespace Swift;
         SymbolRegistry sregistry;
@@ -28,7 +28,32 @@ public:
         CompilerResults compilerResults;
         Parser parser(&nodeFactory, &sregistry, &compilerResults);
         parser.setFileName(L"<file>");
-        return parser.parse(str);
+        Node* ret = parser.parse(str);
+        if(compilerResults.numResults() > 0)
+        {
+            for(int i = 0; i < compilerResults.numResults(); i++)
+            {
+                const CompilerResult& res = compilerResults.getResult(i);
+                switch(res.level)
+                {
+                    case ErrorLevel::Fatal:
+                        std::wcout<<L"Fatal:";
+                        break;
+                    case ErrorLevel::Error:
+                        std::wcout<<L"Error:";
+                        break;
+                    case ErrorLevel::Warning:
+                        std::wcout<<L"Warning:";
+                        break;
+                }
+                std::wcout<<L"("<<res.line<<L", "<<res.column<<") ";
+                std::wstring msg = compilerResults.format(res);
+                std::wcout<<msg<<std::endl;
+            }
+
+        }
+
+        return ret;
     }
     void wcs_assertEquals(const wchar_t* expected, const std::wstring& actual, const char* file, int line)
     {
@@ -91,7 +116,7 @@ struct Tracer
     char func[100];
     
 };
-#define PARSE_STATEMENT(s) Tracer tracer(__FILE__, __LINE__, __FUNCTION__);Node* root = parseStatement((s));tracer.node = root;
+#define PARSE_STATEMENT(s) Tracer tracer(__FILE__, __LINE__, __FUNCTION__);Node* root = parseStatement(__FUNCTION__, (s));tracer.node = root;
 
 
 #endif//TEST_UTILS_H

@@ -9,6 +9,8 @@
 #include <stack>
 #include <sstream>
 #include <iostream>
+#include <swift_errors.h>
+
 using namespace Swift;
 
 Expression* Parser::parseFloat()
@@ -88,7 +90,7 @@ Expression* Parser::parsePostfixExpression()
             {
                 expect_next(token);//skip .
                 expect_next(token);//read identifier
-                tassert(token, token.type == TokenType::Identifier);
+                tassert(token, token.type == TokenType::Identifier, Errors::E_EXPECT_INIT_SELF_DYNAMICTYPE_IDENTIFIER, token.token);
                 
                 // postfix-expression → initializer-expression
                 if(token == L"init")
@@ -108,7 +110,7 @@ Expression* Parser::parsePostfixExpression()
                     ret = nodeFactory->createDynamicType(token.state, ret);
                     continue;
                 }
-                tassert(token, token.identifier.keyword == Keyword::_);
+                tassert(token, token.identifier.keyword == Keyword::_, Errors::E_EXPECT_IDENTIFIER, token.token);
                 // postfix-expression → explicit-member-expression
                 Identifier* field = nodeFactory->createIdentifier(token.state, token.token);
                 ret = nodeFactory->createMemberAccess(token.state, ret, field);
@@ -394,7 +396,7 @@ Expression* Parser::parseSelfExpression()
     if(token == L".")
     {
         expect_next(token);
-        tassert(token, token.type == TokenType::Identifier);
+        tassert(token, token.type == TokenType::Identifier, Errors::E_EXPECT_IDENTIFIER, token.token);
         if(token.identifier.keyword != Keyword::_ && token.identifier.keyword != Keyword::Init)
             unexpected(token);
         Identifier* field = nodeFactory->createIdentifier(token.state, token.token);
@@ -503,7 +505,7 @@ Expression* Parser::parseLiteralExpression()
         //check if there's a colon after an expression
         
         Expression* tmp = parseExpression();
-        tassert(token, tmp != NULL);
+        tassert(token, tmp != NULL, Errors::E_EXPECT_EXPRESSION, token.token);
         peek(token);
         if(token.type == TokenType::Comma || token.type == TokenType::CloseBracket)//array
         {
@@ -526,7 +528,7 @@ Expression* Parser::parseLiteralExpression()
             DictionaryLiteral* dict = nodeFactory->createDictionaryLiteral(token.state);
             Expression* key = tmp;
             Expression* value = parseExpression();
-            tassert(token, value != NULL);
+            tassert(token, value != NULL, Errors::E_EXPECT_EXPRESSION, token.token);
             dict->insert(key, value);
             while(match(L","))
             {
@@ -743,7 +745,7 @@ Expression* Parser::parseBinaryExpression(Expression* lhs)
         if(token.operators.type == OperatorType::InfixBinary)
         {
             OperatorInfo* op = symbolRegistry->getOperator(token.token);
-            tassert(token, op != NULL);
+            tassert(token, op != NULL, Errors::E_UNDEFINED_INFIX_OPERATOR, token.token);
             Expression* rhs = parsePrefixExpression();
             int precedence = op->precedence.infix > 0 ? op->precedence.infix : 100;
             BinaryOperator* ret = nodeFactory->createBinary(token.state, op->name, op->associativity, precedence);
@@ -803,7 +805,7 @@ Closure* Parser::parseClosureExpression()
             //read capture-list
             expect_next(token);
             Keyword::T k = token.getKeyword();
-            tassert(token, k == Keyword::Weak || k == Keyword::Unowned || k == Keyword::Unowned_safe || k == Keyword::Unowned_unsafe);
+            tassert(token, k == Keyword::Weak || k == Keyword::Unowned || k == Keyword::Unowned_safe || k == Keyword::Unowned_unsafe, Errors::E_EXPECT_CAPTURE_SPECIFIER, token.token);
             switch(token.getKeyword())
             {
                 case Keyword::Weak:

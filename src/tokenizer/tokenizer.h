@@ -28,6 +28,7 @@ public:
     bool next(Token& token);
     bool peek(Token& token);
 
+    const std::wstring& getKeyword(Keyword::T k);
 
     /**
      * Save current state for restoring later
@@ -73,6 +74,7 @@ private:
     TokenizerState state;
     int positions[16];
     std::map<std::wstring, KeywordInfo> keywords;
+    std::map<Keyword::T, std::wstring> keywordNames;
 };
 
 

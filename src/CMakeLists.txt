@@ -29,6 +29,7 @@ SET(CMAKE_CXX_FLAGS "$ENV{CXXFLAGS} -O0 -Wall -g -ggdb")
 SET(SWIFT_TOKENIZER_SRC tokenizer/tokenizer.cpp)
 SET(SWIFT_PARSER_SRC ${SWIFT_TOKENIZER_SRC}
     common/compiler_results.cpp
+    common/auto-release-pool.cpp
     parser/parser.cpp
     parser/parser_expression.cpp
     parser/parser_statement.cpp

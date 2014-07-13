@@ -5,12 +5,19 @@
 #include "ast/node-factory.h"
 #include "ast/ast.h"
 #include "common/compiler_results.h"
+#include "common/auto-release-pool.h"
 #include "swift_errors.h"
 #include <cstdlib>
 #include <stack>
 #include <sstream>
 #include <iostream>
 using namespace Swift;
+
+struct Interrupt
+{
+
+};
+
 
 Parser::Parser(NodeFactory* nodeFactory, SymbolRegistry* symbolRegistry, CompilerResults* compilerResults)
     :nodeFactory(nodeFactory), symbolRegistry(symbolRegistry), compilerResults(compilerResults)
@@ -40,7 +47,7 @@ void Parser::expect_next(Token& token)
     if(next(token))
         return;
     compilerResults->add(ErrorLevel::Fatal, token.state, Errors::E_UNEXPECTED_EOF);
-    throw 0;
+    throw Interrupt();
 }
 /**
  * Peek next token from tokenizer, return false if EOF reached.
@@ -140,7 +147,7 @@ void Parser::expect(const wchar_t* str)
 void Parser::expect(const wchar_t* str, Token& token)
 {
     expect_next(token);
-    tassert(token, token == str);
+    tassert(token, token == str, Errors::E_EXPECT, str);
 }
 
 void Parser::expect(Keyword::T keyword)
@@ -152,14 +159,17 @@ void Parser::expect(Keyword::T keyword)
 void Parser::expect(Keyword::T keyword, Token& token)
 {
     expect_next(token);
-    tassert(token, token.type == TokenType::Identifier);
-    tassert(token, token.identifier.keyword == keyword);
+    if(keyword == token.getKeyword())
+        return;
+
+    const std::wstring& str = tokenizer->getKeyword(keyword);
+    tassert(token, false, Errors::E_EXPECT_KEYWORD, str);
 }
 void Parser::expect_identifier(Token& token)
 {
     expect_next(token);
-    tassert(token, token.type == TokenType::Identifier);
-    tassert(token, token.identifier.keyword == Keyword::_);
+    tassert(token, token.type == TokenType::Identifier, Errors::E_EXPECT_IDENTIFIER, token.token);
+    tassert(token, token.identifier.keyword == Keyword::_, Errors::E_EXPECT_IDENTIFIER, token.token);
 }
 
 /**
@@ -167,16 +177,34 @@ void Parser::expect_identifier(Token& token)
  */
 void Parser::unexpected(const Token& token)
 {
-    throw 0;    
+    compilerResults->add(ErrorLevel::Fatal, token.state, Errors::E_UNEXPECTED, token.token);
+    throw Interrupt();
 }
-void Parser::tassert(Token& token, bool cond)
+void Parser::tassert(Token& token, bool cond, int errorCode, const std::wstring& s)
 {
-    if(!cond)
-        throw 0;
+    if(cond)
+        return;
+    //record this issue
+    compilerResults->add(ErrorLevel::Fatal, token.state, errorCode, s);
+    throw Interrupt();
 }
 
 Node* Parser::parse(const wchar_t* code)
 {
     tokenizer->set(code);
-    return parseStatement();
+    AutoReleasePool pool;
+    nodeFactory->setAutoReleasePool(&pool);
+    Node* ret = NULL;
+    try
+    {
+        ret = parseStatement();
+        pool.removeAll();
+    }
+    catch(...)
+    {
+        //clean up all nodes created during the parsing
+        ret = NULL;
+        nodeFactory->setAutoReleasePool(NULL);
+    }
+    return ret;
 }

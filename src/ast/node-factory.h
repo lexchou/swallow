@@ -85,10 +85,12 @@ class GenericParameters;
 class Pattern;
 class EnumCasePattern;
 struct SourceInfo;
+class AutoReleasePool;
 
 class NodeFactory
 {
 public:
+    NodeFactory();
     virtual ~NodeFactory(){}
 public:
     virtual CommentNode* createComment(const SourceInfo& state, const std::wstring& comment);
@@ -171,8 +173,23 @@ public:
     virtual OperatorDef* createOperator(const SourceInfo& state, const std::vector<Attribute*>& attrs);
     virtual GenericConstraint* createGenericConstraint(const SourceInfo& state);
     virtual GenericParameters* createGenericParameters(const SourceInfo& state);
-    
-    
+
+
+public:
+    void setAutoReleasePool(AutoReleasePool* autoReleasePool);
+protected:
+
+    void bindNode(const SourceInfo&s, Node* n);
+
+    template<class T>
+    inline T* _(const SourceInfo& s, T* n)
+    {
+        bindNode(s, static_cast<Node*>(n));
+        return n;
+    }
+
+protected:
+    AutoReleasePool* autoReleasePool;
 };
 
 

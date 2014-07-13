@@ -153,7 +153,7 @@ TupleType* Parser::parseTupleType()
 TypeIdentifier* Parser::parseTypeIdentifier()
 {
     Token token;
-    match_identifier(token);
+    expect_identifier(token);
     TypeIdentifier* ret = nodeFactory->createTypeIdentifier(token.state, token.token);
     if(match(L"<"))
     {

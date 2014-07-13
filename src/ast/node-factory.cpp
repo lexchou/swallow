@@ -3,12 +3,20 @@
 #include "tokenizer/tokens.h"
 USE_SWIFT_NS;
 
-template<class T>
-inline T* _(const SourceInfo& s, T* n)
+
+NodeFactory::NodeFactory()
+    :autoReleasePool(NULL)
 {
-    SourceInfo* si = static_cast<Node*>(n)->getSourceInfo();
-    *si = s;
-    return n;
+}
+void NodeFactory::setAutoReleasePool(AutoReleasePool* autoReleasePool)
+{
+    this->autoReleasePool = autoReleasePool;
+}
+
+void NodeFactory::bindNode(const SourceInfo&s, Node* n)
+{
+    *n->getSourceInfo() = s;
+    n->setAutoReleasePool(autoReleasePool);
 }
 
 

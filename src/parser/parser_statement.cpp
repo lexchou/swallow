@@ -9,6 +9,7 @@
 #include <stack>
 #include <sstream>
 #include <iostream>
+#include "swift_errors.h"
 using namespace Swift;
 
 
@@ -320,7 +321,7 @@ Statement* Parser::parseSwitch()
     {
         //switch-case → case-label statements  |default-label statements
         expect_next(token);
-        tassert(token, token.type == TokenType::Identifier);
+        tassert(token, token.type == TokenType::Identifier, Errors::E_EXPECT_CASE, token.token);
         // case-label → casecase-item-list:
         if(token.identifier.keyword == Keyword::Case)
         {
@@ -352,7 +353,7 @@ Statement* Parser::parseSwitch()
         }
         else
         {
-            unexpected(token);
+            tassert(token, false, Errors::E_EXPECT_CASE, token.token);
         }
         
     }

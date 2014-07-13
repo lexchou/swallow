@@ -94,9 +94,16 @@ Tokenizer::Tokenizer(const wchar_t* data)
         std::wstring name = keywords[i].name;
         KeywordInfo info = {keywords[i].keyword, keywords[i].type};
         this->keywords.insert(std::make_pair(name, info));
+        this->keywordNames.insert(std::make_pair(info.keyword, name));
     }
     
 }
+
+const std::wstring& Tokenizer::getKeyword(Keyword::T k)
+{
+    return keywordNames[k];
+}
+
 void Tokenizer::set(const wchar_t* data)
 {
     if(this->data)
