@@ -57,6 +57,16 @@ inline static bool check_digit(int base, wchar_t ch)
             return ch >='0' && ch <='9';
     }
 }
+inline static int to_digit(wchar_t ch)
+{
+    if(ch >= '0' && ch <= '9')
+        return ch - '0';
+    if(ch >= 'a' && ch <= 'f')
+        return ch - 'a' + 0xa;
+    if(ch >= 'A' && ch <= 'F')
+        return ch - 'A' + 0xa;
+    return 0;
+}
 
 
 

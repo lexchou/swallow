@@ -41,9 +41,11 @@ struct Token
         {
             int base;
             bool sign;
-            bool fraction;
-            bool exponent;
+            int fraction;
+            int exponent;
+
             int64_t value;
+            double dvalue;
         } number;
         struct
         {

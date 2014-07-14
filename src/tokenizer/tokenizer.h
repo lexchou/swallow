@@ -65,7 +65,8 @@ private:
     bool readMultilineComment(Token& token);
     bool readString(Token& token);
     bool readNumber(Token& token);
-    bool readNumberLiteral(Token& token, int base);
+    bool readNumberLiteral(Token& token, int base, int64_t& out);
+    bool readFraction(Token& token, int base, double& out);
     bool readIdentifier(Token& token);
 private:
     wchar_t* data;

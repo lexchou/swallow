@@ -1,5 +1,6 @@
 #include "tokenizer.h"
 #include "token_char_types.h"
+#include <cmath>
 #include <cstring>
 #include <wchar.h>
 #include <ctype.h>
@@ -432,12 +433,10 @@ bool Tokenizer::readString(Token& token)
     }
     return true;
 }
-bool Tokenizer::readNumberLiteral(Token& token, int base)
+bool Tokenizer::readNumberLiteral(Token& token, int base, int64_t& out)
 {
     wchar_t ch = must_get();
-    tassert(check_digit(base, ch));
-    token.append(ch);
-    while(get(ch))
+    do
     {
         if(!check_digit(base, ch))
         {
@@ -445,7 +444,36 @@ bool Tokenizer::readNumberLiteral(Token& token, int base)
             break;
         }
         token.append(ch);
-    }
+        if(ch != '_')
+        {
+            int digit = to_digit(ch);
+            out = out * base + digit;
+        }
+    } while(get(ch));
+    return true;
+}
+
+bool Tokenizer::readFraction(Token& token, int base, double& out)
+{
+    out = 0;
+    wchar_t ch = must_get();
+    double dbase = 1.0 / base;
+    double b = dbase;
+    do
+    {
+        if(!check_digit(base, ch))
+        {
+            unget();
+            break;
+        }
+        token.append(ch);
+        if(ch != '_')
+        {
+            int digit = to_digit(ch);
+            out += digit * b;
+            b *= dbase;
+        }
+    } while(get(ch));
     return true;
 }
 bool Tokenizer::readNumber(Token& token)
@@ -454,32 +482,40 @@ bool Tokenizer::readNumber(Token& token)
     
     token.number.base = 10;
     token.number.sign = false;
-    token.number.exponent = false;
-    token.number.fraction = false;
+    token.number.exponent = 0;
+    token.number.fraction = 0;
+    token.number.dvalue = 0;
+    token.number.value = 0;
     token.type = TokenType::Integer;
-    
+    int64_t val = 0, exponent = 0;
+    double fract = 0;
+    int base = 10;
+    int sign = 1;
     if(ch == '+' || ch == '-')
     {
         token.append(ch);
+        if(ch == '-')
+            sign = -1;
         ch = must_get();
         token.number.sign = true;
+
     }
     token.append(ch);
+    if(check_digit(base, ch))
+        val = to_digit(ch);
     
     if(!peek(ch))
-        return true;
-    int base = 10;
+        goto done;
     switch(ch)
     {
         case 'b': base = 2; token.append(must_get()); break;
         case 'o': base = 8; token.append(must_get()); break;
         case 'x': base = 16; token.append(must_get()); break;
         case '.': break;
-        default: if(!isdigit(ch) && ch != '_') return true;
+        default: if(!isdigit(ch) && ch != '_' && ch != 'e') goto done;
     }
-    token.number.base = base;
     if(ch != '.')
-        readNumberLiteral(token, base);
+        readNumberLiteral(token, base, val);
     if(peek(ch) && ch == '.')//read fraction part
     {
         //check next digit
@@ -487,28 +523,58 @@ bool Tokenizer::readNumber(Token& token)
         if(!peek(ch) || !check_digit(base, ch))
         {
             unget();//rollback .
-            return true;
+            goto done;
         }
         
         token.type = TokenType::Float;
         token.append(dot);
-        readNumberLiteral(token, base);
+        readFraction(token, base, fract);
     }
     if(peek(ch))
     {
         if(base == 10 && ch == 'e')
         {
+            token.type = TokenType::Float;
             token.append(must_get());
-            readNumberLiteral(token, base);
+            readNumberLiteral(token, base, exponent);
             token.number.exponent = true;
         }
         else if(base == 16 && ch == 'p')
         {
+            token.type = TokenType::Float;
             token.append(must_get());
-            readNumberLiteral(token, base);
+            readNumberLiteral(token, base, exponent);
             token.number.exponent = true;
         }
     }
+
+    done:
+
+    token.number.exponent = (int)exponent;
+    token.number.base = base;
+    token.number.fraction = fract;
+    token.number.sign = sign;
+
+    if(token.type == TokenType::Integer)
+    {
+        token.number.value = sign * val;
+        token.number.dvalue = token.number.value;
+    }
+    else if(token.type == TokenType::Float)
+    {
+        double dval = (double)val + fract;
+        if(exponent != 0)
+        {
+            int e = pow(base == 10 ? 10 : 2, exponent);
+
+            dval = dval * e;
+        }
+        dval *= sign;
+        token.number.dvalue = dval;
+        token.number.value = (int64_t)dval;
+    }
+
+
     return true;
 }
 bool Tokenizer::readIdentifier(Token& token)

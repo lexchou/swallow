@@ -23,6 +23,7 @@ class TestDeclaration : public SwiftTestCase
     CPPUNIT_TEST(testVar);
     CPPUNIT_TEST(testVar_Multiple);
     CPPUNIT_TEST(testVar_Typed);
+    CPPUNIT_TEST(testOperator);
     CPPUNIT_TEST_SUITE_END();
 public:
     
@@ -240,6 +241,19 @@ public:
         
         
     }
+
+    void testOperator()
+    {
+        PARSE_STATEMENT(L"operator infix +- { associativity left precedence 140 }");
+        OperatorDef* o = NULL;
+        CPPUNIT_ASSERT(o = dynamic_cast<OperatorDef*>(root));
+        ASSERT_EQUALS(L"+-", o->getName());
+        CPPUNIT_ASSERT_EQUAL(Associativity::Left, o->getAssociativity());
+        CPPUNIT_ASSERT_EQUAL(140, o->getPrecedence());
+
+
+    }
+
     
 };
 CPPUNIT_TEST_SUITE_NAMED_REGISTRATION(TestDeclaration, "alltest");
