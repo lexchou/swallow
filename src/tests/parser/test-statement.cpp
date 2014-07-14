@@ -1,7 +1,7 @@
 #ifndef TEST_STATEMENT_H
 #define TEST_STATEMENT_H
 
-#include "utils.h"
+#include "tests/utils.h"
 
 using namespace Swift;
 

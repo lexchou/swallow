@@ -2,7 +2,7 @@
 #include "parser_details.h"
 #include "ast/node.h"
 #include "tokenizer/tokenizer.h"
-#include "symbol-registry.h"
+#include "semantics/symbol-registry.h"
 #include "ast/node-factory.h"
 #include "ast/ast.h"
 #include <cstdlib>

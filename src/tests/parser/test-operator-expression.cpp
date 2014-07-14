@@ -1,11 +1,7 @@
 #ifndef TEST_OPERATOR_EXPRESSION_H
 #define TEST_OPERATOR_EXPRESSION_H
 
-#include "utils.h"
-#include "parser/parser.h"
-#include "parser/symbol-registry.h"
-#include "ast/ast.h"
-#include "ast/node-factory.h"
+#include "tests/utils.h"
 
 using namespace Swift;
 

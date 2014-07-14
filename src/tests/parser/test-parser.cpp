@@ -1,4 +1,4 @@
-#include "utils.h"
+#include "tests/utils.h"
 using namespace Swift;
 
 int main(int argc, char** argv)

@@ -37,9 +37,11 @@ SET(SWIFT_PARSER_SRC ${SWIFT_TOKENIZER_SRC}
     parser/parser_pattern.cpp
     parser/parser_type.cpp
     parser/parser_attribute.cpp
-    parser/symbol-registry.cpp
+
+    semantics/symbol-registry.cpp
 
     ast/node.cpp
+    ast/node-visitor.cpp
     ast/expression.cpp
     ast/pattern.cpp
     ast/comment.cpp
@@ -131,25 +133,34 @@ add_definitions(-DTRACE_NODE)
 
 enable_testing()
 ADD_EXECUTABLE(TestParser
-		tests/test-parser.cpp 
-		tests/test-operator-expression.cpp
-		tests/test-literal-expression.cpp
-		tests/test-postfix-expression.cpp
-		tests/test-type.cpp
-		tests/test-generic.cpp
-		tests/test-declaration.cpp
-		tests/test-func.cpp
-		tests/test-statement.cpp
-		tests/test-enum.cpp
-		tests/test-class.cpp
-		tests/test-closure.cpp
-        tests/test-extension.cpp
-        tests/test-protocol.cpp
+		tests/parser/test-parser.cpp 
+		tests/parser/test-operator-expression.cpp
+		tests/parser/test-literal-expression.cpp
+		tests/parser/test-postfix-expression.cpp
+		tests/parser/test-type.cpp
+		tests/parser/test-generic.cpp
+		tests/parser/test-declaration.cpp
+		tests/parser/test-func.cpp
+		tests/parser/test-statement.cpp
+		tests/parser/test-enum.cpp
+		tests/parser/test-class.cpp
+		tests/parser/test-closure.cpp
+        tests/parser/test-extension.cpp
+        tests/parser/test-protocol.cpp
 		${SWIFT_TOKENIZER_SRC} ${SWIFT_PARSER_SRC})
 target_link_libraries(TestParser cppunit)
 
-ADD_EXECUTABLE(TestTokenizer tests/test-tokenizer.cpp ${SWIFT_TOKENIZER_SRC})
+ADD_EXECUTABLE(TestTokenizer tests/tokenizer/test-tokenizer.cpp ${SWIFT_TOKENIZER_SRC})
 target_link_libraries(TestTokenizer cppunit)
+
+ADD_EXECUTABLE(TestSemantics
+    tests/semantics/test-semantics.cpp
+    tests/semantics/test-constant-folding.cpp
+    ${SWIFT_TOKENIZER_SRC} ${SWIFT_PARSER_SRC})
+target_link_libraries(TestSemantics cppunit)
+
+
 ADD_TEST(NAME TestTokenizer COMMAND TestTokenizer)
+ADD_TEST(NAME TestSemantics COMMAND TestSemantics)
 ADD_TEST(NAME TestParser COMMAND TestParser)
 

@@ -11,7 +11,7 @@
 SWIFT_NS_BEGIN
 
 class AutoReleasePool;
-
+class NodeVisitor;
 class Node
 {
 protected:
@@ -22,6 +22,8 @@ public:
     SourceInfo* getSourceInfo();
     void setAutoReleasePool(AutoReleasePool* autoReleasePool);
     AutoReleasePool* getAutoReleasePool();
+public:
+    virtual void accept(NodeVisitor* visitor){}
 public:
     virtual void serialize(std::wostream& out) {};
 protected:

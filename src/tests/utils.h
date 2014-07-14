@@ -8,7 +8,7 @@
 #include <iostream>
 #include <cstdlib>
 #include "parser/parser.h"
-#include "parser/symbol-registry.h"
+#include "semantics/symbol-registry.h"
 #include "ast/ast.h"
 #include "ast/node-factory.h"
 #include "common/compiler_results.h"

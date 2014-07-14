@@ -1,6 +1,6 @@
 #include "tokenizer/tokens.h"
 #include "tokenizer/tokenizer.h"
-#include "utils.h"
+#include "tests/utils.h"
 using namespace Swift;
 
 
@@ -527,7 +527,7 @@ public:
         ASSERT_EQUALS(L"0xffe", token.c_str());
         
         CPPUNIT_ASSERT(tokenizer.next(token));
-        CPPUNIT_ASSERT_EQUAL(TokenType::Double, token.type);
+        CPPUNIT_ASSERT_EQUAL(TokenType::Float, token.type);
         CPPUNIT_ASSERT_EQUAL(16, token.number.base);
         CPPUNIT_ASSERT_EQUAL((double)1016, token.number.dvalue);
         ASSERT_EQUALS(L"0xfep2", token.c_str());

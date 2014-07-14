@@ -1,8 +1,4 @@
-#include "utils.h"
-#include "parser/parser.h"
-#include "parser/symbol-registry.h"
-#include "ast/ast.h"
-#include "ast/node-factory.h"
+#include "tests/utils.h"
 
 
 using namespace Swift;

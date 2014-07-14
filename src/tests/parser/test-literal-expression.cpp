@@ -1,6 +1,6 @@
-#include "utils.h"
+#include "tests/utils.h"
 #include "parser/parser.h"
-#include "parser/symbol-registry.h"
+#include "semantics/symbol-registry.h"
 #include "ast/ast.h"
 #include "ast/node-factory.h"
 
