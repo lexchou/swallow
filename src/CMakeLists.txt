@@ -156,6 +156,7 @@ target_link_libraries(TestTokenizer cppunit)
 ADD_EXECUTABLE(TestSemantics
     tests/semantics/test-semantics.cpp
     tests/semantics/test-constant-folding.cpp
+    tests/semantics/test-type-inference.cpp
     ${SWIFT_TOKENIZER_SRC} ${SWIFT_PARSER_SRC})
 target_link_libraries(TestSemantics cppunit)
 
