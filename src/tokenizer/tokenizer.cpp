@@ -90,7 +90,7 @@ Tokenizer::Tokenizer(const wchar_t* data)
         {L"willSet",        R, Keyword::WillSet}
     };
     
-    for(int i = 0; i < sizeof(keywords) / sizeof(keywords[0]); i++)
+    for(unsigned i = 0; i < sizeof(keywords) / sizeof(keywords[0]); i++)
     {
         std::wstring name = keywords[i].name;
         KeywordInfo info = {keywords[i].keyword, keywords[i].type};
@@ -172,7 +172,7 @@ bool Tokenizer::peek(wchar_t &ch)
 }
 bool Tokenizer::get(wchar_t &ch)
 {
-    if(state.cursor >= size)
+    if(state.cursor >= (int)size)
         return false;
     //save line and column
     int p = (state.cursor << 1) & 0xf;

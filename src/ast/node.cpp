@@ -3,6 +3,7 @@
 #include <cstdlib>
 #include <cassert>
 #include <set>
+#include <algorithm>
 USE_SWIFT_NS
 
 #ifdef TRACE_NODE
