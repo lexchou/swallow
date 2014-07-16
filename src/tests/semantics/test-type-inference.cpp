@@ -15,6 +15,7 @@ public:
     void testLiteral()
     {
         SEMANTIC_ANALYZE(L"let a = 34");
+        Variable* a = dynamic_cast<Variable*>(scope->lookup(L"a"));
 
     }
 

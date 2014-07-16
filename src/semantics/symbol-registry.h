@@ -5,7 +5,8 @@
 #include "swift_types.h"
 #include <string>
 #include <map>
-
+#include <stack>
+#include "symbol-scope.h"
 SWIFT_NS_BEGIN
 
 
@@ -27,9 +28,11 @@ struct OperatorInfo
         this->precedence.postfix = -1;
     }
 };
+class SymbolScope;
 class SymbolRegistry
 {
     typedef std::map<std::wstring, OperatorInfo> OperatorMap;
+    friend class SymbolScope;
 public:
     SymbolRegistry();
 public:
@@ -39,8 +42,16 @@ public:
     bool isPrefixOperator(const std::wstring& name);
     bool isPostfixOperator(const std::wstring& name);
     bool isInfixOperator(const std::wstring& name);
+
+    SymbolScope* getCurrentScope();
+protected:
+    void enterScope(SymbolScope* scope);
+    void leaveScope();
 private:
     OperatorMap operators;
+    std::stack<SymbolScope*> scopes;
+    SymbolScope* currentScope;
+    SymbolScope topScope;
 };
 
 SWIFT_NS_END

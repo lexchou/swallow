@@ -19,17 +19,16 @@
 class SwiftTestCase : public CppUnit::TestFixture
 {
 public:
-    Swift::Node* analyzeStatement(Swift::CompilerResults& compilerResults, const char* func, const wchar_t* str)
+    Swift::Node* analyzeStatement(Swift::SymbolRegistry& registry, Swift::CompilerResults& compilerResults, const char* func, const wchar_t* str)
     {
-        Swift::Node* ret = parseStatement(compilerResults, func, str);
+        Swift::Node* ret = parseStatement(registry, compilerResults, func, str);
         return ret;
     }
-    Swift::Node* parseStatement(Swift::CompilerResults& compilerResults, const char* func, const wchar_t* str)
+    Swift::Node* parseStatement(Swift::SymbolRegistry& registry, Swift::CompilerResults& compilerResults, const char* func, const wchar_t* str)
     {
         using namespace Swift;
-        SymbolRegistry sregistry;
         NodeFactory nodeFactory;
-        Parser parser(&nodeFactory, &sregistry, &compilerResults);
+        Parser parser(&nodeFactory, &registry, &compilerResults);
         parser.setFileName(L"<file>");
         Node* ret = parser.parse(str);
         if(compilerResults.numResults() > 0)
@@ -120,13 +119,16 @@ struct Tracer
     
 };
 #define PARSE_STATEMENT(s) Tracer tracer(__FILE__, __LINE__, __FUNCTION__); \
+    Swift::SymbolRegistry symbolRegistry; \
     Swift::CompilerResults compilerResults; \
-    Node* root = parseStatement(compilerResults, __FUNCTION__, (s)); \
+    Node* root = parseStatement(symbolRegistry, compilerResults, __FUNCTION__, (s)); \
     tracer.node = root;
 #define SEMANTIC_ANALYZE(s) Tracer tracer(__FILE__, __LINE__, __FUNCTION__); \
+    Swift::SymbolRegistry symbolRegistry; \
     Swift::CompilerResults compilerResults; \
-    Node* root = analyzeStatement(compilerResults, __FUNCTION__, (s)); \
-    tracer.node = root;
+    Node* root = analyzeStatement(symbolRegistry, compilerResults, __FUNCTION__, (s)); \
+    tracer.node = root; \
+    Swift::SymbolScope* scope = symbolRegistry.getCurrentScope();
 
 
 #endif//TEST_UTILS_H

@@ -1,7 +1,9 @@
 #include "symbol-registry.h"
+#include "symbol-scope.h"
 using namespace Swift;
 
 SymbolRegistry::SymbolRegistry()
+:currentScope(NULL), topScope(this)
 {
     //Assignment operator
     registerOperator(L"=", OperatorType::InfixBinary, Associativity::Right, 90);
@@ -109,3 +111,17 @@ bool SymbolRegistry::isInfixOperator(const std::wstring& name)
     return op && (op->precedence.infix > 0);
 }
 
+SymbolScope* SymbolRegistry::getCurrentScope()
+{
+    return currentScope;
+}
+void SymbolRegistry::enterScope(SymbolScope* scope)
+{
+    scopes.push(currentScope);
+    currentScope = scope;
+}
+void SymbolRegistry::leaveScope()
+{
+    currentScope = scopes.top();
+    scopes.pop();
+}

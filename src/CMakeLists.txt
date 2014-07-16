@@ -39,6 +39,7 @@ SET(SWIFT_PARSER_SRC ${SWIFT_TOKENIZER_SRC}
     parser/parser_attribute.cpp
 
     semantics/symbol-registry.cpp
+    semantics/symbol-scope.cpp
 
     ast/node.cpp
     ast/node-visitor.cpp
