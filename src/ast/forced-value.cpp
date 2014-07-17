@@ -3,6 +3,7 @@ USE_SWIFT_NS
 
 
 ForcedValue::ForcedValue(Expression* expr)
+    :Expression(NodeType::ForcedValue)
 {
     setExpression(expr);
 }

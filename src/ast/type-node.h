@@ -9,7 +9,7 @@ class Attribute;
 class TypeNode : public Statement
 {
 public:
-    TypeNode();
+    TypeNode(NodeType::T nodeType);
     ~TypeNode();
 public:
     void addAttribute(Attribute* attr);

@@ -6,7 +6,7 @@ USE_SWIFT_NS
 
 
 ForLoop::ForLoop()
-    :condition(NULL), step(NULL), codeBlock(NULL)
+    :Statement(NodeType::For), condition(NULL), step(NULL), codeBlock(NULL)
 {
 }
 ForLoop::~ForLoop()

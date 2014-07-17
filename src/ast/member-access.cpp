@@ -4,6 +4,7 @@ USE_SWIFT_NS
 
 
 MemberAccess::MemberAccess(Expression* self, Identifier* field)
+    :Expression(NodeType::MemberAccess)
 {
     setSelf(self);
     setField(field);

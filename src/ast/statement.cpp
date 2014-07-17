@@ -3,7 +3,8 @@
 USE_SWIFT_NS
 
 
-Statement::Statement()
+Statement::Statement(NodeType::T nodeType)
+    :Node(nodeType)
 {
 }
 

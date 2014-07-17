@@ -6,7 +6,7 @@ USE_SWIFT_NS
 
 
 DoLoop::DoLoop()
-    :codeBlock(NULL), condition(NULL)
+    :Statement(NodeType::Do), codeBlock(NULL), condition(NULL)
 {
 }
 DoLoop::~DoLoop()

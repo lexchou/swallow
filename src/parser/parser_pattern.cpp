@@ -40,7 +40,7 @@ Pattern* Parser::parsePattern()
                     if(match(L":"))
                     {
                         TypeNode* type = parseTypeAnnotation();
-                        ret->setType(type);
+                        ret->setDeclaredType(type);
                     }
                 }
                 return ret;

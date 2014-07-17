@@ -3,7 +3,8 @@
 USE_SWIFT_NS
 
 
-Pattern::Pattern()
+Pattern::Pattern(NodeType::T nodeType)
+    :Statement(nodeType)
 {
 }
 

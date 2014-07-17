@@ -7,7 +7,7 @@ SWIFT_NS_BEGIN
 class Expression : public Pattern
 {
 protected:
-	Expression();
+	Expression(NodeType::T nodeType);
 };
 
 SWIFT_NS_END

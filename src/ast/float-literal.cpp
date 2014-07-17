@@ -2,7 +2,7 @@
 USE_SWIFT_NS
 
 FloatLiteral::FloatLiteral(const std::wstring& val)
-:value(val)
+    :Expression(NodeType::FloatLiteral), value(val)
 {
 }
 void FloatLiteral::serialize(std::wostream& out)

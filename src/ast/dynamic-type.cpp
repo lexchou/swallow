@@ -2,6 +2,7 @@
 USE_SWIFT_NS
 
 DynamicType::DynamicType(Expression* expr)
+    :Expression(NodeType::DynamicType)
 {
     setExpression(expr);
 }

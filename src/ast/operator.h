@@ -7,7 +7,7 @@ SWIFT_NS_BEGIN
 class Operator : public Expression
 {
 protected:
-    Operator(OperatorType::T type, Associativity::T associativity, int precedence);
+    Operator(NodeType::T, OperatorType::T type, Associativity::T associativity, int precedence);
 public:
     
     OperatorType::T getType() const { return type;}

@@ -4,13 +4,13 @@
 USE_SWIFT_NS
 
 Identifier::Identifier(const std::wstring& identifier)
-    :identifier(identifier), type(NULL), genericArgument(NULL)
+    :Expression(NodeType::Identifier), identifier(identifier), declaredType(NULL), genericArgument(NULL)
 {
 }
 
 Identifier::~Identifier()
 {
-    SafeDelete(type);
+    SafeDelete(declaredType);
     SafeDelete(genericArgument);
 }
 
@@ -20,13 +20,13 @@ void Identifier::serialize(std::wostream& out)
 }
 
 
-void Identifier::setType(TypeNode* type)
+void Identifier::setDeclaredType(TypeNode* type)
 {
-    this->type = type;
+    this->declaredType = type;
 }
-TypeNode* Identifier::getType()
+TypeNode* Identifier::getDeclaredType()
 {
-    return type;
+    return declaredType;
 }
 
 GenericArgument* Identifier::getGenericArgument()

@@ -2,7 +2,7 @@
 USE_SWIFT_NS
 
 CompileConstant::CompileConstant(const std::wstring& name, const std::wstring& value)
-:name(name), value(value)
+    :Expression(NodeType::CompileConstant), name(name), value(value)
 {
     
 }

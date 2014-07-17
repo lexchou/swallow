@@ -6,7 +6,7 @@ USE_SWIFT_NS
 
 
 SwitchCase::SwitchCase()
-    :controlExpression(NULL), defaultCase(NULL)
+    :Statement(NodeType::SwitchCase), controlExpression(NULL), defaultCase(NULL)
 {
 }
 

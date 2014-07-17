@@ -8,7 +8,7 @@ SWIFT_NS_BEGIN
 class Pattern : public Statement
 {
 public:
-    Pattern();
+    Pattern(NodeType::T nodeType);
 public:
 };
 

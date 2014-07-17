@@ -6,7 +6,7 @@ USE_SWIFT_NS
 
 
 Closure::Closure()
-:captureSpecifier(_), capture(NULL), parameters(NULL), returnType(NULL)
+    :Expression(NodeType::Closure), captureSpecifier(_), capture(NULL), parameters(NULL), returnType(NULL)
 {
 }
 

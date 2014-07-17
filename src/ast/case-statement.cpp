@@ -5,6 +5,7 @@ USE_SWIFT_NS
 
 
 CaseStatement::CaseStatement()
+    :Statement(NodeType::Case)
 {
 }
 CaseStatement::~CaseStatement()

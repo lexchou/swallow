@@ -7,7 +7,7 @@ USE_SWIFT_NS
 
 
 ForInLoop::ForInLoop()
-:loopVars(NULL), container(NULL), codeBlock(NULL)
+    :Statement(NodeType::ForIn), loopVars(NULL), container(NULL), codeBlock(NULL)
 {
 }
 

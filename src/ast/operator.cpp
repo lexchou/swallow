@@ -1,8 +1,8 @@
 #include "operator.h"
 USE_SWIFT_NS
 
-Operator::Operator(OperatorType::T type, Associativity::T associativity, int precedence)
-    :type(type), associativity(associativity), precedence(precedence)
+Operator::Operator(NodeType::T nodeType, OperatorType::T type, Associativity::T associativity, int precedence)
+    :Expression(nodeType), type(type), associativity(associativity), precedence(precedence)
 {
     
 }

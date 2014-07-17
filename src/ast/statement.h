@@ -8,7 +8,7 @@ SWIFT_NS_BEGIN
 class Statement : public Node
 {
 public:
-    Statement();
+    Statement(NodeType::T nodeType);
 private:
 };
 

@@ -11,7 +11,7 @@ class GenericParameters;
 class Declaration : public Statement
 {
 public:
-    Declaration();
+    Declaration(NodeType::T nodeType);
     ~Declaration();
 public:
     void setAttributes(const std::vector<Attribute*>& attrs);

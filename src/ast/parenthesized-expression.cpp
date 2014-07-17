@@ -4,6 +4,7 @@ USE_SWIFT_NS
 
 
 ParenthesizedExpression::ParenthesizedExpression()
+    :Expression(NodeType::ParenthesizedExpression)
 {
     
 }

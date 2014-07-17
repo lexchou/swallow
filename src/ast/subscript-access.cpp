@@ -3,6 +3,7 @@ USE_SWIFT_NS
 
 
 SubscriptAccess::SubscriptAccess(Expression* self, Expression* index)
+    :Expression(NodeType::SubscriptAccess)
 {
     setSelf(self);
     setIndex(index);

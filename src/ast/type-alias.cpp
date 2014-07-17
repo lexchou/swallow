@@ -5,7 +5,7 @@ USE_SWIFT_NS
 
 
 TypeAlias::TypeAlias()
-    :type(NULL)
+    :Declaration(NodeType::TypeAlias), type(NULL)
 {
 }
 TypeAlias::~TypeAlias()

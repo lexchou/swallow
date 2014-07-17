@@ -5,7 +5,8 @@
 USE_SWIFT_NS
 
 
-TypeNode::TypeNode()
+TypeNode::TypeNode(NodeType::T nodeType)
+    :Statement(nodeType)
 {
 }
 TypeNode::~TypeNode()

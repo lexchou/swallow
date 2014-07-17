@@ -3,6 +3,7 @@ USE_SWIFT_NS
 
 
 InitializerReference::InitializerReference(Expression* expr)
+:Expression(NodeType::InitRef)
 {
     setExpression(expr);
 }

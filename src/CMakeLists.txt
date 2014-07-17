@@ -40,6 +40,7 @@ SET(SWIFT_PARSER_SRC ${SWIFT_TOKENIZER_SRC}
 
     semantics/symbol-registry.cpp
     semantics/symbol-scope.cpp
+    semantics/type-inference-action.cpp
 
     ast/node.cpp
     ast/node-visitor.cpp

@@ -4,7 +4,7 @@ USE_SWIFT_NS
 
 
 ImplicitlyUnwrappedOptional::ImplicitlyUnwrappedOptional()
-    :innerType(NULL)
+    :TypeNode(NodeType::ImplicitlyUnwrappedOptional), innerType(NULL)
 {
 }
 ImplicitlyUnwrappedOptional::~ImplicitlyUnwrappedOptional()

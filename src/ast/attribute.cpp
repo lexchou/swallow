@@ -4,7 +4,7 @@ USE_SWIFT_NS
 
 
 Attribute::Attribute()
-    :Node()
+    :Node(NodeType::Attribute)
 {
 }
 void Attribute::serialize(std::wostream& out)

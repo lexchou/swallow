@@ -4,6 +4,7 @@ USE_SWIFT_NS
 
 
 BreakStatement::BreakStatement()
+    :Statement(NodeType::Break)
 {
 }
 void BreakStatement::serialize(std::wostream& out)

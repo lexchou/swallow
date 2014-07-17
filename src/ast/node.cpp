@@ -13,8 +13,8 @@ std::list<Node*> Node::UnreleasedNodes;
 #endif
 
 
-Node::Node()
-:autoReleasePool(NULL)
+Node::Node(NodeType::T nodeType)
+:autoReleasePool(NULL), nodeType(nodeType)
 {
 #ifdef TRACE_NODE
     NodeCount++;
@@ -59,4 +59,8 @@ AutoReleasePool* Node::getAutoReleasePool()
 SourceInfo* Node::getSourceInfo()
 {
     return &sourceInfo;
+}
+NodeType::T Node::getNodeType()
+{
+    return nodeType;
 }

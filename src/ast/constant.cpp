@@ -6,6 +6,7 @@ USE_SWIFT_NS
 
 
 Constant::Constant()
+    :Declaration(NodeType::Constant)
 {
 }
 Constant::~Constant()

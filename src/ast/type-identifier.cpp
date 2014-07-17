@@ -4,6 +4,7 @@ USE_SWIFT_NS
 
 
 TypeIdentifier::TypeIdentifier()
+    :TypeNode(NodeType::TypeIdentifier)
 {
     nestedType = NULL;
 }

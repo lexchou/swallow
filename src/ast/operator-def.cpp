@@ -4,6 +4,7 @@ USE_SWIFT_NS
 
 
 OperatorDef::OperatorDef()
+    :Declaration(NodeType::Operator)
 {
     associativity = Associativity::Left;
     precedence = 100;

@@ -4,8 +4,8 @@
 USE_SWIFT_NS
 
 
-TypeDeclaration::TypeDeclaration()
-    :identifier(NULL)
+TypeDeclaration::TypeDeclaration(NodeType::T nodeType)
+    :Declaration(nodeType), identifier(NULL)
 {
 }
 

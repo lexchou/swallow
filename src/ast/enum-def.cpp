@@ -6,6 +6,7 @@ USE_SWIFT_NS
 
 
 EnumDef::EnumDef()
+    :TypeDeclaration(NodeType::Enum)
 {
 }
 EnumDef::~EnumDef()

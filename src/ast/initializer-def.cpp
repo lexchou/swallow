@@ -6,7 +6,7 @@ USE_SWIFT_NS
 
 
 InitializerDef::InitializerDef()
-    :convenience(false), parameters(NULL), body(NULL)
+    :Declaration(NodeType::Init), convenience(false), parameters(NULL), body(NULL)
 {
 }
 

@@ -5,7 +5,7 @@ USE_SWIFT_NS
 
 
 GenericConstraint::GenericConstraint()
-:identifier(NULL)
+:Node(NodeType::GenericConstraint), identifier(NULL)
 {
 }
 GenericConstraint::~GenericConstraint()

@@ -8,7 +8,7 @@ USE_SWIFT_NS
 
 
 Variable::Variable()
-    :name(NULL), type(NULL), initializer(NULL), getter(NULL), setter(NULL), willSet(NULL), didSet(NULL)
+    :Declaration(NodeType::Variable), name(NULL), type(NULL), initializer(NULL), getter(NULL), setter(NULL), willSet(NULL), didSet(NULL)
 {
 }
 

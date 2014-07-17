@@ -5,6 +5,7 @@ USE_SWIFT_NS
 
 
 Parameters::Parameters()
+:Node(NodeType::Parameters)
 {
     variadicParameters = false;
 }

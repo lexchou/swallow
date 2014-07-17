@@ -3,6 +3,7 @@ USE_SWIFT_NS
 
 
 DictionaryLiteral::DictionaryLiteral()
+    :Expression(NodeType::DictionaryLiteral)
 {
 
 }

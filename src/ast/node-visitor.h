@@ -4,11 +4,23 @@
 
 SWIFT_NS_BEGIN
 
+class Variables;
+class Constant;
+class Assignment;
+class ClassDef;
+class StructDef;
+class EnumDef;
+class ProtocolDef;
+class ExtensionDef;
+class FunctionDef;
+
 class NodeVisitor
 {
 public:
     virtual ~NodeVisitor(){}
 public:
+    virtual void visitVariables(Variables* node){}
+    virtual void visitConstants(Constant* node){}
     virtual void visitAssignment(Assignment* node){}
     virtual void visitClass(ClassDef* node){}
     virtual void visitStruct(StructDef* node){}

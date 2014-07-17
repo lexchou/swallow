@@ -7,7 +7,7 @@ USE_SWIFT_NS
 
 
 SubscriptDef::SubscriptDef()
-    :parameters(NULL), returnType(NULL), getter(NULL), setter(NULL)
+    :Declaration(NodeType::Subscript), parameters(NULL), returnType(NULL), getter(NULL), setter(NULL)
 {
 }
 

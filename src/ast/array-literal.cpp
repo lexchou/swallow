@@ -2,6 +2,7 @@
 USE_SWIFT_NS
 
 ArrayLiteral::ArrayLiteral()
+    :Expression(NodeType::ArrayLiteral)
 {
 
 }

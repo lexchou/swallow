@@ -6,6 +6,7 @@
 SWIFT_NS_BEGIN
 class TypeNode;
 class GenericArgument;
+class Type;
 class Identifier : public Expression
 {
 public:
@@ -15,14 +16,16 @@ public:
     void serialize(std::wostream& out);
     const std::wstring& getIdentifier() const { return identifier;}
     
-    void setType(TypeNode* type);
-    TypeNode* getType();
+    void setDeclaredType(TypeNode* type);
+    TypeNode* getDeclaredType();
     
     GenericArgument* getGenericArgument();
     void setGenericArgument(GenericArgument* val);
+public:
+
 private:
     std::wstring identifier;
-    TypeNode* type;
+    TypeNode* declaredType;
     GenericArgument* genericArgument;
 };
 

@@ -4,7 +4,7 @@ USE_SWIFT_NS
 
 
 StructDef::StructDef()
-    :TypeDeclaration()
+    :TypeDeclaration(NodeType::Struct)
 {
 }
 void StructDef::serialize(std::wostream& out)

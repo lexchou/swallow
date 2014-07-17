@@ -4,7 +4,7 @@ USE_SWIFT_NS
 
 
 ClassDef::ClassDef()
-    :TypeDeclaration()
+    :TypeDeclaration(NodeType::Class)
 {
 }
 void ClassDef::serialize(std::wostream& out)

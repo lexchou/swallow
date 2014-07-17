@@ -1,12 +1,12 @@
 #ifndef TEST_TYPE_INFERENCE_H
 #define TEST_TYPE_INFERENCE_H
 
-#include "tests/utils.h"
+#include "tests/semantics/semantic-test.h"
 
 
 using namespace Swift;
 
-class TestTypeInference : public SwiftTestCase
+class TestTypeInference : public SemanticTestCase
 {
     CPPUNIT_TEST_SUITE(TestTypeInference);
     CPPUNIT_TEST(testLiteral);

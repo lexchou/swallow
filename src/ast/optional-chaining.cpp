@@ -4,7 +4,7 @@ USE_SWIFT_NS
 
 
 OptionalChaining::OptionalChaining(Expression* expr)
-:expression(expr)
+    :Expression(NodeType::OptionalChaining), expression(expr)
 {
 }
 OptionalChaining::~OptionalChaining()

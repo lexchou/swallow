@@ -4,7 +4,7 @@ USE_SWIFT_NS
 
 
 OptionalType::OptionalType()
-    :innerType(NULL)
+    :TypeNode(NodeType::OptionalType), innerType(NULL)
 {
 }
 OptionalType::~OptionalType()

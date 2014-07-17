@@ -2,7 +2,7 @@
 USE_SWIFT_NS
 
 IntegerLiteral::IntegerLiteral(const std::wstring& val)
-:value(val)
+    :Expression(NodeType::IntegerLiteral), value(val)
 {
 }
 void IntegerLiteral::serialize(std::wostream& out)

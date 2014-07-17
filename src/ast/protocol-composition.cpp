@@ -5,6 +5,7 @@ USE_SWIFT_NS
 
 
 ProtocolComposition::ProtocolComposition()
+    :TypeNode(NodeType::ProtocolComposition)
 {
 }
 

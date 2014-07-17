@@ -5,7 +5,7 @@ USE_SWIFT_NS
 
 
 SelfExpression::SelfExpression(Expression* expr)
-:expression(expr)
+    :Expression(NodeType::Self), expression(expr)
 {
 }
 SelfExpression::~SelfExpression()

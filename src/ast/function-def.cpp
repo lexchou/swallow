@@ -7,7 +7,7 @@ USE_SWIFT_NS
 
 
 FunctionDef::FunctionDef()
-    :returnType(NULL), body(NULL)
+    :Declaration(NodeType::Function), returnType(NULL), body(NULL)
 {
 }
 

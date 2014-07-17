@@ -4,7 +4,7 @@ USE_SWIFT_NS
 
 
 LabeledStatement::LabeledStatement()
-    :statement(NULL)
+    :Statement(NodeType::LabeledStatement), statement(NULL)
 {
 }
 LabeledStatement::~LabeledStatement()

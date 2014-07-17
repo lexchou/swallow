@@ -5,6 +5,7 @@ USE_SWIFT_NS
 
 
 Variables::Variables()
+    :Declaration(NodeType::Variables)
 {
 }
 Variables::~Variables()

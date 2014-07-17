@@ -2,7 +2,7 @@
 USE_SWIFT_NS
 
 ConditionalOperator::ConditionalOperator(Pattern* expr, Expression* trueExpr, Expression* falseExpr)
-:Operator(OperatorType::Ternary, Associativity::Right, 100)
+    :Operator(NodeType::ConditionalOperator, OperatorType::Ternary, Associativity::Right, 100)
 {
     this->setCondition(expr);
     this->setTrueExpression(trueExpr);

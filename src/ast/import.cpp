@@ -4,7 +4,7 @@ USE_SWIFT_NS
 
 
 Import::Import()
-    :kind(_)
+    :Declaration(NodeType::Import), kind(_)
 {
 }
 void Import::serialize(std::wostream& out)

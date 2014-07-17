@@ -5,7 +5,7 @@ USE_SWIFT_NS
 
 
 FunctionCall::FunctionCall()
-:function(NULL), arguments(NULL), trailingClosure(NULL)
+    :Expression(NodeType::FunctionCall), function(NULL), arguments(NULL), trailingClosure(NULL)
 {
     
 }

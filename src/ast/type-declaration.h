@@ -9,7 +9,7 @@ class TypeIdentifier;
 class TypeDeclaration : public Declaration
 {
 public:
-    TypeDeclaration();
+    TypeDeclaration(NodeType::T nodeType);
     ~TypeDeclaration();
 public:
     void addParent(TypeIdentifier* parent);

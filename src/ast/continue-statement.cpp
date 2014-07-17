@@ -4,6 +4,7 @@ USE_SWIFT_NS
 
 
 ContinueStatement::ContinueStatement()
+    :Statement(NodeType::Continue)
 {
 }
 void ContinueStatement::serialize(std::wostream& out)

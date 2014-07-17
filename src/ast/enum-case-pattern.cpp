@@ -5,7 +5,7 @@ USE_SWIFT_NS
 
 
 EnumCasePattern::EnumCasePattern()
-    :associatedBinding(NULL)
+    :Pattern(NodeType::EnumCasePattern), associatedBinding(NULL)
 {
 }
 EnumCasePattern::~EnumCasePattern()

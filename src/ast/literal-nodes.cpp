@@ -3,7 +3,7 @@ USE_SWIFT_NS
 
 
 BooleanLiteral::BooleanLiteral(bool val)
-    :value(val)
+    :Expression(NodeType::BooleanLiteral), value(val)
 {
 }
 

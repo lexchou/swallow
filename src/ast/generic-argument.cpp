@@ -5,6 +5,7 @@ USE_SWIFT_NS
 
 
 GenericArgument::GenericArgument()
+:Node(NodeType::GenericArgument)
 {
 }
 GenericArgument::~GenericArgument()

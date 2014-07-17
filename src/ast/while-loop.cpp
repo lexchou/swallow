@@ -6,7 +6,7 @@ USE_SWIFT_NS
 
 
 WhileLoop::WhileLoop()
-    :codeBlock(NULL), condition(NULL)
+    :Statement(NodeType::While), codeBlock(NULL), condition(NULL)
 {
 }
 

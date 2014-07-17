@@ -6,6 +6,7 @@ USE_SWIFT_NS
 
 
 GenericParameters::GenericParameters()
+:Node(NodeType::GenericParameter)
 {
 }
 GenericParameters::~GenericParameters()

@@ -5,7 +5,7 @@ USE_SWIFT_NS
 
 
 IfStatement::IfStatement()
-    :condition(NULL), thenPart(NULL), elsePart(NULL)
+    :Statement(NodeType::If), condition(NULL), thenPart(NULL), elsePart(NULL)
 {
 }
 

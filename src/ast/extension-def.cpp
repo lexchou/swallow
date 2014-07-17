@@ -5,7 +5,7 @@ USE_SWIFT_NS
 
 
 ExtensionDef::ExtensionDef()
-    :TypeDeclaration()
+    :TypeDeclaration(NodeType::Extension)
 {
 }
 void ExtensionDef::serialize(std::wostream& out)

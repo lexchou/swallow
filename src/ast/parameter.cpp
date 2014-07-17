@@ -6,6 +6,7 @@ USE_SWIFT_NS
 
 
 Parameter::Parameter()
+:Node(NodeType::Parameter)
 {
     inout = false;
     accessibility = None;

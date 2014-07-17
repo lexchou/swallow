@@ -4,6 +4,7 @@ USE_SWIFT_NS
 
 
 CodeBlock::CodeBlock()
+    :Statement(NodeType::CodeBlock)
 {
 }
 CodeBlock::~CodeBlock()

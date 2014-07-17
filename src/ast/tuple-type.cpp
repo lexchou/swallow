@@ -5,6 +5,7 @@ USE_SWIFT_NS
 
 
 TupleType::TupleType()
+    :TypeNode(NodeType::TupleType)
 {
     variadicParameters = false;
 }

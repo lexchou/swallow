@@ -5,7 +5,7 @@ USE_SWIFT_NS
 
 
 DeinitializerDef::DeinitializerDef()
-:body(NULL)
+    :Declaration(NodeType::Deinit), body(NULL)
 {
 }
 DeinitializerDef::~DeinitializerDef()

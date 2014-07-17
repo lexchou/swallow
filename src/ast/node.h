@@ -12,16 +12,95 @@ SWIFT_NS_BEGIN
 
 class AutoReleasePool;
 class NodeVisitor;
+struct NodeType
+{
+    enum T
+    {
+        ArrayLiteral,
+        ArrayType,
+        Assignment,
+        Attribute,
+        BinaryOperator,
+        BooleanLiteral,
+        Break,
+        Case,
+        Class,
+        Closure,
+        CodeBlock,
+        Comment,
+        CompileConstant,
+        ConditionalOperator,
+        Constant,
+        Continue,
+        Deinit,
+        DictionaryLiteral,
+        Do,
+        DynamicType,
+        EnumCasePattern,
+        Enum,
+        Extension,
+        Fallthrough,
+        FloatLiteral,
+        ForIn,
+        For,
+        ForcedValue,
+        FunctionCall,
+        Function,
+        FunctionType,
+        GenericArgument,
+        GenericConstraint,
+        GenericParameter,
+        Identifier,
+        If,
+        ImplicitlyUnwrappedOptional,
+        Import,
+        InOut,
+        Init,
+        InitRef,
+        IntegerLiteral,
+        LabeledStatement,
+        LetBinding,
+        MemberAccess,
+        Operator,
+        OptionalChaining,
+        OptionalType,
+        Parameter,
+        Parameters,
+        ParenthesizedExpression,
+        ProtocolComposition,
+        Protocol,
+        Return,
+        Self,
+        StringLiteral,
+        Struct,
+        SubscriptAccess,
+        Subscript,
+        SwitchCase,
+        Tuple,
+        TupleType,
+        TypeAlias,
+        TypeCase,
+        TypeCheck,
+        TypeIdentifier,
+        UnaryOperator,
+        Variable,
+        Variables,
+        VarBinding,
+        While
+    };
+};
+
 class Node
 {
 protected:
-    Node();
+    Node(NodeType::T nodeType);
 public:
     virtual ~Node();
 public:
     SourceInfo* getSourceInfo();
     void setAutoReleasePool(AutoReleasePool* autoReleasePool);
     AutoReleasePool* getAutoReleasePool();
+    NodeType::T getNodeType();
 public:
     virtual void accept(NodeVisitor* visitor){}
 public:
@@ -31,7 +110,8 @@ protected:
 protected:
     SourceInfo sourceInfo;
     AutoReleasePool* autoReleasePool;
-    
+    NodeType::T nodeType;
+
 #ifdef TRACE_NODE
 public:
     static std::list<Node*> UnreleasedNodes;

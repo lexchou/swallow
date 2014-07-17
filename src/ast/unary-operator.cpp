@@ -3,7 +3,7 @@
 USE_SWIFT_NS;
 
 UnaryOperator::UnaryOperator(const std::wstring& op, OperatorType::T type)
-    :Operator(type, Associativity::None ,precedence), op(op)
+    :Operator(NodeType::UnaryOperator, type, Associativity::None ,precedence), op(op)
 {
 }
 UnaryOperator::~UnaryOperator()

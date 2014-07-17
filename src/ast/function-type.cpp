@@ -4,6 +4,7 @@ USE_SWIFT_NS
 
 
 FunctionType::FunctionType()
+    :TypeNode(NodeType::FunctionType)
 {
 }
 FunctionType::~FunctionType()

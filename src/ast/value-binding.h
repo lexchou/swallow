@@ -8,7 +8,7 @@ SWIFT_NS_BEGIN
 class ValueBinding : public Pattern
 {
 public:
-    ValueBinding();
+    ValueBinding(NodeType::T nodeType);
     ~ValueBinding();
 public:
     void setBinding(Pattern* st);
@@ -20,12 +20,14 @@ protected:
 class LetBinding : public ValueBinding
 {
 public:
+    LetBinding();
     virtual void serialize(std::wostream& out);
 };
 
 class VarBinding : public ValueBinding
 {
 public:
+    VarBinding();
     virtual void serialize(std::wostream& out);
 };
 

@@ -5,7 +5,7 @@ USE_SWIFT_NS
 
 
 ReturnStatement::ReturnStatement()
-    :expression(NULL)
+    :Statement(NodeType::Return), expression(NULL)
 {
 }
 ReturnStatement::~ReturnStatement()

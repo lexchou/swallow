@@ -5,7 +5,7 @@ USE_SWIFT_NS
 
 
 Tuple::Tuple()
-    :type(NULL)
+    :Expression(NodeType::Tuple), type(NULL)
 {
 }
 Tuple::~Tuple()

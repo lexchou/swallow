@@ -6,8 +6,8 @@
 USE_SWIFT_NS
 
 
-Declaration::Declaration()
-    :specifiers(0), genericParameters(NULL)
+Declaration::Declaration(NodeType::T nodeType)
+    :Statement(nodeType), specifiers(0), genericParameters(NULL)
 {
 }
 Declaration::~Declaration()

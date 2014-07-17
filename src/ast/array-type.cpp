@@ -4,7 +4,7 @@ USE_SWIFT_NS
 
 
 ArrayType::ArrayType()
-    :innerType(NULL)
+    :TypeNode(NodeType::ArrayType), innerType(NULL)
 {
 }
 ArrayType::~ArrayType()
