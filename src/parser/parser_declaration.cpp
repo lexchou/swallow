@@ -271,7 +271,7 @@ Variable* Parser::parseVariableDeclaration()
     Variable* ret = nodeFactory->createVariable(*key->getSourceInfo());
     ret->setName(key);
     ret->setTypeAttributes(attrs);
-    ret->setType(type);
+    ret->setDeclaredType(type);
     ret->setInitializer(val);
     return ret;
 }

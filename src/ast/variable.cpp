@@ -8,7 +8,7 @@ USE_SWIFT_NS
 
 
 Variable::Variable()
-    :Declaration(NodeType::Variable), name(NULL), type(NULL), initializer(NULL), getter(NULL), setter(NULL), willSet(NULL), didSet(NULL)
+    :Declaration(NodeType::Variable), name(NULL), declaredType(NULL), initializer(NULL), getter(NULL), setter(NULL), willSet(NULL), didSet(NULL), type(NULL)
 {
 }
 
@@ -16,7 +16,7 @@ Variable::~Variable()
 {
     SafeDeleteAll(typeAttributes);
     SafeDelete(name);
-    SafeDelete(type);
+    SafeDelete(declaredType);
     SafeDelete(initializer);
     SafeDelete(getter);
     SafeDelete(setter);
@@ -27,6 +27,14 @@ void Variable::serialize(std::wostream& out)
 {
 }
 
+TypePtr Variable::getType()
+{
+    return type;
+}
+void Variable::setType(TypePtr type)
+{
+    this->type = type;
+}
 
 void Variable::setName(Pattern* pattern)
 {
@@ -45,13 +53,13 @@ const Attributes& Variable::getTypeAttributes() const
 {
     return typeAttributes;
 }
-void Variable::setType(TypeNode* t)
+void Variable::setDeclaredType(TypeNode* t)
 {
-    this->type = t;
+    this->declaredType = t;
 }
-TypeNode* Variable::getType()
+TypeNode* Variable::getDeclaredType()
 {
-    return type;
+    return declaredType;
 }
 void Variable::setInitializer(Expression* expr)
 {

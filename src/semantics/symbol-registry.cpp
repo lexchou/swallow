@@ -1,5 +1,6 @@
 #include "symbol-registry.h"
 #include "symbol-scope.h"
+#include "type.h"
 using namespace Swift;
 
 SymbolRegistry::SymbolRegistry()
@@ -70,6 +71,13 @@ SymbolRegistry::SymbolRegistry()
     
 
     //?:  Right associative, precedence level 100
+
+    //Register built-in type
+    currentScope->addType(TypePtr(Type::newType(L"Int", Type::Primitive)));
+    currentScope->addType(TypePtr(Type::newType(L"Bool", Type::Primitive)));
+    currentScope->addType(TypePtr(Type::newType(L"Float", Type::Primitive)));
+    currentScope->addType(TypePtr(Type::newType(L"Double", Type::Primitive)));
+    currentScope->addType(TypePtr(Type::newType(L"String", Type::Primitive)));
 }
 
 bool SymbolRegistry::registerOperator(const std::wstring& name, OperatorType::T type, Associativity::T associativity, int precedence)
@@ -124,4 +132,52 @@ void SymbolRegistry::leaveScope()
 {
     currentScope = scopes.top();
     scopes.pop();
+}
+
+Node* SymbolRegistry::lookupSymbol(const std::wstring& name)
+{
+    Node* ret = NULL;
+    lookupSymbol(name, NULL, &ret);
+    return ret;
+}
+bool SymbolRegistry::lookupSymbol(const std::wstring& name, SymbolScope** scope, Node** ret)
+{
+    SymbolScope* s = currentScope;
+    for(; s; s = s->parent)
+    {
+        Node* symbol = s->lookup(name);
+        if(symbol)
+        {
+            if(scope)
+                *scope = s;
+            if(ret)
+                *ret = symbol;
+            return true;
+        }
+    }
+    return false;
+}
+TypePtr SymbolRegistry::lookupType(const std::wstring& name)
+{
+    TypePtr ret;
+    if(lookupType(name, NULL, &ret))
+        return ret;
+    return NULL;
+}
+bool SymbolRegistry::lookupType(const std::wstring& name, SymbolScope** scope, TypePtr* ret)
+{
+    SymbolScope* s = currentScope;
+    for(; s; s = s->parent)
+    {
+        TypePtr type = s->lookupType(name);
+        if(type)
+        {
+            if(scope)
+                *scope = s;
+            if(ret)
+                *ret = type;
+            return true;
+        }
+    }
+    return false;
 }

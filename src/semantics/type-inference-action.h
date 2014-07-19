@@ -10,10 +10,14 @@ class Expression;
 class TypeInferenceAction : public NodeVisitor
 {
 public:
+    TypeInferenceAction(SymbolRegistry* symbolRegistry);
+public:
     virtual void visitVariables(Variables* node);
     virtual void visitConstants(Constant* node);
 private:
-    Type* evaluateType(Expression* expr);
+    TypePtr evaluateType(Expression* expr);
+private:
+    SymbolRegistry* symbolRegistry;
 };
 
 

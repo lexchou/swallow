@@ -2,6 +2,7 @@
 #define TEST_TYPE_INFERENCE_H
 
 #include "tests/semantics/semantic-test.h"
+#include "semantics/type.h"
 
 
 using namespace Swift;
@@ -15,7 +16,13 @@ public:
     void testLiteral()
     {
         SEMANTIC_ANALYZE(L"let a = 34");
-        Variable* a = dynamic_cast<Variable*>(scope->lookup(L"a"));
+        Identifier* a = NULL;
+
+        CPPUNIT_ASSERT(a = dynamic_cast<Identifier*>(scope->lookup(L"a")));
+        TypePtr type = a->getType();
+        CPPUNIT_ASSERT(type);
+        TypePtr Int = symbolRegistry.getCurrentScope()->lookupType(L"Int");
+        CPPUNIT_ASSERT(type == Int);
 
     }
 

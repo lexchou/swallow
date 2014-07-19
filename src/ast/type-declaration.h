@@ -22,7 +22,7 @@ public:
     void addDeclaration(Declaration* decl);
     int numDeclarations()const;
     Declaration* getDeclaration(int i);
-private:
+public:
     std::vector<TypeIdentifier*> parents;
     TypeIdentifier* identifier;
     std::vector<Declaration*> declarations;

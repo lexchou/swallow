@@ -3,6 +3,7 @@
 #include "declaration.h"
 #include "attribute.h"
 #include <string>
+#include "semantics/type.h"
 
 SWIFT_NS_BEGIN
 class CodeBlock;
@@ -25,8 +26,8 @@ public:
     void setTypeAttributes(const Attributes& attrs);
     const Attributes& getTypeAttributes() const;
     
-    void setType(TypeNode* t);
-    TypeNode* getType();
+    void setDeclaredType(TypeNode* t);
+    TypeNode* getDeclaredType();
     
     
     void setInitializer(Expression* expr);
@@ -51,7 +52,9 @@ public:
     
     void setDidSetSetter(const std::wstring& name);
     const std::wstring& getDidSetSetter()const;
-
+public:
+    TypePtr getType();
+    void setType(TypePtr type);
 public:
     virtual void serialize(std::wostream& out);
 private:
@@ -61,12 +64,14 @@ private:
     Attributes typeAttributes;
     
     Pattern* name;
-    TypeNode* type;
+    TypeNode* declaredType;
     Expression* initializer;
     CodeBlock* getter;
     CodeBlock* setter;
     CodeBlock* willSet;
     CodeBlock* didSet;
+
+    TypePtr type;
 };
 
 SWIFT_NS_END

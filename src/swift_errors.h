@@ -25,6 +25,10 @@ struct Errors
 
         
         //semantic errors
+        E_INVALID_REDECLARATION, // Invalid redeclaration of type %
+        E_USE_OF_UNDECLARED_TYPE, // Use of undeclared type %
+        E_CANNOT_ASSIGN, // cannot assign to the result of this expression
+        E_USE_OF_UNRESOLVED_IDENTIFIER, //use of unresolved identifier '%'
         //linking errors
     };
     

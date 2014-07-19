@@ -8,3 +8,12 @@ Pattern::Pattern(NodeType::T nodeType)
 {
 }
 
+
+void Pattern::setType(TypePtr type)
+{
+    this->type = type;
+}
+TypePtr Pattern::getType()
+{
+    return type;
+}

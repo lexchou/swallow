@@ -21,8 +21,10 @@ public:
     std::pair<Pattern*, Expression*> getPair(int i);
 public:
     virtual void serialize(std::wostream& out);
-private:
-    std::vector<Pattern*> pairs;
+public://Node
+    virtual void accept(NodeVisitor* visitor);
+public:
+    std::vector<std::pair<Pattern*, Expression*> > pairs;
 };
 
 SWIFT_NS_END

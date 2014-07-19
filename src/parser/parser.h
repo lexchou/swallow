@@ -31,6 +31,7 @@ class Parameters;
 class GenericParameters;
 class GenericArgument;
 class CompilerResults;
+class Program;
 class Parser
 {
     friend struct Flags;
@@ -38,11 +39,10 @@ public:
     Parser(NodeFactory* nodeFactory, SymbolRegistry* symbolRegistry, CompilerResults* compilerResults);
     ~Parser();
 public:
-    Node* parse(const wchar_t* code);
+    Node* parseStatement(const wchar_t* code);
+    Program* parse(const wchar_t* code);
     void setFileName(const wchar_t* fileName);
     void setFunctionName(const wchar_t* function);
-public:
-    Node* parseType(const wchar_t* code);
 private:
     TypeNode* parseType();
     TypeNode* parseTypeAnnotation();

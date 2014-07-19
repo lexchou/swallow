@@ -9,6 +9,7 @@ class Assignment : public BinaryOperator
 public:
 	Assignment(Expression* lhs, Expression* rhs);
 public:
+    virtual void accept(NodeVisitor* visitor);
 };
 SWIFT_NS_END
 

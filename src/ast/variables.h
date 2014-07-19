@@ -21,10 +21,12 @@ public:
     void addVariable(Variable* var);
     Variable* getVariable(int i);
     int numVariables();
-    
+public://Node
+    virtual void accept(NodeVisitor* visitor);
+
 public:
     virtual void serialize(std::wostream& out);
-private:
+public:
     std::vector<Variable*> variables;
 };
 

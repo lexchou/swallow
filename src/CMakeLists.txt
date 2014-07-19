@@ -40,9 +40,12 @@ SET(SWIFT_PARSER_SRC ${SWIFT_TOKENIZER_SRC}
 
     semantics/symbol-registry.cpp
     semantics/symbol-scope.cpp
+    semantics/type.cpp
     semantics/type-inference-action.cpp
+    semantics/symbol-resolve-action.cpp
 
     ast/node.cpp
+    ast/program.cpp
     ast/node-visitor.cpp
     ast/expression.cpp
     ast/pattern.cpp
@@ -159,6 +162,7 @@ ADD_EXECUTABLE(TestSemantics
     tests/semantics/test-semantics.cpp
     tests/semantics/test-constant-folding.cpp
     tests/semantics/test-type-inference.cpp
+    tests/semantics/test-symbol-resolve.cpp
     ${SWIFT_TOKENIZER_SRC} ${SWIFT_PARSER_SRC})
 target_link_libraries(TestSemantics cppunit)
 

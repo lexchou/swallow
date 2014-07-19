@@ -44,6 +44,13 @@ public:
     bool isInfixOperator(const std::wstring& name);
 
     SymbolScope* getCurrentScope();
+
+
+    bool lookupSymbol(const std::wstring& name, SymbolScope** scope, Node** ret);
+    Node* lookupSymbol(const std::wstring& name);
+    bool lookupType(const std::wstring& name, SymbolScope** scope, TypePtr* ret);
+    TypePtr lookupType(const std::wstring& name);
+
 protected:
     void enterScope(SymbolScope* scope);
     void leaveScope();

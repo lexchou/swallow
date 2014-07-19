@@ -1,4 +1,4 @@
-
+#include <ast/node-visitor.h>
 #include "variables.h"
 #include "variable.h"
 USE_SWIFT_NS
@@ -36,4 +36,9 @@ Variable* Variables::getVariable(int i)
 int Variables::numVariables()
 {
     return variables.size();
+}
+
+void Variables::accept(NodeVisitor* visitor)
+{
+    visitor->visitVariables(this);
 }

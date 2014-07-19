@@ -13,7 +13,8 @@ struct ErrorLevel
     {
         Fatal,
         Error,
-        Warning
+        Warning,
+        Note
     };
 };
 struct CompilerResult : SourceInfo

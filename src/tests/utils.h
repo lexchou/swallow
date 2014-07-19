@@ -25,7 +25,24 @@ public:
         NodeFactory nodeFactory;
         Parser parser(&nodeFactory, &registry, &compilerResults);
         parser.setFileName(L"<file>");
-        Node* ret = parser.parse(str);
+        Node* ret = parser.parseStatement(str);
+        dumpCompilerResults(compilerResults);
+        return ret;
+    }
+
+    Swift::Program* parseStatements(Swift::SymbolRegistry& registry, Swift::CompilerResults& compilerResults, const char* func, const wchar_t* str)
+    {
+        using namespace Swift;
+        NodeFactory nodeFactory;
+        Parser parser(&nodeFactory, &registry, &compilerResults);
+        parser.setFileName(L"<file>");
+        Program* ret = parser.parse(str);
+        dumpCompilerResults(compilerResults);
+        return ret;
+    }
+    void dumpCompilerResults(Swift::CompilerResults& compilerResults)
+    {
+        using namespace Swift;
         if(compilerResults.numResults() > 0)
         {
             for(int i = 0; i < compilerResults.numResults(); i++)
@@ -49,8 +66,6 @@ public:
             }
 
         }
-
-        return ret;
     }
     void wcs_assertEquals(const wchar_t* expected, const std::wstring& actual, const char* file, int line)
     {

@@ -67,6 +67,7 @@ struct NodeType
         Parameter,
         Parameters,
         ParenthesizedExpression,
+        Program,
         ProtocolComposition,
         Protocol,
         Return,

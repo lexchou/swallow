@@ -20,6 +20,10 @@ void NodeFactory::bindNode(const SourceInfo&s, Node* n)
 }
 
 
+Program* NodeFactory::createProgram()
+{
+    return _(SourceInfo(), new Program());
+}
 CommentNode* NodeFactory::createComment(const SourceInfo& state, const std::wstring& comment)
 {
     return _(state, new CommentNode(comment));

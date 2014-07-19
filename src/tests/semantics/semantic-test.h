@@ -1,6 +1,7 @@
 #ifndef SEMANTIC_TEST_H
 #define SEMANTIC_TEST_H
 #include "tests/utils.h"
+#include "semantics/symbol-resolve-action.h"
 #include "semantics/type-inference-action.h"
 
 
@@ -10,11 +11,16 @@ public:
     Swift::Node* analyzeStatement(Swift::SymbolRegistry& registry, Swift::CompilerResults& compilerResults, const char* func, const wchar_t* str)
     {
         using namespace Swift;
-        Node* ret = parseStatement(registry, compilerResults, func, str);
+        Program* ret = parseStatements(registry, compilerResults, func, str);
         if(!ret)
             return ret;
         {
-            TypeInferenceAction action;
+            SymbolResolveAction action(&registry, &compilerResults);
+            ret->accept(&action);
+        }
+
+        {
+            TypeInferenceAction action(&registry);
             ret->accept(&action);
         }
 

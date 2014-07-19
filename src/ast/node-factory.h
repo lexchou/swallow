@@ -60,6 +60,7 @@ class ProtocolComposition;
 class TupleType;
 class Attribute;
 class Closure;
+class Program;
 
 
 
@@ -93,6 +94,7 @@ public:
     NodeFactory();
     virtual ~NodeFactory(){}
 public:
+    virtual Program* createProgram();
     virtual CommentNode* createComment(const SourceInfo& state, const std::wstring& comment);
     virtual BooleanLiteral* createBoolean(const SourceInfo& state, bool value);
     virtual IntegerLiteral* createInteger(const SourceInfo& state, const std::wstring& value);

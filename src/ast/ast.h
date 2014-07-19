@@ -1,5 +1,6 @@
 #ifndef AST_H
 #define AST_H
+#include "program.h"
 #include "unary-operator.h"
 #include "binary-operator.h"
 #include "in-out-parameter.h"

@@ -10,11 +10,7 @@
 #include <iostream>
 using namespace Swift;
 
-Node* Parser::parseType(const wchar_t* code)
-{
-    tokenizer->set(code);
-    return parseType();
-}
+
 TypeNode* Parser::parseTypeAnnotation()
 {
     Attributes attrs;

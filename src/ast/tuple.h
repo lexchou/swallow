@@ -19,7 +19,7 @@ public:
     
     TypeNode* getType();
     void setType(TypeNode* type);
-private:
+public:
     TypeNode* type;
     std::vector<Pattern*> elements;
 };
