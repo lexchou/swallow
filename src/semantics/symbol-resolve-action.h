@@ -8,6 +8,7 @@ SWIFT_NS_BEGIN
 class SymbolRegistry;
 class CompilerResults;
 class TypeDeclaration;
+class Expression;
 class Pattern;
 class SymbolResolveAction : public NodeVisitor
 {
@@ -25,8 +26,15 @@ public:
     virtual void visitFunction(FunctionDef* node);
 private:
     void defineType(TypeDeclaration* node, Type::Category category);
+    //Register all symbols in the pattern
     void registerPattern(Pattern* pattern);
+    //Verify each symbol in the tuple is initialized
     void verifyTuplePattern(Pattern* pattern);
+
+    //Verify every symbol in the expression is initialized
+    void verifyExpression(Expression* expr);
+    //set or reset flag in all identifiers in given pattern
+    void setFlag(Pattern* pattern, bool add, int flag);
 private:
     SymbolRegistry* symbolRegistry;
     CompilerResults* compilerResults;

@@ -33,7 +33,8 @@ public:
     Swift::CompilerResults compilerResults; \
     Node* root = analyzeStatement(symbolRegistry, compilerResults, __FUNCTION__, (s)); \
     tracer.node = root; \
-    Swift::SymbolScope* scope = symbolRegistry.getCurrentScope();
+    Swift::SymbolScope* scope = symbolRegistry.getCurrentScope(); \
+    (void)scope;
 
 
 

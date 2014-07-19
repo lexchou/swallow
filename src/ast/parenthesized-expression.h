@@ -18,8 +18,9 @@ public:
     Expression* get(int idx);
 public:
     virtual void serialize(std::wostream& out);
-private:
-    std::vector<std::pair<std::wstring, Expression*> > expressions;
+public:
+    typedef std::pair<std::wstring, Expression*> Term;
+    std::vector<Term> expressions;
 };
 
 SWIFT_NS_END

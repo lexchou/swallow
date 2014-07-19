@@ -29,6 +29,8 @@ struct Errors
         E_USE_OF_UNDECLARED_TYPE, // Use of undeclared type %
         E_CANNOT_ASSIGN, // cannot assign to the result of this expression
         E_USE_OF_UNRESOLVED_IDENTIFIER, //use of unresolved identifier '%'
+        E_USE_OF_UNINITIALIZED_VARIABLE, //use of local variable 'b' before its declaration
+        E_USE_OF_INITIALIZING_VARIABLE, //variable used within its own initial value
         //linking errors
     };
     

@@ -40,7 +40,7 @@ public:
     void addStatement(Statement* st);
     int numStatement()const;
     Statement* getStatement(int i);
-private:
+public:
     CaptureSpecifier captureSpecifier;
     Expression* capture;
     Parameters* parameters;

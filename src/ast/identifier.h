@@ -10,6 +10,13 @@ class Type;
 class Identifier : public Expression
 {
 public:
+    enum Flags
+    {
+        F_INITIALIZING = 1,
+        F_INITIALIZED = 2,
+    };
+
+public:
     Identifier(const std::wstring& identifier);
     ~Identifier();
 public:
@@ -22,7 +29,7 @@ public:
     GenericArgument* getGenericArgument();
     void setGenericArgument(GenericArgument* val);
 public:
-
+    int flags;
 private:
     std::wstring identifier;
     TypeNode* declaredType;

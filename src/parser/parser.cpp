@@ -221,6 +221,8 @@ Program* Parser::parse(const wchar_t* code)
         while(peek(token))
         {
             Statement* statement = parseStatement();
+            if(!statement)
+                break;
             ret->addStatement(statement);
         }
         pool.removeAll();

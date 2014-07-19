@@ -12,6 +12,7 @@ class TestSymbolResolve : public SemanticTestCase
     CPPUNIT_TEST_SUITE(TestSymbolResolve);
     CPPUNIT_TEST(testUndeclaredVars);
     CPPUNIT_TEST(testUseVariableBeforeDeclaration);
+    CPPUNIT_TEST(testVariableUsedWithinItsOwnInitialization);
     CPPUNIT_TEST_SUITE_END();
 public:
     void testUndeclaredVars()
@@ -25,11 +26,23 @@ public:
 
     void testUseVariableBeforeDeclaration()
     {
-        SEMANTIC_ANALYZE(L"let a = b, b = 3;");
+        SEMANTIC_ANALYZE(L"let a = b, b = 1;");
+        CPPUNIT_ASSERT_EQUAL(1, compilerResults.numResults());
+
+        const CompilerResult& r = compilerResults.getResult(0);
+        CPPUNIT_ASSERT_EQUAL((int)Errors::E_USE_OF_UNINITIALIZED_VARIABLE, r.code);
+        ASSERT_EQUALS(L"b", r.item);
+
+    }
+
+    void testVariableUsedWithinItsOwnInitialization()
+    {
+        SEMANTIC_ANALYZE(L"let a = a + 1;");
         CPPUNIT_ASSERT_EQUAL(1, compilerResults.numResults());
         const CompilerResult& r = compilerResults.getResult(0);
-        CPPUNIT_ASSERT_EQUAL((int)Errors::E_USE_OF_UNRESOLVED_IDENTIFIER, r.code);
+        CPPUNIT_ASSERT_EQUAL((int)Errors::E_USE_OF_INITIALIZING_VARIABLE, r.code);
         ASSERT_EQUALS(L"a", r.item);
+
     }
 
 

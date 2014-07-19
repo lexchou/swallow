@@ -6,6 +6,7 @@ USE_SWIFT_NS
 Identifier::Identifier(const std::wstring& identifier)
     :Expression(NodeType::Identifier), identifier(identifier), declaredType(NULL), genericArgument(NULL)
 {
+    flags = 0;
 }
 
 Identifier::~Identifier()

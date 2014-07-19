@@ -24,7 +24,7 @@ public:
     int numIndices();
 public:
     virtual void serialize(std::wostream& out);
-private:
+public:
     Expression* self;
     std::vector<Expression*> indices;
     

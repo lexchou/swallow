@@ -59,6 +59,9 @@ public:
                     case ErrorLevel::Warning:
                         std::wcout<<L"Warning:";
                         break;
+                    case ErrorLevel::Note:
+                        std::wcout<<L"Note:";
+                        break;
                 }
                 std::wcout<<L"("<<res.line<<L", "<<res.column<<") ";
                 std::wstring msg = compilerResults.format(res);

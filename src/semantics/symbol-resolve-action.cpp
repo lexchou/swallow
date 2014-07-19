@@ -53,14 +53,6 @@ void SymbolResolveAction::verifyTuplePattern(Pattern* pattern)
 
 }
 
-void SymbolResolveAction::visitVariables(Variables* node)
-{
-    for(Variable* var : node->variables)
-    {
-        Pattern* name = var->getName();
-        registerPattern(name);
-    }
-}
 void SymbolResolveAction::registerPattern(Pattern* pattern)
 {
     if(pattern->getNodeType() == NodeType::Identifier)
@@ -77,13 +69,101 @@ void SymbolResolveAction::registerPattern(Pattern* pattern)
         }
     }
 }
+
+void SymbolResolveAction::visitVariables(Variables* node)
+{
+    for(Variable* var : node->variables)
+    {
+        Pattern* name = var->getName();
+        registerPattern(name);
+    }
+}
+
 void SymbolResolveAction::visitConstants(Constant* node)
 {
     for(const std::pair<Pattern*, Expression*>& c : node->pairs)
     {
         registerPattern(c.first);
     }
+    //verify initializer
+    for(const std::pair<Pattern*, Expression*>& c : node->pairs)
+    {
+        setFlag(c.first, true, Identifier::F_INITIALIZING);
+        verifyExpression(c.second);
+        setFlag(c.first, true, Identifier::F_INITIALIZED);
+        setFlag(c.first, false, Identifier::F_INITIALIZING);
+    }
 }
+
+void SymbolResolveAction::verifyExpression(Expression* expr)
+{
+    struct IdentifierResolveAction : NodeVisitor
+    {
+        SymbolRegistry* symbolRegistry;
+        CompilerResults* compilerResults;
+        virtual void visitClosure(Closure* node)
+        {
+            node->accept(this);
+        }
+        virtual void visitIdentifier(Identifier* id)
+        {
+            Node* sym = symbolRegistry->lookupSymbol(id->getIdentifier());
+            if(!sym)
+            {
+                compilerResults->add(ErrorLevel::Error, *id->getSourceInfo(), Errors::E_USE_OF_UNRESOLVED_IDENTIFIER, id->getIdentifier());
+                return;
+            }
+            if(Identifier* identifier = dynamic_cast<Identifier*>(sym))
+            {
+                if((identifier->flags & Identifier::F_INITIALIZING))
+                {
+                    compilerResults->add(ErrorLevel::Error, *id->getSourceInfo(), Errors::E_USE_OF_INITIALIZING_VARIABLE, id->getIdentifier());
+                }
+                else if((identifier->flags & Identifier::F_INITIALIZED) == 0)
+                {
+                    compilerResults->add(ErrorLevel::Error, *id->getSourceInfo(), Errors::E_USE_OF_UNINITIALIZED_VARIABLE, id->getIdentifier());
+                }
+            }
+        }
+        virtual void visitStatement(Statement* st)
+        {
+            st->accept(this);
+        }
+
+        virtual void visitEnumCasePattern(EnumCasePattern* node)
+        {
+            //TODO: check if the enum case is defined
+        }
+    };
+    IdentifierResolveAction visitor;
+    visitor.symbolRegistry = symbolRegistry;
+    visitor.compilerResults = compilerResults;
+
+    NodeVisitor::acceptPattern(expr, &visitor);
+
+}
+void SymbolResolveAction::setFlag(Pattern* pattern, bool add, int flag)
+{
+    NodeType::T t = pattern->getNodeType();
+    if(t == NodeType::Identifier)
+    {
+        Identifier* id = static_cast<Identifier*>(pattern);
+        if(add)
+            id->flags |= flag;
+        else
+            id->flags &= ~flag;
+    }
+    else if(t == NodeType::Tuple)
+    {
+        Tuple* tuple = static_cast<Tuple*>(pattern);
+        for(Pattern* element : tuple->elements)
+        {
+            setFlag(element, add, flag);
+        }
+    }
+
+}
+
 void SymbolResolveAction::visitClass(ClassDef* node)
 {
     defineType(node, Type::Class);
