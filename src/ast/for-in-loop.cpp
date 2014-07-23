@@ -3,6 +3,7 @@
 #include "pattern.h"
 #include "expression.h"
 #include "code-block.h"
+#include "node-visitor.h"
 USE_SWIFT_NS
 
 
@@ -21,6 +22,10 @@ ForInLoop::~ForInLoop()
 void ForInLoop::serialize(std::wostream& out)
 {
 
+}
+void ForInLoop::accept(NodeVisitor* visitor)
+{
+    visitor->visitForIn(this);
 }
 
 

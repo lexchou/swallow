@@ -11,6 +11,7 @@ public:
     ProtocolDef();
 public:
     virtual void serialize(std::wostream& out);
+    virtual void accept(NodeVisitor* visitor);
 };
 
 SWIFT_NS_END

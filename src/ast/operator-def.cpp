@@ -1,5 +1,6 @@
 
 #include "operator-def.h"
+#include "node-visitor.h"
 USE_SWIFT_NS
 
 
@@ -47,6 +48,10 @@ void OperatorDef::serialize(std::wostream& out)
         }
     }
     out<<L"}";
+}
+void OperatorDef::accept(NodeVisitor* visitor)
+{
+    visitor->visitOperator(this);
 }
 
 void OperatorDef::setName(const std::wstring& name)

@@ -1,4 +1,5 @@
 #include "dictionary-literal.h"
+#include "node-visitor.h"
 USE_SWIFT_NS
 
 
@@ -44,4 +45,7 @@ void DictionaryLiteral::serialize(std::wostream& out)
     }
     out<<L"]";
 }
-
+void DictionaryLiteral::accept(NodeVisitor* visitor)
+{
+    visitor->visitDictionaryLiteral(this);
+}

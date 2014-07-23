@@ -23,7 +23,11 @@ public:
     void setDefaultCase(CaseStatement* c);
     CaseStatement* getDefaultCase();
 public:
+    std::vector<CaseStatement*>::iterator begin() {return cases.begin();}
+    std::vector<CaseStatement*>::iterator end() {return cases.end();}
+public:
     virtual void serialize(std::wostream& out);
+    virtual void accept(NodeVisitor* visitor);
 private:
     Expression* controlExpression;
     std::vector<CaseStatement*> cases;

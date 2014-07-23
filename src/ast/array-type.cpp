@@ -1,5 +1,6 @@
 
 #include "array-type.h"
+#include "node-visitor.h"
 USE_SWIFT_NS
 
 
@@ -24,4 +25,8 @@ void ArrayType::setInnerType(TypeNode* innerType)
 TypeNode* ArrayType::getInnerType()
 {
     return innerType;
+}
+void ArrayType::accept(NodeVisitor* visitor)
+{
+//    visitor->visitArrayType(this);
 }

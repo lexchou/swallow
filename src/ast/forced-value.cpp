@@ -1,3 +1,4 @@
+#include <ast/node-visitor.h>
 #include "forced-value.h"
 USE_SWIFT_NS
 
@@ -24,4 +25,8 @@ void ForcedValue::serialize(std::wostream& out)
 {
     getExpression()->serialize(out);
     out<<L"!";
+}
+void ForcedValue::accept(NodeVisitor* visitor)
+{
+    visitor->visitForcedValue(this);
 }

@@ -19,6 +19,9 @@ public:
     void addStatement(Statement* statement);
     int numStatements()const;
     Statement* getStatement(int n);
+
+    std::vector<Statement*>::iterator begin() { return statements.begin();}
+    std::vector<Statement*>::iterator end() { return statements.end();}
 private:
     std::vector<Statement*> statements;
 };

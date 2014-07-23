@@ -41,6 +41,7 @@ public:
     
 public:
     virtual void serialize(std::wostream& out);
+    virtual void accept(NodeVisitor* visitor);
 private:
     std::vector<AssociatedType> associatedTypes;
     std::vector<Constant> constants;

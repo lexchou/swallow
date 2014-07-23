@@ -1,3 +1,4 @@
+#include <ast/node-visitor.h>
 #include "member-access.h"
 #include "identifier.h"
 USE_SWIFT_NS
@@ -40,4 +41,8 @@ void MemberAccess::serialize(std::wostream& out)
         getSelf()->serialize(out);
     out<<L".";
     getSelf()->serialize(out);
+}
+void MemberAccess::accept(NodeVisitor* visitor)
+{
+    visitor->visitMemberAccess(this);
 }

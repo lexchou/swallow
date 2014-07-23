@@ -9,6 +9,7 @@ class Pattern;
 class Expression;
 class Constant : public Declaration
 {
+    typedef std::vector<std::pair<Pattern*, Expression*> > Pairs;
 public:
     Constant();
     ~Constant();
@@ -19,12 +20,15 @@ public:
     void add(Pattern* pattern, Expression* initializer);
     int numPairs();
     std::pair<Pattern*, Expression*> getPair(int i);
+
+    Pairs::iterator begin(){return pairs.begin();}
+    Pairs::iterator end(){return pairs.end();}
 public:
     virtual void serialize(std::wostream& out);
 public://Node
     virtual void accept(NodeVisitor* visitor);
 public:
-    std::vector<std::pair<Pattern*, Expression*> > pairs;
+    Pairs pairs;
 };
 
 SWIFT_NS_END

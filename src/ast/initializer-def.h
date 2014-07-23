@@ -26,6 +26,7 @@ public:
     CodeBlock* getBody();
 public:
     virtual void serialize(std::wostream& out);
+    virtual void accept(NodeVisitor* visitor);
 private:
     bool convenience;
     Parameters* parameters;

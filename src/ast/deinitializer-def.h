@@ -16,6 +16,7 @@ public:
     void setBody(CodeBlock* body);
 public:
     virtual void serialize(std::wostream& out);
+    virtual void accept(NodeVisitor* visitor);
 private:
     CodeBlock* body;
 };

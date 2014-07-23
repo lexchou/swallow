@@ -18,6 +18,7 @@ public:
     Statement* getStatement();
 public:
     virtual void serialize(std::wostream& out);
+    virtual void accept(NodeVisitor* visitor);
 private:
     std::wstring label;
     Statement* statement;

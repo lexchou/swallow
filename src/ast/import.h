@@ -29,6 +29,7 @@ public:
     void setPath(const std::wstring& path);
 public:
     virtual void serialize(std::wostream& out);
+    virtual void accept(NodeVisitor* visitor);
 private:
     std::wstring path;
     Kind kind;

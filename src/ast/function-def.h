@@ -31,6 +31,8 @@ public:
     void addParameters(Parameters*);
     int numParameters();
     Parameters* getParameters(int i);
+    const std::vector<Parameters*>&  getParametersList()const{return parametersList;}
+
     
     void setReturnType(TypeNode*);
     TypeNode* getReturnType();
@@ -40,9 +42,10 @@ public:
     
     void setBody(CodeBlock* body);
     CodeBlock* getBody();
-    
+
 public:
     virtual void serialize(std::wostream& out);
+    virtual void accept(NodeVisitor* visitor);
 private:
     std::wstring name;
     Attributes returnAttributes;

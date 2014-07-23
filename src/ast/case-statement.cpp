@@ -1,6 +1,7 @@
 
 #include "case-statement.h"
 #include "expression.h"
+#include "node-visitor.h"
 USE_SWIFT_NS
 
 
@@ -47,6 +48,11 @@ void CaseStatement::serialize(std::wostream& out)
         st->serialize(out);
         out<<std::endl;
     }
+}
+void CaseStatement::accept(NodeVisitor* visitor)
+{
+    visitor->visitCase(this);
+
 }
 
 

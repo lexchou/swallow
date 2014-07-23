@@ -14,6 +14,7 @@ public:
     const std::wstring& getValue() const;
 public:
     virtual void serialize(std::wostream& out);
+    virtual void accept(NodeVisitor* visitor);
 private:
     std::wstring name;
     std::wstring value;

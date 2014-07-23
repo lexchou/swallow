@@ -23,6 +23,7 @@ void Constant::serialize(std::wostream& out)
 {
 }
 
+
 void Constant::add(Pattern* pattern, Expression* initializer)
 {
     pairs.push_back(std::make_pair(pattern, initializer));

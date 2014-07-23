@@ -19,7 +19,11 @@ public:
     void setAttributes(const Attributes& attrs);
     const Attributes& getAttributes()const;
 public:
+    std::vector<Statement*>::iterator begin() { return statements.begin();}
+    std::vector<Statement*>::iterator end() { return statements.end();}
+public:
     virtual void serialize(std::wostream& out);
+    virtual void accept(NodeVisitor* visitor);
 private:
     Attributes attributes;
     std::vector<Statement*> statements;

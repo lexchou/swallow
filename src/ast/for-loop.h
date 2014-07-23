@@ -28,7 +28,8 @@ public:
     
 public:
     virtual void serialize(std::wostream& out);
-private:
+    virtual void accept(NodeVisitor* visitor);
+public:
     std::vector<Expression*> inits;
     Expression* condition;
     Expression* step;

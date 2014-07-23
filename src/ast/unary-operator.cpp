@@ -1,3 +1,4 @@
+#include <ast/node-visitor.h>
 #include "unary-operator.h"
 #include "identifier.h"
 USE_SWIFT_NS;
@@ -44,4 +45,9 @@ void UnaryOperator::serialize(std::wostream& out)
         out<<op;
     }
 }
+void UnaryOperator::accept(NodeVisitor* visitor)
+{
+    visitor->visitUnaryOperator(this);
+}
+
 

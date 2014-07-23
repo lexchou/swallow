@@ -1,5 +1,6 @@
 
 #include "protocol-def.h"
+#include "node-visitor.h"
 USE_SWIFT_NS
 
 
@@ -9,4 +10,8 @@ ProtocolDef::ProtocolDef()
 }
 void ProtocolDef::serialize(std::wostream& out)
 {
+}
+void ProtocolDef::accept(NodeVisitor* visitor)
+{
+    visitor->visitProtocol(this);
 }

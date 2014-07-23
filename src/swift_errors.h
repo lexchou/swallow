@@ -31,6 +31,7 @@ struct Errors
         E_USE_OF_UNRESOLVED_IDENTIFIER, //use of unresolved identifier '%'
         E_USE_OF_UNINITIALIZED_VARIABLE, //use of local variable 'b' before its declaration
         E_USE_OF_INITIALIZING_VARIABLE, //variable used within its own initial value
+        E_DEFINITION_CONFLICT, //definition conflicts with previous value
         //linking errors
     };
     

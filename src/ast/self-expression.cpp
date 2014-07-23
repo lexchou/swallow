@@ -1,4 +1,5 @@
 #include "self-expression.h"
+#include "node-visitor.h"
 USE_SWIFT_NS
 
 
@@ -27,4 +28,8 @@ void SelfExpression::serialize(std::wostream& out)
 {
     getExpression()->serialize(out);
     out<<L".self";
+}
+void SelfExpression::accept(NodeVisitor* visitor)
+{
+    visitor->visitSelf(this);
 }

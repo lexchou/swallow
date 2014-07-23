@@ -3,6 +3,7 @@
 #include "type-node.h"
 #include "code-block.h"
 #include "parameters.h"
+#include "node-visitor.h"
 USE_SWIFT_NS
 
 
@@ -25,6 +26,10 @@ void SubscriptDef::serialize(std::wostream& out)
 //    out<<value;
 }
 
+void SubscriptDef::accept(NodeVisitor* visitor)
+{
+    visitor->visitSubscript(this);
+}
 
 void SubscriptDef::setParameters(Parameters* params)
 {

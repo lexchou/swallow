@@ -1,4 +1,4 @@
-
+#include <ast/node-visitor.h>
 #include "enum-def.h"
 #include "tuple-type.h"
 #include "expression.h"
@@ -30,6 +30,10 @@ EnumDef::~EnumDef()
 }
 void EnumDef::serialize(std::wostream& out)
 {
+}
+void EnumDef::accept(NodeVisitor* visitor)
+{
+    visitor->visitEnum(this);
 }
 
 EnumDef::Type EnumDef::getType()const

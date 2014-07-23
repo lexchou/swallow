@@ -1,6 +1,7 @@
 
 #include "return-statement.h"
 #include "expression.h"
+#include "node-visitor.h"
 USE_SWIFT_NS
 
 
@@ -21,6 +22,10 @@ void ReturnStatement::serialize(std::wostream& out)
         out<<L" ";
         getExpression()->serialize(out);
     }
+}
+void ReturnStatement::accept(NodeVisitor* visitor)
+{
+    visitor->visitReturn(this);
 }
 
 void ReturnStatement::setExpression(Expression* expr)

@@ -13,6 +13,7 @@ class TestSymbolResolve : public SemanticTestCase
     CPPUNIT_TEST(testUndeclaredVars);
     CPPUNIT_TEST(testUseVariableBeforeDeclaration);
     CPPUNIT_TEST(testVariableUsedWithinItsOwnInitialization);
+    CPPUNIT_TEST(testDuplicatedVars);
     CPPUNIT_TEST_SUITE_END();
 public:
     void testUndeclaredVars()
@@ -43,6 +44,16 @@ public:
         CPPUNIT_ASSERT_EQUAL((int)Errors::E_USE_OF_INITIALIZING_VARIABLE, r.code);
         ASSERT_EQUALS(L"a", r.item);
 
+    }
+
+    void testDuplicatedVars()
+    {
+        SEMANTIC_ANALYZE(L"let fa = 3;var fa = 3")
+
+        CPPUNIT_ASSERT_EQUAL(1, compilerResults.numResults());
+        const CompilerResult& r = compilerResults.getResult(0);
+        CPPUNIT_ASSERT_EQUAL((int)Errors::E_DEFINITION_CONFLICT, r.code);
+        ASSERT_EQUALS(L"fa", r.item);
     }
 
 

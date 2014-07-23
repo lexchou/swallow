@@ -1,5 +1,6 @@
 #include "parenthesized-expression.h"
 #include "expression.h"
+#include "node-visitor.h"
 USE_SWIFT_NS
 
 
@@ -45,6 +46,11 @@ void ParenthesizedExpression::serialize(std::wostream& out)
     }
     
     out<<L")";
+}
+
+void ParenthesizedExpression::accept(NodeVisitor* visitor)
+{
+    visitor->visitParenthesizedExpression(this);
 }
 
 std::wstring ParenthesizedExpression::getName(int idx)

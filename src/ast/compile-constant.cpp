@@ -1,3 +1,4 @@
+#include <ast/node-visitor.h>
 #include "compile-constant.h"
 USE_SWIFT_NS
 
@@ -9,6 +10,10 @@ CompileConstant::CompileConstant(const std::wstring& name, const std::wstring& v
 void CompileConstant::serialize(std::wostream& out)
 {
     out<<name;
+}
+void CompileConstant::accept(NodeVisitor* visitor)
+{
+    visitor->visitCompileConstant(this);
 }
 
 const std::wstring& CompileConstant::getName() const

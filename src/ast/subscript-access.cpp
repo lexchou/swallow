@@ -1,3 +1,4 @@
+#include <ast/node-visitor.h>
 #include "subscript-access.h"
 USE_SWIFT_NS
 
@@ -67,4 +68,10 @@ void SubscriptAccess::serialize(std::wostream& out)
     }
     out<<L"]";
 }
+
+void SubscriptAccess::accept(NodeVisitor* visitor)
+{
+    visitor->visitSubscriptAccess(this);
+}
+
 

@@ -15,6 +15,7 @@ public:
     TypeNode* getInnerType();
 public:
     virtual void serialize(std::wostream& out);
+    virtual void accept(NodeVisitor* visitor);
 private:
     TypeNode* innerType;
 };

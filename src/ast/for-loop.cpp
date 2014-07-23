@@ -2,6 +2,7 @@
 #include "for-loop.h"
 #include "expression.h"
 #include "code-block.h"
+#include "node-visitor.h"
 USE_SWIFT_NS
 
 
@@ -36,7 +37,10 @@ void ForLoop::serialize(std::wostream& out)
     out<<std::endl;
     getCodeBlock()->serialize(out);
 }
-
+void ForLoop::accept(NodeVisitor* visitor)
+{
+    visitor->visitForLoop(this);
+}
 
 void ForLoop::addInit(Expression* init)
 {

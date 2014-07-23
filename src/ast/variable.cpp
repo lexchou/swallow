@@ -4,6 +4,7 @@
 #include "code-block.h"
 #include "type-node.h"
 #include "pattern.h"
+#include "node-visitor.h"
 USE_SWIFT_NS
 
 
@@ -25,6 +26,10 @@ Variable::~Variable()
 }
 void Variable::serialize(std::wostream& out)
 {
+}
+void Variable::accept(NodeVisitor* visitor)
+{
+    visitor->visitVariable(this);
 }
 
 TypePtr Variable::getType()

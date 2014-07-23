@@ -1,4 +1,4 @@
-
+#include <ast/node-visitor.h>
 #include "function-def.h"
 #include "code-block.h"
 #include "type-node.h"
@@ -22,6 +22,11 @@ FunctionDef::~FunctionDef()
 
 void FunctionDef::serialize(std::wostream& out)
 {
+}
+
+void FunctionDef::accept(NodeVisitor* visitor)
+{
+    visitor->visitFunction(this);
 }
 
 void FunctionDef::setName(const std::wstring& name)

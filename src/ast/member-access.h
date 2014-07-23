@@ -18,6 +18,7 @@ public:
     Identifier* getField();
 public:
     virtual void serialize(std::wostream& out);
+    virtual void accept(NodeVisitor* visitor);
 public:
     Expression* self;
     Identifier* field;

@@ -1,4 +1,4 @@
-
+#include <ast/node-visitor.h>
 #include "closure.h"
 #include "parameters.h"
 #include "type-node.h"
@@ -21,7 +21,10 @@ Closure::~Closure()
 void Closure::serialize(std::wostream& out)
 {
 }
-
+void Closure::accept(NodeVisitor* visitor)
+{
+    visitor->visitClosure(this);
+}
 
 Closure::CaptureSpecifier Closure::getCaptureSpecifier()const
 {

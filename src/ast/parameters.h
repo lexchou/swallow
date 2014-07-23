@@ -13,6 +13,7 @@ public:
     ~Parameters();
 public:
     virtual void serialize(std::wostream& out);
+    virtual void accept(NodeVisitor* visitor);
 public:
     void setVariadicParameters(bool val);
     bool isVariadicParameters()const;
@@ -20,6 +21,10 @@ public:
     void addParameter(Parameter* parameter);
     int numParameters()const;
     Parameter* getParameter(int i);
+
+    std::vector<Parameter*>::iterator begin() { return parameters.begin();}
+    std::vector<Parameter*>::iterator end() { return parameters.end();}
+
 private:
     bool variadicParameters;
     std::vector<Parameter*> parameters;

@@ -22,8 +22,13 @@ public:
     
     void addIndex(Expression* index);
     int numIndices();
+
+    std::vector<Expression*>::iterator begin(){return indices.begin();}
+    std::vector<Expression*>::iterator end(){return indices.end();}
+
 public:
     virtual void serialize(std::wostream& out);
+    virtual void accept(NodeVisitor* visitor);
 public:
     Expression* self;
     std::vector<Expression*> indices;

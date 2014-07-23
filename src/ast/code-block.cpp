@@ -1,5 +1,6 @@
 
 #include "code-block.h"
+#include "node-visitor.h"
 USE_SWIFT_NS
 
 
@@ -22,6 +23,10 @@ void CodeBlock::serialize(std::wostream& out)
         out<<std::endl;
     }
     out<<L"}"<<std::endl;
+}
+void CodeBlock::accept(NodeVisitor* visitor)
+{
+    visitor->visitCodeBlock(this);
 }
 
 

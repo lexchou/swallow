@@ -19,6 +19,7 @@ public:
     Tuple* getAssociatedBinding();
 public:
     virtual void serialize(std::wostream& out);
+    virtual void accept(NodeVisitor* visitor);
 private:
     std::wstring name;
     Tuple* associatedBinding;

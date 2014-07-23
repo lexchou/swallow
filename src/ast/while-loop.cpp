@@ -2,6 +2,7 @@
 #include "while-loop.h"
 #include "expression.h"
 #include "code-block.h"
+#include "node-visitor.h"
 USE_SWIFT_NS
 
 
@@ -23,7 +24,10 @@ void WhileLoop::serialize(std::wostream& out)
     getCodeBlock()->serialize(out);
     out<<std::endl;
 }
-
+void WhileLoop::accept(NodeVisitor* visitor)
+{
+    visitor->visitWhileLoop(this);
+}
 
 
 void WhileLoop::setCodeBlock(CodeBlock* codeBlock)

@@ -1,5 +1,6 @@
 
 #include "import.h"
+#include "node-visitor.h"
 USE_SWIFT_NS
 
 
@@ -38,7 +39,10 @@ void Import::serialize(std::wostream& out)
     }
     out<<path;
 }
-
+void Import::accept(NodeVisitor* visitor)
+{
+    visitor->visitImport(this);
+}
 
 Import::Kind Import::getKind()const
 {

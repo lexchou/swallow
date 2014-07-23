@@ -2,6 +2,7 @@
 #include "parameter.h"
 #include "expression.h"
 #include "type-node.h"
+#include "node-visitor.h"
 USE_SWIFT_NS
 
 
@@ -23,7 +24,11 @@ Parameter::~Parameter()
 void Parameter::serialize(std::wostream& out)
 {
 }
+void Parameter::accept(NodeVisitor* visitor)
+{
+    visitor->visitParameter(this);
 
+}
 
 void Parameter::setInout(bool inout)
 {

@@ -1,3 +1,4 @@
+#include <ast/node-visitor.h>
 #include "optional-chaining.h"
 USE_SWIFT_NS
 
@@ -26,4 +27,8 @@ void OptionalChaining::serialize(std::wostream& out)
 {
     getExpression()->serialize(out);
     out<<L"?";
+}
+void OptionalChaining::accept(NodeVisitor* visitor)
+{
+    visitor->visitOptionalChaining(this);
 }

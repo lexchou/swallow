@@ -19,7 +19,10 @@ void FunctionType::serialize(std::wostream& out)
     out<<L" -> ";
     getReturnType()->serialize(out);
 }
-
+void FunctionType::accept(NodeVisitor* visitor)
+{
+//
+}
 void FunctionType::setArgumentsType(TypeNode* argumentsType)
 {
     this->argumentsType = argumentsType;

@@ -19,6 +19,7 @@ public:
     TypeNode* getReturnType();
 public:
     virtual void serialize(std::wostream& out);
+    virtual void accept(NodeVisitor* visitor);
 private:
     TypeNode* argumentsType;
     TypeNode* returnType;

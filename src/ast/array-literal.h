@@ -15,7 +15,8 @@ public:
     int numElements()const;
 public:
     virtual void serialize(std::wostream& out);
-private:
+    virtual void accept(NodeVisitor* visitor);
+public:
     std::vector<Expression*> elements;
 };
 SWIFT_NS_END

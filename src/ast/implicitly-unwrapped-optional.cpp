@@ -17,7 +17,10 @@ void ImplicitlyUnwrappedOptional::serialize(std::wostream& out)
     getInnerType()->serialize(out);
     out<<L"!";
 }
-
+void ImplicitlyUnwrappedOptional::accept(NodeVisitor* visitor)
+{
+//
+}
 
 
 void ImplicitlyUnwrappedOptional::setInnerType(TypeNode* innerType)

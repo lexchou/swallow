@@ -15,6 +15,7 @@ public:
     void addParent(TypeIdentifier* parent);
     int numParents()const;
     TypeIdentifier* getParent(int i);
+    const std::vector<TypeIdentifier*>& getParents() {return parents;}
     
     void setIdentifier(TypeIdentifier* id);
     TypeIdentifier* getIdentifier();
@@ -22,6 +23,10 @@ public:
     void addDeclaration(Declaration* decl);
     int numDeclarations()const;
     Declaration* getDeclaration(int i);
+
+    std::vector<Declaration*>::iterator begin() {return declarations.begin();}
+    std::vector<Declaration*>::iterator end() {return declarations.end();}
+
 public:
     std::vector<TypeIdentifier*> parents;
     TypeIdentifier* identifier;

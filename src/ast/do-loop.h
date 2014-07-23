@@ -20,6 +20,7 @@ public:
     Expression* getCondition();
 public:
     virtual void serialize(std::wostream& out);
+    virtual void accept(NodeVisitor* visitor);
 private:
     CodeBlock* codeBlock;
     Expression* condition;

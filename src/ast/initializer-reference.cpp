@@ -1,3 +1,4 @@
+#include <ast/node-visitor.h>
 #include "initializer-reference.h"
 USE_SWIFT_NS
 
@@ -26,4 +27,9 @@ void InitializerReference::serialize(std::wostream& out)
 {
     getExpression()->serialize(out);
     out<<L".init";
+}
+
+void InitializerReference::accept(NodeVisitor* visitor)
+{
+    visitor->visitInitializerReference(this);
 }

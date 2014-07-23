@@ -1,3 +1,4 @@
+#include <ast/node-visitor.h>
 #include "dynamic-type.h"
 USE_SWIFT_NS
 
@@ -24,4 +25,8 @@ void DynamicType::serialize(std::wostream& out)
 {
     getExpression()->serialize(out);
     out<<L".dynamicType";
+}
+void DynamicType::accept(NodeVisitor* visitor)
+{
+    visitor->visitDynamicType(this);
 }

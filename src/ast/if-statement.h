@@ -24,6 +24,7 @@ public:
     
 public:
     virtual void serialize(std::wostream& out);
+    virtual void accept(NodeVisitor* visitor);
 private:
     Expression* condition;
     CodeBlock* thenPart;

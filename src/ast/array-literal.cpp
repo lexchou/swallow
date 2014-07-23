@@ -1,4 +1,5 @@
 #include "array-literal.h"
+#include "node-visitor.h"
 USE_SWIFT_NS
 
 ArrayLiteral::ArrayLiteral()
@@ -36,3 +37,7 @@ void ArrayLiteral::serialize(std::wostream& out)
     out<<L"]";
 }
 
+void ArrayLiteral::accept(NodeVisitor* visitor)
+{
+    visitor->visitArrayLiteral(this);
+}

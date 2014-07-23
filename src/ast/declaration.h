@@ -26,7 +26,6 @@ protected:
     
 public:
     virtual void serialize(std::wostream& out);
-    
 protected:
     std::vector<Attribute*> attributes;
     int specifiers;

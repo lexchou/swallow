@@ -25,12 +25,17 @@ public:
     void addCondition(Pattern* condition, Expression* guard);
     int numConditions()const;
     const Condition& getCondition(int i);
+    const std::vector<Condition>& getConditions(){return conditions;}
+
+    std::vector<Statement*>::iterator begin(){return statements.begin();}
+    std::vector<Statement*>::iterator end(){return statements.end();}
     
     void addStatement(Statement* statement);
     Statement* getStatement(int idx);
     int numStatements();
 public:
     virtual void serialize(std::wostream& out);
+    virtual void accept(NodeVisitor* visitor);
 private:
     std::vector<Condition> conditions;
     std::vector<Statement*> statements;

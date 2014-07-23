@@ -224,6 +224,7 @@ Program* Parser::parse(const wchar_t* code)
             if(!statement)
                 break;
             ret->addStatement(statement);
+            match(L";");
         }
         pool.removeAll();
     }

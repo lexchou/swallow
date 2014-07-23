@@ -24,6 +24,7 @@ public:
     ~Closure();
 public:
     virtual void serialize(std::wostream& out);
+    virtual void accept(NodeVisitor* visitor);
 public:
     CaptureSpecifier getCaptureSpecifier()const;
     void setCaptureSpecifier(CaptureSpecifier val);
@@ -40,6 +41,9 @@ public:
     void addStatement(Statement* st);
     int numStatement()const;
     Statement* getStatement(int i);
+
+    std::vector<Statement*>::iterator begin(){return statements.begin();}
+    std::vector<Statement*>::iterator end(){return statements.end();}
 public:
     CaptureSpecifier captureSpecifier;
     Expression* capture;

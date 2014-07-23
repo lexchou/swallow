@@ -20,7 +20,9 @@ public:
     Identifier(const std::wstring& identifier);
     ~Identifier();
 public:
-    void serialize(std::wostream& out);
+    virtual void serialize(std::wostream& out);
+    virtual void accept(NodeVisitor* visitor);
+public:
     const std::wstring& getIdentifier() const { return identifier;}
     
     void setDeclaredType(TypeNode* type);

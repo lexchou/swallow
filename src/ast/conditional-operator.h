@@ -25,6 +25,7 @@ public:
     virtual void set(int i, Node* val);
 public:
     virtual void serialize(std::wostream& out);
+    virtual void accept(NodeVisitor* visitor);
 private:
     Pattern* condition;
     Expression* trueExpression;

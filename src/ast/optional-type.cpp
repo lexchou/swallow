@@ -17,6 +17,10 @@ void OptionalType::serialize(std::wostream& out)
     getInnerType()->serialize(out);
     out<<L"?";
 }
+void OptionalType::accept(NodeVisitor* visitor)
+{
+//
+}
 
 
 

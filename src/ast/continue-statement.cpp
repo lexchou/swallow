@@ -1,5 +1,6 @@
 
 #include "continue-statement.h"
+#include "node-visitor.h"
 USE_SWIFT_NS
 
 
@@ -12,6 +13,10 @@ void ContinueStatement::serialize(std::wostream& out)
     out<<L"continue";
     if(!loop.empty())
         out<<L" "<<loop;
+}
+void ContinueStatement::accept(NodeVisitor* visitor)
+{
+    visitor->visitContinue(this);
 }
 
 

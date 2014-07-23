@@ -23,6 +23,10 @@ void Variables::serialize(std::wostream& out)
         (*iter)->serialize(out);
     }
 }
+void Variables::accept(NodeVisitor* visitor)
+{
+    visitor->visitVariables(this);
+}
 
 
 void Variables::addVariable(Variable* var)
@@ -38,7 +42,3 @@ int Variables::numVariables()
     return variables.size();
 }
 
-void Variables::accept(NodeVisitor* visitor)
-{
-    visitor->visitVariables(this);
-}

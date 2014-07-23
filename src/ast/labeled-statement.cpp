@@ -1,5 +1,6 @@
 
 #include "labeled-statement.h"
+#include "node-visitor.h"
 USE_SWIFT_NS
 
 
@@ -16,7 +17,10 @@ void LabeledStatement::serialize(std::wostream& out)
     out<<label<<L":";
     getStatement()->serialize(out);
 }
-
+void LabeledStatement::accept(NodeVisitor* visitor)
+{
+    visitor->visitLabeledStatement(this);
+}
 
 
 void LabeledStatement::setLabel(const std::wstring& label)

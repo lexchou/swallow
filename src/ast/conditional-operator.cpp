@@ -1,3 +1,4 @@
+#include <ast/node-visitor.h>
 #include "conditional-operator.h"
 USE_SWIFT_NS
 
@@ -25,6 +26,10 @@ void ConditionalOperator::serialize(std::wostream& out)
     out<<L"):(";
     this->getTrueExpression()->serialize(out);
     out<<L"))";
+}
+void ConditionalOperator::accept(NodeVisitor* visitor)
+{
+    visitor->visitConditionalOperator(this);
 }
 
 

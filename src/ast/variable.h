@@ -57,6 +57,7 @@ public:
     void setType(TypePtr type);
 public:
     virtual void serialize(std::wostream& out);
+    virtual void accept(NodeVisitor* visitor);
 private:
     std::wstring setterName;
     std::wstring willSetSetter;

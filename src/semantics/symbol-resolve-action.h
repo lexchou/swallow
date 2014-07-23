@@ -24,6 +24,8 @@ public:
     virtual void visitProtocol(ProtocolDef* node);
     virtual void visitExtension(ExtensionDef* node);
     virtual void visitFunction(FunctionDef* node);
+    virtual void visitIdentifier(Identifier* id);
+    virtual void visitEnumCasePattern(EnumCasePattern* node);
 private:
     void defineType(TypeDeclaration* node, Type::Category category);
     //Register all symbols in the pattern
@@ -31,8 +33,6 @@ private:
     //Verify each symbol in the tuple is initialized
     void verifyTuplePattern(Pattern* pattern);
 
-    //Verify every symbol in the expression is initialized
-    void verifyExpression(Expression* expr);
     //set or reset flag in all identifiers in given pattern
     void setFlag(Pattern* pattern, bool add, int flag);
 private:

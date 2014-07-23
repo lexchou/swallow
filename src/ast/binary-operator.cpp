@@ -1,4 +1,5 @@
 #include "binary-operator.h"
+#include "node-visitor.h"
 USE_SWIFT_NS;
 
 BinaryOperator::BinaryOperator(const std::wstring& op, Associativity::T associativity, int precedence)
@@ -17,6 +18,10 @@ void BinaryOperator::serialize(std::wostream& out)
     out<<op;
     getRHS()->serialize(out);
     out<<L")";    
+}
+void BinaryOperator::accept(NodeVisitor* visitor)
+{
+    visitor->visitBinaryOperator(this);
 }
 
 

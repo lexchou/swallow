@@ -1,3 +1,4 @@
+#include <ast/node-visitor.h>
 #include "function-call.h"
 #include "parenthesized-expression.h"
 #include "closure.h"
@@ -63,4 +64,8 @@ void FunctionCall::serialize(std::wostream& out)
         out<<L" ";
         getTrailingClosure()->serialize(out);
     }
+}
+void FunctionCall::accept(NodeVisitor* visitor)
+{
+    visitor->visitFunctionCall(this);
 }

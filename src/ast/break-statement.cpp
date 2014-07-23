@@ -1,5 +1,6 @@
 
 #include "break-statement.h"
+#include "node-visitor.h"
 USE_SWIFT_NS
 
 
@@ -13,7 +14,10 @@ void BreakStatement::serialize(std::wostream& out)
     if(!loop.empty())
         out<<L" "<<loop;
 }
-
+void BreakStatement::accept(NodeVisitor* visitor)
+{
+    visitor->visitBreak(this);
+}
 
 void BreakStatement::setLoop(const std::wstring& loop)
 {
