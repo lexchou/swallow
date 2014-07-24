@@ -120,7 +120,7 @@ public:
         CPPUNIT_ASSERT_EQUAL(1, c->numPairs());
         CPPUNIT_ASSERT(id = dynamic_cast<Identifier*>(c->getPair(0).first));
         ASSERT_EQUALS(L"a", id->getIdentifier().c_str());
-        CPPUNIT_ASSERT(type = dynamic_cast<ArrayType*>(id->getType()));
+        CPPUNIT_ASSERT(type = dynamic_cast<ArrayType*>(id->getDeclaredType()));
         CPPUNIT_ASSERT(Int = dynamic_cast<TypeIdentifier*>(type->getInnerType()));
         ASSERT_EQUALS(L"Int", Int->getName().c_str());
         
@@ -148,7 +148,7 @@ public:
         
         CPPUNIT_ASSERT(id = dynamic_cast<Identifier*>(c->getPair(1).first));
         ASSERT_EQUALS(L"b", id->getIdentifier().c_str());
-        CPPUNIT_ASSERT(Int = dynamic_cast<TypeIdentifier*>(id->getType()));
+        CPPUNIT_ASSERT(Int = dynamic_cast<TypeIdentifier*>(id->getDeclaredType()));
         ASSERT_EQUALS(L"Int", Int->getName().c_str());
         
     }
@@ -236,7 +236,7 @@ public:
         CPPUNIT_ASSERT(id = dynamic_cast<Identifier*>(var->getName()));
         ASSERT_EQUALS(L"welcomeMessage", id->getIdentifier().c_str());
         
-        CPPUNIT_ASSERT(t = dynamic_cast<TypeIdentifier*>(var->getType()));
+        CPPUNIT_ASSERT(t = dynamic_cast<TypeIdentifier*>(var->getDeclaredType()));
         ASSERT_EQUALS(L"String", t->getName().c_str());
         
         

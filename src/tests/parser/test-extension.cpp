@@ -88,7 +88,7 @@ public:
         CPPUNIT_ASSERT_EQUAL(1, vars->numVariables());
         CPPUNIT_ASSERT(var = vars->getVariable(0));
         ASSERT_EQUALS(L"km", dynamic_cast<Identifier*>(var->getName())->getIdentifier().c_str());
-        ASSERT_EQUALS(L"Double", dynamic_cast<TypeIdentifier*>(var->getType())->getName());
+        ASSERT_EQUALS(L"Double", dynamic_cast<TypeIdentifier*>(var->getDeclaredType())->getName());
         CPPUNIT_ASSERT(NULL == var->getInitializer());
         CPPUNIT_ASSERT(cb = var->getGetter());
         CPPUNIT_ASSERT_EQUAL(1, cb->numStatements());
@@ -99,7 +99,7 @@ public:
         CPPUNIT_ASSERT_EQUAL(1, vars->numVariables());
         CPPUNIT_ASSERT(var = vars->getVariable(0));
         ASSERT_EQUALS(L"m", dynamic_cast<Identifier*>(var->getName())->getIdentifier().c_str());
-        ASSERT_EQUALS(L"Double", dynamic_cast<TypeIdentifier*>(var->getType())->getName());
+        ASSERT_EQUALS(L"Double", dynamic_cast<TypeIdentifier*>(var->getDeclaredType())->getName());
         CPPUNIT_ASSERT(NULL == var->getInitializer());
         CPPUNIT_ASSERT(cb = var->getGetter());
         CPPUNIT_ASSERT_EQUAL(1, cb->numStatements());

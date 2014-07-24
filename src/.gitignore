@@ -11,3 +11,4 @@ swift.xcodeproj/
 CTestTestfile.cmake
 TestParser
 Testing/
+.idea/
