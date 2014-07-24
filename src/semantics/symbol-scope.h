@@ -13,18 +13,19 @@ class SymbolScope
 {
     friend class SymbolRegistry;
 public:
-    SymbolScope(SymbolRegistry* registry);
+    SymbolScope();
     ~SymbolScope();
 public:
     void addSymbol(const std::wstring& name, Node* symbol);
     void addType(TypePtr type);
     Node* lookup(const std::wstring& name);
     TypePtr lookupType(const std::wstring& name);
+    Node* getOwner();
 private:
     typedef std::map<std::wstring, Node*> SymbolMap;
     typedef std::map<std::wstring, TypePtr> TypeMap;
+    Node* owner;
     SymbolScope* parent;
-    SymbolRegistry* registry;
     SymbolMap symbols;
     TypeMap types;
 };

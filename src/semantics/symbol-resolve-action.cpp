@@ -7,7 +7,7 @@
 USE_SWIFT_NS
 
 SymbolResolveAction::SymbolResolveAction(SymbolRegistry* symbolRegistry, CompilerResults* compilerResults)
-    :symbolRegistry(symbolRegistry), compilerResults(compilerResults)
+    :SemanticNodeVisitor(symbolRegistry), compilerResults(compilerResults)
 {
 
 }

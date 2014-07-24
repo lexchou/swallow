@@ -3,6 +3,7 @@
 #include "swift_conf.h"
 #include "ast/node-visitor.h"
 #include "semantics/type.h"
+#include "semantic-node-visitor.h"
 SWIFT_NS_BEGIN
 
 class SymbolRegistry;
@@ -10,7 +11,7 @@ class CompilerResults;
 class TypeDeclaration;
 class Expression;
 class Pattern;
-class SymbolResolveAction : public NodeVisitor
+class SymbolResolveAction : public SemanticNodeVisitor
 {
 public:
     SymbolResolveAction(SymbolRegistry* symbolRegistry, CompilerResults* compilerResults);
@@ -36,7 +37,6 @@ private:
     //set or reset flag in all identifiers in given pattern
     void setFlag(Pattern* pattern, bool add, int flag);
 private:
-    SymbolRegistry* symbolRegistry;
     CompilerResults* compilerResults;
 };
 

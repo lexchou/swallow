@@ -7,7 +7,7 @@ USE_SWIFT_NS
 
 
 TypeInferenceAction::TypeInferenceAction(SymbolRegistry* symbolRegistry)
-    :symbolRegistry(symbolRegistry)
+    :SemanticNodeVisitor(symbolRegistry)
 {
 
 }

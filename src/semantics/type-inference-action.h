@@ -2,12 +2,13 @@
 #define TYPE_INFERENCE_ACTION_H
 #include "swift_conf.h"
 #include "ast/node-visitor.h"
+#include "semantic-node-visitor.h"
 SWIFT_NS_BEGIN
 
 
 class Type;
 class Expression;
-class TypeInferenceAction : public NodeVisitor
+class TypeInferenceAction : public SemanticNodeVisitor
 {
 public:
     TypeInferenceAction(SymbolRegistry* symbolRegistry);
@@ -17,7 +18,6 @@ public:
 private:
     TypePtr evaluateType(Expression* expr);
 private:
-    SymbolRegistry* symbolRegistry;
 };
 
 

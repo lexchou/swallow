@@ -4,7 +4,7 @@
 using namespace Swift;
 
 SymbolRegistry::SymbolRegistry()
-:currentScope(NULL), topScope(this)
+:currentScope(NULL)
 {
     //Assignment operator
     registerOperator(L"=", OperatorType::InfixBinary, Associativity::Right, 90);
@@ -72,6 +72,7 @@ SymbolRegistry::SymbolRegistry()
 
     //?:  Right associative, precedence level 100
 
+    enterScope(&topScope);
     //Register built-in type
     currentScope->addType(TypePtr(Type::newType(L"Int", Type::Primitive)));
     currentScope->addType(TypePtr(Type::newType(L"Bool", Type::Primitive)));
@@ -126,6 +127,7 @@ SymbolScope* SymbolRegistry::getCurrentScope()
 void SymbolRegistry::enterScope(SymbolScope* scope)
 {
     scopes.push(currentScope);
+    scope->parent = currentScope;
     currentScope = scope;
 }
 void SymbolRegistry::leaveScope()

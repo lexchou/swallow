@@ -56,6 +56,10 @@ public:
         ASSERT_EQUALS(L"fa", r.item);
     }
 
+    void testLocalGlobal()
+    {
+
+    }
 
 };
 CPPUNIT_TEST_SUITE_NAMED_REGISTRATION(TestSymbolResolve, "alltest");

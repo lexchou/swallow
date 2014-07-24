@@ -4,17 +4,17 @@
 
 USE_SWIFT_NS
 
-SymbolScope::SymbolScope(SymbolRegistry* registry)
-:registry(registry)
+SymbolScope::SymbolScope()
+    :owner(NULL), parent(NULL)
 {
-    parent = registry->getCurrentScope();
-    registry->enterScope(this);
 }
 SymbolScope::~SymbolScope()
 {
-    registry->leaveScope();
 }
-
+Node* SymbolScope::getOwner()
+{
+    return owner;
+}
 void SymbolScope::addSymbol(const std::wstring& name, Node* symbol)
 {
     this->symbols.insert(std::make_pair(name, symbol));
