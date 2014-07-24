@@ -80,6 +80,7 @@ public:
     
     virtual Import* createImport(const SourceInfo& state, const std::vector<Attribute*>& attrs);
     virtual Constant* createConstant(const SourceInfo& state, const std::vector<Attribute*>& attrs, int specifiers);
+    virtual Constants* createConstants(const SourceInfo& state, const std::vector<Attribute*>& attrs, int specifiers);
     virtual Variables* createVariables(const SourceInfo& state, const std::vector<Attribute*>& attrs, int specifiers);
     virtual Variable* createVariable(const SourceInfo& state);
     virtual TypeAlias* createTypealias(const SourceInfo& state, const std::vector<Attribute*>& attrs);

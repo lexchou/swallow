@@ -189,11 +189,16 @@ void NodeVisitor::visitVariable(Variable* node)
     ACCEPT(node->getDidSet());
 }
 
-void NodeVisitor::visitConstants(Constant* node)
+
+void NodeVisitor::visitConstant(Constant* node)
+{
+    ACCEPT(node->initializer);
+}
+void NodeVisitor::visitConstants(Constants* node)
 {
     for(auto c : *node)
     {
-        ACCEPT(c.second);
+        ACCEPT(c);
     }
 }
 

@@ -111,20 +111,20 @@ public:
     void testLet()
     {
         PARSE_STATEMENT(L"let a : Int[] = [1, 2, 3]");
-        Constant* c = NULL;
+        Constants* c = NULL;
         Identifier* id = NULL;
         ArrayLiteral* value = NULL;
         ArrayType* type = NULL;
         TypeIdentifier* Int = NULL;
-        CPPUNIT_ASSERT(c = dynamic_cast<Constant*>(root));
-        CPPUNIT_ASSERT_EQUAL(1, c->numPairs());
-        CPPUNIT_ASSERT(id = dynamic_cast<Identifier*>(c->getPair(0).first));
+        CPPUNIT_ASSERT(c = dynamic_cast<Constants*>(root));
+        CPPUNIT_ASSERT_EQUAL(1, c->numConstants());
+        CPPUNIT_ASSERT(id = dynamic_cast<Identifier*>(c->getConstant(0)->name));
         ASSERT_EQUALS(L"a", id->getIdentifier().c_str());
         CPPUNIT_ASSERT(type = dynamic_cast<ArrayType*>(id->getDeclaredType()));
         CPPUNIT_ASSERT(Int = dynamic_cast<TypeIdentifier*>(type->getInnerType()));
         ASSERT_EQUALS(L"Int", Int->getName().c_str());
         
-        CPPUNIT_ASSERT(value = dynamic_cast<ArrayLiteral*>(c->getPair(0).second));
+        CPPUNIT_ASSERT(value = dynamic_cast<ArrayLiteral*>(c->getConstant(0)->initializer));
         CPPUNIT_ASSERT_EQUAL(3, value->numElements());
         ASSERT_EQUALS(L"1", dynamic_cast<IntegerLiteral*>(value->getElement(0))->toString().c_str());
         ASSERT_EQUALS(L"2", dynamic_cast<IntegerLiteral*>(value->getElement(1))->toString().c_str());
@@ -135,18 +135,18 @@ public:
     void testLet_Multiple()
     {
         PARSE_STATEMENT(L"let a=[k1 : 1, k2 : 2], b : Int = 2");
-        Constant* c = NULL;
+        Constants* c = NULL;
         Identifier* id = NULL;
         TypeIdentifier* Int = NULL;
         DictionaryLiteral* dict = NULL;
-        CPPUNIT_ASSERT(c = dynamic_cast<Constant*>(root));
-        CPPUNIT_ASSERT_EQUAL(2, c->numPairs());
-        CPPUNIT_ASSERT(id = dynamic_cast<Identifier*>(c->getPair(0).first));
+        CPPUNIT_ASSERT(c = dynamic_cast<Constants*>(root));
+        CPPUNIT_ASSERT_EQUAL(2, c->numConstants());
+        CPPUNIT_ASSERT(id = dynamic_cast<Identifier*>(c->getConstant(0)->name));
         ASSERT_EQUALS(L"a", id->getIdentifier().c_str());
-        CPPUNIT_ASSERT(dict = dynamic_cast<DictionaryLiteral*>(c->getPair(0).second));
+        CPPUNIT_ASSERT(dict = dynamic_cast<DictionaryLiteral*>(c->getConstant(0)->initializer));
         CPPUNIT_ASSERT_EQUAL(2, dict->numElements());
         
-        CPPUNIT_ASSERT(id = dynamic_cast<Identifier*>(c->getPair(1).first));
+        CPPUNIT_ASSERT(id = dynamic_cast<Identifier*>(c->getConstant(1)->name));
         ASSERT_EQUALS(L"b", id->getIdentifier().c_str());
         CPPUNIT_ASSERT(Int = dynamic_cast<TypeIdentifier*>(id->getDeclaredType()));
         ASSERT_EQUALS(L"Int", Int->getName().c_str());
@@ -156,15 +156,15 @@ public:
     void testLet_Tuple()
     {
         PARSE_STATEMENT(L"let (a, b) : Int = (1, 2)");
-        Constant* c = NULL;
+        Constants* c = NULL;
         Tuple* tuple = NULL;
         TypeIdentifier* type = NULL;
         ParenthesizedExpression* p = NULL;
-        CPPUNIT_ASSERT(c = dynamic_cast<Constant*>(root));
-        CPPUNIT_ASSERT(tuple = dynamic_cast<Tuple*>(c->getPair(0).first));
+        CPPUNIT_ASSERT(c = dynamic_cast<Constants*>(root));
+        CPPUNIT_ASSERT(tuple = dynamic_cast<Tuple*>(c->getConstant(0)->name));
         CPPUNIT_ASSERT_EQUAL(2, tuple->numElements());
         CPPUNIT_ASSERT(type = dynamic_cast<TypeIdentifier*>(tuple->getType()));
-        CPPUNIT_ASSERT(p = dynamic_cast<ParenthesizedExpression*>(c->getPair(0).second));
+        CPPUNIT_ASSERT(p = dynamic_cast<ParenthesizedExpression*>(c->getConstant(0)->initializer));
         CPPUNIT_ASSERT_EQUAL(2, p->numExpressions());
         
     }

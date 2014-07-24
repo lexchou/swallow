@@ -113,6 +113,7 @@ SET(SWIFT_PARSER_SRC ${SWIFT_TOKENIZER_SRC}
 
     ast/class-def.cpp
     ast/constant.cpp
+    ast/constants.cpp
     ast/declaration.cpp
     ast/deinitializer-def.cpp
     ast/initializer-def.cpp

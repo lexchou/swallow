@@ -12,7 +12,8 @@ public:
 public:
     virtual void visitVariables(Variables* node);
     virtual void visitVariable(Variable* node);
-    virtual void visitConstants(Constant* node);
+    virtual void visitConstant(Constant* node);
+    virtual void visitConstants(Constants* node);
     virtual void visitAssignment(Assignment* node);
     virtual void visitClass(ClassDef* node);
     virtual void visitStruct(StructDef* node);

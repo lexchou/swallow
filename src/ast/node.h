@@ -31,6 +31,7 @@ struct NodeType
         CompileConstant,
         ConditionalOperator,
         Constant,
+        Constants,
         Continue,
         Deinit,
         DictionaryLiteral,

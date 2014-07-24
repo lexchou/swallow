@@ -837,14 +837,14 @@ public:
                         L"}\n"
                         L"}\n");
         StructDef* s = NULL;
-        Constant* let = NULL;
+        Constants* let = NULL;
         InitializerDef* init = NULL;
         Parameters* params = NULL;
         
         CPPUNIT_ASSERT(s = dynamic_cast<StructDef*>(root));
         CPPUNIT_ASSERT_EQUAL(2, s->numDeclarations());
         
-        CPPUNIT_ASSERT(let = dynamic_cast<Constant*>(s->getDeclaration(0)));
+        CPPUNIT_ASSERT(let = dynamic_cast<Constants*>(s->getDeclaration(0)));
         CPPUNIT_ASSERT(init = dynamic_cast<InitializerDef*>(s->getDeclaration(1)));
         CPPUNIT_ASSERT(!init->isConvenience());
         CPPUNIT_ASSERT(params = dynamic_cast<Parameters*>(init->getParameters()));
@@ -962,13 +962,13 @@ public:
                         L"}");
         
         ClassDef* s = NULL;
-        Constant* let = NULL;
+        Constants* let = NULL;
         
         
         CPPUNIT_ASSERT(s = dynamic_cast<ClassDef*>(root));
         CPPUNIT_ASSERT_EQUAL(4, s->numDeclarations());
         
-        CPPUNIT_ASSERT(let = dynamic_cast<Constant*>(s->getDeclaration(1)));
+        CPPUNIT_ASSERT(let = dynamic_cast<Constants*>(s->getDeclaration(1)));
         CPPUNIT_ASSERT(let->getSpecifiers() && TypeSpecifier::Unowned);
 
     }

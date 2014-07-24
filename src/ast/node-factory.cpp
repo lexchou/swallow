@@ -1,6 +1,5 @@
 #include "node-factory.h"
 #include "ast/ast.h"
-#include "tokenizer/tokens.h"
 USE_SWIFT_NS;
 
 
@@ -272,6 +271,14 @@ Constant* NodeFactory::createConstant(const SourceInfo& state, const std::vector
     ret->setSpecifiers(specifiers);
     return ret;
 }
+Constants* NodeFactory::createConstants(const SourceInfo& state, const std::vector<Attribute*>& attrs, int specifiers)
+{
+    Constants* ret = _(state, new Constants());
+    ret->setAttributes(attrs);
+    ret->setSpecifiers(specifiers);
+    return ret;
+}
+
 Variables* NodeFactory::createVariables(const SourceInfo& state, const std::vector<Attribute*>& attrs, int specifiers)
 {
     Variables* ret = _(state, new Variables());

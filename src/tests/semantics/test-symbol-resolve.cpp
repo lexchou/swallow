@@ -14,6 +14,7 @@ class TestSymbolResolve : public SemanticTestCase
     CPPUNIT_TEST(testUseVariableBeforeDeclaration);
     CPPUNIT_TEST(testVariableUsedWithinItsOwnInitialization);
     CPPUNIT_TEST(testDuplicatedVars);
+    CPPUNIT_TEST(testLocalGlobal);
     CPPUNIT_TEST_SUITE_END();
 public:
     void testUndeclaredVars()
@@ -58,6 +59,12 @@ public:
 
     void testLocalGlobal()
     {
+        SEMANTIC_ANALYZE(L"let global = 0; func test(){let local = 1}");
+        FunctionDef* test = NULL;
+
+        CPPUNIT_ASSERT(test = dynamic_cast<FunctionDef*>(scope->lookup(L"test")));
+
+
 
     }
 

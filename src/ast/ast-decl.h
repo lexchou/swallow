@@ -64,6 +64,7 @@ class Program;
 
 class Import;
 class Constant;
+class Constants;
 class Variables;
 class Variable;
 class TypeAlias;

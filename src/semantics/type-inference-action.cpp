@@ -15,31 +15,22 @@ TypeInferenceAction::TypeInferenceAction(SymbolRegistry* symbolRegistry)
 void TypeInferenceAction::visitVariables(Variables* node)
 {
 }
-void TypeInferenceAction::visitConstants(Constant* node)
+void TypeInferenceAction::visitConstant(Constant* node)
 {
-    int pairs = node->numPairs();
-    for(int i = 0; i < pairs; i++)
+    TypePtr type = evaluateType(node->initializer);
+    if(Identifier* id = dynamic_cast<Identifier*>(node->name))
     {
-        std::pair<Pattern*, Expression*> pair = node->getPair(i);
-        TypePtr type = evaluateType(pair.second);
-        if(Identifier* id = dynamic_cast<Identifier*>(pair.first))
+        symbolRegistry->getCurrentScope()->addSymbol(id->getIdentifier(), id);
+        if(id->getDeclaredType() == NULL)
         {
-            symbolRegistry->getCurrentScope()->addSymbol(id->getIdentifier(), id);
-            if(id->getDeclaredType() == NULL)
-            {
-                id->setType(type);
-            }
-            else
-            {
-                //check if the type is convertible
-
-            }
+            id->setType(type);
+        }
+        else
+        {
+            //check if the type is convertible
 
         }
-
-
     }
-
 }
 TypePtr TypeInferenceAction::evaluateType(Expression* expr)
 {

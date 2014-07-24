@@ -18,7 +18,7 @@ public:
 public:
     virtual void visitAssignment(Assignment* node);
     virtual void visitVariables(Variables* node);
-    virtual void visitConstants(Constant* node);
+    virtual void visitConstants(Constants* node);
     virtual void visitClass(ClassDef* node);
     virtual void visitStruct(StructDef* node);
     virtual void visitEnum(EnumDef* node);

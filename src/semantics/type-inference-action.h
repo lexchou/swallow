@@ -14,7 +14,7 @@ public:
     TypeInferenceAction(SymbolRegistry* symbolRegistry);
 public:
     virtual void visitVariables(Variables* node);
-    virtual void visitConstants(Constant* node);
+    virtual void visitConstant(Constant* node);
 private:
     TypePtr evaluateType(Expression* expr);
 private:

@@ -145,7 +145,11 @@ void NodeVisitorDecorator::visitVariable(Variable* node)
     VISIT(visitVariable);
 }
 
-void NodeVisitorDecorator::visitConstants(Constant* node)
+void NodeVisitorDecorator::visitConstant(Constant* node)
+{
+    VISIT(visitConstant);
+}
+void NodeVisitorDecorator::visitConstants(Constants* node)
 {
     VISIT(visitConstants);
 }

@@ -68,6 +68,7 @@
 
 #include "ast/import.h"
 #include "ast/constant.h"
+#include "ast/constants.h"
 #include "ast/variable.h"
 #include "ast/variables.h"
 #include "ast/type-alias.h"

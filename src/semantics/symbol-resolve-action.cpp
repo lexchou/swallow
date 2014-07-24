@@ -89,19 +89,19 @@ void SymbolResolveAction::visitVariables(Variables* node)
     }
 }
 
-void SymbolResolveAction::visitConstants(Constant* node)
+void SymbolResolveAction::visitConstants(Constants* node)
 {
-    for(const std::pair<Pattern*, Expression*>& c : node->pairs)
+    for(Constant* c : *node)
     {
-        registerPattern(c.first);
+        registerPattern(c->name);
     }
     //verify initializer
-    for(const std::pair<Pattern*, Expression*>& c : node->pairs)
+    for(Constant* c : *node)
     {
-        setFlag(c.first, true, Identifier::F_INITIALIZING);
-        c.second->accept(this);
-        setFlag(c.first, true, Identifier::F_INITIALIZED);
-        setFlag(c.first, false, Identifier::F_INITIALIZING);
+        setFlag(c->name, true, Identifier::F_INITIALIZING);
+        c->initializer->accept(this);
+        setFlag(c->name, true, Identifier::F_INITIALIZED);
+        setFlag(c->name, false, Identifier::F_INITIALIZING);
     }
 }
 

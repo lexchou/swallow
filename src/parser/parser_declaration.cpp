@@ -236,7 +236,7 @@ Declaration* Parser::parseLet(const std::vector<Attribute*>& attrs, int specifie
     Token token;
     Flags flag(this, UNDER_LET);
     expect(Keyword::Let, token);
-    Constant* ret = nodeFactory->createConstant(token.state, attrs, specifiers);
+    Constants* ret = nodeFactory->createConstants(token.state, attrs, specifiers);
     do
     {
         Pattern* pattern = parsePattern();
@@ -245,7 +245,11 @@ Declaration* Parser::parseLet(const std::vector<Attribute*>& attrs, int specifie
         {
             initializer = parseExpression();
         }
-        ret->add(pattern, initializer);
+
+        Constant* constant = nodeFactory->createConstant(*pattern->getSourceInfo(), attrs, specifiers);
+        constant->name = pattern;
+        constant->initializer = initializer;
+        ret->add(constant);
     }while(match(L","));
     return ret;
 }
