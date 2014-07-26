@@ -10,6 +10,10 @@
 #include "ast/code-block.h"
 #include "ast/closure.h"
 #include "scope-owner.h"
+#include "ast/function-def.h"
+#include "ast/constant.h"
+#include "ast/variable.h"
+#include "symbol.h"
 
 SWIFT_NS_BEGIN
 
@@ -18,34 +22,39 @@ class ScopedProgram : public Program, public ScopeOwner
 public:
     virtual void accept(NodeVisitor* visitor);
 };
-class ScopedClass : public ClassDef, public ScopeOwner
+class ScopedClass : public ClassDef, public ScopeOwner, public Symbol
 {
 public:
     virtual void accept(NodeVisitor* visitor);
+    virtual const std::wstring& getName()const;
 
 };
-class ScopedProtocol : public ProtocolDef, public ScopeOwner
+class ScopedProtocol : public ProtocolDef, public ScopeOwner, public Symbol
 {
 public:
     virtual void accept(NodeVisitor* visitor);
+    virtual const std::wstring& getName()const;
 
 };
-class ScopedStruct : public StructDef, public ScopeOwner
+class ScopedStruct : public StructDef, public ScopeOwner, public Symbol
 {
 public:
     virtual void accept(NodeVisitor* visitor);
+    virtual const std::wstring& getName()const;
 
 };
-class ScopedEnum : public EnumDef, public ScopeOwner
+class ScopedEnum : public EnumDef, public ScopeOwner, public Symbol
 {
 public:
     virtual void accept(NodeVisitor* visitor);
+    virtual const std::wstring& getName()const;
 
 };
-class ScopedExtension : public ExtensionDef, public ScopeOwner
+class ScopedExtension : public ExtensionDef, public ScopeOwner, public Symbol
 {
 public:
     virtual void accept(NodeVisitor* visitor);
+    virtual const std::wstring& getName()const;
 
 };
 class ScopedCodeBlock : public CodeBlock, public ScopeOwner
@@ -59,6 +68,23 @@ class ScopedClosure : public Closure, public ScopeOwner
 public:
     virtual void accept(NodeVisitor* visitor);
 };
+
+class SymboledFunction : public FunctionDef, public Symbol
+{
+public:
+    const std::wstring& getName()const;
+};
+class SymboledVariable : public Variable, public Symbol
+{
+public:
+    virtual const std::wstring& getName()const;
+};
+class SymboledConstant : public Constant, public Symbol
+{
+public:
+    virtual const std::wstring& getName()const;
+};
+
 
 
 SWIFT_NS_END

@@ -58,7 +58,7 @@ public:
 public:
     virtual void serialize(std::wostream& out);
     virtual void accept(NodeVisitor* visitor);
-private:
+protected:
     std::wstring setterName;
     std::wstring willSetSetter;
     std::wstring didSetSetter;

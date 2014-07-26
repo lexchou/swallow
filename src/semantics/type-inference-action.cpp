@@ -3,6 +3,7 @@
 #include "ast/variables.h"
 #include "ast/constant.h"
 #include "ast/identifier.h"
+#include "scoped-nodes.h"
 USE_SWIFT_NS
 
 
@@ -20,7 +21,7 @@ void TypeInferenceAction::visitConstant(Constant* node)
     TypePtr type = evaluateType(node->initializer);
     if(Identifier* id = dynamic_cast<Identifier*>(node->name))
     {
-        symbolRegistry->getCurrentScope()->addSymbol(id->getIdentifier(), id);
+        symbolRegistry->getCurrentScope()->addSymbol(static_cast<SymboledConstant*>(node));
         if(id->getDeclaredType() == NULL)
         {
             id->setType(type);

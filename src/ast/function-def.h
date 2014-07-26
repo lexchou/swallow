@@ -46,7 +46,7 @@ public:
 public:
     virtual void serialize(std::wostream& out);
     virtual void accept(NodeVisitor* visitor);
-private:
+protected:
     std::wstring name;
     Attributes returnAttributes;
     std::vector<Parameters*> parametersList;

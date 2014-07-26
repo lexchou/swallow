@@ -32,7 +32,7 @@ public:
     void setGenericArgument(GenericArgument* val);
 public:
     int flags;
-private:
+protected:
     std::wstring identifier;
     TypeNode* declaredType;
     GenericArgument* genericArgument;

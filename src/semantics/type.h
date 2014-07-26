@@ -3,11 +3,12 @@
 #include "swift_conf.h"
 #include <memory>
 #include <string>
+#include "symbol.h"
+#include "swift_types.h"
 SWIFT_NS_BEGIN
 
-class Type;
-typedef std::shared_ptr<Type> TypePtr;
-class Type
+
+class Type : public Symbol
 {
     friend class SymbolRegistry;
 public:

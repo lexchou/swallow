@@ -74,11 +74,11 @@ SymbolRegistry::SymbolRegistry()
 
     enterScope(&topScope);
     //Register built-in type
-    currentScope->addType(TypePtr(Type::newType(L"Int", Type::Primitive)));
-    currentScope->addType(TypePtr(Type::newType(L"Bool", Type::Primitive)));
-    currentScope->addType(TypePtr(Type::newType(L"Float", Type::Primitive)));
-    currentScope->addType(TypePtr(Type::newType(L"Double", Type::Primitive)));
-    currentScope->addType(TypePtr(Type::newType(L"String", Type::Primitive)));
+    currentScope->addSymbol(Type::newType(L"Int", Type::Primitive));
+    currentScope->addSymbol(Type::newType(L"Bool", Type::Primitive));
+    currentScope->addSymbol(Type::newType(L"Float", Type::Primitive));
+    currentScope->addSymbol(Type::newType(L"Double", Type::Primitive));
+    currentScope->addSymbol(Type::newType(L"String", Type::Primitive));
 }
 
 bool SymbolRegistry::registerOperator(const std::wstring& name, OperatorType::T type, Associativity::T associativity, int precedence)
@@ -136,18 +136,18 @@ void SymbolRegistry::leaveScope()
     scopes.pop();
 }
 
-Node* SymbolRegistry::lookupSymbol(const std::wstring& name)
+Symbol* SymbolRegistry::lookupSymbol(const std::wstring& name)
 {
-    Node* ret = NULL;
+    Symbol* ret = NULL;
     lookupSymbol(name, NULL, &ret);
     return ret;
 }
-bool SymbolRegistry::lookupSymbol(const std::wstring& name, SymbolScope** scope, Node** ret)
+bool SymbolRegistry::lookupSymbol(const std::wstring& name, SymbolScope** scope, Symbol** ret)
 {
     SymbolScope* s = currentScope;
     for(; s; s = s->parent)
     {
-        Node* symbol = s->lookup(name);
+        Symbol* symbol = s->lookup(name);
         if(symbol)
         {
             if(scope)
@@ -161,25 +161,16 @@ bool SymbolRegistry::lookupSymbol(const std::wstring& name, SymbolScope** scope,
 }
 TypePtr SymbolRegistry::lookupType(const std::wstring& name)
 {
-    TypePtr ret;
+    Type* ret;
     if(lookupType(name, NULL, &ret))
         return ret;
     return NULL;
 }
 bool SymbolRegistry::lookupType(const std::wstring& name, SymbolScope** scope, TypePtr* ret)
 {
-    SymbolScope* s = currentScope;
-    for(; s; s = s->parent)
-    {
-        TypePtr type = s->lookupType(name);
-        if(type)
-        {
-            if(scope)
-                *scope = s;
-            if(ret)
-                *ret = type;
-            return true;
-        }
-    }
-    return false;
+    Symbol* symbol = NULL;
+    bool r = lookupSymbol(name, scope, &symbol);
+    if(ret)
+        *ret = dynamic_cast<Type*>(symbol);
+    return r;
 }

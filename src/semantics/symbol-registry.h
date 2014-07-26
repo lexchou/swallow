@@ -29,6 +29,8 @@ struct OperatorInfo
     }
 };
 class SymbolScope;
+class Symbol;
+class Type;
 class SymbolRegistry
 {
     typedef std::map<std::wstring, OperatorInfo> OperatorMap;
@@ -46,10 +48,11 @@ public:
     SymbolScope* getCurrentScope();
 
 
-    bool lookupSymbol(const std::wstring& name, SymbolScope** scope, Node** ret);
-    Node* lookupSymbol(const std::wstring& name);
-    bool lookupType(const std::wstring& name, SymbolScope** scope, TypePtr* ret);
     TypePtr lookupType(const std::wstring& name);
+    bool lookupType(const std::wstring& name, SymbolScope** scope, TypePtr* ret);
+
+    bool lookupSymbol(const std::wstring& name, SymbolScope** scope, Symbol** ret);
+    Symbol* lookupSymbol(const std::wstring& name);
 
 public:
     void enterScope(SymbolScope* scope);

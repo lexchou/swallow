@@ -175,6 +175,11 @@ struct SourceInfo
     {}
 };
 
+class Symbol;
+class Type;
+class Node;
+typedef Type* TypePtr;
+
 
 SWIFT_NS_END
 

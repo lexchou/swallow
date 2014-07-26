@@ -23,7 +23,7 @@ public:
         CPPUNIT_ASSERT(a = dynamic_cast<Identifier*>(scope->lookup(L"a")));
         TypePtr type = a->getType();
         CPPUNIT_ASSERT(type);
-        TypePtr Int = symbolRegistry.getCurrentScope()->lookupType(L"Int");
+        TypePtr Int = symbolRegistry.lookupType(L"Int");
         CPPUNIT_ASSERT(type == Int);
 
     }
@@ -35,7 +35,7 @@ public:
         CPPUNIT_ASSERT(a = dynamic_cast<Identifier*>(scope->lookup(L"a")));
         TypePtr type = a->getType();
         CPPUNIT_ASSERT(type);
-        TypePtr String = symbolRegistry.getCurrentScope()->lookupType(L"String");
+        TypePtr String = symbolRegistry.lookupType(L"String");
         CPPUNIT_ASSERT(type == String);
     }
     void testTuple()

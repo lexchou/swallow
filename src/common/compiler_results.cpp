@@ -27,7 +27,7 @@ std::wstring CompilerResults::format(const CompilerResult& result)
     int p = temp.find('%');
     if(p == -1)
         return temp;
-    temp.replace(p, p + 1, result.item);
+    temp.replace(p, 1, result.item);
     return temp;
 }
 std::wstring CompilerResults::getErrorTemplate(int errorCode)
@@ -60,6 +60,22 @@ std::wstring CompilerResults::getErrorTemplate(int errorCode)
             return L"The capture specifier is not specified.";
         case Errors::E_EXPECT_CASE:
             return L"case/default is expected in switch/case statement";
+        case Errors::E_INVALID_REDECLARATION:
+            return L"Invalid redeclaration of type %";
+        case Errors::E_USE_OF_UNDECLARED_TYPE:
+            return L"Use of undeclared type %";
+        case Errors::E_CANNOT_ASSIGN:
+            return L"cannot assign to the result of this expression";
+        case Errors::E_USE_OF_UNRESOLVED_IDENTIFIER:
+            return L"use of unresolved identifier '%'";
+        case Errors::E_USE_OF_UNINITIALIZED_VARIABLE:
+            return L"use of local variable '%' before its declaration";
+        case Errors::E_USE_OF_INITIALIZING_VARIABLE:
+            return L"variable used within its own initial value";
+        case Errors::E_DEFINITION_CONFLICT:
+            return L"definition conflicts with previous value";
+        case Errors::E_USE_OF_FUNCTION_LOCAL_INSIDE_TYPE:
+            return L"use of function local variable inside type declaration";
         default:
             return L"Unknown error";
     }

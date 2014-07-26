@@ -15,22 +15,12 @@ Node* SymbolScope::getOwner()
 {
     return owner;
 }
-void SymbolScope::addSymbol(const std::wstring& name, Node* symbol)
+void SymbolScope::addSymbol(SymbolPtr symbol)
 {
-    this->symbols.insert(std::make_pair(name, symbol));
+    this->symbols.insert(std::make_pair(symbol->getName(), symbol));
 }
-void SymbolScope::addType(TypePtr type)
-{
-    types.insert(std::make_pair(type->getName(), type));
-}
-TypePtr SymbolScope::lookupType(const std::wstring& name)
-{
-    TypeMap::iterator iter = types.find(name);
-    if(iter != types.end())
-        return iter->second;
-    return NULL;
-}
-Node* SymbolScope::lookup(const std::wstring& name)
+
+Symbol* SymbolScope::lookup(const std::wstring& name)
 {
     SymbolMap::iterator iter = symbols.find(name);
     if(iter != symbols.end())
