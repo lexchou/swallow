@@ -40,7 +40,7 @@ public:
     }
     void testTuple()
     {
-        /*
+
         SEMANTIC_ANALYZE(L"let (a, b) = (1, 0.3)");
         Identifier* a = NULL;
         CPPUNIT_ASSERT(a = dynamic_cast<Identifier*>(scope->lookup(L"a")));
@@ -48,7 +48,7 @@ public:
         CPPUNIT_ASSERT(type);
         TypePtr String = symbolRegistry.getCurrentScope()->lookupType(L"Int");
         CPPUNIT_ASSERT(type == String);
-        */
+
     }
 
 

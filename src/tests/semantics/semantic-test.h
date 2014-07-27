@@ -12,6 +12,7 @@ public:
     Swift::ScopedProgram* analyzeStatement(Swift::SymbolRegistry& registry, Swift::CompilerResults& compilerResults, const char* func, const wchar_t* str)
     {
         using namespace Swift;
+        registry.getCurrentScope()->addSymbol(new SymbolPlaceHolder(L"println"));
 
         ScopedNodeFactory nodeFactory;
         Parser parser(&nodeFactory, &registry, &compilerResults);

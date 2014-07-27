@@ -14,6 +14,17 @@ public:
     virtual const std::wstring& getName() const = 0;
 
 };
+class SymbolPlaceHolder : public Symbol
+{
+public:
+    SymbolPlaceHolder(const std::wstring& name)
+    :name(name){}
+public:
+    virtual const std::wstring& getName() const {return name;}
+private:
+    std::wstring name;
+
+};
 
 SWIFT_NS_END
 

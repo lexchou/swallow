@@ -16,6 +16,9 @@ class TestSymbolResolve : public SemanticTestCase
     CPPUNIT_TEST(testDuplicatedVars);
     CPPUNIT_TEST(testLocalGlobal);
     CPPUNIT_TEST(testLocalTypeUsesUpperLocalSymbol);
+    CPPUNIT_TEST(testClassVariable1);
+    CPPUNIT_TEST(testClassVariable2);
+    CPPUNIT_TEST(testClassVariable3);
     CPPUNIT_TEST_SUITE_END();
 public:
     void testUndeclaredVars()
@@ -88,6 +91,62 @@ public:
         const CompilerResult& r = compilerResults.getResult(0);
         CPPUNIT_ASSERT_EQUAL((int)Errors::E_USE_OF_FUNCTION_LOCAL_INSIDE_TYPE, r.code);
         ASSERT_EQUALS(L"b", r.item);
+    }
+    void testClassVariable1()
+    {
+        const wchar_t* code =
+                L"class Class\n"
+                L"{\n"
+                L"    var _val : Int = 0\n"
+                L"    var val : Int = 0 {\n"
+                L"        willSet(newVal) {\n"
+                L"            _val = newVal;\n"
+                L"        }\n"
+                L"        didSet {\n"
+                L"            println(oldValue);\n"
+                L"        }\n"
+                L"    }\n"
+                L"}";
+        SEMANTIC_ANALYZE(code);
+        CPPUNIT_ASSERT_EQUAL(0, compilerResults.numResults());
+    }
+
+    void testClassVariable2()
+    {
+        const wchar_t* code =
+                L"class Class\n"
+        L"{\n"
+        L"    var _val : Int = 0\n"
+        L"    var val : Int = 0 {\n"
+        L"        willSet {\n"
+        L"            _val = newValue;\n"
+        L"        }\n"
+        L"        didSet(old) {\n"
+        L"            println(old);\n"
+        L"        }\n"
+        L"    }\n"
+        L"}";
+        SEMANTIC_ANALYZE(code);
+        CPPUNIT_ASSERT_EQUAL(0, compilerResults.numResults());
+    }
+
+    void testClassVariable3()
+    {
+        const wchar_t* code =
+                L"class Class\n"
+        L"{\n"
+        L"    var _val : Int = 0\n"
+        L"    var val : Int = 0 {\n"
+        L"        get{\n"
+        L"            return _val;\n"
+        L"        }\n"
+        L"        set {\n"
+        L"            _val = newValue;\n"
+        L"        }\n"
+        L"    }\n"
+        L"}";
+        SEMANTIC_ANALYZE(code);
+        CPPUNIT_ASSERT_EQUAL(0, compilerResults.numResults());
     }
 
 };

@@ -84,11 +84,57 @@ void SymbolResolveAction::registerPattern(Pattern* pattern)
 
 void SymbolResolveAction::visitVariables(Variables* node)
 {
-    for(Variable* var : node->variables)
+    for(Variable* var : *node)
     {
         Pattern* name = var->getName();
         registerPattern(name);
     }
+    for(Variable* v : *node)
+    {
+        Pattern* name = v->getName();
+        Expression* initializer = v->getInitializer();
+        CodeBlock* didSet = v->getDidSet();
+        CodeBlock* willSet = v->getWillSet();
+        CodeBlock* getter = v->getGetter();
+        CodeBlock* setter = v->getSetter();
+        setFlag(name, true, Identifier::F_INITIALIZING);
+        if(initializer)
+        {
+            initializer->accept(this);
+        }
+        setFlag(name, true, Identifier::F_INITIALIZED);
+        setFlag(name, false, Identifier::F_INITIALIZING);
+        if(v->getGetter())
+        {
+            v->getGetter()->accept(this);
+        }
+        if(setter)
+        {
+            std::wstring name = v->getSetterName().empty() ? L"newValue" : v->getSetterName();
+            //TODO: replace the symbol to internal value
+            ScopedCodeBlock* cb = static_cast<ScopedCodeBlock*>(setter);
+            cb->getScope()->addSymbol(new SymbolPlaceHolder(name));
+            cb->accept(this);
+        }
+        if(willSet)
+        {
+            std::wstring setter = v->getWillSetSetter().empty() ? L"newValue" : v->getWillSetSetter();
+            //TODO: replace the symbol to internal value
+            ScopedCodeBlock* cb = static_cast<ScopedCodeBlock*>(willSet);
+            cb->getScope()->addSymbol(new SymbolPlaceHolder(setter));
+            cb->accept(this);
+        }
+        if(didSet)
+        {
+            std::wstring setter = v->getDidSetSetter().empty() ? L"oldValue" : v->getDidSetSetter();
+            //TODO: replace the symbol to internal value
+            ScopedCodeBlock* cb = static_cast<ScopedCodeBlock*>(didSet);
+            cb->getScope()->addSymbol(new SymbolPlaceHolder(setter));
+            cb->accept(this);
+        }
+
+    }
+
 }
 
 void SymbolResolveAction::visitConstants(Constants* node)
