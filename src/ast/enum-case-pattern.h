@@ -15,14 +15,14 @@ public:
     void setName(const std::wstring& name);
     const std::wstring& getName()const;
     
-    void setAssociatedBinding(Tuple* tuple);
-    Tuple* getAssociatedBinding();
+    void setAssociatedBinding(const TuplePtr& tuple);
+    TuplePtr getAssociatedBinding();
 public:
     virtual void serialize(std::wostream& out);
     virtual void accept(NodeVisitor* visitor);
 private:
     std::wstring name;
-    Tuple* associatedBinding;
+    TuplePtr associatedBinding;
 };
 
 SWIFT_NS_END

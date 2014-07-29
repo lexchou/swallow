@@ -4,68 +4,51 @@
 USE_SWIFT_NS
 
 
-Identifier* ScopedNodeFactory::createIdentifier(const SourceInfo& state, const std::wstring& op)
+IdentifierPtr ScopedNodeFactory::createIdentifier(const SourceInfo& state)
 {
-    SymbolIdentifier* ret = _(state, new SymbolIdentifier(op));
-    return ret;
+    return _(state, new SymbolIdentifier());
 }
-EnumDef* ScopedNodeFactory::createEnum(const SourceInfo& state, const std::vector<Attribute*>& attrs)
+EnumDefPtr ScopedNodeFactory::createEnum(const SourceInfo& state)
 {
-    ScopedEnum* ret = _(state, new ScopedEnum());
-    ret->setAttributes(attrs);
-    return ret;
+    return _(state, new ScopedEnum());
 }
-StructDef* ScopedNodeFactory::createStruct(const SourceInfo& state, const std::vector<Attribute*>& attrs)
+StructDefPtr ScopedNodeFactory::createStruct(const SourceInfo& state)
 {
-    ScopedStruct* ret = _(state, new ScopedStruct());
-    ret->setAttributes(attrs);
-    return ret;
+    return _(state, new ScopedStruct());
 }
-ClassDef* ScopedNodeFactory::createClass(const SourceInfo& state, const std::vector<Attribute*>& attrs)
+ClassDefPtr ScopedNodeFactory::createClass(const SourceInfo& state)
 {
-    ScopedClass* ret = _(state, new ScopedClass());
-    ret->setAttributes(attrs);
-    return ret;
+    return _(state, new ScopedClass());
 }
-ProtocolDef* ScopedNodeFactory::createProtocol(const SourceInfo& state, const std::vector<Attribute*>& attrs)
+ProtocolDefPtr ScopedNodeFactory::createProtocol(const SourceInfo& state)
 {
-    ScopedProtocol* ret = _(state, new ScopedProtocol());
-    ret->setAttributes(attrs);
-    return ret;
+    return _(state, new ScopedProtocol());
 }
-ExtensionDef* ScopedNodeFactory::createExtension(const SourceInfo& state, const std::vector<Attribute*>& attrs)
+ExtensionDefPtr ScopedNodeFactory::createExtension(const SourceInfo& state)
 {
-    ScopedExtension* ret = _(state, new ScopedExtension());
-    ret->setAttributes(attrs);
-    return ret;
+    return _(state, new ScopedExtension());
 }
-Program* ScopedNodeFactory::createProgram()
+ProgramPtr ScopedNodeFactory::createProgram()
 {
     return _(SourceInfo(), new ScopedProgram());
 }
-CodeBlock* ScopedNodeFactory::createCodeBlock(const SourceInfo& state)
+CodeBlockPtr ScopedNodeFactory::createCodeBlock(const SourceInfo& state)
 {
     return _(state, new ScopedCodeBlock());
 }
-Closure* ScopedNodeFactory::createClosure(const SourceInfo& state)
+ClosurePtr ScopedNodeFactory::createClosure(const SourceInfo& state)
 {
     return _(state, new ScopedClosure());
 }
-Constant* ScopedNodeFactory::createConstant(const SourceInfo& state, const std::vector<Attribute*>& attrs, int specifiers)
+ConstantPtr ScopedNodeFactory::createConstant(const SourceInfo& state)
 {
-    Constant* ret = _(state, new SymboledConstant());
-    ret->setAttributes(attrs);
-    ret->setSpecifiers(specifiers);
-    return ret;
+    return _(state, new SymboledConstant());
 }
-Variable* ScopedNodeFactory::createVariable(const SourceInfo& state)
+VariablePtr ScopedNodeFactory::createVariable(const SourceInfo& state)
 {
     return _(state, new SymboledVariable());
 }
-FunctionDef* ScopedNodeFactory::createFunction(const SourceInfo& state, const std::vector<Attribute*>& attrs, int specifiers)
+FunctionDefPtr ScopedNodeFactory::createFunction(const SourceInfo& state)
 {
-    FunctionDef* ret = _(state, new SymboledFunction());
-    ret->setAttributes(attrs);
-    ret->setSpecifiers(specifiers);
-    return ret;
+    return _(state, new SymboledFunction());
 }

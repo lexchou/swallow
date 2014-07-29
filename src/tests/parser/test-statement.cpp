@@ -35,30 +35,30 @@ public:
     {
         PARSE_STATEMENT(L"for i = 0;i < 10; i++{a = i * 2;println(a);}");
         CPPUNIT_ASSERT(root != NULL);
-        ForLoop* loop = dynamic_cast<ForLoop*>(root);
+        ForLoopPtr loop = std::dynamic_pointer_cast<ForLoop>(root);
         CPPUNIT_ASSERT(loop != NULL);
         
         CPPUNIT_ASSERT_EQUAL(1, loop->numInit());
-        Assignment* eq = dynamic_cast<Assignment*>(loop->getInit(0));
+        AssignmentPtr eq = std::dynamic_pointer_cast<Assignment>(loop->getInit(0));
         CPPUNIT_ASSERT(eq != NULL);
         
-        BinaryOperator* le = dynamic_cast<BinaryOperator*>(loop->getCondition());
+        BinaryOperatorPtr le = std::dynamic_pointer_cast<BinaryOperator>(loop->getCondition());
         ASSERT_EQUALS(L"<", le->getOperator().c_str());
         CPPUNIT_ASSERT(le != NULL);
         
-        UnaryOperator* step = dynamic_cast<UnaryOperator*>(loop->getStep());
+        UnaryOperatorPtr step = std::dynamic_pointer_cast<UnaryOperator>(loop->getStep());
         CPPUNIT_ASSERT(step != NULL);
         ASSERT_EQUALS(L"++", step->getOperator().c_str());
         CPPUNIT_ASSERT_EQUAL(OperatorType::PostfixUnary, step->getType());
         
-        CodeBlock* body = loop->getCodeBlock();
+        CodeBlockPtr body = loop->getCodeBlock();
         
         CPPUNIT_ASSERT_EQUAL(2, body->numStatements());
-        CPPUNIT_ASSERT(eq = dynamic_cast<Assignment*>(body->getStatement(0)));
-        FunctionCall* call;
-        CPPUNIT_ASSERT(call = dynamic_cast<FunctionCall*>(body->getStatement(1)));
-        Identifier* func;
-        CPPUNIT_ASSERT(func = dynamic_cast<Identifier*>(call->getFunction()));
+        CPPUNIT_ASSERT(eq = std::dynamic_pointer_cast<Assignment>(body->getStatement(0)));
+        FunctionCallPtr call;
+        CPPUNIT_ASSERT(call = std::dynamic_pointer_cast<FunctionCall>(body->getStatement(1)));
+        IdentifierPtr func;
+        CPPUNIT_ASSERT(func = std::dynamic_pointer_cast<Identifier>(call->getFunction()));
         ASSERT_EQUALS(L"println", func->getIdentifier().c_str());
         
     }
@@ -67,7 +67,7 @@ public:
     {
         PARSE_STATEMENT(L"for ;; {}");
         CPPUNIT_ASSERT(root != NULL);
-        ForLoop* loop = dynamic_cast<ForLoop*>(root);
+        ForLoopPtr loop = std::dynamic_pointer_cast<ForLoop>(root);
         CPPUNIT_ASSERT(loop != NULL);
         
         CPPUNIT_ASSERT_EQUAL(0, loop->numInit());
@@ -76,7 +76,7 @@ public:
         CPPUNIT_ASSERT(loop->getStep() == NULL);
         
         
-        CodeBlock* body = loop->getCodeBlock();
+        CodeBlockPtr body = loop->getCodeBlock();
         
         CPPUNIT_ASSERT_EQUAL(0, body->numStatements());
         
@@ -87,14 +87,14 @@ public:
         PARSE_STATEMENT(L"for index in 1...5 {\n"
                         L"println(\"\(index) times 5 is \(index * 5)\")\n"
                         L"}");
-        ForInLoop* f = NULL;
-        BinaryOperator* op = NULL;
-        Identifier* id = NULL;
+        ForInLoopPtr f;
+        BinaryOperatorPtr op;
+        IdentifierPtr id;
         
-        CPPUNIT_ASSERT(f = dynamic_cast<ForInLoop*>(root));
-        CPPUNIT_ASSERT(id = dynamic_cast<Identifier*>(f->getLoopVars()));
+        CPPUNIT_ASSERT(f = std::dynamic_pointer_cast<ForInLoop>(root));
+        CPPUNIT_ASSERT(id = std::dynamic_pointer_cast<Identifier>(f->getLoopVars()));
         ASSERT_EQUALS(L"index", id->getIdentifier());
-        CPPUNIT_ASSERT(op = dynamic_cast<BinaryOperator*>(f->getContainer()));
+        CPPUNIT_ASSERT(op = std::dynamic_pointer_cast<BinaryOperator>(f->getContainer()));
         ASSERT_EQUALS(L"...", op->getOperator());
         
         
@@ -105,21 +105,21 @@ public:
     {
         PARSE_STATEMENT(L"while notTrue {println(a);}");
         CPPUNIT_ASSERT(root != NULL);
-        WhileLoop* loop = dynamic_cast<WhileLoop*>(root);
+        WhileLoopPtr loop = std::dynamic_pointer_cast<WhileLoop>(root);
         CPPUNIT_ASSERT(loop != NULL);
         
-        Identifier* cond = dynamic_cast<Identifier*>(loop->getCondition());
+        IdentifierPtr cond = std::dynamic_pointer_cast<Identifier>(loop->getCondition());
         CPPUNIT_ASSERT(cond != NULL);
         ASSERT_EQUALS(L"notTrue", cond->getIdentifier().c_str());
         
         
-        CodeBlock* body = loop->getCodeBlock();
+        CodeBlockPtr body = loop->getCodeBlock();
         
         CPPUNIT_ASSERT_EQUAL(1, body->numStatements());
-        FunctionCall* call;
-        CPPUNIT_ASSERT(call = dynamic_cast<FunctionCall*>(body->getStatement(0)));
-        Identifier* func;
-        CPPUNIT_ASSERT(func = dynamic_cast<Identifier*>(call->getFunction()));
+        FunctionCallPtr call;
+        CPPUNIT_ASSERT(call = std::dynamic_pointer_cast<FunctionCall>(body->getStatement(0)));
+        IdentifierPtr func;
+        CPPUNIT_ASSERT(func = std::dynamic_pointer_cast<Identifier>(call->getFunction()));
         ASSERT_EQUALS(L"println", func->getIdentifier().c_str());
         
     }
@@ -127,39 +127,39 @@ public:
     {
         PARSE_STATEMENT(L"do{println(a);}while read(a)");
         CPPUNIT_ASSERT(root != NULL);
-        DoLoop* loop = dynamic_cast<DoLoop*>(root);
+        DoLoopPtr loop = std::dynamic_pointer_cast<DoLoop>(root);
         CPPUNIT_ASSERT(loop != NULL);
         
-        FunctionCall* call = dynamic_cast<FunctionCall*>(loop->getCondition());
+        FunctionCallPtr call = std::dynamic_pointer_cast<FunctionCall>(loop->getCondition());
         CPPUNIT_ASSERT(call != NULL);
-        Identifier* func = static_cast<Identifier*>(call->getFunction());
+        IdentifierPtr func = std::static_pointer_cast<Identifier>(call->getFunction());
         ASSERT_EQUALS(L"read", func->getIdentifier().c_str());
         
         
-        CodeBlock* body = loop->getCodeBlock();
+        CodeBlockPtr body = loop->getCodeBlock();
         
         CPPUNIT_ASSERT_EQUAL(1, body->numStatements());
-        CPPUNIT_ASSERT(call = dynamic_cast<FunctionCall*>(body->getStatement(0)));
-        CPPUNIT_ASSERT(func = dynamic_cast<Identifier*>(call->getFunction()));
+        CPPUNIT_ASSERT(call = std::dynamic_pointer_cast<FunctionCall>(body->getStatement(0)));
+        CPPUNIT_ASSERT(func = std::dynamic_pointer_cast<Identifier>(call->getFunction()));
         ASSERT_EQUALS(L"println", func->getIdentifier().c_str());
         
     }
     void testIf()
     {
         PARSE_STATEMENT(L"if a<0 {return -1}");
-        IfStatement* _if;
-        BinaryOperator* op;
-        CPPUNIT_ASSERT(_if = dynamic_cast<IfStatement*>(root));
-        CPPUNIT_ASSERT(op = dynamic_cast<BinaryOperator*>(_if->getCondition()));
+        IfStatementPtr _if;
+        BinaryOperatorPtr op;
+        CPPUNIT_ASSERT(_if = std::dynamic_pointer_cast<IfStatement>(root));
+        CPPUNIT_ASSERT(op = std::dynamic_pointer_cast<BinaryOperator>(_if->getCondition()));
         ASSERT_EQUALS(L"<", op->getOperator().c_str());
-        ReturnStatement* ret;
-        CodeBlock* then;
-        CPPUNIT_ASSERT(then = dynamic_cast<CodeBlock*>(_if->getThen()));
+        ReturnStatementPtr ret;
+        CodeBlockPtr then;
+        CPPUNIT_ASSERT(then = std::dynamic_pointer_cast<CodeBlock>(_if->getThen()));
         CPPUNIT_ASSERT_EQUAL(1, then->numStatements());
-        CPPUNIT_ASSERT(ret = dynamic_cast<ReturnStatement*>(then->getStatement(0)));
-        IntegerLiteral* id;
-        CPPUNIT_ASSERT(id = dynamic_cast<IntegerLiteral*>(ret->getExpression()));
-        ASSERT_EQUALS(L"-1", id->toString().c_str());
+        CPPUNIT_ASSERT(ret = std::dynamic_pointer_cast<ReturnStatement>(then->getStatement(0)));
+        IntegerLiteralPtr id;
+        CPPUNIT_ASSERT(id = std::dynamic_pointer_cast<IntegerLiteral>(ret->getExpression()));
+        ASSERT_EQUALS(L"-1", id->valueAsString);
         CPPUNIT_ASSERT(_if->getElse() == NULL);
         
     }
@@ -167,27 +167,27 @@ public:
     void testIf2()
     {
         PARSE_STATEMENT(L"if a<0 {return -1}else{return 1;}");
-        IfStatement* _if;
-        BinaryOperator* op;
-        CPPUNIT_ASSERT(_if = dynamic_cast<IfStatement*>(root));
-        CPPUNIT_ASSERT(op = dynamic_cast<BinaryOperator*>(_if->getCondition()));
+        IfStatementPtr _if;
+        BinaryOperatorPtr op;
+        CPPUNIT_ASSERT(_if = std::dynamic_pointer_cast<IfStatement>(root));
+        CPPUNIT_ASSERT(op = std::dynamic_pointer_cast<BinaryOperator>(_if->getCondition()));
         ASSERT_EQUALS(L"<", op->getOperator().c_str());
-        ReturnStatement* ret;
-        CodeBlock* then, * elsePart;
+        ReturnStatementPtr ret;
+        CodeBlockPtr then, elsePart;
         
-        CPPUNIT_ASSERT(then = dynamic_cast<CodeBlock*>(_if->getThen()));
+        CPPUNIT_ASSERT(then = std::dynamic_pointer_cast<CodeBlock>(_if->getThen()));
         CPPUNIT_ASSERT_EQUAL(1, then->numStatements());
-        CPPUNIT_ASSERT(ret = dynamic_cast<ReturnStatement*>(then->getStatement(0)));
-        IntegerLiteral* id;
-        CPPUNIT_ASSERT(id = dynamic_cast<IntegerLiteral*>(ret->getExpression()));
-        ASSERT_EQUALS(L"-1", id->toString().c_str());
+        CPPUNIT_ASSERT(ret = std::dynamic_pointer_cast<ReturnStatement>(then->getStatement(0)));
+        IntegerLiteralPtr id;
+        CPPUNIT_ASSERT(id = std::dynamic_pointer_cast<IntegerLiteral>(ret->getExpression()));
+        ASSERT_EQUALS(L"-1", id->valueAsString);
         
         
-        CPPUNIT_ASSERT(elsePart = dynamic_cast<CodeBlock*>(_if->getElse()));
+        CPPUNIT_ASSERT(elsePart = std::dynamic_pointer_cast<CodeBlock>(_if->getElse()));
         CPPUNIT_ASSERT_EQUAL(1, elsePart->numStatements());
-        CPPUNIT_ASSERT(ret = dynamic_cast<ReturnStatement*>(elsePart->getStatement(0)));
-        CPPUNIT_ASSERT(id = dynamic_cast<IntegerLiteral*>(ret->getExpression()));
-        ASSERT_EQUALS(L"1", id->toString().c_str());
+        CPPUNIT_ASSERT(ret = std::dynamic_pointer_cast<ReturnStatement>(elsePart->getStatement(0)));
+        CPPUNIT_ASSERT(id = std::dynamic_pointer_cast<IntegerLiteral>(ret->getExpression()));
+        ASSERT_EQUALS(L"1", id->valueAsString);
         
     }
     
@@ -196,44 +196,44 @@ public:
         PARSE_STATEMENT(L"if a<0 {return -1}else if a == 0 {return 0;} else {return 1}");
         
         
-        IfStatement* _if;
-        BinaryOperator* op;
-        CPPUNIT_ASSERT(_if = dynamic_cast<IfStatement*>(root));
-        CPPUNIT_ASSERT(op = dynamic_cast<BinaryOperator*>(_if->getCondition()));
+        IfStatementPtr _if;
+        BinaryOperatorPtr op;
+        CPPUNIT_ASSERT(_if = std::dynamic_pointer_cast<IfStatement>(root));
+        CPPUNIT_ASSERT(op = std::dynamic_pointer_cast<BinaryOperator>(_if->getCondition()));
         ASSERT_EQUALS(L"<", op->getOperator().c_str());
-        ReturnStatement* ret;
-        CodeBlock* then, * elsePart;
+        ReturnStatementPtr ret;
+        CodeBlockPtr then, elsePart;
         
-        CPPUNIT_ASSERT(then = dynamic_cast<CodeBlock*>(_if->getThen()));
+        CPPUNIT_ASSERT(then = std::dynamic_pointer_cast<CodeBlock>(_if->getThen()));
         CPPUNIT_ASSERT_EQUAL(1, then->numStatements());
-        CPPUNIT_ASSERT(ret = dynamic_cast<ReturnStatement*>(then->getStatement(0)));
-        IntegerLiteral* id;
-        CPPUNIT_ASSERT(id = dynamic_cast<IntegerLiteral*>(ret->getExpression()));
-        ASSERT_EQUALS(L"-1", id->toString().c_str());
+        CPPUNIT_ASSERT(ret = std::dynamic_pointer_cast<ReturnStatement>(then->getStatement(0)));
+        IntegerLiteralPtr id;
+        CPPUNIT_ASSERT(id = std::dynamic_pointer_cast<IntegerLiteral>(ret->getExpression()));
+        ASSERT_EQUALS(L"-1", id->valueAsString);
         
         
-        CPPUNIT_ASSERT(_if = dynamic_cast<IfStatement*>(_if->getElse()));
+        CPPUNIT_ASSERT(_if = std::dynamic_pointer_cast<IfStatement>(_if->getElse()));
         
-        CPPUNIT_ASSERT(then = dynamic_cast<CodeBlock*>(_if->getThen()));
+        CPPUNIT_ASSERT(then = std::dynamic_pointer_cast<CodeBlock>(_if->getThen()));
         CPPUNIT_ASSERT_EQUAL(1, then->numStatements());
-        CPPUNIT_ASSERT(ret = dynamic_cast<ReturnStatement*>(then->getStatement(0)));
-        CPPUNIT_ASSERT(id = dynamic_cast<IntegerLiteral*>(ret->getExpression()));
-        ASSERT_EQUALS(L"0", id->toString().c_str());
+        CPPUNIT_ASSERT(ret = std::dynamic_pointer_cast<ReturnStatement>(then->getStatement(0)));
+        CPPUNIT_ASSERT(id = std::dynamic_pointer_cast<IntegerLiteral>(ret->getExpression()));
+        ASSERT_EQUALS(L"0", id->valueAsString);
         
         
-        CPPUNIT_ASSERT(elsePart = dynamic_cast<CodeBlock*>(_if->getElse()));
+        CPPUNIT_ASSERT(elsePart = std::dynamic_pointer_cast<CodeBlock>(_if->getElse()));
 
         CPPUNIT_ASSERT_EQUAL(1, elsePart->numStatements());
-        CPPUNIT_ASSERT(ret = dynamic_cast<ReturnStatement*>(elsePart->getStatement(0)));
-        CPPUNIT_ASSERT(id = dynamic_cast<IntegerLiteral*>(ret->getExpression()));
-        ASSERT_EQUALS(L"1", id->toString().c_str());
+        CPPUNIT_ASSERT(ret = std::dynamic_pointer_cast<ReturnStatement>(elsePart->getStatement(0)));
+        CPPUNIT_ASSERT(id = std::dynamic_pointer_cast<IntegerLiteral>(ret->getExpression()));
+        ASSERT_EQUALS(L"1", id->valueAsString);
         
     }
     void testSwitch_Empty()
     {
         PARSE_STATEMENT(L"switch i{}");
-        SwitchCase* sc = NULL;
-        CPPUNIT_ASSERT(sc = dynamic_cast<SwitchCase*>(root));
+        SwitchCasePtr sc;
+        CPPUNIT_ASSERT(sc = std::dynamic_pointer_cast<SwitchCase>(root));
         CPPUNIT_ASSERT_EQUAL(0, sc->numCases());
         CPPUNIT_ASSERT(sc->getDefaultCase() == NULL);
 
@@ -249,10 +249,10 @@ public:
                            L"default:"
                            L"print(\"other\")"
                            L"}");
-        SwitchCase* sc = NULL;
-        CaseStatement* c = NULL;
-        Statement* st = NULL;
-        CPPUNIT_ASSERT(sc = dynamic_cast<SwitchCase*>(root));
+        SwitchCasePtr sc;
+        CaseStatementPtr c;
+        StatementPtr st;
+        CPPUNIT_ASSERT(sc = std::dynamic_pointer_cast<SwitchCase>(root));
         CPPUNIT_ASSERT_EQUAL(2, sc->numCases());
         CPPUNIT_ASSERT(sc->getDefaultCase() != NULL);
         
@@ -260,18 +260,18 @@ public:
         CPPUNIT_ASSERT_EQUAL(5, c->numConditions());
         CPPUNIT_ASSERT_EQUAL(1, c->numStatements());
         CPPUNIT_ASSERT(st = c->getStatement(0));
-        CPPUNIT_ASSERT(dynamic_cast<FunctionCall*>(st));
+        CPPUNIT_ASSERT(std::dynamic_pointer_cast<FunctionCall>(st));
         
         CPPUNIT_ASSERT(c = sc->getCase(1));
         CPPUNIT_ASSERT_EQUAL(3, c->numConditions());
         CPPUNIT_ASSERT_EQUAL(1, c->numStatements());
         CPPUNIT_ASSERT(st = c->getStatement(0));
-        CPPUNIT_ASSERT(dynamic_cast<FunctionCall*>(st));
+        CPPUNIT_ASSERT(std::dynamic_pointer_cast<FunctionCall>(st));
         
         CPPUNIT_ASSERT(c = sc->getDefaultCase());
         CPPUNIT_ASSERT_EQUAL(1, c->numStatements());
         CPPUNIT_ASSERT(st = c->getStatement(0));
-        CPPUNIT_ASSERT(dynamic_cast<FunctionCall*>(st));
+        CPPUNIT_ASSERT(std::dynamic_pointer_cast<FunctionCall>(st));
         
     }
     
@@ -285,10 +285,10 @@ public:
                            L"println(\"Not the letter A\")"
                            L"}");
         
-        SwitchCase* sc = NULL;
-        CaseStatement* c = NULL;
-        Statement* st = NULL;
-        CPPUNIT_ASSERT(sc = dynamic_cast<SwitchCase*>(root));
+        SwitchCasePtr sc;
+        CaseStatementPtr c;
+        StatementPtr st;
+        CPPUNIT_ASSERT(sc = std::dynamic_pointer_cast<SwitchCase>(root));
         CPPUNIT_ASSERT_EQUAL(2, sc->numCases());
         CPPUNIT_ASSERT(sc->getDefaultCase() != NULL);
         
@@ -300,12 +300,12 @@ public:
         CPPUNIT_ASSERT_EQUAL(1, c->numConditions());
         CPPUNIT_ASSERT_EQUAL(1, c->numStatements());
         CPPUNIT_ASSERT(st = c->getStatement(0));
-        CPPUNIT_ASSERT(dynamic_cast<FunctionCall*>(st));
+        CPPUNIT_ASSERT(std::dynamic_pointer_cast<FunctionCall>(st));
         
         CPPUNIT_ASSERT(c = sc->getDefaultCase());
         CPPUNIT_ASSERT_EQUAL(1, c->numStatements());
         CPPUNIT_ASSERT(st = c->getStatement(0));
-        CPPUNIT_ASSERT(dynamic_cast<FunctionCall*>(st));
+        CPPUNIT_ASSERT(std::dynamic_pointer_cast<FunctionCall>(st));
         
         
     }
@@ -321,11 +321,11 @@ public:
                            L"naturalCount = \"millions and millions of\""
                            L"}");
         
-        SwitchCase* sc = NULL;
-        CaseStatement* c = NULL;
-        Statement* st = NULL;
-        Pattern* p = NULL;
-        CPPUNIT_ASSERT(sc = dynamic_cast<SwitchCase*>(root));
+        SwitchCasePtr sc;
+        CaseStatementPtr c;
+        StatementPtr st;
+        PatternPtr p;
+        CPPUNIT_ASSERT(sc = std::dynamic_pointer_cast<SwitchCase>(root));
         CPPUNIT_ASSERT_EQUAL(2, sc->numCases());
         CPPUNIT_ASSERT(sc->getDefaultCase() != NULL);
         
@@ -333,19 +333,19 @@ public:
         CPPUNIT_ASSERT_EQUAL(1, c->numConditions());
         CPPUNIT_ASSERT_EQUAL(1, c->numStatements());
         CPPUNIT_ASSERT(st = c->getStatement(0));
-        CPPUNIT_ASSERT(dynamic_cast<Assignment*>(st));
+        CPPUNIT_ASSERT(std::dynamic_pointer_cast<Assignment>(st));
         
         CPPUNIT_ASSERT(c = sc->getCase(1));
         CPPUNIT_ASSERT_EQUAL(1, c->numConditions());
         CPPUNIT_ASSERT_EQUAL(1, c->numStatements());
         CPPUNIT_ASSERT(st = c->getStatement(0));
         CPPUNIT_ASSERT(p = c->getCondition(0).condition);
-        CPPUNIT_ASSERT(dynamic_cast<Assignment*>(st));
+        CPPUNIT_ASSERT(std::dynamic_pointer_cast<Assignment>(st));
         
         CPPUNIT_ASSERT(c = sc->getDefaultCase());
         CPPUNIT_ASSERT_EQUAL(1, c->numStatements());
         CPPUNIT_ASSERT(st = c->getStatement(0));
-        CPPUNIT_ASSERT(dynamic_cast<Assignment*>(st));
+        CPPUNIT_ASSERT(std::dynamic_pointer_cast<Assignment>(st));
         
         
     }
@@ -360,30 +360,30 @@ public:
                            L"println(\"(\(somePoint.0), 0) is on the x-axis\")"
                            L"}");
         
-        SwitchCase* sc = NULL;
-        CaseStatement* c = NULL;
-        Statement* st = NULL;
-        Tuple* tuple = NULL;
-        CPPUNIT_ASSERT(sc = dynamic_cast<SwitchCase*>(root));
+        SwitchCasePtr sc;
+        CaseStatementPtr c;
+        StatementPtr st;
+        TuplePtr tuple;
+        CPPUNIT_ASSERT(sc = std::dynamic_pointer_cast<SwitchCase>(root));
         CPPUNIT_ASSERT_EQUAL(2, sc->numCases());
         
         CPPUNIT_ASSERT(c = sc->getCase(0));
         CPPUNIT_ASSERT_EQUAL(1, c->numConditions());
         CPPUNIT_ASSERT_EQUAL(1, c->numStatements());
-        CPPUNIT_ASSERT(tuple = dynamic_cast<Tuple*>(c->getCondition(0).condition));
+        CPPUNIT_ASSERT(tuple = std::dynamic_pointer_cast<Tuple>(c->getCondition(0).condition));
         CPPUNIT_ASSERT_EQUAL(2, tuple->numElements());
-        CPPUNIT_ASSERT(dynamic_cast<IntegerLiteral*>(tuple->getElement(0)));
-        CPPUNIT_ASSERT(dynamic_cast<IntegerLiteral*>(tuple->getElement(1)));
+        CPPUNIT_ASSERT(std::dynamic_pointer_cast<IntegerLiteral>(tuple->getElement(0)));
+        CPPUNIT_ASSERT(std::dynamic_pointer_cast<IntegerLiteral>(tuple->getElement(1)));
         
         
         CPPUNIT_ASSERT(c = sc->getCase(1));
         CPPUNIT_ASSERT_EQUAL(1, c->numConditions());
         CPPUNIT_ASSERT_EQUAL(1, c->numStatements());
         CPPUNIT_ASSERT(st = c->getStatement(0));
-        CPPUNIT_ASSERT(tuple = dynamic_cast<Tuple*>(c->getCondition(0).condition));
+        CPPUNIT_ASSERT(tuple = std::dynamic_pointer_cast<Tuple>(c->getCondition(0).condition));
         CPPUNIT_ASSERT_EQUAL(2, tuple->numElements());
-        CPPUNIT_ASSERT(dynamic_cast<Identifier*>(tuple->getElement(0)));
-        CPPUNIT_ASSERT(dynamic_cast<IntegerLiteral*>(tuple->getElement(1)));
+        CPPUNIT_ASSERT(std::dynamic_pointer_cast<Identifier>(tuple->getElement(0)));
+        CPPUNIT_ASSERT(std::dynamic_pointer_cast<IntegerLiteral>(tuple->getElement(1)));
         
         
     }
@@ -410,26 +410,26 @@ public:
                            L"println(\"(\(x), \(y)) is just some arbitrary point\")"
                            L"}");
         
-        SwitchCase* sc = NULL;
-        CaseStatement* c = NULL;
-        Statement* st = NULL;
-        Tuple* tuple = NULL;
-        ValueBinding* vb = NULL;
-        BinaryOperator* eq;
-        UnaryOperator* u = NULL;
-        CPPUNIT_ASSERT(sc = dynamic_cast<SwitchCase*>(root));
+        SwitchCasePtr sc;
+        CaseStatementPtr c;
+        StatementPtr st;
+        TuplePtr tuple;
+        std::shared_ptr<ValueBinding> vb;
+        BinaryOperatorPtr eq;
+        UnaryOperatorPtr u;
+        CPPUNIT_ASSERT(sc = std::dynamic_pointer_cast<SwitchCase>(root));
         CPPUNIT_ASSERT_EQUAL(3, sc->numCases());
         
         CPPUNIT_ASSERT(c = sc->getCase(0));
         CPPUNIT_ASSERT_EQUAL(1, c->numConditions());
         CPPUNIT_ASSERT_EQUAL(1, c->numStatements());
-        CPPUNIT_ASSERT(vb = dynamic_cast<ValueBinding*>(c->getCondition(0).condition));
-        CPPUNIT_ASSERT(tuple = dynamic_cast<Tuple*>(vb->getBinding()));
+        CPPUNIT_ASSERT(vb = std::dynamic_pointer_cast<ValueBinding>(c->getCondition(0).condition));
+        CPPUNIT_ASSERT(tuple = std::dynamic_pointer_cast<Tuple>(vb->getBinding()));
         CPPUNIT_ASSERT_EQUAL(2, tuple->numElements());
-        CPPUNIT_ASSERT(dynamic_cast<Identifier*>(tuple->getElement(0)));
-        CPPUNIT_ASSERT(dynamic_cast<Identifier*>(tuple->getElement(1)));
+        CPPUNIT_ASSERT(std::dynamic_pointer_cast<Identifier>(tuple->getElement(0)));
+        CPPUNIT_ASSERT(std::dynamic_pointer_cast<Identifier>(tuple->getElement(1)));
         //where
-        CPPUNIT_ASSERT(eq = dynamic_cast<BinaryOperator*>(c->getCondition(0).guard));
+        CPPUNIT_ASSERT(eq = std::dynamic_pointer_cast<BinaryOperator>(c->getCondition(0).guard));
         ASSERT_EQUALS(L"==", eq->getOperator().c_str());
         
         
@@ -437,15 +437,15 @@ public:
         CPPUNIT_ASSERT_EQUAL(1, c->numConditions());
         CPPUNIT_ASSERT_EQUAL(1, c->numStatements());
         CPPUNIT_ASSERT(st = c->getStatement(0));
-        CPPUNIT_ASSERT(vb = dynamic_cast<ValueBinding*>(c->getCondition(0).condition));
-        CPPUNIT_ASSERT(tuple = dynamic_cast<Tuple*>(vb->getBinding()));
+        CPPUNIT_ASSERT(vb = std::dynamic_pointer_cast<ValueBinding>(c->getCondition(0).condition));
+        CPPUNIT_ASSERT(tuple = std::dynamic_pointer_cast<Tuple>(vb->getBinding()));
         CPPUNIT_ASSERT_EQUAL(2, tuple->numElements());
-        CPPUNIT_ASSERT(dynamic_cast<Identifier*>(tuple->getElement(0)));
-        CPPUNIT_ASSERT(dynamic_cast<Identifier*>(tuple->getElement(1)));
+        CPPUNIT_ASSERT(std::dynamic_pointer_cast<Identifier>(tuple->getElement(0)));
+        CPPUNIT_ASSERT(std::dynamic_pointer_cast<Identifier>(tuple->getElement(1)));
         //where
-        CPPUNIT_ASSERT(eq = dynamic_cast<BinaryOperator*>(c->getCondition(0).guard));
+        CPPUNIT_ASSERT(eq = std::dynamic_pointer_cast<BinaryOperator>(c->getCondition(0).guard));
         ASSERT_EQUALS(L"==", eq->getOperator().c_str());
-        CPPUNIT_ASSERT(u = dynamic_cast<UnaryOperator*>(eq->getRHS()));
+        CPPUNIT_ASSERT(u = std::dynamic_pointer_cast<UnaryOperator>(eq->getRHS()));
         CPPUNIT_ASSERT_EQUAL(OperatorType::PrefixUnary, u->getType());
         ASSERT_EQUALS(L"-", u->getOperator().c_str());
         
@@ -453,12 +453,12 @@ public:
         CPPUNIT_ASSERT_EQUAL(1, c->numConditions());
         CPPUNIT_ASSERT_EQUAL(1, c->numStatements());
         CPPUNIT_ASSERT(st = c->getStatement(0));
-        CPPUNIT_ASSERT(vb = dynamic_cast<ValueBinding*>(c->getCondition(0).condition));
-        CPPUNIT_ASSERT(tuple = dynamic_cast<Tuple*>(vb->getBinding()));
+        CPPUNIT_ASSERT(vb = std::dynamic_pointer_cast<ValueBinding>(c->getCondition(0).condition));
+        CPPUNIT_ASSERT(tuple = std::dynamic_pointer_cast<Tuple>(vb->getBinding()));
         CPPUNIT_ASSERT_EQUAL(2, tuple->numElements());
-        CPPUNIT_ASSERT(dynamic_cast<Identifier*>(tuple->getElement(0)));
-        CPPUNIT_ASSERT(dynamic_cast<Identifier*>(tuple->getElement(1)));
-        CPPUNIT_ASSERT(NULL == dynamic_cast<BinaryOperator*>(c->getCondition(0).guard));
+        CPPUNIT_ASSERT(std::dynamic_pointer_cast<Identifier>(tuple->getElement(0)));
+        CPPUNIT_ASSERT(std::dynamic_pointer_cast<Identifier>(tuple->getElement(1)));
+        CPPUNIT_ASSERT(NULL == std::dynamic_pointer_cast<BinaryOperator>(c->getCondition(0).guard));
 
         
     }
@@ -477,15 +477,15 @@ public:
                            L"}");
         
         
-        SwitchCase* sc = NULL;
-        CaseStatement* c = NULL;
-        EnumCasePattern* e = NULL;
-        CPPUNIT_ASSERT(sc = dynamic_cast<SwitchCase*>(root));
+        SwitchCasePtr sc;
+        CaseStatementPtr c;
+        EnumCasePatternPtr e;
+        CPPUNIT_ASSERT(sc = std::dynamic_pointer_cast<SwitchCase>(root));
         CPPUNIT_ASSERT_EQUAL(4, sc->numCases());
         
         CPPUNIT_ASSERT(c = sc->getCase(0));
         CPPUNIT_ASSERT_EQUAL(1, c->numConditions());
-        CPPUNIT_ASSERT(e = dynamic_cast<EnumCasePattern*>(c->getCondition(0).condition));
+        CPPUNIT_ASSERT(e = std::dynamic_pointer_cast<EnumCasePattern>(c->getCondition(0).condition));
         CPPUNIT_ASSERT(NULL == c->getCondition(0).guard);
         ASSERT_EQUALS(L"North", e->getName().c_str());
         CPPUNIT_ASSERT(e->getAssociatedBinding() == NULL);
@@ -493,7 +493,7 @@ public:
         
         CPPUNIT_ASSERT(c = sc->getCase(1));
         CPPUNIT_ASSERT_EQUAL(1, c->numConditions());
-        CPPUNIT_ASSERT(e = dynamic_cast<EnumCasePattern*>(c->getCondition(0).condition));
+        CPPUNIT_ASSERT(e = std::dynamic_pointer_cast<EnumCasePattern>(c->getCondition(0).condition));
         CPPUNIT_ASSERT(NULL == c->getCondition(0).guard);
         ASSERT_EQUALS(L"South", e->getName().c_str());
         CPPUNIT_ASSERT(e->getAssociatedBinding() == NULL);
@@ -501,7 +501,7 @@ public:
         
         CPPUNIT_ASSERT(c = sc->getCase(2));
         CPPUNIT_ASSERT_EQUAL(1, c->numConditions());
-        CPPUNIT_ASSERT(e = dynamic_cast<EnumCasePattern*>(c->getCondition(0).condition));
+        CPPUNIT_ASSERT(e = std::dynamic_pointer_cast<EnumCasePattern>(c->getCondition(0).condition));
         CPPUNIT_ASSERT(NULL == c->getCondition(0).guard);
         ASSERT_EQUALS(L"East", e->getName().c_str());
         CPPUNIT_ASSERT(e->getAssociatedBinding() == NULL);
@@ -509,7 +509,7 @@ public:
         
         CPPUNIT_ASSERT(c = sc->getCase(3));
         CPPUNIT_ASSERT_EQUAL(1, c->numConditions());
-        CPPUNIT_ASSERT(e = dynamic_cast<EnumCasePattern*>(c->getCondition(0).condition));
+        CPPUNIT_ASSERT(e = std::dynamic_pointer_cast<EnumCasePattern>(c->getCondition(0).condition));
         CPPUNIT_ASSERT(NULL == c->getCondition(0).guard);
         ASSERT_EQUALS(L"West", e->getName().c_str());
         CPPUNIT_ASSERT(e->getAssociatedBinding() == NULL);
@@ -525,46 +525,46 @@ public:
                            L"println(\"QR code with value of \(productCode).\") "
                            L"}");
         
-        SwitchCase* sc = NULL;
-        CaseStatement* c = NULL;
-        EnumCasePattern* e = NULL;
-        Tuple* t = NULL;
-        LetBinding* let = NULL;
-        Identifier* id = NULL;
-        CPPUNIT_ASSERT(sc = dynamic_cast<SwitchCase*>(root));
+        SwitchCasePtr sc;
+        CaseStatementPtr c;
+        EnumCasePatternPtr e;
+        TuplePtr t;
+        LetBindingPtr let;
+        IdentifierPtr id;
+        CPPUNIT_ASSERT(sc = std::dynamic_pointer_cast<SwitchCase>(root));
         CPPUNIT_ASSERT_EQUAL(2, sc->numCases());
         
         CPPUNIT_ASSERT(c = sc->getCase(0));
         CPPUNIT_ASSERT_EQUAL(1, c->numConditions());
-        CPPUNIT_ASSERT(e = dynamic_cast<EnumCasePattern*>(c->getCondition(0).condition));
+        CPPUNIT_ASSERT(e = std::dynamic_pointer_cast<EnumCasePattern>(c->getCondition(0).condition));
         CPPUNIT_ASSERT(NULL == c->getCondition(0).guard);
         ASSERT_EQUALS(L"UPCA", e->getName().c_str());
         CPPUNIT_ASSERT(t = e->getAssociatedBinding());
         CPPUNIT_ASSERT_EQUAL(3, t->numElements());
         
-        CPPUNIT_ASSERT(let = dynamic_cast<LetBinding*>(t->getElement(0)));
-        CPPUNIT_ASSERT(id = dynamic_cast<Identifier*>(let->getBinding()));
+        CPPUNIT_ASSERT(let = std::dynamic_pointer_cast<LetBinding>(t->getElement(0)));
+        CPPUNIT_ASSERT(id = std::dynamic_pointer_cast<Identifier>(let->getBinding()));
         ASSERT_EQUALS(L"numberSystem", id->getIdentifier().c_str());
         
-        CPPUNIT_ASSERT(let = dynamic_cast<LetBinding*>(t->getElement(1)));
-        CPPUNIT_ASSERT(id = dynamic_cast<Identifier*>(let->getBinding()));
+        CPPUNIT_ASSERT(let = std::dynamic_pointer_cast<LetBinding>(t->getElement(1)));
+        CPPUNIT_ASSERT(id = std::dynamic_pointer_cast<Identifier>(let->getBinding()));
         ASSERT_EQUALS(L"identifier", id->getIdentifier().c_str());
         
-        CPPUNIT_ASSERT(let = dynamic_cast<LetBinding*>(t->getElement(2)));
-        CPPUNIT_ASSERT(id = dynamic_cast<Identifier*>(let->getBinding()));
+        CPPUNIT_ASSERT(let = std::dynamic_pointer_cast<LetBinding>(t->getElement(2)));
+        CPPUNIT_ASSERT(id = std::dynamic_pointer_cast<Identifier>(let->getBinding()));
         ASSERT_EQUALS(L"check", id->getIdentifier().c_str());
         
         
         CPPUNIT_ASSERT(c = sc->getCase(1));
         CPPUNIT_ASSERT_EQUAL(1, c->numConditions());
-        CPPUNIT_ASSERT(e = dynamic_cast<EnumCasePattern*>(c->getCondition(0).condition));
+        CPPUNIT_ASSERT(e = std::dynamic_pointer_cast<EnumCasePattern>(c->getCondition(0).condition));
         CPPUNIT_ASSERT(NULL == c->getCondition(0).guard);
         ASSERT_EQUALS(L"QRCode", e->getName().c_str());
         CPPUNIT_ASSERT(t = e->getAssociatedBinding());
         CPPUNIT_ASSERT_EQUAL(1, t->numElements());
         
         
-        CPPUNIT_ASSERT(id = dynamic_cast<Identifier*>(t->getElement(0)));
+        CPPUNIT_ASSERT(id = std::dynamic_pointer_cast<Identifier>(t->getElement(0)));
         ASSERT_EQUALS(L"productCode", id->getIdentifier().c_str());
         
     }
@@ -575,20 +575,20 @@ public:
                            L"break gameLoop "
                            L"continue gameLoop"
                            L"}");
-        LabeledStatement* label = NULL;
-        WhileLoop* w = NULL;
-        BinaryOperator* op = NULL;
-        CodeBlock* cb = NULL;
+        LabeledStatementPtr label;
+        WhileLoopPtr w;
+        BinaryOperatorPtr op;
+        CodeBlockPtr cb;
         
-        CPPUNIT_ASSERT(label = dynamic_cast<LabeledStatement*>(root));
+        CPPUNIT_ASSERT(label = std::dynamic_pointer_cast<LabeledStatement>(root));
         ASSERT_EQUALS(L"gameLoop", label->getLabel().c_str());
-        CPPUNIT_ASSERT(w = dynamic_cast<WhileLoop*>(label->getStatement()));
-        CPPUNIT_ASSERT(op = dynamic_cast<BinaryOperator*>(w->getCondition()));
-        CPPUNIT_ASSERT(cb = dynamic_cast<CodeBlock*>(w->getCodeBlock()));
+        CPPUNIT_ASSERT(w = std::dynamic_pointer_cast<WhileLoop>(label->getStatement()));
+        CPPUNIT_ASSERT(op = std::dynamic_pointer_cast<BinaryOperator>(w->getCondition()));
+        CPPUNIT_ASSERT(cb = std::dynamic_pointer_cast<CodeBlock>(w->getCodeBlock()));
         ASSERT_EQUALS(L"!=", op->getOperator().c_str());
         CPPUNIT_ASSERT_EQUAL(2, cb->numStatements());
-        BreakStatement* bs = dynamic_cast<BreakStatement*>(cb->getStatement(0));
-        ContinueStatement* cs = dynamic_cast<ContinueStatement*>(cb->getStatement(1));
+        BreakStatementPtr bs = std::dynamic_pointer_cast<BreakStatement>(cb->getStatement(0));
+        ContinueStatementPtr cs = std::dynamic_pointer_cast<ContinueStatement>(cb->getStatement(1));
         CPPUNIT_ASSERT(bs);
         CPPUNIT_ASSERT(cs);
         ASSERT_EQUALS(L"gameLoop", bs->getLoop().c_str());
@@ -604,20 +604,20 @@ public:
                            L"break gameLoop "
                            L"continue gameLoop"
                            L"} while square != finalSquare");
-        LabeledStatement* label = NULL;
-        DoLoop* w = NULL;
-        BinaryOperator* op = NULL;
-        CodeBlock* cb = NULL;
+        LabeledStatementPtr label;
+        DoLoopPtr w;
+        BinaryOperatorPtr op;
+        CodeBlockPtr cb;
         
-        CPPUNIT_ASSERT(label = dynamic_cast<LabeledStatement*>(root));
+        CPPUNIT_ASSERT(label = std::dynamic_pointer_cast<LabeledStatement>(root));
         ASSERT_EQUALS(L"gameLoop", label->getLabel().c_str());
-        CPPUNIT_ASSERT(w = dynamic_cast<DoLoop*>(label->getStatement()));
-        CPPUNIT_ASSERT(op = dynamic_cast<BinaryOperator*>(w->getCondition()));
-        CPPUNIT_ASSERT(cb = dynamic_cast<CodeBlock*>(w->getCodeBlock()));
+        CPPUNIT_ASSERT(w = std::dynamic_pointer_cast<DoLoop>(label->getStatement()));
+        CPPUNIT_ASSERT(op = std::dynamic_pointer_cast<BinaryOperator>(w->getCondition()));
+        CPPUNIT_ASSERT(cb = std::dynamic_pointer_cast<CodeBlock>(w->getCodeBlock()));
         ASSERT_EQUALS(L"!=", op->getOperator().c_str());
         CPPUNIT_ASSERT_EQUAL(2, cb->numStatements());
-        BreakStatement* bs = dynamic_cast<BreakStatement*>(cb->getStatement(0));
-        ContinueStatement* cs = dynamic_cast<ContinueStatement*>(cb->getStatement(1));
+        BreakStatementPtr bs = std::dynamic_pointer_cast<BreakStatement>(cb->getStatement(0));
+        ContinueStatementPtr cs = std::dynamic_pointer_cast<ContinueStatement>(cb->getStatement(1));
         CPPUNIT_ASSERT(bs);
         CPPUNIT_ASSERT(cs);
         ASSERT_EQUALS(L"gameLoop", bs->getLoop().c_str());
@@ -631,20 +631,20 @@ public:
                            L"break gameLoop "
                            L"continue gameLoop"
                            L"}");
-        LabeledStatement* label = NULL;
-        ForLoop* w = NULL;
-        BinaryOperator* op = NULL;
-        CodeBlock* cb = NULL;
+        LabeledStatementPtr label;
+        ForLoopPtr w;
+        BinaryOperatorPtr op;
+        CodeBlockPtr cb;
         
-        CPPUNIT_ASSERT(label = dynamic_cast<LabeledStatement*>(root));
+        CPPUNIT_ASSERT(label = std::dynamic_pointer_cast<LabeledStatement>(root));
         ASSERT_EQUALS(L"gameLoop", label->getLabel().c_str());
-        CPPUNIT_ASSERT(w = dynamic_cast<ForLoop*>(label->getStatement()));
-        CPPUNIT_ASSERT(op = dynamic_cast<BinaryOperator*>(w->getCondition()));
-        CPPUNIT_ASSERT(cb = dynamic_cast<CodeBlock*>(w->getCodeBlock()));
+        CPPUNIT_ASSERT(w = std::dynamic_pointer_cast<ForLoop>(label->getStatement()));
+        CPPUNIT_ASSERT(op = std::dynamic_pointer_cast<BinaryOperator>(w->getCondition()));
+        CPPUNIT_ASSERT(cb = std::dynamic_pointer_cast<CodeBlock>(w->getCodeBlock()));
         ASSERT_EQUALS(L"!=", op->getOperator().c_str());
         CPPUNIT_ASSERT_EQUAL(2, cb->numStatements());
-        BreakStatement* bs = dynamic_cast<BreakStatement*>(cb->getStatement(0));
-        ContinueStatement* cs = dynamic_cast<ContinueStatement*>(cb->getStatement(1));
+        BreakStatementPtr bs = std::dynamic_pointer_cast<BreakStatement>(cb->getStatement(0));
+        ContinueStatementPtr cs = std::dynamic_pointer_cast<ContinueStatement>(cb->getStatement(1));
         CPPUNIT_ASSERT(bs);
         CPPUNIT_ASSERT(cs);
         ASSERT_EQUALS(L"gameLoop", bs->getLoop().c_str());

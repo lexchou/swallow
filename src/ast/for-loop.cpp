@@ -12,10 +12,7 @@ ForLoop::ForLoop()
 }
 ForLoop::~ForLoop()
 {
-    SafeDelete(condition);
-    SafeDelete(step);
-    SafeDelete(codeBlock);
-    SafeDeleteAll(inits);
+
 }
 
 void ForLoop::serialize(std::wostream& out)
@@ -23,7 +20,7 @@ void ForLoop::serialize(std::wostream& out)
     out<<L"for ";
     for(int i = 0; i < numInit(); i++)
     {
-        Expression* init = getInit(i);
+        ExpressionPtr init = getInit(i);
         if(i > 0)
             out<<L", ";
         init->serialize(out);
@@ -39,10 +36,10 @@ void ForLoop::serialize(std::wostream& out)
 }
 void ForLoop::accept(NodeVisitor* visitor)
 {
-    visitor->visitForLoop(this);
+    accept2(visitor, &NodeVisitor::visitForLoop);
 }
 
-void ForLoop::addInit(Expression* init)
+void ForLoop::addInit(const ExpressionPtr& init)
 {
     inits.push_back(init);
 }
@@ -50,34 +47,34 @@ int ForLoop::numInit()
 {
     return inits.size();
 }
-Expression* ForLoop::getInit(int idx)
+ExpressionPtr ForLoop::getInit(int idx)
 {
     return inits[idx];
 }
 
-void ForLoop::setCondition(Expression* cond)
+void ForLoop::setCondition(const ExpressionPtr& cond)
 {
     condition = cond;
 }
-Expression* ForLoop::getCondition()
+ExpressionPtr ForLoop::getCondition()
 {
     return condition;
 }
 
-void ForLoop::setStep(Expression* step)
+void ForLoop::setStep(const ExpressionPtr& step)
 {
     this->step = step;
 }
-Expression* ForLoop::getStep()
+ExpressionPtr ForLoop::getStep()
 {
     return step;
 }
 
-void ForLoop::setCodeBlock(CodeBlock* codeBlock)
+void ForLoop::setCodeBlock(const CodeBlockPtr& codeBlock)
 {
     this->codeBlock = codeBlock;
 }
-CodeBlock* ForLoop::getCodeBlock()
+CodeBlockPtr ForLoop::getCodeBlock()
 {
     return codeBlock;
 }

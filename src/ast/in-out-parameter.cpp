@@ -2,8 +2,8 @@
 #include "identifier.h"
 USE_SWIFT_NS;
 
-InOutParameter::InOutParameter(Identifier* identifier)
-:UnaryOperator(L"&", OperatorType::PrefixUnary)
+InOutParameter::InOutParameter()
 {
-    setOperand(identifier);
+    this->setOperator(L"&");
+    type = OperatorType::PrefixUnary;
 }

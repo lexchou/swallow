@@ -9,16 +9,16 @@ class ParenthesizedExpression : public Expression
 {
 public:
 
-    typedef std::pair<std::wstring, Expression*> Term;
+    typedef std::pair<std::wstring, ExpressionPtr> Term;
 public:
     ParenthesizedExpression();
     ~ParenthesizedExpression();
 public:
-    void append(const std::wstring& name, Expression* expr);
-    void append(Expression* expr);
+    void append(const std::wstring& name, const ExpressionPtr& expr);
+    void append(const ExpressionPtr& expr);
     int numExpressions()const;
     std::wstring getName(int idx);
-    Expression* get(int idx);
+    ExpressionPtr get(int idx);
 public:
     virtual void serialize(std::wostream& out);
     virtual void accept(NodeVisitor* visitor);

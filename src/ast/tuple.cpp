@@ -11,37 +11,34 @@ Tuple::Tuple()
 }
 Tuple::~Tuple()
 {
-    SafeDelete(type);
-    SafeDeleteAll(elements);
 }
 
 void Tuple::serialize(std::wostream& out)
 {
     out<<L"(";
-    std::vector<Pattern*>::iterator iter = elements.begin();
-    for(; iter != elements.end(); iter++)
+    for(const PatternPtr& p : elements)
     {
-        (*iter)->serialize(out);
+        p->serialize(out);
     }
     out<<L")";
 }
 
 void Tuple::accept(NodeVisitor* visitor)
 {
-    visitor->visitTuple(this);
+    accept2(visitor, &NodeVisitor::visitTuple);
 }
 
 
-TypeNode* Tuple::getType()
+TypeNodePtr Tuple::getType()
 {
     return type;
 }
-void Tuple::setType(TypeNode* type)
+void Tuple::setType(const TypeNodePtr& type)
 {
     this->type = type;
 }
 
-void Tuple::add(Pattern* st)
+void Tuple::add(const PatternPtr& st)
 {
     elements.push_back(st);
 }
@@ -49,7 +46,7 @@ int Tuple::numElements()
 {
     return elements.size();
 }
-Pattern* Tuple::getElement(int i)
+PatternPtr Tuple::getElement(int i)
 {
     return elements[i];
 }

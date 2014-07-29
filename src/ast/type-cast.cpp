@@ -2,16 +2,16 @@
 #include "type-node.h"
 USE_SWIFT_NS
 
-TypeCast::TypeCast(Expression* expr, TypeNode* type)
-:BinaryOperator(L"as", Associativity::None, 132)
+TypeCast::TypeCast()
 {
-    setLHS(expr);
-    setType(type);
+    op = L"as";
+    associativity = Associativity::None;
+    precedence = 132;
+
     optional = false;
 }
 TypeCast::~TypeCast()
 {
-    SafeDelete(type);
 }
 
 void TypeCast::setOptional(bool val)
@@ -23,11 +23,11 @@ bool TypeCast::isOptional()const
 {
     return optional;
 }
-TypeNode* TypeCast::getType()
+TypeNodePtr TypeCast::getType()
 {
     return type;
 }
-void TypeCast::setType(TypeNode* type)
+void TypeCast::setType(TypeNodePtr type)
 {
     this->type = type;
 }
@@ -36,7 +36,7 @@ int TypeCast::numChildren()
 {
     return 2;
 }
-Node* TypeCast::get(int i)
+NodePtr TypeCast::get(int i)
 {
     switch(i)
     {
@@ -48,15 +48,15 @@ Node* TypeCast::get(int i)
             return NULL;
     }
 }
-void TypeCast::set(int i, Node* val)
+void TypeCast::set(int i, const NodePtr& val)
 {
     switch(i)
     {
         case 0:
-            lhs = dynamic_cast<Pattern*>(val);
+            lhs = std::dynamic_pointer_cast<Pattern>(val);
             break;
         case 1:
-            type = dynamic_cast<TypeNode*>(val);
+            type = std::dynamic_pointer_cast<TypeNode>(val);
             break;
         default:
             break;

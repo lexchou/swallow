@@ -17,25 +17,26 @@ public:
     };
 
 public:
-    Identifier(const std::wstring& identifier);
+    Identifier();
     ~Identifier();
 public:
     virtual void serialize(std::wostream& out);
     virtual void accept(NodeVisitor* visitor);
 public:
     const std::wstring& getIdentifier() const { return identifier;}
+    void setIdentifier(const std::wstring& id){identifier = id;}
     
-    void setDeclaredType(TypeNode* type);
-    TypeNode* getDeclaredType();
+    void setDeclaredType(const TypeNodePtr& type);
+    TypeNodePtr getDeclaredType();
     
-    GenericArgument* getGenericArgument();
-    void setGenericArgument(GenericArgument* val);
+    GenericArgumentPtr getGenericArgument();
+    void setGenericArgument(const GenericArgumentPtr& val);
 public:
     int flags;
 protected:
     std::wstring identifier;
-    TypeNode* declaredType;
-    GenericArgument* genericArgument;
+    TypeNodePtr declaredType;
+    GenericArgumentPtr genericArgument;
 };
 
 SWIFT_NS_END

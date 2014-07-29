@@ -10,14 +10,13 @@ ValueBinding::ValueBinding(NodeType::T nodeType)
 }
 ValueBinding::~ValueBinding()
 {
-    SafeDelete(binding);
 }
 
-void ValueBinding::setBinding(Pattern* st)
+void ValueBinding::setBinding(const PatternPtr& st)
 {
     this->binding = st;
 }
-Pattern* ValueBinding::getBinding()
+PatternPtr ValueBinding::getBinding()
 {
     return binding;
 }
@@ -33,7 +32,7 @@ void LetBinding::serialize(std::wostream& out)
 }
 void LetBinding::accept(NodeVisitor* visitor)
 {
-    visitor->visitLetBinding(this);
+    accept2(visitor, &NodeVisitor::visitLetBinding);
 }
 
 VarBinding::VarBinding()
@@ -47,5 +46,5 @@ void VarBinding::serialize(std::wostream& out)
 }
 void VarBinding::accept(NodeVisitor* visitor)
 {
-    visitor->visitVarBinding(this);
+    accept2(visitor, &NodeVisitor::visitVarBinding);
 }

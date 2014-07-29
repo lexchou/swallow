@@ -11,7 +11,7 @@ DeinitializerDef::DeinitializerDef()
 }
 DeinitializerDef::~DeinitializerDef()
 {
-    SafeDelete(body);
+
 }
 
 void DeinitializerDef::serialize(std::wostream& out)
@@ -22,15 +22,15 @@ void DeinitializerDef::serialize(std::wostream& out)
 
 void DeinitializerDef::accept(NodeVisitor* visitor)
 {
-    visitor->visitDeinit(this);
+    accept2(visitor, &NodeVisitor::visitDeinit);
 }
 
 
-CodeBlock* DeinitializerDef::getBody()
+CodeBlockPtr DeinitializerDef::getBody()
 {
     return body;
 }
-void DeinitializerDef::setBody(CodeBlock* body)
+void DeinitializerDef::setBody(const CodeBlockPtr& body)
 {
     this->body = body;
 }

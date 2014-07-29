@@ -11,29 +11,14 @@ EnumDef::EnumDef()
 }
 EnumDef::~EnumDef()
 {
-    {
-        std::vector<AssociatedType>::iterator iter = associatedTypes.begin();
-        for(; iter != associatedTypes.end(); iter++)
-        {
-            if(iter->value)
-                delete iter->value;
-        }
-    }
-    {
-        std::vector<Constant>::iterator iter = constants.begin();
-        for(; iter != constants.end(); iter++)
-        {
-            if(iter->value)
-                delete iter->value;
-        }
-    }
+
 }
 void EnumDef::serialize(std::wostream& out)
 {
 }
 void EnumDef::accept(NodeVisitor* visitor)
 {
-    visitor->visitEnum(this);
+    accept2(visitor, &NodeVisitor::visitEnum);
 }
 
 EnumDef::Type EnumDef::getType()const
@@ -45,7 +30,7 @@ EnumDef::Type EnumDef::getType()const
     return UnionStyle;
 }
 
-void EnumDef::addAssociatedType(const std::wstring& name, TupleType* associatedType)
+void EnumDef::addAssociatedType(const std::wstring& name, const TupleTypePtr& associatedType)
 {
     associatedTypes.push_back(AssociatedType(name, associatedType));
 }
@@ -58,7 +43,7 @@ const EnumDef::AssociatedType& EnumDef::getAssociatedType(int i)
     return associatedTypes[i];
 }
 
-void EnumDef::addConstant(const std::wstring& name, Expression* value)
+void EnumDef::addConstant(const std::wstring& name, const ExpressionPtr& value)
 {
     constants.push_back(Constant(name, value));
 }

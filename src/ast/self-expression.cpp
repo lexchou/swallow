@@ -5,20 +5,20 @@ USE_SWIFT_NS
 
 
 
-SelfExpression::SelfExpression(Expression* expr)
-    :Expression(NodeType::Self), expression(expr)
+SelfExpression::SelfExpression()
+    :Expression(NodeType::Self)
 {
 }
 SelfExpression::~SelfExpression()
 {
-    SafeDelete(expression);
+
 }
 
-void SelfExpression::setExpression(Expression* expr)
+void SelfExpression::setExpression(const ExpressionPtr& expr)
 {
     this->expression = expr;
 }
-Expression* SelfExpression::getExpression()
+ExpressionPtr SelfExpression::getExpression()
 {
     return expression;
 }
@@ -31,5 +31,5 @@ void SelfExpression::serialize(std::wostream& out)
 }
 void SelfExpression::accept(NodeVisitor* visitor)
 {
-    visitor->visitSelf(this);
+    accept2(visitor, &NodeVisitor::visitSelf);
 }

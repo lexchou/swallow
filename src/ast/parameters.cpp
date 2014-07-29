@@ -12,7 +12,7 @@ Parameters::Parameters()
 }
 Parameters::~Parameters()
 {
-    SafeDeleteAll(parameters);
+
 }
 
 void Parameters::serialize(std::wostream& out)
@@ -20,7 +20,7 @@ void Parameters::serialize(std::wostream& out)
 }
 void Parameters::accept(NodeVisitor* visitor)
 {
-    visitor->visitParameters(this);
+    accept2(visitor, &NodeVisitor::visitParameters);
 }
 
 void Parameters::setVariadicParameters(bool val)
@@ -32,7 +32,7 @@ bool Parameters::isVariadicParameters()const
     return variadicParameters;
 }
 
-void Parameters::addParameter(Parameter* parameter)
+void Parameters::addParameter(const ParameterPtr& parameter)
 {
     parameters.push_back(parameter);
 }
@@ -40,7 +40,7 @@ int Parameters::numParameters()const
 {
     return parameters.size();
 }
-Parameter* Parameters::getParameter(int i)
+ParameterPtr Parameters::getParameter(int i)
 {
-    return static_cast<Parameter*>(parameters[i]);
+    return parameters[i];
 }

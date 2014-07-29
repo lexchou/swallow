@@ -2,8 +2,10 @@
 #define NODE_H
 #include "swift_conf.h"
 #include "swift_types.h"
+#include "ast-decl.h"
 #include <vector>
 #include <sstream>
+#include <memory>
 #ifdef TRACE_NODE
 #include <list>
 #endif//TRACE_NODE
@@ -92,7 +94,7 @@ struct NodeType
     };
 };
 
-class Node
+class Node : public std::enable_shared_from_this<Node>
 {
 protected:
     Node(NodeType::T nodeType);
@@ -105,6 +107,15 @@ public:
     NodeType::T getNodeType();
 public:
     virtual void accept(NodeVisitor* visitor){}
+
+protected:
+    template<class ASTNode>
+    inline void accept2(NodeVisitor* visitor, void (NodeVisitor::*visit)(const std::shared_ptr<ASTNode>&))
+    {
+        std::shared_ptr<ASTNode> ptr = std::static_pointer_cast<ASTNode>(shared_from_this());
+        (visitor->*visit)(ptr);
+    }
+
 public:
     virtual void serialize(std::wostream& out) {};
 protected:
@@ -120,7 +131,7 @@ public:
     static int NodeCount;
 #endif
 };
-
+typedef std::shared_ptr<Node> NodePtr;
 
 SWIFT_NS_END
 

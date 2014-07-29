@@ -10,15 +10,12 @@ CodeBlock::CodeBlock()
 }
 CodeBlock::~CodeBlock()
 {
-    SafeDeleteAll(statements);
-    SafeDeleteAll(attributes);
 }
 void CodeBlock::serialize(std::wostream& out)
 {
     out<<L"{"<<std::endl;
-    for(int i = 0; i < numStatements(); i++)
+    for(StatementPtr st : *this)
     {
-        Statement* st = getStatement(i);
         st->serialize(out);
         out<<std::endl;
     }
@@ -26,11 +23,11 @@ void CodeBlock::serialize(std::wostream& out)
 }
 void CodeBlock::accept(NodeVisitor* visitor)
 {
-    visitor->visitCodeBlock(this);
+    accept2(visitor, &NodeVisitor::visitCodeBlock);
 }
 
 
-void CodeBlock::addStatement(Statement* st)
+void CodeBlock::addStatement(const StatementPtr& st)
 {
     statements.push_back(st);
 }
@@ -38,7 +35,7 @@ int CodeBlock::numStatements()
 {
     return statements.size();
 }
-Statement* CodeBlock::getStatement(int idx)
+StatementPtr CodeBlock::getStatement(int idx)
 {
     return statements[idx];
 }

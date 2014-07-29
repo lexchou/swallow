@@ -136,18 +136,18 @@ void SymbolRegistry::leaveScope()
     scopes.pop();
 }
 
-Symbol* SymbolRegistry::lookupSymbol(const std::wstring& name)
+SymbolPtr SymbolRegistry::lookupSymbol(const std::wstring& name)
 {
-    Symbol* ret = NULL;
+    SymbolPtr ret = NULL;
     lookupSymbol(name, NULL, &ret);
     return ret;
 }
-bool SymbolRegistry::lookupSymbol(const std::wstring& name, SymbolScope** scope, Symbol** ret)
+bool SymbolRegistry::lookupSymbol(const std::wstring& name, SymbolScope** scope, SymbolPtr* ret)
 {
     SymbolScope* s = currentScope;
     for(; s; s = s->parent)
     {
-        Symbol* symbol = s->lookup(name);
+        SymbolPtr symbol = s->lookup(name);
         if(symbol)
         {
             if(scope)
@@ -161,16 +161,16 @@ bool SymbolRegistry::lookupSymbol(const std::wstring& name, SymbolScope** scope,
 }
 TypePtr SymbolRegistry::lookupType(const std::wstring& name)
 {
-    Type* ret;
+    TypePtr ret;
     if(lookupType(name, NULL, &ret))
         return ret;
     return NULL;
 }
 bool SymbolRegistry::lookupType(const std::wstring& name, SymbolScope** scope, TypePtr* ret)
 {
-    Symbol* symbol = NULL;
+    SymbolPtr symbol = NULL;
     bool r = lookupSymbol(name, scope, &symbol);
     if(ret)
-        *ret = dynamic_cast<Type*>(symbol);
+        *ret = std::dynamic_pointer_cast<Type>(symbol);
     return r;
 }

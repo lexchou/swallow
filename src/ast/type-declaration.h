@@ -12,25 +12,25 @@ public:
     TypeDeclaration(NodeType::T nodeType);
     ~TypeDeclaration();
 public:
-    void addParent(TypeIdentifier* parent);
+    void addParent(const TypeIdentifierPtr& parent);
     int numParents()const;
-    TypeIdentifier* getParent(int i);
-    const std::vector<TypeIdentifier*>& getParents() {return parents;}
+    TypeIdentifierPtr getParent(int i);
+    const std::vector<TypeIdentifierPtr>& getParents() {return parents;}
     
-    void setIdentifier(TypeIdentifier* id);
-    TypeIdentifier* getIdentifier();
+    void setIdentifier(const TypeIdentifierPtr& id);
+    TypeIdentifierPtr getIdentifier();
     
-    void addDeclaration(Declaration* decl);
+    void addDeclaration(const DeclarationPtr& decl);
     int numDeclarations()const;
-    Declaration* getDeclaration(int i);
+    DeclarationPtr getDeclaration(int i);
 
-    std::vector<Declaration*>::iterator begin() {return declarations.begin();}
-    std::vector<Declaration*>::iterator end() {return declarations.end();}
+    std::vector<DeclarationPtr>::iterator begin() {return declarations.begin();}
+    std::vector<DeclarationPtr>::iterator end() {return declarations.end();}
 
 public:
-    std::vector<TypeIdentifier*> parents;
-    TypeIdentifier* identifier;
-    std::vector<Declaration*> declarations;
+    std::vector<TypeIdentifierPtr> parents;
+    TypeIdentifierPtr identifier;
+    std::vector<DeclarationPtr> declarations;
 };
 
 SWIFT_NS_END

@@ -7,6 +7,7 @@
 #include <map>
 #include <stack>
 #include "symbol-scope.h"
+#include "semantic-types.h"
 SWIFT_NS_BEGIN
 
 
@@ -28,9 +29,6 @@ struct OperatorInfo
         this->precedence.postfix = -1;
     }
 };
-class SymbolScope;
-class Symbol;
-class Type;
 class SymbolRegistry
 {
     typedef std::map<std::wstring, OperatorInfo> OperatorMap;
@@ -51,8 +49,8 @@ public:
     TypePtr lookupType(const std::wstring& name);
     bool lookupType(const std::wstring& name, SymbolScope** scope, TypePtr* ret);
 
-    bool lookupSymbol(const std::wstring& name, SymbolScope** scope, Symbol** ret);
-    Symbol* lookupSymbol(const std::wstring& name);
+    bool lookupSymbol(const std::wstring& name, SymbolScope** scope, SymbolPtr* ret);
+    SymbolPtr lookupSymbol(const std::wstring& name);
 
 public:
     void enterScope(SymbolScope* scope);

@@ -11,13 +11,13 @@ public:
     ImplicitlyUnwrappedOptional();
     ~ImplicitlyUnwrappedOptional();
 public:
-    void setInnerType(TypeNode* innerType);
-    TypeNode* getInnerType();
+    void setInnerType(const TypeNodePtr& innerType);
+    TypeNodePtr getInnerType();
 public:
     virtual void serialize(std::wostream& out);
     virtual void accept(NodeVisitor* visitor);
 private:
-    TypeNode* innerType;
+    TypeNodePtr innerType;
 };
 
 SWIFT_NS_END

@@ -13,5 +13,5 @@ void StructDef::serialize(std::wostream& out)
 
 void StructDef::accept(NodeVisitor* visitor)
 {
-    visitor->visitStruct(this);
+    accept2(visitor, &NodeVisitor::visitStruct);
 }

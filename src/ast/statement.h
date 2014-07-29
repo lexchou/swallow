@@ -11,6 +11,7 @@ public:
     Statement(NodeType::T nodeType);
 private:
 };
+typedef std::shared_ptr<Statement> StatementPtr;
 
 SWIFT_NS_END
 

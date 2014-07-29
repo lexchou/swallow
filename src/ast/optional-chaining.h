@@ -7,16 +7,16 @@ SWIFT_NS_BEGIN
 class OptionalChaining : public Expression
 {
 public:
-    OptionalChaining(Expression* expr);
+    OptionalChaining();
     ~OptionalChaining();
 public:
-    void setExpression(Expression* expr);
-    Expression* getExpression();
+    void setExpression(const ExpressionPtr& expr);
+    ExpressionPtr getExpression();
 public:
     virtual void serialize(std::wostream& out);
     virtual void accept(NodeVisitor* visitor);
 private:
-    Expression* expression;
+    ExpressionPtr expression;
 };
 
 SWIFT_NS_END

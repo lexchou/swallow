@@ -16,8 +16,8 @@ public:
 
 private:
     TypePtr type;
-
 };
+typedef std::shared_ptr<Pattern> PatternPtr;
 
 SWIFT_NS_END
 

@@ -8,10 +8,12 @@ SWIFT_NS_BEGIN
 class CompileConstant : public Expression
 {
 public:
-    CompileConstant(const std::wstring& name, const std::wstring& value);
+    CompileConstant();
 public:
     const std::wstring& getName() const;
+    void setName(const std::wstring& name);
     const std::wstring& getValue() const;
+    void setValue(const std::wstring& value);
 public:
     virtual void serialize(std::wostream& out);
     virtual void accept(NodeVisitor* visitor);

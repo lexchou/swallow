@@ -11,7 +11,6 @@ TypeAlias::TypeAlias()
 }
 TypeAlias::~TypeAlias()
 {
-    SafeDelete(type);
 }
 void TypeAlias::serialize(std::wostream& out)
 {
@@ -20,7 +19,7 @@ void TypeAlias::serialize(std::wostream& out)
 }
 void TypeAlias::accept(NodeVisitor* visitor)
 {
-    visitor->visitTypeAlias(this);
+    accept2(visitor, &NodeVisitor::visitTypeAlias);
 }
 
 const std::wstring& TypeAlias::getName()const
@@ -32,11 +31,11 @@ void TypeAlias::setName(const std::wstring& name)
     this->name = name;
 }
 
-void TypeAlias::setType(TypeNode* type)
+void TypeAlias::setType(TypeNodePtr type)
 {
     this->type = type;
 }
-TypeNode* TypeAlias::getType()
+TypeNodePtr TypeAlias::getType()
 {
     return type;
 }

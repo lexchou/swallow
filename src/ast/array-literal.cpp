@@ -10,13 +10,13 @@ ArrayLiteral::ArrayLiteral()
 
 ArrayLiteral::~ArrayLiteral()
 {
-    SafeDeleteAll(elements);
+//    SafeDeleteAll(elements);
 }
-void ArrayLiteral::push(Expression* item)
+void ArrayLiteral::push(const ExpressionPtr& item)
 {
 	elements.push_back(item);
 }
-Expression* ArrayLiteral::getElement(int i)
+ExpressionPtr ArrayLiteral::getElement(int i)
 {
     return elements[i];
 }
@@ -28,16 +28,15 @@ int ArrayLiteral::numElements()const
 void ArrayLiteral::serialize(std::wostream& out)
 {
     out<<L"[";
-    for(std::vector<Expression*>::iterator iter = elements.begin(); iter != elements.end(); iter++)
+    for(ExpressionPtr el : elements)
     {
-        if(iter != elements.begin())
-            out<<L", ";
-        (*iter)->serialize(out);
+        el->serialize(out);
     }
     out<<L"]";
 }
 
+
 void ArrayLiteral::accept(NodeVisitor* visitor)
 {
-    visitor->visitArrayLiteral(this);
+    accept2(visitor, &NodeVisitor::visitArrayLiteral);
 }

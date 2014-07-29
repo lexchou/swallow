@@ -13,25 +13,30 @@
 
 using namespace Swift;
 
-Expression* Parser::parseFloat()
+ExpressionPtr Parser::parseFloat()
 {
     Token token;
     expect_next(token);
-    Expression* ret = nodeFactory->createFloat(token.state, token.token);
+    FloatLiteralPtr ret = nodeFactory->createFloat(token.state);
+    ret->valueAsString = token.token;
+    ret->value = token.number.dvalue;
     return ret;
 }
-Expression* Parser::parseInteger()
+ExpressionPtr Parser::parseInteger()
 {
     Token token;
     expect_next(token);
-    Expression* ret = nodeFactory->createInteger(token.state, token.token);
+    IntegerLiteralPtr ret = nodeFactory->createInteger(token.state);
+    ret->valueAsString = token.token;
+    ret->value = token.number.value;
     return ret;
 }
-Expression* Parser::parseString()
+ExpressionPtr Parser::parseString()
 {
     Token token;
     expect_next(token);
-    Expression* ret = nodeFactory->createString(token.state, token.token);
+    StringLiteralPtr ret = nodeFactory->createString(token.state);
+    ret->value = token.token;
     return ret;
 }
 /*
@@ -40,28 +45,32 @@ Expression* Parser::parseString()
  prefix-expression → in-out-expression
  in-out-expression → & identifier
  */
-Expression* Parser::parsePrefixExpression()
+ExpressionPtr Parser::parsePrefixExpression()
 {
     Token token;
     if(match(L"&"))
     {
         //in-out-expression → & identifier
         expect_identifier(token);
-        Identifier* identifier = nodeFactory->createIdentifier(token.state, token.token);
-        InOutParameter* ret = nodeFactory->createInOutParameter(token.state, identifier);
+        IdentifierPtr identifier = nodeFactory->createIdentifier(token.state);
+        identifier->setIdentifier(token.token);
+        InOutParameterPtr ret = nodeFactory->createInOutParameter(token.state);
+        ret->setOperand(identifier);
         return ret;
     }
     
     expect_next(token);
     if(symbolRegistry->isPrefixOperator(token.token))
     {
-        Expression* postfixExpression = parsePostfixExpression();
-        UnaryOperator* op = nodeFactory->createUnary(token.state, token.token, token.operators.type);
+        ExpressionPtr postfixExpression = parsePostfixExpression();
+        UnaryOperatorPtr op = nodeFactory->createUnary(token.state);
+        op->setOperator(token.token);
+        op->setType(token.operators.type);
         op->setOperand(postfixExpression);
         return op;
     }
     restore(token);
-    Expression* ret = parsePostfixExpression();
+    ExpressionPtr ret = parsePostfixExpression();
     return ret;
 }
 /*
@@ -77,11 +86,11 @@ Expression* Parser::parsePrefixExpression()
  postfix-expression → forced-value-expression
  postfix-expression → optional-chaining-expression
  */
-Expression* Parser::parsePostfixExpression()
+ExpressionPtr Parser::parsePostfixExpression()
 {
     Token token;
     // postfix-expression → primary-expression
-    Expression* ret =  parsePrimaryExpression();
+    ExpressionPtr ret =  parsePrimaryExpression();
     while(peek(token))
     {
         if(token.type == TokenType::Operator)
@@ -95,39 +104,53 @@ Expression* Parser::parsePostfixExpression()
                 // postfix-expression → initializer-expression
                 if(token == L"init")
                 {
-                    ret = nodeFactory->createInitializerReference(token.state, ret);
+                    InitializerReferencePtr r = nodeFactory->createInitializerReference(token.state);
+                    r->setExpression(ret);
+                    ret = r;
                     continue;
                 }
                 // postfix-expression → postfix-self-expression
                 if(token.identifier.keyword == Keyword::Self)
                 {
-                    ret = nodeFactory->createSelfExpression(token.state, ret);
+                    SelfExpressionPtr r = nodeFactory->createSelfExpression(token.state);
+                    r->setExpression(ret);
+                    ret = r;
                     continue;
                 }
                 // postfix-expression → dynamic-type-expression
                 if(token.identifier.keyword == Keyword::DynamicType)
                 {
-                    ret = nodeFactory->createDynamicType(token.state, ret);
+                    DynamicTypePtr r = nodeFactory->createDynamicType(token.state);
+                    r->setExpression(ret);
+                    ret = r;
                     continue;
                 }
                 tassert(token, token.identifier.keyword == Keyword::_, Errors::E_EXPECT_IDENTIFIER, token.token);
                 // postfix-expression → explicit-member-expression
-                Identifier* field = nodeFactory->createIdentifier(token.state, token.token);
-                ret = nodeFactory->createMemberAccess(token.state, ret, field);
+                IdentifierPtr field = nodeFactory->createIdentifier(token.state);
+                field->setIdentifier(token.token);
+                MemberAccessPtr access = nodeFactory->createMemberAccess(token.state);
+                access->setSelf(ret);
+                access->setField(field);
+                ret = access;
                 continue;
             }
             if(token == L"!")
             {
                 // postfix-expression → forced-value-expression
                 expect_next(token);
-                ret = nodeFactory->createForcedValue(token.state, ret);
+                ForcedValuePtr r = nodeFactory->createForcedValue(token.state);
+                r->setExpression(ret);
+                ret = r;
                 continue;
             }
             // postfix-expression → postfix-expression postfix-operator
             if(symbolRegistry->isPostfixOperator(token.token))
             {
                 expect_next(token);
-                UnaryOperator* postfix = nodeFactory->createUnary(token.state, token.token, OperatorType::PostfixUnary);
+                UnaryOperatorPtr postfix = nodeFactory->createUnary(token.state);
+                postfix->setOperator(token.token);
+                postfix->setType(OperatorType::PostfixUnary);
                 postfix->setOperand(ret);
                 ret = postfix;
                 continue;
@@ -139,7 +162,9 @@ Expression* Parser::parsePostfixExpression()
             //? used as post unary operator will treated as optional chaining expression, not ternary expression
             // postfix-expression → optional-chaining-expression
             expect_next(token);
-            ret = nodeFactory->createOptionalChaining(token.state, ret);
+            OptionalChainingPtr r = nodeFactory->createOptionalChaining(token.state);
+            r->setExpression(ret);
+            ret = r;
             continue;
         }
         // postfix-expression → function-call-expression
@@ -148,7 +173,7 @@ Expression* Parser::parsePostfixExpression()
             bool suppressTrailingClosure = (this->flags & SUPPRESS_TRAILING_CLOSURE) != 0;
             if(!(token.type == TokenType::OpenBrace && suppressTrailingClosure))
             {
-                FunctionCall* call = parseFunctionCallExpression();
+                FunctionCallPtr call = parseFunctionCallExpression();
                 call->setFunction(ret);
                 ret = call;
                 continue;
@@ -159,8 +184,10 @@ Expression* Parser::parsePostfixExpression()
         {
             // subscript-expression → postfix-expression[expression-list]
             match(L"[", token);
-            Expression* expr = parseExpression();
-            SubscriptAccess* subscript = nodeFactory->createSubscriptAccess(token.state, ret, expr);
+            ExpressionPtr expr = parseExpression();
+            SubscriptAccessPtr subscript = nodeFactory->createSubscriptAccess(token.state);
+            subscript->setSelf(ret);
+            subscript->addIndex(expr);
             while(match(L","))
             {
                 if(predicate(L"]"))
@@ -184,18 +211,18 @@ Expression* Parser::parsePostfixExpression()
  ‌ function-call-expression → postfix-expression parenthesized-expression opt trailing-closure
  ‌ trailing-closure → closure-expression
  */
-FunctionCall* Parser::parseFunctionCallExpression()
+FunctionCallPtr Parser::parseFunctionCallExpression()
 {
-    FunctionCall* ret = nodeFactory->createFunctionCall(tokenizer->save());
+    FunctionCallPtr ret = nodeFactory->createFunctionCall(tokenizer->save());
     if(predicate(L"("))
     {
-        ParenthesizedExpression* p = static_cast<ParenthesizedExpression*>(this->parseParenthesizedExpression());
+        ParenthesizedExpressionPtr p = this->parseParenthesizedExpression();
         ret->setArguments(p);
     }
     bool suppressTrailingClosure = (this->flags & SUPPRESS_TRAILING_CLOSURE) != 0;
     if(!suppressTrailingClosure && predicate(L"{"))
     {
-        Closure* closure = parseClosureExpression();
+        ClosurePtr closure = parseClosureExpression();
         ret->setTrailingClosure(closure);
     }
     return ret;
@@ -213,7 +240,7 @@ FunctionCall* Parser::parseFunctionCallExpression()
  primary-expression → implicit-member-expression
  primary-expression → wildcard-expression
  */
-Expression* Parser::parsePrimaryExpression()
+ExpressionPtr Parser::parsePrimaryExpression()
 {
     Token token;
     peek(token);
@@ -236,7 +263,7 @@ Expression* Parser::parsePrimaryExpression()
             default:
                 break;
         }
-        Identifier* identifier = parseIdentifier();
+        IdentifierPtr identifier = parseIdentifier();
         return identifier;
     }
     // primary-expression → literal-expression
@@ -258,7 +285,9 @@ Expression* Parser::parsePrimaryExpression()
     if(token == L"_")
     {
         expect_next(token);
-        return nodeFactory->createIdentifier(token.state, L"_");
+        IdentifierPtr id = nodeFactory->createIdentifier(token.state);
+        id->setIdentifier(L"_");
+        return id;
     }
     
     // primary-expression → closure-expression
@@ -272,8 +301,11 @@ Expression* Parser::parsePrimaryExpression()
     {
         expect_next(token);
         expect_identifier(token);
-        Identifier* field = nodeFactory->createIdentifier(token.state, token.token);
-        return nodeFactory->createMemberAccess(token.state, NULL, field);
+        IdentifierPtr field = nodeFactory->createIdentifier(token.state);
+        field->setIdentifier(token.token);
+        MemberAccessPtr ret = nodeFactory->createMemberAccess(token.state);
+        ret->setField(field);
+        return ret;
     }
     return NULL;
 }
@@ -320,14 +352,14 @@ bool Parser::isGenericArgument()
  ‌ generic-argument-list → generic-argument | generic-argument,generic-argument-list
  ‌ generic-argument → type
 */
-GenericArgument* Parser::parseGenericArgument()
+GenericArgumentPtr Parser::parseGenericArgument()
 {
     Token token;
     expect(L"<", token);
-    GenericArgument* ret = nodeFactory->createGenericArgument(token.state);
+    GenericArgumentPtr ret = nodeFactory->createGenericArgument(token.state);
     do
     {
-        TypeNode* argument = parseType();
+        TypeNodePtr argument = parseType();
         ret->addArgument(argument);
     } while(match(L","));
     expect(L">");
@@ -343,11 +375,11 @@ GenericArgument* Parser::parseGenericArgument()
  ‌ expression-element-list → expression-element | expression-element,expression-element-list
  ‌ expression-element → expression | identifier:expression
  */
-Expression* Parser::parseParenthesizedExpression()
+ParenthesizedExpressionPtr Parser::parseParenthesizedExpression()
 {
     Token token;
     match(L"(", token);
-    ParenthesizedExpression* ret = nodeFactory->createParenthesizedExpression(token.state);
+    ParenthesizedExpressionPtr ret = nodeFactory->createParenthesizedExpression(token.state);
     if(!predicate(L")"))
     {
         parseExpressionItem(ret);
@@ -362,20 +394,20 @@ Expression* Parser::parseParenthesizedExpression()
     return ret;
 }
 
-void Parser::parseExpressionItem(ParenthesizedExpression* parent)
+void Parser::parseExpressionItem(const ParenthesizedExpressionPtr& parent)
 {
     Token token;
     expect_next(token);
     if(token.type == TokenType::Identifier && token.identifier.keyword == Keyword::_ && match(L":"))
     {
         //identifier:expression
-        Expression* expr = parseExpression();
+        ExpressionPtr expr = parseExpression();
         parent->append(token.token, expr);
         return;
     }
     //rollback and parse exception
     restore(token);
-    Expression* expr = parseExpression();
+    ExpressionPtr expr = parseExpression();
     parent->append(expr);
 }
 
@@ -387,26 +419,32 @@ void Parser::parseExpressionItem(ParenthesizedExpression* parent)
  ‌ self-expression → self[expression]
  ‌ self-expression → self.init
  */
-Expression* Parser::parseSelfExpression()
+ExpressionPtr Parser::parseSelfExpression()
 {
     Token token;
     expect(Keyword::Self);
     expect_next(token);
-    Identifier* self = nodeFactory->createIdentifier(token.state, L"self");
+    IdentifierPtr self = nodeFactory->createIdentifier(token.state);
+    self->setIdentifier(L"self");
     if(token == L".")
     {
         expect_next(token);
         tassert(token, token.type == TokenType::Identifier, Errors::E_EXPECT_IDENTIFIER, token.token);
         if(token.identifier.keyword != Keyword::_ && token.identifier.keyword != Keyword::Init)
             unexpected(token);
-        Identifier* field = nodeFactory->createIdentifier(token.state, token.token);
-        MemberAccess* ret = nodeFactory->createMemberAccess(token.state, self, field);
+        IdentifierPtr field = nodeFactory->createIdentifier(token.state);
+        field->setIdentifier(token.token);
+        MemberAccessPtr ret = nodeFactory->createMemberAccess(token.state);
+        ret->setField(field);
+        ret->setSelf(self);
         return ret;
     }
     else if(token == L"[")
     {
-        Expression* expr = this->parseExpression();
-        SubscriptAccess* sub = nodeFactory->createSubscriptAccess(token.state, self, expr);
+        ExpressionPtr expr = this->parseExpression();
+        SubscriptAccessPtr sub = nodeFactory->createSubscriptAccess(token.state);
+        sub->setSelf(self);
+        sub->addIndex(expr);
         return sub;
     }
     else
@@ -421,11 +459,12 @@ Expression* Parser::parseSelfExpression()
  ‌ superclass-subscript-expression → super[expression]
  ‌ superclass-initializer-expression → super.init
  */
-Expression* Parser::parseSuperExpression()
+ExpressionPtr Parser::parseSuperExpression()
 {
     Token token;
     expect(Keyword::Super, token);
-    Identifier* super = nodeFactory->createIdentifier(token.state, L"super");
+    IdentifierPtr super = nodeFactory->createIdentifier(token.state);
+    super->setIdentifier(L"super");
     expect_next(token);
     if(token == L".")
     {
@@ -434,30 +473,36 @@ Expression* Parser::parseSuperExpression()
             unexpected(token);
         if(token.identifier.keyword != Keyword::_ && token.identifier.keyword != Keyword::Init)
             unexpected(token);
-        Identifier* field = nodeFactory->createIdentifier(token.state, token.token);
-        MemberAccess* ret = nodeFactory->createMemberAccess(token.state, super, field);
+        IdentifierPtr field = nodeFactory->createIdentifier(token.state);
+        field->setIdentifier(token.token);
+        MemberAccessPtr ret = nodeFactory->createMemberAccess(token.state);
+        ret->setSelf(super);
+        ret->setField(field);
         return ret;
     }
     else if(token == L"[")
     {
-        Expression* expr = this->parseExpression();
+        ExpressionPtr expr = this->parseExpression();
         expect(L"]", token);
-        SubscriptAccess* sub = nodeFactory->createSubscriptAccess(token.state, super, expr);
+        SubscriptAccessPtr sub = nodeFactory->createSubscriptAccess(token.state);
+        sub->setSelf(super);
+        sub->addIndex(expr);
         return sub;
     }
     unexpected(token);
     return NULL;
 }
 
-Identifier* Parser::parseIdentifier()
+IdentifierPtr Parser::parseIdentifier()
 {
     Token token;
     expect_identifier(token);
-    Identifier* ret = nodeFactory->createIdentifier(token.state, token.token);
+    IdentifierPtr ret = nodeFactory->createIdentifier(token.state);
+    ret->setIdentifier(token.token);
     
     if(isGenericArgument())
     {
-        GenericArgument* arg = static_cast<GenericArgument*>(parseGenericArgument());
+        GenericArgumentPtr arg = parseGenericArgument();
         ret->setGenericArgument(arg);
     }
     return ret;
@@ -475,7 +520,7 @@ Identifier* Parser::parseIdentifier()
  dictionary-literal-item → dictionary-literal-item, opt dictionary-literal-item, dictionarya-literal-items
  dictionary-literal-item → expression : expression
  */
-Expression* Parser::parseLiteralExpression()
+ExpressionPtr Parser::parseLiteralExpression()
 {
     Token token;
     expect_next(token);
@@ -504,19 +549,19 @@ Expression* Parser::parseLiteralExpression()
         restore(token);
         //check if there's a colon after an expression
         
-        Expression* tmp = parseExpression();
+        ExpressionPtr tmp = parseExpression();
         tassert(token, tmp != NULL, Errors::E_EXPECT_EXPRESSION, token.token);
         peek(token);
         if(token.type == TokenType::Comma || token.type == TokenType::CloseBracket)//array
         {
-            ArrayLiteral* array = nodeFactory->createArrayLiteral(token.state);
-            array->push(tmp);
+            ArrayLiteralPtr array = nodeFactory->createArrayLiteral(token.state);
+            array->push(ExpressionPtr(tmp));
             while(match(L","))
             {
                 if(predicate(L"]"))
                     break;
                 tmp = parseExpression();
-                array->push(tmp);
+                array->push(ExpressionPtr(tmp));
             }
             expect(L"]");
             return array;
@@ -525,9 +570,9 @@ Expression* Parser::parseLiteralExpression()
         else if(token.type == TokenType::Colon)//dictionary
         {
             match(L":");
-            DictionaryLiteral* dict = nodeFactory->createDictionaryLiteral(token.state);
-            Expression* key = tmp;
-            Expression* value = parseExpression();
+            DictionaryLiteralPtr dict = nodeFactory->createDictionaryLiteral(token.state);
+            ExpressionPtr key = tmp;
+            ExpressionPtr value = parseExpression();
             tassert(token, value != NULL, Errors::E_EXPECT_EXPRESSION, token.token);
             dict->insert(key, value);
             while(match(L","))
@@ -550,21 +595,37 @@ Expression* Parser::parseLiteralExpression()
         switch(token.identifier.keyword)
         {
             case Keyword::File:
-                return nodeFactory->createCompilecConstant(token.state, L"__FILE__", fileName);
+            {
+                CompileConstantPtr c = nodeFactory->createCompilecConstant(token.state);
+                c->setName(L"__FILE__");
+                c->setValue(fileName);
+                return c;
+            }
             case Keyword::Line:
             {
                 std::wstringstream ss;
                 ss<<token.state.column;
-                return nodeFactory->createCompilecConstant(token.state, L"__LINE__", ss.str());
+                CompileConstantPtr c = nodeFactory->createCompilecConstant(token.state);
+                c->setName(L"__LINE__");
+                c->setValue(ss.str());
+                return c;
             }
             case Keyword::Column:
             {
                 std::wstringstream ss;
                 ss<<token.state.line;
-                return nodeFactory->createCompilecConstant(token.state, L"__COLUMN__", ss.str());
+                CompileConstantPtr c = nodeFactory->createCompilecConstant(token.state);
+                c->setName(L"__COLUMN__");
+                c->setValue(ss.str());
+                return c;
             }
             case Keyword::Function:
-                return nodeFactory->createCompilecConstant(token.state, L"__FUNCTION__", functionName);
+            {
+                CompileConstantPtr c = nodeFactory->createCompilecConstant(token.state);
+                c->setName(L"__FUNCTION__");
+                c->setValue(functionName);
+                return c;
+            }
             default:
                 break;
         }
@@ -573,33 +634,43 @@ Expression* Parser::parseLiteralExpression()
     unexpected(token);
     return NULL;
 }
-Expression* Parser::parseLiteral()
+ExpressionPtr Parser::parseLiteral()
 {
     Token token;
     expect_next(token);
-    Expression* ret = NULL;
     switch(token.type)
     {
         case TokenType::Integer:
-            ret = nodeFactory->createInteger(token.state, token.token);
-            break;
+        {
+            IntegerLiteralPtr i = nodeFactory->createInteger(token.state);
+            i->valueAsString = token.token;
+            i->value = token.number.value;
+            return i;
+        }
         case TokenType::String:
-            ret = nodeFactory->createString(token.state, token.token);
-            break;
+        {
+            StringLiteralPtr s = nodeFactory->createString(token.state);
+            s->value = token.token;
+            return s;
+        }
         case TokenType::Float:
-            ret = nodeFactory->createFloat(token.state, token.token);
-            break;
+        {
+            FloatLiteralPtr f = nodeFactory->createFloat(token.state);
+            f->valueAsString = token.token;
+            f->value = token.number.dvalue;
+            return f;
+        }
         default:
             unexpected(token);
             break;
     }
-    return ret;
+    return NULL;
 }
-std::pair<Expression*, Expression*> Parser::parseDictionaryLiteralItem()
+std::pair<ExpressionPtr, ExpressionPtr> Parser::parseDictionaryLiteralItem()
 {
-    Expression* key = parseExpression();
+    ExpressionPtr key = parseExpression();
     expect(L":");
-    Expression* value = parseExpression();
+    ExpressionPtr value = parseExpression();
     return std::make_pair(key, value);
 }
 
@@ -624,7 +695,7 @@ static inline bool isBinaryExpr(const Token& token)
 /**
  * Rotate the AST tree if required
  */
-static int rotateRequired(Operator* lhs, Operator* rhs)
+static int rotateRequired(const OperatorPtr& lhs, const OperatorPtr& rhs)
 {
     if(lhs->getPrecedence() == rhs->getPrecedence())
     {
@@ -636,32 +707,32 @@ static int rotateRequired(Operator* lhs, Operator* rhs)
 /**
  * Sort the AST tree by precedence, if the precedence is the same, sort by associativity
  */
-static Operator* sortExpression(Operator* op)
+static OperatorPtr sortExpression(OperatorPtr op)
 {
-    Operator* root = op;
-    Operator* c;
+    OperatorPtr root = op;
+    OperatorPtr c;
     if(op->numChildren() != 2)
         return op;
-    Node* left = op->get(0);
-    Node* right = op->get(1);
-    if(left && (c = dynamic_cast<Operator*>(left)) && c->numChildren() == 2)
+    NodePtr left = op->get(0);
+    NodePtr right = op->get(1);
+    if(left && (c = std::dynamic_pointer_cast<Operator>(left)) && c->numChildren() == 2)
     {
         left = c = sortExpression(c);
         if(rotateRequired(c, root))
         {
             //make c the root
-            Node* r = c->get(1);
+            NodePtr r = c->get(1);
             c->set(1, root);
             root->set(0, r);
             root = c;
             //sort new right child
-            Node* r2 = sortExpression(static_cast<Operator*>(c->get(1)));
+            NodePtr r2 = sortExpression(std::static_pointer_cast<Operator>(c->get(1)));
             c->set(1, r2);
             return root;
         }
     }
     //sort old right child
-    c = dynamic_cast<Operator*>(right);
+    c = std::dynamic_pointer_cast<Operator>(right);
     if(c != NULL)
         sortExpression(c);
     return root;
@@ -670,10 +741,10 @@ static Operator* sortExpression(Operator* op)
  expression → prefix-expression binary-expressions opt
  ‌ expression-list → expression | expression,expression-list
  */
-Expression* Parser::parseExpression()
+ExpressionPtr Parser::parseExpression()
 {
     Token token;
-    Expression* ret = parsePrefixExpression();
+    ExpressionPtr ret = parsePrefixExpression();
     peek(token);
     
     //‌ binary-expressions → binary-expressionbinary-expressionsopt
@@ -685,7 +756,7 @@ Expression* Parser::parseExpression()
             ret = parseBinaryExpression(ret);
         }
     }
-    if(Operator* op = dynamic_cast<Operator*>(ret))
+    if(OperatorPtr op = std::dynamic_pointer_cast<Operator>(ret))
     {
         //sort the tree by associativity and precedence
         ret = sortExpression(op);
@@ -700,7 +771,7 @@ Expression* Parser::parseExpression()
  ‌ binary-expression → conditional-operatorprefix-expression
  ‌ binary-expression → type-casting-operator
  */
-Expression* Parser::parseBinaryExpression(Expression* lhs)
+ExpressionPtr Parser::parseBinaryExpression(const ExpressionPtr& lhs)
 {
     Token token;
     expect_next(token);
@@ -708,8 +779,10 @@ Expression* Parser::parseBinaryExpression(Expression* lhs)
     {
         if(token.identifier.keyword == Keyword::Is)
         {
-            TypeNode* typeNode = parseType();
-            Expression* ret = nodeFactory->createTypeCheck(token.state, lhs, typeNode);
+            TypeNodePtr typeNode = parseType();
+            TypeCheckPtr ret = nodeFactory->createTypeCheck(token.state);
+            ret->setLHS(lhs);
+            ret->setType(typeNode);
             return ret;
         }
         else if(token.identifier.keyword == Keyword::As)
@@ -726,9 +799,11 @@ Expression* Parser::parseBinaryExpression(Expression* lhs)
                     restore(t);
             }
             
-            TypeNode* typeNode = parseType();
+            TypeNodePtr typeNode = parseType();
             
-            TypeCast* ret = nodeFactory->createTypeCast(token.state, lhs, typeNode);
+            TypeCastPtr ret = nodeFactory->createTypeCast(token.state);
+            ret->setLHS(lhs);
+            ret->setType(typeNode);
             ret->setOptional(optional);
             return ret;
         }
@@ -737,8 +812,10 @@ Expression* Parser::parseBinaryExpression(Expression* lhs)
     {
         if(token == L"=")
         {
-            Expression* rhs = parsePrefixExpression();
-            Expression* ret = nodeFactory->createAssignment(token.state, lhs, rhs);
+            ExpressionPtr rhs = parsePrefixExpression();
+            AssignmentPtr ret = nodeFactory->createAssignment(token.state);
+            ret->setLHS(lhs);
+            ret->setRHS(rhs);
             return ret;
         }
         
@@ -746,9 +823,12 @@ Expression* Parser::parseBinaryExpression(Expression* lhs)
         {
             OperatorInfo* op = symbolRegistry->getOperator(token.token);
             tassert(token, op != NULL, Errors::E_UNDEFINED_INFIX_OPERATOR, token.token);
-            Expression* rhs = parsePrefixExpression();
+            ExpressionPtr rhs = parsePrefixExpression();
             int precedence = op->precedence.infix > 0 ? op->precedence.infix : 100;
-            BinaryOperator* ret = nodeFactory->createBinary(token.state, op->name, op->associativity, precedence);
+            BinaryOperatorPtr ret = nodeFactory->createBinary(token.state);
+            ret->setOperator(op->name);
+            ret->setAssociativity(op->associativity);
+            ret->setPrecedence(precedence);
             ret->setLHS(lhs);
             ret->setRHS(rhs);
             return ret;
@@ -757,10 +837,13 @@ Expression* Parser::parseBinaryExpression(Expression* lhs)
     if(token.type == TokenType::Optional)
     {
         // binary-expression → conditional-operator prefix-expression
-        Expression* expr = parseExpression();
+        ExpressionPtr expr = parseExpression();
         expect(L":");
-        Expression* expr2 = parsePrefixExpression();
-        Expression* ret = nodeFactory->createConditionalOperator(token.state, lhs, expr, expr2);
+        ExpressionPtr expr2 = parsePrefixExpression();
+        ConditionalOperatorPtr ret = nodeFactory->createConditionalOperator(token.state);
+        ret->setCondition(lhs);
+        ret->setTrueExpression(expr);
+        ret->setFalseExpression(expr2);
         return ret;
     }
     unexpected(token);
@@ -778,11 +861,11 @@ Expression* Parser::parseBinaryExpression(Expression* lhs)
  ‌ capture-list → [capture-specifier expression]
  ‌ capture-specifier → weak  unowned  unowned(safe) unowned(unsafe)
 */
-Closure* Parser::parseClosureExpression()
+ClosurePtr Parser::parseClosureExpression()
 {
     Token token;
     expect(L"{", token);
-    Closure* ret = nodeFactory->createClosure(token.state);
+    ClosurePtr ret = nodeFactory->createClosure(token.state);
     TokenizerState s = tokenizer->save();
     bool hasSignature = false;
     //look for keyword "in"
@@ -824,22 +907,22 @@ Closure* Parser::parseClosureExpression()
                     unexpected(token);
                     break;
             }
-            Expression* capture = parseExpression();
+            ExpressionPtr capture = parseExpression();
             ret->setCapture(capture);
             expect(L"]");
         }
         if(predicate(L"("))
         {
-            Parameters* params = parseParameterClause();
+            ParametersPtr params = parseParameterClause();
             ret->setParameters(params);
         }
         else
         {
-            Parameters* params = nodeFactory->createParameters(tokenizer->save());
+            ParametersPtr params = nodeFactory->createParameters(tokenizer->save());
             do
             {
                 expect_identifier(token);
-                Parameter* param = nodeFactory->createParameter(token.state);
+                ParameterPtr param = nodeFactory->createParameter(token.state);
                 param->setLocalName(token.token);
                 params->addParameter(param);
             } while (match(L","));
@@ -847,14 +930,14 @@ Closure* Parser::parseClosureExpression()
         }
         if(match(L"->"))
         {
-            TypeNode* t = parseType();
+            TypeNodePtr t = parseType();
             ret->setReturnType(t);
         }
         expect(Keyword::In);
     }
     while(!predicate(L"}"))
     {
-        Statement* s = parseStatement();
+        StatementPtr s = parseStatement();
         ret->addStatement(s);
     }
     expect(L"}");

@@ -11,18 +11,18 @@ public:
     FunctionType();
     ~FunctionType();
 public:
-    void setArgumentsType(TypeNode* argumentsType);
-    void setReturnType(TypeNode* retType);
+    void setArgumentsType(const TypeNodePtr& argumentsType);
+    void setReturnType(const TypeNodePtr& retType);
     
     
-    TypeNode* getArgumentsType();
-    TypeNode* getReturnType();
+    TypeNodePtr getArgumentsType();
+    TypeNodePtr getReturnType();
 public:
     virtual void serialize(std::wostream& out);
     virtual void accept(NodeVisitor* visitor);
 private:
-    TypeNode* argumentsType;
-    TypeNode* returnType;
+    TypeNodePtr argumentsType;
+    TypeNodePtr returnType;
 };
 
 SWIFT_NS_END

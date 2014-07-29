@@ -2,6 +2,7 @@
 #define PARAMETERS_H
 #include "node.h"
 #include <string>
+#include "ast-decl.h"
 
 SWIFT_NS_BEGIN
 
@@ -18,16 +19,16 @@ public:
     void setVariadicParameters(bool val);
     bool isVariadicParameters()const;
     
-    void addParameter(Parameter* parameter);
+    void addParameter(const ParameterPtr& parameter);
     int numParameters()const;
-    Parameter* getParameter(int i);
+    ParameterPtr getParameter(int i);
 
-    std::vector<Parameter*>::iterator begin() { return parameters.begin();}
-    std::vector<Parameter*>::iterator end() { return parameters.end();}
+    std::vector<ParameterPtr>::iterator begin() { return parameters.begin();}
+    std::vector<ParameterPtr>::iterator end() { return parameters.end();}
 
 private:
     bool variadicParameters;
-    std::vector<Parameter*> parameters;
+    std::vector<ParameterPtr> parameters;
 };
 
 SWIFT_NS_END

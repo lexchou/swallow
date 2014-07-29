@@ -19,9 +19,7 @@ private:
     std::vector<std::wstring> balancedTokens;
     std::wstring name;
 public:
-    static void disposeAll(std::vector<Attribute*>& attributes);
 };
-typedef std::vector<Attribute*> Attributes;
 
 
 SWIFT_NS_END

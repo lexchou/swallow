@@ -15,15 +15,15 @@ public:
     const std::wstring& getName()const;
     void setName(const std::wstring& name);
     
-    void setType(TypeNode* type);
-    TypeNode* getType();
+    void setType(TypeNodePtr type);
+    TypeNodePtr getType();
     
 public:
     virtual void serialize(std::wostream& out);
     virtual void accept(NodeVisitor* visitor);
 private:
     std::wstring name;
-    TypeNode* type;
+    TypeNodePtr type;
 };
 
 SWIFT_NS_END

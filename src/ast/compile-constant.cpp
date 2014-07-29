@@ -2,8 +2,8 @@
 #include "compile-constant.h"
 USE_SWIFT_NS
 
-CompileConstant::CompileConstant(const std::wstring& name, const std::wstring& value)
-    :Expression(NodeType::CompileConstant), name(name), value(value)
+CompileConstant::CompileConstant()
+    :Expression(NodeType::CompileConstant)
 {
     
 }
@@ -13,7 +13,7 @@ void CompileConstant::serialize(std::wostream& out)
 }
 void CompileConstant::accept(NodeVisitor* visitor)
 {
-    visitor->visitCompileConstant(this);
+    accept2(visitor, &NodeVisitor::visitCompileConstant);
 }
 
 const std::wstring& CompileConstant::getName() const
@@ -23,4 +23,12 @@ const std::wstring& CompileConstant::getName() const
 const std::wstring& CompileConstant::getValue() const
 {
     return value;
+}
+void CompileConstant::setName(const std::wstring& name)
+{
+    this->name = name;
+}
+void CompileConstant::setValue(const std::wstring& value)
+{
+    this->value = value;
 }

@@ -13,11 +13,7 @@ FunctionDef::FunctionDef()
 
 FunctionDef::~FunctionDef()
 {
-    SafeDeleteAll(returnAttributes);
-    SafeDeleteAll(parametersList);
-    SafeDelete(returnType);
-    SafeDelete(body);
-    
+
 }
 
 void FunctionDef::serialize(std::wostream& out)
@@ -26,7 +22,7 @@ void FunctionDef::serialize(std::wostream& out)
 
 void FunctionDef::accept(NodeVisitor* visitor)
 {
-    visitor->visitFunction(this);
+    accept2(visitor, &NodeVisitor::visitFunction);
 }
 
 void FunctionDef::setName(const std::wstring& name)
@@ -41,7 +37,7 @@ const std::wstring& FunctionDef::getName()const
 
 
 
-void FunctionDef::addParameters(Parameters* parameters)
+void FunctionDef::addParameters(const ParametersPtr& parameters)
 {
     parametersList.push_back(parameters);
 }
@@ -49,16 +45,16 @@ int FunctionDef::numParameters()
 {
     return parametersList.size();
 }
-Parameters* FunctionDef::getParameters(int i)
+ParametersPtr FunctionDef::getParameters(int i)
 {
     return parametersList[i];
 }
 
-void FunctionDef::setReturnType(TypeNode* type)
+void FunctionDef::setReturnType(const TypeNodePtr& type)
 {
     returnType = type;
 }
-TypeNode* FunctionDef::getReturnType()
+TypeNodePtr FunctionDef::getReturnType()
 {
     return returnType;
 }
@@ -72,11 +68,11 @@ const Attributes& FunctionDef::getReturnTypeAttributes()const
     return returnAttributes;
 }
 
-void FunctionDef::setBody(CodeBlock* body)
+void FunctionDef::setBody(const CodeBlockPtr& body)
 {
     this->body = body;
 }
-CodeBlock* FunctionDef::getBody()
+CodeBlockPtr FunctionDef::getBody()
 {
     return body;
 }

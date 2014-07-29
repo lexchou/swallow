@@ -8,20 +8,20 @@ class Identifier;
 class MemberAccess : public Expression
 {
 public:
-    MemberAccess(Expression* self, Identifier* field);
+    MemberAccess();
     ~MemberAccess();
 public:
-    void setSelf(Expression* self);
-    void setField(Identifier* field);
+    void setSelf(const ExpressionPtr& self);
+    void setField(const IdentifierPtr& field);
     
-    Expression* getSelf();
-    Identifier* getField();
+    ExpressionPtr getSelf();
+    IdentifierPtr getField();
 public:
     virtual void serialize(std::wostream& out);
     virtual void accept(NodeVisitor* visitor);
 public:
-    Expression* self;
-    Identifier* field;
+    ExpressionPtr self;
+    IdentifierPtr field;
     
 };
 

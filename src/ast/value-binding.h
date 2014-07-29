@@ -11,10 +11,10 @@ public:
     ValueBinding(NodeType::T nodeType);
     ~ValueBinding();
 public:
-    void setBinding(Pattern* st);
-    Pattern* getBinding();
+    void setBinding(const PatternPtr& st);
+    PatternPtr getBinding();
 protected:
-    Pattern* binding;
+    PatternPtr binding;
 };
 
 class LetBinding : public ValueBinding

@@ -22,7 +22,7 @@ using namespace Swift;
  ‌ pattern → type-casting-pattern
  ‌ pattern → expression-pattern
 */
-Pattern* Parser::parsePattern()
+PatternPtr Parser::parsePattern()
 {
     Token token;
     expect_next(token);
@@ -34,12 +34,13 @@ Pattern* Parser::parsePattern()
             // pattern → identifier-pattern type-annotationopt
             case Keyword::_:
             {
-                Identifier* ret = nodeFactory->createIdentifier(token.state, token.token);
+                IdentifierPtr ret = nodeFactory->createIdentifier(token.state);
+                ret->setIdentifier(token.token);
                 if((flags & (UNDER_VAR | UNDER_CASE)) == 0)//type annotation is not parsed when it's inside a let/var
                 {
                     if(match(L":"))
                     {
-                        TypeNode* type = parseTypeAnnotation();
+                        TypeNodePtr type = parseTypeAnnotation();
                         ret->setDeclaredType(type);
                     }
                 }
@@ -48,15 +49,15 @@ Pattern* Parser::parsePattern()
             // pattern → value-binding-pattern
             case Keyword::Var:
             {
-                VarBinding* let = nodeFactory->createVarBinding(token.state);
-                Pattern* binding = parsePattern();
+                VarBindingPtr let = nodeFactory->createVarBinding(token.state);
+                PatternPtr binding = parsePattern();
                 let->setBinding(binding);
                 return let;
             }
             case Keyword::Let:
             {
-                LetBinding* let = nodeFactory->createLetBinding(token.state);
-                Pattern* binding = parsePattern();
+                LetBindingPtr let = nodeFactory->createLetBinding(token.state);
+                PatternPtr binding = parsePattern();
                 let->setBinding(binding);
                 return let;
             }
@@ -69,13 +70,13 @@ Pattern* Parser::parsePattern()
     if(token.type == TokenType::OpenParen)
     {
         //pattern → tuple-pattern type-annotation opt
-        Tuple* ret = static_cast<Tuple*>(parseTuple());
+        TuplePtr ret = std::static_pointer_cast<Tuple>(parseTuple());
         if(flags & (UNDER_LET | UNDER_VAR))
         {
             //type-annotation only exists under let/var statement
             if(match(L":"))
             {
-                TypeNode* type = parseTypeAnnotation();
+                TypeNodePtr type = parseTypeAnnotation();
                 ret->setType(type);
             }
         }
@@ -96,13 +97,13 @@ Pattern* Parser::parsePattern()
         }
     }
     //‌ pattern → expression-pattern
-    Pattern* ret = parseExpression();
+    PatternPtr ret = parseExpression();
     if(this->flags & UNDER_SWITCH_CASE)
     {
         if(predicate(L"as"))
         {
             restore(token);
-            delete ret;
+            ret = NULL;
             return parseTypeCastingPattern();
         }
     }
@@ -112,17 +113,18 @@ Pattern* Parser::parsePattern()
 /*
   “enum-case-pattern → type-identifier opt . enum-case-name tuple-pattern opt
 */
-Pattern* Parser::parseEnumPattern()
+PatternPtr Parser::parseEnumPattern()
 {
     Token token;
     expect(L".");
     expect_identifier(token);
-    EnumCasePattern* ret = nodeFactory->createEnumCasePattern(token.state, token.token);
+    EnumCasePatternPtr ret = nodeFactory->createEnumCasePattern(token.state);
+    ret->setName(token.token);
 
 
     if(predicate(L"("))
     {
-        Tuple* t = static_cast<Tuple*>(parseTuple());
+        TuplePtr t = std::static_pointer_cast<Tuple>(parseTuple());
         ret->setAssociatedBinding(t);
 
     }
@@ -133,36 +135,41 @@ Pattern* Parser::parseEnumPattern()
  ‌ is-pattern → is type
  ‌ as-pattern → pattern as type
 */
-Pattern* Parser::parseTypeCastingPattern()
+PatternPtr Parser::parseTypeCastingPattern()
 {
     Token token;
     if(match(Keyword::Is, token))
     {
         //is-pattern → is type
-        TypeNode* type = parseType();
-        return nodeFactory->createTypeCheck(token.state, NULL, type);
+        TypeNodePtr type = parseType();
+        TypeCheckPtr ret = nodeFactory->createTypeCheck(token.state);
+        ret->setType(type);
+        return ret;
     }
     // as-pattern → pattern as type
-    Pattern* pat = parsePattern();
+    PatternPtr pat = parsePattern();
     expect(Keyword::As, token);
-    TypeNode* type = parseType();
-    return nodeFactory->createTypeCheck(token.state, pat, type);
+    TypeNodePtr type = parseType();
+    TypeCastPtr ret = nodeFactory->createTypeCast(token.state);
+    ret->setLHS(pat);
+    ret->setType(type);
+    return ret;
 }
 /*
   tuple-pattern → (tuple-pattern-element-list opt)
  ‌ tuple-pattern-element-list → tuple-pattern-element | tuple-pattern-element,tuple-pattern-element-list
  ‌ tuple-pattern-element → pattern
  */
-Pattern* Parser::parseTuple()
+PatternPtr Parser::parseTuple()
 {
     Token token;
     expect(L"(", token);
-    Tuple* ret = nodeFactory->createTuple(token.state);
+    TuplePtr ret = nodeFactory->createTuple(token.state);
     if(!predicate(L")"))
     {
         do
         {
-            Pattern* pattern = parsePattern();
+            PatternPtr pattern = parsePattern();
             ret->add(pattern);
         }while(match(L","));
         

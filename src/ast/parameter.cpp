@@ -17,16 +17,14 @@ Parameter::Parameter()
 }
 Parameter::~Parameter()
 {
-    Attribute::disposeAll(typeAttributes);
-    SafeDelete(type);
-    SafeDelete(defaultValue);
+
 }
 void Parameter::serialize(std::wostream& out)
 {
 }
 void Parameter::accept(NodeVisitor* visitor)
 {
-    visitor->visitParameter(this);
+    accept2(visitor, &NodeVisitor::visitParameter);
 
 }
 
@@ -84,19 +82,19 @@ const Attributes& Parameter::getTypeAttributes()const
     return typeAttributes;
 }
 
-void Parameter::setType(TypeNode* type)
+void Parameter::setType(const TypeNodePtr& type)
 {
     this->type = type;
 }
-TypeNode* Parameter::getType()
+TypeNodePtr Parameter::getType()
 {
     return type;
 }
-void Parameter::setDefaultValue(Expression* def)
+void Parameter::setDefaultValue(const ExpressionPtr& def)
 {
     this->defaultValue = def;
 }
-Expression* Parameter::getDefaultValue()
+ExpressionPtr Parameter::getDefaultValue()
 {
     return defaultValue;
 }

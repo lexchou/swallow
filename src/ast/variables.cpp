@@ -10,12 +10,11 @@ Variables::Variables()
 }
 Variables::~Variables()
 {
-    SafeDeleteAll(variables);
 }
 void Variables::serialize(std::wostream& out)
 {
     out<<L"let ";
-    std::vector<Variable*>::iterator iter = variables.begin();
+    std::vector<VariablePtr>::iterator iter = variables.begin();
     for(; iter != variables.end(); iter++)
     {
         if(iter != variables.begin())
@@ -25,15 +24,15 @@ void Variables::serialize(std::wostream& out)
 }
 void Variables::accept(NodeVisitor* visitor)
 {
-    visitor->visitVariables(this);
+    accept2(visitor, &NodeVisitor::visitVariables);
 }
 
 
-void Variables::addVariable(Variable* var)
+void Variables::addVariable(const VariablePtr& var)
 {
     variables.push_back(var);
 }
-Variable* Variables::getVariable(int i)
+VariablePtr Variables::getVariable(int i)
 {
     return variables[i];
 }

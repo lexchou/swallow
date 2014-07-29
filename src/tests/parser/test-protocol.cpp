@@ -27,10 +27,10 @@ public:
         PARSE_STATEMENT(L"protocol SomeProtocol {\n"
                         L"// protocol definition goes here\n"
                         L"}");
-        ProtocolDef* p = NULL;
-        TypeIdentifier* id = NULL;
-        CPPUNIT_ASSERT(p = dynamic_cast<ProtocolDef*>(root));
-        CPPUNIT_ASSERT(id = dynamic_cast<TypeIdentifier*>(p->getIdentifier()));
+        ProtocolDefPtr p;
+        TypeIdentifierPtr id;
+        CPPUNIT_ASSERT(p = std::dynamic_pointer_cast<ProtocolDef>(root));
+        CPPUNIT_ASSERT(id = std::dynamic_pointer_cast<TypeIdentifier>(p->getIdentifier()));
         ASSERT_EQUALS(L"SomeProtocol", id->getName());
     }
     
@@ -39,9 +39,9 @@ public:
         PARSE_STATEMENT(L"struct SomeStructure: FirstProtocol, AnotherProtocol {\n"
                         L"// structure definition goes here\n"
                         L"}");
-        StructDef* c = NULL;
+        StructDefPtr c;
         
-        CPPUNIT_ASSERT(c = dynamic_cast<StructDef*>(root));
+        CPPUNIT_ASSERT(c = std::dynamic_pointer_cast<StructDef>(root));
         CPPUNIT_ASSERT_EQUAL(2, c->numParents());
     }
     
@@ -50,9 +50,9 @@ public:
         PARSE_STATEMENT(L"class SomeClass: SomeSuperclass, FirstProtocol, AnotherProtocol {\n"
                         L"// class definition goes here\n"
                         L"}");
-        ClassDef* c = NULL;
+        ClassDefPtr c;
         
-        CPPUNIT_ASSERT(c = dynamic_cast<ClassDef*>(root));
+        CPPUNIT_ASSERT(c = std::dynamic_pointer_cast<ClassDef>(root));
         CPPUNIT_ASSERT_EQUAL(3, c->numParents());
     }
     
@@ -62,26 +62,26 @@ public:
                         L"var mustBeSettable: Int { get set }\n"
                         L"var doesNotNeedToBeSettable: Int { get }\n"
                         L"}");
-        ProtocolDef* p = NULL;
-        CPPUNIT_ASSERT(p = dynamic_cast<ProtocolDef*>(root));
+        ProtocolDefPtr p;
+        CPPUNIT_ASSERT(p = std::dynamic_pointer_cast<ProtocolDef>(root));
         CPPUNIT_ASSERT_EQUAL(2, p->numDeclarations());
-        Variables* vars = NULL;
-        Variable* var = NULL;
+        VariablesPtr vars;
+        VariablePtr var;
         
-        CPPUNIT_ASSERT(vars = dynamic_cast<Variables*>(p->getDeclaration(0)));
+        CPPUNIT_ASSERT(vars = std::dynamic_pointer_cast<Variables>(p->getDeclaration(0)));
         CPPUNIT_ASSERT_EQUAL(1, vars->numVariables());
         CPPUNIT_ASSERT(var = vars->getVariable(0));
-        ASSERT_EQUALS(L"mustBeSettable", dynamic_cast<Identifier*>(var->getName())->getIdentifier());
+        ASSERT_EQUALS(L"mustBeSettable", std::dynamic_pointer_cast<Identifier>(var->getName())->getIdentifier());
         CPPUNIT_ASSERT_EQUAL(0, vars->getSpecifiers());
         CPPUNIT_ASSERT(NULL != var->getGetter());
         CPPUNIT_ASSERT(NULL != var->getSetter());
         
         
         
-        CPPUNIT_ASSERT(vars = dynamic_cast<Variables*>(p->getDeclaration(1)));
+        CPPUNIT_ASSERT(vars = std::dynamic_pointer_cast<Variables>(p->getDeclaration(1)));
         CPPUNIT_ASSERT_EQUAL(1, vars->numVariables());
         CPPUNIT_ASSERT(var = vars->getVariable(0));
-        ASSERT_EQUALS(L"doesNotNeedToBeSettable", dynamic_cast<Identifier*>(var->getName())->getIdentifier());
+        ASSERT_EQUALS(L"doesNotNeedToBeSettable", std::dynamic_pointer_cast<Identifier>(var->getName())->getIdentifier());
         CPPUNIT_ASSERT(NULL != var->getGetter());
         CPPUNIT_ASSERT(NULL == var->getSetter());
         
@@ -92,17 +92,17 @@ public:
         PARSE_STATEMENT(L"protocol AnotherProtocol {\n"
                         L"class var someTypeProperty: Int { get set }\n"
                         L"}");
-        ProtocolDef* p = NULL;
-        CPPUNIT_ASSERT(p = dynamic_cast<ProtocolDef*>(root));
+        ProtocolDefPtr p;
+        CPPUNIT_ASSERT(p = std::dynamic_pointer_cast<ProtocolDef>(root));
         CPPUNIT_ASSERT_EQUAL(1, p->numDeclarations());
-        Variables* vars = NULL;
-        Variable* var = NULL;
+        VariablesPtr vars;
+        VariablePtr var;
         
-        CPPUNIT_ASSERT(vars = dynamic_cast<Variables*>(p->getDeclaration(0)));
+        CPPUNIT_ASSERT(vars = std::dynamic_pointer_cast<Variables>(p->getDeclaration(0)));
         CPPUNIT_ASSERT_EQUAL(1, vars->numVariables());
         CPPUNIT_ASSERT(var = vars->getVariable(0));
         CPPUNIT_ASSERT_EQUAL((int)TypeSpecifier::Class, vars->getSpecifiers());
-        ASSERT_EQUALS(L"someTypeProperty", dynamic_cast<Identifier*>(var->getName())->getIdentifier());
+        ASSERT_EQUALS(L"someTypeProperty", std::dynamic_pointer_cast<Identifier>(var->getName())->getIdentifier());
         CPPUNIT_ASSERT(NULL != var->getGetter());
         CPPUNIT_ASSERT(NULL != var->getSetter());
         
@@ -112,17 +112,17 @@ public:
         PARSE_STATEMENT(L"protocol FullyNamed {\n"
                         L"var fullName: String { get }\n"
                         L"}");
-        ProtocolDef* p = NULL;
-        CPPUNIT_ASSERT(p = dynamic_cast<ProtocolDef*>(root));
+        ProtocolDefPtr p;
+        CPPUNIT_ASSERT(p = std::dynamic_pointer_cast<ProtocolDef>(root));
         CPPUNIT_ASSERT_EQUAL(1, p->numDeclarations());
-        Variables* vars = NULL;
-        Variable* var = NULL;
+        VariablesPtr vars;
+        VariablePtr var;
         
-        CPPUNIT_ASSERT(vars = dynamic_cast<Variables*>(p->getDeclaration(0)));
+        CPPUNIT_ASSERT(vars = std::dynamic_pointer_cast<Variables>(p->getDeclaration(0)));
         CPPUNIT_ASSERT_EQUAL(1, vars->numVariables());
         CPPUNIT_ASSERT(var = vars->getVariable(0));
         CPPUNIT_ASSERT_EQUAL(0, vars->getSpecifiers());
-        ASSERT_EQUALS(L"fullName", dynamic_cast<Identifier*>(var->getName())->getIdentifier());
+        ASSERT_EQUALS(L"fullName", std::dynamic_pointer_cast<Identifier>(var->getName())->getIdentifier());
         CPPUNIT_ASSERT(NULL != var->getGetter());
         CPPUNIT_ASSERT(NULL == var->getSetter());
         
@@ -134,12 +134,12 @@ public:
                         L"class func someTypeMethod()\n"
                         L"}");
         
-        ProtocolDef* p = NULL;
-        CPPUNIT_ASSERT(p = dynamic_cast<ProtocolDef*>(root));
+        ProtocolDefPtr p;
+        CPPUNIT_ASSERT(p = std::dynamic_pointer_cast<ProtocolDef>(root));
         CPPUNIT_ASSERT_EQUAL(1, p->numDeclarations());
-        FunctionDef* f = NULL;
+        FunctionDefPtr f;
         
-        CPPUNIT_ASSERT(f = dynamic_cast<FunctionDef*>(p->getDeclaration(0)));
+        CPPUNIT_ASSERT(f = std::dynamic_pointer_cast<FunctionDef>(p->getDeclaration(0)));
         CPPUNIT_ASSERT_EQUAL((int)TypeSpecifier::Class, f->getSpecifiers());
         ASSERT_EQUALS(L"someTypeMethod", f->getName());
         CPPUNIT_ASSERT(NULL == f->getBody());
@@ -151,12 +151,12 @@ public:
                         L"func random() -> Double\n"
                         L"}");
         
-        ProtocolDef* p = NULL;
-        CPPUNIT_ASSERT(p = dynamic_cast<ProtocolDef*>(root));
+        ProtocolDefPtr p;
+        CPPUNIT_ASSERT(p = std::dynamic_pointer_cast<ProtocolDef>(root));
         CPPUNIT_ASSERT_EQUAL(1, p->numDeclarations());
-        FunctionDef* f = NULL;
+        FunctionDefPtr f;
         
-        CPPUNIT_ASSERT(f = dynamic_cast<FunctionDef*>(p->getDeclaration(0)));
+        CPPUNIT_ASSERT(f = std::dynamic_pointer_cast<FunctionDef>(p->getDeclaration(0)));
         CPPUNIT_ASSERT_EQUAL(0, f->getSpecifiers());
         ASSERT_EQUALS(L"random", f->getName());
         CPPUNIT_ASSERT(NULL == f->getBody());
@@ -170,12 +170,12 @@ public:
                         L"mutating func toggle()\n"
                         L"}");
         
-        ProtocolDef* p = NULL;
-        CPPUNIT_ASSERT(p = dynamic_cast<ProtocolDef*>(root));
+        ProtocolDefPtr p;
+        CPPUNIT_ASSERT(p = std::dynamic_pointer_cast<ProtocolDef>(root));
         CPPUNIT_ASSERT_EQUAL(1, p->numDeclarations());
-        FunctionDef* f = NULL;
+        FunctionDefPtr f;
         
-        CPPUNIT_ASSERT(f = dynamic_cast<FunctionDef*>(p->getDeclaration(0)));
+        CPPUNIT_ASSERT(f = std::dynamic_pointer_cast<FunctionDef>(p->getDeclaration(0)));
         CPPUNIT_ASSERT_EQUAL((int)TypeSpecifier::Mutating, f->getSpecifiers());
         ASSERT_EQUALS(L"toggle", f->getName());
         CPPUNIT_ASSERT(NULL == f->getBody());
@@ -187,16 +187,16 @@ public:
                         L"func asPrettyText() -> String\n"
                         L"}");
         
-        ProtocolDef* p = NULL;
-        CPPUNIT_ASSERT(p = dynamic_cast<ProtocolDef*>(root));
+        ProtocolDefPtr p;
+        CPPUNIT_ASSERT(p = std::dynamic_pointer_cast<ProtocolDef>(root));
         CPPUNIT_ASSERT_EQUAL(1, p->numDeclarations());
         CPPUNIT_ASSERT_EQUAL(1, p->numParents());
         ASSERT_EQUALS(L"TextRepresentable", p->getParent(0)->getName());
         
         
-        FunctionDef* f = NULL;
+        FunctionDefPtr f;
         
-        CPPUNIT_ASSERT(f = dynamic_cast<FunctionDef*>(p->getDeclaration(0)));
+        CPPUNIT_ASSERT(f = std::dynamic_pointer_cast<FunctionDef>(p->getDeclaration(0)));
         CPPUNIT_ASSERT_EQUAL(0, f->getSpecifiers());
         ASSERT_EQUALS(L"asPrettyText", f->getName());
         CPPUNIT_ASSERT(NULL == f->getBody());
@@ -209,30 +209,30 @@ public:
                         L"@optional func incrementForCount(count: Int) -> Int\n"
                         L"@optional var fixedIncrement: Int { get }\n"
                         L"}");
-        ProtocolDef* p = NULL;
-        CPPUNIT_ASSERT(p = dynamic_cast<ProtocolDef*>(root));
+        ProtocolDefPtr p;
+        CPPUNIT_ASSERT(p = std::dynamic_pointer_cast<ProtocolDef>(root));
         CPPUNIT_ASSERT_EQUAL(2, p->numDeclarations());
         CPPUNIT_ASSERT(p->getAttribute(L"objc"));
         
         
         
-        FunctionDef* f = NULL;
+        FunctionDefPtr f;
         
-        CPPUNIT_ASSERT(f = dynamic_cast<FunctionDef*>(p->getDeclaration(0)));
+        CPPUNIT_ASSERT(f = std::dynamic_pointer_cast<FunctionDef>(p->getDeclaration(0)));
         CPPUNIT_ASSERT_EQUAL(0, f->getSpecifiers());
         ASSERT_EQUALS(L"incrementForCount", f->getName());
         CPPUNIT_ASSERT(NULL == f->getBody());
         CPPUNIT_ASSERT(f->getAttribute(L"optional"));
         
-        Variables* vars = NULL;
-        Variable* var = NULL;
+        VariablesPtr vars;
+        VariablePtr var;
         
-        CPPUNIT_ASSERT(vars = dynamic_cast<Variables*>(p->getDeclaration(1)));
+        CPPUNIT_ASSERT(vars = std::dynamic_pointer_cast<Variables>(p->getDeclaration(1)));
         CPPUNIT_ASSERT(vars->getAttribute(L"optional"));
         CPPUNIT_ASSERT_EQUAL(1, vars->numVariables());
         CPPUNIT_ASSERT(var = vars->getVariable(0));
         CPPUNIT_ASSERT_EQUAL(0, vars->getSpecifiers());
-        ASSERT_EQUALS(L"fixedIncrement", dynamic_cast<Identifier*>(var->getName())->getIdentifier());
+        ASSERT_EQUALS(L"fixedIncrement", std::dynamic_pointer_cast<Identifier>(var->getName())->getIdentifier());
         CPPUNIT_ASSERT(NULL != var->getGetter());
         CPPUNIT_ASSERT(NULL == var->getSetter());
         

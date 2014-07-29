@@ -13,5 +13,5 @@ void ExtensionDef::serialize(std::wostream& out)
 }
 void ExtensionDef::accept(NodeVisitor* visitor)
 {
-    visitor->visitExtension(this);
+    accept2(visitor, &NodeVisitor::visitExtension);
 }

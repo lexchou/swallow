@@ -11,20 +11,20 @@ TypeNode::TypeNode(NodeType::T nodeType)
 }
 TypeNode::~TypeNode()
 {
-    SafeDeleteAll(attributes);
+
 }
 
-void TypeNode::addAttribute(Attribute* attr)
+void TypeNode::addAttribute(AttributePtr attr)
 {
     attributes.push_back(attr);
 }
-void TypeNode::setAttributes(const std::vector<Attribute*> attrs)
+void TypeNode::setAttributes(const std::vector<AttributePtr> attrs)
 {
     attributes.clear();
     std::copy(attrs.begin(), attrs.end(), std::back_inserter(attributes));
     
 }
-const std::vector<Attribute*>& TypeNode::getAttributes()
+const std::vector<AttributePtr>& TypeNode::getAttributes()
 {
     return attributes;
 }

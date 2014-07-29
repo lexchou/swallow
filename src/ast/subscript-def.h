@@ -14,20 +14,20 @@ public:
     SubscriptDef();
     ~SubscriptDef();
 public:
-    void setParameters(Parameters* params);
-    Parameters* getParameters();
+    void setParameters(const ParametersPtr& params);
+    ParametersPtr getParameters();
     
-    void setReturnType(TypeNode* type);
-    TypeNode* getReturnType();
+    void setReturnType(const TypeNodePtr& type);
+    TypeNodePtr getReturnType();
     
     void setReturnTypeAttributes(const Attributes& attrs);
     const Attributes& getReturnTypeAttributes()const;
     
-    void setGetter(CodeBlock* getter);
-    CodeBlock* getGetter();
+    void setGetter(const CodeBlockPtr& getter);
+    CodeBlockPtr getGetter();
     
-    void setSetter(CodeBlock* setter);
-    CodeBlock* getSetter();
+    void setSetter(const CodeBlockPtr& setter);
+    CodeBlockPtr getSetter();
     
     void setSetterName(const std::wstring& name);
     const std::wstring& getSetterName()const;
@@ -38,10 +38,10 @@ public:
 private:
     std::wstring setterName;
     Attributes returnTypeAttributes;
-    Parameters* parameters;
-    TypeNode* returnType;
-    CodeBlock* getter;
-    CodeBlock* setter;
+    ParametersPtr parameters;
+    TypeNodePtr returnType;
+    CodeBlockPtr getter;
+    CodeBlockPtr setter;
 };
 
 SWIFT_NS_END

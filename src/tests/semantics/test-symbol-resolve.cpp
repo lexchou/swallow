@@ -64,12 +64,12 @@ public:
     void testLocalGlobal()
     {
         SEMANTIC_ANALYZE(L"let global = 0; func test(){let local = 1;}");
-        FunctionDef* test = NULL;
+        FunctionDefPtr test = NULL;
 
-        CPPUNIT_ASSERT(test = dynamic_cast<FunctionDef*>(scope->lookup(L"test")));
-        ScopedCodeBlock* cb = static_cast<ScopedCodeBlock*>(test->getBody());
-        Symbol* local = cb->getScope()->lookup(L"local");
-        Symbol* global = root->getScope()->lookup(L"global");
+        CPPUNIT_ASSERT(test = std::dynamic_pointer_cast<FunctionDef>(scope->lookup(L"test")));
+        ScopedCodeBlockPtr cb = std::static_pointer_cast<ScopedCodeBlock>(test->getBody());
+        SymbolPtr local = cb->getScope()->lookup(L"local");
+        SymbolPtr global = root->getScope()->lookup(L"global");
         CPPUNIT_ASSERT(local != NULL);
         CPPUNIT_ASSERT(global != NULL);
     }

@@ -18,17 +18,17 @@ public:
     using Declaration::getAttributes;
     using Declaration::getSpecifiers;
 public:
-    void addVariable(Variable* var);
-    Variable* getVariable(int i);
+    void addVariable(const VariablePtr& var);
+    VariablePtr getVariable(int i);
     int numVariables();
 
-    std::vector<Variable*>::iterator begin() {return variables.begin();}
-    std::vector<Variable*>::iterator end() {return variables.end();}
+    std::vector<VariablePtr>::iterator begin() {return variables.begin();}
+    std::vector<VariablePtr>::iterator end() {return variables.end();}
 public://Node
     virtual void serialize(std::wostream& out);
     virtual void accept(NodeVisitor* visitor);
 public:
-    std::vector<Variable*> variables;
+    std::vector<VariablePtr> variables;
 };
 
 SWIFT_NS_END

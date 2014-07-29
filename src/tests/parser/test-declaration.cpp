@@ -30,8 +30,8 @@ public:
     void testImport()
     {
         PARSE_STATEMENT(L"import Foundation");
-        Import* import = NULL;
-        CPPUNIT_ASSERT(import = dynamic_cast<Import*>(root));
+        ImportPtr import;
+        CPPUNIT_ASSERT(import = std::dynamic_pointer_cast<Import>(root));
         ASSERT_EQUALS(L"Foundation", import->getPath().c_str());
         CPPUNIT_ASSERT_EQUAL(Import::_, import->getKind());
         
@@ -39,8 +39,8 @@ public:
     void testImportSubModule()
     {
         PARSE_STATEMENT(L"import Foundation.SubModule");
-        Import* import = NULL;
-        CPPUNIT_ASSERT(import = dynamic_cast<Import*>(root));
+        ImportPtr import;
+        CPPUNIT_ASSERT(import = std::dynamic_pointer_cast<Import>(root));
         ASSERT_EQUALS(L"Foundation.SubModule", import->getPath().c_str());
         CPPUNIT_ASSERT_EQUAL(Import::_, import->getKind());
     }
@@ -48,8 +48,8 @@ public:
     void testImportKind_Class()
     {
         PARSE_STATEMENT(L"import class Foundation.NSFileManager");
-        Import* import = NULL;
-        CPPUNIT_ASSERT(import = dynamic_cast<Import*>(root));
+        ImportPtr import;
+        CPPUNIT_ASSERT(import = std::dynamic_pointer_cast<Import>(root));
         ASSERT_EQUALS(L"Foundation.NSFileManager", import->getPath().c_str());
         CPPUNIT_ASSERT_EQUAL(Import::Class, import->getKind());
     }
@@ -57,8 +57,8 @@ public:
     void testImportKind_TypeAlias()
     {
         PARSE_STATEMENT(L"import typealias Foundation.NSFileManager");
-        Import* import = NULL;
-        CPPUNIT_ASSERT(import = dynamic_cast<Import*>(root));
+        ImportPtr import;
+        CPPUNIT_ASSERT(import = std::dynamic_pointer_cast<Import>(root));
         ASSERT_EQUALS(L"Foundation.NSFileManager", import->getPath().c_str());
         CPPUNIT_ASSERT_EQUAL(Import::Typealias, import->getKind());
     }
@@ -66,8 +66,8 @@ public:
     void testImportKind_Struct()
     {
         PARSE_STATEMENT(L"import struct Foundation.NSFileManager");
-        Import* import = NULL;
-        CPPUNIT_ASSERT(import = dynamic_cast<Import*>(root));
+        ImportPtr import;
+        CPPUNIT_ASSERT(import = std::dynamic_pointer_cast<Import>(root));
         ASSERT_EQUALS(L"Foundation.NSFileManager", import->getPath().c_str());
         CPPUNIT_ASSERT_EQUAL(Import::Struct, import->getKind());
     }
@@ -75,8 +75,8 @@ public:
     void testImportKind_Enum()
     {
         PARSE_STATEMENT(L"import enum Foundation.NSFileManager");
-        Import* import = NULL;
-        CPPUNIT_ASSERT(import = dynamic_cast<Import*>(root));
+        ImportPtr import;
+        CPPUNIT_ASSERT(import = std::dynamic_pointer_cast<Import>(root));
         ASSERT_EQUALS(L"Foundation.NSFileManager", import->getPath().c_str());
         CPPUNIT_ASSERT_EQUAL(Import::Enum, import->getKind());
     }
@@ -84,8 +84,8 @@ public:
     void testImportKind_Protocol()
     {
         PARSE_STATEMENT(L"import protocol Foundation.NSFileManager");
-        Import* import = NULL;
-        CPPUNIT_ASSERT(import = dynamic_cast<Import*>(root));
+        ImportPtr import;
+        CPPUNIT_ASSERT(import = std::dynamic_pointer_cast<Import>(root));
         ASSERT_EQUALS(L"Foundation.NSFileManager", import->getPath().c_str());
         CPPUNIT_ASSERT_EQUAL(Import::Protocol, import->getKind());
     }
@@ -93,8 +93,8 @@ public:
     void testImportKind_Var()
     {
         PARSE_STATEMENT(L"import var Foundation.NSFileManager");
-        Import* import = NULL;
-        CPPUNIT_ASSERT(import = dynamic_cast<Import*>(root));
+        ImportPtr import;
+        CPPUNIT_ASSERT(import = std::dynamic_pointer_cast<Import>(root));
         ASSERT_EQUALS(L"Foundation.NSFileManager", import->getPath().c_str());
         CPPUNIT_ASSERT_EQUAL(Import::Var, import->getKind());
     }
@@ -102,8 +102,8 @@ public:
     void testImportKind_Func()
     {
         PARSE_STATEMENT(L"import func Foundation.NSFileManager");
-        Import* import = NULL;
-        CPPUNIT_ASSERT(import = dynamic_cast<Import*>(root));
+        ImportPtr import;
+        CPPUNIT_ASSERT(import = std::dynamic_pointer_cast<Import>(root));
         ASSERT_EQUALS(L"Foundation.NSFileManager", import->getPath().c_str());
         CPPUNIT_ASSERT_EQUAL(Import::Func, import->getKind());
     }
@@ -111,44 +111,44 @@ public:
     void testLet()
     {
         PARSE_STATEMENT(L"let a : Int[] = [1, 2, 3]");
-        Constants* c = NULL;
-        Identifier* id = NULL;
-        ArrayLiteral* value = NULL;
-        ArrayType* type = NULL;
-        TypeIdentifier* Int = NULL;
-        CPPUNIT_ASSERT(c = dynamic_cast<Constants*>(root));
+        ConstantsPtr c;
+        IdentifierPtr id;
+        ArrayLiteralPtr value;
+        ArrayTypePtr type;
+        TypeIdentifierPtr Int;
+        CPPUNIT_ASSERT(c = std::dynamic_pointer_cast<Constants>(root));
         CPPUNIT_ASSERT_EQUAL(1, c->numConstants());
-        CPPUNIT_ASSERT(id = dynamic_cast<Identifier*>(c->getConstant(0)->name));
+        CPPUNIT_ASSERT(id = std::dynamic_pointer_cast<Identifier>(c->getConstant(0)->name));
         ASSERT_EQUALS(L"a", id->getIdentifier().c_str());
-        CPPUNIT_ASSERT(type = dynamic_cast<ArrayType*>(id->getDeclaredType()));
-        CPPUNIT_ASSERT(Int = dynamic_cast<TypeIdentifier*>(type->getInnerType()));
+        CPPUNIT_ASSERT(type = std::dynamic_pointer_cast<ArrayType>(id->getDeclaredType()));
+        CPPUNIT_ASSERT(Int = std::dynamic_pointer_cast<TypeIdentifier>(type->getInnerType()));
         ASSERT_EQUALS(L"Int", Int->getName().c_str());
         
-        CPPUNIT_ASSERT(value = dynamic_cast<ArrayLiteral*>(c->getConstant(0)->initializer));
+        CPPUNIT_ASSERT(value = std::dynamic_pointer_cast<ArrayLiteral>(c->getConstant(0)->initializer));
         CPPUNIT_ASSERT_EQUAL(3, value->numElements());
-        ASSERT_EQUALS(L"1", dynamic_cast<IntegerLiteral*>(value->getElement(0))->toString().c_str());
-        ASSERT_EQUALS(L"2", dynamic_cast<IntegerLiteral*>(value->getElement(1))->toString().c_str());
-        ASSERT_EQUALS(L"3", dynamic_cast<IntegerLiteral*>(value->getElement(2))->toString().c_str());
+        ASSERT_EQUALS(L"1", std::dynamic_pointer_cast<IntegerLiteral>(value->getElement(0))->valueAsString);
+        ASSERT_EQUALS(L"2", std::dynamic_pointer_cast<IntegerLiteral>(value->getElement(1))->valueAsString);
+        ASSERT_EQUALS(L"3", std::dynamic_pointer_cast<IntegerLiteral>(value->getElement(2))->valueAsString);
 
     }
     
     void testLet_Multiple()
     {
         PARSE_STATEMENT(L"let a=[k1 : 1, k2 : 2], b : Int = 2");
-        Constants* c = NULL;
-        Identifier* id = NULL;
-        TypeIdentifier* Int = NULL;
-        DictionaryLiteral* dict = NULL;
-        CPPUNIT_ASSERT(c = dynamic_cast<Constants*>(root));
+        ConstantsPtr c;
+        IdentifierPtr id;
+        TypeIdentifierPtr Int;
+        DictionaryLiteralPtr dict;
+        CPPUNIT_ASSERT(c = std::dynamic_pointer_cast<Constants>(root));
         CPPUNIT_ASSERT_EQUAL(2, c->numConstants());
-        CPPUNIT_ASSERT(id = dynamic_cast<Identifier*>(c->getConstant(0)->name));
+        CPPUNIT_ASSERT(id = std::dynamic_pointer_cast<Identifier>(c->getConstant(0)->name));
         ASSERT_EQUALS(L"a", id->getIdentifier().c_str());
-        CPPUNIT_ASSERT(dict = dynamic_cast<DictionaryLiteral*>(c->getConstant(0)->initializer));
+        CPPUNIT_ASSERT(dict = std::dynamic_pointer_cast<DictionaryLiteral>(c->getConstant(0)->initializer));
         CPPUNIT_ASSERT_EQUAL(2, dict->numElements());
         
-        CPPUNIT_ASSERT(id = dynamic_cast<Identifier*>(c->getConstant(1)->name));
+        CPPUNIT_ASSERT(id = std::dynamic_pointer_cast<Identifier>(c->getConstant(1)->name));
         ASSERT_EQUALS(L"b", id->getIdentifier().c_str());
-        CPPUNIT_ASSERT(Int = dynamic_cast<TypeIdentifier*>(id->getDeclaredType()));
+        CPPUNIT_ASSERT(Int = std::dynamic_pointer_cast<TypeIdentifier>(id->getDeclaredType()));
         ASSERT_EQUALS(L"Int", Int->getName().c_str());
         
     }
@@ -156,15 +156,15 @@ public:
     void testLet_Tuple()
     {
         PARSE_STATEMENT(L"let (a, b) : Int = (1, 2)");
-        Constants* c = NULL;
-        Tuple* tuple = NULL;
-        TypeIdentifier* type = NULL;
-        ParenthesizedExpression* p = NULL;
-        CPPUNIT_ASSERT(c = dynamic_cast<Constants*>(root));
-        CPPUNIT_ASSERT(tuple = dynamic_cast<Tuple*>(c->getConstant(0)->name));
+        ConstantsPtr c;
+        TuplePtr tuple;
+        TypeIdentifierPtr type;
+        ParenthesizedExpressionPtr p;
+        CPPUNIT_ASSERT(c = std::dynamic_pointer_cast<Constants>(root));
+        CPPUNIT_ASSERT(tuple = std::dynamic_pointer_cast<Tuple>(c->getConstant(0)->name));
         CPPUNIT_ASSERT_EQUAL(2, tuple->numElements());
-        CPPUNIT_ASSERT(type = dynamic_cast<TypeIdentifier*>(tuple->getType()));
-        CPPUNIT_ASSERT(p = dynamic_cast<ParenthesizedExpression*>(c->getConstant(0)->initializer));
+        CPPUNIT_ASSERT(type = std::dynamic_pointer_cast<TypeIdentifier>(tuple->getType()));
+        CPPUNIT_ASSERT(p = std::dynamic_pointer_cast<ParenthesizedExpression>(c->getConstant(0)->initializer));
         CPPUNIT_ASSERT_EQUAL(2, p->numExpressions());
         
     }
@@ -172,52 +172,52 @@ public:
     void testVar()
     {
         PARSE_STATEMENT(L"var currentLoginAttempt = 0");
-        Variables* vars = NULL;
-        Variable* var = NULL;
-        Identifier* id = NULL;
-        IntegerLiteral* i = NULL;
+        VariablesPtr vars;
+        VariablePtr var;
+        IdentifierPtr id;
+        IntegerLiteralPtr i;
         
-        CPPUNIT_ASSERT(vars = dynamic_cast<Variables*>(root));
+        CPPUNIT_ASSERT(vars = std::dynamic_pointer_cast<Variables>(root));
         CPPUNIT_ASSERT_EQUAL(1, vars->numVariables());
-        CPPUNIT_ASSERT(var = dynamic_cast<Variable*>(vars->getVariable(0)));
-        CPPUNIT_ASSERT(id = dynamic_cast<Identifier*>(var->getName()));
+        CPPUNIT_ASSERT(var = std::dynamic_pointer_cast<Variable>(vars->getVariable(0)));
+        CPPUNIT_ASSERT(id = std::dynamic_pointer_cast<Identifier>(var->getName()));
         ASSERT_EQUALS(L"currentLoginAttempt", id->getIdentifier().c_str());
         
-        CPPUNIT_ASSERT(i = dynamic_cast<IntegerLiteral*>(var->getInitializer()));
-        ASSERT_EQUALS(L"0", i->toString().c_str());
+        CPPUNIT_ASSERT(i = std::dynamic_pointer_cast<IntegerLiteral>(var->getInitializer()));
+        ASSERT_EQUALS(L"0", i->valueAsString);
         
         
     }
     void testVar_Multiple()
     {
         PARSE_STATEMENT(L"var x = 0.0, y = 0.0, z = 0.0");
-        Variables* vars = NULL;
-        Variable* var = NULL;
-        Identifier* id = NULL;
-        FloatLiteral* f = NULL;
+        VariablesPtr vars;
+        VariablePtr var;
+        IdentifierPtr id;
+        FloatLiteralPtr f;
         
-        CPPUNIT_ASSERT(vars = dynamic_cast<Variables*>(root));
+        CPPUNIT_ASSERT(vars = std::dynamic_pointer_cast<Variables>(root));
         CPPUNIT_ASSERT_EQUAL(3, vars->numVariables());
         
-        CPPUNIT_ASSERT(var = dynamic_cast<Variable*>(vars->getVariable(0)));
-        CPPUNIT_ASSERT(id = dynamic_cast<Identifier*>(var->getName()));
+        CPPUNIT_ASSERT(var = std::dynamic_pointer_cast<Variable>(vars->getVariable(0)));
+        CPPUNIT_ASSERT(id = std::dynamic_pointer_cast<Identifier>(var->getName()));
         ASSERT_EQUALS(L"x", id->getIdentifier().c_str());
-        CPPUNIT_ASSERT(f = dynamic_cast<FloatLiteral*>(var->getInitializer()));
-        ASSERT_EQUALS(L"0.0", f->toString().c_str());
+        CPPUNIT_ASSERT(f = std::dynamic_pointer_cast<FloatLiteral>(var->getInitializer()));
+        ASSERT_EQUALS(L"0.0", f->valueAsString);
         
         
-        CPPUNIT_ASSERT(var = dynamic_cast<Variable*>(vars->getVariable(1)));
-        CPPUNIT_ASSERT(id = dynamic_cast<Identifier*>(var->getName()));
+        CPPUNIT_ASSERT(var = std::dynamic_pointer_cast<Variable>(vars->getVariable(1)));
+        CPPUNIT_ASSERT(id = std::dynamic_pointer_cast<Identifier>(var->getName()));
         ASSERT_EQUALS(L"y", id->getIdentifier().c_str());
-        CPPUNIT_ASSERT(f = dynamic_cast<FloatLiteral*>(var->getInitializer()));
-        ASSERT_EQUALS(L"0.0", f->toString().c_str());
+        CPPUNIT_ASSERT(f = std::dynamic_pointer_cast<FloatLiteral>(var->getInitializer()));
+        ASSERT_EQUALS(L"0.0", f->valueAsString);
         
         
-        CPPUNIT_ASSERT(var = dynamic_cast<Variable*>(vars->getVariable(2)));
-        CPPUNIT_ASSERT(id = dynamic_cast<Identifier*>(var->getName()));
+        CPPUNIT_ASSERT(var = std::dynamic_pointer_cast<Variable>(vars->getVariable(2)));
+        CPPUNIT_ASSERT(id = std::dynamic_pointer_cast<Identifier>(var->getName()));
         ASSERT_EQUALS(L"z", id->getIdentifier().c_str());
-        CPPUNIT_ASSERT(f = dynamic_cast<FloatLiteral*>(var->getInitializer()));
-        ASSERT_EQUALS(L"0.0", f->toString().c_str());
+        CPPUNIT_ASSERT(f = std::dynamic_pointer_cast<FloatLiteral>(var->getInitializer()));
+        ASSERT_EQUALS(L"0.0", f->valueAsString);
         
         
     }
@@ -225,18 +225,18 @@ public:
     void testVar_Typed()
     {
         PARSE_STATEMENT(L"var welcomeMessage: String");
-        Variables* vars = NULL;
-        Variable* var = NULL;
-        Identifier* id = NULL;
-        TypeIdentifier* t = NULL;
+        VariablesPtr vars;
+        VariablePtr var;
+        IdentifierPtr id;
+        TypeIdentifierPtr t;
         
-        CPPUNIT_ASSERT(vars = dynamic_cast<Variables*>(root));
+        CPPUNIT_ASSERT(vars = std::dynamic_pointer_cast<Variables>(root));
         CPPUNIT_ASSERT_EQUAL(1, vars->numVariables());
-        CPPUNIT_ASSERT(var = dynamic_cast<Variable*>(vars->getVariable(0)));
-        CPPUNIT_ASSERT(id = dynamic_cast<Identifier*>(var->getName()));
+        CPPUNIT_ASSERT(var = std::dynamic_pointer_cast<Variable>(vars->getVariable(0)));
+        CPPUNIT_ASSERT(id = std::dynamic_pointer_cast<Identifier>(var->getName()));
         ASSERT_EQUALS(L"welcomeMessage", id->getIdentifier().c_str());
         
-        CPPUNIT_ASSERT(t = dynamic_cast<TypeIdentifier*>(var->getDeclaredType()));
+        CPPUNIT_ASSERT(t = std::dynamic_pointer_cast<TypeIdentifier>(var->getDeclaredType()));
         ASSERT_EQUALS(L"String", t->getName().c_str());
         
         
@@ -245,8 +245,8 @@ public:
     void testOperator()
     {
         PARSE_STATEMENT(L"operator infix +- { associativity left precedence 140 }");
-        OperatorDef* o = NULL;
-        CPPUNIT_ASSERT(o = dynamic_cast<OperatorDef*>(root));
+        OperatorDefPtr o;
+        CPPUNIT_ASSERT(o = std::dynamic_pointer_cast<OperatorDef>(root));
         ASSERT_EQUALS(L"+-", o->getName());
         CPPUNIT_ASSERT_EQUAL(Associativity::Left, o->getAssociativity());
         CPPUNIT_ASSERT_EQUAL(140, o->getPrecedence());

@@ -2,6 +2,7 @@
 #define FOR_LOOP_H
 #include "statement.h"
 #include <string>
+#include "ast-decl.h"
 
 SWIFT_NS_BEGIN
 
@@ -13,27 +14,27 @@ public:
     ForLoop();
     ~ForLoop();
 public:
-    void addInit(Expression* init);
+    void addInit(const ExpressionPtr& init);
     int numInit();
-    Expression* getInit(int idx);
+    ExpressionPtr getInit(int idx);
     
-    void setCondition(Expression* cond);
-    Expression* getCondition();
+    void setCondition(const ExpressionPtr& cond);
+    ExpressionPtr getCondition();
     
-    void setStep(Expression* step);
-    Expression* getStep();
+    void setStep(const ExpressionPtr& step);
+    ExpressionPtr getStep();
     
-    void setCodeBlock(CodeBlock* codeBlock);
-    CodeBlock* getCodeBlock();
+    void setCodeBlock(const CodeBlockPtr& codeBlock);
+    CodeBlockPtr getCodeBlock();
     
 public:
     virtual void serialize(std::wostream& out);
     virtual void accept(NodeVisitor* visitor);
 public:
-    std::vector<Expression*> inits;
-    Expression* condition;
-    Expression* step;
-    CodeBlock* codeBlock;
+    std::vector<ExpressionPtr> inits;
+    ExpressionPtr condition;
+    ExpressionPtr step;
+    CodeBlockPtr codeBlock;
 };
 
 SWIFT_NS_END

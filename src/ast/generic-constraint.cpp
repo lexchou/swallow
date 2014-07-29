@@ -10,8 +10,7 @@ GenericConstraint::GenericConstraint()
 }
 GenericConstraint::~GenericConstraint()
 {
-    SafeDelete(identifier);
-    SafeDeleteAll(expectedTypes);
+
 }
 
 void GenericConstraint::serialize(std::wostream& out)
@@ -20,11 +19,11 @@ void GenericConstraint::serialize(std::wostream& out)
 }
 
 
-void GenericConstraint::setIdentifier(TypeIdentifier* identifier)
+void GenericConstraint::setIdentifier(const TypeIdentifierPtr& identifier)
 {
     this->identifier = identifier;
 }
-TypeIdentifier* GenericConstraint::getIdentifier()
+TypeIdentifierPtr GenericConstraint::getIdentifier()
 {
     return identifier;
 }
@@ -38,7 +37,7 @@ GenericConstraint::ConstraintType GenericConstraint::getConstraintType()const
     return type;
 }
 
-void GenericConstraint::addExpectedType(TypeIdentifier* expectedIdentifier)
+void GenericConstraint::addExpectedType(const TypeIdentifierPtr& expectedIdentifier)
 {
     expectedTypes.push_back(expectedIdentifier);
 }
@@ -46,7 +45,7 @@ int GenericConstraint::numExpectedTypes()const
 {
     return expectedTypes.size();
 }
-TypeIdentifier* GenericConstraint::getExpectedType(int i)
+TypeIdentifierPtr GenericConstraint::getExpectedType(int i)
 {
     return expectedTypes[i];
 }

@@ -10,8 +10,6 @@ TypeIdentifier::TypeIdentifier()
 }
 TypeIdentifier::~TypeIdentifier()
 {
-    SafeDelete(nestedType);
-    SafeDeleteAll(genericArguments);
 }
 void TypeIdentifier::serialize(std::wostream& out)
 {
@@ -19,7 +17,7 @@ void TypeIdentifier::serialize(std::wostream& out)
     if(numGenericArguments())
     {
         out<<L"<";
-        std::vector<TypeNode*>::iterator iter = genericArguments.begin();
+        std::vector<TypeNodePtr>::iterator iter = genericArguments.begin();
         for(; iter != genericArguments.end(); iter++)
         {
             if(iter != genericArguments.begin())
@@ -40,7 +38,7 @@ const std::wstring& TypeIdentifier::getName() const
     return name;
 }
 
-void TypeIdentifier::addGenericArgument(TypeNode* argument)
+void TypeIdentifier::addGenericArgument(TypeNodePtr argument)
 {
     genericArguments.push_back(argument);
 }
@@ -48,17 +46,17 @@ int TypeIdentifier::numGenericArguments()
 {
     return genericArguments.size();
 }
-TypeNode* TypeIdentifier::getGenericArgument(int idx)
+TypeNodePtr TypeIdentifier::getGenericArgument(int idx)
 {
     return genericArguments[idx];
 }
 
 
-void TypeIdentifier::setNestedType(TypeIdentifier* type)
+void TypeIdentifier::setNestedType(TypeIdentifierPtr type)
 {
     this->nestedType = type;
 }
-TypeIdentifier* TypeIdentifier::getNestedType()
+TypeIdentifierPtr TypeIdentifier::getNestedType()
 {
     return nestedType;
 }

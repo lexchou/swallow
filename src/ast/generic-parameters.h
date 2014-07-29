@@ -16,18 +16,18 @@ public:
 public:
     virtual void serialize(std::wostream& out);
 public:
-    void addGenericType(TypeIdentifier* type);
+    void addGenericType(const TypeIdentifierPtr& type);
     int numGenericTypes()const;
-    TypeIdentifier* getGenericType(int i);
+    TypeIdentifierPtr getGenericType(int i);
     
     
-    void addConstraint(GenericConstraint* constraint);
+    void addConstraint(const GenericConstraintPtr& constraint);
     int numConstraints()const;
-    GenericConstraint* getConstraint(int i);
+    GenericConstraintPtr getConstraint(int i);
     
 private:
-    std::vector<GenericConstraint*> constraints;
-    std::vector<TypeIdentifier*> genericTypes;
+    std::vector<GenericConstraintPtr> constraints;
+    std::vector<TypeIdentifierPtr> genericTypes;
     
 };
 

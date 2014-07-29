@@ -189,12 +189,12 @@ void Parser::tassert(Token& token, bool cond, int errorCode, const std::wstring&
     throw Interrupt();
 }
 
-Node* Parser::parseStatement(const wchar_t* code)
+NodePtr Parser::parseStatement(const wchar_t* code)
 {
     tokenizer->set(code);
     AutoReleasePool pool;
     nodeFactory->setAutoReleasePool(&pool);
-    Node* ret = NULL;
+    NodePtr ret = NULL;
     try
     {
         ret = parseStatement();
@@ -209,18 +209,18 @@ Node* Parser::parseStatement(const wchar_t* code)
     return ret;
 }
 
-Program* Parser::parse(const wchar_t* code)
+ProgramPtr Parser::parse(const wchar_t* code)
 {
     tokenizer->set(code);
     AutoReleasePool pool;
     nodeFactory->setAutoReleasePool(&pool);
-    Program* ret = nodeFactory->createProgram();
+    ProgramPtr ret = nodeFactory->createProgram();
     try
     {
         Token token;
         while(peek(token))
         {
-            Statement* statement = parseStatement();
+            StatementPtr statement = parseStatement();
             if(!statement)
                 break;
             ret->addStatement(statement);
@@ -231,7 +231,6 @@ Program* Parser::parse(const wchar_t* code)
     catch(...)
     {
         //clean up all nodes created during the parsing
-        delete ret;
         ret = NULL;
         nodeFactory->setAutoReleasePool(NULL);
     }

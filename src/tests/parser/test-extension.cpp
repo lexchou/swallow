@@ -57,15 +57,15 @@ public:
     {
         PARSE_STATEMENT(L"extension SomeType {"
                         L"}");
-        ExtensionDef* s = NULL;
-        CPPUNIT_ASSERT(s = dynamic_cast<ExtensionDef*>(root));
+        ExtensionDefPtr s;
+        CPPUNIT_ASSERT(s = std::dynamic_pointer_cast<ExtensionDef>(root));
     }
     void testExtensionProtocols()
     {
         PARSE_STATEMENT(L"extension SomeType: SomeProtocol, AnotherProtocol {"
                         L"}");
-        ExtensionDef* s = NULL;
-        CPPUNIT_ASSERT(s = dynamic_cast<ExtensionDef*>(root));
+        ExtensionDefPtr s;
+        CPPUNIT_ASSERT(s = std::dynamic_pointer_cast<ExtensionDef>(root));
     }
     void testComputedProperty()
     {
@@ -76,34 +76,34 @@ public:
                         L"var mm: Double { return self / 1_000.0 }\n"
                         L"var ft: Double { return self / 3.28084 }\n"
                         L"}");
-        ExtensionDef* s = NULL;
-        Variables* vars = NULL;
-        Variable* var = NULL;
-        CodeBlock* cb = NULL;
-        ReturnStatement* ret = NULL;
-        CPPUNIT_ASSERT(s = dynamic_cast<ExtensionDef*>(root));
+        ExtensionDefPtr s;
+        VariablesPtr vars;
+        VariablePtr var;
+        CodeBlockPtr cb;
+        ReturnStatementPtr ret;
+        CPPUNIT_ASSERT(s = std::dynamic_pointer_cast<ExtensionDef>(root));
         CPPUNIT_ASSERT_EQUAL(5, s->numDeclarations());
         
-        CPPUNIT_ASSERT(vars = dynamic_cast<Variables*>(s->getDeclaration(0)));
+        CPPUNIT_ASSERT(vars = std::dynamic_pointer_cast<Variables>(s->getDeclaration(0)));
         CPPUNIT_ASSERT_EQUAL(1, vars->numVariables());
         CPPUNIT_ASSERT(var = vars->getVariable(0));
-        ASSERT_EQUALS(L"km", dynamic_cast<Identifier*>(var->getName())->getIdentifier().c_str());
-        ASSERT_EQUALS(L"Double", dynamic_cast<TypeIdentifier*>(var->getDeclaredType())->getName());
+        ASSERT_EQUALS(L"km", std::dynamic_pointer_cast<Identifier>(var->getName())->getIdentifier().c_str());
+        ASSERT_EQUALS(L"Double", std::dynamic_pointer_cast<TypeIdentifier>(var->getDeclaredType())->getName());
         CPPUNIT_ASSERT(NULL == var->getInitializer());
         CPPUNIT_ASSERT(cb = var->getGetter());
         CPPUNIT_ASSERT_EQUAL(1, cb->numStatements());
-        CPPUNIT_ASSERT(ret = dynamic_cast<ReturnStatement*>(cb->getStatement(0)));
+        CPPUNIT_ASSERT(ret = std::dynamic_pointer_cast<ReturnStatement>(cb->getStatement(0)));
         
         
-        CPPUNIT_ASSERT(vars = dynamic_cast<Variables*>(s->getDeclaration(1)));
+        CPPUNIT_ASSERT(vars = std::dynamic_pointer_cast<Variables>(s->getDeclaration(1)));
         CPPUNIT_ASSERT_EQUAL(1, vars->numVariables());
         CPPUNIT_ASSERT(var = vars->getVariable(0));
-        ASSERT_EQUALS(L"m", dynamic_cast<Identifier*>(var->getName())->getIdentifier().c_str());
-        ASSERT_EQUALS(L"Double", dynamic_cast<TypeIdentifier*>(var->getDeclaredType())->getName());
+        ASSERT_EQUALS(L"m", std::dynamic_pointer_cast<Identifier>(var->getName())->getIdentifier().c_str());
+        ASSERT_EQUALS(L"Double", std::dynamic_pointer_cast<TypeIdentifier>(var->getDeclaredType())->getName());
         CPPUNIT_ASSERT(NULL == var->getInitializer());
         CPPUNIT_ASSERT(cb = var->getGetter());
         CPPUNIT_ASSERT_EQUAL(1, cb->numStatements());
-        CPPUNIT_ASSERT(ret = dynamic_cast<ReturnStatement*>(cb->getStatement(0)));
+        CPPUNIT_ASSERT(ret = std::dynamic_pointer_cast<ReturnStatement>(cb->getStatement(0)));
 
         
     }
@@ -118,28 +118,28 @@ public:
                         L"    }\n"
                         L"}\n"
                         L"}");
-        ExtensionDef* e = NULL;
-        FunctionDef* f = NULL;
-        Parameter* param = NULL;
+        ExtensionDefPtr e;
+        FunctionDefPtr f;
+        ParameterPtr param;
         
-        CPPUNIT_ASSERT(e = dynamic_cast<ExtensionDef*>(root));
-        ASSERT_EQUALS(L"Int", dynamic_cast<TypeIdentifier*>(e->getIdentifier())->getName());
+        CPPUNIT_ASSERT(e = std::dynamic_pointer_cast<ExtensionDef>(root));
+        ASSERT_EQUALS(L"Int", std::dynamic_pointer_cast<TypeIdentifier>(e->getIdentifier())->getName());
         CPPUNIT_ASSERT_EQUAL(1, e->numDeclarations());
         
-        CPPUNIT_ASSERT(f = dynamic_cast<FunctionDef*>(e->getDeclaration(0)));
+        CPPUNIT_ASSERT(f = std::dynamic_pointer_cast<FunctionDef>(e->getDeclaration(0)));
         ASSERT_EQUALS(L"repetitions", f->getName());
         
         CPPUNIT_ASSERT_EQUAL(1, f->numParameters());
         CPPUNIT_ASSERT_EQUAL(1, f->getParameters(0)->numParameters());
         CPPUNIT_ASSERT(param = f->getParameters(0)->getParameter(0));
         ASSERT_EQUALS(L"task", param->getLocalName());
-        FunctionType* type = NULL;
-        TupleType* tuple = NULL;
-        CPPUNIT_ASSERT(type = dynamic_cast<FunctionType*>(param->getType()));
-        CPPUNIT_ASSERT(tuple = dynamic_cast<TupleType*>(type->getArgumentsType()));
+        FunctionTypePtr type;
+        TupleTypePtr tuple;
+        CPPUNIT_ASSERT(type = std::dynamic_pointer_cast<FunctionType>(param->getType()));
+        CPPUNIT_ASSERT(tuple = std::dynamic_pointer_cast<TupleType>(type->getArgumentsType()));
         CPPUNIT_ASSERT_EQUAL(0, tuple->numElements());
         
-        CPPUNIT_ASSERT(tuple = dynamic_cast<TupleType*>(type->getReturnType()));
+        CPPUNIT_ASSERT(tuple = std::dynamic_pointer_cast<TupleType>(type->getReturnType()));
         CPPUNIT_ASSERT_EQUAL(0, tuple->numElements());
         
     }
@@ -155,16 +155,16 @@ public:
                         L"}\n"
                         L"}");
         
-        ExtensionDef* s = NULL;
-        InitializerDef* init = NULL;
-        Parameters* params = NULL;
+        ExtensionDefPtr s;
+        InitializerDefPtr init;
+        ParametersPtr params;
         
-        CPPUNIT_ASSERT(s = dynamic_cast<ExtensionDef*>(root));
+        CPPUNIT_ASSERT(s = std::dynamic_pointer_cast<ExtensionDef>(root));
         CPPUNIT_ASSERT_EQUAL(1, s->numDeclarations());
         
-        CPPUNIT_ASSERT(init = dynamic_cast<InitializerDef*>(s->getDeclaration(0)));
+        CPPUNIT_ASSERT(init = std::dynamic_pointer_cast<InitializerDef>(s->getDeclaration(0)));
         CPPUNIT_ASSERT(!init->isConvenience());
-        CPPUNIT_ASSERT(params = dynamic_cast<Parameters*>(init->getParameters()));
+        CPPUNIT_ASSERT(params = std::dynamic_pointer_cast<Parameters>(init->getParameters()));
         CPPUNIT_ASSERT_EQUAL(2, params->numParameters());
         
         
@@ -178,16 +178,16 @@ public:
                         L"}\n"
                         L"}");
         
-        ExtensionDef* s = NULL;
-        FunctionDef* square = NULL;
-        Parameters* params = NULL;
+        ExtensionDefPtr s;
+        FunctionDefPtr square;
+        ParametersPtr params;
         
-        CPPUNIT_ASSERT(s = dynamic_cast<ExtensionDef*>(root));
+        CPPUNIT_ASSERT(s = std::dynamic_pointer_cast<ExtensionDef>(root));
         CPPUNIT_ASSERT_EQUAL(1, s->numDeclarations());
         
-        CPPUNIT_ASSERT(square = dynamic_cast<FunctionDef*>(s->getDeclaration(0)));
+        CPPUNIT_ASSERT(square = std::dynamic_pointer_cast<FunctionDef>(s->getDeclaration(0)));
         CPPUNIT_ASSERT_EQUAL((int)TypeSpecifier::Mutating, square->getSpecifiers());
-        CPPUNIT_ASSERT(params = dynamic_cast<Parameters*>(square->getParameters(0)));
+        CPPUNIT_ASSERT(params = std::dynamic_pointer_cast<Parameters>(square->getParameters(0)));
         CPPUNIT_ASSERT_EQUAL(0, params->numParameters());
         
         
@@ -205,15 +205,15 @@ public:
                         L"  }\n"
                         L"}");
      
-        ExtensionDef* s = NULL;
-        SubscriptDef* subscript = NULL;
-        Parameters* params = NULL;
+        ExtensionDefPtr s;
+        SubscriptDefPtr subscript;
+        ParametersPtr params;
         
-        CPPUNIT_ASSERT(s = dynamic_cast<ExtensionDef*>(root));
+        CPPUNIT_ASSERT(s = std::dynamic_pointer_cast<ExtensionDef>(root));
         CPPUNIT_ASSERT_EQUAL(1, s->numDeclarations());
         
-        CPPUNIT_ASSERT(subscript = dynamic_cast<SubscriptDef*>(s->getDeclaration(0)));
-        CPPUNIT_ASSERT(params = dynamic_cast<Parameters*>(subscript->getParameters()));
+        CPPUNIT_ASSERT(subscript = std::dynamic_pointer_cast<SubscriptDef>(s->getDeclaration(0)));
+        CPPUNIT_ASSERT(params = std::dynamic_pointer_cast<Parameters>(subscript->getParameters()));
         CPPUNIT_ASSERT_EQUAL(1, params->numParameters());
     }
     void testNestedType()
@@ -235,21 +235,21 @@ public:
                         L"  }\n"
                         L"}");
         
-        ExtensionDef* s = NULL;
-        EnumDef* e = NULL;
-        Variables* vars = NULL;
-        Variable* kind = NULL;
+        ExtensionDefPtr s;
+        EnumDefPtr e;
+        VariablesPtr vars;
+        VariablePtr kind;
         
-        CPPUNIT_ASSERT(s = dynamic_cast<ExtensionDef*>(root));
+        CPPUNIT_ASSERT(s = std::dynamic_pointer_cast<ExtensionDef>(root));
         CPPUNIT_ASSERT_EQUAL(2, s->numDeclarations());
         
-        CPPUNIT_ASSERT(e = dynamic_cast<EnumDef*>(s->getDeclaration(0)));
-        ASSERT_EQUALS(L"Kind", dynamic_cast<TypeIdentifier*>(e->getIdentifier())->getName());
+        CPPUNIT_ASSERT(e = std::dynamic_pointer_cast<EnumDef>(s->getDeclaration(0)));
+        ASSERT_EQUALS(L"Kind", std::dynamic_pointer_cast<TypeIdentifier>(e->getIdentifier())->getName());
         
-        CPPUNIT_ASSERT(vars = dynamic_cast<Variables*>(s->getDeclaration(1)));
+        CPPUNIT_ASSERT(vars = std::dynamic_pointer_cast<Variables>(s->getDeclaration(1)));
         CPPUNIT_ASSERT_EQUAL(1, vars->numVariables());
         CPPUNIT_ASSERT(kind = vars->getVariable(0));
-        ASSERT_EQUALS(L"kind", dynamic_cast<Identifier*>(kind->getName())->getIdentifier());
+        ASSERT_EQUALS(L"kind", std::dynamic_pointer_cast<Identifier>(kind->getName())->getIdentifier());
 	
         
     }

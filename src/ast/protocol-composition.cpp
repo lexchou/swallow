@@ -11,28 +11,25 @@ ProtocolComposition::ProtocolComposition()
 
 ProtocolComposition::~ProtocolComposition()
 {
-    SafeDeleteAll(protocols);
+
 }
 
 void ProtocolComposition::serialize(std::wostream& out)
 {
     out<<L"protocol<";
-    std::vector<TypeIdentifier*>::iterator iter = protocols.begin();
-    for(; iter != protocols.end(); iter++)
+    for(const TypeIdentifierPtr& protocol : protocols)
     {
-        if(iter != protocols.begin())
-            out<<L", ";
-        (*iter)->serialize(out);
+        protocol->serialize(out);
     }
     out<<L">";
 }
 
 
-void ProtocolComposition::addProtocol(TypeIdentifier* protocol)
+void ProtocolComposition::addProtocol(TypeIdentifierPtr protocol)
 {
     protocols.push_back(protocol);
 }
-TypeIdentifier* ProtocolComposition::getProtocol(int i)
+TypeIdentifierPtr ProtocolComposition::getProtocol(int i)
 {
     return protocols[i];
 }

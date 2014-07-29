@@ -13,15 +13,16 @@ TypeInferenceAction::TypeInferenceAction(SymbolRegistry* symbolRegistry)
 
 }
 
-void TypeInferenceAction::visitVariables(Variables* node)
+void TypeInferenceAction::visitVariables(const VariablesPtr& node)
 {
 }
-void TypeInferenceAction::visitConstant(Constant* node)
+
+void TypeInferenceAction::visitConstant(const ConstantPtr& node)
 {
     TypePtr type = evaluateType(node->initializer);
-    if(Identifier* id = dynamic_cast<Identifier*>(node->name))
+    if(IdentifierPtr id = std::dynamic_pointer_cast<Identifier>(node->name))
     {
-        symbolRegistry->getCurrentScope()->addSymbol(static_cast<SymboledConstant*>(node));
+        symbolRegistry->getCurrentScope()->addSymbol(std::static_pointer_cast<SymboledConstant>(node));
         if(id->getDeclaredType() == NULL)
         {
             id->setType(type);
@@ -33,7 +34,7 @@ void TypeInferenceAction::visitConstant(Constant* node)
         }
     }
 }
-TypePtr TypeInferenceAction::evaluateType(Expression* expr)
+TypePtr TypeInferenceAction::evaluateType(const ExpressionPtr& expr)
 {
     switch(expr->getNodeType())
     {

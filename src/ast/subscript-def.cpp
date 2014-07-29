@@ -14,11 +14,7 @@ SubscriptDef::SubscriptDef()
 
 SubscriptDef::~SubscriptDef()
 {
-    SafeDelete(parameters);
-    SafeDelete(returnType);
-    SafeDelete(getter);
-    SafeDelete(setter);
-    SafeDeleteAll(returnTypeAttributes);
+
 }
 
 void SubscriptDef::serialize(std::wostream& out)
@@ -28,30 +24,29 @@ void SubscriptDef::serialize(std::wostream& out)
 
 void SubscriptDef::accept(NodeVisitor* visitor)
 {
-    visitor->visitSubscript(this);
+    accept2(visitor, &NodeVisitor::visitSubscript);
 }
 
-void SubscriptDef::setParameters(Parameters* params)
+void SubscriptDef::setParameters(const ParametersPtr& params)
 {
     this->parameters = params;
 }
-Parameters* SubscriptDef::getParameters()
+ParametersPtr SubscriptDef::getParameters()
 {
     return parameters;
 }
 
-void SubscriptDef::setReturnType(TypeNode* type)
+void SubscriptDef::setReturnType(const TypeNodePtr& type)
 {
     this->returnType = type;
 }
-TypeNode* SubscriptDef::getReturnType()
+TypeNodePtr SubscriptDef::getReturnType()
 {
     return returnType;
 }
 
 void SubscriptDef::setReturnTypeAttributes(const Attributes& attrs)
 {
-    SafeDeleteAll(returnTypeAttributes);
     returnTypeAttributes = attrs;
 }
 const Attributes& SubscriptDef::getReturnTypeAttributes()const
@@ -59,20 +54,20 @@ const Attributes& SubscriptDef::getReturnTypeAttributes()const
     return returnTypeAttributes;
 }
 
-void SubscriptDef::setGetter(CodeBlock* getter)
+void SubscriptDef::setGetter(const CodeBlockPtr& getter)
 {
     this->getter = getter;
 }
-CodeBlock* SubscriptDef::getGetter()
+CodeBlockPtr SubscriptDef::getGetter()
 {
     return getter;
 }
 
-void SubscriptDef::setSetter(CodeBlock* setter)
+void SubscriptDef::setSetter(const CodeBlockPtr& setter)
 {
     this->setter = setter;
 }
-CodeBlock* SubscriptDef::getSetter()
+CodeBlockPtr SubscriptDef::getSetter()
 {
     return setter;
 }

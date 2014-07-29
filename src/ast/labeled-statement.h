@@ -14,14 +14,14 @@ public:
     void setLabel(const std::wstring& label);
     const std::wstring& getLabel() const;
     
-    void setStatement(Statement* statement);
-    Statement* getStatement();
+    void setStatement(const StatementPtr& statement);
+    StatementPtr getStatement();
 public:
     virtual void serialize(std::wostream& out);
     virtual void accept(NodeVisitor* visitor);
 private:
     std::wstring label;
-    Statement* statement;
+    StatementPtr statement;
 };
 
 SWIFT_NS_END

@@ -3,6 +3,7 @@
 #include "node.h"
 #include <string>
 #include "attribute.h"
+#include "ast-decl.h"
 
 SWIFT_NS_BEGIN
 
@@ -42,11 +43,11 @@ public:
     void setTypeAttributes(const Attributes& attrs);
     const Attributes& getTypeAttributes()const;
     
-    void setType(TypeNode* type);
-    TypeNode* getType();
+    void setType(const TypeNodePtr& type);
+    TypeNodePtr getType();
     
-    void setDefaultValue(Expression* def);
-    Expression* getDefaultValue();
+    void setDefaultValue(const ExpressionPtr& def);
+    ExpressionPtr getDefaultValue();
     
 private:
     bool inout;
@@ -55,8 +56,8 @@ private:
     std::wstring externalName;
     std::wstring localName;
     Attributes typeAttributes;
-    TypeNode* type;
-    Expression* defaultValue;
+    TypeNodePtr type;
+    ExpressionPtr defaultValue;
 };
 
 SWIFT_NS_END

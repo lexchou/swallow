@@ -13,8 +13,7 @@ WhileLoop::WhileLoop()
 
 WhileLoop::~WhileLoop()
 {
-    SafeDelete(codeBlock);
-    SafeDelete(condition);
+
 }
 
 void WhileLoop::serialize(std::wostream& out)
@@ -26,24 +25,24 @@ void WhileLoop::serialize(std::wostream& out)
 }
 void WhileLoop::accept(NodeVisitor* visitor)
 {
-    visitor->visitWhileLoop(this);
+    accept2(visitor, &NodeVisitor::visitWhileLoop);
 }
 
 
-void WhileLoop::setCodeBlock(CodeBlock* codeBlock)
+void WhileLoop::setCodeBlock(const CodeBlockPtr& codeBlock)
 {
     this->codeBlock = codeBlock;
 }
-CodeBlock* WhileLoop::getCodeBlock()
+CodeBlockPtr WhileLoop::getCodeBlock()
 {
     return codeBlock;
 }
 
-void WhileLoop::setCondition(Expression* expression)
+void WhileLoop::setCondition(const ExpressionPtr& expression)
 {
     this->condition = expression;
 }
-Expression* WhileLoop::getCondition()
+ExpressionPtr WhileLoop::getCondition()
 {
     return condition;
 }

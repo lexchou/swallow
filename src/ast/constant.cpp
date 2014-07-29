@@ -11,8 +11,6 @@ Constant::Constant()
 }
 Constant::~Constant()
 {
-    SafeDelete(name);
-    SafeDelete(initializer);
 
 }
 void Constant::serialize(std::wostream& out)
@@ -21,5 +19,5 @@ void Constant::serialize(std::wostream& out)
 
 void Constant::accept(NodeVisitor* visitor)
 {
-    visitor->visitConstant(this);
+    accept2(visitor, &NodeVisitor::visitConstant);
 }

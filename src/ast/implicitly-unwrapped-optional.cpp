@@ -9,7 +9,6 @@ ImplicitlyUnwrappedOptional::ImplicitlyUnwrappedOptional()
 }
 ImplicitlyUnwrappedOptional::~ImplicitlyUnwrappedOptional()
 {
-    SafeDelete(innerType);
 }
 
 void ImplicitlyUnwrappedOptional::serialize(std::wostream& out)
@@ -23,11 +22,11 @@ void ImplicitlyUnwrappedOptional::accept(NodeVisitor* visitor)
 }
 
 
-void ImplicitlyUnwrappedOptional::setInnerType(TypeNode* innerType)
+void ImplicitlyUnwrappedOptional::setInnerType(const TypeNodePtr& innerType)
 {
     this->innerType = innerType;
 }
-TypeNode* ImplicitlyUnwrappedOptional::getInnerType()
+TypeNodePtr ImplicitlyUnwrappedOptional::getInnerType()
 {
     return innerType;
 }

@@ -11,358 +11,358 @@ USE_SWIFT_NS
     } while(0);
 
 
-void NodeVisitor::visitDeinit(DeinitializerDef* node)
+void NodeVisitor::visitDeinit(const DeinitializerDefPtr& node)
 {
-    ACCEPT(node->getBody());
+    ACCEPT(node->getBody().get());
 }
 
-void NodeVisitor::visitInit(InitializerDef* node)
+void NodeVisitor::visitInit(const InitializerDefPtr& node)
 {
-    ACCEPT(node->getBody());
+    ACCEPT(node->getBody().get());
 }
 
-void NodeVisitor::visitImport(Import* node)
+void NodeVisitor::visitImport(const ImportPtr& node)
 {
 
 }
 
-void NodeVisitor::visitSubscript(SubscriptDef* node)
+void NodeVisitor::visitSubscript(const SubscriptDefPtr& node)
 {
-    ACCEPT(node->getGetter());
-    ACCEPT(node->getSetter());
+    ACCEPT(node->getGetter().get());
+    ACCEPT(node->getSetter().get());
 }
 
-void NodeVisitor::visitTypeAlias(TypeAlias* node)
+void NodeVisitor::visitTypeAlias(const TypeAliasPtr& node)
 {
 }
 
-void NodeVisitor::visitForIn(ForInLoop* node)
+void NodeVisitor::visitForIn(const ForInLoopPtr& node)
 {
-    ACCEPT(node->getContainer());
-    ACCEPT(node->getCodeBlock());
+    ACCEPT(node->getContainer().get());
+    ACCEPT(node->getCodeBlock().get());
 }
 
-void NodeVisitor::visitForLoop(ForLoop* node)
+void NodeVisitor::visitForLoop(const ForLoopPtr& node)
 {
-    for(Expression* init : node->inits)
+    for(ExpressionPtr init : node->inits)
     {
-        ACCEPT(init);
+        ACCEPT(init.get());
     }
-    ACCEPT(node->condition);
-    ACCEPT(node->step);
-    ACCEPT(node->codeBlock);
+    ACCEPT(node->condition.get());
+    ACCEPT(node->step.get());
+    ACCEPT(node->codeBlock.get());
 }
 
-void NodeVisitor::visitDoLoop(DoLoop* node)
+void NodeVisitor::visitDoLoop(const DoLoopPtr& node)
 {
-    ACCEPT(node->getCodeBlock());
-    ACCEPT(node->getCondition());
+    ACCEPT(node->getCodeBlock().get());
+    ACCEPT(node->getCondition().get());
 }
 
-void NodeVisitor::visitLabeledStatement(LabeledStatement* node)
+void NodeVisitor::visitLabeledStatement(const LabeledStatementPtr& node)
 {
-    ACCEPT(node->getStatement());
+    ACCEPT(node->getStatement().get());
 }
 
-void NodeVisitor::visitOperator(OperatorDef* node)
+void NodeVisitor::visitOperator(const OperatorDefPtr& node)
 {
 
 }
 
-void NodeVisitor::visitArrayLiteral(ArrayLiteral* node)
+void NodeVisitor::visitArrayLiteral(const ArrayLiteralPtr& node)
 {
-    for(Expression* expr : node->elements)
+    for(ExpressionPtr expr : node->elements)
     {
-        ACCEPT(expr);
+        ACCEPT(expr.get());
     }
 }
 
-void NodeVisitor::visitDictionaryLiteral(DictionaryLiteral* node)
+void NodeVisitor::visitDictionaryLiteral(const DictionaryLiteralPtr& node)
 {
     for(auto entry : *node)
     {
-        ACCEPT(entry.first);
-        ACCEPT(entry.second);
+        ACCEPT(entry.first.get());
+        ACCEPT(entry.second.get());
     }
 }
 
-void NodeVisitor::visitBreak(BreakStatement* node)
+void NodeVisitor::visitBreak(const BreakStatementPtr& node)
 {
 }
 
-void NodeVisitor::visitReturn(ReturnStatement* node)
+void NodeVisitor::visitReturn(const ReturnStatementPtr& node)
 {
-    ACCEPT(node->getExpression());
+    ACCEPT(node->getExpression().get());
 }
 
-void NodeVisitor::visitContinue(ContinueStatement* node)
-{
-}
-
-void NodeVisitor::visitFallthrough(FallthroughStatement* node)
+void NodeVisitor::visitContinue(const ContinueStatementPtr& node)
 {
 }
 
-void NodeVisitor::visitIf(IfStatement* node)
+void NodeVisitor::visitFallthrough(const FallthroughStatementPtr& node)
 {
-    ACCEPT(node->getCondition());
-    ACCEPT(node->getThen());
-    ACCEPT(node->getElse());
 }
 
-void NodeVisitor::visitSwitchCase(SwitchCase* node)
+void NodeVisitor::visitIf(const IfStatementPtr& node)
 {
-    ACCEPT(node->getControlExpression());
-    for(CaseStatement* c : *node)
+    ACCEPT(node->getCondition().get());
+    ACCEPT(node->getThen().get());
+    ACCEPT(node->getElse().get());
+}
+
+void NodeVisitor::visitSwitchCase(const SwitchCasePtr& node)
+{
+    ACCEPT(node->getControlExpression().get());
+    for(CaseStatementPtr c : *node)
     {
-        ACCEPT(c);
+        ACCEPT(c.get());
     }
-    ACCEPT(node->getDefaultCase());
+    ACCEPT(node->getDefaultCase().get());
 }
 
-void NodeVisitor::visitCase(CaseStatement* node)
+void NodeVisitor::visitCase(const CaseStatementPtr& node)
 {
     for(auto condition : node->getConditions())
     {
-        ACCEPT(condition.condition);
-        ACCEPT(condition.guard);
+        ACCEPT(condition.condition.get());
+        ACCEPT(condition.guard.get());
     }
     for(auto st : *node)
     {
-        ACCEPT(st);
+        ACCEPT(st.get());
     }
 }
 
-void NodeVisitor::visitCodeBlock(CodeBlock* node)
+void NodeVisitor::visitCodeBlock(const CodeBlockPtr& node)
 {
     for(auto st: *node)
     {
-        ACCEPT(st);
+        ACCEPT(st.get());
     }
 }
 
-void NodeVisitor::visitParameter(Parameter* node)
+void NodeVisitor::visitParameter(const ParameterPtr& node)
 {
 
 }
 
-void NodeVisitor::visitParameters(Parameters* node)
+void NodeVisitor::visitParameters(const ParametersPtr& node)
 {
-    for(Parameter* p : *node)
+    for(ParameterPtr p : *node)
     {
-        ACCEPT(p);
+        ACCEPT(p.get());
     }
 }
 
-void NodeVisitor::visitProgram(Program* node)
+void NodeVisitor::visitProgram(const ProgramPtr& node)
 {
-    for(Statement* st : *node)
+    for(StatementPtr st : *node)
     {
-        ACCEPT(st);
+        ACCEPT(st.get());
     }
 }
 
-void NodeVisitor::visitLetBinding(LetBinding* node)
+void NodeVisitor::visitLetBinding(const LetBindingPtr& node)
 {
 
 }
 
-void NodeVisitor::visitVarBinding(VarBinding* node)
+void NodeVisitor::visitVarBinding(const VarBindingPtr& node)
 {
 }
 
 
-void NodeVisitor::visitVariables(Variables* node)
+void NodeVisitor::visitVariables(const VariablesPtr& node)
 {
-    for(Variable* var : *node)
+    for(VariablePtr var : *node)
     {
-        ACCEPT(var);
+        ACCEPT(var.get());
     }
 }
 
-void NodeVisitor::visitVariable(Variable* node)
+void NodeVisitor::visitVariable(const VariablePtr& node)
 {
-    ACCEPT(node->getInitializer());
-    ACCEPT(node->getGetter());
-    ACCEPT(node->getSetter());
-    ACCEPT(node->getWillSet());
-    ACCEPT(node->getDidSet());
+    ACCEPT(node->getInitializer().get());
+    ACCEPT(node->getGetter().get());
+    ACCEPT(node->getSetter().get());
+    ACCEPT(node->getWillSet().get());
+    ACCEPT(node->getDidSet().get());
 }
 
 
-void NodeVisitor::visitConstant(Constant* node)
+void NodeVisitor::visitConstant(const ConstantPtr& node)
 {
-    ACCEPT(node->initializer);
+    ACCEPT(node->initializer.get());
 }
-void NodeVisitor::visitConstants(Constants* node)
+void NodeVisitor::visitConstants(const ConstantsPtr& node)
 {
     for(auto c : *node)
     {
-        ACCEPT(c);
+        ACCEPT(c.get());
     }
 }
 
-void NodeVisitor::visitAssignment(Assignment* node)
+void NodeVisitor::visitAssignment(const AssignmentPtr& node)
 {
-    ACCEPT(node->getLHS());
-    ACCEPT(node->getRHS();)
+    ACCEPT(node->getLHS().get());
+    ACCEPT(node->getRHS().get());
 }
 
-void NodeVisitor::visitClass(ClassDef* node)
+void NodeVisitor::visitClass(const ClassDefPtr& node)
 {
-    for(Declaration* dec : *node)
+    for(DeclarationPtr dec : *node)
     {
         dec->accept(this);
     }
 }
 
-void NodeVisitor::visitStruct(StructDef* node)
+void NodeVisitor::visitStruct(const StructDefPtr& node)
 {
-    for(Declaration* dec : *node)
+    for(DeclarationPtr dec : *node)
     {
         dec->accept(this);
     }
 }
 
-void NodeVisitor::visitEnum(EnumDef* node)
+void NodeVisitor::visitEnum(const EnumDefPtr& node)
 {
-    for(Declaration* dec : *node)
+    for(DeclarationPtr dec : *node)
     {
         dec->accept(this);
     }
 }
 
-void NodeVisitor::visitProtocol(ProtocolDef* node)
+void NodeVisitor::visitProtocol(const ProtocolDefPtr& node)
 {
-    for(Declaration* dec : *node)
+    for(DeclarationPtr dec : *node)
     {
         dec->accept(this);
     }
 }
 
-void NodeVisitor::visitExtension(ExtensionDef* node)
+void NodeVisitor::visitExtension(const ExtensionDefPtr& node)
 {
-    for(Declaration* dec : *node)
+    for(DeclarationPtr dec : *node)
     {
         dec->accept(this);
     }
 }
 
-void NodeVisitor::visitFunction(FunctionDef* node)
+void NodeVisitor::visitFunction(const FunctionDefPtr& node)
 {
-    for(Parameters* params : node->getParametersList())
+    for(ParametersPtr params : node->getParametersList())
     {
-        ACCEPT(params);
+        ACCEPT(params.get());
     }
-    ACCEPT(node->getBody());
+    ACCEPT(node->getBody().get());
 }
 
-void NodeVisitor::visitWhileLoop(WhileLoop* node)
+void NodeVisitor::visitWhileLoop(const WhileLoopPtr& node)
 {
-    ACCEPT(node->getCondition());
-    ACCEPT(node->getCodeBlock());
+    ACCEPT(node->getCondition().get());
+    ACCEPT(node->getCodeBlock().get());
 }
 
-void NodeVisitor::visitConditionalOperator(ConditionalOperator* node)
+void NodeVisitor::visitConditionalOperator(const ConditionalOperatorPtr& node)
 {
-    ACCEPT(node->getCondition());
-    ACCEPT(node->getTrueExpression());
-    ACCEPT(node->getFalseExpression());
+    ACCEPT(node->getCondition().get());
+    ACCEPT(node->getTrueExpression().get());
+    ACCEPT(node->getFalseExpression().get());
 }
 
-void NodeVisitor::visitBinaryOperator(BinaryOperator* node)
+void NodeVisitor::visitBinaryOperator(const BinaryOperatorPtr& node)
 {
-    ACCEPT(node->getLHS());
-    ACCEPT(node->getRHS());
+    ACCEPT(node->getLHS().get());
+    ACCEPT(node->getRHS().get());
 }
 
-void NodeVisitor::visitUnaryOperator(UnaryOperator* node)
+void NodeVisitor::visitUnaryOperator(const UnaryOperatorPtr& node)
 {
-    ACCEPT(node->getOperand());
+    ACCEPT(node->getOperand().get());
 }
 
-void NodeVisitor::visitTuple(Tuple* node)
+void NodeVisitor::visitTuple(const TuplePtr& node)
 {
-    for(Pattern* p : *node)
+    for(const PatternPtr& p : *node)
     {
-        ACCEPT(p);
-    }
-}
-
-void NodeVisitor::visitIdentifier(Identifier* node)
-{
-
-}
-
-void NodeVisitor::visitCompileConstant(CompileConstant* node)
-{
-}
-
-void NodeVisitor::visitSubscriptAccess(SubscriptAccess* node)
-{
-    ACCEPT(node->getSelf());
-    for(Expression* index : *node)
-    {
-        ACCEPT(index);
+        ACCEPT(p.get());
     }
 }
 
-void NodeVisitor::visitMemberAccess(MemberAccess* node)
+void NodeVisitor::visitIdentifier(const IdentifierPtr& node)
 {
-    ACCEPT(node->getSelf());
+
 }
 
-void NodeVisitor::visitFunctionCall(FunctionCall* node)
+void NodeVisitor::visitCompileConstant(const CompileConstantPtr& node)
 {
-    ACCEPT(node->getFunction());
-    ACCEPT(node->getArguments());
-    ACCEPT(node->getTrailingClosure())
 }
 
-void NodeVisitor::visitClosure(Closure* node)
+void NodeVisitor::visitSubscriptAccess(const SubscriptAccessPtr& node)
 {
-    ACCEPT(node->getCapture());
-    ACCEPT(node->getParameters());
-    for(Statement* st : *node)
+    ACCEPT(node->getSelf().get());
+    for(ExpressionPtr index : *node)
     {
-        ACCEPT(st);
+        ACCEPT(index.get());
     }
 }
 
-void NodeVisitor::visitSelf(SelfExpression* node)
+void NodeVisitor::visitMemberAccess(const MemberAccessPtr& node)
 {
-    ACCEPT(node->getExpression());
+    ACCEPT(node->getSelf().get());
 }
 
-void NodeVisitor::visitInitializerReference(InitializerReference* node)
+void NodeVisitor::visitFunctionCall(const FunctionCallPtr& node)
 {
-    ACCEPT(node->getExpression());
+    ACCEPT(node->getFunction().get());
+    ACCEPT(node->getArguments().get());
+    ACCEPT(node->getTrailingClosure().get())
+}
+
+void NodeVisitor::visitClosure(const ClosurePtr& node)
+{
+    ACCEPT(node->getCapture().get());
+    ACCEPT(node->getParameters().get());
+    for(const StatementPtr& st : *node)
+    {
+        ACCEPT(st.get());
+    }
+}
+
+void NodeVisitor::visitSelf(const SelfExpressionPtr& node)
+{
+    ACCEPT(node->getExpression().get());
+}
+
+void NodeVisitor::visitInitializerReference(const InitializerReferencePtr& node)
+{
+    ACCEPT(node->getExpression().get());
 }
 
 
-void NodeVisitor::visitEnumCasePattern(EnumCasePattern* node)
+void NodeVisitor::visitEnumCasePattern(const EnumCasePatternPtr& node)
 {
 }
 
-void NodeVisitor::visitDynamicType(DynamicType* node)
+void NodeVisitor::visitDynamicType(const DynamicTypePtr& node)
 {
-    ACCEPT(node->getExpression());
+    ACCEPT(node->getExpression().get());
 }
 
-void NodeVisitor::visitForcedValue(ForcedValue* node)
+void NodeVisitor::visitForcedValue(const ForcedValuePtr& node)
 {
-    ACCEPT(node->getExpression());
+    ACCEPT(node->getExpression().get());
 }
 
-void NodeVisitor::visitOptionalChaining(OptionalChaining* node)
+void NodeVisitor::visitOptionalChaining(const OptionalChainingPtr& node)
 {
-    ACCEPT(node->getExpression());
+    ACCEPT(node->getExpression().get());
 }
 
-void NodeVisitor::visitParenthesizedExpression(ParenthesizedExpression* node)
+void NodeVisitor::visitParenthesizedExpression(const ParenthesizedExpressionPtr& node)
 {
     for(auto term : *node)
     {
-        ACCEPT(term.second);
+        ACCEPT(term.second.get());
     }
 }

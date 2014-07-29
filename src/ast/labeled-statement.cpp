@@ -10,7 +10,7 @@ LabeledStatement::LabeledStatement()
 }
 LabeledStatement::~LabeledStatement()
 {
-    SafeDelete(statement);
+
 }
 void LabeledStatement::serialize(std::wostream& out)
 {
@@ -19,7 +19,7 @@ void LabeledStatement::serialize(std::wostream& out)
 }
 void LabeledStatement::accept(NodeVisitor* visitor)
 {
-    visitor->visitLabeledStatement(this);
+    accept2(visitor, &NodeVisitor::visitLabeledStatement);
 }
 
 
@@ -32,12 +32,12 @@ const std::wstring& LabeledStatement::getLabel() const
     return label;
 }
 
-void LabeledStatement::setStatement(Statement* statement)
+void LabeledStatement::setStatement(const StatementPtr& statement)
 {
     this->statement = statement;
 }
 
-Statement* LabeledStatement::getStatement()
+StatementPtr LabeledStatement::getStatement()
 {
     return statement;
 }

@@ -7,19 +7,19 @@ SWIFT_NS_BEGIN
 class ScopedNodeFactory : public NodeFactory
 {
 public:
-    virtual Identifier* createIdentifier(const SourceInfo& state, const std::wstring& op);
-    virtual EnumDef* createEnum(const SourceInfo& state, const std::vector<Attribute*>& attrs);
-    virtual StructDef* createStruct(const SourceInfo& state, const std::vector<Attribute*>& attrs);
-    virtual ClassDef* createClass(const SourceInfo& state, const std::vector<Attribute*>& attrs);
-    virtual ProtocolDef* createProtocol(const SourceInfo& state, const std::vector<Attribute*>& attrs);
-    virtual ExtensionDef* createExtension(const SourceInfo& state, const std::vector<Attribute*>& attrs);
-    virtual Program* createProgram();
-    virtual CodeBlock* createCodeBlock(const SourceInfo& state);
-    virtual Closure* createClosure(const SourceInfo& state);
+    virtual IdentifierPtr createIdentifier(const SourceInfo& state);
+    virtual EnumDefPtr createEnum(const SourceInfo& state);
+    virtual StructDefPtr createStruct(const SourceInfo& state);
+    virtual ClassDefPtr createClass(const SourceInfo& state);
+    virtual ProtocolDefPtr createProtocol(const SourceInfo& state);
+    virtual ExtensionDefPtr createExtension(const SourceInfo& state);
+    virtual ProgramPtr createProgram();
+    virtual CodeBlockPtr createCodeBlock(const SourceInfo& state);
+    virtual ClosurePtr createClosure(const SourceInfo& state);
 
-    virtual Constant* createConstant(const SourceInfo& state, const std::vector<Attribute*>& attrs, int specifiers);
-    virtual Variable* createVariable(const SourceInfo& state);
-    virtual FunctionDef* createFunction(const SourceInfo& state, const std::vector<Attribute*>& attrs, int specifiers);
+    virtual ConstantPtr createConstant(const SourceInfo& state);
+    virtual VariablePtr createVariable(const SourceInfo& state);
+    virtual FunctionDefPtr createFunction(const SourceInfo& state);
 
 };
 

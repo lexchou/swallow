@@ -1,8 +1,8 @@
 #include "integer-literal.h"
 USE_SWIFT_NS
 
-IntegerLiteral::IntegerLiteral(const std::wstring& val)
-    :Expression(NodeType::IntegerLiteral), value(val)
+IntegerLiteral::IntegerLiteral()
+    :Expression(NodeType::IntegerLiteral), valueAsString(L"0"), value(0)
 {
 }
 void IntegerLiteral::serialize(std::wostream& out)

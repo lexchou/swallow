@@ -22,7 +22,7 @@ using namespace Swift;
 ‌ statement → control-transfer-statement;opt
 ‌ statements → statementstatementsopt
 */
-Statement* Parser::parseStatement()
+StatementPtr Parser::parseStatement()
 {
     Token token;
     if(peek(token))
@@ -82,11 +82,11 @@ Statement* Parser::parseStatement()
         else if(token == L"@")
             return parseDeclaration();
     }
-    Expression* ret = parseExpression();
+    ExpressionPtr ret = parseExpression();
     match(L";");
     return ret;
 }
-Statement* Parser::parseLoopStatement()
+StatementPtr Parser::parseLoopStatement()
 {
     Token token;
     if(peek(token))
@@ -115,7 +115,7 @@ Statement* Parser::parseLoopStatement()
 ‌ for-init → variable-declaration | expression-list
  for-in-statement → for pattern in expression code-block
 */
-Statement* Parser::parseForLoop()
+StatementPtr Parser::parseForLoop()
 {
     //check if it's a for-in loop
     Token token, t;
@@ -143,26 +143,26 @@ Statement* Parser::parseForLoop()
 /*
  for-in-statement → for pattern in expression code-block
 */
-Statement* Parser::parseForIn()
+StatementPtr Parser::parseForIn()
 {
     Token token;
     expect(Keyword::For, token);
-    ForInLoop* ret = nodeFactory->createForInLoop(token.state);
+    ForInLoopPtr ret = nodeFactory->createForInLoop(token.state);
     Flags flags(this);
     flags += SUPPRESS_TRAILING_CLOSURE;
-    Pattern* loopVars = parsePattern();
+    PatternPtr loopVars = parsePattern();
     expect(Keyword::In);
-    Expression* container = parseExpression();
+    ExpressionPtr container = parseExpression();
     flags -= SUPPRESS_TRAILING_CLOSURE;
-    CodeBlock* codeBlock = parseCodeBlock();
+    CodeBlockPtr codeBlock = parseCodeBlock();
     ret->setLoopVars(loopVars);
     ret->setContainer(container);
     ret->setCodeBlock(codeBlock);
     return ret;
 }
-Statement* Parser::parseForStatement()
+StatementPtr Parser::parseForStatement()
 {
-    std::vector<ExpressionNode*> inits;
+    std::vector<ExpressionPtr> inits;
 
     //‌ for-statement → forfor-initopt;expressionopt;expressionoptcode-block
     //‌ for-statement → for(for-initopt;expressionopt;expressionopt)code-block
@@ -170,7 +170,7 @@ Statement* Parser::parseForStatement()
     expect(Keyword::For, token);
     Flags flags(this);
     flags += SUPPRESS_TRAILING_CLOSURE;
-    ForLoop* ret = nodeFactory->createForLoop(token.state);
+    ForLoopPtr ret = nodeFactory->createForLoop(token.state);
     bool parenthesized = match(L"(");
     if(!predicate(L";"))
     {
@@ -178,7 +178,7 @@ Statement* Parser::parseForStatement()
         {
             if(predicate(L";"))
                 break;
-            Expression* init = parseExpression();
+            ExpressionPtr init = parseExpression();
             ret->addInit(init);
         }
         while(match(L","));
@@ -187,18 +187,18 @@ Statement* Parser::parseForStatement()
     expect(L";");
     if(!predicate(L";"))
     {
-        Expression* cond = parseExpression();
+        ExpressionPtr cond = parseExpression();
         ret->setCondition(cond);
     }
     expect(L";");
-    Expression* step = NULL;
+    ExpressionPtr step = NULL;
     if(!predicate(L"{"))
         step = parseExpression();
     ret->setStep(step);
     
     if(parenthesized)
         expect(L")");
-    CodeBlock* codeBlock = parseCodeBlock();
+    CodeBlockPtr codeBlock = parseCodeBlock();
     ret->setCodeBlock(codeBlock);
     return ret;
     
@@ -211,21 +211,21 @@ Statement* Parser::parseForStatement()
  ‌ while-statement → whilewhile-conditioncode-block
  ‌ while-condition → expression | declaration
 */
-Statement* Parser::parseWhileLoop()
+StatementPtr Parser::parseWhileLoop()
 {
     Token token;
     Flags flags(this, SUPPRESS_TRAILING_CLOSURE);
     expect(Keyword::While, token);
-    WhileLoop* ret = nodeFactory->createWhileLoop(token.state);
-    Expression* condition = parseConditionExpression();
+    WhileLoopPtr ret = nodeFactory->createWhileLoop(token.state);
+    ExpressionPtr condition = parseConditionExpression();
     //TODO: The condition can also be an optional binding declaration, as discussed in Optional Binding.
     ret->setCondition(condition);
-    CodeBlock* codeBlock = parseCodeBlock();
+    CodeBlockPtr codeBlock = parseCodeBlock();
     ret->setCodeBlock(codeBlock);
     return ret;
 }
 //“while-condition → expression  declaration”
-Expression* Parser::parseConditionExpression()
+ExpressionPtr Parser::parseConditionExpression()
 {
     return parseExpression();
 }
@@ -234,16 +234,16 @@ Expression* Parser::parseConditionExpression()
 
 ‌ do-while-statement → docode-blockwhilewhile-condition
 */
-Statement* Parser::parseDoLoop()
+StatementPtr Parser::parseDoLoop()
 {
     Token token;
     Flags flags(this, SUPPRESS_TRAILING_CLOSURE);
     expect(Keyword::Do, token);
-    DoLoop* ret = nodeFactory->createDoLoop(token.state);
-    CodeBlock* codeBlock = parseCodeBlock();
+    DoLoopPtr ret = nodeFactory->createDoLoop(token.state);
+    CodeBlockPtr codeBlock = parseCodeBlock();
     ret->setCodeBlock(codeBlock);
     expect(Keyword::While);
-    Expression* condition = parseConditionExpression();
+    ExpressionPtr condition = parseConditionExpression();
     ret->setCondition(condition);
     return ret;
 }
@@ -254,18 +254,18 @@ Statement* Parser::parseDoLoop()
  ‌ if-condition → expression  declaration
  ‌ else-clause → elsecode-block  elseif-statement
  */
-Statement* Parser::parseIf()
+IfStatementPtr Parser::parseIf()
 {
     Token token;
     expect(Keyword::If, token);
-    IfStatement* ret = nodeFactory->createIf(token.state);
+    IfStatementPtr ret = nodeFactory->createIf(token.state);
     {
         Flags flags(this);
         flags += SUPPRESS_TRAILING_CLOSURE;
-        Expression* cond = parseConditionExpression();
+        ExpressionPtr cond = parseConditionExpression();
         ret->setCondition(cond);
     }
-    CodeBlock* thenPart = parseCodeBlock();
+    CodeBlockPtr thenPart = parseCodeBlock();
     ret->setThen(thenPart);
     if(match(L"else"))
     {
@@ -274,12 +274,12 @@ Statement* Parser::parseIf()
         restore(token);
         if(token.type == TokenType::OpenBrace)
         {
-            CodeBlock* elsePart = parseCodeBlock();
+            CodeBlockPtr elsePart = parseCodeBlock();
             ret->setElse(elsePart);
         }
         else if(token.type == TokenType::Identifier && token.identifier.keyword == Keyword::If)
         {
-            IfStatement* elseIf = static_cast<IfStatement*>(parseIf());
+            IfStatementPtr elseIf = parseIf();
             ret->setElse(elseIf);
         }
         else
@@ -302,17 +302,17 @@ Statement* Parser::parseIf()
  ‌ guard-clause → whereguard-expression
  ‌ guard-expression → expression
 */
-Statement* Parser::parseSwitch()
+StatementPtr Parser::parseSwitch()
 {
     Token token;
     Flags flags(this, UNDER_SWITCH_CASE | SUPPRESS_TRAILING_CLOSURE);
     
     expect(Keyword::Switch, token);
-    SwitchCase* ret = nodeFactory->createSwitch(token.state);
+    SwitchCasePtr ret = nodeFactory->createSwitch(token.state);
     {
         Flags f(flags);
         f += SUPPRESS_TRAILING_CLOSURE;
-        Expression* controlExpr = parseExpression();
+        ExpressionPtr controlExpr = parseExpression();
         ret->setControlExpression(controlExpr);
     }
     expect(L"{");
@@ -329,11 +329,11 @@ Statement* Parser::parseSwitch()
             fcase += UNDER_CASE;
             
             //“case-item-list → pattern guard-clause opt | pattern guard-clause opt , case-item-list”
-            CaseStatement* caseCond = nodeFactory->createCase(token.state);
+            CaseStatementPtr caseCond = nodeFactory->createCase(token.state);
             do
             {
-                Pattern* pattern = parsePattern();
-                Expression* guard = NULL;
+                PatternPtr pattern = parsePattern();
+                ExpressionPtr guard = NULL;
                 if(match(L"where"))
                     guard = parseExpression();
                 caseCond->addCondition(pattern, guard);
@@ -347,7 +347,7 @@ Statement* Parser::parseSwitch()
         else if(token.identifier.keyword == Keyword::Default)
         {
             expect(L":");
-            CaseStatement* caseCond = nodeFactory->createCase(token.state);
+            CaseStatementPtr caseCond = nodeFactory->createCase(token.state);
             parseSwitchStatements(caseCond);
             ret->setDefaultCase(caseCond);
         }
@@ -361,7 +361,7 @@ Statement* Parser::parseSwitch()
     
     return ret;
 }
-void Parser::parseSwitchStatements(CaseStatement* case_)
+void Parser::parseSwitchStatements(const CaseStatementPtr& case_)
 {
     Token token;
     Flags flags(this);
@@ -375,7 +375,7 @@ void Parser::parseSwitchStatements(CaseStatement* case_)
         {
             break;
         }
-        Statement* st = parseStatement();
+        StatementPtr st = parseStatement();
         case_->addStatement(st);
     }
         
@@ -385,11 +385,11 @@ void Parser::parseSwitchStatements(CaseStatement* case_)
 
 ‌ break-statement → breaklabel-nameopt
 */
-Statement* Parser::parseBreak()
+StatementPtr Parser::parseBreak()
 {
     Token token;
     expect(Keyword::Break, token);
-    BreakStatement* ret = nodeFactory->createBreak(token.state);
+    BreakStatementPtr ret = nodeFactory->createBreak(token.state);
     
     if(match_identifier(token) && token.identifier.keyword == Keyword::_)
     {
@@ -407,11 +407,11 @@ Statement* Parser::parseBreak()
  
  ‌ continue-statement → continuelabel-nameopt
 */
-Statement* Parser::parseContinue()
+StatementPtr Parser::parseContinue()
 {
     Token token;
     expect(Keyword::Continue, token);
-    ContinueStatement* ret = nodeFactory->createContinue(token.state);
+    ContinueStatementPtr ret = nodeFactory->createContinue(token.state);
     
     if(match_identifier(token) && token.identifier.keyword == Keyword::_)
     {
@@ -430,11 +430,11 @@ Statement* Parser::parseContinue()
  
  ‌ fallthrough-statement → fallthrough
 */
-Statement* Parser::parseFallthrough()
+StatementPtr Parser::parseFallthrough()
 {
     Token token;
     expect(Keyword::Fallthrough, token);
-    FallthroughStatement* ret = nodeFactory->createFallthrough(token.state);
+    FallthroughStatementPtr ret = nodeFactory->createFallthrough(token.state);
     return ret;
 }
 /*
@@ -442,17 +442,17 @@ Statement* Parser::parseFallthrough()
 
 ‌ return-statement → returnexpressionopt
 */
-Statement* Parser::parseReturn()
+StatementPtr Parser::parseReturn()
 {
     Token token;
     expect(Keyword::Return, token);
-    ReturnStatement* ret = nodeFactory->createReturn(token.state);
+    ReturnStatementPtr ret = nodeFactory->createReturn(token.state);
     
     if(peek(token))
     {
         //try to read an expression
         try {
-            Expression* expr = parseExpression();
+            ExpressionPtr expr = parseExpression();
             ret->setExpression(expr);
         } catch (...) {
             //TODO: clean all node created during parsing the expression
@@ -467,7 +467,7 @@ Statement* Parser::parseReturn()
 ‌ statement-label → label-name:
 ‌ label-name → identifier
 */
-Statement* Parser::parseLabeledStatement()
+StatementPtr Parser::parseLabeledStatement()
 {
     Token token;
     expect_identifier(token);
@@ -481,8 +481,8 @@ Statement* Parser::parseLabeledStatement()
         {
             case Keyword::Switch:
             {
-                Statement* statement = parseSwitch();
-                LabeledStatement* ret = nodeFactory->createLabel(token.state);
+                StatementPtr statement = parseSwitch();
+                LabeledStatementPtr ret = nodeFactory->createLabel(token.state);
                 ret->setLabel(label);
                 ret->setStatement(statement);
                 return ret;
@@ -491,8 +491,8 @@ Statement* Parser::parseLabeledStatement()
             case Keyword::Do:
             case Keyword::While:
             {
-                Statement* statement = parseLoopStatement();
-                LabeledStatement* ret = nodeFactory->createLabel(token.state);
+                StatementPtr statement = parseLoopStatement();
+                LabeledStatementPtr ret = nodeFactory->createLabel(token.state);
                 ret->setLabel(label);
                 ret->setStatement(statement);
                 return ret;
@@ -505,16 +505,16 @@ Statement* Parser::parseLabeledStatement()
     return NULL;
 }
 
-CodeBlock* Parser::parseCodeBlock()
+CodeBlockPtr Parser::parseCodeBlock()
 {
     Token token;
     Flags flags(this);
     flags -= SUPPRESS_TRAILING_CLOSURE;
     expect(L"{", token);
-    CodeBlock* ret = nodeFactory->createCodeBlock(token.state);
+    CodeBlockPtr ret = nodeFactory->createCodeBlock(token.state);
     while(!match(L"}"))
     {
-        Statement* st = parseStatement();
+        StatementPtr st = parseStatement();
         if(st != NULL)
             ret->addStatement(st);
     }

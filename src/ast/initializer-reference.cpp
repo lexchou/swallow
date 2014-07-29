@@ -3,21 +3,19 @@
 USE_SWIFT_NS
 
 
-InitializerReference::InitializerReference(Expression* expr)
+InitializerReference::InitializerReference()
 :Expression(NodeType::InitRef)
 {
-    setExpression(expr);
 }
 InitializerReference::~InitializerReference()
 {
-    SafeDelete(expression);
 }
 
-void InitializerReference::setExpression(Expression* expr)
+void InitializerReference::setExpression(const ExpressionPtr& expr)
 {
     this->expression = expr;
 }
-Expression* InitializerReference::getExpression()
+ExpressionPtr InitializerReference::getExpression()
 {
     return expression;
 }
@@ -31,5 +29,5 @@ void InitializerReference::serialize(std::wostream& out)
 
 void InitializerReference::accept(NodeVisitor* visitor)
 {
-    visitor->visitInitializerReference(this);
+    accept2(visitor, &NodeVisitor::visitInitializerReference);
 }

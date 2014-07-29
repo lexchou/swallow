@@ -9,7 +9,6 @@ OptionalType::OptionalType()
 }
 OptionalType::~OptionalType()
 {
-    SafeDelete(innerType);
 }
 
 void OptionalType::serialize(std::wostream& out)
@@ -24,11 +23,11 @@ void OptionalType::accept(NodeVisitor* visitor)
 
 
 
-void OptionalType::setInnerType(TypeNode* innerType)
+void OptionalType::setInnerType(TypeNodePtr innerType)
 {
     this->innerType = innerType;
 }
-TypeNode* OptionalType::getInnerType()
+TypeNodePtr OptionalType::getInnerType()
 {
     return innerType;
 }

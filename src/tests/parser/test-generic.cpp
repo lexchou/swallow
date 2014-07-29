@@ -24,15 +24,15 @@ public:
                         L"a = b\n"
                         L"b = temporaryA\n"
                         L"}");
-        FunctionDef* f = NULL;
-        GenericParameters* gp = NULL;
-        TypeIdentifier* type = NULL;
-        Parameters* params = NULL;
-        Parameter* param = NULL;
-        CPPUNIT_ASSERT(f = dynamic_cast<FunctionDef*>(root));
-        CPPUNIT_ASSERT(gp = dynamic_cast<GenericParameters*>(f->getGenericParameters()));
+        FunctionDefPtr f;
+        GenericParametersPtr gp;
+        TypeIdentifierPtr type;
+        ParametersPtr params;
+        ParameterPtr param;
+        CPPUNIT_ASSERT(f = std::dynamic_pointer_cast<FunctionDef>(root));
+        CPPUNIT_ASSERT(gp = std::dynamic_pointer_cast<GenericParameters>(f->getGenericParameters()));
         CPPUNIT_ASSERT_EQUAL(1, gp->numGenericTypes());
-        CPPUNIT_ASSERT(type = dynamic_cast<TypeIdentifier*>(gp->getGenericType(0)));
+        CPPUNIT_ASSERT(type = std::dynamic_pointer_cast<TypeIdentifier>(gp->getGenericType(0)));
         ASSERT_EQUALS(L"T", type->getName());
         
         CPPUNIT_ASSERT_EQUAL(1, f->numParameters());
@@ -42,13 +42,13 @@ public:
         CPPUNIT_ASSERT(param = params->getParameter(0));
         CPPUNIT_ASSERT(param->isInout());
         ASSERT_EQUALS(L"a", param->getLocalName());
-        CPPUNIT_ASSERT(type = dynamic_cast<TypeIdentifier*>(param->getType()));
+        CPPUNIT_ASSERT(type = std::dynamic_pointer_cast<TypeIdentifier>(param->getType()));
         ASSERT_EQUALS(L"T", type->getName());
         
         CPPUNIT_ASSERT(param = params->getParameter(1));
         CPPUNIT_ASSERT(param->isInout());
         ASSERT_EQUALS(L"b", param->getLocalName());
-        CPPUNIT_ASSERT(type = dynamic_cast<TypeIdentifier*>(param->getType()));
+        CPPUNIT_ASSERT(type = std::dynamic_pointer_cast<TypeIdentifier>(param->getType()));
         ASSERT_EQUALS(L"T", type->getName());
         
     }
@@ -63,13 +63,13 @@ public:
                         L"    return items.removeLast()\n"
                         L"}\n"
                         L"}");
-        StructDef* s = NULL;
-        GenericParameters* gp = NULL;
-        TypeIdentifier* type = NULL;
-        CPPUNIT_ASSERT(s = dynamic_cast<StructDef*>(root));
-        CPPUNIT_ASSERT(gp = dynamic_cast<GenericParameters*>(s->getGenericParameters()));
+        StructDefPtr s;
+        GenericParametersPtr gp;
+        TypeIdentifierPtr type;
+        CPPUNIT_ASSERT(s = std::dynamic_pointer_cast<StructDef>(root));
+        CPPUNIT_ASSERT(gp = std::dynamic_pointer_cast<GenericParameters>(s->getGenericParameters()));
         CPPUNIT_ASSERT_EQUAL(1, gp->numGenericTypes());
-        CPPUNIT_ASSERT(type = dynamic_cast<TypeIdentifier*>(gp->getGenericType(0)));
+        CPPUNIT_ASSERT(type = std::dynamic_pointer_cast<TypeIdentifier>(gp->getGenericType(0)));
         ASSERT_EQUALS(L"T", type->getName());
         
     }
@@ -77,16 +77,16 @@ public:
     void testVar()
     {
         PARSE_STATEMENT(L"var stackOfStrings = Stack<String>()");
-        Variables* vars = NULL;
-        Variable* var;
-        FunctionCall* call = NULL;
-        Identifier* id = NULL;
-        GenericArgument* arg = NULL;
-        CPPUNIT_ASSERT(vars = dynamic_cast<Variables*>(root));
+        VariablesPtr vars;
+        VariablePtr var;
+        FunctionCallPtr call;
+        IdentifierPtr id;
+        GenericArgumentPtr arg;
+        CPPUNIT_ASSERT(vars = std::dynamic_pointer_cast<Variables>(root));
         CPPUNIT_ASSERT_EQUAL(1, vars->numVariables());
-        CPPUNIT_ASSERT(var = dynamic_cast<Variable*>(vars->getVariable(0)));
-        CPPUNIT_ASSERT(call = dynamic_cast<FunctionCall*>(var->getInitializer()));
-        CPPUNIT_ASSERT(id = dynamic_cast<Identifier*>(call->getFunction()));
+        CPPUNIT_ASSERT(var = std::dynamic_pointer_cast<Variable>(vars->getVariable(0)));
+        CPPUNIT_ASSERT(call = std::dynamic_pointer_cast<FunctionCall>(var->getInitializer()));
+        CPPUNIT_ASSERT(id = std::dynamic_pointer_cast<Identifier>(call->getFunction()));
         CPPUNIT_ASSERT(arg = id->getGenericArgument());
     }
     
@@ -94,18 +94,18 @@ public:
     {
         PARSE_STATEMENT(L"func someFunction<T: SomeClass, U: SomeProtocol>(someT: T, someU: U) {\n"
                         L"}");
-        FunctionDef* f = NULL;
-        GenericParameters* params = NULL;
-        TypeIdentifier* type = NULL;
-        GenericConstraint* constraint = NULL;
-        CPPUNIT_ASSERT(f = dynamic_cast<FunctionDef*>(root));
+        FunctionDefPtr f;
+        GenericParametersPtr params;
+        TypeIdentifierPtr type;
+        GenericConstraintPtr constraint;
+        CPPUNIT_ASSERT(f = std::dynamic_pointer_cast<FunctionDef>(root));
         CPPUNIT_ASSERT(params = f->getGenericParameters());
         CPPUNIT_ASSERT_EQUAL(2, params->numGenericTypes());
         CPPUNIT_ASSERT_EQUAL(2, params->numConstraints());
 
-        CPPUNIT_ASSERT(type = dynamic_cast<TypeIdentifier*>(params->getGenericType(0)));
+        CPPUNIT_ASSERT(type = std::dynamic_pointer_cast<TypeIdentifier>(params->getGenericType(0)));
         ASSERT_EQUALS(L"T", type->getName());
-        CPPUNIT_ASSERT(type = dynamic_cast<TypeIdentifier*>(params->getGenericType(1)));
+        CPPUNIT_ASSERT(type = std::dynamic_pointer_cast<TypeIdentifier>(params->getGenericType(1)));
         ASSERT_EQUALS(L"U", type->getName());
         
         CPPUNIT_ASSERT(constraint = params->getConstraint(0));
@@ -138,16 +138,16 @@ public:
                         L"}");
         
         
-        FunctionDef* f = NULL;
-        GenericParameters* params = NULL;
-        TypeIdentifier* type = NULL;
-        GenericConstraint* constraint = NULL;
-        CPPUNIT_ASSERT(f = dynamic_cast<FunctionDef*>(root));
+        FunctionDefPtr f;
+        GenericParametersPtr params;
+        TypeIdentifierPtr type;
+        GenericConstraintPtr constraint;
+        CPPUNIT_ASSERT(f = std::dynamic_pointer_cast<FunctionDef>(root));
         CPPUNIT_ASSERT(params = f->getGenericParameters());
         CPPUNIT_ASSERT_EQUAL(1, params->numGenericTypes());
         CPPUNIT_ASSERT_EQUAL(1, params->numConstraints());
         
-        CPPUNIT_ASSERT(type = dynamic_cast<TypeIdentifier*>(params->getGenericType(0)));
+        CPPUNIT_ASSERT(type = std::dynamic_pointer_cast<TypeIdentifier>(params->getGenericType(0)));
         ASSERT_EQUALS(L"T", type->getName());
 
         
@@ -175,18 +175,18 @@ public:
                         L"  return true\n"
                         L"}");
         
-        FunctionDef* f = NULL;
-        GenericParameters* params = NULL;
-        TypeIdentifier* type = NULL;
-        GenericConstraint* constraint = NULL;
-        CPPUNIT_ASSERT(f = dynamic_cast<FunctionDef*>(root));
+        FunctionDefPtr f;
+        GenericParametersPtr params;
+        TypeIdentifierPtr type;
+        GenericConstraintPtr constraint;
+        CPPUNIT_ASSERT(f = std::dynamic_pointer_cast<FunctionDef>(root));
         CPPUNIT_ASSERT(params = f->getGenericParameters());
         CPPUNIT_ASSERT_EQUAL(2, params->numGenericTypes());
         CPPUNIT_ASSERT_EQUAL(4, params->numConstraints());
         
-        CPPUNIT_ASSERT(type = dynamic_cast<TypeIdentifier*>(params->getGenericType(0)));
+        CPPUNIT_ASSERT(type = std::dynamic_pointer_cast<TypeIdentifier>(params->getGenericType(0)));
         ASSERT_EQUALS(L"C1", type->getName());
-        CPPUNIT_ASSERT(type = dynamic_cast<TypeIdentifier*>(params->getGenericType(1)));
+        CPPUNIT_ASSERT(type = std::dynamic_pointer_cast<TypeIdentifier>(params->getGenericType(1)));
         ASSERT_EQUALS(L"C2", type->getName());
         
         CPPUNIT_ASSERT(constraint = params->getConstraint(0));

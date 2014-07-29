@@ -2,21 +2,19 @@
 #include "dynamic-type.h"
 USE_SWIFT_NS
 
-DynamicType::DynamicType(Expression* expr)
+DynamicType::DynamicType()
     :Expression(NodeType::DynamicType)
 {
-    setExpression(expr);
 }
 DynamicType::~DynamicType()
 {
-    SafeDelete(expression);
 }
 
-void DynamicType::setExpression(Expression* expr)
+void DynamicType::setExpression(const ExpressionPtr& expr)
 {
     this->expression = expr;
 }
-Expression* DynamicType::getExpression()
+ExpressionPtr DynamicType::getExpression()
 {
     return expression;
 }
@@ -28,5 +26,5 @@ void DynamicType::serialize(std::wostream& out)
 }
 void DynamicType::accept(NodeVisitor* visitor)
 {
-    visitor->visitDynamicType(this);
+    accept2(visitor, &NodeVisitor::visitDynamicType);
 }

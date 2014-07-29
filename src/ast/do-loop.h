@@ -2,6 +2,7 @@
 #define DO_LOOP_H
 #include "statement.h"
 #include <string>
+#include "ast-decl.h"
 
 SWIFT_NS_BEGIN
 
@@ -13,17 +14,17 @@ public:
     DoLoop();
     ~DoLoop();
 public:
-    void setCodeBlock(CodeBlock* codeBlock);
-    CodeBlock* getCodeBlock();
+    void setCodeBlock(const CodeBlockPtr& codeBlock);
+    CodeBlockPtr getCodeBlock();
     
-    void setCondition(Expression* expression);
-    Expression* getCondition();
+    void setCondition(const ExpressionPtr& expression);
+    ExpressionPtr getCondition();
 public:
     virtual void serialize(std::wostream& out);
     virtual void accept(NodeVisitor* visitor);
 private:
-    CodeBlock* codeBlock;
-    Expression* condition;
+    CodeBlockPtr codeBlock;
+    ExpressionPtr condition;
 };
 
 SWIFT_NS_END

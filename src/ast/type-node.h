@@ -12,12 +12,13 @@ public:
     TypeNode(NodeType::T nodeType);
     ~TypeNode();
 public:
-    void addAttribute(Attribute* attr);
-    void setAttributes(const std::vector<Attribute*> attrs);
-    const std::vector<Attribute*>& getAttributes();
+    void addAttribute(AttributePtr attr);
+    void setAttributes(const std::vector<AttributePtr> attrs);
+    const std::vector<AttributePtr>& getAttributes();
 private:
-    std::vector<Attribute*> attributes;
+    std::vector<AttributePtr> attributes;
 };
+
 
 SWIFT_NS_END
 

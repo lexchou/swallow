@@ -15,37 +15,30 @@ Variable::Variable()
 
 Variable::~Variable()
 {
-    SafeDeleteAll(typeAttributes);
-    SafeDelete(name);
-    SafeDelete(declaredType);
-    SafeDelete(initializer);
-    SafeDelete(getter);
-    SafeDelete(setter);
-    SafeDelete(willSet);
-    SafeDelete(didSet);
+
 }
 void Variable::serialize(std::wostream& out)
 {
 }
 void Variable::accept(NodeVisitor* visitor)
 {
-    visitor->visitVariable(this);
+    accept2(visitor, &NodeVisitor::visitVariable);
 }
 
 TypePtr Variable::getType()
 {
     return type;
 }
-void Variable::setType(TypePtr type)
+void Variable::setType(const TypePtr& type)
 {
     this->type = type;
 }
 
-void Variable::setName(Pattern* pattern)
+void Variable::setName(const PatternPtr& pattern)
 {
     this->name = pattern;
 }
-Pattern* Variable::getName()
+PatternPtr Variable::getName()
 {
     return name;
 }
@@ -58,28 +51,28 @@ const Attributes& Variable::getTypeAttributes() const
 {
     return typeAttributes;
 }
-void Variable::setDeclaredType(TypeNode* t)
+void Variable::setDeclaredType(const TypeNodePtr& t)
 {
     this->declaredType = t;
 }
-TypeNode* Variable::getDeclaredType()
+TypeNodePtr Variable::getDeclaredType()
 {
     return declaredType;
 }
-void Variable::setInitializer(Expression* expr)
+void Variable::setInitializer(const ExpressionPtr& expr)
 {
     this->initializer = expr;
 }
-Expression* Variable::getInitializer()
+ExpressionPtr Variable::getInitializer()
 {
     return initializer;
 }
 
-void Variable::setSetter(CodeBlock* setter)
+void Variable::setSetter(const CodeBlockPtr& setter)
 {
     this->setter = setter;
 }
-CodeBlock* Variable::getSetter()
+CodeBlockPtr Variable::getSetter()
 {
     return setter;
 }
@@ -93,30 +86,30 @@ const std::wstring& Variable::getSetterName()
     return setterName;
 }
 
-void Variable::setGetter(CodeBlock* getter)
+void Variable::setGetter(const CodeBlockPtr& getter)
 {
     this->getter = getter;
 }
-CodeBlock* Variable::getGetter()
+CodeBlockPtr Variable::getGetter()
 {
     return getter;
 }
 
 
-void Variable::setWillSet(CodeBlock* willSet)
+void Variable::setWillSet(const CodeBlockPtr& willSet)
 {
     this->willSet = willSet;
 }
-CodeBlock* Variable::getWillSet()
+CodeBlockPtr Variable::getWillSet()
 {
     return willSet;
 }
 
-void Variable::setDidSet(CodeBlock* didSet)
+void Variable::setDidSet(const CodeBlockPtr& didSet)
 {
     this->didSet = didSet;
 }
-CodeBlock* Variable::getDidSet()
+CodeBlockPtr Variable::getDidSet()
 {
     return didSet;
 }

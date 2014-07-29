@@ -2,8 +2,8 @@
 USE_SWIFT_NS
 
 
-BooleanLiteral::BooleanLiteral(bool val)
-    :Expression(NodeType::BooleanLiteral), value(val)
+BooleanLiteral::BooleanLiteral()
+    :Expression(NodeType::BooleanLiteral)
 {
 }
 

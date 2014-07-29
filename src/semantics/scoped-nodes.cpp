@@ -27,14 +27,14 @@ struct ScopeGuard
 void ScopedProgram::accept(NodeVisitor* visitor)
 {
     ScopeGuard scope(this, visitor);
-    visitor->visitProgram(this);
+    accept2(visitor, &NodeVisitor::visitProgram);
 }
 
 
 void ScopedClass::accept(NodeVisitor* visitor)
 {
     ScopeGuard scope(this, visitor);
-    visitor->visitClass(this);
+    accept2(visitor, &NodeVisitor::visitClass);
 }
 const std::wstring& ScopedClass::getName()const
 {
@@ -45,7 +45,7 @@ const std::wstring& ScopedClass::getName()const
 void ScopedProtocol::accept(NodeVisitor* visitor)
 {
     ScopeGuard scope(this, visitor);
-    visitor->visitProtocol(this);
+    accept2(visitor, &NodeVisitor::visitProtocol);
 }
 const std::wstring& ScopedProtocol::getName()const
 {
@@ -55,7 +55,7 @@ const std::wstring& ScopedProtocol::getName()const
 void ScopedStruct::accept(NodeVisitor* visitor)
 {
     ScopeGuard scope(this, visitor);
-    visitor->visitStruct(this);
+    accept2(visitor, &NodeVisitor::visitStruct);
 }
 const std::wstring& ScopedStruct::getName()const
 {
@@ -64,7 +64,7 @@ const std::wstring& ScopedStruct::getName()const
 void ScopedEnum::accept(NodeVisitor* visitor)
 {
     ScopeGuard scope(this, visitor);
-    visitor->visitEnum(this);
+    accept2(visitor, &NodeVisitor::visitEnum);
 }
 const std::wstring& ScopedEnum::getName()const
 {
@@ -73,7 +73,7 @@ const std::wstring& ScopedEnum::getName()const
 void ScopedExtension::accept(NodeVisitor* visitor)
 {
     ScopeGuard scope(this, visitor);
-    visitor->visitExtension(this);
+    accept2(visitor, &NodeVisitor::visitExtension);
 }
 const std::wstring& ScopedExtension::getName()const
 {
@@ -85,13 +85,13 @@ const std::wstring& ScopedExtension::getName()const
 void ScopedCodeBlock::accept(NodeVisitor* visitor)
 {
     ScopeGuard scope(this, visitor);
-    visitor->visitCodeBlock(this);
+    accept2(visitor, &NodeVisitor::visitCodeBlock);
 }
 
 void ScopedClosure::accept(NodeVisitor* visitor)
 {
     ScopeGuard scope(this, visitor);
-    visitor->visitClosure(this);
+    accept2(visitor, &NodeVisitor::visitClosure);
 }
 
 
@@ -102,12 +102,12 @@ const std::wstring& SymboledFunction::getName()const
 
 const std::wstring& SymboledVariable::getName()const
 {
-    Identifier* id = dynamic_cast<Identifier*>(name);
+    IdentifierPtr id = std::dynamic_pointer_cast<Identifier>(name);
     return id->getIdentifier();
 }
 
 const std::wstring& SymboledConstant::getName()const
 {
-    Identifier* id = dynamic_cast<Identifier*>(this->name);
+    IdentifierPtr id = std::dynamic_pointer_cast<Identifier>(this->name);
     return id->getIdentifier();
 }

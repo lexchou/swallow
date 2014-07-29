@@ -26,16 +26,16 @@ public:
                         L"    ++songCount\n"
                         L"}");
         
-        IfStatement* _if = NULL;
-        TypeCheck* is = NULL;
-        Identifier* id = NULL;
-        TypeIdentifier* type = NULL;
+        IfStatementPtr _if = NULL;
+        TypeCheckPtr is;
+        IdentifierPtr id;
+        TypeIdentifierPtr type;
         
-        CPPUNIT_ASSERT(_if = dynamic_cast<IfStatement*>(root));
-        CPPUNIT_ASSERT(is = dynamic_cast<TypeCheck*>(_if->getCondition()));
+        CPPUNIT_ASSERT(_if = std::dynamic_pointer_cast<IfStatement>(root));
+        CPPUNIT_ASSERT(is = std::dynamic_pointer_cast<TypeCheck>(_if->getCondition()));
         ASSERT_EQUALS(L"is", is->getOperator().c_str());
-        CPPUNIT_ASSERT(id = dynamic_cast<Identifier*>(is->getLHS()));
-        CPPUNIT_ASSERT(type = dynamic_cast<TypeIdentifier*>(is->getType()));
+        CPPUNIT_ASSERT(id = std::dynamic_pointer_cast<Identifier>(is->getLHS()));
+        CPPUNIT_ASSERT(type = std::dynamic_pointer_cast<TypeIdentifier>(is->getType()));
         
         ASSERT_EQUALS(L"item", id->getIdentifier());
         ASSERT_EQUALS(L"Movie", type->getName());
@@ -49,16 +49,16 @@ public:
         PARSE_STATEMENT(L"m = item as? Movie");
         
         
-        Assignment* eq = NULL;
-        TypeCast* as = NULL;
-        Identifier* id = NULL;
-        TypeIdentifier* type = NULL;
+        AssignmentPtr eq;
+        TypeCastPtr as;
+        IdentifierPtr id;
+        TypeIdentifierPtr type;
         
-        CPPUNIT_ASSERT(eq = dynamic_cast<Assignment*>(root));
-        CPPUNIT_ASSERT(as = dynamic_cast<TypeCast*>(eq->getRHS()));
+        CPPUNIT_ASSERT(eq = std::dynamic_pointer_cast<Assignment>(root));
+        CPPUNIT_ASSERT(as = std::dynamic_pointer_cast<TypeCast>(eq->getRHS()));
         ASSERT_EQUALS(L"as?", as->getOperator().c_str());
-        CPPUNIT_ASSERT(id = dynamic_cast<Identifier*>(as->getLHS()));
-        CPPUNIT_ASSERT(type = dynamic_cast<TypeIdentifier*>(as->getType()));
+        CPPUNIT_ASSERT(id = std::dynamic_pointer_cast<Identifier>(as->getLHS()));
+        CPPUNIT_ASSERT(type = std::dynamic_pointer_cast<TypeIdentifier>(as->getType()));
         
         ASSERT_EQUALS(L"item", id->getIdentifier());
         ASSERT_EQUALS(L"Movie", type->getName());
@@ -70,16 +70,16 @@ public:
         PARSE_STATEMENT(L"m = item as Movie");
         
         
-        Assignment* eq = NULL;
-        TypeCast* as = NULL;
-        Identifier* id = NULL;
-        TypeIdentifier* type = NULL;
+        AssignmentPtr eq;
+        TypeCastPtr as;
+        IdentifierPtr id;
+        TypeIdentifierPtr type;
         
-        CPPUNIT_ASSERT(eq = dynamic_cast<Assignment*>(root));
-        CPPUNIT_ASSERT(as = dynamic_cast<TypeCast*>(eq->getRHS()));
+        CPPUNIT_ASSERT(eq = std::dynamic_pointer_cast<Assignment>(root));
+        CPPUNIT_ASSERT(as = std::dynamic_pointer_cast<TypeCast>(eq->getRHS()));
         ASSERT_EQUALS(L"as", as->getOperator().c_str());
-        CPPUNIT_ASSERT(id = dynamic_cast<Identifier*>(as->getLHS()));
-        CPPUNIT_ASSERT(type = dynamic_cast<TypeIdentifier*>(as->getType()));
+        CPPUNIT_ASSERT(id = std::dynamic_pointer_cast<Identifier>(as->getLHS()));
+        CPPUNIT_ASSERT(type = std::dynamic_pointer_cast<TypeIdentifier>(as->getType()));
         
         ASSERT_EQUALS(L"item", id->getIdentifier());
         ASSERT_EQUALS(L"Movie", type->getName());
@@ -96,33 +96,33 @@ public:
     {
         PARSE_STATEMENT(L"a=4+1*(3+1*4)");
         CPPUNIT_ASSERT(root != NULL);
-        Assignment* eq = dynamic_cast<Assignment*>(root);
+        AssignmentPtr eq = std::dynamic_pointer_cast<Assignment>(root);
         
         CPPUNIT_ASSERT(eq != NULL);
         CPPUNIT_ASSERT_EQUAL(2, eq->numChildren());
         
-        Identifier* id = dynamic_cast<Identifier*>(eq->getLHS());
+        IdentifierPtr id = std::dynamic_pointer_cast<Identifier>(eq->getLHS());
         CPPUNIT_ASSERT(id != NULL);
         ASSERT_EQUALS(L"a", id->getIdentifier().c_str());
         
-        BinaryOperator* add = dynamic_cast<BinaryOperator*>(eq->getRHS());
+        BinaryOperatorPtr add = std::dynamic_pointer_cast<BinaryOperator>(eq->getRHS());
         CPPUNIT_ASSERT(add != NULL);
         ASSERT_EQUALS(L"+", add->getOperator().c_str());
         
         
-        BinaryOperator* mul = dynamic_cast<BinaryOperator*>(add->getRHS());
+        BinaryOperatorPtr mul = std::dynamic_pointer_cast<BinaryOperator>(add->getRHS());
         CPPUNIT_ASSERT(mul != NULL);
         ASSERT_EQUALS(L"*", mul->getOperator().c_str());
         
-        ParenthesizedExpression* p = dynamic_cast<ParenthesizedExpression*>(mul->getRHS());
+        ParenthesizedExpressionPtr p = std::dynamic_pointer_cast<ParenthesizedExpression>(mul->getRHS());
         CPPUNIT_ASSERT(p != NULL);
         CPPUNIT_ASSERT_EQUAL(1, p->numExpressions());
         
-        add = dynamic_cast<BinaryOperator*>(p->get(0));
+        add = std::dynamic_pointer_cast<BinaryOperator>(p->get(0));
         CPPUNIT_ASSERT(add != NULL);
         ASSERT_EQUALS(L"+", add->getOperator().c_str());
         
-        mul = dynamic_cast<BinaryOperator*>(add->getRHS());
+        mul = std::dynamic_pointer_cast<BinaryOperator>(add->getRHS());
         CPPUNIT_ASSERT(mul != NULL);
         ASSERT_EQUALS(L"*", mul->getOperator().c_str());
         

@@ -6,12 +6,12 @@ SWIFT_NS_BEGIN
 
 class DictionaryLiteral : public Expression
 {
-    typedef std::vector<std::pair<Expression*, Expression*> > Map;
+    typedef std::vector<std::pair<ExpressionPtr, ExpressionPtr> > Map;
 public:
 	DictionaryLiteral();
     ~DictionaryLiteral();
 public:
-	void insert(Expression* key, Expression* value);
+	void insert(const ExpressionPtr& key, const ExpressionPtr& value);
     int numElements()const;
 public:
     Map::iterator begin(){return items.begin();}

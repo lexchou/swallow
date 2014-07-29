@@ -10,7 +10,6 @@ ArrayType::ArrayType()
 }
 ArrayType::~ArrayType()
 {
-    SafeDelete(innerType);
 }
 void ArrayType::serialize(std::wostream& out)
 {
@@ -18,15 +17,15 @@ void ArrayType::serialize(std::wostream& out)
     out<<L"[]";
 }
 
-void ArrayType::setInnerType(TypeNode* innerType)
+void ArrayType::setInnerType(TypeNodePtr innerType)
 {
     this->innerType = innerType;
 }
-TypeNode* ArrayType::getInnerType()
+TypeNodePtr ArrayType::getInnerType()
 {
     return innerType;
 }
 void ArrayType::accept(NodeVisitor* visitor)
 {
-//    visitor->visitArrayType(this);
+    //accept2(visitor, &NodeVisitor::visitArrayType);
 }

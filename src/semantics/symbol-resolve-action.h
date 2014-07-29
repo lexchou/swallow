@@ -16,26 +16,26 @@ class SymbolResolveAction : public SemanticNodeVisitor
 public:
     SymbolResolveAction(SymbolRegistry* symbolRegistry, CompilerResults* compilerResults);
 public:
-    virtual void visitAssignment(Assignment* node);
-    virtual void visitVariables(Variables* node);
-    virtual void visitConstants(Constants* node);
-    virtual void visitClass(ClassDef* node);
-    virtual void visitStruct(StructDef* node);
-    virtual void visitEnum(EnumDef* node);
-    virtual void visitProtocol(ProtocolDef* node);
-    virtual void visitExtension(ExtensionDef* node);
-    virtual void visitFunction(FunctionDef* node);
-    virtual void visitIdentifier(Identifier* id);
-    virtual void visitEnumCasePattern(EnumCasePattern* node);
+    virtual void visitAssignment(const AssignmentPtr& node);
+    virtual void visitVariables(const VariablesPtr& node);
+    virtual void visitConstants(const ConstantsPtr& node);
+    virtual void visitClass(const ClassDefPtr& node);
+    virtual void visitStruct(const StructDefPtr& node);
+    virtual void visitEnum(const EnumDefPtr& node);
+    virtual void visitProtocol(const ProtocolDefPtr& node);
+    virtual void visitExtension(const ExtensionDefPtr& node);
+    virtual void visitFunction(const FunctionDefPtr& node);
+    virtual void visitIdentifier(const IdentifierPtr& id);
+    virtual void visitEnumCasePattern(const EnumCasePatternPtr& node);
 private:
-    void defineType(TypeDeclaration* node, Type::Category category);
+    void defineType(const std::shared_ptr<TypeDeclaration>& node, Type::Category category);
     //Register all symbols in the pattern
-    void registerPattern(Pattern* pattern);
+    void registerPattern(const PatternPtr& pattern);
     //Verify each symbol in the tuple is initialized
-    void verifyTuplePattern(Pattern* pattern);
+    void verifyTuplePattern(const PatternPtr& pattern);
 
     //set or reset flag in all identifiers in given pattern
-    void setFlag(Pattern* pattern, bool add, int flag);
+    void setFlag(const PatternPtr& pattern, bool add, int flag);
 private:
     CompilerResults* compilerResults;
 };

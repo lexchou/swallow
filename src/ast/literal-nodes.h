@@ -8,10 +8,10 @@ SWIFT_NS_BEGIN
 class BooleanLiteral : public Expression
 {
 public:
-    BooleanLiteral(bool val);
+    BooleanLiteral();
 public:
     virtual void serialize(std::wostream& out);
-private:
+public:
     bool value;
 };
 

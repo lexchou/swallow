@@ -7,28 +7,29 @@ SWIFT_NS_BEGIN
 class BinaryOperator : public Operator
 {
 public:
-    BinaryOperator(const std::wstring& op, Associativity::T associativity, int precedence);
+    BinaryOperator();
     ~BinaryOperator();
 public:
-    void setLHS(Pattern* val){lhs = val;}
-    Pattern* getLHS(){return lhs;}
+    void setLHS(PatternPtr val){lhs = val;}
+    PatternPtr getLHS(){return lhs;}
 
-    void setRHS(Pattern* val){rhs = val;}
-    Pattern* getRHS(){return rhs;}
+    void setRHS(PatternPtr val){rhs = val;}
+    PatternPtr getRHS(){return rhs;}
     
     const std::wstring& getOperator() const { return op;}
+    void setOperator(const std::wstring& op) {this->op = op;}
 public:
     
     virtual int numChildren();
-    virtual Node* get(int i);
-    virtual void set(int i, Node* val);
+    virtual NodePtr get(int i);
+    virtual void set(int i, const NodePtr& val);
 public:
     virtual void serialize(std::wostream& out);
     virtual void accept(NodeVisitor* visitor);
 protected:
     std::wstring op;
-    Pattern* lhs;
-    Pattern* rhs;
+    PatternPtr lhs;
+    PatternPtr rhs;
 };
 
 SWIFT_NS_END

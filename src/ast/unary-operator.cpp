@@ -3,20 +3,19 @@
 #include "identifier.h"
 USE_SWIFT_NS;
 
-UnaryOperator::UnaryOperator(const std::wstring& op, OperatorType::T type)
-    :Operator(NodeType::UnaryOperator, type, Associativity::None ,precedence), op(op)
+UnaryOperator::UnaryOperator()
+    :Operator(NodeType::UnaryOperator)
 {
 }
 UnaryOperator::~UnaryOperator()
 {
-    SafeDelete(operand);
 }
 
 int UnaryOperator::numChildren()
 {
     return 1;
 }
-Node* UnaryOperator::get(int i)
+NodePtr UnaryOperator::get(int i)
 {
     switch(i)
     {
@@ -26,10 +25,10 @@ Node* UnaryOperator::get(int i)
             return NULL;
     }
 }
-void UnaryOperator::set(int i, Node* val)
+void UnaryOperator::set(int i, const NodePtr& val)
 {
     if(i == 0)
-        operand = dynamic_cast<Expression*>(val);
+        operand = std::dynamic_pointer_cast<Expression>(val);
 }
 
 void UnaryOperator::serialize(std::wostream& out)
@@ -47,7 +46,7 @@ void UnaryOperator::serialize(std::wostream& out)
 }
 void UnaryOperator::accept(NodeVisitor* visitor)
 {
-    visitor->visitUnaryOperator(this);
+    accept2(visitor, &NodeVisitor::visitUnaryOperator);
 }
 
 

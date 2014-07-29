@@ -8,11 +8,11 @@ SWIFT_NS_BEGIN
 class StringLiteral : public Expression
 {
 public:
-    StringLiteral(const std::wstring& val);
+    StringLiteral();
 public:
     const std::wstring& toString() const { return value;}
     virtual void serialize(std::wostream& out);
-private:
+public:
     std::wstring value;
 };
 

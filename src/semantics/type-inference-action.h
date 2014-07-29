@@ -13,10 +13,10 @@ class TypeInferenceAction : public SemanticNodeVisitor
 public:
     TypeInferenceAction(SymbolRegistry* symbolRegistry);
 public:
-    virtual void visitVariables(Variables* node);
-    virtual void visitConstant(Constant* node);
+    virtual void visitVariables(const VariablesPtr& node);
+    virtual void visitConstant(const ConstantPtr& node);
 private:
-    TypePtr evaluateType(Expression* expr);
+    TypePtr evaluateType(const ExpressionPtr& expr);
 private:
 };
 

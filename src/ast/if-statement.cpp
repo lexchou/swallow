@@ -12,9 +12,7 @@ IfStatement::IfStatement()
 
 IfStatement::~IfStatement()
 {
-    SafeDelete(condition);
-    SafeDelete(thenPart);
-    SafeDelete(elsePart);
+
 }
 
 void IfStatement::serialize(std::wostream& out)
@@ -31,33 +29,33 @@ void IfStatement::serialize(std::wostream& out)
 }
 void IfStatement::accept(NodeVisitor* visitor)
 {
-    visitor->visitIf(this);
+    accept2(visitor, &NodeVisitor::visitIf);
 }
 
 
-void IfStatement::setCondition(Expression* expr)
+void IfStatement::setCondition(const ExpressionPtr& expr)
 {
     this->condition = expr;
 }
-Expression* IfStatement::getCondition()
+ExpressionPtr IfStatement::getCondition()
 {
     return condition;
 }
 
-void IfStatement::setThen(CodeBlock* thenPart)
+void IfStatement::setThen(const CodeBlockPtr& thenPart)
 {
     this->thenPart = thenPart;
 }
-CodeBlock* IfStatement::getThen()
+CodeBlockPtr IfStatement::getThen()
 {
     return thenPart;
 }
 
-void IfStatement::setElse(Statement* elsePart)
+void IfStatement::setElse(const StatementPtr& elsePart)
 {
     this->elsePart = elsePart;
 }
-Statement* IfStatement::getElse()
+StatementPtr IfStatement::getElse()
 {
     return elsePart;
 }

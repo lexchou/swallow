@@ -14,9 +14,7 @@ ForInLoop::ForInLoop()
 
 ForInLoop::~ForInLoop()
 {
-    SafeDelete(loopVars);
-    SafeDelete(container);
-    SafeDelete(codeBlock);
+
 }
 
 void ForInLoop::serialize(std::wostream& out)
@@ -25,33 +23,33 @@ void ForInLoop::serialize(std::wostream& out)
 }
 void ForInLoop::accept(NodeVisitor* visitor)
 {
-    visitor->visitForIn(this);
+    accept2(visitor, &NodeVisitor::visitForIn);
 }
 
 
-void ForInLoop::setLoopVars(Pattern* val)
+void ForInLoop::setLoopVars(const PatternPtr& val)
 {
     loopVars = val;
 }
-Pattern* ForInLoop::getLoopVars()
+PatternPtr ForInLoop::getLoopVars()
 {
     return loopVars;
 }
 
-void ForInLoop::setContainer(Expression* val)
+void ForInLoop::setContainer(const ExpressionPtr& val)
 {
     this->container = val;
 }
-Expression* ForInLoop::getContainer()
+ExpressionPtr ForInLoop::getContainer()
 {
     return container;
 }
 
-void ForInLoop::setCodeBlock(CodeBlock* val)
+void ForInLoop::setCodeBlock(const CodeBlockPtr& val)
 {
     codeBlock = val;
 }
-CodeBlock* ForInLoop::getCodeBlock()
+CodeBlockPtr ForInLoop::getCodeBlock()
 {
     return codeBlock;
 }

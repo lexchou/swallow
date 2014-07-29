@@ -7,24 +7,24 @@ SWIFT_NS_BEGIN
 class UnaryOperator : public Operator
 {
 public:
-    UnaryOperator(const std::wstring& op, OperatorType::T type);
+    UnaryOperator();
     ~UnaryOperator();
 public:
-    void setOperand(Expression* node){operand = node;}
-    Expression* getOperand(){return operand;}
+    void setOperand(ExpressionPtr node){operand = node;}
+    ExpressionPtr getOperand(){return operand;}
     
     const std::wstring& getOperator() const { return op;}
     void setOperator(const std::wstring& op) { this->op = op;}
 public:
     virtual int numChildren();
-    virtual Node* get(int i);
-    virtual void set(int i, Node* val);
+    virtual NodePtr get(int i);
+    virtual void set(int i, const NodePtr& val);
 public:
     virtual void serialize(std::wostream& out);
     virtual void accept(NodeVisitor* visitor);
 private:
     std::wstring op;
-    Expression* operand;
+    ExpressionPtr operand;
 };
 
 SWIFT_NS_END

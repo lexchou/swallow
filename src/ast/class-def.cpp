@@ -13,6 +13,6 @@ void ClassDef::serialize(std::wostream& out)
 }
 void ClassDef::accept(NodeVisitor* visitor)
 {
-    visitor->visitClass(this);
+    accept2(visitor, &NodeVisitor::visitClass);
 
 }

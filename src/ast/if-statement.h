@@ -2,6 +2,8 @@
 #define IF_STATEMENT_H
 #include "statement.h"
 #include <string>
+#include "ast-decl.h"
+
 
 SWIFT_NS_BEGIN
 
@@ -13,22 +15,22 @@ public:
     IfStatement();
     ~IfStatement();
 public:
-    void setCondition(Expression* expr);
-    Expression* getCondition();
+    void setCondition(const ExpressionPtr& expr);
+    ExpressionPtr getCondition();
     
-    void setThen(CodeBlock* thenPart);
-    CodeBlock* getThen();
+    void setThen(const CodeBlockPtr& thenPart);
+    CodeBlockPtr getThen();
     
-    void setElse(Statement* elsePart);
-    Statement* getElse();
+    void setElse(const StatementPtr& elsePart);
+    StatementPtr getElse();
     
 public:
     virtual void serialize(std::wostream& out);
     virtual void accept(NodeVisitor* visitor);
 private:
-    Expression* condition;
-    CodeBlock* thenPart;
-    Statement* elsePart;
+    ExpressionPtr condition;
+    CodeBlockPtr thenPart;
+    StatementPtr elsePart;
 };
 
 SWIFT_NS_END

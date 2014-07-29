@@ -20,7 +20,7 @@ void SymbolScope::addSymbol(SymbolPtr symbol)
     this->symbols.insert(std::make_pair(symbol->getName(), symbol));
 }
 
-Symbol* SymbolScope::lookup(const std::wstring& name)
+SymbolPtr SymbolScope::lookup(const std::wstring& name)
 {
     SymbolMap::iterator iter = symbols.find(name);
     if(iter != symbols.end())

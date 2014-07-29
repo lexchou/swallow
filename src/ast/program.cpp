@@ -12,7 +12,6 @@ Program::Program()
 
 Program::~Program()
 {
-    SafeDeleteAll(statements);
 }
 
 void Program::serialize(std::wostream& out)
@@ -23,9 +22,9 @@ void Program::serialize(std::wostream& out)
 
 void Program::accept(NodeVisitor* visitor)
 {
-    visitor->visitProgram(this);
+    accept2(visitor, &NodeVisitor::visitProgram);
 }
-void Program::addStatement(Statement* statement)
+void Program::addStatement(const StatementPtr& statement)
 {
     statements.push_back(statement);
 }
@@ -33,7 +32,7 @@ int Program::numStatements()const
 {
     return statements.size();
 }
-Statement* Program::getStatement(int n)
+StatementPtr Program::getStatement(int n)
 {
     return statements[n];
 }

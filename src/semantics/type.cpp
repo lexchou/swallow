@@ -11,19 +11,19 @@ Type::Type(const std::wstring& name, Category category, TypePtr keyType, TypePtr
 
 
 
-Type* Type::newDictionaryType(const std::wstring& name, TypePtr keyType, TypePtr valueType)
+TypePtr Type::newDictionaryType(const std::wstring& name, TypePtr keyType, TypePtr valueType)
 {
-    return new Type(name, Dictionary, keyType, valueType);
+    return TypePtr(new Type(name, Dictionary, keyType, valueType));
 }
-Type* Type::newType(const std::wstring& name, Category category)
+TypePtr Type::newType(const std::wstring& name, Category category)
 {
-    return new Type(name, category, nullptr, nullptr);
+    return TypePtr(new Type(name, category, nullptr, nullptr));
 }
 
 
-Type* Type::newArrayType(const std::wstring& name, TypePtr elementType)
+TypePtr Type::newArrayType(const std::wstring& name, TypePtr elementType)
 {
-    return new Type(name, Array, nullptr, elementType);
+    return TypePtr(new Type(name, Array, nullptr, elementType));
 }
 
 bool Type::isPrimitive()const

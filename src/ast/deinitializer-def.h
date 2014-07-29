@@ -12,13 +12,13 @@ public:
     DeinitializerDef();
     ~DeinitializerDef();
 public:
-    CodeBlock* getBody();
-    void setBody(CodeBlock* body);
+    CodeBlockPtr getBody();
+    void setBody(const CodeBlockPtr& body);
 public:
     virtual void serialize(std::wostream& out);
     virtual void accept(NodeVisitor* visitor);
 private:
-    CodeBlock* body;
+    CodeBlockPtr body;
 };
 
 SWIFT_NS_END

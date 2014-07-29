@@ -8,12 +8,12 @@ SWIFT_NS_BEGIN
 class FloatLiteral : public Expression
 {
 public:
-    FloatLiteral(const std::wstring& val);
+    FloatLiteral();
 public:
-    const std::wstring& toString() const { return value;}
     virtual void serialize(std::wostream& out);
-private:
-    std::wstring value;
+public:
+    std::wstring valueAsString;
+    double value;
 };
 
 SWIFT_NS_END

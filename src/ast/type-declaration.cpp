@@ -12,13 +12,11 @@ TypeDeclaration::TypeDeclaration(NodeType::T nodeType)
 
 TypeDeclaration::~TypeDeclaration()
 {
-    SafeDeleteAll(declarations);
-    SafeDeleteAll(parents);
-    SafeDelete(identifier);
+
 }
 
 
-void TypeDeclaration::addParent(TypeIdentifier* protocol)
+void TypeDeclaration::addParent(const TypeIdentifierPtr& protocol)
 {
     parents.push_back(protocol);
 }
@@ -26,7 +24,7 @@ int TypeDeclaration::numParents()const
 {
     return parents.size();
 }
-TypeIdentifier* TypeDeclaration::getParent(int i)
+TypeIdentifierPtr TypeDeclaration::getParent(int i)
 {
     if(i < 0 || i >= parents.size())
         return NULL;
@@ -35,17 +33,17 @@ TypeIdentifier* TypeDeclaration::getParent(int i)
 
 
 
-void TypeDeclaration::setIdentifier(TypeIdentifier* id)
+void TypeDeclaration::setIdentifier(const TypeIdentifierPtr& id)
 {
     this->identifier = id;
 }
-TypeIdentifier* TypeDeclaration::getIdentifier()
+TypeIdentifierPtr TypeDeclaration::getIdentifier()
 {
     return identifier;
 }
 
 
-void TypeDeclaration::addDeclaration(Declaration* decl)
+void TypeDeclaration::addDeclaration(const DeclarationPtr& decl)
 {
     declarations.push_back(decl);
 }
@@ -53,7 +51,7 @@ int TypeDeclaration::numDeclarations()const
 {
     return declarations.size();
 }
-Declaration* TypeDeclaration::getDeclaration(int i)
+DeclarationPtr TypeDeclaration::getDeclaration(int i)
 {
     return declarations[i];
 }

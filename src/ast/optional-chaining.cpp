@@ -4,20 +4,19 @@ USE_SWIFT_NS
 
 
 
-OptionalChaining::OptionalChaining(Expression* expr)
-    :Expression(NodeType::OptionalChaining), expression(expr)
+OptionalChaining::OptionalChaining()
+    :Expression(NodeType::OptionalChaining)
 {
 }
 OptionalChaining::~OptionalChaining()
 {
-    SafeDelete(expression);
 }
 
-void OptionalChaining::setExpression(Expression* expr)
+void OptionalChaining::setExpression(const ExpressionPtr& expr)
 {
     this->expression = expr;
 }
-Expression* OptionalChaining::getExpression()
+ExpressionPtr OptionalChaining::getExpression()
 {
     return expression;
 }
@@ -30,5 +29,5 @@ void OptionalChaining::serialize(std::wostream& out)
 }
 void OptionalChaining::accept(NodeVisitor* visitor)
 {
-    visitor->visitOptionalChaining(this);
+    accept2(visitor, &NodeVisitor::visitOptionalChaining);
 }

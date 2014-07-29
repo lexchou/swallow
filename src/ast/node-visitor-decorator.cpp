@@ -9,273 +9,273 @@ NodeVisitorDecorator::NodeVisitorDecorator(NodeVisitor* visitor)
 
 }
 
-void NodeVisitorDecorator::visitDeinit(DeinitializerDef* node)
+void NodeVisitorDecorator::visitDeinit(const DeinitializerDefPtr& node)
 {
     visitor->visitDeinit(node);
 }
 
-void NodeVisitorDecorator::visitInit(InitializerDef* node)
+void NodeVisitorDecorator::visitInit(const InitializerDefPtr& node)
 {
     visitor->visitInit(node);
 }
 
-void NodeVisitorDecorator::visitImport(Import* node)
+void NodeVisitorDecorator::visitImport(const ImportPtr& node)
 {
     visitor->visitImport(node);
 }
 
-void NodeVisitorDecorator::visitSubscript(SubscriptDef* node)
+void NodeVisitorDecorator::visitSubscript(const SubscriptDefPtr& node)
 {
     visitor->visitSubscript(node);
 }
 
-void NodeVisitorDecorator::visitTypeAlias(TypeAlias* node)
+void NodeVisitorDecorator::visitTypeAlias(const TypeAliasPtr& node)
 {
     visitor->visitTypeAlias(node);
 }
 
-void NodeVisitorDecorator::visitForIn(ForInLoop* node)
+void NodeVisitorDecorator::visitForIn(const ForInLoopPtr& node)
 {
     visitor->visitForIn(node);
 }
 
-void NodeVisitorDecorator::visitForLoop(ForLoop* node)
+void NodeVisitorDecorator::visitForLoop(const ForLoopPtr& node)
 {
     visitor->visitForLoop(node);
 }
 
-void NodeVisitorDecorator::visitDoLoop(DoLoop* node)
+void NodeVisitorDecorator::visitDoLoop(const DoLoopPtr& node)
 {
     visitor->visitDoLoop(node);
 }
 
-void NodeVisitorDecorator::visitLabeledStatement(LabeledStatement* node)
+void NodeVisitorDecorator::visitLabeledStatement(const LabeledStatementPtr& node)
 {
     visitor->visitLabeledStatement(node);
 }
 
-void NodeVisitorDecorator::visitOperator(OperatorDef* node)
+void NodeVisitorDecorator::visitOperator(const OperatorDefPtr& node)
 {
     visitor->visitOperator(node);
 }
 
-void NodeVisitorDecorator::visitArrayLiteral(ArrayLiteral* node)
+void NodeVisitorDecorator::visitArrayLiteral(const ArrayLiteralPtr& node)
 {
     visitor->visitArrayLiteral(node);
 }
 
-void NodeVisitorDecorator::visitDictionaryLiteral(DictionaryLiteral* node)
+void NodeVisitorDecorator::visitDictionaryLiteral(const DictionaryLiteralPtr& node)
 {
     visitor->visitDictionaryLiteral(node);
 }
 
-void NodeVisitorDecorator::visitBreak(BreakStatement* node)
+void NodeVisitorDecorator::visitBreak(const BreakStatementPtr& node)
 {
     visitor->visitBreak(node);
 }
 
-void NodeVisitorDecorator::visitReturn(ReturnStatement* node)
+void NodeVisitorDecorator::visitReturn(const ReturnStatementPtr& node)
 {
     visitor->visitReturn(node);
 }
 
-void NodeVisitorDecorator::visitContinue(ContinueStatement* node)
+void NodeVisitorDecorator::visitContinue(const ContinueStatementPtr& node)
 {
     visitor->visitContinue(node);
 }
 
-void NodeVisitorDecorator::visitFallthrough(FallthroughStatement* node)
+void NodeVisitorDecorator::visitFallthrough(const FallthroughStatementPtr& node)
 {
     visitor->visitFallthrough(node);
 }
 
-void NodeVisitorDecorator::visitIf(IfStatement* node)
+void NodeVisitorDecorator::visitIf(const IfStatementPtr& node)
 {
     visitor->visitIf(node);
 }
 
-void NodeVisitorDecorator::visitSwitchCase(SwitchCase* node)
+void NodeVisitorDecorator::visitSwitchCase(const SwitchCasePtr& node)
 {
     visitor->visitSwitchCase(node);
 }
 
-void NodeVisitorDecorator::visitCase(CaseStatement* node)
+void NodeVisitorDecorator::visitCase(const CaseStatementPtr& node)
 {
     visitor->visitCase(node);
 }
 
-void NodeVisitorDecorator::visitCodeBlock(CodeBlock* node)
+void NodeVisitorDecorator::visitCodeBlock(const CodeBlockPtr& node)
 {
     visitor->visitCodeBlock(node);
 }
 
-void NodeVisitorDecorator::visitParameter(Parameter* node)
+void NodeVisitorDecorator::visitParameter(const ParameterPtr& node)
 {
     VISIT(visitParameter);
 }
 
-void NodeVisitorDecorator::visitParameters(Parameters* node)
+void NodeVisitorDecorator::visitParameters(const ParametersPtr& node)
 {
     VISIT(visitParameters);
 }
 
-void NodeVisitorDecorator::visitProgram(Program* node)
+void NodeVisitorDecorator::visitProgram(const ProgramPtr& node)
 {
     VISIT(visitProgram);
 }
 
-void NodeVisitorDecorator::visitLetBinding(LetBinding* node)
+void NodeVisitorDecorator::visitLetBinding(const LetBindingPtr& node)
 {
     VISIT(visitLetBinding);
 }
 
-void NodeVisitorDecorator::visitVarBinding(VarBinding* node)
+void NodeVisitorDecorator::visitVarBinding(const VarBindingPtr& node)
 {
     VISIT(visitVarBinding);
 }
 
 
-void NodeVisitorDecorator::visitVariables(Variables* node)
+void NodeVisitorDecorator::visitVariables(const VariablesPtr& node)
 {
     VISIT(visitVariables);
 }
 
-void NodeVisitorDecorator::visitVariable(Variable* node)
+void NodeVisitorDecorator::visitVariable(const VariablePtr& node)
 {
     VISIT(visitVariable);
 }
 
-void NodeVisitorDecorator::visitConstant(Constant* node)
+void NodeVisitorDecorator::visitConstant(const ConstantPtr& node)
 {
     VISIT(visitConstant);
 }
-void NodeVisitorDecorator::visitConstants(Constants* node)
+void NodeVisitorDecorator::visitConstants(const ConstantsPtr& node)
 {
     VISIT(visitConstants);
 }
 
-void NodeVisitorDecorator::visitAssignment(Assignment* node)
+void NodeVisitorDecorator::visitAssignment(const AssignmentPtr& node)
 {
     VISIT(visitAssignment);
 }
 
-void NodeVisitorDecorator::visitClass(ClassDef* node)
+void NodeVisitorDecorator::visitClass(const ClassDefPtr& node)
 {
     VISIT(visitClass);
 }
 
-void NodeVisitorDecorator::visitStruct(StructDef* node)
+void NodeVisitorDecorator::visitStruct(const StructDefPtr& node)
 {
     VISIT(visitStruct);
 }
 
-void NodeVisitorDecorator::visitEnum(EnumDef* node)
+void NodeVisitorDecorator::visitEnum(const EnumDefPtr& node)
 {
     VISIT(visitEnum);
 }
 
-void NodeVisitorDecorator::visitProtocol(ProtocolDef* node)
+void NodeVisitorDecorator::visitProtocol(const ProtocolDefPtr& node)
 {
     VISIT(visitProtocol);
 }
 
-void NodeVisitorDecorator::visitExtension(ExtensionDef* node)
+void NodeVisitorDecorator::visitExtension(const ExtensionDefPtr& node)
 {
     VISIT(visitExtension);
 }
 
-void NodeVisitorDecorator::visitFunction(FunctionDef* node)
+void NodeVisitorDecorator::visitFunction(const FunctionDefPtr& node)
 {
     VISIT(visitFunction);
 }
 
-void NodeVisitorDecorator::visitWhileLoop(WhileLoop* node)
+void NodeVisitorDecorator::visitWhileLoop(const WhileLoopPtr& node)
 {
     VISIT(visitWhileLoop);
 }
 
-void NodeVisitorDecorator::visitConditionalOperator(ConditionalOperator* node)
+void NodeVisitorDecorator::visitConditionalOperator(const ConditionalOperatorPtr& node)
 {
     VISIT(visitConditionalOperator);
 }
 
-void NodeVisitorDecorator::visitBinaryOperator(BinaryOperator* node)
+void NodeVisitorDecorator::visitBinaryOperator(const BinaryOperatorPtr& node)
 {
     VISIT(visitBinaryOperator);
 }
 
-void NodeVisitorDecorator::visitUnaryOperator(UnaryOperator* node)
+void NodeVisitorDecorator::visitUnaryOperator(const UnaryOperatorPtr& node)
 {
     VISIT(visitUnaryOperator);
 }
 
-void NodeVisitorDecorator::visitTuple(Tuple* node)
+void NodeVisitorDecorator::visitTuple(const TuplePtr& node)
 {
     VISIT(visitTuple);
 }
 
-void NodeVisitorDecorator::visitIdentifier(Identifier* node)
+void NodeVisitorDecorator::visitIdentifier(const IdentifierPtr& node)
 {
     VISIT(visitIdentifier);
 }
 
-void NodeVisitorDecorator::visitCompileConstant(CompileConstant* node)
+void NodeVisitorDecorator::visitCompileConstant(const CompileConstantPtr& node)
 {
     VISIT(visitCompileConstant);
 }
 
-void NodeVisitorDecorator::visitSubscriptAccess(SubscriptAccess* node)
+void NodeVisitorDecorator::visitSubscriptAccess(const SubscriptAccessPtr& node)
 {
     VISIT(visitSubscriptAccess);
 }
 
-void NodeVisitorDecorator::visitMemberAccess(MemberAccess* node)
+void NodeVisitorDecorator::visitMemberAccess(const MemberAccessPtr& node)
 {
     VISIT(visitMemberAccess);
 }
 
-void NodeVisitorDecorator::visitFunctionCall(FunctionCall* node)
+void NodeVisitorDecorator::visitFunctionCall(const FunctionCallPtr& node)
 {
     VISIT(visitFunctionCall);
 }
 
-void NodeVisitorDecorator::visitClosure(Closure* node)
+void NodeVisitorDecorator::visitClosure(const ClosurePtr& node)
 {
     VISIT(visitClosure);
 }
 
-void NodeVisitorDecorator::visitSelf(SelfExpression* node)
+void NodeVisitorDecorator::visitSelf(const SelfExpressionPtr& node)
 {
     VISIT(visitSelf);
 }
 
-void NodeVisitorDecorator::visitInitializerReference(InitializerReference* node)
+void NodeVisitorDecorator::visitInitializerReference(const InitializerReferencePtr& node)
 {
     VISIT(visitInitializerReference);
 }
 
 
-void NodeVisitorDecorator::visitEnumCasePattern(EnumCasePattern* node)
+void NodeVisitorDecorator::visitEnumCasePattern(const EnumCasePatternPtr& node)
 {
     VISIT(visitEnumCasePattern);
 }
 
-void NodeVisitorDecorator::visitDynamicType(DynamicType* node)
+void NodeVisitorDecorator::visitDynamicType(const DynamicTypePtr& node)
 {
     VISIT(visitDynamicType);
 }
 
-void NodeVisitorDecorator::visitForcedValue(ForcedValue* node)
+void NodeVisitorDecorator::visitForcedValue(const ForcedValuePtr& node)
 {
     VISIT(visitForcedValue);
 }
 
-void NodeVisitorDecorator::visitOptionalChaining(OptionalChaining* node)
+void NodeVisitorDecorator::visitOptionalChaining(const OptionalChainingPtr& node)
 {
     VISIT(visitOptionalChaining);
 }
 
-void NodeVisitorDecorator::visitParenthesizedExpression(ParenthesizedExpression* node)
+void NodeVisitorDecorator::visitParenthesizedExpression(const ParenthesizedExpressionPtr& node)
 {
     VISIT(visitParenthesizedExpression);
 }

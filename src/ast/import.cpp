@@ -41,7 +41,7 @@ void Import::serialize(std::wostream& out)
 }
 void Import::accept(NodeVisitor* visitor)
 {
-    visitor->visitImport(this);
+    accept2(visitor, &NodeVisitor::visitImport);
 }
 
 Import::Kind Import::getKind()const

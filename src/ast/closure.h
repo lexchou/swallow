@@ -29,27 +29,27 @@ public:
     CaptureSpecifier getCaptureSpecifier()const;
     void setCaptureSpecifier(CaptureSpecifier val);
     
-    void setCapture(Expression* capture);
-    Expression* getCapture();
+    void setCapture(const ExpressionPtr& capture);
+    ExpressionPtr getCapture();
     
-    void setParameters(Parameters* val);
-    Parameters* getParameters();
+    void setParameters(const ParametersPtr& val);
+    ParametersPtr getParameters();
     
-    void setReturnType(TypeNode* val);
-    TypeNode* getReturnType();
+    void setReturnType(const TypeNodePtr& val);
+    TypeNodePtr getReturnType();
     
-    void addStatement(Statement* st);
+    void addStatement(const StatementPtr& st);
     int numStatement()const;
-    Statement* getStatement(int i);
+    StatementPtr getStatement(int i);
 
-    std::vector<Statement*>::iterator begin(){return statements.begin();}
-    std::vector<Statement*>::iterator end(){return statements.end();}
+    std::vector<StatementPtr>::iterator begin(){return statements.begin();}
+    std::vector<StatementPtr>::iterator end(){return statements.end();}
 public:
     CaptureSpecifier captureSpecifier;
-    Expression* capture;
-    Parameters* parameters;
-    TypeNode* returnType;
-    std::vector<Statement*> statements;
+    ExpressionPtr capture;
+    ParametersPtr parameters;
+    TypeNodePtr returnType;
+    std::vector<StatementPtr> statements;
     
 };
 

@@ -2,6 +2,7 @@
 #define TUPLE_H
 #include "expression.h"
 #include <string>
+#include "ast-decl.h"
 
 SWIFT_NS_BEGIN
 
@@ -15,19 +16,19 @@ public:
     virtual void serialize(std::wostream& out);
     virtual void accept(NodeVisitor* visitor);
 public:
-    void add(Pattern* pattern);
+    void add(const PatternPtr& pattern);
     int numElements();
-    Pattern* getElement(int i);
+    PatternPtr getElement(int i);
     
-    TypeNode* getType();
-    void setType(TypeNode* type);
+    TypeNodePtr getType();
+    void setType(const TypeNodePtr& type);
 
-    std::vector<Pattern*>::iterator begin(){return elements.begin();}
-    std::vector<Pattern*>::iterator end(){return elements.end();}
+    std::vector<PatternPtr>::iterator begin(){return elements.begin();}
+    std::vector<PatternPtr>::iterator end(){return elements.end();}
 
 public:
-    TypeNode* type;
-    std::vector<Pattern*> elements;
+    TypeNodePtr type;
+    std::vector<PatternPtr> elements;
 };
 
 SWIFT_NS_END

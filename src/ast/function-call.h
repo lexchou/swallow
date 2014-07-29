@@ -13,21 +13,21 @@ public:
     ~FunctionCall();
 public:
     
-    void setFunction(Expression* expr);
-    Expression* getFunction();
+    void setFunction(const ExpressionPtr& expr);
+    ExpressionPtr getFunction();
     
-    void setArguments(ParenthesizedExpression* arguments);
-    ParenthesizedExpression* getArguments();
+    void setArguments(const ParenthesizedExpressionPtr& arguments);
+    ParenthesizedExpressionPtr getArguments();
     
-    void setTrailingClosure(Closure* trailingClosure);
-    Closure* getTrailingClosure();
+    void setTrailingClosure(const ClosurePtr& trailingClosure);
+    ClosurePtr getTrailingClosure();
 public:
     virtual void serialize(std::wostream& out);
     virtual void accept(NodeVisitor* visitor);
 private:
-    Expression* function;
-    ParenthesizedExpression* arguments;
-    Closure* trailingClosure;
+    ExpressionPtr function;
+    ParenthesizedExpressionPtr arguments;
+    ClosurePtr trailingClosure;
 };
 
 SWIFT_NS_END

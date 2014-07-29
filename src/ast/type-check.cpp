@@ -2,22 +2,21 @@
 #include "type-node.h"
 USE_SWIFT_NS
 
-TypeCheck::TypeCheck(Pattern* expr, TypeNode* type)
-:BinaryOperator(L"is", Associativity::None, 132)
+TypeCheck::TypeCheck()
 {
-    setLHS(expr);
-    setType(type);
+    op = L"is";
+    associativity = Associativity::None;
+    precedence = 132;
 }
 TypeCheck::~TypeCheck()
 {
-    SafeDelete(type);
 }
 
-TypeNode* TypeCheck::getType()
+TypeNodePtr TypeCheck::getType()
 {
     return type;
 }
-void TypeCheck::setType(TypeNode* type)
+void TypeCheck::setType(TypeNodePtr type)
 {
     this->type = type;
 }
@@ -25,7 +24,7 @@ int TypeCheck::numChildren()
 {
     return 2;
 }
-Node* TypeCheck::get(int i)
+NodePtr TypeCheck::get(int i)
 {
     switch(i)
     {
@@ -37,15 +36,15 @@ Node* TypeCheck::get(int i)
             return NULL;
     }
 }
-void TypeCheck::set(int i, Node* val)
+void TypeCheck::set(int i, const NodePtr& val)
 {
     switch(i)
     {
         case 0:
-            lhs = dynamic_cast<Pattern*>(val);
+            lhs = std::dynamic_pointer_cast<Pattern>(val);
             break;
         case 1:
-            type = dynamic_cast<TypeNode*>(val);
+            type = std::dynamic_pointer_cast<TypeNode>(val);
             break;
         default:
             break;

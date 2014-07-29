@@ -13,25 +13,25 @@ public:
     SwitchCase();
     ~SwitchCase();
 public:
-    void setControlExpression(Expression* expr);
-    Expression* getControlExpression();
+    void setControlExpression(const ExpressionPtr& expr);
+    ExpressionPtr getControlExpression();
     
-    void addCase(CaseStatement* c);
+    void addCase(const CaseStatementPtr& c);
     int numCases();
-    CaseStatement* getCase(int idx);
+    CaseStatementPtr getCase(int idx);
     
-    void setDefaultCase(CaseStatement* c);
-    CaseStatement* getDefaultCase();
+    void setDefaultCase(const CaseStatementPtr& c);
+    CaseStatementPtr getDefaultCase();
 public:
-    std::vector<CaseStatement*>::iterator begin() {return cases.begin();}
-    std::vector<CaseStatement*>::iterator end() {return cases.end();}
+    std::vector<CaseStatementPtr>::iterator begin() {return cases.begin();}
+    std::vector<CaseStatementPtr>::iterator end() {return cases.end();}
 public:
     virtual void serialize(std::wostream& out);
     virtual void accept(NodeVisitor* visitor);
 private:
-    Expression* controlExpression;
-    std::vector<CaseStatement*> cases;
-    CaseStatement* defaultCase;
+    ExpressionPtr controlExpression;
+    std::vector<CaseStatementPtr> cases;
+    CaseStatementPtr defaultCase;
 };
 
 SWIFT_NS_END

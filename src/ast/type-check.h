@@ -8,17 +8,17 @@ class TypeNode;
 class TypeCheck : public BinaryOperator
 {
 public:
-    TypeCheck(Pattern* expr, TypeNode* type);
+    TypeCheck();
     ~TypeCheck();
 public:
-    TypeNode* getType();
-    void setType(TypeNode* type);
+    TypeNodePtr getType();
+    void setType(TypeNodePtr type);
 public:
     virtual int numChildren();
-    virtual Node* get(int i);
-    virtual void set(int i, Node* val);
+    virtual NodePtr get(int i);
+    virtual void set(int i, const NodePtr& val);
 private:
-    TypeNode* type;
+    TypeNodePtr type;
 };
 
 SWIFT_NS_END

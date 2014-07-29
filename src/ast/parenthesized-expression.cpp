@@ -12,19 +12,13 @@ ParenthesizedExpression::ParenthesizedExpression()
 
 ParenthesizedExpression::~ParenthesizedExpression()
 {
-    std::vector<std::pair<std::wstring, Expression*> >::iterator iter = expressions.begin();
-    for(; iter != expressions.end(); iter++)
-    {
-        delete iter->second;
-    }
-    expressions.clear();
 }
 
-void ParenthesizedExpression::append(const std::wstring& name, Expression* expr)
+void ParenthesizedExpression::append(const std::wstring& name, const ExpressionPtr& expr)
 {
     expressions.push_back(std::make_pair(name, expr));
 }
-void ParenthesizedExpression::append(Expression* expr)
+void ParenthesizedExpression::append(const ExpressionPtr& expr)
 {
     append(L"", expr);
 }
@@ -35,7 +29,7 @@ int ParenthesizedExpression::numExpressions()const
 void ParenthesizedExpression::serialize(std::wostream& out)
 {
     out<<L"(";
-    std::vector<std::pair<std::wstring, Expression*> >::iterator iter = expressions.begin();
+    std::vector<std::pair<std::wstring, ExpressionPtr> >::iterator iter = expressions.begin();
     for(; iter != expressions.end(); iter++)
     {
         if(iter != expressions.begin())
@@ -50,7 +44,7 @@ void ParenthesizedExpression::serialize(std::wostream& out)
 
 void ParenthesizedExpression::accept(NodeVisitor* visitor)
 {
-    visitor->visitParenthesizedExpression(this);
+    accept2(visitor, &NodeVisitor::visitParenthesizedExpression);
 }
 
 std::wstring ParenthesizedExpression::getName(int idx)
@@ -59,7 +53,7 @@ std::wstring ParenthesizedExpression::getName(int idx)
         return L"";
     return expressions[idx].first;
 }
-Expression* ParenthesizedExpression::get(int idx)
+ExpressionPtr ParenthesizedExpression::get(int idx)
 {
     if(idx <0 || idx >= expressions.size())
         return NULL;

@@ -2,8 +2,8 @@
 USE_SWIFT_NS
 
 
-StringLiteral::StringLiteral(const std::wstring& val)
-    :Expression(NodeType::StringLiteral), value(val)
+StringLiteral::StringLiteral()
+    :Expression(NodeType::StringLiteral)
 {
 }
 void StringLiteral::serialize(std::wostream& out)

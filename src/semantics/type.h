@@ -5,6 +5,7 @@
 #include <string>
 #include "symbol.h"
 #include "swift_types.h"
+#include "semantic-types.h"
 SWIFT_NS_BEGIN
 
 
@@ -26,9 +27,9 @@ public:
 private:
     Type(const std::wstring& name, Category category, TypePtr keyType, TypePtr valueType);
 public:
-    static Type* newArrayType(const std::wstring& name, TypePtr elementType);
-    static Type* newDictionaryType(const std::wstring& name, TypePtr keyType, TypePtr valueType);
-    static Type* newType(const std::wstring& name, Category category);
+    static TypePtr newArrayType(const std::wstring& name, TypePtr elementType);
+    static TypePtr newDictionaryType(const std::wstring& name, TypePtr keyType, TypePtr valueType);
+    static TypePtr newType(const std::wstring& name, Category category);
 public:
     bool isPrimitive()const;
     bool isArray();

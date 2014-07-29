@@ -10,16 +10,9 @@ DictionaryLiteral::DictionaryLiteral()
 }
 DictionaryLiteral::~DictionaryLiteral()
 {
-    std::vector<std::pair<Expression*, Expression*> >::iterator iter = items.begin();
-    for(; iter != items.end(); iter++)
-    {
-        delete iter->first;
-        delete iter->second;
-    }
-    items.clear();
 }
 
-void DictionaryLiteral::insert(Expression* key, Expression* value)
+void DictionaryLiteral::insert(const ExpressionPtr& key, const ExpressionPtr& value)
 {
 	items.push_back(std::make_pair(key, value));
 }
@@ -34,7 +27,7 @@ void DictionaryLiteral::serialize(std::wostream& out)
     out<<L"[";
     if(items.empty())
         out<<L":";
-    std::vector<std::pair<Expression*, Expression*> >::iterator iter = items.begin();
+    std::vector<std::pair<ExpressionPtr, ExpressionPtr> >::iterator iter = items.begin();
     for(; iter != items.end(); iter++)
     {
         if(iter != items.begin())
@@ -47,5 +40,5 @@ void DictionaryLiteral::serialize(std::wostream& out)
 }
 void DictionaryLiteral::accept(NodeVisitor* visitor)
 {
-    visitor->visitDictionaryLiteral(this);
+    accept2(visitor, &NodeVisitor::visitDictionaryLiteral);
 }

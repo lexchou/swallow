@@ -16,7 +16,7 @@ void ContinueStatement::serialize(std::wostream& out)
 }
 void ContinueStatement::accept(NodeVisitor* visitor)
 {
-    visitor->visitContinue(this);
+    accept2(visitor, &NodeVisitor::visitContinue);
 }
 
 

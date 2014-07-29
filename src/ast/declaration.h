@@ -3,6 +3,7 @@
 #include "statement.h"
 #include <string>
 #include <vector>
+#include "ast-decl.h"
 
 SWIFT_NS_BEGIN
 
@@ -14,22 +15,22 @@ public:
     Declaration(NodeType::T nodeType);
     ~Declaration();
 public:
-    void setAttributes(const std::vector<Attribute*>& attrs);
-    const std::vector<Attribute*>& getAttributes();
-    Attribute* getAttribute(const wchar_t* name);
+    void setAttributes(const std::vector<AttributePtr>& attrs);
+    const std::vector<AttributePtr>& getAttributes();
+    AttributePtr getAttribute(const wchar_t* name);
 protected:
     int getSpecifiers();
     void setSpecifiers(int specifiers);
     
-    GenericParameters* getGenericParameters();
-    void setGenericParameters(GenericParameters* val);
+    GenericParametersPtr getGenericParameters();
+    void setGenericParameters(const GenericParametersPtr& val);
     
 public:
     virtual void serialize(std::wostream& out);
 protected:
-    std::vector<Attribute*> attributes;
+    std::vector<AttributePtr> attributes;
     int specifiers;
-    GenericParameters* genericParameters;
+    GenericParametersPtr genericParameters;
 };
 
 SWIFT_NS_END

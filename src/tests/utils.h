@@ -19,24 +19,24 @@
 class SwiftTestCase : public CppUnit::TestFixture
 {
 public:
-    Swift::Node* parseStatement(Swift::SymbolRegistry& registry, Swift::CompilerResults& compilerResults, const char* func, const wchar_t* str)
+    Swift::NodePtr parseStatement(Swift::SymbolRegistry& registry, Swift::CompilerResults& compilerResults, const char* func, const wchar_t* str)
     {
         using namespace Swift;
         NodeFactory nodeFactory;
         Parser parser(&nodeFactory, &registry, &compilerResults);
         parser.setFileName(L"<file>");
-        Node* ret = parser.parseStatement(str);
+        NodePtr ret = parser.parseStatement(str);
         dumpCompilerResults(compilerResults);
         return ret;
     }
 
-    Swift::Program* parseStatements(Swift::SymbolRegistry& registry, Swift::CompilerResults& compilerResults, const char* func, const wchar_t* str)
+    Swift::ProgramPtr parseStatements(Swift::SymbolRegistry& registry, Swift::CompilerResults& compilerResults, const char* func, const wchar_t* str)
     {
         using namespace Swift;
         NodeFactory nodeFactory;
         Parser parser(&nodeFactory, &registry, &compilerResults);
         parser.setFileName(L"<file>");
-        Program* ret = parser.parse(str);
+        ProgramPtr ret = parser.parse(str);
         dumpCompilerResults(compilerResults);
         return ret;
     }
@@ -95,7 +95,6 @@ struct Tracer
         strcpy(this->file, file);
         strcpy(this->func, func);
         this->line = line;
-        node = NULL;
 #ifdef TRACE_NODE
         using namespace Swift;
         Node::UnreleasedNodes.clear();
@@ -104,7 +103,6 @@ struct Tracer
     }
     ~Tracer()
     {
-        delete node;
 #ifdef TRACE_NODE
         using namespace Swift;
         using namespace std;
@@ -124,8 +122,7 @@ struct Tracer
         }
 #endif//TRACE_NODE
     }
-    
-    Swift::Node* node;
+
     char file[1024];
     int line;
     char func[100];
@@ -134,8 +131,7 @@ struct Tracer
 #define PARSE_STATEMENT(s) Tracer tracer(__FILE__, __LINE__, __FUNCTION__); \
     Swift::SymbolRegistry symbolRegistry; \
     Swift::CompilerResults compilerResults; \
-    Node* root = parseStatement(symbolRegistry, compilerResults, __FUNCTION__, (s)); \
-    tracer.node = root;
+    NodePtr root = parseStatement(symbolRegistry, compilerResults, __FUNCTION__, (s));
 #endif//TEST_UTILS_H
 
 

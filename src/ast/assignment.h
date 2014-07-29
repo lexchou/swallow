@@ -7,7 +7,7 @@ SWIFT_NS_BEGIN
 class Assignment : public BinaryOperator
 {
 public:
-	Assignment(Expression* lhs, Expression* rhs);
+	Assignment();
 public:
     virtual void accept(NodeVisitor* visitor);
 };

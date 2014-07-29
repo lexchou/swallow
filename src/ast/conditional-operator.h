@@ -7,29 +7,29 @@ SWIFT_NS_BEGIN
 class ConditionalOperator : public Operator
 {
 public:
-    ConditionalOperator(Pattern* expr, Expression* trueExpr, Expression* falseExpr);
+    ConditionalOperator();
     ~ConditionalOperator();
 public:
-    Pattern* getCondition() { return condition;}
-    Expression* getTrueExpression() { return trueExpression;}
-    Expression* getFalseExpression() { return falseExpression;}
+    PatternPtr getCondition() { return condition;}
+    ExpressionPtr getTrueExpression() { return trueExpression;}
+    ExpressionPtr getFalseExpression() { return falseExpression;}
     
     
-    void setCondition(Pattern* v) { condition = v;}
-    void setTrueExpression(Expression* v) { trueExpression = v;}
-    void setFalseExpression(Expression* v) { falseExpression = v;}
+    void setCondition(PatternPtr v) { condition = v;}
+    void setTrueExpression(ExpressionPtr v) { trueExpression = v;}
+    void setFalseExpression(ExpressionPtr v) { falseExpression = v;}
 public:
     
     virtual int numChildren();
-    virtual Node* get(int i);
-    virtual void set(int i, Node* val);
+    virtual NodePtr get(int i);
+    virtual void set(int i, const NodePtr& val);
 public:
     virtual void serialize(std::wostream& out);
     virtual void accept(NodeVisitor* visitor);
 private:
-    Pattern* condition;
-    Expression* trueExpression;
-    Expression* falseExpression;
+    PatternPtr condition;
+    ExpressionPtr trueExpression;
+    ExpressionPtr falseExpression;
 };
 
 SWIFT_NS_END

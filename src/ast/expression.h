@@ -9,6 +9,6 @@ class Expression : public Pattern
 protected:
 	Expression(NodeType::T nodeType);
 };
-
+typedef std::shared_ptr<Expression> ExpressionPtr;
 SWIFT_NS_END
 #endif//EXPRESSION_H

@@ -12,30 +12,26 @@ Declaration::Declaration(NodeType::T nodeType)
 }
 Declaration::~Declaration()
 {
-    SafeDeleteAll(attributes);
-    SafeDelete(genericParameters);
 }
 void Declaration::serialize(std::wostream& out)
 {
 }
 
 
-void Declaration::setAttributes(const std::vector<Attribute*>& attrs)
+void Declaration::setAttributes(const std::vector<AttributePtr>& attrs)
 {
     this->attributes.clear();
     std::copy(attrs.begin(), attrs.end(), std::back_inserter(attributes));
 }
 
-const std::vector<Attribute*>& Declaration::getAttributes()
+const std::vector<AttributePtr>& Declaration::getAttributes()
 {
     return attributes;
 }
-Attribute* Declaration::getAttribute(const wchar_t* name)
+AttributePtr Declaration::getAttribute(const wchar_t* name)
 {
-    std::vector<Attribute*>::iterator iter = attributes.begin();
-    for(; iter != attributes.end(); iter++)
+    for(const AttributePtr& attr : attributes)
     {
-        Attribute* attr = *iter;
         if(attr->getName() == name)
             return attr;
     }
@@ -53,11 +49,11 @@ void Declaration::setSpecifiers(int specifiers)
 }
 
 
-GenericParameters* Declaration::getGenericParameters()
+GenericParametersPtr Declaration::getGenericParameters()
 {
     return genericParameters;
 }
-void Declaration::setGenericParameters(GenericParameters* val)
+void Declaration::setGenericParameters(const GenericParametersPtr& val)
 {
     genericParameters = val;
 }

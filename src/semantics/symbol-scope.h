@@ -3,13 +3,10 @@
 #include "swift_conf.h"
 #include <map>
 #include <memory>
+#include "semantic-types.h"
 SWIFT_NS_BEGIN
 
-class SymbolRegistry;
-class Symbol;
 class Node;
-class Type;
-typedef Symbol* SymbolPtr;
 class SymbolScope
 {
     friend class SymbolRegistry;

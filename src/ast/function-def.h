@@ -28,20 +28,20 @@ public:
     
     
     
-    void addParameters(Parameters*);
+    void addParameters(const ParametersPtr&);
     int numParameters();
-    Parameters* getParameters(int i);
-    const std::vector<Parameters*>&  getParametersList()const{return parametersList;}
+    ParametersPtr getParameters(int i);
+    const std::vector<ParametersPtr>&  getParametersList()const{return parametersList;}
 
     
-    void setReturnType(TypeNode*);
-    TypeNode* getReturnType();
+    void setReturnType(const TypeNodePtr&);
+    TypeNodePtr getReturnType();
     
     void setReturnTypeAttributes(const Attributes& attrs);
     const Attributes& getReturnTypeAttributes()const;
     
-    void setBody(CodeBlock* body);
-    CodeBlock* getBody();
+    void setBody(const CodeBlockPtr& body);
+    CodeBlockPtr getBody();
 
 public:
     virtual void serialize(std::wostream& out);
@@ -49,9 +49,9 @@ public:
 protected:
     std::wstring name;
     Attributes returnAttributes;
-    std::vector<Parameters*> parametersList;
-    TypeNode* returnType;
-    CodeBlock* body;
+    std::vector<ParametersPtr> parametersList;
+    TypeNodePtr returnType;
+    CodeBlockPtr body;
 };
 
 SWIFT_NS_END

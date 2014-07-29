@@ -14,11 +14,11 @@ public:
 public:
     virtual void serialize(std::wostream& out);
 public:
-    void addArgument(TypeNode* type);
-    TypeNode* getArgument(int i);
+    void addArgument(const TypeNodePtr& type);
+    TypeNodePtr getArgument(int i);
     int numArguments();
 private:
-    std::vector<TypeNode*> arguments;
+    std::vector<TypeNodePtr> arguments;
 };
 
 SWIFT_NS_END

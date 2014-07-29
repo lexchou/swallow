@@ -8,20 +8,20 @@ class TypeNode;
 class TypeCast : public BinaryOperator
 {
 public:
-    TypeCast(Expression* expr, TypeNode* type);
+    TypeCast();
     ~TypeCast();
 public:
-    TypeNode* getType();
-    void setType(TypeNode* type);
+    TypeNodePtr getType();
+    void setType(TypeNodePtr type);
 public:
     virtual int numChildren();
-    virtual Node* get(int i);
-    virtual void set(int i, Node* val);
+    virtual NodePtr get(int i);
+    virtual void set(int i, const NodePtr& val);
     
     void setOptional(bool val);
     bool isOptional()const;
 private:
-    TypeNode* type;
+    TypeNodePtr type;
     bool optional;
 };
 

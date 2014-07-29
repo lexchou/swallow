@@ -13,8 +13,7 @@ InitializerDef::InitializerDef()
 
 InitializerDef::~InitializerDef()
 {
-    SafeDelete(body);
-    SafeDelete(parameters);
+
 }
 
 void InitializerDef::serialize(std::wostream& out)
@@ -22,7 +21,7 @@ void InitializerDef::serialize(std::wostream& out)
 }
 void InitializerDef::accept(NodeVisitor* visitor)
 {
-    visitor->visitInit(this);
+    accept2(visitor, &NodeVisitor::visitInit);
 }
 
 void InitializerDef::setConvenience(bool convenience)
@@ -35,20 +34,20 @@ bool InitializerDef::isConvenience()const
 }
 
 
-void InitializerDef::setParameters(Parameters* parameters)
+void InitializerDef::setParameters(const ParametersPtr& parameters)
 {
     this->parameters = parameters;
 }
-Parameters* InitializerDef::getParameters()
+ParametersPtr InitializerDef::getParameters()
 {
     return parameters;
 }
 
-void InitializerDef::setBody(CodeBlock* body)
+void InitializerDef::setBody(const CodeBlockPtr& body)
 {
     this->body = body;
 }
-CodeBlock* InitializerDef::getBody()
+CodeBlockPtr InitializerDef::getBody()
 {
     return body;
 }

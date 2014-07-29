@@ -7,8 +7,8 @@ SWIFT_NS_BEGIN
 class CommentNode : public Node
 {
 public:
-	CommentNode(const std::wstring& comment);
-private:
+	CommentNode();
+public:
 	std::wstring comment;
 public:
     virtual void serialize(std::wostream& out);

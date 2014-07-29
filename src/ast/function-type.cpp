@@ -9,8 +9,6 @@ FunctionType::FunctionType()
 }
 FunctionType::~FunctionType()
 {
-    SafeDelete(returnType);
-    SafeDelete(argumentsType);
 }
 
 void FunctionType::serialize(std::wostream& out)
@@ -23,22 +21,22 @@ void FunctionType::accept(NodeVisitor* visitor)
 {
 //
 }
-void FunctionType::setArgumentsType(TypeNode* argumentsType)
+void FunctionType::setArgumentsType(const TypeNodePtr& argumentsType)
 {
     this->argumentsType = argumentsType;
 }
 
-TypeNode* FunctionType::getArgumentsType()
+TypeNodePtr FunctionType::getArgumentsType()
 {
     return argumentsType;
 }
-void FunctionType::setReturnType(TypeNode* retType)
+void FunctionType::setReturnType(const TypeNodePtr& retType)
 {
     this->returnType = retType;
 }
 
 
-TypeNode* FunctionType::getReturnType()
+TypeNodePtr FunctionType::getReturnType()
 {
     return returnType;
 }

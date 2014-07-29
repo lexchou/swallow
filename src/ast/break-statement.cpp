@@ -16,7 +16,7 @@ void BreakStatement::serialize(std::wostream& out)
 }
 void BreakStatement::accept(NodeVisitor* visitor)
 {
-    visitor->visitBreak(this);
+    accept2(visitor, &NodeVisitor::visitBreak);
 }
 
 void BreakStatement::setLoop(const std::wstring& loop)

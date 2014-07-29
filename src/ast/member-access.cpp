@@ -4,32 +4,28 @@
 USE_SWIFT_NS
 
 
-MemberAccess::MemberAccess(Expression* self, Identifier* field)
+MemberAccess::MemberAccess()
     :Expression(NodeType::MemberAccess)
 {
-    setSelf(self);
-    setField(field);
 }
 MemberAccess::~MemberAccess()
 {
-    SafeDelete(self);
-    SafeDelete(field);
 }
-void MemberAccess::setSelf(Expression* self)
+void MemberAccess::setSelf(const ExpressionPtr& self)
 {
     this->self = self;
 }
-void MemberAccess::setField(Identifier* field)
+void MemberAccess::setField(const IdentifierPtr& field)
 {
     this->field = field;
 }
 
-Expression* MemberAccess::getSelf()
+ExpressionPtr MemberAccess::getSelf()
 {
     return self;
     
 }
-Identifier* MemberAccess::getField()
+IdentifierPtr MemberAccess::getField()
 {
     return field;
 }
@@ -44,5 +40,5 @@ void MemberAccess::serialize(std::wostream& out)
 }
 void MemberAccess::accept(NodeVisitor* visitor)
 {
-    visitor->visitMemberAccess(this);
+    accept2(visitor, &NodeVisitor::visitMemberAccess);
 }

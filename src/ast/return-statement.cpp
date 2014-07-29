@@ -11,7 +11,6 @@ ReturnStatement::ReturnStatement()
 }
 ReturnStatement::~ReturnStatement()
 {
-    SafeDelete(expression);
 }
 
 void ReturnStatement::serialize(std::wostream& out)
@@ -25,14 +24,14 @@ void ReturnStatement::serialize(std::wostream& out)
 }
 void ReturnStatement::accept(NodeVisitor* visitor)
 {
-    visitor->visitReturn(this);
+    accept2(visitor, &NodeVisitor::visitReturn);
 }
 
-void ReturnStatement::setExpression(Expression* expr)
+void ReturnStatement::setExpression(const ExpressionPtr& expr)
 {
     this->expression = expr;
 }
-Expression* ReturnStatement::getExpression()
+ExpressionPtr ReturnStatement::getExpression()
 {
     return expression;
 }

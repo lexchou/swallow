@@ -2,7 +2,7 @@
 #define TYPE_IDENTIFIER_H
 #include "type-node.h"
 #include <string>
-
+#include "ast-decl.h"
 SWIFT_NS_BEGIN
 
 class TypeIdentifier : public TypeNode
@@ -14,18 +14,18 @@ public:
     void setName(const std::wstring& name);
     const std::wstring& getName() const;
     
-    void addGenericArgument(TypeNode* argument);
+    void addGenericArgument(TypeNodePtr argument);
     int numGenericArguments();
-    TypeNode* getGenericArgument(int idx);
+    TypeNodePtr getGenericArgument(int idx);
     
-    void setNestedType(TypeIdentifier* type);
-    TypeIdentifier* getNestedType();
+    void setNestedType(TypeIdentifierPtr type);
+    TypeIdentifierPtr getNestedType();
 public:
     virtual void serialize(std::wostream& out);
 private:
     std::wstring name;
-    std::vector<TypeNode*> genericArguments;
-    TypeIdentifier* nestedType;
+    std::vector<TypeNodePtr> genericArguments;
+    TypeIdentifierPtr nestedType;
 };
 
 SWIFT_NS_END

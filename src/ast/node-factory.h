@@ -16,88 +16,88 @@ public:
     NodeFactory();
     virtual ~NodeFactory(){}
 public:
-    virtual Program* createProgram();
-    virtual CommentNode* createComment(const SourceInfo& state, const std::wstring& comment);
-    virtual BooleanLiteral* createBoolean(const SourceInfo& state, bool value);
-    virtual IntegerLiteral* createInteger(const SourceInfo& state, const std::wstring& value);
-    virtual FloatLiteral* createFloat(const SourceInfo& state, const std::wstring& value);
-    virtual StringLiteral* createString(const SourceInfo& state, const std::wstring& value);
-    virtual UnaryOperator* createUnary(const SourceInfo& state, const std::wstring& op, OperatorType::T type);
-    virtual BinaryOperator* createBinary(const SourceInfo& state, const std::wstring& op, Associativity::T associativity, int precedence);
+    virtual ProgramPtr createProgram();
+    virtual CommentNodePtr createComment(const SourceInfo& state);
+    virtual BooleanLiteralPtr createBoolean(const SourceInfo& state);
+    virtual IntegerLiteralPtr createInteger(const SourceInfo& state);
+    virtual FloatLiteralPtr createFloat(const SourceInfo& state);
+    virtual StringLiteralPtr createString(const SourceInfo& state);
+    virtual UnaryOperatorPtr createUnary(const SourceInfo& state);
+    virtual BinaryOperatorPtr createBinary(const SourceInfo& state);
 
-    virtual Identifier* createIdentifier(const SourceInfo& state, const std::wstring& op);
-    virtual GenericArgument* createGenericArgument(const SourceInfo& state);
-    virtual InOutParameter* createInOutParameter(const SourceInfo& state, Identifier* identifier);
+    virtual IdentifierPtr createIdentifier(const SourceInfo& state);
+    virtual GenericArgumentPtr createGenericArgument(const SourceInfo& state);
+    virtual InOutParameterPtr createInOutParameter(const SourceInfo& state);
 
-    virtual ArrayLiteral* createArrayLiteral(const SourceInfo& state);
-    virtual DictionaryLiteral* createDictionaryLiteral(const SourceInfo& state);
-    virtual CompileConstant* createCompilecConstant(const SourceInfo& state, const std::wstring& name, const std::wstring& value);
-    virtual MemberAccess* createMemberAccess(const SourceInfo& state, Expression* self, Identifier* field);
-    virtual SubscriptAccess* createSubscriptAccess(const SourceInfo& state, Expression* self, Expression* index);
+    virtual ArrayLiteralPtr createArrayLiteral(const SourceInfo& state);
+    virtual DictionaryLiteralPtr createDictionaryLiteral(const SourceInfo& state);
+    virtual CompileConstantPtr createCompilecConstant(const SourceInfo& state);
+    virtual MemberAccessPtr createMemberAccess(const SourceInfo& state);
+    virtual SubscriptAccessPtr createSubscriptAccess(const SourceInfo& state);
     
-    virtual TypeCheck* createTypeCheck(const SourceInfo& state, Pattern* expr, TypeNode* type);
-    virtual TypeCast* createTypeCast(const SourceInfo& state, Expression* expr, TypeNode* type);
-    virtual Assignment* createAssignment(const SourceInfo& state, Expression* lhs, Expression* rhs);
-    virtual ConditionalOperator* createConditionalOperator(const SourceInfo& state, Expression* cond, Expression* trueExpr, Expression* falseExpr);
-    virtual ParenthesizedExpression* createParenthesizedExpression(const SourceInfo& state);
+    virtual TypeCheckPtr createTypeCheck(const SourceInfo& state);
+    virtual TypeCastPtr createTypeCast(const SourceInfo& state);
+    virtual AssignmentPtr createAssignment(const SourceInfo& state);
+    virtual ConditionalOperatorPtr createConditionalOperator(const SourceInfo& state);
+    virtual ParenthesizedExpressionPtr createParenthesizedExpression(const SourceInfo& state);
     
-    virtual InitializerReference* createInitializerReference(const SourceInfo& state, Expression*);
-    virtual SelfExpression* createSelfExpression(const SourceInfo& state, Expression* expr);
-    virtual DynamicType* createDynamicType(const SourceInfo& state, Expression* expr);
-    virtual ForcedValue* createForcedValue(const SourceInfo& state, Expression* expr);
-    virtual OptionalChaining* createOptionalChaining(const SourceInfo& state, Expression* expr);
-    virtual FunctionCall* createFunctionCall(const SourceInfo& state);
+    virtual InitializerReferencePtr createInitializerReference(const SourceInfo& state);
+    virtual SelfExpressionPtr createSelfExpression(const SourceInfo& state);
+    virtual DynamicTypePtr createDynamicType(const SourceInfo& state);
+    virtual ForcedValuePtr createForcedValue(const SourceInfo& state);
+    virtual OptionalChainingPtr createOptionalChaining(const SourceInfo& state);
+    virtual FunctionCallPtr createFunctionCall(const SourceInfo& state);
 
-    virtual ForLoop* createForLoop(const SourceInfo& state);
-    virtual ForInLoop* createForInLoop(const SourceInfo& state);
-    virtual WhileLoop* createWhileLoop(const SourceInfo& state);
-    virtual IfStatement* createIf(const SourceInfo& state);
-    virtual DoLoop* createDoLoop(const SourceInfo& state);
-    virtual SwitchCase* createSwitch(const SourceInfo& state);
-    virtual CaseStatement* createCase(const SourceInfo& state);
-    virtual BreakStatement* createBreak(const SourceInfo& state);
-    virtual ContinueStatement* createContinue(const SourceInfo& state);
-    virtual FallthroughStatement* createFallthrough(const SourceInfo& state);
-    virtual ReturnStatement* createReturn(const SourceInfo& state);
-    virtual LabeledStatement* createLabel(const SourceInfo& state);
-    virtual CodeBlock* createCodeBlock(const SourceInfo& state);
-    virtual LetBinding* createLetBinding(const SourceInfo& state);
-    virtual VarBinding* createVarBinding(const SourceInfo& state);
-    virtual Tuple* createTuple(const SourceInfo& state);
-    virtual Closure* createClosure(const SourceInfo& state);
-    virtual EnumCasePattern* createEnumCasePattern(const SourceInfo& state, const std::wstring& name);
+    virtual ForLoopPtr createForLoop(const SourceInfo& state);
+    virtual ForInLoopPtr createForInLoop(const SourceInfo& state);
+    virtual WhileLoopPtr createWhileLoop(const SourceInfo& state);
+    virtual IfStatementPtr createIf(const SourceInfo& state);
+    virtual DoLoopPtr createDoLoop(const SourceInfo& state);
+    virtual SwitchCasePtr createSwitch(const SourceInfo& state);
+    virtual CaseStatementPtr createCase(const SourceInfo& state);
+    virtual BreakStatementPtr createBreak(const SourceInfo& state);
+    virtual ContinueStatementPtr createContinue(const SourceInfo& state);
+    virtual FallthroughStatementPtr createFallthrough(const SourceInfo& state);
+    virtual ReturnStatementPtr createReturn(const SourceInfo& state);
+    virtual LabeledStatementPtr createLabel(const SourceInfo& state);
+    virtual CodeBlockPtr createCodeBlock(const SourceInfo& state);
+    virtual LetBindingPtr createLetBinding(const SourceInfo& state);
+    virtual VarBindingPtr createVarBinding(const SourceInfo& state);
+    virtual TuplePtr createTuple(const SourceInfo& state);
+    virtual ClosurePtr createClosure(const SourceInfo& state);
+    virtual EnumCasePatternPtr createEnumCasePattern(const SourceInfo& state);
     
-    virtual FunctionType* createFunctionType(const SourceInfo& state, TypeNode* argumentsType, TypeNode* retType);
-    virtual ArrayType* createArrayType(const SourceInfo& state, TypeNode* innerType);
-    virtual OptionalType* createOptionalType(const SourceInfo& state, TypeNode* innerType);
-    virtual ImplicitlyUnwrappedOptional* createImplicitlyUnwrappedOptional(const SourceInfo& state, TypeNode* innerType);
-    virtual TypeIdentifier* createTypeIdentifier(const SourceInfo& state, const std::wstring& typeName);
-    virtual ProtocolComposition* createProtocolComposition(const SourceInfo& state);
-    virtual TupleType* createTupleType(const SourceInfo& state);
-    virtual Attribute* createAttribute(const SourceInfo& state);
+    virtual FunctionTypePtr createFunctionType(const SourceInfo& state);
+    virtual ArrayTypePtr createArrayType(const SourceInfo& state);
+    virtual OptionalTypePtr createOptionalType(const SourceInfo& state);
+    virtual ImplicitlyUnwrappedOptionalPtr createImplicitlyUnwrappedOptional(const SourceInfo& state);
+    virtual TypeIdentifierPtr createTypeIdentifier(const SourceInfo& state);
+    virtual ProtocolCompositionPtr createProtocolComposition(const SourceInfo& state);
+    virtual TupleTypePtr createTupleType(const SourceInfo& state);
+    virtual AttributePtr createAttribute(const SourceInfo& state);
 
     
     
-    virtual Import* createImport(const SourceInfo& state, const std::vector<Attribute*>& attrs);
-    virtual Constant* createConstant(const SourceInfo& state, const std::vector<Attribute*>& attrs, int specifiers);
-    virtual Constants* createConstants(const SourceInfo& state, const std::vector<Attribute*>& attrs, int specifiers);
-    virtual Variables* createVariables(const SourceInfo& state, const std::vector<Attribute*>& attrs, int specifiers);
-    virtual Variable* createVariable(const SourceInfo& state);
-    virtual TypeAlias* createTypealias(const SourceInfo& state, const std::vector<Attribute*>& attrs);
-    virtual FunctionDef* createFunction(const SourceInfo& state, const std::vector<Attribute*>& attrs, int specifiers);
-    virtual Parameters* createParameters(const SourceInfo& state);
-    virtual Parameter* createParameter(const SourceInfo& state);
-    virtual EnumDef* createEnum(const SourceInfo& state, const std::vector<Attribute*>& attrs);
-    virtual StructDef* createStruct(const SourceInfo& state, const std::vector<Attribute*>& attrs);
-    virtual ClassDef* createClass(const SourceInfo& state, const std::vector<Attribute*>& attrs);
-    virtual ProtocolDef* createProtocol(const SourceInfo& state, const std::vector<Attribute*>& attrs);
-    virtual InitializerDef* createInitializer(const SourceInfo& state, const std::vector<Attribute*>& attrs);
-    virtual DeinitializerDef* createDeinitializer(const SourceInfo& state, const std::vector<Attribute*>& attrs);
-    virtual ExtensionDef* createExtension(const SourceInfo& state, const std::vector<Attribute*>& attrs);
-    virtual SubscriptDef* createSubscript(const SourceInfo& state, const std::vector<Attribute*>& attrs);
-    virtual OperatorDef* createOperator(const SourceInfo& state, const std::vector<Attribute*>& attrs);
-    virtual GenericConstraint* createGenericConstraint(const SourceInfo& state);
-    virtual GenericParameters* createGenericParameters(const SourceInfo& state);
+    virtual ImportPtr createImport(const SourceInfo& state);
+    virtual ConstantPtr createConstant(const SourceInfo& state);
+    virtual ConstantsPtr createConstants(const SourceInfo& state);
+    virtual VariablesPtr createVariables(const SourceInfo& state);
+    virtual VariablePtr createVariable(const SourceInfo& state);
+    virtual TypeAliasPtr createTypealias(const SourceInfo& state);
+    virtual FunctionDefPtr createFunction(const SourceInfo& state);
+    virtual ParametersPtr createParameters(const SourceInfo& state);
+    virtual ParameterPtr createParameter(const SourceInfo& state);
+    virtual EnumDefPtr createEnum(const SourceInfo& state);
+    virtual StructDefPtr createStruct(const SourceInfo& state);
+    virtual ClassDefPtr createClass(const SourceInfo& state);
+    virtual ProtocolDefPtr createProtocol(const SourceInfo& state);
+    virtual InitializerDefPtr createInitializer(const SourceInfo& state);
+    virtual DeinitializerDefPtr createDeinitializer(const SourceInfo& state);
+    virtual ExtensionDefPtr createExtension(const SourceInfo& state);
+    virtual SubscriptDefPtr createSubscript(const SourceInfo& state);
+    virtual OperatorDefPtr createOperator(const SourceInfo& state);
+    virtual GenericConstraintPtr createGenericConstraint(const SourceInfo& state);
+    virtual GenericParametersPtr createGenericParameters(const SourceInfo& state);
 
 
 public:
@@ -107,10 +107,11 @@ protected:
     void bindNode(const SourceInfo&s, Node* n);
 
     template<class T>
-    inline T* _(const SourceInfo& s, T* n)
+    inline std::shared_ptr<T> _(const SourceInfo& s, T* n)
     {
-        bindNode(s, static_cast<Node*>(n));
-        return n;
+        std::shared_ptr<T> ret = std::shared_ptr<T>(n);
+        bindNode(s, n);
+        return ret;
     }
 
 protected:

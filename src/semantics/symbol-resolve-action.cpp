@@ -14,26 +14,26 @@ SymbolResolveAction::SymbolResolveAction(SymbolRegistry* symbolRegistry, Compile
 
 }
 
-void SymbolResolveAction::visitAssignment(Assignment* node)
+void SymbolResolveAction::visitAssignment(const AssignmentPtr& node)
 {
     //check node's LHS, it must be a tuple or identifier
-    Pattern* pattern = node->getLHS();
+    PatternPtr pattern = node->getLHS();
     verifyTuplePattern(pattern);
 }
-void SymbolResolveAction::verifyTuplePattern(Pattern* pattern)
+void SymbolResolveAction::verifyTuplePattern(const PatternPtr& pattern)
 {
 
     if(pattern->getNodeType() == NodeType::Identifier)
     {
-        Identifier* id = static_cast<Identifier*>(pattern);
-        Type* type = symbolRegistry->lookupType(id->getIdentifier());
+        IdentifierPtr id = std::static_pointer_cast<Identifier>(pattern);
+        TypePtr type = symbolRegistry->lookupType(id->getIdentifier());
         if(type)
         {
             //cannot assign expression to type
             compilerResults->add(ErrorLevel::Error, *id->getSourceInfo(), Errors::E_CANNOT_ASSIGN, id->getIdentifier());
             return;
         }
-        Node* sym = dynamic_cast<Node*>(symbolRegistry->lookupSymbol(id->getIdentifier()));
+        NodePtr sym = std::dynamic_pointer_cast<Node>(symbolRegistry->lookupSymbol(id->getIdentifier()));
         if(!sym)
         {
             compilerResults->add(ErrorLevel::Error, *id->getSourceInfo(), Errors::E_USE_OF_UNRESOLVED_IDENTIFIER, id->getIdentifier());
@@ -41,8 +41,8 @@ void SymbolResolveAction::verifyTuplePattern(Pattern* pattern)
     }
     else if(pattern->getNodeType() == NodeType::Tuple)
     {
-        Tuple* tuple = static_cast<Tuple*>(pattern);
-        for(Pattern* element : tuple->elements)
+        TuplePtr tuple = std::static_pointer_cast<Tuple>(pattern);
+        for(const PatternPtr& element : tuple->elements)
         {
             verifyTuplePattern(element);
         }
@@ -55,13 +55,13 @@ void SymbolResolveAction::verifyTuplePattern(Pattern* pattern)
 
 }
 
-void SymbolResolveAction::registerPattern(Pattern* pattern)
+void SymbolResolveAction::registerPattern(const PatternPtr& pattern)
 {
     SymbolScope* scope = symbolRegistry->getCurrentScope();
     if(pattern->getNodeType() == NodeType::Identifier)
     {
-        Identifier* id = static_cast<Identifier*>(pattern);
-        Symbol* s = symbolRegistry->lookupSymbol(id->getIdentifier());
+        IdentifierPtr id = std::static_pointer_cast<Identifier>(pattern);
+        SymbolPtr s = symbolRegistry->lookupSymbol(id->getIdentifier());
         if(s)
         {
             //already defined
@@ -69,34 +69,34 @@ void SymbolResolveAction::registerPattern(Pattern* pattern)
         }
         else
         {
-            scope->addSymbol(static_cast<SymbolIdentifier*>(id));
+            scope->addSymbol(std::static_pointer_cast<SymbolIdentifier>(id));
         }
     }
     else if(pattern->getNodeType() == NodeType::Tuple)
     {
-        Tuple* tuple = static_cast<Tuple*>(pattern);
-        for(Pattern* element : tuple->elements)
+        TuplePtr tuple = std::static_pointer_cast<Tuple>(pattern);
+        for(const PatternPtr& element : tuple->elements)
         {
             registerPattern(element);
         }
     }
 }
 
-void SymbolResolveAction::visitVariables(Variables* node)
+void SymbolResolveAction::visitVariables(const VariablesPtr& node)
 {
-    for(Variable* var : *node)
+    for(const VariablePtr& var : *node)
     {
-        Pattern* name = var->getName();
+        PatternPtr name = var->getName();
         registerPattern(name);
     }
-    for(Variable* v : *node)
+    for(const VariablePtr& v : *node)
     {
-        Pattern* name = v->getName();
-        Expression* initializer = v->getInitializer();
-        CodeBlock* didSet = v->getDidSet();
-        CodeBlock* willSet = v->getWillSet();
-        CodeBlock* getter = v->getGetter();
-        CodeBlock* setter = v->getSetter();
+        PatternPtr name = v->getName();
+        ExpressionPtr initializer = v->getInitializer();
+        CodeBlockPtr didSet = v->getDidSet();
+        CodeBlockPtr willSet = v->getWillSet();
+        CodeBlockPtr getter = v->getGetter();
+        CodeBlockPtr setter = v->getSetter();
         setFlag(name, true, Identifier::F_INITIALIZING);
         if(initializer)
         {
@@ -104,32 +104,32 @@ void SymbolResolveAction::visitVariables(Variables* node)
         }
         setFlag(name, true, Identifier::F_INITIALIZED);
         setFlag(name, false, Identifier::F_INITIALIZING);
-        if(v->getGetter())
+        if(getter)
         {
-            v->getGetter()->accept(this);
+            getter->accept(this);
         }
         if(setter)
         {
             std::wstring name = v->getSetterName().empty() ? L"newValue" : v->getSetterName();
             //TODO: replace the symbol to internal value
-            ScopedCodeBlock* cb = static_cast<ScopedCodeBlock*>(setter);
-            cb->getScope()->addSymbol(new SymbolPlaceHolder(name));
+            ScopedCodeBlockPtr cb = std::static_pointer_cast<ScopedCodeBlock>(setter);
+            cb->getScope()->addSymbol(SymbolPtr(new SymbolPlaceHolder(name)));
             cb->accept(this);
         }
         if(willSet)
         {
             std::wstring setter = v->getWillSetSetter().empty() ? L"newValue" : v->getWillSetSetter();
             //TODO: replace the symbol to internal value
-            ScopedCodeBlock* cb = static_cast<ScopedCodeBlock*>(willSet);
-            cb->getScope()->addSymbol(new SymbolPlaceHolder(setter));
+            ScopedCodeBlockPtr cb = std::static_pointer_cast<ScopedCodeBlock>(willSet);
+            cb->getScope()->addSymbol(SymbolPtr(new SymbolPlaceHolder(setter)));
             cb->accept(this);
         }
         if(didSet)
         {
             std::wstring setter = v->getDidSetSetter().empty() ? L"oldValue" : v->getDidSetSetter();
             //TODO: replace the symbol to internal value
-            ScopedCodeBlock* cb = static_cast<ScopedCodeBlock*>(didSet);
-            cb->getScope()->addSymbol(new SymbolPlaceHolder(setter));
+            ScopedCodeBlockPtr cb = std::static_pointer_cast<ScopedCodeBlock>(didSet);
+            cb->getScope()->addSymbol(SymbolPtr(new SymbolPlaceHolder(setter)));
             cb->accept(this);
         }
 
@@ -137,14 +137,14 @@ void SymbolResolveAction::visitVariables(Variables* node)
 
 }
 
-void SymbolResolveAction::visitConstants(Constants* node)
+void SymbolResolveAction::visitConstants(const ConstantsPtr& node)
 {
-    for(Constant* c : *node)
+    for(const ConstantPtr& c : *node)
     {
         registerPattern(c->name);
     }
     //verify initializer
-    for(Constant* c : *node)
+    for(const ConstantPtr& c : *node)
     {
         setFlag(c->name, true, Identifier::F_INITIALIZING);
         c->initializer->accept(this);
@@ -153,9 +153,9 @@ void SymbolResolveAction::visitConstants(Constants* node)
     }
 }
 
-void SymbolResolveAction::visitIdentifier(Identifier* id)
+void SymbolResolveAction::visitIdentifier(const IdentifierPtr& id)
 {
-    Symbol* sym = NULL;
+    SymbolPtr sym = NULL;
     SymbolScope* scope = NULL;
     symbolRegistry->lookupSymbol(id->getIdentifier(), &scope, &sym);
     if(!sym)
@@ -163,7 +163,7 @@ void SymbolResolveAction::visitIdentifier(Identifier* id)
         compilerResults->add(ErrorLevel::Error, *id->getSourceInfo(), Errors::E_USE_OF_UNRESOLVED_IDENTIFIER, id->getIdentifier());
         return;
     }
-    if(Identifier* identifier = dynamic_cast<Identifier*>(sym))
+    if(IdentifierPtr identifier = std::dynamic_pointer_cast<Identifier>(sym))
     {
         if((identifier->flags & Identifier::F_INITIALIZING))
         {
@@ -185,17 +185,17 @@ void SymbolResolveAction::visitIdentifier(Identifier* id)
 
     }
 }
-void SymbolResolveAction::visitEnumCasePattern(EnumCasePattern* node)
+void SymbolResolveAction::visitEnumCasePattern(const EnumCasePatternPtr& node)
 {
     //TODO: check if the enum case is defined
 }
 
-void SymbolResolveAction::setFlag(Pattern* pattern, bool add, int flag)
+void SymbolResolveAction::setFlag(const PatternPtr& pattern, bool add, int flag)
 {
     NodeType::T t = pattern->getNodeType();
     if(t == NodeType::Identifier)
     {
-        Identifier* id = static_cast<Identifier*>(pattern);
+        IdentifierPtr id = std::static_pointer_cast<Identifier>(pattern);
         if(add)
             id->flags |= flag;
         else
@@ -203,8 +203,8 @@ void SymbolResolveAction::setFlag(Pattern* pattern, bool add, int flag)
     }
     else if(t == NodeType::Tuple)
     {
-        Tuple* tuple = static_cast<Tuple*>(pattern);
-        for(Pattern* element : tuple->elements)
+        TuplePtr tuple = std::static_pointer_cast<Tuple>(pattern);
+        for(const PatternPtr& element : tuple->elements)
         {
             setFlag(element, add, flag);
         }
@@ -212,9 +212,9 @@ void SymbolResolveAction::setFlag(Pattern* pattern, bool add, int flag)
 
 }
 
-void SymbolResolveAction::defineType(TypeDeclaration* node, Type::Category category)
+void SymbolResolveAction::defineType(const std::shared_ptr<TypeDeclaration>& node, Type::Category category)
 {
-    TypeIdentifier* id = node->getIdentifier();
+    TypeIdentifierPtr id = node->getIdentifier();
     SymbolScope* scope = NULL;
     TypePtr type;
     //it's inside the type's scope, so need to access parent scope;
@@ -229,7 +229,7 @@ void SymbolResolveAction::defineType(TypeDeclaration* node, Type::Category categ
         return;
     }
     //check for parent class or protocol
-    for(TypeIdentifier* parent : node->parents)
+    for(const TypeIdentifierPtr& parent : node->parents)
     {
         //check the parent must be a defined type
         type = symbolRegistry->lookupType(parent->getName());
@@ -245,33 +245,33 @@ void SymbolResolveAction::defineType(TypeDeclaration* node, Type::Category categ
 }
 
 
-void SymbolResolveAction::visitClass(ClassDef* node)
+void SymbolResolveAction::visitClass(const ClassDefPtr& node)
 {
     defineType(node, Type::Class);
     NodeVisitor::visitClass(node);
 }
-void SymbolResolveAction::visitStruct(StructDef* node)
+void SymbolResolveAction::visitStruct(const StructDefPtr& node)
 {
     defineType(node, Type::Struct);
     NodeVisitor::visitStruct(node);
 }
-void SymbolResolveAction::visitEnum(EnumDef* node)
+void SymbolResolveAction::visitEnum(const EnumDefPtr& node)
 {
     defineType(node, Type::Enum);
     NodeVisitor::visitEnum(node);
 }
-void SymbolResolveAction::visitProtocol(ProtocolDef* node)
+void SymbolResolveAction::visitProtocol(const ProtocolDefPtr& node)
 {
     defineType(node, Type::Protocol);
     NodeVisitor::visitProtocol(node);
 }
-void SymbolResolveAction::visitExtension(ExtensionDef* node)
+void SymbolResolveAction::visitExtension(const ExtensionDefPtr& node)
 {
     NodeVisitor::visitExtension(node);
 
 }
-void SymbolResolveAction::visitFunction(FunctionDef* node)
+void SymbolResolveAction::visitFunction(const FunctionDefPtr& node)
 {
-    symbolRegistry->getCurrentScope()->addSymbol(static_cast<SymboledFunction*>(node));
+    symbolRegistry->getCurrentScope()->addSymbol(std::static_pointer_cast<SymboledFunction>(node));
     NodeVisitor::visitFunction(node);
 }

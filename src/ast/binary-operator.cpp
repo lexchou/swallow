@@ -2,14 +2,13 @@
 #include "node-visitor.h"
 USE_SWIFT_NS;
 
-BinaryOperator::BinaryOperator(const std::wstring& op, Associativity::T associativity, int precedence)
-    :Operator(NodeType::BinaryOperator, OperatorType::InfixBinary, associativity, precedence), op(op), lhs(NULL), rhs(NULL)
+BinaryOperator::BinaryOperator()
+    :Operator(NodeType::BinaryOperator)
 {
+    type = OperatorType::InfixBinary;
 }
 BinaryOperator::~BinaryOperator()
 {
-    SafeDelete(lhs);
-    SafeDelete(rhs);
 }
 void BinaryOperator::serialize(std::wostream& out)
 {
@@ -21,7 +20,7 @@ void BinaryOperator::serialize(std::wostream& out)
 }
 void BinaryOperator::accept(NodeVisitor* visitor)
 {
-    visitor->visitBinaryOperator(this);
+    accept2(visitor, &NodeVisitor::visitBinaryOperator);
 }
 
 
@@ -29,7 +28,7 @@ int BinaryOperator::numChildren()
 {
     return 2;
 }
-Node* BinaryOperator::get(int i)
+NodePtr BinaryOperator::get(int i)
 {
     switch(i)
     {
@@ -41,15 +40,15 @@ Node* BinaryOperator::get(int i)
             return NULL;
     }
 }
-void BinaryOperator::set(int i, Node* val)
+void BinaryOperator::set(int i, const NodePtr& val)
 {
     switch(i)
     {
         case 0:
-            lhs = dynamic_cast<Pattern*>(val);
+            lhs = std::dynamic_pointer_cast<Pattern>(val);
             break;
         case 1:
-            rhs = dynamic_cast<Pattern*>(val);
+            rhs = std::dynamic_pointer_cast<Pattern>(val);
             break;
         default:
             break;

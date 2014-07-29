@@ -14,9 +14,7 @@ SwitchCase::SwitchCase()
 SwitchCase::~SwitchCase()
 {
     
-    SafeDelete(controlExpression);
-    SafeDeleteAll(cases);
-    SafeDelete(defaultCase);
+
 }
 
 void SwitchCase::serialize(std::wostream& out)
@@ -28,19 +26,19 @@ void SwitchCase::serialize(std::wostream& out)
 }
 void SwitchCase::accept(NodeVisitor* visitor)
 {
-    visitor->visitSwitchCase(this);
+    accept2(visitor, &NodeVisitor::visitSwitchCase);
 }
 
-void SwitchCase::setControlExpression(Expression* expr)
+void SwitchCase::setControlExpression(const ExpressionPtr& expr)
 {
     this->controlExpression = expr;
 }
-Expression* SwitchCase::getControlExpression()
+ExpressionPtr SwitchCase::getControlExpression()
 {
     return controlExpression;
 }
 
-void SwitchCase::addCase(CaseStatement* c)
+void SwitchCase::addCase(const CaseStatementPtr& c)
 {
     cases.push_back(c);
 }
@@ -48,16 +46,16 @@ int SwitchCase::numCases()
 {
     return cases.size();
 }
-CaseStatement* SwitchCase::getCase(int idx)
+CaseStatementPtr SwitchCase::getCase(int idx)
 {
     return cases[idx];
 }
 
-void SwitchCase::setDefaultCase(CaseStatement* c)
+void SwitchCase::setDefaultCase(const CaseStatementPtr& c)
 {
     this->defaultCase = c;
 }
-CaseStatement* SwitchCase::getDefaultCase()
+CaseStatementPtr SwitchCase::getDefaultCase()
 {
     return defaultCase;
 }

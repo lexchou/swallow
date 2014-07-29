@@ -14,35 +14,33 @@ FunctionCall::FunctionCall()
 
 FunctionCall::~FunctionCall()
 {
-    SafeDelete(function);
-    SafeDelete(arguments);
-    SafeDelete(trailingClosure);
+
 }
 
-void FunctionCall::setFunction(Expression* expr)
+void FunctionCall::setFunction(const ExpressionPtr& expr)
 {
     function = expr;
 }
-Expression* FunctionCall::getFunction()
+ExpressionPtr FunctionCall::getFunction()
 {
     return function;
 }
-void FunctionCall::setArguments(ParenthesizedExpression* arguments)
+void FunctionCall::setArguments(const ParenthesizedExpressionPtr& arguments)
 {
     this->arguments = arguments;
 }
-ParenthesizedExpression* FunctionCall::getArguments()
+ParenthesizedExpressionPtr FunctionCall::getArguments()
 {
     return arguments;
 }
 
-void FunctionCall::setTrailingClosure(Closure* trailingClosure)
+void FunctionCall::setTrailingClosure(const ClosurePtr& trailingClosure)
 {
     this->trailingClosure = trailingClosure;
 }
 
 
-Closure* FunctionCall::getTrailingClosure()
+ClosurePtr FunctionCall::getTrailingClosure()
 {
     return trailingClosure;
 }
@@ -67,5 +65,5 @@ void FunctionCall::serialize(std::wostream& out)
 }
 void FunctionCall::accept(NodeVisitor* visitor)
 {
-    visitor->visitFunctionCall(this);
+    accept2(visitor, &NodeVisitor::visitFunctionCall);
 }

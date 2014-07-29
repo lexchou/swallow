@@ -10,14 +10,14 @@ EnumCasePattern::EnumCasePattern()
 }
 EnumCasePattern::~EnumCasePattern()
 {
-    SafeDelete(associatedBinding);
+
 }
 void EnumCasePattern::serialize(std::wostream& out)
 {
 }
 void EnumCasePattern::accept(NodeVisitor* visitor)
 {
-    visitor->visitEnumCasePattern(this);
+    accept2(visitor, &NodeVisitor::visitEnumCasePattern);
 }
 
 void EnumCasePattern::setName(const std::wstring& name)
@@ -29,11 +29,11 @@ const std::wstring& EnumCasePattern::getName()const
     return name;
 }
 
-void EnumCasePattern::setAssociatedBinding(Tuple* tuple)
+void EnumCasePattern::setAssociatedBinding(const TuplePtr& tuple)
 {
     associatedBinding = tuple;
 }
-Tuple* EnumCasePattern::getAssociatedBinding()
+TuplePtr EnumCasePattern::getAssociatedBinding()
 {
     return associatedBinding;
 }

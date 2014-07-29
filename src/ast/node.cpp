@@ -32,8 +32,6 @@ Node::~Node()
     this->setAutoReleasePool(NULL);
 }
 
-
-
 void Node::setAutoReleasePool(AutoReleasePool* autoReleasePool)
 {
     if(this->autoReleasePool == autoReleasePool)

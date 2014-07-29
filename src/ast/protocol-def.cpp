@@ -13,5 +13,5 @@ void ProtocolDef::serialize(std::wostream& out)
 }
 void ProtocolDef::accept(NodeVisitor* visitor)
 {
-    visitor->visitProtocol(this);
+    accept2(visitor, &NodeVisitor::visitProtocol);
 }

@@ -11,8 +11,7 @@ GenericParameters::GenericParameters()
 }
 GenericParameters::~GenericParameters()
 {
-    SafeDeleteAll(genericTypes);
-    SafeDeleteAll(constraints);
+
 }
 void GenericParameters::serialize(std::wostream& out)
 {
@@ -20,7 +19,7 @@ void GenericParameters::serialize(std::wostream& out)
 }
 
 
-void GenericParameters::addGenericType(TypeIdentifier* type)
+void GenericParameters::addGenericType(const TypeIdentifierPtr& type)
 {
     genericTypes.push_back(type);
 }
@@ -28,13 +27,13 @@ int GenericParameters::numGenericTypes()const
 {
     return genericTypes.size();
 }
-TypeIdentifier* GenericParameters::getGenericType(int i)
+TypeIdentifierPtr GenericParameters::getGenericType(int i)
 {
-    return static_cast<TypeIdentifier*>(genericTypes[i]);
+    return genericTypes[i];
 }
 
 
-void GenericParameters::addConstraint(GenericConstraint* constraint)
+void GenericParameters::addConstraint(const GenericConstraintPtr& constraint)
 {
     constraints.push_back(constraint);
 }
@@ -42,7 +41,7 @@ int GenericParameters::numConstraints()const
 {
     return constraints.size();
 }
-GenericConstraint* GenericParameters::getConstraint(int i)
+GenericConstraintPtr GenericParameters::getConstraint(int i)
 {
     return constraints[i];
 }

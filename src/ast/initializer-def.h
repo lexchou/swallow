@@ -19,18 +19,18 @@ public:
     bool isConvenience()const;
     
     
-    void setParameters(Parameters* parameters);
-    Parameters* getParameters();
+    void setParameters(const ParametersPtr& parameters);
+    ParametersPtr getParameters();
     
-    void setBody(CodeBlock* body);
-    CodeBlock* getBody();
+    void setBody(const CodeBlockPtr& body);
+    CodeBlockPtr getBody();
 public:
     virtual void serialize(std::wostream& out);
     virtual void accept(NodeVisitor* visitor);
 private:
     bool convenience;
-    Parameters* parameters;
-    CodeBlock* body;
+    ParametersPtr parameters;
+    CodeBlockPtr body;
 };
 
 SWIFT_NS_END

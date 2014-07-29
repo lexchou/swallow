@@ -12,10 +12,7 @@ Closure::Closure()
 
 Closure::~Closure()
 {
-    SafeDelete(capture);
-    SafeDelete(parameters);
-    SafeDelete(returnType);
-    SafeDeleteAll(statements);
+
 }
 
 void Closure::serialize(std::wostream& out)
@@ -23,7 +20,7 @@ void Closure::serialize(std::wostream& out)
 }
 void Closure::accept(NodeVisitor* visitor)
 {
-    visitor->visitClosure(this);
+    accept2(visitor, &NodeVisitor::visitClosure);
 }
 
 Closure::CaptureSpecifier Closure::getCaptureSpecifier()const
@@ -35,34 +32,34 @@ void Closure::setCaptureSpecifier(CaptureSpecifier val)
     captureSpecifier = val;
 }
 
-void Closure::setCapture(Expression* capture)
+void Closure::setCapture(const ExpressionPtr& capture)
 {
     this->capture = capture;
 }
-Expression* Closure::getCapture()
+ExpressionPtr Closure::getCapture()
 {
     return capture;
 }
 
-void Closure::setParameters(Parameters* val)
+void Closure::setParameters(const ParametersPtr& val)
 {
     parameters = val;
 }
-Parameters* Closure::getParameters()
+ParametersPtr Closure::getParameters()
 {
     return parameters;
 }
 
-void Closure::setReturnType(TypeNode* val)
+void Closure::setReturnType(const TypeNodePtr& val)
 {
     returnType = val;
 }
-TypeNode* Closure::getReturnType()
+TypeNodePtr Closure::getReturnType()
 {
     return returnType;
 }
 
-void Closure::addStatement(Statement* st)
+void Closure::addStatement(const StatementPtr& st)
 {
     statements.push_back(st);
 }
@@ -70,7 +67,7 @@ int Closure::numStatement()const
 {
     return statements.size();
 }
-Statement* Closure::getStatement(int i)
+StatementPtr Closure::getStatement(int i)
 {
     return statements[i];
 }

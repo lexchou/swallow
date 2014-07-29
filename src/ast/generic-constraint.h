@@ -18,22 +18,22 @@ public:
     GenericConstraint();
     ~GenericConstraint();
 public:
-    void setIdentifier(TypeIdentifier* identifier);
-    TypeIdentifier* getIdentifier();
+    void setIdentifier(const TypeIdentifierPtr& identifier);
+    TypeIdentifierPtr getIdentifier();
 
     void setConstraintType(ConstraintType constraint);
     ConstraintType getConstraintType()const;
     
-    void addExpectedType(TypeIdentifier* expectedIdentifier);
+    void addExpectedType(const TypeIdentifierPtr& expectedIdentifier);
     int numExpectedTypes()const;
-    TypeIdentifier* getExpectedType(int i);
+    TypeIdentifierPtr getExpectedType(int i);
     
 public:
     virtual void serialize(std::wostream& out);
 private:
     ConstraintType type;
-    TypeIdentifier* identifier;
-    std::vector<TypeIdentifier*> expectedTypes;
+    TypeIdentifierPtr identifier;
+    std::vector<TypeIdentifierPtr> expectedTypes;
 };
 
 SWIFT_NS_END

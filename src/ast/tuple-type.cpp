@@ -11,20 +11,14 @@ TupleType::TupleType()
 }
 TupleType::~TupleType()
 {
-    std::vector<TupleElement>::iterator iter = elements.begin();
-    for(; iter != elements.end(); iter++)
-    {
-        delete iter->type;
-    }
-    elements.clear();
 }
 
-static void serializeAttributes(TypeNode* type, std::wostream& out)
+static void serializeAttributes(const TypeNodePtr& type, std::wostream& out)
 {
-    const std::vector<Attribute*>& attrs = type->getAttributes();
+    const std::vector<AttributePtr>& attrs = type->getAttributes();
     if(attrs.empty())
         return;
-    std::vector<Attribute*>::const_iterator iter = attrs.begin();
+    std::vector<AttributePtr>::const_iterator iter = attrs.begin();
     for(; iter != attrs.end(); iter++)
     {
         (*iter)->serialize(out);
@@ -37,7 +31,7 @@ void TupleType::serialize(std::wostream& out)
     std::vector<TupleElement>::iterator iter = elements.begin();
     for(; iter != elements.end(); iter++)
     {
-        TypeNode* type = iter->type;
+        TypeNodePtr type = iter->type;
         if(iter != elements.begin())
         {
             out<<L", ";
@@ -62,7 +56,7 @@ void TupleType::serialize(std::wostream& out)
     out<<L")";
 }
 
-void TupleType::add(bool inout, const std::wstring& name, TypeNode* type)
+void TupleType::add(bool inout, const std::wstring& name, const TypeNodePtr& type)
 {
     elements.push_back(TupleElement(inout, name, type));
 }
@@ -70,7 +64,7 @@ int TupleType::numElements()
 {
     return elements.size();
 }
-TypeNode* TupleType::getElementType(int i)
+TypeNodePtr TupleType::getElementType(int i)
 {
     return elements[i].type;
 }

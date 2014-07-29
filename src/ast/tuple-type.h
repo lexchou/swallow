@@ -13,17 +13,17 @@ protected:
     {
         bool inout;
         std::wstring name;
-        TypeNode* type;
-        TupleElement(bool inout, const std::wstring& name, TypeNode* type)
+        TypeNodePtr type;
+        TupleElement(bool inout, const std::wstring& name, const TypeNodePtr& type)
         :inout(inout), name(name), type(type){}
     };
 public:
     TupleType();
     ~TupleType();
 public:
-    void add(bool inout, const std::wstring& name, TypeNode* type);
+    void add(bool inout, const std::wstring& name, const TypeNodePtr& type);
     int numElements();
-    TypeNode* getElementType(int i);
+    TypeNodePtr getElementType(int i);
     const TupleElement& getElement(int i);
     
     void setVariadicParameters(bool val);

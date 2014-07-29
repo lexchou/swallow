@@ -8,30 +8,30 @@ class Identifier;
 class SubscriptAccess : public Expression
 {
 public:
-    SubscriptAccess(Expression* self, Expression* index);
+    SubscriptAccess();
     ~SubscriptAccess();
 public:
-    void setSelf(Expression* self);
-    Expression* getSelf();
+    void setSelf(ExpressionPtr self);
+    ExpressionPtr getSelf();
     
-    void setIndex(Expression* index);
-    Expression* getIndex();
+    void setIndex(ExpressionPtr index);
+    ExpressionPtr getIndex();
 
-    void setIndex(int idx, Expression* index);
-    Expression* getIndex(int idx);
+    void setIndex(int idx, const ExpressionPtr& index);
+    ExpressionPtr getIndex(int idx);
     
-    void addIndex(Expression* index);
+    void addIndex(ExpressionPtr index);
     int numIndices();
 
-    std::vector<Expression*>::iterator begin(){return indices.begin();}
-    std::vector<Expression*>::iterator end(){return indices.end();}
+    std::vector<ExpressionPtr>::iterator begin(){return indices.begin();}
+    std::vector<ExpressionPtr>::iterator end(){return indices.end();}
 
 public:
     virtual void serialize(std::wostream& out);
     virtual void accept(NodeVisitor* visitor);
 public:
-    Expression* self;
-    std::vector<Expression*> indices;
+    ExpressionPtr self;
+    std::vector<ExpressionPtr> indices;
     
 };
 

@@ -8,14 +8,14 @@ SWIFT_NS_BEGIN
 class IntegerLiteral : public Expression
 {
 public:
-    IntegerLiteral(const std::wstring& val);
+    IntegerLiteral();
 public:
-    const std::wstring& toString() const { return value;}
     virtual void serialize(std::wostream& out);
-private:
-    std::wstring value;
+public:
+    std::wstring valueAsString;
+    int64_t value;
 };
-
+typedef std::shared_ptr<IntegerLiteral> IntegerLiteralPtr;
 
 SWIFT_NS_END
 

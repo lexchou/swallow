@@ -7,6 +7,7 @@
 
 
 SWIFT_NS_BEGIN
+/*
 template<class T>
 inline void SafeDelete(T*& val)
 {
@@ -25,6 +26,7 @@ inline void SafeDeleteAll(ContainerT& container)
     }
     container.clear();
 }
+*/
 
 SWIFT_NS_END
 

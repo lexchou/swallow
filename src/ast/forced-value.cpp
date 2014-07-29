@@ -3,20 +3,18 @@
 USE_SWIFT_NS
 
 
-ForcedValue::ForcedValue(Expression* expr)
+ForcedValue::ForcedValue()
     :Expression(NodeType::ForcedValue)
 {
-    setExpression(expr);
 }
 ForcedValue::~ForcedValue()
 {
-    SafeDelete(expression);
 }
-void ForcedValue::setExpression(Expression* expr)
+void ForcedValue::setExpression(const ExpressionPtr& expr)
 {
     this->expression = expr;
 }
-Expression* ForcedValue::getExpression()
+ExpressionPtr ForcedValue::getExpression()
 {
     return expression;
 }
@@ -28,5 +26,5 @@ void ForcedValue::serialize(std::wostream& out)
 }
 void ForcedValue::accept(NodeVisitor* visitor)
 {
-    visitor->visitForcedValue(this);
+    accept2(visitor, &NodeVisitor::visitForcedValue);
 }

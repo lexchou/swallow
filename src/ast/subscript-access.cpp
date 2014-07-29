@@ -3,49 +3,46 @@
 USE_SWIFT_NS
 
 
-SubscriptAccess::SubscriptAccess(Expression* self, Expression* index)
+SubscriptAccess::SubscriptAccess()
     :Expression(NodeType::SubscriptAccess)
 {
-    setSelf(self);
-    setIndex(index);
+
 }
 
 SubscriptAccess::~SubscriptAccess()
 {
-    SafeDelete(self);
-    SafeDeleteAll(indices);
 }
 
-void SubscriptAccess::setSelf(Expression* self)
+void SubscriptAccess::setSelf(ExpressionPtr self)
 {
     this->self = self;
 }
-Expression* SubscriptAccess::getSelf()
+ExpressionPtr SubscriptAccess::getSelf()
 {
     return self;
 }
 
-void SubscriptAccess::setIndex(Expression* index)
+void SubscriptAccess::setIndex(ExpressionPtr index)
 {
-    SafeDeleteAll(indices);
+    indices.clear();
     addIndex(index);
 }
-Expression* SubscriptAccess::getIndex()
+ExpressionPtr SubscriptAccess::getIndex()
 {
     if(indices.empty())
         return NULL;
     return indices.front();
 }
-void SubscriptAccess::setIndex(int idx, Expression* index)
+void SubscriptAccess::setIndex(int idx, const ExpressionPtr& index)
 {
     indices[idx] = index;
 }
-Expression* SubscriptAccess::getIndex(int idx)
+ExpressionPtr SubscriptAccess::getIndex(int idx)
 {
     return indices[idx];
 }
 
-void SubscriptAccess::addIndex(Expression* index)
+void SubscriptAccess::addIndex(ExpressionPtr index)
 {
     indices.push_back(index);
 }
@@ -61,7 +58,7 @@ void SubscriptAccess::serialize(std::wostream& out)
     out<<L"[";
     for(int i = 0; i < numIndices(); i++)
     {
-        Expression* index = getIndex(i);
+        ExpressionPtr index = getIndex(i);
         if(i != 0)
             out<<L", ";
         index->serialize(out);
@@ -71,7 +68,7 @@ void SubscriptAccess::serialize(std::wostream& out)
 
 void SubscriptAccess::accept(NodeVisitor* visitor)
 {
-    visitor->visitSubscriptAccess(this);
+    accept2(visitor, &NodeVisitor::visitSubscriptAccess);
 }
 
 

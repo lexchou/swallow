@@ -23,19 +23,19 @@ public:
         KeyValue(const std::wstring& name, ValueType value)
         :name(name), value(value){}
     };
-    typedef KeyValue<TupleType*> AssociatedType;
-    typedef KeyValue<Expression*> Constant;
+    typedef KeyValue<TupleTypePtr> AssociatedType;
+    typedef KeyValue<ExpressionPtr> Constant;
 public:
     EnumDef();
     ~EnumDef();
 public:
     Type getType()const;
     
-    void addAssociatedType(const std::wstring& name, TupleType* associatedType);
+    void addAssociatedType(const std::wstring& name, const TupleTypePtr& associatedType);
     int numAssociatedTypes()const;
     const AssociatedType& getAssociatedType(int i);
     
-    void addConstant(const std::wstring& name, Expression* value);
+    void addConstant(const std::wstring& name, const ExpressionPtr& value);
     int numConstants();
     const Constant& getConstant(int i);
     

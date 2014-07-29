@@ -4,16 +4,15 @@
 #include "node-visitor.h"
 USE_SWIFT_NS
 
-Identifier::Identifier(const std::wstring& identifier)
-    :Expression(NodeType::Identifier), identifier(identifier), declaredType(NULL), genericArgument(NULL)
+Identifier::Identifier()
+    :Expression(NodeType::Identifier)
 {
     flags = 0;
 }
 
 Identifier::~Identifier()
 {
-    SafeDelete(declaredType);
-    SafeDelete(genericArgument);
+
 }
 
 void Identifier::serialize(std::wostream& out)
@@ -22,24 +21,24 @@ void Identifier::serialize(std::wostream& out)
 }
 void Identifier::accept(NodeVisitor* visitor)
 {
-    visitor->visitIdentifier(this);
+    accept2(visitor, &NodeVisitor::visitIdentifier);
 }
 
 
-void Identifier::setDeclaredType(TypeNode* type)
+void Identifier::setDeclaredType(const TypeNodePtr& type)
 {
     this->declaredType = type;
 }
-TypeNode* Identifier::getDeclaredType()
+TypeNodePtr Identifier::getDeclaredType()
 {
     return declaredType;
 }
 
-GenericArgument* Identifier::getGenericArgument()
+GenericArgumentPtr Identifier::getGenericArgument()
 {
     return genericArgument;
 }
-void Identifier::setGenericArgument(GenericArgument* val)
+void Identifier::setGenericArgument(const GenericArgumentPtr& val)
 {
     genericArgument = val;
 }

@@ -3,35 +3,15 @@
 #include "swift_conf.h"
 #include "tokenizer/tokens.h"
 #include <string>
+#include "ast/ast-decl.h"
 
 SWIFT_NS_BEGIN
 
 class Tokenizer;
-class Node;
-class Expression;
-class FunctionCall;
 class SymbolRegistry;
-class Identifier;
 class NodeFactory;
-class Closure;
-class CodeBlock;
-class Statement;
-class ParenthesizedExpression;
-class TypeNode;
-class CaseStatement;
-class Tuple;
-class TupleType;
-class TypeIdentifier;
-class ProtocolComposition;
-class Attribute;
-class Declaration;
-class Pattern;
-class Variable;
-class Parameters;
-class GenericParameters;
-class GenericArgument;
 class CompilerResults;
-class Program;
+
 class Parser
 {
     friend struct Flags;
@@ -39,107 +19,107 @@ public:
     Parser(NodeFactory* nodeFactory, SymbolRegistry* symbolRegistry, CompilerResults* compilerResults);
     ~Parser();
 public:
-    Node* parseStatement(const wchar_t* code);
-    Program* parse(const wchar_t* code);
+    NodePtr parseStatement(const wchar_t* code);
+    ProgramPtr parse(const wchar_t* code);
     void setFileName(const wchar_t* fileName);
     void setFunctionName(const wchar_t* function);
 private:
-    TypeNode* parseType();
-    TypeNode* parseTypeAnnotation();
+    TypeNodePtr parseType();
+    TypeNodePtr parseTypeAnnotation();
     
-    TupleType* parseTupleType();
-    TypeIdentifier* parseTypeIdentifier();
-    ProtocolComposition* parseProtocolComposition();
-    GenericParameters* parseGenericParameters();
+    TupleTypePtr parseTupleType();
+    TypeIdentifierPtr parseTypeIdentifier();
+    ProtocolCompositionPtr parseProtocolComposition();
+    GenericParametersPtr parseGenericParameters();
 private://statement
-    Statement* parseStatement();
-    Statement* parseLoopStatement();
-    Statement* parseForLoop();
+    StatementPtr parseStatement();
+    StatementPtr parseLoopStatement();
+    StatementPtr parseForLoop();
     
-    Statement* parseForIn();
-    Statement* parseForStatement();
+    StatementPtr parseForIn();
+    StatementPtr parseForStatement();
     
-    Statement* parseWhileLoop();
-    Statement* parseDoLoop();
-    Statement* parseIf();
-    Statement* parseSwitch();
-    void parseSwitchStatements(CaseStatement* case_);
-    Statement* parseBreak();
-    Statement* parseContinue();
-    Statement* parseFallthrough();
-    Statement* parseReturn();
-    Statement* parseLabeledStatement();
-    Expression* parseConditionExpression();
+    StatementPtr parseWhileLoop();
+    StatementPtr parseDoLoop();
+    IfStatementPtr parseIf();
+    StatementPtr parseSwitch();
+    void parseSwitchStatements(const CaseStatementPtr& case_);
+    StatementPtr parseBreak();
+    StatementPtr parseContinue();
+    StatementPtr parseFallthrough();
+    StatementPtr parseReturn();
+    StatementPtr parseLabeledStatement();
+    ExpressionPtr parseConditionExpression();
     
-    CodeBlock* parseCodeBlock();
+    CodeBlockPtr parseCodeBlock();
 private://pattern
-    Pattern* parsePattern();
-    Pattern* parseTuple();
-    Pattern* parseEnumPattern();
-    Pattern* parseTypeCastingPattern();
+    PatternPtr parsePattern();
+    PatternPtr parseTuple();
+    PatternPtr parseEnumPattern();
+    PatternPtr parseTypeCastingPattern();
 private://Attribute
-    void parseAttributes(std::vector<Attribute*>& attributes);
-    Attribute* parseAttribute();
-    void parseBalancedToken(Attribute* attr);
-    void parseBalancedTokens(Attribute* attr, const wchar_t* end);
+    void parseAttributes(std::vector<AttributePtr>& attributes);
+    AttributePtr parseAttribute();
+    void parseBalancedToken(const AttributePtr& attr);
+    void parseBalancedTokens(const AttributePtr& attr, const wchar_t* end);
     
 private://declaration
-    Declaration* parseDeclaration();
+    DeclarationPtr parseDeclaration();
     int parseDeclarationSpecifiers();
     void verifyDeclarationSpecifiers(const Token& token, int actualSpecifiers, int expectedSpecifiers);
-    Declaration* parseImport(const std::vector<Attribute*>& attrs);
-    Declaration* parseLet(const std::vector<Attribute*>& attrs, int specifiers);
-    Declaration* parseVar(const std::vector<Attribute*>& attrs, int specifiers);
-    Variable* parseVariableDeclaration();
-    void parseWillSetDidSetBlock(Variable* variable);
-    void parseWillSetClause(Variable* variable, bool opt);
-    void parseDidSetClause(Variable* variable, bool opt);
+    DeclarationPtr parseImport(const std::vector<AttributePtr>& attrs);
+    DeclarationPtr parseLet(const std::vector<AttributePtr>& attrs, int specifiers);
+    DeclarationPtr parseVar(const std::vector<AttributePtr>& attrs, int specifiers);
+    VariablePtr parseVariableDeclaration();
+    void parseWillSetDidSetBlock(const VariablePtr& variable);
+    void parseWillSetClause(const VariablePtr& variable, bool opt);
+    void parseDidSetClause(const VariablePtr& variable, bool opt);
     
-    std::pair<CodeBlock*, std::pair<std::wstring, CodeBlock*> > parseGetterSetterBlock();
-    std::pair<std::wstring, CodeBlock*> parseSetterClause();
-    std::pair<CodeBlock*, CodeBlock*> parseGetterSetterKeywordBlock();
+    std::pair<CodeBlockPtr, std::pair<std::wstring, CodeBlockPtr> > parseGetterSetterBlock();
+    std::pair<std::wstring, CodeBlockPtr> parseSetterClause();
+    std::pair<CodeBlockPtr, CodeBlockPtr> parseGetterSetterKeywordBlock();
     
-    Declaration* parseTypealias(const std::vector<Attribute*>& attrs);
-    Declaration* parseFunc(const std::vector<Attribute*>& attrs, int specifiers);
-    Parameters* parseParameterClause();
+    DeclarationPtr parseTypealias(const std::vector<AttributePtr>& attrs);
+    DeclarationPtr parseFunc(const std::vector<AttributePtr>& attrs, int specifiers);
+    ParametersPtr parseParameterClause();
 
-    Declaration* parseEnum(const std::vector<Attribute*>& attrs);
-    Declaration* parseRawValueEnum(const std::vector<Attribute*>& attrs, const std::wstring& name, TypeIdentifier* baseType);
-    Declaration* parseUnionEnum(const std::vector<Attribute*>& attrs, const std::wstring& name);
+    DeclarationPtr parseEnum(const std::vector<AttributePtr>& attrs);
+    DeclarationPtr parseRawValueEnum(const std::vector<AttributePtr>& attrs, const std::wstring& name, const TypeIdentifierPtr& baseType);
+    DeclarationPtr parseUnionEnum(const std::vector<AttributePtr>& attrs, const std::wstring& name);
 
     
-    Declaration* parseStruct(const std::vector<Attribute*>& attrs);
-    Declaration* parseClass(const std::vector<Attribute*>& attrs);
-    Declaration* parseProtocol(const std::vector<Attribute*>& attrs);
-    Declaration* parseInit(const std::vector<Attribute*>& attrs);
-    Declaration* parseDeinit(const std::vector<Attribute*>& attrs);
-    Declaration* parseExtension(const std::vector<Attribute*>& attrs);
-    Declaration* parseSubscript(const std::vector<Attribute*>& attrs);
-    Declaration* parseOperator(const std::vector<Attribute*>& attrs);
+    DeclarationPtr parseStruct(const std::vector<AttributePtr>& attrs);
+    DeclarationPtr parseClass(const std::vector<AttributePtr>& attrs);
+    DeclarationPtr parseProtocol(const std::vector<AttributePtr>& attrs);
+    DeclarationPtr parseInit(const std::vector<AttributePtr>& attrs);
+    DeclarationPtr parseDeinit(const std::vector<AttributePtr>& attrs);
+    DeclarationPtr parseExtension(const std::vector<AttributePtr>& attrs);
+    DeclarationPtr parseSubscript(const std::vector<AttributePtr>& attrs);
+    DeclarationPtr parseOperator(const std::vector<AttributePtr>& attrs);
 private://expression
-    Expression* parseFloat();
-    Expression* parseInteger();
-    Expression* parseString();
-    Expression* parseExpression();
-    Expression* parseBinaryExpression(Expression* lhs);
-    Expression* parsePrefixExpression();
-    Expression* parsePostfixExpression();
-    FunctionCall* parseFunctionCallExpression();
-    Expression* parsePrimaryExpression();
-    Expression* parseLiteralExpression();
-    Expression* parseParenthesizedExpression();
-    void parseExpressionItem(ParenthesizedExpression* parent);
-    Expression* parseLiteral();
+    ExpressionPtr parseFloat();
+    ExpressionPtr parseInteger();
+    ExpressionPtr parseString();
+    ExpressionPtr parseExpression();
+    ExpressionPtr parseBinaryExpression(const ExpressionPtr& lhs);
+    ExpressionPtr parsePrefixExpression();
+    ExpressionPtr parsePostfixExpression();
+    FunctionCallPtr parseFunctionCallExpression();
+    ExpressionPtr parsePrimaryExpression();
+    ExpressionPtr parseLiteralExpression();
+    ParenthesizedExpressionPtr parseParenthesizedExpression();
+    void parseExpressionItem(const ParenthesizedExpressionPtr& parent);
+    ExpressionPtr parseLiteral();
     
-    Expression* parseSelfExpression();
-    Expression* parseSuperExpression();
-    Identifier* parseIdentifier();
-    Closure* parseClosureExpression();
+    ExpressionPtr parseSelfExpression();
+    ExpressionPtr parseSuperExpression();
+    IdentifierPtr parseIdentifier();
+    ClosurePtr parseClosureExpression();
     bool isGenericArgument();
-    GenericArgument* parseGenericArgument();
+    GenericArgumentPtr parseGenericArgument();
     
     
-    std::pair<Expression*, Expression*> parseDictionaryLiteralItem();
+    std::pair<ExpressionPtr, ExpressionPtr> parseDictionaryLiteralItem();
 private:
     /**
      * Read next token from tokenizer, throw exception if EOF reached.

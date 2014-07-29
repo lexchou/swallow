@@ -2,6 +2,7 @@
 #define FOR_IN_LOOP_H
 #include "statement.h"
 #include <string>
+#include "ast-decl.h"
 
 SWIFT_NS_BEGIN
 
@@ -17,19 +18,19 @@ public:
     virtual void serialize(std::wostream& out);
     virtual void accept(NodeVisitor* visitor);
 public:
-    void setLoopVars(Pattern* val);
-    Pattern* getLoopVars();
+    void setLoopVars(const PatternPtr& val);
+    PatternPtr getLoopVars();
     
-    void setContainer(Expression* vla);
-    Expression* getContainer();
+    void setContainer(const ExpressionPtr& vla);
+    ExpressionPtr getContainer();
     
-    void setCodeBlock(CodeBlock* val);
-    CodeBlock* getCodeBlock();
+    void setCodeBlock(const CodeBlockPtr& val);
+    CodeBlockPtr getCodeBlock();
     
 private:
-    Pattern* loopVars;
-    Expression* container;
-    CodeBlock* codeBlock;
+    PatternPtr loopVars;
+    ExpressionPtr container;
+    CodeBlockPtr codeBlock;
 };
 
 SWIFT_NS_END

@@ -14,5 +14,5 @@ void FallthroughStatement::serialize(std::wostream& out)
 }
 void FallthroughStatement::accept(NodeVisitor* visitor)
 {
-    visitor->visitFallthrough(this);
+    accept2(visitor, &NodeVisitor::visitFallthrough);
 }

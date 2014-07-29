@@ -12,8 +12,7 @@ DoLoop::DoLoop()
 }
 DoLoop::~DoLoop()
 {
-    SafeDelete(codeBlock);
-    SafeDelete(condition);
+
 }
 
 void DoLoop::serialize(std::wostream& out)
@@ -26,23 +25,23 @@ void DoLoop::serialize(std::wostream& out)
 }
 void DoLoop::accept(NodeVisitor* visitor)
 {
-    visitor->visitDoLoop(this);
+    accept2(visitor, &NodeVisitor::visitDoLoop);
 }
 
-void DoLoop::setCodeBlock(CodeBlock* codeBlock)
+void DoLoop::setCodeBlock(const CodeBlockPtr& codeBlock)
 {
     this->codeBlock = codeBlock;
 }
-CodeBlock* DoLoop::getCodeBlock()
+CodeBlockPtr DoLoop::getCodeBlock()
 {
     return codeBlock;
 }
 
-void DoLoop::setCondition(Expression* expression)
+void DoLoop::setCondition(const ExpressionPtr& expression)
 {
     this->condition = expression;
 }
-Expression* DoLoop::getCondition()
+ExpressionPtr DoLoop::getCondition()
 {
     return condition;
 }

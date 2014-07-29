@@ -20,8 +20,8 @@ public:
 public://Node
     virtual void accept(NodeVisitor* visitor);
 public:
-    Pattern* name;
-    Expression* initializer;
+    PatternPtr name;
+    ExpressionPtr initializer;
 };
 
 SWIFT_NS_END

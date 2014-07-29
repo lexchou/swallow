@@ -20,41 +20,41 @@ public:
     using Declaration::getSpecifiers;
     
     
-    void setName(Pattern* pattern);
-    Pattern* getName();
+    void setName(const PatternPtr& pattern);
+    PatternPtr getName();
     
     void setTypeAttributes(const Attributes& attrs);
     const Attributes& getTypeAttributes() const;
     
-    void setDeclaredType(TypeNode* t);
-    TypeNode* getDeclaredType();
+    void setDeclaredType(const TypeNodePtr& t);
+    TypeNodePtr getDeclaredType();
     
     
-    void setInitializer(Expression* expr);
-    Expression* getInitializer();
+    void setInitializer(const ExpressionPtr& expr);
+    ExpressionPtr getInitializer();
     
-    void setSetter(CodeBlock* setter);
-    CodeBlock* getSetter();
+    void setSetter(const CodeBlockPtr& setter);
+    CodeBlockPtr getSetter();
     
     void setSetterName(const std::wstring& name);
     const std::wstring& getSetterName();
     
-    void setGetter(CodeBlock* getter);
-    CodeBlock* getGetter();
+    void setGetter(const CodeBlockPtr& getter);
+    CodeBlockPtr getGetter();
     
-    void setWillSet(CodeBlock* willSet);
-    CodeBlock* getWillSet();
+    void setWillSet(const CodeBlockPtr& willSet);
+    CodeBlockPtr getWillSet();
     void setWillSetSetter(const std::wstring& name);
     const std::wstring& getWillSetSetter()const;
     
-    void setDidSet(CodeBlock* didSet);
-    CodeBlock* getDidSet();
+    void setDidSet(const CodeBlockPtr& didSet);
+    CodeBlockPtr getDidSet();
     
     void setDidSetSetter(const std::wstring& name);
     const std::wstring& getDidSetSetter()const;
 public:
     TypePtr getType();
-    void setType(TypePtr type);
+    void setType(const TypePtr& type);
 public:
     virtual void serialize(std::wostream& out);
     virtual void accept(NodeVisitor* visitor);
@@ -64,13 +64,13 @@ protected:
     std::wstring didSetSetter;
     Attributes typeAttributes;
     
-    Pattern* name;
-    TypeNode* declaredType;
-    Expression* initializer;
-    CodeBlock* getter;
-    CodeBlock* setter;
-    CodeBlock* willSet;
-    CodeBlock* didSet;
+    PatternPtr name;
+    TypeNodePtr declaredType;
+    ExpressionPtr initializer;
+    CodeBlockPtr getter;
+    CodeBlockPtr setter;
+    CodeBlockPtr willSet;
+    CodeBlockPtr didSet;
 
     TypePtr type;
 };

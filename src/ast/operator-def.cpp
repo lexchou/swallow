@@ -51,7 +51,7 @@ void OperatorDef::serialize(std::wostream& out)
 }
 void OperatorDef::accept(NodeVisitor* visitor)
 {
-    visitor->visitOperator(this);
+    accept2(visitor, &NodeVisitor::visitOperator);
 }
 
 void OperatorDef::setName(const std::wstring& name)

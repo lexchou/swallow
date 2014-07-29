@@ -2,19 +2,17 @@
 #include "conditional-operator.h"
 USE_SWIFT_NS
 
-ConditionalOperator::ConditionalOperator(Pattern* expr, Expression* trueExpr, Expression* falseExpr)
-    :Operator(NodeType::ConditionalOperator, OperatorType::Ternary, Associativity::Right, 100)
+ConditionalOperator::ConditionalOperator()
+    :Operator(NodeType::ConditionalOperator)
 {
-    this->setCondition(expr);
-    this->setTrueExpression(trueExpr);
-    this->setFalseExpression(falseExpr);
+    type = OperatorType::Ternary;
+    associativity = Associativity::Right;
+    precedence = 100;
 }
 
 ConditionalOperator::~ConditionalOperator()
 {
-    SafeDelete(condition);
-    SafeDelete(trueExpression);
-    SafeDelete(falseExpression);
+
 }
 
 void ConditionalOperator::serialize(std::wostream& out)
@@ -29,7 +27,7 @@ void ConditionalOperator::serialize(std::wostream& out)
 }
 void ConditionalOperator::accept(NodeVisitor* visitor)
 {
-    visitor->visitConditionalOperator(this);
+    accept2(visitor, &NodeVisitor::visitConditionalOperator);
 }
 
 
@@ -37,7 +35,7 @@ int ConditionalOperator::numChildren()
 {
     return 3;
 }
-Node* ConditionalOperator::get(int i)
+NodePtr ConditionalOperator::get(int i)
 {
     switch(i)
     {
@@ -51,18 +49,18 @@ Node* ConditionalOperator::get(int i)
             return NULL;
     }
 }
-void ConditionalOperator::set(int i, Node* val)
+void ConditionalOperator::set(int i, const NodePtr& val)
 {
     switch(i)
     {
         case 0:
-            condition = dynamic_cast<Pattern*>(val);
+            condition = std::dynamic_pointer_cast<Pattern>(val);
             break;
         case 1:
-            trueExpression = dynamic_cast<Expression*>(val);
+            trueExpression = std::dynamic_pointer_cast<Expression>(val);
             break;
         case 2:
-            falseExpression = dynamic_cast<Expression*>(val);
+            falseExpression = std::dynamic_pointer_cast<Expression>(val);
             break;
         default:
             break;

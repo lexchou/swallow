@@ -10,7 +10,6 @@ GenericArgument::GenericArgument()
 }
 GenericArgument::~GenericArgument()
 {
-    SafeDeleteAll(arguments);
 }
 
 void GenericArgument::serialize(std::wostream& out)
@@ -18,11 +17,11 @@ void GenericArgument::serialize(std::wostream& out)
 }
 
 
-void GenericArgument::addArgument(TypeNode* type)
+void GenericArgument::addArgument(const TypeNodePtr& type)
 {
     arguments.push_back(type);
 }
-TypeNode* GenericArgument::getArgument(int i)
+TypeNodePtr GenericArgument::getArgument(int i)
 {
     return arguments[i];
 }

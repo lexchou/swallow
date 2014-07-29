@@ -2,15 +2,16 @@
 #include "node-visitor.h"
 USE_SWIFT_NS
 
-Assignment::Assignment(Expression* lhs, Expression* rhs)
-    :BinaryOperator(L"=", Associativity::Right, 90)
+Assignment::Assignment()
+    :BinaryOperator()
 {
-    setLHS(lhs);
-    setRHS(rhs);
+    this->op = L"=";
+    this->associativity = Associativity::Right;
+    this->precedence = 90;
 }
 
 
 void Assignment::accept(NodeVisitor* visitor)
 {
-    visitor->visitAssignment(this);
+    accept2(visitor, &NodeVisitor::visitAssignment);
 }

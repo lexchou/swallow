@@ -2,6 +2,7 @@
 #define PROGRAM_H
 #include "node.h"
 #include <string>
+#include "ast-decl.h"
 
 SWIFT_NS_BEGIN
 
@@ -16,14 +17,14 @@ public:
     virtual void accept(NodeVisitor* visitor);
 
 
-    void addStatement(Statement* statement);
+    void addStatement(const StatementPtr& statement);
     int numStatements()const;
-    Statement* getStatement(int n);
+    StatementPtr getStatement(int n);
 
-    std::vector<Statement*>::iterator begin() { return statements.begin();}
-    std::vector<Statement*>::iterator end() { return statements.end();}
+    std::vector<StatementPtr>::iterator begin() { return statements.begin();}
+    std::vector<StatementPtr>::iterator end() { return statements.end();}
 private:
-    std::vector<Statement*> statements;
+    std::vector<StatementPtr> statements;
 };
 
 SWIFT_NS_END

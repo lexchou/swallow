@@ -11,21 +11,21 @@
 using namespace Swift;
 
 
-TypeNode* Parser::parseTypeAnnotation()
+TypeNodePtr Parser::parseTypeAnnotation()
 {
     Attributes attrs;
     if(predicate(L"@"))
     {
         parseAttributes(attrs);
     }
-    TypeNode* ret = parseType();
+    TypeNodePtr ret = parseType();
     ret->setAttributes(attrs);
     return ret;
 }
-TypeNode* Parser::parseType()
+TypeNodePtr Parser::parseType()
 {
     Token token;
-    TypeNode* ret = NULL;
+    TypeNodePtr ret = NULL;
     expect_next(token);
     restore(token);
 
@@ -54,26 +54,35 @@ TypeNode* Parser::parseType()
         if(token == L"->")
         {
             //function-type → type->type
-            TypeNode* retType = parseType();
-            ret = nodeFactory->createFunctionType(token.state, ret, retType);
+            TypeNodePtr retType = parseType();
+            FunctionTypePtr func = nodeFactory->createFunctionType(token.state);
+            func->setArgumentsType(ret);
+            func->setReturnType(retType);
+            ret = func;
             continue;
         }
         if(token == TokenType::OpenBracket)
         {
             expect(L"]");
-            ret = nodeFactory->createArrayType(token.state, ret);
+            ArrayTypePtr array = nodeFactory->createArrayType(token.state);
+            array->setInnerType(ret);
+            ret = array;
             continue;
         }
         if(token == L"?")
         {
             //optional-type → type?
-            ret = nodeFactory->createOptionalType(token.state, ret);
+            OptionalTypePtr type = nodeFactory->createOptionalType(token.state);
+            type->setInnerType(ret);
+            ret = type;
             continue;
         }
         if(token == L"!")
         {
             //implicitly-unwrapped-optional-type → type!
-            ret = nodeFactory->createImplicitlyUnwrappedOptional(token.state, ret);
+            ImplicitlyUnwrappedOptionalPtr type = nodeFactory->createImplicitlyUnwrappedOptional(token.state);
+            type->setInnerType(ret);
+            ret = type;
             continue;
         }
         // ‌ metatype-type → type.Type  type.Protocol
@@ -92,12 +101,12 @@ TypeNode* Parser::parseType()
  ‌ tuple-type-element → attributesoptinoutopttype inoutoptelement-nametype-annotation
  ‌ element-name → identifier
  */
-TupleType* Parser::parseTupleType()
+TupleTypePtr Parser::parseTupleType()
 {
     Token token, token2;
     expect(L"(", token);
-    TupleType* ret = nodeFactory->createTupleType(token.state);
-    std::vector<Attribute*> attributes;
+    TupleTypePtr ret = nodeFactory->createTupleType(token.state);
+    Attributes attributes;
     if(!predicate(L")"))
     {
         do
@@ -119,14 +128,14 @@ TupleType* Parser::parseTupleType()
                     parseAttributes(attributes);
                 }
                 expect(L":");
-                TypeNode* type = parseType();
+                TypeNodePtr type = parseType();
                 type->setAttributes(attributes);
                 ret->add(inout, token.token, type);
             }
             else
             {
                 restore(token);
-                TypeNode* type = parseType();
+                TypeNodePtr type = parseType();
                 type->setAttributes(attributes);
                 ret->add(inout, L"", type);
             }
@@ -146,16 +155,17 @@ TupleType* Parser::parseTupleType()
  ‌ type-identifier → type-name generic-argument-clause opt | type-name generic-argument-clause opt . type-identifier
  ‌ type-name → identifier
 */
-TypeIdentifier* Parser::parseTypeIdentifier()
+TypeIdentifierPtr Parser::parseTypeIdentifier()
 {
     Token token;
     expect_identifier(token);
-    TypeIdentifier* ret = nodeFactory->createTypeIdentifier(token.state, token.token);
+    TypeIdentifierPtr ret = nodeFactory->createTypeIdentifier(token.state);
+    ret->setName(token.token);
     if(match(L"<"))
     {
         do
         {
-            TypeNode* arg = parseType();
+            TypeNodePtr arg = parseType();
             ret->addGenericArgument(arg);
         }while(match(L","));
         
@@ -164,22 +174,22 @@ TypeIdentifier* Parser::parseTypeIdentifier()
     if(match(L"."))
     {
         //read next
-        TypeIdentifier* next = parseTypeIdentifier();
+        TypeIdentifierPtr next = parseTypeIdentifier();
         ret->setNestedType(next);
     }
     return ret;
 }
-ProtocolComposition* Parser::parseProtocolComposition()
+ProtocolCompositionPtr Parser::parseProtocolComposition()
 {
     Token token;
     expect(L"protocol", token);
     expect(L"<");
-    ProtocolComposition* ret = nodeFactory->createProtocolComposition(token.state);
+    ProtocolCompositionPtr ret = nodeFactory->createProtocolComposition(token.state);
     if(!predicate(L">"))
     {
         do
         {
-            TypeIdentifier* protocol = parseTypeIdentifier();
+            TypeIdentifierPtr protocol = parseTypeIdentifier();
             ret->addProtocol(protocol);
         }while(match(L","));
     }
@@ -210,11 +220,11 @@ ProtocolComposition* Parser::parseProtocolComposition()
  ‌ generic-argument → type
  */
 
-GenericParameters* Parser::parseGenericParameters()
+GenericParametersPtr Parser::parseGenericParameters()
 {
     Token token;
     expect(L"<", token);
-    GenericParameters* ret = nodeFactory->createGenericParameters(token.state);
+    GenericParametersPtr ret = nodeFactory->createGenericParameters(token.state);
     // ‌ generic-parameter-list → generic-parameter | generic-parameter,generic-parameter-list
     do
     {
@@ -223,13 +233,17 @@ GenericParameters* Parser::parseGenericParameters()
         //‌ generic-parameter → type-name:protocol-composition-type
         expect_identifier(token);
         std::wstring typeName = token.token;
-        ret->addGenericType(nodeFactory->createTypeIdentifier(token.state, typeName));
+        TypeIdentifierPtr typeId = nodeFactory->createTypeIdentifier(token.state);
+        typeId->setName(typeName);
+        ret->addGenericType(typeId);
         if(match(L":"))
         {
-            TypeIdentifier* expectedType = parseTypeIdentifier();
+            TypeIdentifierPtr expectedType = parseTypeIdentifier();
             
-            GenericConstraint* c = nodeFactory->createGenericConstraint(token.state);
-            c->setIdentifier(nodeFactory->createTypeIdentifier(token.state, typeName));
+            GenericConstraintPtr c = nodeFactory->createGenericConstraint(token.state);
+            typeId = nodeFactory->createTypeIdentifier(token.state);
+            typeId->setName(typeName);
+            c->setIdentifier(typeId);
             c->setConstraintType(GenericConstraint::DerivedFrom);
             c->addExpectedType(expectedType);
             ret->addConstraint(c);
@@ -241,9 +255,9 @@ GenericParameters* Parser::parseGenericParameters()
         // requirement-list → requirement | requirement,requirement-list
         do
         {
-            TypeIdentifier* type = parseTypeIdentifier();
+            TypeIdentifierPtr type = parseTypeIdentifier();
             // requirement → conformance-requirement | same-type-requirement
-            GenericConstraint* c = nodeFactory->createGenericConstraint(*type->getSourceInfo());
+            GenericConstraintPtr c = nodeFactory->createGenericConstraint(*type->getSourceInfo());
             ret->addConstraint(c);
             c->setIdentifier(type);
             if(match(L":"))
@@ -253,14 +267,14 @@ GenericParameters* Parser::parseGenericParameters()
                 c->setConstraintType(GenericConstraint::DerivedFrom);
                 do
                 {
-                    TypeIdentifier* expectedType = parseTypeIdentifier();
+                    TypeIdentifierPtr expectedType = parseTypeIdentifier();
                     c->addExpectedType(expectedType);
                 } while (match(L","));
             }
             else if(match(L"=="))
             {
                 // same-type-requirement → type-identifier==type-identifier
-                TypeIdentifier* expectedType = parseTypeIdentifier();
+                TypeIdentifierPtr expectedType = parseTypeIdentifier();
                 c->setConstraintType(GenericConstraint::EqualsTo);
                 c->addExpectedType(expectedType);
             }

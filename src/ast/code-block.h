@@ -12,21 +12,21 @@ public:
     CodeBlock();
     ~CodeBlock();
 public:
-    void addStatement(Statement* st);
+    void addStatement(const StatementPtr& st);
     int numStatements();
-    Statement* getStatement(int idx);
+    StatementPtr getStatement(int idx);
     
     void setAttributes(const Attributes& attrs);
     const Attributes& getAttributes()const;
 public:
-    std::vector<Statement*>::iterator begin() { return statements.begin();}
-    std::vector<Statement*>::iterator end() { return statements.end();}
+    std::vector<StatementPtr>::iterator begin() { return statements.begin();}
+    std::vector<StatementPtr>::iterator end() { return statements.end();}
 public:
     virtual void serialize(std::wostream& out);
     virtual void accept(NodeVisitor* visitor);
 private:
     Attributes attributes;
-    std::vector<Statement*> statements;
+    std::vector<StatementPtr> statements;
 };
 
 SWIFT_NS_END

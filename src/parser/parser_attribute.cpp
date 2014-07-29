@@ -10,12 +10,12 @@
 #include <iostream>
 using namespace Swift;
 
-void Parser::parseAttributes(std::vector<Attribute*>& attributes)
+void Parser::parseAttributes(std::vector<AttributePtr>& attributes)
 {
     attributes.clear();
     while(predicate(L"@"))
     {
-        Attribute* attr = parseAttribute();
+        AttributePtr attr = parseAttribute();
         attributes.push_back(attr);
     }
 }
@@ -33,11 +33,11 @@ void Parser::parseAttributes(std::vector<Attribute*>& attributes)
  ‌ balanced-token → Any identifier, keyword, literal, or operator
  ‌ balanced-token → Any punctuation except (, ), [, ], {, or }
 */
-Attribute* Parser::parseAttribute()
+AttributePtr Parser::parseAttribute()
 {
     Token token;
     expect(L"@", token);
-    Attribute* ret = nodeFactory->createAttribute(token.state);
+    AttributePtr ret = nodeFactory->createAttribute(token.state);
     expect_identifier(token);
     ret->setName(token.token);
     if(match(L"("))
@@ -47,7 +47,7 @@ Attribute* Parser::parseAttribute()
     }
     return ret;
 }
-void Parser::parseBalancedToken(Attribute* attr)
+void Parser::parseBalancedToken(const AttributePtr& attr)
 {
     Token token;
     expect_next(token);
@@ -67,7 +67,7 @@ void Parser::parseBalancedToken(Attribute* attr)
             return;
     }
 }
-void Parser::parseBalancedTokens(Attribute* attr, const wchar_t* end)
+void Parser::parseBalancedTokens(const AttributePtr& attr, const wchar_t* end)
 {
     while(!predicate(end))
     {
