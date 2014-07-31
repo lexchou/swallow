@@ -1,19 +1,23 @@
 #include <semantics/symbol-registry.h>
+#include <common/compiler_results.h>
+#include <swift_errors.h>
 #include "type-inference-action.h"
 #include "ast/variables.h"
 #include "ast/constant.h"
 #include "ast/identifier.h"
+#include "ast/tuple.h"
 #include "scoped-nodes.h"
+#include "ast/type-node.h"
 USE_SWIFT_NS
 
 
-TypeInferenceAction::TypeInferenceAction(SymbolRegistry* symbolRegistry)
-    :SemanticNodeVisitor(symbolRegistry)
+TypeInferenceAction::TypeInferenceAction(SymbolRegistry* symbolRegistry, CompilerResults* compilerResults)
+    :SemanticNodeVisitor(symbolRegistry, compilerResults)
 {
 
 }
 
-void TypeInferenceAction::visitVariables(const VariablesPtr& node)
+void TypeInferenceAction::visitVariable(const VariablePtr& node)
 {
 }
 
@@ -30,6 +34,24 @@ void TypeInferenceAction::visitConstant(const ConstantPtr& node)
         else
         {
             //check if the type is convertible
+
+        }
+    }
+    else if(TuplePtr id = std::dynamic_pointer_cast<Tuple>(node->name))
+    {
+        TypeNodePtr declaredType = id->getDeclaredType();
+        if(declaredType)
+        {
+            //this is a tuple definition, all elements must be matched to this
+            TypePtr type = symbolRegistry->lookupType(declaredType);
+            if(!type)
+            {
+                std::wstringstream out;
+                declaredType->serialize(out);
+                compilerResults->add(ErrorLevel::Error, *declaredType->getSourceInfo(), Errors::E_USE_OF_UNDECLARED_TYPE, out.str());
+                return;
+            }
+            
 
         }
     }

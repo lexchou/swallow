@@ -3,17 +3,18 @@
 #include "ast/node-visitor.h"
 #include "semantic-types.h"
 SWIFT_NS_BEGIN
-
+class CompilerResults;
 class SemanticNodeVisitor : public NodeVisitor
 {
 protected:
-    SemanticNodeVisitor(SymbolRegistry* symbolRegistry)
-            :symbolRegistry(symbolRegistry)
+    SemanticNodeVisitor(SymbolRegistry* symbolRegistry, CompilerResults* compilerResults)
+            :symbolRegistry(symbolRegistry), compilerResults(compilerResults)
     {}
 public:
     SymbolRegistry* getSymbolRegistry() { return symbolRegistry;}
 protected:
     SymbolRegistry* symbolRegistry;
+    CompilerResults* compilerResults;
 };
 
 SWIFT_NS_END

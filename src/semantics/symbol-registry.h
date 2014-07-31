@@ -29,6 +29,8 @@ struct OperatorInfo
         this->precedence.postfix = -1;
     }
 };
+class TypeNode;
+typedef std::shared_ptr<TypeNode> TypeNodePtr;
 class SymbolRegistry
 {
     typedef std::map<std::wstring, OperatorInfo> OperatorMap;
@@ -46,6 +48,7 @@ public:
     SymbolScope* getCurrentScope();
 
 
+    TypePtr lookupType(const TypeNodePtr& type);
     TypePtr lookupType(const std::wstring& name);
     bool lookupType(const std::wstring& name, SymbolScope** scope, TypePtr* ret);
 

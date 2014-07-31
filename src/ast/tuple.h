@@ -20,14 +20,14 @@ public:
     int numElements();
     PatternPtr getElement(int i);
     
-    TypeNodePtr getType();
-    void setType(const TypeNodePtr& type);
+    TypeNodePtr getDeclaredType();
+    void setDeclaredType(const TypeNodePtr& type);
 
     std::vector<PatternPtr>::iterator begin(){return elements.begin();}
     std::vector<PatternPtr>::iterator end(){return elements.end();}
 
 public:
-    TypeNodePtr type;
+    TypeNodePtr declaredType;
     std::vector<PatternPtr> elements;
 };
 

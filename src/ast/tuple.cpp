@@ -6,7 +6,7 @@ USE_SWIFT_NS
 
 
 Tuple::Tuple()
-    :Expression(NodeType::Tuple), type(NULL)
+    :Expression(NodeType::Tuple)
 {
 }
 Tuple::~Tuple()
@@ -29,13 +29,13 @@ void Tuple::accept(NodeVisitor* visitor)
 }
 
 
-TypeNodePtr Tuple::getType()
+TypeNodePtr Tuple::getDeclaredType()
 {
-    return type;
+    return declaredType;
 }
-void Tuple::setType(const TypeNodePtr& type)
+void Tuple::setDeclaredType(const TypeNodePtr& type)
 {
-    this->type = type;
+    this->declaredType = type;
 }
 
 void Tuple::add(const PatternPtr& st)

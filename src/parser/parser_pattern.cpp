@@ -77,7 +77,7 @@ PatternPtr Parser::parsePattern()
             if(match(L":"))
             {
                 TypeNodePtr type = parseTypeAnnotation();
-                ret->setType(type);
+                ret->setDeclaredType(type);
             }
         }
         return ret;

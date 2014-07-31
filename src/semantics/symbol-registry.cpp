@@ -1,6 +1,7 @@
 #include "symbol-registry.h"
 #include "symbol-scope.h"
 #include "type.h"
+#include "ast/type-identifier.h"
 using namespace Swift;
 
 SymbolRegistry::SymbolRegistry()
@@ -173,4 +174,13 @@ bool SymbolRegistry::lookupType(const std::wstring& name, SymbolScope** scope, T
     if(ret)
         *ret = std::dynamic_pointer_cast<Type>(symbol);
     return r;
+}
+TypePtr SymbolRegistry::lookupType(const TypeNodePtr& type)
+{
+    if(TypeIdentifierPtr id = std::dynamic_pointer_cast<TypeIdentifier>(type))
+    {
+        //TODO: make a generic type if possible
+        return lookupType(id->getName());
+    }
+    return nullptr;
 }

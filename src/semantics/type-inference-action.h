@@ -11,9 +11,9 @@ class Expression;
 class TypeInferenceAction : public SemanticNodeVisitor
 {
 public:
-    TypeInferenceAction(SymbolRegistry* symbolRegistry);
+    TypeInferenceAction(SymbolRegistry* symbolRegistry, CompilerResults* compilerResults);
 public:
-    virtual void visitVariables(const VariablesPtr& node);
+    virtual void visitVariable(const VariablePtr& node);
     virtual void visitConstant(const ConstantPtr& node);
 private:
     TypePtr evaluateType(const ExpressionPtr& expr);

@@ -41,7 +41,7 @@ public:
     void testTuple()
     {
 
-        SEMANTIC_ANALYZE(L"let (a, b) = (1, 0.3)");
+        SEMANTIC_ANALYZE(L"let (a, b) : Int = (1, 0.3)");
         IdentifierPtr a = NULL;
         CPPUNIT_ASSERT(a = std::dynamic_pointer_cast<Identifier>(scope->lookup(L"a")));
         TypePtr type = a->getType();
