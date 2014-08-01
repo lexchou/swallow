@@ -5,6 +5,7 @@
 #include "semantics/type-inference-action.h"
 #include "semantics/scoped-node-factory.h"
 #include "semantics/scoped-nodes.h"
+#include "semantics/symbol-registry.h"
 
 class SemanticTestCase : public SwiftTestCase
 {
@@ -13,13 +14,13 @@ public:
     {
         using namespace Swift;
         registry.getCurrentScope()->addSymbol(SymbolPtr(new SymbolPlaceHolder(L"println")));
-
         ScopedNodeFactory nodeFactory;
-        Parser parser(&nodeFactory, &registry, &compilerResults);
+        Parser parser(&nodeFactory, &compilerResults);
         parser.setFileName(L"<file>");
         ScopedProgramPtr ret = std::dynamic_pointer_cast<ScopedProgram>(parser.parse(str));
+        //ScopedProgram* f;
         dumpCompilerResults(compilerResults);
-
+        //d.g();
         if(!ret)
             return ret;
         {
@@ -28,7 +29,7 @@ public:
         }
 
         {
-            TypeInferenceAction action(&registry);
+            TypeInferenceAction action(&registry, &compilerResults);
             ret->accept(&action);
         }
 

@@ -1,15 +1,9 @@
 #include "parser.h"
 #include "parser_details.h"
-#include "ast/node.h"
 #include "tokenizer/tokenizer.h"
-#include "semantics/symbol-registry.h"
 #include "ast/node-factory.h"
 #include "ast/ast.h"
-#include <cstdlib>
-#include <stack>
-#include <sstream>
-#include <iostream>
-#include <swift_errors.h>
+#include "swift_errors.h"
 
 using namespace Swift;
 
@@ -60,7 +54,8 @@ ExpressionPtr Parser::parsePrefixExpression()
     }
     
     expect_next(token);
-    if(symbolRegistry->isPrefixOperator(token.token))
+    //if(symbolRegistry->isPrefixOperator(token.token))
+    if(token.type == TokenType::Operator && token.operators.type == OperatorType::PrefixUnary)
     {
         ExpressionPtr postfixExpression = parsePostfixExpression();
         UnaryOperatorPtr op = nodeFactory->createUnary(token.state);
@@ -145,7 +140,7 @@ ExpressionPtr Parser::parsePostfixExpression()
                 continue;
             }
             // postfix-expression → postfix-expression postfix-operator
-            if(symbolRegistry->isPostfixOperator(token.token))
+            if(token.type == TokenType::Operator && token.operators.type == OperatorType::PostfixUnary)//symbolRegistry->isPostfixOperator(token.token))
             {
                 expect_next(token);
                 UnaryOperatorPtr postfix = nodeFactory->createUnary(token.state);
@@ -821,14 +816,14 @@ ExpressionPtr Parser::parseBinaryExpression(const ExpressionPtr& lhs)
         
         if(token.operators.type == OperatorType::InfixBinary)
         {
-            OperatorInfo* op = symbolRegistry->getOperator(token.token);
-            tassert(token, op != NULL, Errors::E_UNDEFINED_INFIX_OPERATOR, token.token);
+            //OperatorInfo* op = symbolRegistry->getOperator(token.token);
+            //tassert(token, op != NULL, Errors::E_UNDEFINED_INFIX_OPERATOR, token.token);
             ExpressionPtr rhs = parsePrefixExpression();
-            int precedence = op->precedence.infix > 0 ? op->precedence.infix : 100;
+            //int precedence = op->precedence.infix > 0 ? op->precedence.infix : 100;
             BinaryOperatorPtr ret = nodeFactory->createBinary(token.state);
-            ret->setOperator(op->name);
-            ret->setAssociativity(op->associativity);
-            ret->setPrecedence(precedence);
+            ret->setOperator(token.token);
+            //ret->setAssociativity(op->associativity);
+            //ret->setPrecedence(precedence);
             ret->setLHS(lhs);
             ret->setRHS(rhs);
             return ret;

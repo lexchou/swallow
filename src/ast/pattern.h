@@ -1,10 +1,11 @@
 #ifndef PATTERN_H
 #define PATTERN_H
 #include "statement.h"
-#include "semantics/type.h"
 #include <string>
 
 SWIFT_NS_BEGIN
+class Type;
+typedef std::shared_ptr<Type> TypePtr;
 
 class Pattern : public Statement
 {

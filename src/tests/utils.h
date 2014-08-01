@@ -8,7 +8,6 @@
 #include <iostream>
 #include <cstdlib>
 #include "parser/parser.h"
-#include "semantics/symbol-registry.h"
 #include "ast/ast.h"
 #include "ast/node-factory.h"
 #include "common/compiler_results.h"
@@ -19,22 +18,22 @@
 class SwiftTestCase : public CppUnit::TestFixture
 {
 public:
-    Swift::NodePtr parseStatement(Swift::SymbolRegistry& registry, Swift::CompilerResults& compilerResults, const char* func, const wchar_t* str)
+    Swift::NodePtr parseStatement(Swift::CompilerResults& compilerResults, const char* func, const wchar_t* str)
     {
         using namespace Swift;
         NodeFactory nodeFactory;
-        Parser parser(&nodeFactory, &registry, &compilerResults);
+        Parser parser(&nodeFactory, &compilerResults);
         parser.setFileName(L"<file>");
         NodePtr ret = parser.parseStatement(str);
         dumpCompilerResults(compilerResults);
         return ret;
     }
 
-    Swift::ProgramPtr parseStatements(Swift::SymbolRegistry& registry, Swift::CompilerResults& compilerResults, const char* func, const wchar_t* str)
+    Swift::ProgramPtr parseStatements(Swift::CompilerResults& compilerResults, const char* func, const wchar_t* str)
     {
         using namespace Swift;
         NodeFactory nodeFactory;
-        Parser parser(&nodeFactory, &registry, &compilerResults);
+        Parser parser(&nodeFactory, &compilerResults);
         parser.setFileName(L"<file>");
         ProgramPtr ret = parser.parse(str);
         dumpCompilerResults(compilerResults);
@@ -129,9 +128,8 @@ struct Tracer
     
 };
 #define PARSE_STATEMENT(s) Tracer tracer(__FILE__, __LINE__, __FUNCTION__); \
-    Swift::SymbolRegistry symbolRegistry; \
     Swift::CompilerResults compilerResults; \
-    NodePtr root = parseStatement(symbolRegistry, compilerResults, __FUNCTION__, (s));
+    NodePtr root = parseStatement(compilerResults, __FUNCTION__, (s));
 #endif//TEST_UTILS_H
 
 

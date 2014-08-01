@@ -5,11 +5,12 @@
 #include "swift_errors.h"
 #include "symbol-identifier.h"
 #include "scoped-nodes.h"
+#include "ast/tuple.h"
 
 USE_SWIFT_NS
 
 SymbolResolveAction::SymbolResolveAction(SymbolRegistry* symbolRegistry, CompilerResults* compilerResults)
-    :SemanticNodeVisitor(symbolRegistry, compilerResults), compilerResults(compilerResults)
+    :SemanticNodeVisitor(symbolRegistry, compilerResults)
 {
 
 }

@@ -8,7 +8,6 @@
 SWIFT_NS_BEGIN
 
 class Tokenizer;
-class SymbolRegistry;
 class NodeFactory;
 class CompilerResults;
 
@@ -16,7 +15,7 @@ class Parser
 {
     friend struct Flags;
 public:
-    Parser(NodeFactory* nodeFactory, SymbolRegistry* symbolRegistry, CompilerResults* compilerResults);
+    Parser(NodeFactory* nodeFactory, CompilerResults* compilerResults);
     ~Parser();
 public:
     NodePtr parseStatement(const wchar_t* code);
@@ -178,7 +177,6 @@ private:
 private:
     Tokenizer* tokenizer;
     NodeFactory* nodeFactory;
-    SymbolRegistry* symbolRegistry;
     CompilerResults* compilerResults;
     std::wstring fileName;
     int fileHash;

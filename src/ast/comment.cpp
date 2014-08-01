@@ -2,7 +2,7 @@
 USE_SWIFT_NS
 
 CommentNode::CommentNode()
-    :Node(NodeType::Comment), comment(comment)
+    :Node(NodeType::Comment)
 {
 
 }

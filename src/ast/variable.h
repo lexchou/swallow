@@ -2,8 +2,8 @@
 #define VARIABLE_H
 #include "declaration.h"
 #include "attribute.h"
+#include "semantics/semantic-types.h"
 #include <string>
-#include "semantics/type.h"
 
 SWIFT_NS_BEGIN
 class CodeBlock;

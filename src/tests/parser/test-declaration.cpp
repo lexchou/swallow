@@ -163,7 +163,7 @@ public:
         CPPUNIT_ASSERT(c = std::dynamic_pointer_cast<Constants>(root));
         CPPUNIT_ASSERT(tuple = std::dynamic_pointer_cast<Tuple>(c->getConstant(0)->name));
         CPPUNIT_ASSERT_EQUAL(2, tuple->numElements());
-        CPPUNIT_ASSERT(type = std::dynamic_pointer_cast<TypeIdentifier>(tuple->getType()));
+        CPPUNIT_ASSERT(type = std::dynamic_pointer_cast<TypeIdentifier>(tuple->getDeclaredType()));
         CPPUNIT_ASSERT(p = std::dynamic_pointer_cast<ParenthesizedExpression>(c->getConstant(0)->initializer));
         CPPUNIT_ASSERT_EQUAL(2, p->numExpressions());
         

@@ -33,7 +33,7 @@ public:
     
     void testFor()
     {
-        PARSE_STATEMENT(L"for i = 0;i < 10; i++{a = i * 2;println(a);}");
+        PARSE_STATEMENT(L"for i = 0;i < 10; i++ {a = i * 2;println(a);}");
         CPPUNIT_ASSERT(root != NULL);
         ForLoopPtr loop = std::dynamic_pointer_cast<ForLoop>(root);
         CPPUNIT_ASSERT(loop != NULL);

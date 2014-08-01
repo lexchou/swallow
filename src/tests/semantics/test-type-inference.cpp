@@ -19,7 +19,6 @@ public:
     {
         SEMANTIC_ANALYZE(L"let a = 34");
         IdentifierPtr a = NULL;
-
         CPPUNIT_ASSERT(a = std::dynamic_pointer_cast<Identifier>(scope->lookup(L"a")));
         TypePtr type = a->getType();
         CPPUNIT_ASSERT(type);

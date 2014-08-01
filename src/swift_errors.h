@@ -33,6 +33,11 @@ struct Errors
         E_USE_OF_INITIALIZING_VARIABLE, //variable used within its own initial value
         E_DEFINITION_CONFLICT, //definition conflicts with previous value
         E_USE_OF_FUNCTION_LOCAL_INSIDE_TYPE, //use of function local variable inside type declaration
+
+        E_TUPLE_PATTERN_MUST_MATCH_TUPLE_TYPE,//tuple pattern cannot match values of the non-tuple type '%'
+        E_TUPLE_TYPES_HAVE_A_DIFFERENT_NUMBER_OF_ELEMENT, //tuple types '($T0, $T1)' and '($T2, $T3, $T4)' have a different number of elements (2 vs. 3)
+
+
         //linking errors
     };
     

@@ -1,14 +1,7 @@
 #include "parser.h"
 #include "parser_details.h"
-#include "ast/node.h"
-#include "tokenizer/tokenizer.h"
-#include "semantics/symbol-registry.h"
 #include "ast/node-factory.h"
 #include "ast/ast.h"
-#include <cstdlib>
-#include <stack>
-#include <sstream>
-#include <iostream>
 #include "swift_errors.h"
 using namespace Swift;
 

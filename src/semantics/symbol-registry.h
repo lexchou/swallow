@@ -1,7 +1,6 @@
 #ifndef SYMBOL_REGISTRY_H
 #define SYMBOL_REGISTRY_H
 #include "swift_conf.h"
-#include "tokenizer/tokens.h"
 #include "swift_types.h"
 #include <string>
 #include <map>

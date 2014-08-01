@@ -36,8 +36,6 @@ private:
 
     //set or reset flag in all identifiers in given pattern
     void setFlag(const PatternPtr& pattern, bool add, int flag);
-private:
-    CompilerResults* compilerResults;
 };
 
 SWIFT_NS_END

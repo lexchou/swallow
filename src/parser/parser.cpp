@@ -1,16 +1,14 @@
 #include "parser.h"
-#include "ast/node.h"
 #include "tokenizer/tokenizer.h"
-#include "semantics/symbol-registry.h"
 #include "ast/node-factory.h"
 #include "ast/ast.h"
 #include "common/compiler_results.h"
 #include "common/auto-release-pool.h"
 #include "swift_errors.h"
-#include <cstdlib>
-#include <stack>
-#include <sstream>
-#include <iostream>
+//#include <cstdlib>
+//#include <stack>
+//#include <sstream>
+//#include <iostream>
 using namespace Swift;
 
 struct Interrupt
@@ -19,8 +17,8 @@ struct Interrupt
 };
 
 
-Parser::Parser(NodeFactory* nodeFactory, SymbolRegistry* symbolRegistry, CompilerResults* compilerResults)
-    :nodeFactory(nodeFactory), symbolRegistry(symbolRegistry), compilerResults(compilerResults)
+Parser::Parser(NodeFactory* nodeFactory, CompilerResults* compilerResults)
+    :nodeFactory(nodeFactory), compilerResults(compilerResults)
 {
     tokenizer = new Tokenizer(NULL);
     functionName = L"<top>";

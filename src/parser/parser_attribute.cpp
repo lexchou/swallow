@@ -1,13 +1,7 @@
 #include "parser.h"
-#include "ast/node.h"
-#include "tokenizer/tokenizer.h"
-#include "semantics/symbol-registry.h"
 #include "ast/node-factory.h"
 #include "ast/ast.h"
-#include <cstdlib>
-#include <stack>
-#include <sstream>
-#include <iostream>
+
 using namespace Swift;
 
 void Parser::parseAttributes(std::vector<AttributePtr>& attributes)
