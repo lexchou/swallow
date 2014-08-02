@@ -5,7 +5,7 @@ USE_SWIFT_NS;
 BinaryOperator::BinaryOperator()
     :Operator(NodeType::BinaryOperator)
 {
-    type = OperatorType::InfixBinary;
+    operatorType = OperatorType::InfixBinary;
 }
 BinaryOperator::~BinaryOperator()
 {

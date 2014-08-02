@@ -10,8 +10,8 @@ protected:
     Operator(NodeType::T);
 public:
     
-    OperatorType::T getType() const { return type;}
-    void setType(OperatorType::T type){this->type = type;}
+    OperatorType::T getOperatorType() const { return operatorType;}
+    void setOperatorType(OperatorType::T type){this->operatorType = type;}
     Associativity::T getAssociativity() const { return associativity;}
     void setAssociativity(Associativity::T a) { associativity = a;}
     int getPrecedence() const { return precedence;}
@@ -22,7 +22,7 @@ public:
     virtual NodePtr get(int i) = 0;
     virtual void set(int i, const NodePtr& val) = 0;
 protected:
-    OperatorType::T type;
+    OperatorType::T operatorType;
     Associativity::T associativity;
     int precedence;
     

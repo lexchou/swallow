@@ -11,14 +11,14 @@ public:
     TypeCheck();
     ~TypeCheck();
 public:
-    TypeNodePtr getType();
-    void setType(TypeNodePtr type);
+    TypeNodePtr getDeclaredType();
+    void setDeclaredType(const TypeNodePtr& type);
 public:
     virtual int numChildren();
     virtual NodePtr get(int i);
     virtual void set(int i, const NodePtr& val);
 private:
-    TypeNodePtr type;
+    TypeNodePtr declaredType;
 };
 
 SWIFT_NS_END

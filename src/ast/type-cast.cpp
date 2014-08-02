@@ -23,13 +23,13 @@ bool TypeCast::isOptional()const
 {
     return optional;
 }
-TypeNodePtr TypeCast::getType()
+TypeNodePtr TypeCast::getDeclaredType()
 {
-    return type;
+    return declaredType;
 }
-void TypeCast::setType(TypeNodePtr type)
+void TypeCast::setDeclaredType(const TypeNodePtr& type)
 {
-    this->type = type;
+    this->declaredType = type;
 }
 
 int TypeCast::numChildren()
@@ -43,7 +43,7 @@ NodePtr TypeCast::get(int i)
         case 0:
             return lhs;
         case 1:
-            return type;
+            return declaredType;
         default:
             return NULL;
     }
@@ -56,7 +56,7 @@ void TypeCast::set(int i, const NodePtr& val)
             lhs = std::dynamic_pointer_cast<Pattern>(val);
             break;
         case 1:
-            type = std::dynamic_pointer_cast<TypeNode>(val);
+            declaredType = std::dynamic_pointer_cast<TypeNode>(val);
             break;
         default:
             break;

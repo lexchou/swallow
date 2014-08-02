@@ -12,13 +12,13 @@ TypeCheck::~TypeCheck()
 {
 }
 
-TypeNodePtr TypeCheck::getType()
+TypeNodePtr TypeCheck::getDeclaredType()
 {
-    return type;
+    return declaredType;
 }
-void TypeCheck::setType(TypeNodePtr type)
+void TypeCheck::setDeclaredType(const TypeNodePtr& type)
 {
-    this->type = type;
+    this->declaredType = type;
 }
 int TypeCheck::numChildren()
 {
@@ -31,7 +31,7 @@ NodePtr TypeCheck::get(int i)
         case 0:
             return lhs;
         case 1:
-            return type;
+            return declaredType;
         default:
             return NULL;
     }
@@ -44,7 +44,7 @@ void TypeCheck::set(int i, const NodePtr& val)
             lhs = std::dynamic_pointer_cast<Pattern>(val);
             break;
         case 1:
-            type = std::dynamic_pointer_cast<TypeNode>(val);
+            declaredType = std::dynamic_pointer_cast<TypeNode>(val);
             break;
         default:
             break;

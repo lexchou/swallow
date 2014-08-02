@@ -135,7 +135,7 @@ public:
         ASSERT_EQUALS(L"task", param->getLocalName());
         FunctionTypePtr type;
         TupleTypePtr tuple;
-        CPPUNIT_ASSERT(type = std::dynamic_pointer_cast<FunctionType>(param->getType()));
+        CPPUNIT_ASSERT(type = std::dynamic_pointer_cast<FunctionType>(param->getDeclaredType()));
         CPPUNIT_ASSERT(tuple = std::dynamic_pointer_cast<TupleType>(type->getArgumentsType()));
         CPPUNIT_ASSERT_EQUAL(0, tuple->numElements());
         

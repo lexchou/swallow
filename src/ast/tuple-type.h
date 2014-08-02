@@ -8,7 +8,7 @@ SWIFT_NS_BEGIN
 class Attribute;
 class TupleType : public TypeNode
 {
-protected:
+public:
     struct TupleElement
     {
         bool inout;
@@ -28,6 +28,10 @@ public:
     
     void setVariadicParameters(bool val);
     bool getVariadicParameters()const;
+
+    std::vector<TupleElement>::iterator begin() {return elements.begin();};
+    std::vector<TupleElement>::iterator end() {return elements.end();};
+
 public:
     virtual void serialize(std::wostream& out);
 private:

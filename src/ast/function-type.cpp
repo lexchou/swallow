@@ -1,5 +1,6 @@
 
 #include "function-type.h"
+#include "tuple-type.h"
 USE_SWIFT_NS
 
 
@@ -21,12 +22,12 @@ void FunctionType::accept(NodeVisitor* visitor)
 {
 //
 }
-void FunctionType::setArgumentsType(const TypeNodePtr& argumentsType)
+void FunctionType::setArgumentsType(const TupleTypePtr& argumentsType)
 {
     this->argumentsType = argumentsType;
 }
 
-TypeNodePtr FunctionType::getArgumentsType()
+TupleTypePtr FunctionType::getArgumentsType()
 {
     return argumentsType;
 }

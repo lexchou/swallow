@@ -46,8 +46,6 @@ public:
 
     SymbolScope* getCurrentScope();
 
-
-    TypePtr lookupType(const TypeNodePtr& type);
     TypePtr lookupType(const std::wstring& name);
     bool lookupType(const std::wstring& name, SymbolScope** scope, TypePtr* ret);
 

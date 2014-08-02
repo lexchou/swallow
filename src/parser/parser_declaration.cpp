@@ -664,7 +664,7 @@ ParametersPtr Parser::parseParameterClause()
         param->setLocalName(localName);
         param->setShorthandExternalName(shorthandExternalName);
         param->setTypeAttributes(attrs);
-        param->setType(type);
+        param->setDeclaredType(type);
         param->setDefaultValue(def);
         ret->addParameter(param);
     }while(match(L","));

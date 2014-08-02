@@ -36,12 +36,12 @@ public:
         
         CPPUNIT_ASSERT(param = c->getParameters()->getParameter(0));
         ASSERT_EQUALS(L"s1", param->getLocalName());
-        CPPUNIT_ASSERT(type = std::dynamic_pointer_cast<TypeIdentifier>(param->getType()));
+        CPPUNIT_ASSERT(type = std::dynamic_pointer_cast<TypeIdentifier>(param->getDeclaredType()));
         ASSERT_EQUALS(L"String", type->getName());
         
         CPPUNIT_ASSERT(param = c->getParameters()->getParameter(1));
         ASSERT_EQUALS(L"s2", param->getLocalName());
-        CPPUNIT_ASSERT(type = std::dynamic_pointer_cast<TypeIdentifier>(param->getType()));
+        CPPUNIT_ASSERT(type = std::dynamic_pointer_cast<TypeIdentifier>(param->getDeclaredType()));
         ASSERT_EQUALS(L"String", type->getName());
         
         CPPUNIT_ASSERT_EQUAL(1, c->numStatement());

@@ -136,7 +136,7 @@ PatternPtr Parser::parseTypeCastingPattern()
         //is-pattern → is type
         TypeNodePtr type = parseType();
         TypeCheckPtr ret = nodeFactory->createTypeCheck(token.state);
-        ret->setType(type);
+        ret->setDeclaredType(type);
         return ret;
     }
     // as-pattern → pattern as type
@@ -145,7 +145,7 @@ PatternPtr Parser::parseTypeCastingPattern()
     TypeNodePtr type = parseType();
     TypeCastPtr ret = nodeFactory->createTypeCast(token.state);
     ret->setLHS(pat);
-    ret->setType(type);
+    ret->setDeclaredType(type);
     return ret;
 }
 /*

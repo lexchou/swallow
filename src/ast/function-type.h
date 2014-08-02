@@ -11,17 +11,17 @@ public:
     FunctionType();
     ~FunctionType();
 public:
-    void setArgumentsType(const TypeNodePtr& argumentsType);
+    void setArgumentsType(const TupleTypePtr& argumentsType);
     void setReturnType(const TypeNodePtr& retType);
-    
-    
-    TypeNodePtr getArgumentsType();
+
+
+    TupleTypePtr getArgumentsType();
     TypeNodePtr getReturnType();
 public:
     virtual void serialize(std::wostream& out);
     virtual void accept(NodeVisitor* visitor);
 private:
-    TypeNodePtr argumentsType;
+    TupleTypePtr argumentsType;
     TypeNodePtr returnType;
 };
 

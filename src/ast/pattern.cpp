@@ -9,7 +9,7 @@ Pattern::Pattern(NodeType::T nodeType)
 }
 
 
-void Pattern::setType(TypePtr type)
+void Pattern::setType(const TypePtr& type)
 {
     this->type = type;
 }

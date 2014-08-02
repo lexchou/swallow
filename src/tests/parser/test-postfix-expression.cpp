@@ -30,7 +30,7 @@ public:
         UnaryOperatorPtr inc = std::dynamic_pointer_cast<UnaryOperator>(mod->getLHS());
         CPPUNIT_ASSERT(inc != NULL);
         ASSERT_EQUALS(L"++", inc->getOperator().c_str());
-        CPPUNIT_ASSERT_EQUAL(OperatorType::PostfixUnary, inc->getType());
+        CPPUNIT_ASSERT_EQUAL(OperatorType::PostfixUnary, inc->getOperatorType());
         
     }
     

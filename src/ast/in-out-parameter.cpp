@@ -5,5 +5,5 @@ USE_SWIFT_NS;
 InOutParameter::InOutParameter()
 {
     this->setOperator(L"&");
-    type = OperatorType::PrefixUnary;
+    operatorType = OperatorType::PrefixUnary;
 }

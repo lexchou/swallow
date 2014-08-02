@@ -11,9 +11,9 @@ Type::Type(const std::wstring& name, Category category, TypePtr keyType, TypePtr
 
 
 
-TypePtr Type::newDictionaryType(const std::wstring& name, TypePtr keyType, TypePtr valueType)
+TypePtr Type::newDictionaryType(TypePtr keyType, TypePtr valueType)
 {
-    return TypePtr(new Type(name, Dictionary, keyType, valueType));
+    return TypePtr(new Type(L"", Dictionary, keyType, valueType));
 }
 TypePtr Type::newType(const std::wstring& name, Category category)
 {
@@ -21,14 +21,14 @@ TypePtr Type::newType(const std::wstring& name, Category category)
 }
 
 
-TypePtr Type::newArrayType(const std::wstring& name, TypePtr elementType)
+TypePtr Type::newArrayType(TypePtr elementType)
 {
-    return TypePtr(new Type(name, Array, nullptr, elementType));
+    return TypePtr(new Type(L"", Array, nullptr, elementType));
 }
 
-TypePtr Type::newTuple(const std::wstring& name, const std::vector<TypePtr>& types)
+TypePtr Type::newTuple(const std::vector<TypePtr>& types)
 {
-    Type* ret = new Type(name, Tuple, nullptr, nullptr);
+    Type* ret = new Type(L"", Tuple, nullptr, nullptr);
     ret->elementTypes = types;
     return TypePtr(ret);
 }
@@ -114,8 +114,13 @@ bool Type::operator ==(const Type& rhs)const
         return false;
     if(moduleName != rhs.moduleName)
         return false;
-    if(fullName != rhs.fullName)
-        return false;
+    if(category == Primitive || category == Class || category == Struct || category == Protocol || category == Extension)
+    {
+        //check name
+        if (fullName != rhs.fullName)
+            return false;
+        //TODO: check generic parameters
+    }
     if(!elementTypes.empty() && !rhs.elementTypes.empty())
         return false;
     auto iter = elementTypes.begin(), iter2 = rhs.elementTypes.begin();

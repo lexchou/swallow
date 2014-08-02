@@ -11,8 +11,8 @@ public:
     TypeCast();
     ~TypeCast();
 public:
-    TypeNodePtr getType();
-    void setType(TypeNodePtr type);
+    TypeNodePtr getDeclaredType();
+    void setDeclaredType(const TypeNodePtr& type);
 public:
     virtual int numChildren();
     virtual NodePtr get(int i);
@@ -21,7 +21,7 @@ public:
     void setOptional(bool val);
     bool isOptional()const;
 private:
-    TypeNodePtr type;
+    TypeNodePtr declaredType;
     bool optional;
 };
 

@@ -5,7 +5,7 @@ USE_SWIFT_NS
 ConditionalOperator::ConditionalOperator()
     :Operator(NodeType::ConditionalOperator)
 {
-    type = OperatorType::Ternary;
+    operatorType = OperatorType::Ternary;
     associativity = Associativity::Right;
     precedence = 100;
 }

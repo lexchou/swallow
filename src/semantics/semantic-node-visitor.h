@@ -13,6 +13,11 @@ protected:
 public:
     SymbolRegistry* getSymbolRegistry() { return symbolRegistry;}
 protected:
+    /**
+     * Abort the visitor
+     */
+    void abort();
+protected:
     SymbolRegistry* symbolRegistry;
     CompilerResults* compilerResults;
 };

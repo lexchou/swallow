@@ -33,7 +33,7 @@ void UnaryOperator::set(int i, const NodePtr& val)
 
 void UnaryOperator::serialize(std::wostream& out)
 {
-    if(type == OperatorType::PrefixUnary)
+    if(operatorType == OperatorType::PrefixUnary)
     {
         out<<op;
         this->getOperand()->serialize(out);

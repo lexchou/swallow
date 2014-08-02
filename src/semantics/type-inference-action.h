@@ -16,8 +16,15 @@ public:
     virtual void visitVariable(const VariablePtr& node);
     virtual void visitConstant(const ConstantPtr& node);
 private:
+    void checkTupleDefinition(const TuplePtr& tuple, const ExpressionPtr& initializer);
+    TypePtr lookupType(const TypeNodePtr& type);
     TypePtr evaluateType(const ExpressionPtr& expr);
 private:
+    TypePtr t_int;
+    TypePtr t_double;
+    TypePtr t_string;
+    TypePtr t_bool;
+
 };
 
 

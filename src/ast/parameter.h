@@ -9,6 +9,8 @@ SWIFT_NS_BEGIN
 
 class TypeNode;
 class Expression;
+class Type;
+typedef std::shared_ptr<Type> TypePtr;
 class Parameter : public Node
 {
 public:
@@ -43,9 +45,13 @@ public:
     void setTypeAttributes(const Attributes& attrs);
     const Attributes& getTypeAttributes()const;
     
-    void setType(const TypeNodePtr& type);
-    TypeNodePtr getType();
-    
+    void setDeclaredType(const TypeNodePtr& type);
+    TypeNodePtr getDeclaredType();
+
+
+    void setType(const TypePtr& type);
+    TypePtr getType();
+
     void setDefaultValue(const ExpressionPtr& def);
     ExpressionPtr getDefaultValue();
     
@@ -56,7 +62,8 @@ private:
     std::wstring externalName;
     std::wstring localName;
     Attributes typeAttributes;
-    TypeNodePtr type;
+    TypeNodePtr declaredType;
+    TypePtr type;
     ExpressionPtr defaultValue;
 };
 

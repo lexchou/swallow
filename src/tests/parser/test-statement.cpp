@@ -49,7 +49,7 @@ public:
         UnaryOperatorPtr step = std::dynamic_pointer_cast<UnaryOperator>(loop->getStep());
         CPPUNIT_ASSERT(step != NULL);
         ASSERT_EQUALS(L"++", step->getOperator().c_str());
-        CPPUNIT_ASSERT_EQUAL(OperatorType::PostfixUnary, step->getType());
+        CPPUNIT_ASSERT_EQUAL(OperatorType::PostfixUnary, step->getOperatorType());
         
         CodeBlockPtr body = loop->getCodeBlock();
         
@@ -446,7 +446,7 @@ public:
         CPPUNIT_ASSERT(eq = std::dynamic_pointer_cast<BinaryOperator>(c->getCondition(0).guard));
         ASSERT_EQUALS(L"==", eq->getOperator().c_str());
         CPPUNIT_ASSERT(u = std::dynamic_pointer_cast<UnaryOperator>(eq->getRHS()));
-        CPPUNIT_ASSERT_EQUAL(OperatorType::PrefixUnary, u->getType());
+        CPPUNIT_ASSERT_EQUAL(OperatorType::PrefixUnary, u->getOperatorType());
         ASSERT_EQUALS(L"-", u->getOperator().c_str());
         
         CPPUNIT_ASSERT(c = sc->getCase(2));

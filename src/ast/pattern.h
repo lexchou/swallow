@@ -12,7 +12,7 @@ class Pattern : public Statement
 public:
     Pattern(NodeType::T nodeType);
 public:
-    void setType(TypePtr type);
+    void setType(const TypePtr& type);
     TypePtr getType();
 
 private:

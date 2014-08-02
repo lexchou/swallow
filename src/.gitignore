@@ -10,5 +10,6 @@ swift.build/
 swift.xcodeproj/
 CTestTestfile.cmake
 TestParser
+TestSemantics
 Testing/
 .idea/

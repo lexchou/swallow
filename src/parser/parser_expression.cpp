@@ -60,7 +60,7 @@ ExpressionPtr Parser::parsePrefixExpression()
         ExpressionPtr postfixExpression = parsePostfixExpression();
         UnaryOperatorPtr op = nodeFactory->createUnary(token.state);
         op->setOperator(token.token);
-        op->setType(token.operators.type);
+        op->setOperatorType(token.operators.type);
         op->setOperand(postfixExpression);
         return op;
     }
@@ -145,7 +145,7 @@ ExpressionPtr Parser::parsePostfixExpression()
                 expect_next(token);
                 UnaryOperatorPtr postfix = nodeFactory->createUnary(token.state);
                 postfix->setOperator(token.token);
-                postfix->setType(OperatorType::PostfixUnary);
+                postfix->setOperatorType(OperatorType::PostfixUnary);
                 postfix->setOperand(ret);
                 ret = postfix;
                 continue;
@@ -777,7 +777,7 @@ ExpressionPtr Parser::parseBinaryExpression(const ExpressionPtr& lhs)
             TypeNodePtr typeNode = parseType();
             TypeCheckPtr ret = nodeFactory->createTypeCheck(token.state);
             ret->setLHS(lhs);
-            ret->setType(typeNode);
+            ret->setDeclaredType(typeNode);
             return ret;
         }
         else if(token.identifier.keyword == Keyword::As)
@@ -798,7 +798,7 @@ ExpressionPtr Parser::parseBinaryExpression(const ExpressionPtr& lhs)
             
             TypeCastPtr ret = nodeFactory->createTypeCast(token.state);
             ret->setLHS(lhs);
-            ret->setType(typeNode);
+            ret->setDeclaredType(typeNode);
             ret->setOptional(optional);
             return ret;
         }

@@ -176,6 +176,10 @@ struct SourceInfo
     {}
 };
 
+struct Abort
+{
+
+};
 
 
 SWIFT_NS_END

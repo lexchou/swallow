@@ -82,13 +82,21 @@ const Attributes& Parameter::getTypeAttributes()const
     return typeAttributes;
 }
 
-void Parameter::setType(const TypeNodePtr& type)
+void Parameter::setType(const TypePtr& type)
 {
     this->type = type;
 }
-TypeNodePtr Parameter::getType()
+TypePtr Parameter::getType()
 {
     return type;
+}
+void Parameter::setDeclaredType(const TypeNodePtr& type)
+{
+    this->declaredType = type;
+}
+TypeNodePtr Parameter::getDeclaredType()
+{
+    return declaredType;
 }
 void Parameter::setDefaultValue(const ExpressionPtr& def)
 {

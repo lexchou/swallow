@@ -35,7 +35,7 @@ public:
         CPPUNIT_ASSERT(is = std::dynamic_pointer_cast<TypeCheck>(_if->getCondition()));
         ASSERT_EQUALS(L"is", is->getOperator().c_str());
         CPPUNIT_ASSERT(id = std::dynamic_pointer_cast<Identifier>(is->getLHS()));
-        CPPUNIT_ASSERT(type = std::dynamic_pointer_cast<TypeIdentifier>(is->getType()));
+        CPPUNIT_ASSERT(type = std::dynamic_pointer_cast<TypeIdentifier>(is->getDeclaredType()));
         
         ASSERT_EQUALS(L"item", id->getIdentifier());
         ASSERT_EQUALS(L"Movie", type->getName());
@@ -58,7 +58,7 @@ public:
         CPPUNIT_ASSERT(as = std::dynamic_pointer_cast<TypeCast>(eq->getRHS()));
         ASSERT_EQUALS(L"as?", as->getOperator().c_str());
         CPPUNIT_ASSERT(id = std::dynamic_pointer_cast<Identifier>(as->getLHS()));
-        CPPUNIT_ASSERT(type = std::dynamic_pointer_cast<TypeIdentifier>(as->getType()));
+        CPPUNIT_ASSERT(type = std::dynamic_pointer_cast<TypeIdentifier>(as->getDeclaredType()));
         
         ASSERT_EQUALS(L"item", id->getIdentifier());
         ASSERT_EQUALS(L"Movie", type->getName());
@@ -79,7 +79,7 @@ public:
         CPPUNIT_ASSERT(as = std::dynamic_pointer_cast<TypeCast>(eq->getRHS()));
         ASSERT_EQUALS(L"as", as->getOperator().c_str());
         CPPUNIT_ASSERT(id = std::dynamic_pointer_cast<Identifier>(as->getLHS()));
-        CPPUNIT_ASSERT(type = std::dynamic_pointer_cast<TypeIdentifier>(as->getType()));
+        CPPUNIT_ASSERT(type = std::dynamic_pointer_cast<TypeIdentifier>(as->getDeclaredType()));
         
         ASSERT_EQUALS(L"item", id->getIdentifier());
         ASSERT_EQUALS(L"Movie", type->getName());

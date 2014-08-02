@@ -29,10 +29,10 @@ public:
 private:
     Type(const std::wstring& name, Category category, TypePtr keyType, TypePtr valueType);
 public:
-    static TypePtr newArrayType(const std::wstring& name, TypePtr elementType);
-    static TypePtr newDictionaryType(const std::wstring& name, TypePtr keyType, TypePtr valueType);
+    static TypePtr newArrayType(TypePtr elementType);
+    static TypePtr newDictionaryType(TypePtr keyType, TypePtr valueType);
     static TypePtr newType(const std::wstring& name, Category category);
-    static TypePtr newTuple(const std::wstring& name, const std::vector<TypePtr>& types);
+    static TypePtr newTuple(const std::vector<TypePtr>& types);
 public:
     bool isPrimitive()const;
     bool isArray()const;

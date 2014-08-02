@@ -42,13 +42,13 @@ public:
         CPPUNIT_ASSERT(param = params->getParameter(0));
         CPPUNIT_ASSERT(param->isInout());
         ASSERT_EQUALS(L"a", param->getLocalName());
-        CPPUNIT_ASSERT(type = std::dynamic_pointer_cast<TypeIdentifier>(param->getType()));
+        CPPUNIT_ASSERT(type = std::dynamic_pointer_cast<TypeIdentifier>(param->getDeclaredType()));
         ASSERT_EQUALS(L"T", type->getName());
         
         CPPUNIT_ASSERT(param = params->getParameter(1));
         CPPUNIT_ASSERT(param->isInout());
         ASSERT_EQUALS(L"b", param->getLocalName());
-        CPPUNIT_ASSERT(type = std::dynamic_pointer_cast<TypeIdentifier>(param->getType()));
+        CPPUNIT_ASSERT(type = std::dynamic_pointer_cast<TypeIdentifier>(param->getDeclaredType()));
         ASSERT_EQUALS(L"T", type->getName());
         
     }

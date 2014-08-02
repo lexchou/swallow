@@ -11,11 +11,6 @@
 //#include <iostream>
 using namespace Swift;
 
-struct Interrupt
-{
-
-};
-
 
 Parser::Parser(NodeFactory* nodeFactory, CompilerResults* compilerResults)
     :nodeFactory(nodeFactory), compilerResults(compilerResults)
@@ -45,7 +40,7 @@ void Parser::expect_next(Token& token)
     if(next(token))
         return;
     compilerResults->add(ErrorLevel::Fatal, token.state, Errors::E_UNEXPECTED_EOF);
-    throw Interrupt();
+    throw Abort();
 }
 /**
  * Peek next token from tokenizer, return false if EOF reached.
@@ -156,6 +151,7 @@ void Parser::expect(Keyword::T keyword)
 
 void Parser::expect(Keyword::T keyword, Token& token)
 {
+    //TODO: check EOF and give a more prominent error
     expect_next(token);
     if(keyword == token.getKeyword())
         return;
@@ -176,7 +172,7 @@ void Parser::expect_identifier(Token& token)
 void Parser::unexpected(const Token& token)
 {
     compilerResults->add(ErrorLevel::Fatal, token.state, Errors::E_UNEXPECTED, token.token);
-    throw Interrupt();
+    throw Abort();
 }
 void Parser::tassert(Token& token, bool cond, int errorCode, const std::wstring& s)
 {
@@ -184,7 +180,7 @@ void Parser::tassert(Token& token, bool cond, int errorCode, const std::wstring&
         return;
     //record this issue
     compilerResults->add(ErrorLevel::Fatal, token.state, errorCode, s);
-    throw Interrupt();
+    throw Abort();
 }
 
 NodePtr Parser::parseStatement(const wchar_t* code)

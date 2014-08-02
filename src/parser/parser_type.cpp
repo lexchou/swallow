@@ -47,9 +47,16 @@ TypeNodePtr Parser::parseType()
         if(token == L"->")
         {
             //function-type → type->type
+            TupleTypePtr argType = std::dynamic_pointer_cast<TupleType>(ret);
+            if(!argType)
+            {
+                //wrap ret as a tuple type
+                argType = nodeFactory->createTupleType(*ret->getSourceInfo());
+                argType->add(false, L"", ret);
+            }
             TypeNodePtr retType = parseType();
             FunctionTypePtr func = nodeFactory->createFunctionType(token.state);
-            func->setArgumentsType(ret);
+            func->setArgumentsType(argType);
             func->setReturnType(retType);
             ret = func;
             continue;
@@ -91,7 +98,7 @@ TypeNodePtr Parser::parseType()
  ‌ tuple-type → (tuple-type-bodyopt)
  ‌ tuple-type-body → tuple-type-element-list...opt
  ‌ tuple-type-element-list → tuple-type-element  tuple-type-element,tuple-type-element-list
- ‌ tuple-type-element → attributesoptinoutopttype inoutoptelement-nametype-annotation
+ ‌ tuple-type-element → attributes opt inout opt type | inout opt element-name type-annotation
  ‌ element-name → identifier
  */
 TupleTypePtr Parser::parseTupleType()

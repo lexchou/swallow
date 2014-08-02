@@ -52,7 +52,7 @@ public:
         CPPUNIT_ASSERT(NULL == param->getDefaultValue());
         ASSERT_EQUALS(L"", param->getExternalName().c_str());
         ASSERT_EQUALS(L"input", param->getLocalName().c_str());
-        CPPUNIT_ASSERT(type = std::dynamic_pointer_cast<TypeIdentifier>(param->getType()));
+        CPPUNIT_ASSERT(type = std::dynamic_pointer_cast<TypeIdentifier>(param->getDeclaredType()));
         ASSERT_EQUALS(L"Int", type->getName().c_str());
         
         CPPUNIT_ASSERT(type = std::dynamic_pointer_cast<TypeIdentifier>(func->getReturnType()));
@@ -100,7 +100,7 @@ public:
         CPPUNIT_ASSERT(NULL == param->getDefaultValue());
         ASSERT_EQUALS(L"", param->getExternalName().c_str());
         ASSERT_EQUALS(L"backwards", param->getLocalName().c_str());
-        CPPUNIT_ASSERT(type = std::dynamic_pointer_cast<TypeIdentifier>(param->getType()));
+        CPPUNIT_ASSERT(type = std::dynamic_pointer_cast<TypeIdentifier>(param->getDeclaredType()));
         ASSERT_EQUALS(L"Bool", type->getName().c_str());
         
         CPPUNIT_ASSERT(rettype = std::dynamic_pointer_cast<FunctionType>(func->getReturnType()));
@@ -140,7 +140,7 @@ public:
         CPPUNIT_ASSERT(NULL == param->getDefaultValue());
         ASSERT_EQUALS(L"", param->getExternalName().c_str());
         ASSERT_EQUALS(L"start", param->getLocalName().c_str());
-        CPPUNIT_ASSERT(type = std::dynamic_pointer_cast<TypeIdentifier>(param->getType()));
+        CPPUNIT_ASSERT(type = std::dynamic_pointer_cast<TypeIdentifier>(param->getDeclaredType()));
         ASSERT_EQUALS(L"Int", type->getName().c_str());
         
         
@@ -151,7 +151,7 @@ public:
         CPPUNIT_ASSERT(NULL == param->getDefaultValue());
         ASSERT_EQUALS(L"", param->getExternalName().c_str());
         ASSERT_EQUALS(L"end", param->getLocalName().c_str());
-        CPPUNIT_ASSERT(type = std::dynamic_pointer_cast<TypeIdentifier>(param->getType()));
+        CPPUNIT_ASSERT(type = std::dynamic_pointer_cast<TypeIdentifier>(param->getDeclaredType()));
         ASSERT_EQUALS(L"Int", type->getName().c_str());
         
         
@@ -251,7 +251,7 @@ public:
         CPPUNIT_ASSERT(NULL == param->getDefaultValue());
         ASSERT_EQUALS(L"externalParameterName", param->getExternalName().c_str());
         ASSERT_EQUALS(L"localParameterName", param->getLocalName().c_str());
-        CPPUNIT_ASSERT(type = std::dynamic_pointer_cast<TypeIdentifier>(param->getType()));
+        CPPUNIT_ASSERT(type = std::dynamic_pointer_cast<TypeIdentifier>(param->getDeclaredType()));
         ASSERT_EQUALS(L"Int", type->getName().c_str());
         
     }
@@ -279,7 +279,7 @@ public:
         CPPUNIT_ASSERT(NULL == param->getDefaultValue());
         ASSERT_EQUALS(L"", param->getExternalName().c_str());
         ASSERT_EQUALS(L"string", param->getLocalName().c_str());
-        CPPUNIT_ASSERT(type = std::dynamic_pointer_cast<TypeIdentifier>(param->getType()));
+        CPPUNIT_ASSERT(type = std::dynamic_pointer_cast<TypeIdentifier>(param->getDeclaredType()));
         ASSERT_EQUALS(L"String", type->getName().c_str());
         
         CPPUNIT_ASSERT(param = params->getParameter(1));
@@ -289,7 +289,7 @@ public:
         CPPUNIT_ASSERT(NULL == param->getDefaultValue());
         ASSERT_EQUALS(L"", param->getExternalName().c_str());
         ASSERT_EQUALS(L"characterToFind", param->getLocalName().c_str());
-        CPPUNIT_ASSERT(type = std::dynamic_pointer_cast<TypeIdentifier>(param->getType()));
+        CPPUNIT_ASSERT(type = std::dynamic_pointer_cast<TypeIdentifier>(param->getDeclaredType()));
         ASSERT_EQUALS(L"Character", type->getName().c_str());
         
     }
@@ -319,7 +319,7 @@ public:
         CPPUNIT_ASSERT(!param->isInout());
         ASSERT_EQUALS(L"withJoiner", param->getExternalName().c_str());
         ASSERT_EQUALS(L"joiner", param->getLocalName().c_str());
-        CPPUNIT_ASSERT(type = std::dynamic_pointer_cast<TypeIdentifier>(param->getType()));
+        CPPUNIT_ASSERT(type = std::dynamic_pointer_cast<TypeIdentifier>(param->getDeclaredType()));
         ASSERT_EQUALS(L"String", type->getName().c_str());
         CPPUNIT_ASSERT(str = std::dynamic_pointer_cast<StringLiteral>(param->getDefaultValue()));
         ASSERT_EQUALS(L" ", str->toString().c_str());
@@ -348,7 +348,7 @@ public:
         CPPUNIT_ASSERT(!param->isInout());
         ASSERT_EQUALS(L"", param->getExternalName().c_str());
         ASSERT_EQUALS(L"numbers", param->getLocalName().c_str());
-        CPPUNIT_ASSERT(type = std::dynamic_pointer_cast<TypeIdentifier>(param->getType()));
+        CPPUNIT_ASSERT(type = std::dynamic_pointer_cast<TypeIdentifier>(param->getDeclaredType()));
         ASSERT_EQUALS(L"Double", type->getName().c_str());
         CPPUNIT_ASSERT(NULL == param->getDefaultValue());
         
@@ -375,7 +375,7 @@ public:
         CPPUNIT_ASSERT(!param->isInout());
         ASSERT_EQUALS(L"", param->getExternalName().c_str());
         ASSERT_EQUALS(L"string", param->getLocalName().c_str());
-        CPPUNIT_ASSERT(type = std::dynamic_pointer_cast<TypeIdentifier>(param->getType()));
+        CPPUNIT_ASSERT(type = std::dynamic_pointer_cast<TypeIdentifier>(param->getDeclaredType()));
         ASSERT_EQUALS(L"String", type->getName().c_str());
         CPPUNIT_ASSERT(NULL == param->getDefaultValue());
     }
@@ -402,7 +402,7 @@ public:
         CPPUNIT_ASSERT(param->isInout());
         ASSERT_EQUALS(L"", param->getExternalName().c_str());
         ASSERT_EQUALS(L"a", param->getLocalName().c_str());
-        CPPUNIT_ASSERT(type = std::dynamic_pointer_cast<TypeIdentifier>(param->getType()));
+        CPPUNIT_ASSERT(type = std::dynamic_pointer_cast<TypeIdentifier>(param->getDeclaredType()));
         ASSERT_EQUALS(L"Int", type->getName().c_str());
         CPPUNIT_ASSERT(NULL == param->getDefaultValue());
         
@@ -413,7 +413,7 @@ public:
         CPPUNIT_ASSERT(param->isInout());
         ASSERT_EQUALS(L"", param->getExternalName().c_str());
         ASSERT_EQUALS(L"b", param->getLocalName().c_str());
-        CPPUNIT_ASSERT(type = std::dynamic_pointer_cast<TypeIdentifier>(param->getType()));
+        CPPUNIT_ASSERT(type = std::dynamic_pointer_cast<TypeIdentifier>(param->getDeclaredType()));
         ASSERT_EQUALS(L"Int", type->getName().c_str());
         CPPUNIT_ASSERT(NULL == param->getDefaultValue());
         
@@ -444,7 +444,7 @@ public:
         ASSERT_EQUALS(L"", param->getExternalName().c_str());
         ASSERT_EQUALS(L"mathFunction", param->getLocalName().c_str());
         
-        CPPUNIT_ASSERT(type = std::dynamic_pointer_cast<FunctionType>(param->getType()));
+        CPPUNIT_ASSERT(type = std::dynamic_pointer_cast<FunctionType>(param->getDeclaredType()));
         CPPUNIT_ASSERT(args = std::dynamic_pointer_cast<TupleType>(type->getArgumentsType()));
         CPPUNIT_ASSERT_EQUAL(2, args->numElements());
         
@@ -508,7 +508,7 @@ public:
         CPPUNIT_ASSERT(!param->isInout());
         ASSERT_EQUALS(L"", param->getExternalName().c_str());
         ASSERT_EQUALS(L"a", param->getLocalName().c_str());
-        CPPUNIT_ASSERT(t = std::dynamic_pointer_cast<TypeIdentifier>(param->getType()));
+        CPPUNIT_ASSERT(t = std::dynamic_pointer_cast<TypeIdentifier>(param->getDeclaredType()));
         ASSERT_EQUALS(L"Int", t->getName().c_str());
         
         
@@ -522,7 +522,7 @@ public:
         CPPUNIT_ASSERT(!param->isInout());
         ASSERT_EQUALS(L"", param->getExternalName().c_str());
         ASSERT_EQUALS(L"b", param->getLocalName().c_str());
-        CPPUNIT_ASSERT(t = std::dynamic_pointer_cast<TypeIdentifier>(param->getType()));
+        CPPUNIT_ASSERT(t = std::dynamic_pointer_cast<TypeIdentifier>(param->getDeclaredType()));
         ASSERT_EQUALS(L"Int", t->getName().c_str());
         
     }

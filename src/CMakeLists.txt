@@ -43,6 +43,7 @@ SET(SWIFT_PARSER_SRC ${SWIFT_TOKENIZER_SRC}
     semantics/scope-owner.cpp
     semantics/scoped-nodes.cpp
     semantics/scoped-node-factory.cpp
+    semantics/semantic-node-visitor.cpp
     semantics/type.cpp
     semantics/type-inference-action.cpp
     semantics/symbol-resolve-action.cpp
