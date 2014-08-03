@@ -36,7 +36,11 @@ struct Errors
 
         E_TUPLE_PATTERN_MUST_MATCH_TUPLE_TYPE,//tuple pattern cannot match values of the non-tuple type '%'
         E_TUPLE_TYPES_HAVE_A_DIFFERENT_NUMBER_OF_ELEMENT, //tuple types '($T0, $T1)' and '($T2, $T3, $T4)' have a different number of elements (2 vs. 3)
-
+        E_OPERATOR_REDECLARED,//operator redeclared
+        E_OPERATOR_PRECEDENCE_OUT_OF_RANGE,//'precedence' must be in the range of 0 to 255
+        E_UNKNOWN_BINARY_OPERATOR, //operator is not a known binary operator
+        E_IS_NOT_BINARY_OPERATOR, //'%' is not a binary operator
+        E_NO_OVERLOAD_ACCEPTS_ARGUMENTS,//could not find an overload for '%' that accepts the supplied arguments
 
         //linking errors
     };

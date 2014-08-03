@@ -15,11 +15,18 @@ Node* SymbolScope::getOwner()
 {
     return owner;
 }
-void SymbolScope::addSymbol(SymbolPtr symbol)
+void SymbolScope::addSymbol(const SymbolPtr& symbol)
 {
     this->symbols.insert(std::make_pair(symbol->getName(), symbol));
 }
 
+void SymbolScope::removeSymbol(const SymbolPtr& symbol)
+{
+    SymbolMap::iterator iter = symbols.find(symbol->getName());
+    if(iter != symbols.end() && iter->second == symbol)
+        symbols.erase(iter);
+
+}
 SymbolPtr SymbolScope::lookup(const std::wstring& name)
 {
     SymbolMap::iterator iter = symbols.find(name);

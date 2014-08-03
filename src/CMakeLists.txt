@@ -47,6 +47,8 @@ SET(SWIFT_PARSER_SRC ${SWIFT_TOKENIZER_SRC}
     semantics/type.cpp
     semantics/type-inference-action.cpp
     semantics/symbol-resolve-action.cpp
+    semantics/function-symbol.cpp
+    semantics/function-overloaded-symbol.cpp
 
     ast/node.cpp
     ast/program.cpp

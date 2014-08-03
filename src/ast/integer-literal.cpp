@@ -1,4 +1,5 @@
 #include "integer-literal.h"
+#include "node-visitor.h"
 USE_SWIFT_NS
 
 IntegerLiteral::IntegerLiteral()
@@ -8,4 +9,9 @@ IntegerLiteral::IntegerLiteral()
 void IntegerLiteral::serialize(std::wostream& out)
 {
     out<<value;
+}
+
+void IntegerLiteral::accept(NodeVisitor* visitor)
+{
+    accept2(visitor, &NodeVisitor::visitInteger);
 }

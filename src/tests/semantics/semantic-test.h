@@ -13,7 +13,7 @@ public:
     Swift::ScopedProgramPtr analyzeStatement(Swift::SymbolRegistry& registry, Swift::CompilerResults& compilerResults, const char* func, const wchar_t* str)
     {
         using namespace Swift;
-        registry.getCurrentScope()->addSymbol(SymbolPtr(new SymbolPlaceHolder(L"println")));
+        registry.getCurrentScope()->addSymbol(SymbolPtr(new SymbolPlaceHolder(L"println", nullptr)));
         ScopedNodeFactory nodeFactory;
         Parser parser(&nodeFactory, &compilerResults);
         parser.setFileName(L"<file>");
@@ -23,14 +23,21 @@ public:
         //d.g();
         if(!ret)
             return ret;
+        try
         {
-            SymbolResolveAction action(&registry, &compilerResults);
-            ret->accept(&action);
+            SymbolResolveAction symbolResolve(&registry, &compilerResults);
+            TypeInferenceAction typeInference(&registry, &compilerResults);
+            NodeVisitor* visitors[] = {&symbolResolve, &typeInference};
+            for(NodeVisitor* visitor : visitors)
+            {
+                ret->accept(visitor);
+                if(compilerResults.numResults() > 0)
+                    break;
+            }
         }
-
+        catch(const Abort&)
         {
-            TypeInferenceAction action(&registry, &compilerResults);
-            ret->accept(&action);
+            //ignore this
         }
 
         return ret;

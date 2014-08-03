@@ -11,6 +11,7 @@ public:
     FloatLiteral();
 public:
     virtual void serialize(std::wostream& out);
+    virtual void accept(NodeVisitor* visitor);
 public:
     std::wstring valueAsString;
     double value;

@@ -119,6 +119,8 @@ bool Type::operator ==(const Type& rhs)const
         //check name
         if (fullName != rhs.fullName)
             return false;
+        if(name != rhs.name)
+            return false;
         //TODO: check generic parameters
     }
     if(!elementTypes.empty() && !rhs.elementTypes.empty())

@@ -69,6 +69,9 @@ public://The following visit procedures will not be executed until manually visi
     virtual void visitOptionalChaining(const OptionalChainingPtr& node);
     virtual void visitParenthesizedExpression(const ParenthesizedExpressionPtr& node);
 
+    virtual void visitString(const StringLiteralPtr& node);
+    virtual void visitInteger(const IntegerLiteralPtr& node);
+    virtual void visitFloat(const FloatLiteralPtr& node);
 };
 
 

@@ -366,3 +366,16 @@ void NodeVisitor::visitParenthesizedExpression(const ParenthesizedExpressionPtr&
         ACCEPT(term.second.get());
     }
 }
+
+void NodeVisitor::visitString(const StringLiteralPtr& node)
+{
+
+}
+void NodeVisitor::visitInteger(const IntegerLiteralPtr& node)
+{
+
+}
+void NodeVisitor::visitFloat(const FloatLiteralPtr& node)
+{
+
+}

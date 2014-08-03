@@ -1,4 +1,5 @@
 #include "float-literal.h"
+#include "node-visitor.h"
 USE_SWIFT_NS
 
 FloatLiteral::FloatLiteral()
@@ -8,4 +9,8 @@ FloatLiteral::FloatLiteral()
 void FloatLiteral::serialize(std::wostream& out)
 {
     out<<value;
+}
+void FloatLiteral::accept(NodeVisitor* visitor)
+{
+    accept2(visitor, &NodeVisitor::visitFloat);
 }

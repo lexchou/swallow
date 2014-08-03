@@ -24,6 +24,7 @@ public:
     void testUndeclaredVars()
     {
         SEMANTIC_ANALYZE(L"a = 34");
+        dumpCompilerResults(compilerResults);
         CPPUNIT_ASSERT_EQUAL(1, compilerResults.numResults());
         const CompilerResult& r = compilerResults.getResult(0);
         CPPUNIT_ASSERT_EQUAL((int)Errors::E_USE_OF_UNRESOLVED_IDENTIFIER, r.code);

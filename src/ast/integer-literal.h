@@ -11,6 +11,7 @@ public:
     IntegerLiteral();
 public:
     virtual void serialize(std::wostream& out);
+    virtual void accept(NodeVisitor* visitor);
 public:
     std::wstring valueAsString;
     int64_t value;

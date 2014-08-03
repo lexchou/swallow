@@ -18,6 +18,10 @@ class ScopedCodeBlock;
 typedef std::shared_ptr<ScopedCodeBlock> ScopedCodeBlockPtr;
 class ScopedProgram;
 typedef std::shared_ptr<ScopedProgram> ScopedProgramPtr;
+class FunctionOverloadedSymbol;
+typedef std::shared_ptr<FunctionOverloadedSymbol> FunctionOverloadedSymbolPtr;
+class FunctionSymbol;
+typedef std::shared_ptr<FunctionSymbol> FunctionSymbolPtr;
 
 SWIFT_NS_END
 

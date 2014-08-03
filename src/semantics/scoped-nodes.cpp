@@ -27,7 +27,9 @@ struct ScopeGuard
 void ScopedProgram::accept(NodeVisitor* visitor)
 {
     ScopeGuard scope(this, visitor);
+    scope.symbolRegistry->setFileScope(this->getScope());
     accept2(visitor, &NodeVisitor::visitProgram);
+    scope.symbolRegistry->setFileScope(nullptr);
 }
 
 
