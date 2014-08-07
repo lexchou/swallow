@@ -1,18 +1,30 @@
 #include "function-symbol.h"
+#include "type.h"
+#include <cassert>
 
 USE_SWIFT_NS
 
 
-FunctionSymbol::FunctionSymbol(const std::wstring& name)
-:name(name)
+FunctionSymbol::FunctionSymbol(const std::wstring& name, const TypePtr& functionType, const FunctionDefPtr& definition)
+:name(name), type(functionType), definition(definition)
 {
+    assert(functionType);
+    assert(functionType->getCategory() == Type::Function);
+}
 
+TypePtr FunctionSymbol::getType()
+{
+    return type;
 }
 const std::wstring& FunctionSymbol::getName() const
 {
     return name;
 }
-const TypePtr& FunctionSymbol::getReturnType()const
+TypePtr FunctionSymbol::getReturnType()const
 {
-    return returnType;
+    return type->getReturnType();
+}
+FunctionDefPtr FunctionSymbol::getDefinition()const
+{
+    return definition;
 }

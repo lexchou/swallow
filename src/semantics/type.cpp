@@ -15,9 +15,18 @@ TypePtr Type::newDictionaryType(TypePtr keyType, TypePtr valueType)
 {
     return TypePtr(new Type(L"", Dictionary, keyType, valueType));
 }
-TypePtr Type::newType(const std::wstring& name, Category category)
+TypePtr Type::newType(const std::wstring& name, Category category, const TypeDeclarationPtr& reference)
 {
-    return TypePtr(new Type(name, category, nullptr, nullptr));
+    TypePtr ret = TypePtr(new Type(name, category, nullptr, nullptr));
+    ret->reference = reference;
+    return ret;
+}
+
+TypePtr Type::newTypeReference(const TypePtr& innerType)
+{
+    TypePtr ret(new Type(L"", Reference, nullptr, nullptr));
+    ret->innerType = innerType;
+    return ret;
 }
 
 
@@ -33,6 +42,18 @@ TypePtr Type::newTuple(const std::vector<TypePtr>& types)
     return TypePtr(ret);
 }
 
+TypePtr Type::newFunction(const std::vector<TypePtr>& parameters, const TypePtr& returnType)
+{
+    Type* ret = new Type(L"", Function, nullptr, nullptr);
+    ret->parameterTypes = parameters;
+    ret->returnType = returnType;
+    return TypePtr(ret);
+}
+
+Type::Category Type::getCategory()const
+{
+    return category;
+}
 bool Type::isPrimitive()const
 {
     return category == Primitive;
@@ -106,7 +127,27 @@ TypePtr Type::getValueType()
 {
     return valueType;
 }
+TypeDeclarationPtr Type::getReference()
+{
+    return reference;
+}
 
+TypePtr Type::getInnerType()
+{
+    return innerType;
+}
+
+
+TypePtr Type::getReturnType()
+{
+    return returnType;
+}
+
+
+const std::vector<TypePtr>& Type::getParameterTypes()
+{
+    return parameterTypes;
+}
 
 bool Type::operator ==(const Type& rhs)const
 {
@@ -114,30 +155,64 @@ bool Type::operator ==(const Type& rhs)const
         return false;
     if(moduleName != rhs.moduleName)
         return false;
-    if(category == Primitive || category == Class || category == Struct || category == Protocol || category == Extension)
+
+    switch(category)
     {
-        //check name
-        if (fullName != rhs.fullName)
-            return false;
-        if(name != rhs.name)
-            return false;
-        //TODO: check generic parameters
+        case Primitive:
+        case Class:
+        case Struct:
+        case Protocol:
+        case Extension:
+        case Enum:
+            //check name
+            if (fullName != rhs.fullName)
+                return false;
+            if(name != rhs.name)
+                return false;
+            if(reference != rhs.reference)
+                return false;
+            //TODO: check generic parameters
+            break;
+        case Array:
+        case Tuple:
+        {
+            if (!elementTypes.empty() && !rhs.elementTypes.empty())
+                return false;
+            auto iter = elementTypes.begin(), iter2 = rhs.elementTypes.begin();
+            for (; iter != elementTypes.end(); iter++, iter2++)
+            {
+                if (*iter != *iter2)
+                    return false;
+            }
+            break;
+        }
+        case Dictionary:
+            if(*keyType != *rhs.keyType)
+                return false;
+            if(*valueType != *rhs.valueType)
+                return false;
+            break;
+        case Reference:
+            if(*innerType != *rhs.innerType)
+                return false;
+            break;
+        case Function:
+        case Closure:
+        {
+            if(*returnType != *rhs.returnType)
+                return false;
+            if(parameterTypes.size() != rhs.parameterTypes.size())
+                return false;
+            auto iter = parameterTypes.begin(), iter2 = rhs.parameterTypes.begin();
+            for(; iter != parameterTypes.end(); iter++, iter2++)
+            {
+                if(*iter != *iter2)
+                    return false;
+            }
+            break;
+        }
     }
-    if(!elementTypes.empty() && !rhs.elementTypes.empty())
-        return false;
-    auto iter = elementTypes.begin(), iter2 = rhs.elementTypes.begin();
-    for(; iter != elementTypes.end(); iter++, iter2++)
-    {
-        if(*iter != *iter2)
-            return false;
-    }
-    if(isDictionary())
-    {
-        if(*keyType != *rhs.keyType)
-            return false;
-        if(*valueType != *rhs.valueType)
-            return false;
-    }
+
     return true;
 }
 

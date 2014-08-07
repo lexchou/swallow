@@ -24,6 +24,11 @@ protected:
      */
     void error(const NodePtr& node, int code, const std::wstring& item = std::wstring());
 
+    /**
+     * Convert a AST TypeNode into symboled Type
+     */
+    TypePtr lookupType(const TypeNodePtr& type);
+
 protected:
     SymbolRegistry* symbolRegistry;
     CompilerResults* compilerResults;

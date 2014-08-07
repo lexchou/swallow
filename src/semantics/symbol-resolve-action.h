@@ -27,6 +27,7 @@ public:
     virtual void visitFunction(const FunctionDefPtr& node);
     virtual void visitIdentifier(const IdentifierPtr& id);
     virtual void visitEnumCasePattern(const EnumCasePatternPtr& node);
+    virtual void visitParameter(const ParameterPtr& node);
 private:
     void defineType(const std::shared_ptr<TypeDeclaration>& node, Type::Category category);
     //Register all symbols in the pattern
@@ -36,6 +37,8 @@ private:
 
     //set or reset flag in all identifiers in given pattern
     void setFlag(const PatternPtr& pattern, bool add, int flag);
+    FunctionSymbolPtr createFunctionSymbol(const FunctionDefPtr& func);
+    TypePtr createFunctionType(const std::vector<ParametersPtr>::const_iterator& begin, const std::vector<ParametersPtr>::const_iterator& end, const TypePtr& retType);
 };
 
 SWIFT_NS_END

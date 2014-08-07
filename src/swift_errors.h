@@ -41,7 +41,10 @@ struct Errors
         E_UNKNOWN_BINARY_OPERATOR, //operator is not a known binary operator
         E_IS_NOT_BINARY_OPERATOR, //'%' is not a binary operator
         E_NO_OVERLOAD_ACCEPTS_ARGUMENTS,//could not find an overload for '%' that accepts the supplied arguments
-
+        E_INVALID_CALL_OF_NON_FUNCTION_TYPE,//invalid use of '()' to call a value of non-function type '%'
+        E_UNMATCHED_PARAMETERS, // Unmatched number of supplied parameters
+        E_UNMATCHED_PARAMETER, // Unmatched type of parameter #%
+        E_NO_MATCHED_OVERLOAD, // No matched overload found
         //linking errors
     };
     

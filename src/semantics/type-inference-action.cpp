@@ -16,53 +16,11 @@ USE_SWIFT_NS
 TypeInferenceAction::TypeInferenceAction(SymbolRegistry* symbolRegistry, CompilerResults* compilerResults)
     :SemanticNodeVisitor(symbolRegistry, compilerResults)
 {
-    t_int = symbolRegistry->lookupType(L"Int32");
+    t_int = symbolRegistry->lookupType(L"Int");
     t_bool = symbolRegistry->lookupType(L"Bool");
     t_double = symbolRegistry->lookupType(L"Double");
     t_string = symbolRegistry->lookupType(L"String");
 }
-
-TypePtr TypeInferenceAction::lookupType(const TypeNodePtr& type)
-{
-    if(TypeIdentifierPtr id = std::dynamic_pointer_cast<TypeIdentifier>(type))
-    {
-        //TODO: make a generic type if possible
-        TypePtr ret = symbolRegistry->lookupType(id->getName());
-        if(!ret)
-        {
-            std::wstringstream out;
-            type->serialize(out);
-            error(type, Errors::E_USE_OF_UNDECLARED_TYPE, out.str());
-            abort();
-        }
-        return ret;
-    }
-    if(TupleTypePtr tuple = std::dynamic_pointer_cast<TupleType>(type))
-    {
-        std::vector<TypePtr> elementTypes;
-        for(const TupleType::TupleElement& e : *tuple)
-        {
-            TypePtr t = lookupType(e.type);
-            elementTypes.push_back(t);
-        }
-        return Type::newTuple(elementTypes);
-    }
-    if(ArrayTypePtr array = std::dynamic_pointer_cast<ArrayType>(type))
-    {
-        TypePtr innerType = lookupType(array->getInnerType());
-        return Type::newArrayType(innerType);
-    }
-    if(FunctionTypePtr func = std::dynamic_pointer_cast<FunctionType>(type))
-    {
-        TypePtr retType = nullptr;
-        if(func->getReturnType())
-        {
-            retType = lookupType(func->getReturnType());
-        }
-    }
-    return nullptr;
-}
-
 
 void TypeInferenceAction::checkTupleDefinition(const TuplePtr& tuple, const ExpressionPtr& initializer)
 {
@@ -118,6 +76,130 @@ void TypeInferenceAction::checkTupleDefinition(const TuplePtr& tuple, const Expr
     }
 }
 
+float TypeInferenceAction::calculateFitScore(const FunctionSymbolPtr& func, const ParenthesizedExpressionPtr& arguments, bool supressErrors)
+{
+    float score = 0;
+    const std::vector<TypePtr>& parameters = func->getType()->getParameterTypes();
+
+    //TODO: check variadic parameter definition and trailing closure
+    if(parameters.size() != arguments->numExpressions())
+    {
+        //number is not matched
+        if(!supressErrors)
+        {
+            error(arguments, Errors::E_UNMATCHED_PARAMETERS);
+            abort();
+        }
+        return 0;
+    }
+    int i = 0;
+    for(const TypePtr& parameter : parameters)
+    {
+        const ExpressionPtr& argument = arguments->get(i++);
+        TypePtr argType = argument->getType();
+        if(*argType != *parameter)
+        {
+            if (!supressErrors)
+            {
+                error(arguments, Errors::E_UNMATCHED_PARAMETER);
+                abort();
+            }
+            return -i;//parameter is not matched
+        }
+        score += 1;
+    }
+    return score / arguments->numExpressions();
+}
+
+void TypeInferenceAction::visitFunctionCall(const IdentifierPtr& name, const FunctionCallPtr& node)
+{
+    SymbolPtr sym = symbolRegistry->lookupSymbol(name->getIdentifier());
+    if(!sym)
+    {
+        error(name, Errors::E_USE_OF_UNRESOLVED_IDENTIFIER, name->getIdentifier());
+        abort();
+        return;
+    }
+    //Prepare the arguments
+    for(const ParenthesizedExpression::Term& term : *node->getArguments())
+    {
+        term.second->accept(this);
+    }
+
+    if(FunctionSymbolPtr func = std::dynamic_pointer_cast<FunctionSymbol>(sym))
+    {
+        //verify argument
+        calculateFitScore(func, node->getArguments(), false);
+        node->setType(func->getReturnType());
+    }
+    else if(FunctionOverloadedSymbolPtr funcs = std::dynamic_pointer_cast<FunctionOverloadedSymbol>(sym))
+    {
+        typedef std::pair<float, FunctionSymbolPtr> ScoredFunction;
+        std::vector<ScoredFunction> candidates;
+        for(FunctionSymbolPtr func : *funcs)
+        {
+            float score = calculateFitScore(func, node->getArguments(), true);
+            if(score > 0)
+                candidates.push_back(std::make_pair(score, func));
+        }
+        if(candidates.empty())
+        {
+            error(node, Errors::E_NO_MATCHED_OVERLOAD);
+            abort();
+        }
+        //sort by fit score
+        if(candidates.size() > 1)
+        {
+            sort(candidates.begin(), candidates.end(), [](const ScoredFunction& lhs, const ScoredFunction& rhs ){
+                return rhs.first - lhs.first;
+            });
+        }
+        FunctionSymbolPtr matched = candidates.front().second;
+        node->setType(matched->getReturnType());
+    }
+    else
+    {
+        assert(0 && "Unsupported function to call");
+    }
+
+}
+void TypeInferenceAction::visitFunctionCall(const FunctionCallPtr& node)
+{
+    if(node->getFunction()->getNodeType() == NodeType::Identifier)
+    {
+        IdentifierPtr func = std::static_pointer_cast<Identifier>(node->getFunction());
+        visitFunctionCall(func, node);
+        return;
+    }
+
+
+    SemanticNodeVisitor::visitFunctionCall(node);
+    ExpressionPtr func = node->getFunction();
+
+    TypePtr t = func->getType();
+    Type::Category category = t->getCategory();
+
+    if(category == Type::Function || category == Type::Closure)
+    {
+        //TODO: type reference for calling function
+        node->setType(t->getReturnType());
+    }
+    else if(category == Type::Reference)
+    {
+        //initiate a new instance of specified type
+        node->setType(t->getInnerType());
+    }
+    else
+    {
+        //it's not a function, cannot call
+        std::wstringstream out;
+        func->serialize(out);
+        error(func, Errors::E_INVALID_CALL_OF_NON_FUNCTION_TYPE, out.str());
+        abort();
+    }
+
+
+}
 void TypeInferenceAction::visitString(const StringLiteralPtr& node)
 {
     node->setType(t_string);
@@ -209,7 +291,16 @@ void TypeInferenceAction::visitIdentifier(const IdentifierPtr& node)
         error(node, Errors::E_USE_OF_UNRESOLVED_IDENTIFIER, node->getIdentifier());
         abort();
     }
-    node->setType(s->getType());
+    TypePtr type = std::dynamic_pointer_cast<Type>(s);
+    if(type)
+    {
+        TypePtr ref = Type::newTypeReference(type);
+        node->setType(ref);
+    }
+    else
+    {
+        node->setType(s->getType());
+    }
 }
 void TypeInferenceAction::visitCompileConstant(const CompileConstantPtr& node)
 {

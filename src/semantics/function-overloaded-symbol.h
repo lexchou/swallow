@@ -15,6 +15,9 @@ public:
     virtual const std::wstring& getName() const;
     FunctionSymbolPtr lookupOverload(int argc, TypePtr argv[]);
     void add(const FunctionSymbolPtr& func);
+
+    std::vector<FunctionSymbolPtr>::iterator begin() { return functions.begin();}
+    std::vector<FunctionSymbolPtr>::iterator end() { return functions.end();}
 private:
     std::wstring name;
     std::vector<FunctionSymbolPtr> functions;

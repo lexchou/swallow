@@ -23,6 +23,13 @@ typedef std::shared_ptr<FunctionOverloadedSymbol> FunctionOverloadedSymbolPtr;
 class FunctionSymbol;
 typedef std::shared_ptr<FunctionSymbol> FunctionSymbolPtr;
 
+class SymboledFunction;
+typedef std::shared_ptr<SymboledFunction> SymboledFunctionPtr;
+
+class ScopedClass;
+typedef std::shared_ptr<ScopedClass> ScopedClassPtr;
+
+
 SWIFT_NS_END
 
 #endif//SEMANTIC_TYPES_H

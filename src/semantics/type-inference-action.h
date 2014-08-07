@@ -13,6 +13,8 @@ class TypeInferenceAction : public SemanticNodeVisitor
 public:
     TypeInferenceAction(SymbolRegistry* symbolRegistry, CompilerResults* compilerResults);
 public:
+    void visitFunctionCall(const IdentifierPtr& name, const FunctionCallPtr& node);
+    virtual void visitFunctionCall(const FunctionCallPtr& node);
     virtual void visitOperator(const OperatorDefPtr& node);
     virtual void visitVariable(const VariablePtr& node);
     virtual void visitConstant(const ConstantPtr& node);
@@ -27,8 +29,13 @@ public:
     virtual void visitCompileConstant(const CompileConstantPtr& node);
 private:
     void checkTupleDefinition(const TuplePtr& tuple, const ExpressionPtr& initializer);
-    TypePtr lookupType(const TypeNodePtr& type);
     TypePtr evaluateType(const ExpressionPtr& expr);
+
+    /**
+     * Calculates the fit score of arguments on given function
+     * @return -1 if the type is not matched
+     */
+    float calculateFitScore(const FunctionSymbolPtr& func, const ParenthesizedExpressionPtr& arguments, bool supressErrors);
 private:
     TypePtr t_int;
     TypePtr t_double;

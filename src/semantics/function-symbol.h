@@ -6,20 +6,22 @@
 
 SWIFT_NS_BEGIN
 typedef std::shared_ptr<Symbol> SymbolPtr;
+typedef std::shared_ptr<class FunctionDef> FunctionDefPtr;
 class FunctionSymbol : public Symbol
 {
     friend class FunctionOverloadedSymbol;
     friend class SymbolRegistry;
 public:
-    FunctionSymbol(const std::wstring& name);
+    FunctionSymbol(const std::wstring& name, const TypePtr& functionType, const FunctionDefPtr& definition);
 public:
     virtual const std::wstring& getName() const;
-    const TypePtr& getReturnType()const;
+    TypePtr getReturnType()const;
+    TypePtr getType();
+    FunctionDefPtr getDefinition()const;
 private:
     std::wstring name;
-    TypePtr returnType;
-    std::vector<TypePtr> parameterTypes;
-
+    TypePtr type;
+    FunctionDefPtr definition;
 };
 
 

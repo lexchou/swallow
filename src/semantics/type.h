@@ -9,7 +9,7 @@
 #include <vector>
 SWIFT_NS_BEGIN
 
-
+typedef std::shared_ptr<class TypeDeclaration> TypeDeclarationPtr;
 class Type : public Symbol
 {
     friend class SymbolRegistry;
@@ -24,15 +24,20 @@ public:
         Struct,
         Enum,
         Protocol,
-        Extension
+        Extension,
+        Function,
+        Closure,
+        Reference
     };
 private:
     Type(const std::wstring& name, Category category, TypePtr keyType, TypePtr valueType);
 public:
     static TypePtr newArrayType(TypePtr elementType);
     static TypePtr newDictionaryType(TypePtr keyType, TypePtr valueType);
-    static TypePtr newType(const std::wstring& name, Category category);
+    static TypePtr newType(const std::wstring& name, Category category, const TypeDeclarationPtr& reference = nullptr);
     static TypePtr newTuple(const std::vector<TypePtr>& types);
+    static TypePtr newTypeReference(const TypePtr& innerType);
+    static TypePtr newFunction(const std::vector<TypePtr>& parameters, const TypePtr& returnType);
 public:
     bool isPrimitive()const;
     bool isArray()const;
@@ -43,6 +48,7 @@ public:
      * Does the value copies by value or by reference
      */
     bool isValueType()const;
+    Category getCategory()const;
 
     /**
      * Gets the name of this type
@@ -91,6 +97,26 @@ public:
      * Gets the value type of the dictionary type
      */
     TypePtr getValueType();
+
+    /**
+     * Gets which declaration this type referenced to
+     */
+    TypeDeclarationPtr getReference();
+
+    /**
+     * Gets the inner type for Reference category.
+     */
+    TypePtr getInnerType();
+
+    /**
+     * Gets the return type if it's a function/closure type
+     */
+    TypePtr getReturnType();
+
+    /**
+     * Gets the parameter types if it's a function/closure type
+     */
+    const std::vector<TypePtr>& getParameterTypes();
 public:
     bool operator ==(const Type& rhs)const;
     bool operator !=(const Type& rhs)const;
@@ -100,10 +126,15 @@ private:
     std::wstring fullName;
     std::wstring moduleName;
 
+    TypeDeclarationPtr reference;
+
     Category category;
     TypePtr parentType;
     TypePtr keyType;
     TypePtr valueType;
+    TypePtr innerType;
+    TypePtr returnType;
+    std::vector<TypePtr> parameterTypes;
     std::vector<TypePtr> elementTypes;
 };
 

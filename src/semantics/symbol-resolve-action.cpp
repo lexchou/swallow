@@ -6,6 +6,9 @@
 #include "symbol-identifier.h"
 #include "scoped-nodes.h"
 #include "ast/tuple.h"
+#include "function-symbol.h"
+#include "function-overloaded-symbol.h"
+#include <cassert>
 
 USE_SWIFT_NS
 
@@ -177,7 +180,7 @@ void SymbolResolveAction::visitIdentifier(const IdentifierPtr& id)
         //check if this identifier is accessed inside a class/protocol/extension/struct/enum but defined not in program
         if(dynamic_cast<TypeDeclaration*>(symbolRegistry->getCurrentScope()->getOwner()))
         {
-            if(!dynamic_cast<Program*>(scope->getOwner()))
+            if(scope->getOwner()->getNodeType() != NodeType::Program)
             {
                 compilerResults->add(ErrorLevel::Error, *id->getSourceInfo(), Errors::E_USE_OF_FUNCTION_LOCAL_INSIDE_TYPE, id->getIdentifier());
             }
@@ -241,7 +244,7 @@ void SymbolResolveAction::defineType(const std::shared_ptr<TypeDeclaration>& nod
         }
     }
     //register this type
-    type = Type::newType(id->getName(), category);
+    type = Type::newType(id->getName(), category, node);
     currentScope->addSymbol(type);
 }
 
@@ -271,8 +274,67 @@ void SymbolResolveAction::visitExtension(const ExtensionDefPtr& node)
     NodeVisitor::visitExtension(node);
 
 }
+void SymbolResolveAction::visitParameter(const ParameterPtr& node)
+{
+    TypePtr type = lookupType(node->getDeclaredType());
+    node->setType(type);
+}
+TypePtr SymbolResolveAction::createFunctionType(const std::vector<ParametersPtr>::const_iterator& begin, const std::vector<ParametersPtr>::const_iterator& end, const TypePtr& retType)
+{
+    if(begin == end)
+        return retType;
+
+    TypePtr returnType = createFunctionType(begin + 1, end, retType);
+
+    std::vector<TypePtr> parameterTypes;
+    ParametersPtr params = *begin;
+    for(const ParameterPtr& param : *params)
+    {
+        param->accept(this);
+        TypePtr paramType = param->getType();
+        assert(paramType != nullptr);
+        parameterTypes.push_back(paramType);
+    }
+    return Type::newFunction(parameterTypes, returnType);
+}
+FunctionSymbolPtr SymbolResolveAction::createFunctionSymbol(const FunctionDefPtr& func)
+{
+    TypePtr retType = lookupType(func->getReturnType());
+    TypePtr funcType = createFunctionType(func->getParametersList().begin(), func->getParametersList().end(), retType);
+    FunctionSymbolPtr ret(new FunctionSymbol(func->getName(), funcType, func));
+    return ret;
+}
 void SymbolResolveAction::visitFunction(const FunctionDefPtr& node)
 {
-    symbolRegistry->getCurrentScope()->addSymbol(std::static_pointer_cast<SymboledFunction>(node));
     NodeVisitor::visitFunction(node);
+    FunctionSymbolPtr sym = createFunctionSymbol(node);
+    //check if the same symbol has been defined in this scope
+    SymbolScope* scope = symbolRegistry->getCurrentScope();
+    SymbolPtr oldSym = scope->lookup(sym->getName());
+    if(oldSym)
+    {
+        FunctionOverloadedSymbolPtr overload = std::dynamic_pointer_cast<FunctionOverloadedSymbol>(oldSym);
+        if(!overload)
+        {
+            //wrap it as overload
+            if(FunctionSymbolPtr oldFunc = std::dynamic_pointer_cast<FunctionSymbol>(oldSym))
+            {
+                overload = FunctionOverloadedSymbolPtr(new FunctionOverloadedSymbol(sym->getName()));
+                overload->add(oldFunc);
+                scope->removeSymbol(oldSym);
+                scope->addSymbol(overload);
+            }
+            else
+            {
+                //error, symbol with same name exists
+                error(node, Errors::E_INVALID_REDECLARATION, node->getName());
+                abort();
+            }
+        }
+        overload->add(sym);
+    }
+    else
+    {
+        scope->addSymbol(sym);
+    }
 }

@@ -4,6 +4,7 @@
 #include "tests/semantics/semantic-test.h"
 #include "semantics/type.h"
 #include "swift_errors.h"
+#include "semantics/function-symbol.h"
 
 using namespace Swift;
 
@@ -24,7 +25,7 @@ public:
     void testUndeclaredVars()
     {
         SEMANTIC_ANALYZE(L"a = 34");
-        dumpCompilerResults(compilerResults);
+        //dumpCompilerResults(compilerResults);
         CPPUNIT_ASSERT_EQUAL(1, compilerResults.numResults());
         const CompilerResult& r = compilerResults.getResult(0);
         CPPUNIT_ASSERT_EQUAL((int)Errors::E_USE_OF_UNRESOLVED_IDENTIFIER, r.code);
@@ -66,8 +67,9 @@ public:
     {
         SEMANTIC_ANALYZE(L"let global = 0; func test(){let local = 1;}");
         FunctionDefPtr test = NULL;
-
-        CPPUNIT_ASSERT(test = std::dynamic_pointer_cast<FunctionDef>(scope->lookup(L"test")));
+        FunctionSymbolPtr symbol;
+        CPPUNIT_ASSERT(symbol = std::dynamic_pointer_cast<FunctionSymbol>(scope->lookup(L"test")));
+        CPPUNIT_ASSERT(test = symbol->getDefinition());
         ScopedCodeBlockPtr cb = std::static_pointer_cast<ScopedCodeBlock>(test->getBody());
         SymbolPtr local = cb->getScope()->lookup(L"local");
         SymbolPtr global = root->getScope()->lookup(L"global");
