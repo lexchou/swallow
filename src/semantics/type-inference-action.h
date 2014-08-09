@@ -3,6 +3,8 @@
 #include "swift_conf.h"
 #include "ast/node-visitor.h"
 #include "semantic-node-visitor.h"
+#include "type.h"
+#include "ast/parenthesized-expression.h"
 SWIFT_NS_BEGIN
 
 
@@ -36,6 +38,8 @@ private:
      * @return -1 if the type is not matched
      */
     float calculateFitScore(const FunctionSymbolPtr& func, const ParenthesizedExpressionPtr& arguments, bool supressErrors);
+    bool checkArgument(const Type::Parameter& parameter, const ParenthesizedExpression::Term& argument, bool variadic, float& score, bool supressErrors);
+
 private:
     TypePtr t_int;
     TypePtr t_double;

@@ -45,6 +45,10 @@ struct Errors
         E_UNMATCHED_PARAMETERS, // Unmatched number of supplied parameters
         E_UNMATCHED_PARAMETER, // Unmatched type of parameter #%
         E_NO_MATCHED_OVERLOAD, // No matched overload found
+        E_MISSING_ARGUMENT_LABEL_IN_CALL,// Missing argument label '%:' in call
+        E_EXTRANEOUS_ARGUMENT_LABEL_IN_CALL, //Extraneous argument label '%:' in call
+        E_EXTRANEOUS_ARGUMENT, //Extraneous argument in call
+        E_AMBIGUOUS_USE,    // Ambiguous use of '%'
         //linking errors
     };
     

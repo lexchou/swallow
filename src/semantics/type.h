@@ -14,6 +14,18 @@ class Type : public Symbol
 {
     friend class SymbolRegistry;
 public:
+    struct Parameter
+    {
+        std::wstring name;
+        bool inout;
+        TypePtr type;
+        Parameter(const std::wstring&name, bool inout, const TypePtr& type)
+                :name(name), inout(inout), type(type)
+        {}
+        Parameter(const TypePtr& type)
+                :inout(false), type(type)
+        {}
+    };
     enum Category
     {
         Primitive,
@@ -37,7 +49,7 @@ public:
     static TypePtr newType(const std::wstring& name, Category category, const TypeDeclarationPtr& reference = nullptr);
     static TypePtr newTuple(const std::vector<TypePtr>& types);
     static TypePtr newTypeReference(const TypePtr& innerType);
-    static TypePtr newFunction(const std::vector<TypePtr>& parameters, const TypePtr& returnType);
+    static TypePtr newFunction(const std::vector<Parameter>& parameters, const TypePtr& returnType, bool hasVariadicParameters);
 public:
     bool isPrimitive()const;
     bool isArray()const;
@@ -116,7 +128,12 @@ public:
     /**
      * Gets the parameter types if it's a function/closure type
      */
-    const std::vector<TypePtr>& getParameterTypes();
+    const std::vector<Parameter>& getParameters();
+
+    /**
+     * Check if the function has variadic parameters
+     */
+    bool hasVariadicParameters()const;
 public:
     bool operator ==(const Type& rhs)const;
     bool operator !=(const Type& rhs)const;
@@ -134,7 +151,8 @@ private:
     TypePtr valueType;
     TypePtr innerType;
     TypePtr returnType;
-    std::vector<TypePtr> parameterTypes;
+    std::vector<Parameter> parameters;
+    bool variadicParameters;
     std::vector<TypePtr> elementTypes;
 };
 

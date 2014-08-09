@@ -286,16 +286,18 @@ TypePtr SymbolResolveAction::createFunctionType(const std::vector<ParametersPtr>
 
     TypePtr returnType = createFunctionType(begin + 1, end, retType);
 
-    std::vector<TypePtr> parameterTypes;
+    std::vector<Type::Parameter> parameterTypes;
     ParametersPtr params = *begin;
     for(const ParameterPtr& param : *params)
     {
         param->accept(this);
         TypePtr paramType = param->getType();
         assert(paramType != nullptr);
-        parameterTypes.push_back(paramType);
+        std::wstring externalName = param->isShorthandExternalName() ? param->getLocalName() : param->getExternalName();
+        parameterTypes.push_back(Type::Parameter(externalName, param->isInout(), paramType));
     }
-    return Type::newFunction(parameterTypes, returnType);
+
+    return Type::newFunction(parameterTypes, returnType, params->isVariadicParameters());
 }
 FunctionSymbolPtr SymbolResolveAction::createFunctionSymbol(const FunctionDefPtr& func)
 {

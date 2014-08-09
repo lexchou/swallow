@@ -42,11 +42,12 @@ TypePtr Type::newTuple(const std::vector<TypePtr>& types)
     return TypePtr(ret);
 }
 
-TypePtr Type::newFunction(const std::vector<TypePtr>& parameters, const TypePtr& returnType)
+TypePtr Type::newFunction(const std::vector<Parameter>& parameters, const TypePtr& returnType, bool hasVariadicParameters)
 {
     Type* ret = new Type(L"", Function, nullptr, nullptr);
-    ret->parameterTypes = parameters;
+    ret->parameters = parameters;
     ret->returnType = returnType;
+    ret->variadicParameters = hasVariadicParameters;
     return TypePtr(ret);
 }
 
@@ -144,9 +145,14 @@ TypePtr Type::getReturnType()
 }
 
 
-const std::vector<TypePtr>& Type::getParameterTypes()
+const std::vector<Type::Parameter>& Type::getParameters()
 {
-    return parameterTypes;
+    return parameters;
+}
+
+bool Type::hasVariadicParameters()const
+{
+    return variadicParameters;
 }
 
 bool Type::operator ==(const Type& rhs)const
@@ -201,12 +207,18 @@ bool Type::operator ==(const Type& rhs)const
         {
             if(*returnType != *rhs.returnType)
                 return false;
-            if(parameterTypes.size() != rhs.parameterTypes.size())
+            if(parameters.size() != rhs.parameters.size())
                 return false;
-            auto iter = parameterTypes.begin(), iter2 = rhs.parameterTypes.begin();
-            for(; iter != parameterTypes.end(); iter++, iter2++)
+            if(variadicParameters != rhs.variadicParameters)
+                return false;
+            auto iter = parameters.begin(), iter2 = rhs.parameters.begin();
+            for(; iter != parameters.end(); iter++, iter2++)
             {
-                if(*iter != *iter2)
+                if(iter->name != iter2->name)
+                    return false;
+                if(iter->inout != iter2->inout)
+                    return false;
+                if(*iter->type != *iter2->type)
                     return false;
             }
             break;

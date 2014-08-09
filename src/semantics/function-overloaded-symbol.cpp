@@ -17,16 +17,16 @@ FunctionSymbolPtr FunctionOverloadedSymbol::lookupOverload(int argc, TypePtr arg
     for(const FunctionSymbolPtr& func : functions)
     {
         TypePtr signature = func->getType();
-        const std::vector<TypePtr>& parameterTypes = signature->getParameterTypes();
+        const std::vector<Type::Parameter>& parameterTypes = signature->getParameters();
 
         if(parameterTypes.size() != argc)
             continue;
         //check each parameter's type
         bool matched = true;
         int i = 0;
-        for(const TypePtr& parameterType : parameterTypes)
+        for(const Type::Parameter& parameter : parameterTypes)
         {
-            if(*parameterType != *argv[i++])
+            if(*parameter.type != *argv[i++])
             {
                 matched = false;
                 break;

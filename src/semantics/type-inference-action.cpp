@@ -76,28 +76,153 @@ void TypeInferenceAction::checkTupleDefinition(const TuplePtr& tuple, const Expr
     }
 }
 
+/**
+ *
+ * @param parameter
+ * @param argument
+ * @param variadic  Variadic parameter must have no name
+ * @param score
+ * @param supressErrors
+ */
+bool TypeInferenceAction::checkArgument(const Type::Parameter& parameter, const ParenthesizedExpression::Term& argument, bool variadic, float& score, bool supressErrors)
+{
+
+    const std::wstring name = argument.first;
+    TypePtr argType = argument.second->getType();
+
+    if(variadic)
+    {
+        //variadic parameter must have no name
+        if(!name.empty())
+        {
+            error(argument.second, Errors::E_EXTRANEOUS_ARGUMENT_LABEL_IN_CALL, name);
+            abort();
+        }
+    }
+    else
+    {
+        if (parameter.name != name)
+        {
+            if (!supressErrors)
+            {
+                if (name.empty() && !parameter.name.empty())
+                {
+                    error(argument.second, Errors::E_MISSING_ARGUMENT_LABEL_IN_CALL, parameter.name);
+                }
+                else
+                {
+                    error(argument.second, Errors::E_EXTRANEOUS_ARGUMENT_LABEL_IN_CALL, name);
+                }
+                abort();
+            }
+            return false;
+        }
+    }
+
+    if(*argType != *parameter.type)
+    {
+        if (!supressErrors)
+        {
+            error(argument.second, Errors::E_UNMATCHED_PARAMETER);
+            abort();
+        }
+        return false;//parameter is not matched
+    }
+    score += 1;
+    return true;
+}
+
 float TypeInferenceAction::calculateFitScore(const FunctionSymbolPtr& func, const ParenthesizedExpressionPtr& arguments, bool supressErrors)
 {
     float score = 0;
-    const std::vector<TypePtr>& parameters = func->getType()->getParameterTypes();
+    const std::vector<Type::Parameter>& parameters = func->getType()->getParameters();
+    bool variadic = func->getType()->hasVariadicParameters();
 
-    //TODO: check variadic parameter definition and trailing closure
-    if(parameters.size() != arguments->numExpressions())
+    //TODO: check trailing closure
+
+
+    std::vector<Type::Parameter>::const_iterator paramIter = parameters.begin();
+    std::vector<ParenthesizedExpression::Term>::const_iterator argumentIter = arguments->begin();
+    std::vector<Type::Parameter>::const_iterator paramEnd = variadic ? parameters.end() - 1 : parameters.end();
+    for(;argumentIter != arguments->end() && paramIter != paramEnd; argumentIter++, paramIter++)
     {
-        //number is not matched
-        if(!supressErrors)
-        {
-            error(arguments, Errors::E_UNMATCHED_PARAMETERS);
-            abort();
-        }
-        return 0;
+        const Type::Parameter& parameter = *paramIter;
+        const ParenthesizedExpression::Term& argument = *argumentIter;
+        bool ret = checkArgument(parameter, argument, false, score, supressErrors);
+        if(!ret)
+            return -1;
     }
-    int i = 0;
-    for(const TypePtr& parameter : parameters)
+    //if there's the rest parameters, they must have initializer
+    if(paramIter != paramEnd && argumentIter == arguments->end())
     {
+        //if there's only one parameter and it's a variadic parameter, ignore this error
+        if(!(paramIter + 1 == parameters.end() && variadic))
+        {
+            //TODO: check initializer
+            if (!supressErrors)
+            {
+                error(arguments, Errors::E_UNMATCHED_PARAMETERS);
+                abort();
+            }
+            return -1;
+        }
+    }
+    //if there's the rest arguments, check for variadic
+    if(paramIter == paramEnd && argumentIter != arguments->end())
+    {
+        if(!variadic)
+        {
+            if(!supressErrors)
+            {
+                error(argumentIter->second, Errors::E_EXTRANEOUS_ARGUMENT);
+                abort();
+            }
+            return -1;
+        }
+        const Type::Parameter& parameter = *paramIter;
+        //the first variadic argument must have a label if the parameter got a label
+        if(!parameter.name.empty())
+        {
+            bool ret = checkArgument(parameter, *argumentIter++, false, score, supressErrors);
+            if(!ret)
+                return -1;
+        }
+
+        //check rest argument
+        for(;argumentIter != arguments->end(); argumentIter++)
+        {
+            bool ret = checkArgument(parameter, *argumentIter, true, score, supressErrors);
+            if(!ret)
+                return -1;
+        }
+    }
+
+
+    /*
+    int i = 0;
+    for(const Type::Parameter& parameter : parameters)
+    {
+        const std::wstring name = arguments->getName(i);
         const ExpressionPtr& argument = arguments->get(i++);
         TypePtr argType = argument->getType();
-        if(*argType != *parameter)
+
+        if(parameter.name != name)
+        {
+            if(!supressErrors)
+            {
+                if(name.empty() && !parameter.name.empty())
+                {
+                    error(arguments, Errors::E_MISSING_ARGUMENT_LABEL_IN_CALL, parameter.name);
+                }
+                else
+                {
+                    error(arguments, Errors::E_EXTRANEOUS_ARGUMENT_LABEL_IN_CALL, name);
+                }
+            }
+            return -1;
+        }
+
+        if(*argType != *parameter.type)
         {
             if (!supressErrors)
             {
@@ -108,6 +233,9 @@ float TypeInferenceAction::calculateFitScore(const FunctionSymbolPtr& func, cons
         }
         score += 1;
     }
+    */
+    if(!arguments->numExpressions())
+        return 1;
     return score / arguments->numExpressions();
 }
 
@@ -153,6 +281,11 @@ void TypeInferenceAction::visitFunctionCall(const IdentifierPtr& name, const Fun
             sort(candidates.begin(), candidates.end(), [](const ScoredFunction& lhs, const ScoredFunction& rhs ){
                 return rhs.first - lhs.first;
             });
+            if(candidates[0].first == candidates[1].first)
+            {
+                error(node, Errors::E_AMBIGUOUS_USE, name->getIdentifier());
+                abort();
+            }
         }
         FunctionSymbolPtr matched = candidates.front().second;
         node->setType(matched->getReturnType());

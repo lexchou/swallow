@@ -95,6 +95,10 @@ SymbolRegistry::SymbolRegistry()
     currentScope->addSymbol(t_string = Type::newType(L"String", Type::Primitive));
     currentScope->addSymbol(t_void = Type::newType(L"Void", Type::Primitive));
     //Register built-in variables
+    currentScope->addSymbol(SymbolPtr(new SymbolPlaceHolder(L"true", t_bool)));
+    currentScope->addSymbol(SymbolPtr(new SymbolPlaceHolder(L"false", t_bool)));
+
+
 
     //Register built-in functions
     //Register built-in operators
@@ -124,8 +128,8 @@ SymbolRegistry::SymbolRegistry()
 bool SymbolRegistry::registerOperatorFunction(SymbolScope* scope, const std::wstring& name, const TypePtr& returnType, const TypePtr& lhs, const TypePtr& rhs)
 {
     SymbolPtr sym = scope->lookup(name);
-    std::vector<TypePtr> parameterTypes = {lhs, rhs};
-    TypePtr funcType = Type::newFunction(parameterTypes, returnType);
+    std::vector<Type::Parameter> parameterTypes = {lhs, rhs};
+    TypePtr funcType = Type::newFunction(parameterTypes, returnType, false);
     FunctionSymbolPtr func(new FunctionSymbol(name, funcType, nullptr));
 
     if(sym)
