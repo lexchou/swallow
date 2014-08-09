@@ -17,9 +17,41 @@ TypeInferenceAction::TypeInferenceAction(SymbolRegistry* symbolRegistry, Compile
     :SemanticNodeVisitor(symbolRegistry, compilerResults)
 {
     t_int = symbolRegistry->lookupType(L"Int");
+    t_uint = symbolRegistry->lookupType(L"UInt");
+    t_int8 = symbolRegistry->lookupType(L"Int8");
+    t_uint8 = symbolRegistry->lookupType(L"UInt8");
+    t_int16 = symbolRegistry->lookupType(L"Int16");
+    t_uint16 = symbolRegistry->lookupType(L"UInt16");
+    t_int32 = symbolRegistry->lookupType(L"Int32");
+    t_uint32 = symbolRegistry->lookupType(L"UInt32");
+    t_int64 = symbolRegistry->lookupType(L"Int64");
+    t_uint64 = symbolRegistry->lookupType(L"UInt64");
+
+
     t_bool = symbolRegistry->lookupType(L"Bool");
     t_double = symbolRegistry->lookupType(L"Double");
+    t_float = symbolRegistry->lookupType(L"Float");
     t_string = symbolRegistry->lookupType(L"String");
+
+
+    t_ints.push_back(t_int);
+    t_ints.push_back(t_uint);
+    t_ints.push_back(t_int8);
+    t_ints.push_back(t_uint8);
+    t_ints.push_back(t_int16);
+    t_ints.push_back(t_uint16);
+    t_ints.push_back(t_int32);
+    t_ints.push_back(t_uint32);
+    t_ints.push_back(t_int64);
+    t_ints.push_back(t_uint64);
+
+    for(const TypePtr& t : t_ints)
+    {
+        t_numbers.push_back(t);
+    }
+    t_numbers.push_back(t_double);
+    t_numbers.push_back(t_float);
+
 }
 
 void TypeInferenceAction::checkTupleDefinition(const TuplePtr& tuple, const ExpressionPtr& initializer)
@@ -76,6 +108,38 @@ void TypeInferenceAction::checkTupleDefinition(const TuplePtr& tuple, const Expr
     }
 }
 
+
+TypePtr TypeInferenceAction::getExpressionType(const ExpressionPtr& expr, const TypePtr& hint, float& score)
+{
+    if(expr->getType() == nullptr)
+        expr->accept(this);
+    score = 1;
+    if(expr->getNodeType() == NodeType::IntegerLiteral && hint != nullptr)
+    {
+        IntegerLiteralPtr literal = std::static_pointer_cast<IntegerLiteral>(expr);
+        for(const TypePtr& t : t_ints)
+        {
+            if(t == hint)
+                return t;
+        }
+    }
+    if(expr->getNodeType() == NodeType::FloatLiteral && hint != nullptr)
+    {
+        FloatLiteralPtr literal = std::static_pointer_cast<FloatLiteral>(expr);
+        if(hint == t_float || hint == t_double)
+            return hint;
+        for(const TypePtr& t : t_ints)
+        {
+            if(t == hint)
+            {
+                score = 0.5;
+                return t;
+            }
+        }
+
+    }
+    return expr->getType();
+}
 /**
  *
  * @param parameter
@@ -88,7 +152,8 @@ bool TypeInferenceAction::checkArgument(const Type::Parameter& parameter, const 
 {
 
     const std::wstring name = argument.first;
-    TypePtr argType = argument.second->getType();
+    float s = 1;
+    TypePtr argType = getExpressionType(argument.second, parameter.type, s);
 
     if(variadic)
     {
@@ -128,7 +193,7 @@ bool TypeInferenceAction::checkArgument(const Type::Parameter& parameter, const 
         }
         return false;//parameter is not matched
     }
-    score += 1;
+    score += s;
     return true;
 }
 

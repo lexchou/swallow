@@ -15,6 +15,8 @@ public:
 public:
     std::wstring valueAsString;
     int64_t value;
+    double dvalue;
+    bool isFloat;
 };
 typedef std::shared_ptr<IntegerLiteral> IntegerLiteralPtr;
 

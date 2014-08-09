@@ -23,6 +23,8 @@ ExpressionPtr Parser::parseInteger()
     IntegerLiteralPtr ret = nodeFactory->createInteger(token.state);
     ret->valueAsString = token.token;
     ret->value = token.number.value;
+    ret->dvalue = token.number.dvalue;
+    ret->isFloat = token.type == TokenType::Float;
     return ret;
 }
 ExpressionPtr Parser::parseString()

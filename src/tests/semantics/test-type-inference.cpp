@@ -20,7 +20,9 @@ class TestTypeInference : public SemanticTestCase
     //CPPUNIT_TEST(testOverloadedFunc);
     //CPPUNIT_TEST(testNamedParameterOverload);
     //CPPUNIT_TEST(testVariadicParametersOverload);
-    CPPUNIT_TEST(testVariadicParametersOverload2);
+    //CPPUNIT_TEST(testVariadicParametersOverload2);
+    //CPPUNIT_TEST(testCovarianceOverload);
+    CPPUNIT_TEST(testCovarianceOverload2);
     CPPUNIT_TEST_SUITE_END();
 public:
     void testIntLiteral()
@@ -185,7 +187,39 @@ public:
     }
     void testCovarianceOverload()
     {
+        SEMANTIC_ANALYZE(
+                L"func bar(a : Int)->Bool{return true}\n"
+                        L"func bar(a : Float) -> Int {return 3}\n"
+                        L"let a = bar(3), b = bar(3.4)");
+        IdentifierPtr a, b;
+        TypePtr type;
+        CPPUNIT_ASSERT_EQUAL(0, compilerResults.numResults());
 
+        TypePtr t_Bool = symbolRegistry.lookupType(L"Bool");
+        TypePtr t_Int = symbolRegistry.lookupType(L"Int");
+
+        CPPUNIT_ASSERT(a = std::dynamic_pointer_cast<Identifier>(scope->lookup(L"a")));
+        CPPUNIT_ASSERT(type = a->getType());
+        CPPUNIT_ASSERT(type == t_Bool);
+
+        CPPUNIT_ASSERT(b = std::dynamic_pointer_cast<Identifier>(scope->lookup(L"b")));
+        CPPUNIT_ASSERT(type = b->getType());
+        CPPUNIT_ASSERT(type == t_Int);
+    }
+
+    void testCovarianceOverload2()
+    {
+        SEMANTIC_ANALYZE(
+                L"func bar(a : Double)->Bool{return true}\n"
+                L"func bar(a : Float) -> Int {return 3}\n"
+                L"let a = bar(3.4)");
+        IdentifierPtr a, b;
+        TypePtr type;
+        CPPUNIT_ASSERT_EQUAL(1, compilerResults.numResults());
+
+        const CompilerResult& r = compilerResults.getResult(0);
+        CPPUNIT_ASSERT_EQUAL((int)Errors::E_AMBIGUOUS_USE, r.code);
+        ASSERT_EQUALS(L"bar", r.item);
     }
     void testMixedVariableOverload()
     {
