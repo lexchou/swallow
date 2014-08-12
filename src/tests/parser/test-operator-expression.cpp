@@ -5,141 +5,126 @@
 
 using namespace Swift;
 
-class TestOperatorExpression : public SwiftTestCase
+TEST(TestOperatorExpression, testTypeCheck)
 {
-    CPPUNIT_TEST_SUITE(TestOperatorExpression);
-    CPPUNIT_TEST(testTypeCheck);
-    CPPUNIT_TEST(testTypeCast);
-    CPPUNIT_TEST(testTypeCast2);
-    CPPUNIT_TEST(testSubscriptThroughOptionalChaining);
-    CPPUNIT_TEST(testExpr1);
-    CPPUNIT_TEST(testMinus);
-    CPPUNIT_TEST_SUITE_END();
-public:
-    
-    
-    void testTypeCheck()
-    {
-        PARSE_STATEMENT(L"if item is Movie {\n"
-                        L"++movieCount\n"
-                        L"} else if item is Song {\n"
-                        L"    ++songCount\n"
-                        L"}");
-        
-        IfStatementPtr _if = NULL;
-        TypeCheckPtr is;
-        IdentifierPtr id;
-        TypeIdentifierPtr type;
-        
-        CPPUNIT_ASSERT(_if = std::dynamic_pointer_cast<IfStatement>(root));
-        CPPUNIT_ASSERT(is = std::dynamic_pointer_cast<TypeCheck>(_if->getCondition()));
-        ASSERT_EQUALS(L"is", is->getOperator().c_str());
-        CPPUNIT_ASSERT(id = std::dynamic_pointer_cast<Identifier>(is->getLHS()));
-        CPPUNIT_ASSERT(type = std::dynamic_pointer_cast<TypeIdentifier>(is->getDeclaredType()));
-        
-        ASSERT_EQUALS(L"item", id->getIdentifier());
-        ASSERT_EQUALS(L"Movie", type->getName());
-        
-        
-        
-    }
-    
-    void testTypeCast()
-    {
-        PARSE_STATEMENT(L"m = item as? Movie");
-        
-        
-        AssignmentPtr eq;
-        TypeCastPtr as;
-        IdentifierPtr id;
-        TypeIdentifierPtr type;
-        
-        CPPUNIT_ASSERT(eq = std::dynamic_pointer_cast<Assignment>(root));
-        CPPUNIT_ASSERT(as = std::dynamic_pointer_cast<TypeCast>(eq->getRHS()));
-        ASSERT_EQUALS(L"as?", as->getOperator().c_str());
-        CPPUNIT_ASSERT(id = std::dynamic_pointer_cast<Identifier>(as->getLHS()));
-        CPPUNIT_ASSERT(type = std::dynamic_pointer_cast<TypeIdentifier>(as->getDeclaredType()));
-        
-        ASSERT_EQUALS(L"item", id->getIdentifier());
-        ASSERT_EQUALS(L"Movie", type->getName());
-        
-    }
-    
-    void testTypeCast2()
-    {
-        PARSE_STATEMENT(L"m = item as Movie");
-        
-        
-        AssignmentPtr eq;
-        TypeCastPtr as;
-        IdentifierPtr id;
-        TypeIdentifierPtr type;
-        
-        CPPUNIT_ASSERT(eq = std::dynamic_pointer_cast<Assignment>(root));
-        CPPUNIT_ASSERT(as = std::dynamic_pointer_cast<TypeCast>(eq->getRHS()));
-        ASSERT_EQUALS(L"as", as->getOperator().c_str());
-        CPPUNIT_ASSERT(id = std::dynamic_pointer_cast<Identifier>(as->getLHS()));
-        CPPUNIT_ASSERT(type = std::dynamic_pointer_cast<TypeIdentifier>(as->getDeclaredType()));
-        
-        ASSERT_EQUALS(L"item", id->getIdentifier());
-        ASSERT_EQUALS(L"Movie", type->getName());
-        
-    }
-    
-    void testSubscriptThroughOptionalChaining()
-    {
-        PARSE_STATEMENT(L"firstRoomName = john.residence?[0].name");
-        
-    }
-    
-    void testExpr1()
-    {
-        /*
-        PARSE_STATEMENT(L"a=4+1*(3+1*4)");
-        CPPUNIT_ASSERT(root != NULL);
-        AssignmentPtr eq = std::dynamic_pointer_cast<Assignment>(root);
-        
-        CPPUNIT_ASSERT(eq != NULL);
-        CPPUNIT_ASSERT_EQUAL(2, eq->numChildren());
-        
-        IdentifierPtr id = std::dynamic_pointer_cast<Identifier>(eq->getLHS());
-        CPPUNIT_ASSERT(id != NULL);
-        ASSERT_EQUALS(L"a", id->getIdentifier().c_str());
-        
-        BinaryOperatorPtr add = std::dynamic_pointer_cast<BinaryOperator>(eq->getRHS());
-        CPPUNIT_ASSERT(add != NULL);
-        ASSERT_EQUALS(L"+", add->getOperator().c_str());
-        
-        
-        BinaryOperatorPtr mul = std::dynamic_pointer_cast<BinaryOperator>(add->getRHS());
-        CPPUNIT_ASSERT(mul != NULL);
-        ASSERT_EQUALS(L"*", mul->getOperator().c_str());
-        
-        ParenthesizedExpressionPtr p = std::dynamic_pointer_cast<ParenthesizedExpression>(mul->getRHS());
-        CPPUNIT_ASSERT(p != NULL);
-        CPPUNIT_ASSERT_EQUAL(1, p->numExpressions());
-        
-        add = std::dynamic_pointer_cast<BinaryOperator>(p->get(0));
-        CPPUNIT_ASSERT(add != NULL);
-        ASSERT_EQUALS(L"+", add->getOperator().c_str());
-        
-        mul = std::dynamic_pointer_cast<BinaryOperator>(add->getRHS());
-        CPPUNIT_ASSERT(mul != NULL);
-        ASSERT_EQUALS(L"*", mul->getOperator().c_str());
-        */
-        
-    }
-    void testMinus()
-    {
-        PARSE_STATEMENT(L"-y");
-        
-    }
-    void testParenthesizedExpr()
-    {
-        
-    }
-};
-CPPUNIT_TEST_SUITE_NAMED_REGISTRATION(TestOperatorExpression, "alltest");
+    PARSE_STATEMENT(L"if item is Movie {\n"
+                    L"++movieCount\n"
+                    L"} else if item is Song {\n"
+                    L"    ++songCount\n"
+                    L"}");
+
+    IfStatementPtr _if = NULL;
+    TypeCheckPtr is;
+    IdentifierPtr id;
+    TypeIdentifierPtr type;
+
+    ASSERT_NOT_NULL(_if = std::dynamic_pointer_cast<IfStatement>(root));
+    ASSERT_NOT_NULL(is = std::dynamic_pointer_cast<TypeCheck>(_if->getCondition()));
+    ASSERT_EQ(L"is", is->getOperator());
+    ASSERT_NOT_NULL(id = std::dynamic_pointer_cast<Identifier>(is->getLHS()));
+    ASSERT_NOT_NULL(type = std::dynamic_pointer_cast<TypeIdentifier>(is->getDeclaredType()));
+
+    ASSERT_EQ(L"item", id->getIdentifier());
+    ASSERT_EQ(L"Movie", type->getName());
+
+
+
+}
+
+TEST(TestOperatorExpression, testTypeCast)
+{
+    PARSE_STATEMENT(L"m = item as? Movie");
+
+
+    AssignmentPtr eq;
+    TypeCastPtr as;
+    IdentifierPtr id;
+    TypeIdentifierPtr type;
+
+    ASSERT_NOT_NULL(eq = std::dynamic_pointer_cast<Assignment>(root));
+    ASSERT_NOT_NULL(as = std::dynamic_pointer_cast<TypeCast>(eq->getRHS()));
+    ASSERT_EQ(L"as?", as->getOperator());
+    ASSERT_NOT_NULL(id = std::dynamic_pointer_cast<Identifier>(as->getLHS()));
+    ASSERT_NOT_NULL(type = std::dynamic_pointer_cast<TypeIdentifier>(as->getDeclaredType()));
+
+    ASSERT_EQ(L"item", id->getIdentifier());
+    ASSERT_EQ(L"Movie", type->getName());
+
+}
+
+TEST(TestOperatorExpression, testTypeCast2)
+{
+    PARSE_STATEMENT(L"m = item as Movie");
+
+
+    AssignmentPtr eq;
+    TypeCastPtr as;
+    IdentifierPtr id;
+    TypeIdentifierPtr type;
+
+    ASSERT_NOT_NULL(eq = std::dynamic_pointer_cast<Assignment>(root));
+    ASSERT_NOT_NULL(as = std::dynamic_pointer_cast<TypeCast>(eq->getRHS()));
+    ASSERT_EQ(L"as", as->getOperator());
+    ASSERT_NOT_NULL(id = std::dynamic_pointer_cast<Identifier>(as->getLHS()));
+    ASSERT_NOT_NULL(type = std::dynamic_pointer_cast<TypeIdentifier>(as->getDeclaredType()));
+
+    ASSERT_EQ(L"item", id->getIdentifier());
+    ASSERT_EQ(L"Movie", type->getName());
+
+}
+
+TEST(TestOperatorExpression, testSubscriptThroughOptionalChaining)
+{
+    PARSE_STATEMENT(L"firstRoomName = john.residence?[0].name");
+
+}
+
+TEST(TestOperatorExpression, testExpr1)
+{
+    /*
+    PARSE_STATEMENT(L"a=4+1*(3+1*4)");
+    ASSERT_NOT_NULL(root != NULL);
+    AssignmentPtr eq = std::dynamic_pointer_cast<Assignment>(root);
+
+    ASSERT_NOT_NULL(eq != NULL);
+    ASSERT_EQ(2, eq->numChildren());
+
+    IdentifierPtr id = std::dynamic_pointer_cast<Identifier>(eq->getLHS());
+    ASSERT_NOT_NULL(id != NULL);
+    ASSERT_EQ(L"a", id->getIdentifier());
+
+    BinaryOperatorPtr add = std::dynamic_pointer_cast<BinaryOperator>(eq->getRHS());
+    ASSERT_NOT_NULL(add != NULL);
+    ASSERT_EQ(L"+", add->getOperator());
+
+
+    BinaryOperatorPtr mul = std::dynamic_pointer_cast<BinaryOperator>(add->getRHS());
+    ASSERT_NOT_NULL(mul != NULL);
+    ASSERT_EQ(L"*", mul->getOperator());
+
+    ParenthesizedExpressionPtr p = std::dynamic_pointer_cast<ParenthesizedExpression>(mul->getRHS());
+    ASSERT_NOT_NULL(p != NULL);
+    ASSERT_EQ(1, p->numExpressions());
+
+    add = std::dynamic_pointer_cast<BinaryOperator>(p->get(0));
+    ASSERT_NOT_NULL(add != NULL);
+    ASSERT_EQ(L"+", add->getOperator());
+
+    mul = std::dynamic_pointer_cast<BinaryOperator>(add->getRHS());
+    ASSERT_NOT_NULL(mul != NULL);
+    ASSERT_EQ(L"*", mul->getOperator());
+    */
+
+}
+TEST(TestOperatorExpression, testMinus)
+{
+    PARSE_STATEMENT(L"-y");
+
+}
+TEST(TestOperatorExpression, testParenthesizedExpr)
+{
+
+}
 
 
 

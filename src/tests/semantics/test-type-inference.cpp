@@ -8,80 +8,70 @@
 
 using namespace Swift;
 
-class TestTypeInference : public SemanticTestCase
+TEST(TestTypeInference, testIntLiteral)
 {
-    CPPUNIT_TEST_SUITE(TestTypeInference);
-    CPPUNIT_TEST(testIntLiteral);
-    CPPUNIT_TEST(testStringLiteral);
-    CPPUNIT_TEST(testTuple);
-    CPPUNIT_TEST(testExpression);
-    //CPPUNIT_TEST(testClassInstance);
-    CPPUNIT_TEST_SUITE_END();
-public:
-    void testIntLiteral()
-    {
-        SEMANTIC_ANALYZE(L"let a = 34");
-        IdentifierPtr a = NULL;
-        CPPUNIT_ASSERT(a = std::dynamic_pointer_cast<Identifier>(scope->lookup(L"a")));
-        TypePtr type = a->getType();
-        CPPUNIT_ASSERT(type);
-        TypePtr Int = symbolRegistry.lookupType(L"Int");
-        CPPUNIT_ASSERT(type == Int);
+    SEMANTIC_ANALYZE(L"let a = 34");
+    IdentifierPtr a = NULL;
+    ASSERT_NOT_NULL(a = std::dynamic_pointer_cast<Identifier>(scope->lookup(L"a")));
+    TypePtr type = a->getType();
+    ASSERT_NOT_NULL(type);
+    TypePtr Int = symbolRegistry.lookupType(L"Int");
+    ASSERT_TRUE(type == Int);
 
-    }
-    void testStringLiteral()
-    {
-        SEMANTIC_ANALYZE(L"let a = \"345\"");
-        IdentifierPtr a = NULL;
+}
+TEST(TestTypeInference, testStringLiteral)
+{
+    SEMANTIC_ANALYZE(L"let a = \"345\"");
+    IdentifierPtr a = NULL;
 
-        CPPUNIT_ASSERT(a = std::dynamic_pointer_cast<Identifier>(scope->lookup(L"a")));
-        TypePtr type = a->getType();
-        CPPUNIT_ASSERT(type);
-        TypePtr String = symbolRegistry.lookupType(L"String");
-        CPPUNIT_ASSERT(type == String);
-    }
-    void testTuple()
-    {
-        /*
-        SEMANTIC_ANALYZE(L"let (a, b) : Int = (1, 0.3)");
-        IdentifierPtr a = NULL;
-        CPPUNIT_ASSERT(a = std::dynamic_pointer_cast<Identifier>(scope->lookup(L"a")));
-        TypePtr type = a->getType();
-        CPPUNIT_ASSERT(type);
-        TypePtr String = symbolRegistry.lookupType(L"Int");
-        CPPUNIT_ASSERT(type == String);
-        */
-    }
-    void testExpression()
-    {
-        SEMANTIC_ANALYZE(L"let a = 3 * 4 + 3");
-        CPPUNIT_ASSERT_EQUAL(0, compilerResults.numResults());
+    ASSERT_NOT_NULL(a = std::dynamic_pointer_cast<Identifier>(scope->lookup(L"a")));
+    TypePtr type = a->getType();
+    ASSERT_NOT_NULL(type);
+    TypePtr String = symbolRegistry.lookupType(L"String");
+    ASSERT_TRUE(type == String);
+}
+TEST(TestTypeInference, testTuple)
+{
+    /*
+    SEMANTIC_ANALYZE(L"let (a, b) : Int = (1, 0.3)");
+    IdentifierPtr a = NULL;
+    ASSERT_TRUE(a = std::dynamic_pointer_cast<Identifier>(scope->lookup(L"a")));
+    TypePtr type = a->getType();
+    ASSERT_TRUE(type);
+    TypePtr String = symbolRegistry.lookupType(L"Int");
+    ASSERT_TRUE(type == String);
+    */
+}
+TEST(TestTypeInference, testExpression)
+{
+    SEMANTIC_ANALYZE(L"let a = 3 * 4 + 3");
+    ASSERT_EQ(0, compilerResults.numResults());
 
 
-        IdentifierPtr a;
-        CPPUNIT_ASSERT(a = std::dynamic_pointer_cast<Identifier>(scope->lookup(L"a")));
-        TypePtr type = a->getType();
-        CPPUNIT_ASSERT(type);
-        TypePtr t_int = symbolRegistry.lookupType(L"Int");
-        CPPUNIT_ASSERT(type == t_int);
-    }
+    IdentifierPtr a;
+    ASSERT_NOT_NULL(a = std::dynamic_pointer_cast<Identifier>(scope->lookup(L"a")));
+    TypePtr type = a->getType();
+    ASSERT_NOT_NULL(type);
+    TypePtr t_int = symbolRegistry.lookupType(L"Int");
+    ASSERT_TRUE(type == t_int);
+}
 
-    void testClassInstance()
-    {
-        SEMANTIC_ANALYZE(L"class Test {}\n"
-        L"let a = Test()"
-        );
-        IdentifierPtr a;
-        CPPUNIT_ASSERT(a = std::dynamic_pointer_cast<Identifier>(scope->lookup(L"a")));
-        TypePtr type = a->getType();
-        CPPUNIT_ASSERT(type);
-        TypePtr t_Test;
-        CPPUNIT_ASSERT(t_Test = std::dynamic_pointer_cast<Type>(scope->lookup(L"Test")));
-        CPPUNIT_ASSERT(type == t_Test);
-    }
+TEST(TestTypeInference, testClassInstance)
+{
+    /*
+    SEMANTIC_ANALYZE(L"class Test {}\n"
+    L"let a = Test()"
+    );
+    IdentifierPtr a;
+    ASSERT_NOT_NULL(a = std::dynamic_pointer_cast<Identifier>(scope->lookup(L"a")));
+    TypePtr type = a->getType();
+    ASSERT_NOT_NULL(type);
+    TypePtr t_Test;
+    ASSERT_NOT_NULL(t_Test = std::dynamic_pointer_cast<Type>(scope->lookup(L"Test")));
+    ASSERT_TRUE(type == t_Test);
+    */
+}
 
-};
-CPPUNIT_TEST_SUITE_NAMED_REGISTRATION(TestTypeInference, "alltest");
 
 
 

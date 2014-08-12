@@ -5,233 +5,218 @@
 
 using namespace Swift;
 
-class TestGeneric : public SwiftTestCase
+TEST(TestGeneric, testFunc)
 {
-    
-    CPPUNIT_TEST_SUITE(TestGeneric);
-    CPPUNIT_TEST(testFunc);
-    CPPUNIT_TEST(testStruct);
-    CPPUNIT_TEST(testVar);
-    CPPUNIT_TEST(testTypeConstraint);
-    CPPUNIT_TEST(testTypeConstraint2);
-    CPPUNIT_TEST(testWhereClause);
-    CPPUNIT_TEST_SUITE_END();
-public:
-    void testFunc()
-    {
-        PARSE_STATEMENT(L"func swapTwoValues<T>(inout a: T, inout b: T) {\n"
-                        L"let temporaryA = a\n"
-                        L"a = b\n"
-                        L"b = temporaryA\n"
-                        L"}");
-        FunctionDefPtr f;
-        GenericParametersPtr gp;
-        TypeIdentifierPtr type;
-        ParametersPtr params;
-        ParameterPtr param;
-        CPPUNIT_ASSERT(f = std::dynamic_pointer_cast<FunctionDef>(root));
-        CPPUNIT_ASSERT(gp = std::dynamic_pointer_cast<GenericParameters>(f->getGenericParameters()));
-        CPPUNIT_ASSERT_EQUAL(1, gp->numGenericTypes());
-        CPPUNIT_ASSERT(type = std::dynamic_pointer_cast<TypeIdentifier>(gp->getGenericType(0)));
-        ASSERT_EQUALS(L"T", type->getName());
-        
-        CPPUNIT_ASSERT_EQUAL(1, f->numParameters());
-        CPPUNIT_ASSERT(params = f->getParameters(0));
-        CPPUNIT_ASSERT_EQUAL(2, params->numParameters());
-        
-        CPPUNIT_ASSERT(param = params->getParameter(0));
-        CPPUNIT_ASSERT(param->isInout());
-        ASSERT_EQUALS(L"a", param->getLocalName());
-        CPPUNIT_ASSERT(type = std::dynamic_pointer_cast<TypeIdentifier>(param->getDeclaredType()));
-        ASSERT_EQUALS(L"T", type->getName());
-        
-        CPPUNIT_ASSERT(param = params->getParameter(1));
-        CPPUNIT_ASSERT(param->isInout());
-        ASSERT_EQUALS(L"b", param->getLocalName());
-        CPPUNIT_ASSERT(type = std::dynamic_pointer_cast<TypeIdentifier>(param->getDeclaredType()));
-        ASSERT_EQUALS(L"T", type->getName());
-        
-    }
-    void testStruct()
-    {
-        PARSE_STATEMENT(L"struct Stack<T> {\n"
-                        L"var items = T[]()\n"
-                        L"mutating func push(item: T) {\n"
-                        L"    items.append(item)\n"
-                        L"}\n"
-                        L"mutating func pop() -> T {\n"
-                        L"    return items.removeLast()\n"
-                        L"}\n"
-                        L"}");
-        StructDefPtr s;
-        GenericParametersPtr gp;
-        TypeIdentifierPtr type;
-        CPPUNIT_ASSERT(s = std::dynamic_pointer_cast<StructDef>(root));
-        CPPUNIT_ASSERT(gp = std::dynamic_pointer_cast<GenericParameters>(s->getGenericParameters()));
-        CPPUNIT_ASSERT_EQUAL(1, gp->numGenericTypes());
-        CPPUNIT_ASSERT(type = std::dynamic_pointer_cast<TypeIdentifier>(gp->getGenericType(0)));
-        ASSERT_EQUALS(L"T", type->getName());
-        
-    }
-    
-    void testVar()
-    {
-        PARSE_STATEMENT(L"var stackOfStrings = Stack<String>()");
-        VariablesPtr vars;
-        VariablePtr var;
-        FunctionCallPtr call;
-        IdentifierPtr id;
-        GenericArgumentPtr arg;
-        CPPUNIT_ASSERT(vars = std::dynamic_pointer_cast<Variables>(root));
-        CPPUNIT_ASSERT_EQUAL(1, vars->numVariables());
-        CPPUNIT_ASSERT(var = std::dynamic_pointer_cast<Variable>(vars->getVariable(0)));
-        CPPUNIT_ASSERT(call = std::dynamic_pointer_cast<FunctionCall>(var->getInitializer()));
-        CPPUNIT_ASSERT(id = std::dynamic_pointer_cast<Identifier>(call->getFunction()));
-        CPPUNIT_ASSERT(arg = id->getGenericArgument());
-    }
-    
-    void testTypeConstraint()
-    {
-        PARSE_STATEMENT(L"func someFunction<T: SomeClass, U: SomeProtocol>(someT: T, someU: U) {\n"
-                        L"}");
-        FunctionDefPtr f;
-        GenericParametersPtr params;
-        TypeIdentifierPtr type;
-        GenericConstraintPtr constraint;
-        CPPUNIT_ASSERT(f = std::dynamic_pointer_cast<FunctionDef>(root));
-        CPPUNIT_ASSERT(params = f->getGenericParameters());
-        CPPUNIT_ASSERT_EQUAL(2, params->numGenericTypes());
-        CPPUNIT_ASSERT_EQUAL(2, params->numConstraints());
+    PARSE_STATEMENT(L"func swapTwoValues<T>(inout a: T, inout b: T) {\n"
+                    L"let temporaryA = a\n"
+                    L"a = b\n"
+                    L"b = temporaryA\n"
+                    L"}");
+    FunctionDefPtr f;
+    GenericParametersPtr gp;
+    TypeIdentifierPtr type;
+    ParametersPtr params;
+    ParameterPtr param;
+    ASSERT_NOT_NULL(f = std::dynamic_pointer_cast<FunctionDef>(root));
+    ASSERT_NOT_NULL(gp = std::dynamic_pointer_cast<GenericParameters>(f->getGenericParameters()));
+    ASSERT_EQ(1, gp->numGenericTypes());
+    ASSERT_NOT_NULL(type = std::dynamic_pointer_cast<TypeIdentifier>(gp->getGenericType(0)));
+    ASSERT_EQ(L"T", type->getName());
 
-        CPPUNIT_ASSERT(type = std::dynamic_pointer_cast<TypeIdentifier>(params->getGenericType(0)));
-        ASSERT_EQUALS(L"T", type->getName());
-        CPPUNIT_ASSERT(type = std::dynamic_pointer_cast<TypeIdentifier>(params->getGenericType(1)));
-        ASSERT_EQUALS(L"U", type->getName());
-        
-        CPPUNIT_ASSERT(constraint = params->getConstraint(0));
-        CPPUNIT_ASSERT_EQUAL(1, constraint->numExpectedTypes());
-        CPPUNIT_ASSERT_EQUAL(GenericConstraint::DerivedFrom, constraint->getConstraintType());
-        CPPUNIT_ASSERT(type = constraint->getIdentifier());
-        ASSERT_EQUALS(L"T", type->getName());
-        CPPUNIT_ASSERT(type = constraint->getExpectedType(0));
-        ASSERT_EQUALS(L"SomeClass", type->getName());
-        
-        CPPUNIT_ASSERT(constraint = params->getConstraint(1));
-        CPPUNIT_ASSERT_EQUAL(1, constraint->numExpectedTypes());
-        CPPUNIT_ASSERT_EQUAL(GenericConstraint::DerivedFrom, constraint->getConstraintType());
-        CPPUNIT_ASSERT(type = constraint->getIdentifier());
-        ASSERT_EQUALS(L"U", type->getName());
-        CPPUNIT_ASSERT(type = constraint->getExpectedType(0));
-        ASSERT_EQUALS(L"SomeProtocol", type->getName());
-        
-    }
-    
-    void testTypeConstraint2()
-    {
-        PARSE_STATEMENT(L"func findIndex<T: Equatable>(array: T[], valueToFind: T) -> Int? {\n"
-                        L"for (index, value) in enumerate(array) {\n"
-                        L"    if value == valueToFind {\n"
-                        L"        return index\n"
-                        L"    }\n"
-                        L"}\n"
-                        L"return nil\n"
-                        L"}");
-        
-        
-        FunctionDefPtr f;
-        GenericParametersPtr params;
-        TypeIdentifierPtr type;
-        GenericConstraintPtr constraint;
-        CPPUNIT_ASSERT(f = std::dynamic_pointer_cast<FunctionDef>(root));
-        CPPUNIT_ASSERT(params = f->getGenericParameters());
-        CPPUNIT_ASSERT_EQUAL(1, params->numGenericTypes());
-        CPPUNIT_ASSERT_EQUAL(1, params->numConstraints());
-        
-        CPPUNIT_ASSERT(type = std::dynamic_pointer_cast<TypeIdentifier>(params->getGenericType(0)));
-        ASSERT_EQUALS(L"T", type->getName());
+    ASSERT_EQ(1, f->numParameters());
+    ASSERT_NOT_NULL(params = f->getParameters(0));
+    ASSERT_EQ(2, params->numParameters());
 
-        
-        CPPUNIT_ASSERT(constraint = params->getConstraint(0));
-        CPPUNIT_ASSERT_EQUAL(1, constraint->numExpectedTypes());
-        CPPUNIT_ASSERT_EQUAL(GenericConstraint::DerivedFrom, constraint->getConstraintType());
-        CPPUNIT_ASSERT(type = constraint->getIdentifier());
-        ASSERT_EQUALS(L"T", type->getName());
-        CPPUNIT_ASSERT(type = constraint->getExpectedType(0));
-        ASSERT_EQUALS(L"Equatable", type->getName());
-    }
-    
-    void testWhereClause()
-    {
-        PARSE_STATEMENT(L"func allItemsMatch<C1: Container, C2: Container where C1.ItemType == C2.ItemType, C1.ItemType: Equatable>\n"
-                        L"(someContainer: C1, anotherContainer: C2) -> Bool {\n"
-                        L"  if someContainer.count != anotherContainer.count {\n"
-                        L"      return false\n"
-                        L"  }\n"
-                        L"  for i in 0..someContainer.count {\n"
-                        L"      if someContainer[i] != anotherContainer[i] {\n"
-                        L"          return false\n"
-                        L"      }\n"
-                        L"  }\n"
-                        L"  return true\n"
-                        L"}");
-        
-        FunctionDefPtr f;
-        GenericParametersPtr params;
-        TypeIdentifierPtr type;
-        GenericConstraintPtr constraint;
-        CPPUNIT_ASSERT(f = std::dynamic_pointer_cast<FunctionDef>(root));
-        CPPUNIT_ASSERT(params = f->getGenericParameters());
-        CPPUNIT_ASSERT_EQUAL(2, params->numGenericTypes());
-        CPPUNIT_ASSERT_EQUAL(4, params->numConstraints());
-        
-        CPPUNIT_ASSERT(type = std::dynamic_pointer_cast<TypeIdentifier>(params->getGenericType(0)));
-        ASSERT_EQUALS(L"C1", type->getName());
-        CPPUNIT_ASSERT(type = std::dynamic_pointer_cast<TypeIdentifier>(params->getGenericType(1)));
-        ASSERT_EQUALS(L"C2", type->getName());
-        
-        CPPUNIT_ASSERT(constraint = params->getConstraint(0));
-        CPPUNIT_ASSERT_EQUAL(1, constraint->numExpectedTypes());
-        CPPUNIT_ASSERT_EQUAL(GenericConstraint::DerivedFrom, constraint->getConstraintType());
-        CPPUNIT_ASSERT(type = constraint->getIdentifier());
-        ASSERT_EQUALS(L"C1", type->getName());
-        CPPUNIT_ASSERT(type = constraint->getExpectedType(0));
-        ASSERT_EQUALS(L"Container", type->getName());
-        
-        CPPUNIT_ASSERT(constraint = params->getConstraint(1));
-        CPPUNIT_ASSERT_EQUAL(1, constraint->numExpectedTypes());
-        CPPUNIT_ASSERT_EQUAL(GenericConstraint::DerivedFrom, constraint->getConstraintType());
-        CPPUNIT_ASSERT(type = constraint->getIdentifier());
-        ASSERT_EQUALS(L"C2", type->getName());
-        CPPUNIT_ASSERT(type = constraint->getExpectedType(0));
-        ASSERT_EQUALS(L"Container", type->getName());
-        
-        CPPUNIT_ASSERT(constraint = params->getConstraint(2));
-        CPPUNIT_ASSERT_EQUAL(1, constraint->numExpectedTypes());
-        CPPUNIT_ASSERT_EQUAL(GenericConstraint::EqualsTo, constraint->getConstraintType());
-        CPPUNIT_ASSERT(type = constraint->getIdentifier());
-        ASSERT_EQUALS(L"C1", type->getName());
-        CPPUNIT_ASSERT(type = type->getNestedType());
-        ASSERT_EQUALS(L"ItemType", type->getName());
-        CPPUNIT_ASSERT(type = constraint->getExpectedType(0));
-        ASSERT_EQUALS(L"C2", type->getName());
-        CPPUNIT_ASSERT(type = type->getNestedType());
-        ASSERT_EQUALS(L"ItemType", type->getName());
-        
-        CPPUNIT_ASSERT(constraint = params->getConstraint(3));
-        CPPUNIT_ASSERT_EQUAL(1, constraint->numExpectedTypes());
-        CPPUNIT_ASSERT_EQUAL(GenericConstraint::DerivedFrom, constraint->getConstraintType());
-        CPPUNIT_ASSERT(type = constraint->getIdentifier());
-        ASSERT_EQUALS(L"C1", type->getName());
-        CPPUNIT_ASSERT(type = type->getNestedType());
-        ASSERT_EQUALS(L"ItemType", type->getName());
-        CPPUNIT_ASSERT(type = constraint->getExpectedType(0));
-        ASSERT_EQUALS(L"Equatable", type->getName());
-        
-    }
-    
-};
-CPPUNIT_TEST_SUITE_NAMED_REGISTRATION(TestGeneric, "alltest");
+    ASSERT_NOT_NULL(param = params->getParameter(0));
+    ASSERT_TRUE(param->isInout());
+    ASSERT_EQ(L"a", param->getLocalName());
+    ASSERT_NOT_NULL(type = std::dynamic_pointer_cast<TypeIdentifier>(param->getDeclaredType()));
+    ASSERT_EQ(L"T", type->getName());
 
+    ASSERT_NOT_NULL(param = params->getParameter(1));
+    ASSERT_TRUE(param->isInout());
+    ASSERT_EQ(L"b", param->getLocalName());
+    ASSERT_NOT_NULL(type = std::dynamic_pointer_cast<TypeIdentifier>(param->getDeclaredType()));
+    ASSERT_EQ(L"T", type->getName());
+
+}
+TEST(TestGeneric, testStruct)
+{
+    PARSE_STATEMENT(L"struct Stack<T> {\n"
+                    L"var items = T[]()\n"
+                    L"mutating func push(item: T) {\n"
+                    L"    items.append(item)\n"
+                    L"}\n"
+                    L"mutating func pop() -> T {\n"
+                    L"    return items.removeLast()\n"
+                    L"}\n"
+                    L"}");
+    StructDefPtr s;
+    GenericParametersPtr gp;
+    TypeIdentifierPtr type;
+    ASSERT_NOT_NULL(s = std::dynamic_pointer_cast<StructDef>(root));
+    ASSERT_NOT_NULL(gp = std::dynamic_pointer_cast<GenericParameters>(s->getGenericParameters()));
+    ASSERT_EQ(1, gp->numGenericTypes());
+    ASSERT_NOT_NULL(type = std::dynamic_pointer_cast<TypeIdentifier>(gp->getGenericType(0)));
+    ASSERT_EQ(L"T", type->getName());
+
+}
+
+TEST(TestGeneric, testVar)
+{
+    PARSE_STATEMENT(L"var stackOfStrings = Stack<String>()");
+    VariablesPtr vars;
+    VariablePtr var;
+    FunctionCallPtr call;
+    IdentifierPtr id;
+    GenericArgumentPtr arg;
+    ASSERT_NOT_NULL(vars = std::dynamic_pointer_cast<Variables>(root));
+    ASSERT_EQ(1, vars->numVariables());
+    ASSERT_NOT_NULL(var = std::dynamic_pointer_cast<Variable>(vars->getVariable(0)));
+    ASSERT_NOT_NULL(call = std::dynamic_pointer_cast<FunctionCall>(var->getInitializer()));
+    ASSERT_NOT_NULL(id = std::dynamic_pointer_cast<Identifier>(call->getFunction()));
+    ASSERT_NOT_NULL(arg = id->getGenericArgument());
+}
+
+TEST(TestGeneric, testTypeConstraint)
+{
+    PARSE_STATEMENT(L"func someFunction<T: SomeClass, U: SomeProtocol>(someT: T, someU: U) {\n"
+                    L"}");
+    FunctionDefPtr f;
+    GenericParametersPtr params;
+    TypeIdentifierPtr type;
+    GenericConstraintPtr constraint;
+    ASSERT_NOT_NULL(f = std::dynamic_pointer_cast<FunctionDef>(root));
+    ASSERT_NOT_NULL(params = f->getGenericParameters());
+    ASSERT_EQ(2, params->numGenericTypes());
+    ASSERT_EQ(2, params->numConstraints());
+
+    ASSERT_NOT_NULL(type = std::dynamic_pointer_cast<TypeIdentifier>(params->getGenericType(0)));
+    ASSERT_EQ(L"T", type->getName());
+    ASSERT_NOT_NULL(type = std::dynamic_pointer_cast<TypeIdentifier>(params->getGenericType(1)));
+    ASSERT_EQ(L"U", type->getName());
+
+    ASSERT_NOT_NULL(constraint = params->getConstraint(0));
+    ASSERT_EQ(1, constraint->numExpectedTypes());
+    ASSERT_EQ(GenericConstraint::DerivedFrom, constraint->getConstraintType());
+    ASSERT_NOT_NULL(type = constraint->getIdentifier());
+    ASSERT_EQ(L"T", type->getName());
+    ASSERT_NOT_NULL(type = constraint->getExpectedType(0));
+    ASSERT_EQ(L"SomeClass", type->getName());
+
+    ASSERT_NOT_NULL(constraint = params->getConstraint(1));
+    ASSERT_EQ(1, constraint->numExpectedTypes());
+    ASSERT_EQ(GenericConstraint::DerivedFrom, constraint->getConstraintType());
+    ASSERT_NOT_NULL(type = constraint->getIdentifier());
+    ASSERT_EQ(L"U", type->getName());
+    ASSERT_NOT_NULL(type = constraint->getExpectedType(0));
+    ASSERT_EQ(L"SomeProtocol", type->getName());
+
+}
+
+TEST(TestGeneric, testTypeConstraint2)
+{
+    PARSE_STATEMENT(L"func findIndex<T: Equatable>(array: T[], valueToFind: T) -> Int? {\n"
+                    L"for (index, value) in enumerate(array) {\n"
+                    L"    if value == valueToFind {\n"
+                    L"        return index\n"
+                    L"    }\n"
+                    L"}\n"
+                    L"return nil\n"
+                    L"}");
+
+
+    FunctionDefPtr f;
+    GenericParametersPtr params;
+    TypeIdentifierPtr type;
+    GenericConstraintPtr constraint;
+    ASSERT_NOT_NULL(f = std::dynamic_pointer_cast<FunctionDef>(root));
+    ASSERT_NOT_NULL(params = f->getGenericParameters());
+    ASSERT_EQ(1, params->numGenericTypes());
+    ASSERT_EQ(1, params->numConstraints());
+
+    ASSERT_NOT_NULL(type = std::dynamic_pointer_cast<TypeIdentifier>(params->getGenericType(0)));
+    ASSERT_EQ(L"T", type->getName());
+
+
+    ASSERT_NOT_NULL(constraint = params->getConstraint(0));
+    ASSERT_EQ(1, constraint->numExpectedTypes());
+    ASSERT_EQ(GenericConstraint::DerivedFrom, constraint->getConstraintType());
+    ASSERT_NOT_NULL(type = constraint->getIdentifier());
+    ASSERT_EQ(L"T", type->getName());
+    ASSERT_NOT_NULL(type = constraint->getExpectedType(0));
+    ASSERT_EQ(L"Equatable", type->getName());
+}
+
+TEST(TestGeneric, testWhereClause)
+{
+    PARSE_STATEMENT(L"func allItemsMatch<C1: Container, C2: Container where C1.ItemType == C2.ItemType, C1.ItemType: Equatable>\n"
+                    L"(someContainer: C1, anotherContainer: C2) -> Bool {\n"
+                    L"  if someContainer.count != anotherContainer.count {\n"
+                    L"      return false\n"
+                    L"  }\n"
+                    L"  for i in 0..someContainer.count {\n"
+                    L"      if someContainer[i] != anotherContainer[i] {\n"
+                    L"          return false\n"
+                    L"      }\n"
+                    L"  }\n"
+                    L"  return true\n"
+                    L"}");
+
+    FunctionDefPtr f;
+    GenericParametersPtr params;
+    TypeIdentifierPtr type;
+    GenericConstraintPtr constraint;
+    ASSERT_NOT_NULL(f = std::dynamic_pointer_cast<FunctionDef>(root));
+    ASSERT_NOT_NULL(params = f->getGenericParameters());
+    ASSERT_EQ(2, params->numGenericTypes());
+    ASSERT_EQ(4, params->numConstraints());
+
+    ASSERT_NOT_NULL(type = std::dynamic_pointer_cast<TypeIdentifier>(params->getGenericType(0)));
+    ASSERT_EQ(L"C1", type->getName());
+    ASSERT_NOT_NULL(type = std::dynamic_pointer_cast<TypeIdentifier>(params->getGenericType(1)));
+    ASSERT_EQ(L"C2", type->getName());
+
+    ASSERT_NOT_NULL(constraint = params->getConstraint(0));
+    ASSERT_EQ(1, constraint->numExpectedTypes());
+    ASSERT_EQ(GenericConstraint::DerivedFrom, constraint->getConstraintType());
+    ASSERT_NOT_NULL(type = constraint->getIdentifier());
+    ASSERT_EQ(L"C1", type->getName());
+    ASSERT_NOT_NULL(type = constraint->getExpectedType(0));
+    ASSERT_EQ(L"Container", type->getName());
+
+    ASSERT_NOT_NULL(constraint = params->getConstraint(1));
+    ASSERT_EQ(1, constraint->numExpectedTypes());
+    ASSERT_EQ(GenericConstraint::DerivedFrom, constraint->getConstraintType());
+    ASSERT_NOT_NULL(type = constraint->getIdentifier());
+    ASSERT_EQ(L"C2", type->getName());
+    ASSERT_NOT_NULL(type = constraint->getExpectedType(0));
+    ASSERT_EQ(L"Container", type->getName());
+
+    ASSERT_NOT_NULL(constraint = params->getConstraint(2));
+    ASSERT_EQ(1, constraint->numExpectedTypes());
+    ASSERT_EQ(GenericConstraint::EqualsTo, constraint->getConstraintType());
+    ASSERT_NOT_NULL(type = constraint->getIdentifier());
+    ASSERT_EQ(L"C1", type->getName());
+    ASSERT_NOT_NULL(type = type->getNestedType());
+    ASSERT_EQ(L"ItemType", type->getName());
+    ASSERT_NOT_NULL(type = constraint->getExpectedType(0));
+    ASSERT_EQ(L"C2", type->getName());
+    ASSERT_NOT_NULL(type = type->getNestedType());
+    ASSERT_EQ(L"ItemType", type->getName());
+
+    ASSERT_NOT_NULL(constraint = params->getConstraint(3));
+    ASSERT_EQ(1, constraint->numExpectedTypes());
+    ASSERT_EQ(GenericConstraint::DerivedFrom, constraint->getConstraintType());
+    ASSERT_NOT_NULL(type = constraint->getIdentifier());
+    ASSERT_EQ(L"C1", type->getName());
+    ASSERT_NOT_NULL(type = type->getNestedType());
+    ASSERT_EQ(L"ItemType", type->getName());
+    ASSERT_NOT_NULL(type = constraint->getExpectedType(0));
+    ASSERT_EQ(L"Equatable", type->getName());
+
+}
+    
 
 
 #endif

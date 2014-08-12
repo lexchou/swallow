@@ -1,27 +1,17 @@
 PROJECT(swift)
 cmake_minimum_required(VERSION 2.6)
 
-FIND_PATH(CPPUNIT_INCLUDE_DIR cppunit/TestCase.h
-    /usr/local/include
-    /usr/include
-)
-FIND_PATH(CPPUNIT_LIBRARIES libcppunit.a
-    /usr/local/lib
-    /usr/lib
-    /usr/lib/x86_64-linux-gnu/
-)
 FIND_PATH(GTEST_DIR libgtest.a
     ../gtest-1.7.0
     /usr/lib
     /usr/lib/x86_64-linux-gnu/
 )
 SET(GTEST_LIBS gtest gtest_main pthread)
-LINK_DIRECTORIES(${CPPUNIT_LIBRARIES} ${GTEST_DIR})
+LINK_DIRECTORIES(${GTEST_DIR})
 
 INCLUDE_DIRECTORIES(
     ${PROJECT_SOURCE_DIR}
     ${PROJECT_SOURCE_DIR}/inc
-    ${CPPUNIT_INCLUDE_DIR}
     ../gtest-1.7.0/include/
 )
 
@@ -167,11 +157,12 @@ ADD_EXECUTABLE(TestParser
 		tests/parser/test-closure.cpp
         tests/parser/test-extension.cpp
         tests/parser/test-protocol.cpp
+        tests/utils.cpp
 		${SWIFT_TOKENIZER_SRC} ${SWIFT_PARSER_SRC})
-target_link_libraries(TestParser cppunit ${GTEST_LIBS})
+target_link_libraries(TestParser ${GTEST_LIBS})
 
 ADD_EXECUTABLE(TestTokenizer tests/tokenizer/test-tokenizer.cpp ${SWIFT_TOKENIZER_SRC})
-target_link_libraries(TestTokenizer cppunit ${GTEST_LIBS})
+target_link_libraries(TestTokenizer ${GTEST_LIBS})
 
 ADD_EXECUTABLE(TestSemantics
     tests/semantics/test-semantics.cpp
@@ -179,8 +170,9 @@ ADD_EXECUTABLE(TestSemantics
     tests/semantics/test-type-inference.cpp
     tests/semantics/test-symbol-resolve.cpp
     tests/semantics/test-function-overloads.cpp
+    tests/utils.cpp
     ${SWIFT_TOKENIZER_SRC} ${SWIFT_PARSER_SRC})
-target_link_libraries(TestSemantics cppunit ${GTEST_LIBS})
+target_link_libraries(TestSemantics ${GTEST_LIBS})
 
 
 ADD_TEST(NAME TestTokenizer COMMAND TestTokenizer)

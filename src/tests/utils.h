@@ -1,10 +1,7 @@
 #ifndef TEST_UTILS_H
 #define TEST_UTILS_H
 
-
-#include <cppunit/TestFixture.h>
-#include <cppunit/extensions/HelperMacros.h>
-#include <cppunit/ui/text/TestRunner.h>
+#include <gtest/gtest.h>
 #include <iostream>
 #include <cstdlib>
 #include "parser/parser.h"
@@ -14,115 +11,18 @@
 
 
 #define ASSERT_EQUALS(E, A) wcs_assertEquals((E), (A), __FILE__, __LINE__)
+#define ASSERT_NOT_NULL(condition) GTEST_TEST_BOOLEAN_((condition) != NULL, #condition, false, true, GTEST_FATAL_FAILURE_)
+#define ASSERT_NULL(condition) GTEST_TEST_BOOLEAN_((condition) == NULL, #condition, false, true, GTEST_FATAL_FAILURE_)
 
-class SwiftTestCase : public CppUnit::TestFixture
-{
-public:
-    Swift::NodePtr parseStatement(Swift::CompilerResults& compilerResults, const char* func, const wchar_t* str)
-    {
-        using namespace Swift;
-        NodeFactory nodeFactory;
-        Parser parser(&nodeFactory, &compilerResults);
-        parser.setFileName(L"<file>");
-        NodePtr ret = parser.parseStatement(str);
-        dumpCompilerResults(compilerResults);
-        return ret;
-    }
+void dumpCompilerResults(Swift::CompilerResults& compilerResults);
+Swift::NodePtr parseStatement(Swift::CompilerResults& compilerResults, const char* func, const wchar_t* str);
+Swift::ProgramPtr parseStatements(Swift::CompilerResults& compilerResults, const char* func, const wchar_t* str);
 
-    Swift::ProgramPtr parseStatements(Swift::CompilerResults& compilerResults, const char* func, const wchar_t* str)
-    {
-        using namespace Swift;
-        NodeFactory nodeFactory;
-        Parser parser(&nodeFactory, &compilerResults);
-        parser.setFileName(L"<file>");
-        ProgramPtr ret = parser.parse(str);
-        dumpCompilerResults(compilerResults);
-        return ret;
-    }
-    void dumpCompilerResults(Swift::CompilerResults& compilerResults)
-    {
-        using namespace Swift;
-        if(compilerResults.numResults() > 0)
-        {
-            for(int i = 0; i < compilerResults.numResults(); i++)
-            {
-                const CompilerResult& res = compilerResults.getResult(i);
-                switch(res.level)
-                {
-                    case ErrorLevel::Fatal:
-                        std::wcout<<L"Fatal:";
-                        break;
-                    case ErrorLevel::Error:
-                        std::wcout<<L"Error:";
-                        break;
-                    case ErrorLevel::Warning:
-                        std::wcout<<L"Warning:";
-                        break;
-                    case ErrorLevel::Note:
-                        std::wcout<<L"Note:";
-                        break;
-                }
-                std::wcout<<L"("<<res.line<<L", "<<res.column<<") ";
-                std::wstring msg = compilerResults.format(res);
-                std::wcout<<msg<<std::endl;
-            }
-
-        }
-    }
-    void wcs_assertEquals(const wchar_t* expected, const std::wstring& actual, const char* file, int line)
-    {
-        wcs_assertEquals(expected, actual.c_str(), file, line);
-    }
-    void wcs_assertEquals(const wchar_t* expected, const wchar_t* actual, const char* file, int line)
-    {
-        if(!wcscmp(expected, actual))
-            return;
-        char expected2[1024];
-        char actual2[1024];
-        wcstombs(expected2, expected, sizeof(expected2));
-        wcstombs(actual2, actual, sizeof(actual2));
-        
-        
-        CPPUNIT_NS::Asserter::failNotEqual( expected2, actual2, CPPUNIT_NS::SourceLine(file, line), "");
-    }
-};
 
 struct Tracer
 {
-    Tracer(const char* file, int line, const char* func)
-    {
-        strcpy(this->file, file);
-        strcpy(this->func, func);
-        this->line = line;
-#ifdef TRACE_NODE
-        using namespace Swift;
-        Node::UnreleasedNodes.clear();
-        Node::NodeCount = 0;
-#endif
-    }
-    ~Tracer()
-    {
-#ifdef TRACE_NODE
-        using namespace Swift;
-        using namespace std;
-        list<Node*>& nodes = Node::UnreleasedNodes;
-        int unreleasedNodes = nodes.size();
-        if(Node::NodeCount != 0)
-        {
-            stringstream ss;
-            list<Node*>::iterator iter = nodes.begin();
-            ss<<unreleasedNodes<<" unreleased AST nodes detected in [" << file << ":" << func << "]:";
-            for(; iter != nodes.end(); iter++)
-            {
-                Node* node = *iter;
-                const char* nodeName = Node::nodeTypeToName(node->getNodeType());
-                ss << static_cast<const void*>(node) << "(" << nodeName << ")" <<", ";
-            }
-            std::cout<<ss.str()<<std::endl;
-        }
-#endif//TRACE_NODE
-    }
-
+    Tracer(const char* file, int line, const char* func);
+    ~Tracer();
     char file[1024];
     int line;
     char func[100];

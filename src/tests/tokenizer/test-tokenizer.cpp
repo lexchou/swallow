@@ -1,7 +1,6 @@
 #include "tokenizer/tokens.h"
 #include "tokenizer/tokenizer.h"
 #include "tests/utils.h"
-#include <gtest/gtest.h>
 using namespace Swift;
 
 

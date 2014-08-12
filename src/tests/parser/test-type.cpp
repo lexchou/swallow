@@ -9,21 +9,10 @@
 
 using namespace Swift;
 
-class TestType : public CppUnit::TestFixture
+TEST(TestType, testArrayType)
 {
-    CPPUNIT_TEST_SUITE(TestType);
-    CPPUNIT_TEST(testArrayType);
-    CPPUNIT_TEST_SUITE_END();
-public:
-    
-    
-    
-    void testArrayType()
-    {
-        
-    }
-};
-CPPUNIT_TEST_SUITE_NAMED_REGISTRATION(TestType, "alltest");
+
+}
 
 
 

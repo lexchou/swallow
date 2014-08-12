@@ -6,24 +6,16 @@
 
 using namespace Swift;
 
-class TestConstantFolding : public SwiftTestCase
+
+TEST(TestConstantFolding, testLogic)
 {
-    CPPUNIT_TEST_SUITE(TestConstantFolding);
-        CPPUNIT_TEST(testArithmetic);
-        CPPUNIT_TEST(testLogic);
-    CPPUNIT_TEST_SUITE_END();
-public:
-    void testLogic()
-    {
 
-    }
-    void testArithmetic()
-    {
+}
+TEST(TestConstantFolding, testArithmetic)
+{
 
-    }
-    
-};
-CPPUNIT_TEST_SUITE_NAMED_REGISTRATION(TestConstantFolding, "alltest");
+}
+
 
 
 
