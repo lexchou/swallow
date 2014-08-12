@@ -24,6 +24,13 @@ protected:
      */
     void error(const NodePtr& node, int code, const std::wstring& item = std::wstring());
 
+
+    /**
+     * Outputs an compiler error
+     */
+    void warning(const NodePtr& node, int code, const std::wstring& item = std::wstring());
+
+
     /**
      * Convert a AST TypeNode into symboled Type
      */

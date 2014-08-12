@@ -24,7 +24,7 @@ TypePtr Type::newType(const std::wstring& name, Category category, const TypeDec
 
 TypePtr Type::newTypeReference(const TypePtr& innerType)
 {
-    TypePtr ret(new Type(L"", Reference, nullptr, nullptr));
+    TypePtr ret(new Type(L"", MetaType, nullptr, nullptr));
     ret->innerType = innerType;
     return ret;
 }
@@ -55,31 +55,17 @@ Type::Category Type::getCategory()const
 {
     return category;
 }
-bool Type::isPrimitive()const
-{
-    return category == Primitive;
-}
-bool Type::isArray()const
-{
-    return category == Array;
-}
-bool Type::isDictionary() const
-{
-    return category == Dictionary;
-}
-bool Type::isTuple()const
-{
-    return category == Tuple;
-}
+
 
 
 bool Type::isValueType()const
 {
     switch(category)
     {
-        case Primitive:
+        case Aggregate:
         case Tuple:
         case Struct:
+            //TODO: String is not value type
             return true;
         default:
             return false;
@@ -128,9 +114,11 @@ TypePtr Type::getValueType()
 {
     return valueType;
 }
-TypeDeclarationPtr Type::getReference()
+TypeDeclarationPtr Type::getReference()const
 {
-    return reference;
+    if(reference.expired())
+        return nullptr;
+    return reference.lock();
 }
 
 TypePtr Type::getInnerType()
@@ -155,6 +143,17 @@ bool Type::hasVariadicParameters()const
     return variadicParameters;
 }
 
+
+
+FunctionOverloadedSymbolPtr Type::getInitializer()
+{
+    return initializer;
+}
+Type::SymbolMap& Type::getSymbols()
+{
+    return symbols;
+}
+
 bool Type::operator ==(const Type& rhs)const
 {
     if(category != rhs.category)
@@ -164,7 +163,7 @@ bool Type::operator ==(const Type& rhs)const
 
     switch(category)
     {
-        case Primitive:
+        case Aggregate:
         case Class:
         case Struct:
         case Protocol:
@@ -175,7 +174,7 @@ bool Type::operator ==(const Type& rhs)const
                 return false;
             if(name != rhs.name)
                 return false;
-            if(reference != rhs.reference)
+            if(getReference() != rhs.getReference())
                 return false;
             //TODO: check generic parameters
             break;
@@ -198,7 +197,7 @@ bool Type::operator ==(const Type& rhs)const
             if(*valueType != *rhs.valueType)
                 return false;
             break;
-        case Reference:
+        case MetaType:
             if(*innerType != *rhs.innerType)
                 return false;
             break;

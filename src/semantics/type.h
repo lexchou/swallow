@@ -7,13 +7,19 @@
 #include "swift_types.h"
 #include "semantic-types.h"
 #include <vector>
+#include <map>
+
 SWIFT_NS_BEGIN
 
 typedef std::shared_ptr<class TypeDeclaration> TypeDeclarationPtr;
+typedef std::weak_ptr<class TypeDeclaration> TypeDeclarationWeakPtr;
+
 class Type : public Symbol
 {
     friend class SymbolRegistry;
+    friend class SymbolResolveAction;
 public:
+    typedef std::map<std::wstring, SymbolPtr> SymbolMap;
     struct Parameter
     {
         std::wstring name;
@@ -28,7 +34,7 @@ public:
     };
     enum Category
     {
-        Primitive,
+        Aggregate,
         Tuple,
         Array,
         Dictionary,
@@ -39,7 +45,7 @@ public:
         Extension,
         Function,
         Closure,
-        Reference
+        MetaType
     };
 private:
     Type(const std::wstring& name, Category category, TypePtr keyType, TypePtr valueType);
@@ -51,11 +57,6 @@ public:
     static TypePtr newTypeReference(const TypePtr& innerType);
     static TypePtr newFunction(const std::vector<Parameter>& parameters, const TypePtr& returnType, bool hasVariadicParameters);
 public:
-    bool isPrimitive()const;
-    bool isArray()const;
-    bool isDictionary() const;
-    bool isTuple()const;
-
     /**
      * Does the value copies by value or by reference
      */
@@ -113,7 +114,7 @@ public:
     /**
      * Gets which declaration this type referenced to
      */
-    TypeDeclarationPtr getReference();
+    TypeDeclarationPtr getReference()const;
 
     /**
      * Gets the inner type for Reference category.
@@ -134,6 +135,18 @@ public:
      * Check if the function has variadic parameters
      */
     bool hasVariadicParameters()const;
+
+
+    /**
+     * Returns the initializer of class/structure
+     */
+    FunctionOverloadedSymbolPtr getInitializer();
+
+    /**
+     * Return all internal symbols
+     */
+    SymbolMap& getSymbols();
+
 public:
     bool operator ==(const Type& rhs)const;
     bool operator !=(const Type& rhs)const;
@@ -143,7 +156,7 @@ private:
     std::wstring fullName;
     std::wstring moduleName;
 
-    TypeDeclarationPtr reference;
+    TypeDeclarationWeakPtr reference;
 
     Category category;
     TypePtr parentType;
@@ -152,8 +165,10 @@ private:
     TypePtr innerType;
     TypePtr returnType;
     std::vector<Parameter> parameters;
+    FunctionOverloadedSymbolPtr initializer;
     bool variadicParameters;
     std::vector<TypePtr> elementTypes;
+    SymbolMap symbols;
 };
 
 

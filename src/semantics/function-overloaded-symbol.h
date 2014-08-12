@@ -11,10 +11,13 @@ class FunctionOverloadedSymbol : public Symbol
 {
 public:
     FunctionOverloadedSymbol(const std::wstring& name);
+    FunctionOverloadedSymbol();
 public:
     virtual const std::wstring& getName() const;
     FunctionSymbolPtr lookupOverload(int argc, TypePtr argv[]);
     void add(const FunctionSymbolPtr& func);
+
+    int numOverloads()const;
 
     std::vector<FunctionSymbolPtr>::iterator begin() { return functions.begin();}
     std::vector<FunctionSymbolPtr>::iterator end() { return functions.end();}

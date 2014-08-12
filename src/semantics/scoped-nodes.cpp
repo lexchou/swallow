@@ -102,6 +102,8 @@ const std::wstring& SymboledFunction::getName()const
     return name;
 }
 
+
+
 const std::wstring& SymboledVariable::getName()const
 {
     IdentifierPtr id = std::dynamic_pointer_cast<Identifier>(name);

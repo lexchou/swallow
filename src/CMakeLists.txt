@@ -10,12 +10,19 @@ FIND_PATH(CPPUNIT_LIBRARIES libcppunit.a
     /usr/lib
     /usr/lib/x86_64-linux-gnu/
 )
-LINK_DIRECTORIES(${CPPUNIT_LIBRARIES})
+FIND_PATH(GTEST_DIR libgtest.a
+    ../gtest-1.7.0
+    /usr/lib
+    /usr/lib/x86_64-linux-gnu/
+)
+SET(GTEST_LIBS gtest gtest_main pthread)
+LINK_DIRECTORIES(${CPPUNIT_LIBRARIES} ${GTEST_DIR})
 
 INCLUDE_DIRECTORIES(
     ${PROJECT_SOURCE_DIR}
     ${PROJECT_SOURCE_DIR}/inc
     ${CPPUNIT_INCLUDE_DIR}
+    ../gtest-1.7.0/include/
 )
 
 
@@ -161,18 +168,19 @@ ADD_EXECUTABLE(TestParser
         tests/parser/test-extension.cpp
         tests/parser/test-protocol.cpp
 		${SWIFT_TOKENIZER_SRC} ${SWIFT_PARSER_SRC})
-target_link_libraries(TestParser cppunit)
+target_link_libraries(TestParser cppunit ${GTEST_LIBS})
 
 ADD_EXECUTABLE(TestTokenizer tests/tokenizer/test-tokenizer.cpp ${SWIFT_TOKENIZER_SRC})
-target_link_libraries(TestTokenizer cppunit)
+target_link_libraries(TestTokenizer cppunit ${GTEST_LIBS})
 
 ADD_EXECUTABLE(TestSemantics
     tests/semantics/test-semantics.cpp
     tests/semantics/test-constant-folding.cpp
     tests/semantics/test-type-inference.cpp
     tests/semantics/test-symbol-resolve.cpp
+    tests/semantics/test-function-overloads.cpp
     ${SWIFT_TOKENIZER_SRC} ${SWIFT_PARSER_SRC})
-target_link_libraries(TestSemantics cppunit)
+target_link_libraries(TestSemantics cppunit ${GTEST_LIBS})
 
 
 ADD_TEST(NAME TestTokenizer COMMAND TestTokenizer)

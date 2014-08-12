@@ -55,3 +55,12 @@ DeclarationPtr TypeDeclaration::getDeclaration(int i)
 {
     return declarations[i];
 }
+
+TypePtr TypeDeclaration::getType()
+{
+    return type;
+}
+void TypeDeclaration::setType(const TypePtr& type)
+{
+    this->type = type;
+}

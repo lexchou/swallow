@@ -66,7 +66,7 @@ void TypeInferenceAction::checkTupleDefinition(const TuplePtr& tuple, const Expr
         error(tuple, Errors::E_USE_OF_UNDECLARED_TYPE, out.str());
         return;
     }
-    if(!(type->isTuple()))
+    if(!(type->getCategory() == Type::Tuple))
     {
         //tuple definition must have a tuple type definition
         std::wstringstream out;
@@ -117,6 +117,11 @@ TypePtr TypeInferenceAction::getExpressionType(const ExpressionPtr& expr, const 
     if(expr->getNodeType() == NodeType::IntegerLiteral && hint != nullptr)
     {
         IntegerLiteralPtr literal = std::static_pointer_cast<IntegerLiteral>(expr);
+        if(hint == t_float || hint == t_double)
+        {
+            score  = 0.5;
+            return hint;
+        }
         for(const TypePtr& t : t_ints)
         {
             if(t == hint)
@@ -128,15 +133,6 @@ TypePtr TypeInferenceAction::getExpressionType(const ExpressionPtr& expr, const 
         FloatLiteralPtr literal = std::static_pointer_cast<FloatLiteral>(expr);
         if(hint == t_float || hint == t_double)
             return hint;
-        for(const TypePtr& t : t_ints)
-        {
-            if(t == hint)
-            {
-                score = 0.5;
-                return t;
-            }
-        }
-
     }
     return expr->getType();
 }
@@ -261,44 +257,6 @@ float TypeInferenceAction::calculateFitScore(const FunctionSymbolPtr& func, cons
                 return -1;
         }
     }
-
-
-    /*
-    int i = 0;
-    for(const Type::Parameter& parameter : parameters)
-    {
-        const std::wstring name = arguments->getName(i);
-        const ExpressionPtr& argument = arguments->get(i++);
-        TypePtr argType = argument->getType();
-
-        if(parameter.name != name)
-        {
-            if(!supressErrors)
-            {
-                if(name.empty() && !parameter.name.empty())
-                {
-                    error(arguments, Errors::E_MISSING_ARGUMENT_LABEL_IN_CALL, parameter.name);
-                }
-                else
-                {
-                    error(arguments, Errors::E_EXTRANEOUS_ARGUMENT_LABEL_IN_CALL, name);
-                }
-            }
-            return -1;
-        }
-
-        if(*argType != *parameter.type)
-        {
-            if (!supressErrors)
-            {
-                error(arguments, Errors::E_UNMATCHED_PARAMETER);
-                abort();
-            }
-            return -i;//parameter is not matched
-        }
-        score += 1;
-    }
-    */
     if(!arguments->numExpressions())
         return 1;
     return score / arguments->numExpressions();
@@ -344,7 +302,7 @@ void TypeInferenceAction::visitFunctionCall(const IdentifierPtr& name, const Fun
         if(candidates.size() > 1)
         {
             sort(candidates.begin(), candidates.end(), [](const ScoredFunction& lhs, const ScoredFunction& rhs ){
-                return rhs.first - lhs.first;
+                return rhs.first < lhs.first;
             });
             if(candidates[0].first == candidates[1].first)
             {
@@ -382,7 +340,7 @@ void TypeInferenceAction::visitFunctionCall(const FunctionCallPtr& node)
         //TODO: type reference for calling function
         node->setType(t->getReturnType());
     }
-    else if(category == Type::Reference)
+    else if(category == Type::MetaType)
     {
         //initiate a new instance of specified type
         node->setType(t->getInnerType());

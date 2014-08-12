@@ -8,9 +8,17 @@ FunctionOverloadedSymbol::FunctionOverloadedSymbol(const std::wstring& name)
 {
 
 }
+FunctionOverloadedSymbol::FunctionOverloadedSymbol()
+{
+
+}
 const std::wstring& FunctionOverloadedSymbol::getName() const
 {
     return name;
+}
+int FunctionOverloadedSymbol::numOverloads()const
+{
+    return functions.size();
 }
 FunctionSymbolPtr FunctionOverloadedSymbol::lookupOverload(int argc, TypePtr argv[])
 {

@@ -29,8 +29,12 @@ void SemanticNodeVisitor::abort()
 void SemanticNodeVisitor::error(const NodePtr& node, int code, const std::wstring& item)
 {
     compilerResults->add(ErrorLevel::Error, *node->getSourceInfo(), code, item);
+    abort();
 }
-
+void SemanticNodeVisitor::warning(const NodePtr& node, int code, const std::wstring& item)
+{
+    compilerResults->add(ErrorLevel::Warning, *node->getSourceInfo(), code, item);
+}
 
 
 TypePtr SemanticNodeVisitor::lookupType(const TypeNodePtr& type)

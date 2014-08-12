@@ -79,21 +79,21 @@ SymbolRegistry::SymbolRegistry()
     //Register built-in type
     TypePtr t_int8, t_uint8, t_int16, t_uint16, t_int32, t_uint32, t_int64, t_uint64, t_int, t_uint;
     TypePtr t_bool, t_float, t_double, t_string, t_void;
-    currentScope->addSymbol(t_int8 = Type::newType(L"Int8", Type::Primitive));
-    currentScope->addSymbol(t_uint8 = Type::newType(L"UInt8", Type::Primitive));
-    currentScope->addSymbol(t_int16 = Type::newType(L"Int16", Type::Primitive));
-    currentScope->addSymbol(t_uint16 = Type::newType(L"UInt16", Type::Primitive));
-    currentScope->addSymbol(t_int32 = Type::newType(L"Int32", Type::Primitive));
-    currentScope->addSymbol(t_uint32 = Type::newType(L"UInt32", Type::Primitive));
-    currentScope->addSymbol(t_int64 = Type::newType(L"Int64", Type::Primitive));
-    currentScope->addSymbol(t_uint64 = Type::newType(L"UInt64", Type::Primitive));
-    currentScope->addSymbol(t_int = Type::newType(L"Int", Type::Primitive));
-    currentScope->addSymbol(t_uint = Type::newType(L"UInt", Type::Primitive));
-    currentScope->addSymbol(t_bool = Type::newType(L"Bool", Type::Primitive));
-    currentScope->addSymbol(t_float = Type::newType(L"Float", Type::Primitive));
-    currentScope->addSymbol(t_double = Type::newType(L"Double", Type::Primitive));
-    currentScope->addSymbol(t_string = Type::newType(L"String", Type::Primitive));
-    currentScope->addSymbol(t_void = Type::newType(L"Void", Type::Primitive));
+    currentScope->addSymbol(t_int8 = Type::newType(L"Int8", Type::Aggregate));
+    currentScope->addSymbol(t_uint8 = Type::newType(L"UInt8", Type::Aggregate));
+    currentScope->addSymbol(t_int16 = Type::newType(L"Int16", Type::Aggregate));
+    currentScope->addSymbol(t_uint16 = Type::newType(L"UInt16", Type::Aggregate));
+    currentScope->addSymbol(t_int32 = Type::newType(L"Int32", Type::Aggregate));
+    currentScope->addSymbol(t_uint32 = Type::newType(L"UInt32", Type::Aggregate));
+    currentScope->addSymbol(t_int64 = Type::newType(L"Int64", Type::Aggregate));
+    currentScope->addSymbol(t_uint64 = Type::newType(L"UInt64", Type::Aggregate));
+    currentScope->addSymbol(t_int = Type::newType(L"Int", Type::Aggregate));
+    currentScope->addSymbol(t_uint = Type::newType(L"UInt", Type::Aggregate));
+    currentScope->addSymbol(t_bool = Type::newType(L"Bool", Type::Aggregate));
+    currentScope->addSymbol(t_float = Type::newType(L"Float", Type::Aggregate));
+    currentScope->addSymbol(t_double = Type::newType(L"Double", Type::Aggregate));
+    currentScope->addSymbol(t_string = Type::newType(L"String", Type::Aggregate));
+    currentScope->addSymbol(t_void = Type::newType(L"Void", Type::Aggregate));
     //Register built-in variables
     currentScope->addSymbol(SymbolPtr(new SymbolPlaceHolder(L"true", t_bool)));
     currentScope->addSymbol(SymbolPtr(new SymbolPlaceHolder(L"false", t_bool)));
@@ -104,8 +104,8 @@ SymbolRegistry::SymbolRegistry()
     //Register built-in operators
     const wchar_t* arithmetics[] = {L"+", L"-", L"*", L"/", L"%", L"&+", L"&-", L"&*", L"&/", L"&%"};
     const wchar_t* bitwises[] = {L"|", L"&", L"^", L"<<", L">>"};
-    TypePtr integers[] = {t_int8, t_uint8, t_int16, t_uint16, t_int32, t_uint32, t_int64, t_uint64};
-    TypePtr numbers[] = {t_int8, t_uint8, t_int16, t_uint16, t_int32, t_uint32, t_int64, t_uint64, t_float, t_double};
+    TypePtr integers[] = {t_int, t_uint, t_int8, t_uint8, t_int16, t_uint16, t_int32, t_uint32, t_int64, t_uint64};
+    TypePtr numbers[] = {t_int, t_uint, t_int8, t_uint8, t_int16, t_uint16, t_int32, t_uint32, t_int64, t_uint64, t_float, t_double};
     for(const wchar_t* arithmetic : arithmetics)
     {
         std::wstring op = arithmetic;

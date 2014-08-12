@@ -20,69 +20,72 @@ SWIFT_NS_BEGIN
 class ScopedProgram : public Program, public ScopeOwner
 {
 public:
-    virtual void accept(NodeVisitor* visitor);
+    virtual void accept(NodeVisitor* visitor) override;
 };
 class ScopedClass : public ClassDef, public ScopeOwner, public Symbol
 {
 public:
-    virtual void accept(NodeVisitor* visitor);
-    virtual const std::wstring& getName()const;
+    virtual void accept(NodeVisitor* visitor) override;
+    virtual const std::wstring& getName()const override;
 
 };
 class ScopedProtocol : public ProtocolDef, public ScopeOwner, public Symbol
 {
 public:
-    virtual void accept(NodeVisitor* visitor);
-    virtual const std::wstring& getName()const;
+    virtual void accept(NodeVisitor* visitor) override;
+    virtual const std::wstring& getName()const override;
 
 };
 class ScopedStruct : public StructDef, public ScopeOwner, public Symbol
 {
 public:
-    virtual void accept(NodeVisitor* visitor);
-    virtual const std::wstring& getName()const;
+    virtual void accept(NodeVisitor* visitor) override;
+    virtual const std::wstring& getName()const override;
 
 };
 class ScopedEnum : public EnumDef, public ScopeOwner, public Symbol
 {
 public:
-    virtual void accept(NodeVisitor* visitor);
-    virtual const std::wstring& getName()const;
+    virtual void accept(NodeVisitor* visitor) override;
+    virtual const std::wstring& getName()const override;
 
 };
 class ScopedExtension : public ExtensionDef, public ScopeOwner, public Symbol
 {
 public:
-    virtual void accept(NodeVisitor* visitor);
-    virtual const std::wstring& getName()const;
+    virtual void accept(NodeVisitor* visitor) override;
+    virtual const std::wstring& getName()const override;
 
 };
 class ScopedCodeBlock : public CodeBlock, public ScopeOwner
 {
 public:
-    virtual void accept(NodeVisitor* visitor);
+    virtual void accept(NodeVisitor* visitor) override;
 
 };
 class ScopedClosure : public Closure, public ScopeOwner
 {
 public:
-    virtual void accept(NodeVisitor* visitor);
+    virtual void accept(NodeVisitor* visitor) override;
 };
 
 class SymboledFunction : public FunctionDef, public Symbol
 {
 public:
-    const std::wstring& getName()const;
+    const std::wstring& getName()const override;
 };
+
+
+
 class SymboledVariable : public Variable, public Symbol
 {
 public:
-    virtual const std::wstring& getName()const;
+    virtual const std::wstring& getName()const override;
 };
 class SymboledConstant : public Constant, public Symbol
 {
 public:
-    virtual const std::wstring& getName()const;
+    virtual const std::wstring& getName()const override;
 };
 
 

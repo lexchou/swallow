@@ -626,7 +626,7 @@ bool Tokenizer::readIdentifier(Token& token)
     {
         //resolve keyword
         using namespace std;
-        map<wstring, KeywordInfo>::iterator iter = keywords.find(token.c_str());
+        map<wstring, KeywordInfo>::iterator iter = keywords.find(token.token);
         if(iter != keywords.end())
         {
             token.identifier.keyword = iter->second.keyword;

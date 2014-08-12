@@ -115,7 +115,8 @@ struct Tracer
             for(; iter != nodes.end(); iter++)
             {
                 Node* node = *iter;
-                ss << static_cast<const void*>(node) <<", ";
+                const char* nodeName = Node::nodeTypeToName(node->getNodeType());
+                ss << static_cast<const void*>(node) << "(" << nodeName << ")" <<", ";
             }
             std::cout<<ss.str()<<std::endl;
         }

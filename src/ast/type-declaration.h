@@ -4,7 +4,9 @@
 #include <string>
 
 SWIFT_NS_BEGIN
+
 class TypeIdentifier;
+typedef std::shared_ptr<class Type> TypePtr;
 
 class TypeDeclaration : public Declaration
 {
@@ -24,6 +26,9 @@ public:
     int numDeclarations()const;
     DeclarationPtr getDeclaration(int i);
 
+    TypePtr getType();
+    void setType(const TypePtr& type);
+
     std::vector<DeclarationPtr>::iterator begin() {return declarations.begin();}
     std::vector<DeclarationPtr>::iterator end() {return declarations.end();}
 
@@ -31,6 +36,7 @@ public:
     std::vector<TypeIdentifierPtr> parents;
     TypeIdentifierPtr identifier;
     std::vector<DeclarationPtr> declarations;
+    TypePtr type;
 };
 
 SWIFT_NS_END

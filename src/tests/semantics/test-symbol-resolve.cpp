@@ -12,7 +12,8 @@ class TestSymbolResolve : public SemanticTestCase
 {
     CPPUNIT_TEST_SUITE(TestSymbolResolve);
     CPPUNIT_TEST(testUndeclaredVars);
-    CPPUNIT_TEST(testUseVariableBeforeDeclaration);
+    CPPUNIT_TEST(testUseConstantBeforeDeclaration);
+    CPPUNIT_TEST(testVariables);
     CPPUNIT_TEST(testVariableUsedWithinItsOwnInitialization);
     CPPUNIT_TEST(testDuplicatedVars);
     CPPUNIT_TEST(testLocalGlobal);
@@ -20,6 +21,7 @@ class TestSymbolResolve : public SemanticTestCase
     CPPUNIT_TEST(testClassVariable1);
     CPPUNIT_TEST(testClassVariable2);
     CPPUNIT_TEST(testClassVariable3);
+    CPPUNIT_TEST(testStructureInit);
     CPPUNIT_TEST_SUITE_END();
 public:
     void testUndeclaredVars()
@@ -32,7 +34,7 @@ public:
         ASSERT_EQUALS(L"a", r.item);
     }
 
-    void testUseVariableBeforeDeclaration()
+    void testUseConstantBeforeDeclaration()
     {
         SEMANTIC_ANALYZE(L"let a = b, b = 1;");
         CPPUNIT_ASSERT_EQUAL(1, compilerResults.numResults());
@@ -40,6 +42,14 @@ public:
         const CompilerResult& r = compilerResults.getResult(0);
         CPPUNIT_ASSERT_EQUAL((int)Errors::E_USE_OF_UNINITIALIZED_VARIABLE, r.code);
         ASSERT_EQUALS(L"b", r.item);
+
+    }
+
+    void testVariables()
+    {
+        SEMANTIC_ANALYZE(L"var a : Int = 1;");
+        CPPUNIT_ASSERT_EQUAL(0, compilerResults.numResults());
+
 
     }
 
@@ -150,6 +160,23 @@ public:
         L"}";
         SEMANTIC_ANALYZE(code);
         CPPUNIT_ASSERT_EQUAL(0, compilerResults.numResults());
+    }
+
+    void testStructureInit()
+    {
+        const wchar_t* code =
+                L"struct Test\n"
+                        "{\n"
+                        "    init(a : Int, a : Int)\n"
+                        "    {\n"
+                        "        \n"
+                        "    }\n"
+                        "}";
+        SEMANTIC_ANALYZE(code);
+        CPPUNIT_ASSERT_EQUAL(1, compilerResults.numResults());
+        const CompilerResult& r = compilerResults.getResult(0);
+        CPPUNIT_ASSERT_EQUAL((int)Errors::E_DEFINITION_CONFLICT, r.code);
+        ASSERT_EQUALS(L"a", r.item);
     }
 
 };

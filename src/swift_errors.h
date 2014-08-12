@@ -49,10 +49,16 @@ struct Errors
         E_EXTRANEOUS_ARGUMENT_LABEL_IN_CALL, //Extraneous argument label '%:' in call
         E_EXTRANEOUS_ARGUMENT, //Extraneous argument in call
         E_AMBIGUOUS_USE,    // Ambiguous use of '%'
+        E_INOUT_ARGUMENTS_CANNOT_BE_VARIADIC, // Inout arguments cannot be variadic
+
+
+        W_PARAM_CAN_BE_EXPRESSED_MORE_SUCCINCTLY, // '% %' can be expressed more succinctly as '#%'
+        W_EXTRANEOUS_SHARTP_IN_PARAMETER, //Extraneous '#' in parameter: '%' is already the keyword argument name
         //linking errors
     };
     
 };
+
 
 SWIFT_NS_END
 
