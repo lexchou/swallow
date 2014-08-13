@@ -5,11 +5,11 @@
 
 SWIFT_NS_BEGIN
 
-class ValueBinding : public Pattern
+class ValueBindingPattern : public Pattern
 {
 public:
-    ValueBinding(NodeType::T nodeType);
-    ~ValueBinding();
+    ValueBindingPattern(NodeType::T nodeType);
+    ~ValueBindingPattern();
 public:
     void setBinding(const PatternPtr& st);
     PatternPtr getBinding();
@@ -17,18 +17,18 @@ protected:
     PatternPtr binding;
 };
 
-class LetBinding : public ValueBinding
+class LetPattern : public ValueBindingPattern
 {
 public:
-    LetBinding();
+    LetPattern();
     virtual void serialize(std::wostream& out);
     virtual void accept(NodeVisitor* visitor);
 };
 
-class VarBinding : public ValueBinding
+class VarPattern : public ValueBindingPattern
 {
 public:
-    VarBinding();
+    VarPattern();
     virtual void serialize(std::wostream& out);
     virtual void accept(NodeVisitor* visitor);
 };

@@ -185,13 +185,13 @@ CodeBlockPtr NodeFactory::createCodeBlock(const SourceInfo& state)
 {
     return _(state, new CodeBlock());
 }
-LetBindingPtr NodeFactory::createLetBinding(const SourceInfo& state)
+LetPatternPtr NodeFactory::createLetPattern(const SourceInfo& state)
 {
-    return _(state, new LetBinding());
+    return _(state, new LetPattern());
 }
-VarBindingPtr NodeFactory::createVarBinding(const SourceInfo& state)
+VarPatternPtr NodeFactory::createVarPattern(const SourceInfo& state)
 {
-    return _(state, new VarBinding());
+    return _(state, new VarPattern());
 }
 TuplePtr NodeFactory::createTuple(const SourceInfo& state)
 {

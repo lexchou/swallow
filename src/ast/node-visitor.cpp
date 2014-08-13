@@ -162,12 +162,12 @@ void NodeVisitor::visitProgram(const ProgramPtr& node)
     }
 }
 
-void NodeVisitor::visitLetBinding(const LetBindingPtr& node)
+void NodeVisitor::visitLetPattern(const LetPatternPtr& node)
 {
 
 }
 
-void NodeVisitor::visitVarBinding(const VarBindingPtr& node)
+void NodeVisitor::visitVarPattern(const VarPatternPtr& node)
 {
 }
 

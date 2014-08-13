@@ -67,7 +67,7 @@ const char* Node::nodeTypeToName(NodeType::T nodeType)
         CASE_TYPE(InitRef)
         CASE_TYPE(IntegerLiteral)
         CASE_TYPE(LabeledStatement)
-        CASE_TYPE(LetBinding)
+        CASE_TYPE(LetPattern)
         CASE_TYPE(MemberAccess)
         CASE_TYPE(Operator)
         CASE_TYPE(OptionalChaining)
@@ -94,10 +94,10 @@ const char* Node::nodeTypeToName(NodeType::T nodeType)
         CASE_TYPE(UnaryOperator)
         CASE_TYPE(Variable)
         CASE_TYPE(Variables)
-        CASE_TYPE(VarBinding)
+        CASE_TYPE(VarPattern)
         CASE_TYPE(While)
     }
-
+#undef CASE_TYPE
 }
 
 

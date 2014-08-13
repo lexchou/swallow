@@ -62,7 +62,7 @@ struct NodeType
         InitRef,
         IntegerLiteral,
         LabeledStatement,
-        LetBinding,
+        LetPattern,
         MemberAccess,
         Operator,
         OptionalChaining,
@@ -89,7 +89,7 @@ struct NodeType
         UnaryOperator,
         Variable,
         Variables,
-        VarBinding,
+        VarPattern,
         While
     };
 };

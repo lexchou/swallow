@@ -50,7 +50,7 @@
 #include "ast/case-statement.h"
 #include "ast/while-loop.h"
 
-#include "ast/value-binding.h"
+#include "ast/value-binding-pattern.h"
 #include "ast/tuple.h"
 #include "ast/enum-case-pattern.h"
 

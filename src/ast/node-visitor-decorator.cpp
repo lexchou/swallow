@@ -124,14 +124,14 @@ void NodeVisitorDecorator::visitProgram(const ProgramPtr& node)
     VISIT(visitProgram);
 }
 
-void NodeVisitorDecorator::visitLetBinding(const LetBindingPtr& node)
+void NodeVisitorDecorator::visitLetPattern(const LetPatternPtr& node)
 {
-    VISIT(visitLetBinding);
+    VISIT(visitLetPattern);
 }
 
-void NodeVisitorDecorator::visitVarBinding(const VarBindingPtr& node)
+void NodeVisitorDecorator::visitVarPattern(const VarPatternPtr& node)
 {
-    VISIT(visitVarBinding);
+    VISIT(visitVarPattern);
 }
 
 

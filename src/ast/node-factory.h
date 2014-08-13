@@ -61,8 +61,8 @@ public:
     virtual ReturnStatementPtr createReturn(const SourceInfo& state);
     virtual LabeledStatementPtr createLabel(const SourceInfo& state);
     virtual CodeBlockPtr createCodeBlock(const SourceInfo& state);
-    virtual LetBindingPtr createLetBinding(const SourceInfo& state);
-    virtual VarBindingPtr createVarBinding(const SourceInfo& state);
+    virtual LetPatternPtr createLetPattern(const SourceInfo& state);
+    virtual VarPatternPtr createVarPattern(const SourceInfo& state);
     virtual TuplePtr createTuple(const SourceInfo& state);
     virtual ClosurePtr createClosure(const SourceInfo& state);
     virtual EnumCasePatternPtr createEnumCasePattern(const SourceInfo& state);

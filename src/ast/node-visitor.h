@@ -47,8 +47,8 @@ public://statement
     virtual void visitParameter(const ParameterPtr& node);
     virtual void visitParameters(const ParametersPtr& node);
     virtual void visitProgram(const ProgramPtr& node);
-    virtual void visitLetBinding(const LetBindingPtr& node);
-    virtual void visitVarBinding(const VarBindingPtr& node);
+    virtual void visitLetPattern(const LetPatternPtr& node);
+    virtual void visitVarPattern(const VarPatternPtr& node);
 public://The following visit procedures will not be executed until manually visit them by acceptPattern
     virtual void visitConditionalOperator(const ConditionalOperatorPtr& node);
     virtual void visitBinaryOperator(const BinaryOperatorPtr& node);

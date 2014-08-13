@@ -42,14 +42,14 @@ PatternPtr Parser::parsePattern()
             // pattern → value-binding-pattern
             case Keyword::Var:
             {
-                VarBindingPtr let = nodeFactory->createVarBinding(token.state);
+                VarPatternPtr let = nodeFactory->createVarPattern(token.state);
                 PatternPtr binding = parsePattern();
                 let->setBinding(binding);
                 return let;
             }
             case Keyword::Let:
             {
-                LetBindingPtr let = nodeFactory->createLetBinding(token.state);
+                LetPatternPtr let = nodeFactory->createLetPattern(token.state);
                 PatternPtr binding = parsePattern();
                 let->setBinding(binding);
                 return let;

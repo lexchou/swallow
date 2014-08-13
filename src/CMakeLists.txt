@@ -92,7 +92,7 @@ SET(SWIFT_PARSER_SRC ${SWIFT_TOKENIZER_SRC}
     ast/case-statement.cpp
     ast/while-loop.cpp
     ast/code-block.cpp
-    ast/value-binding.cpp
+    ast/value-binding-pattern.cpp
     ast/tuple.cpp
     ast/closure.cpp
     ast/enum-case-pattern.cpp
