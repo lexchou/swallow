@@ -29,6 +29,9 @@ typedef std::shared_ptr<SymboledFunction> SymboledFunctionPtr;
 class ScopedClass;
 typedef std::shared_ptr<ScopedClass> ScopedClassPtr;
 
+typedef std::shared_ptr<class SymboledVariable> SymboledVariablePtr;
+typedef std::shared_ptr<class SymboledConstant> SymboledConstantPtr;
+
 
 SWIFT_NS_END
 

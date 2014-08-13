@@ -245,8 +245,10 @@ void SymbolResolveAction::defineType(const std::shared_ptr<TypeDeclaration>& nod
         }
     }
     //register this type
-    type = Type::newType(id->getName(), category, node);
-    currentScope->addSymbol(type);
+    if(node->getType())
+    {
+        currentScope->addSymbol(node->getType());
+    }
 }
 
 
@@ -275,9 +277,35 @@ void SymbolResolveAction::visitStruct(const StructDefPtr& node)
     //TypePtr type = node->getType();
     if(type->getInitializer()->numOverloads() == 0)
     {
-        //apply rule 1
-        //check all fields
-        FunctionOverloadedSymbolPtr initializer(new FunctionOverloadedSymbol());
+        //check all fields if they all have initializer
+        bool hasDefaultValues = true;
+        for(auto syms : type->getSymbols())
+        {
+            if(SymboledConstantPtr let = std::dynamic_pointer_cast<SymboledConstant>(syms.second))
+            {
+                if(!let->initializer)
+                {
+                    hasDefaultValues = false;
+                    break;
+                }
+            }
+            if(SymboledVariablePtr var = std::dynamic_pointer_cast<SymboledVariable>(syms.second))
+            {
+                if(!var->getInitializer())
+                {
+                    hasDefaultValues = false;
+                    break;
+                }
+            }
+        }
+        if(hasDefaultValues)
+        {
+            //apply rule 1
+            std::vector<Type::Parameter> params;
+            TypePtr initType = Type::newFunction(params, type, false);
+            FunctionSymbolPtr initializer(new FunctionSymbol(node->getIdentifier()->getName(), initType, nullptr));
+            type->getInitializer()->add(initializer);
+        }
 
     }
 

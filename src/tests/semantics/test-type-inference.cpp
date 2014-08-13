@@ -56,12 +56,15 @@ TEST(TestTypeInference, testExpression)
     ASSERT_TRUE(type == t_int);
 }
 
-TEST(TestTypeInference, testClassInstance)
+TEST(TestTypeInference, testStructInstance)
 {
-    /*
-    SEMANTIC_ANALYZE(L"class Test {}\n"
+
+    SEMANTIC_ANALYZE(L"struct Test {}\n"
     L"let a = Test()"
     );
+    ASSERT_EQ(0, compilerResults.numResults());
+
+
     IdentifierPtr a;
     ASSERT_NOT_NULL(a = std::dynamic_pointer_cast<Identifier>(scope->lookup(L"a")));
     TypePtr type = a->getType();
@@ -69,7 +72,7 @@ TEST(TestTypeInference, testClassInstance)
     TypePtr t_Test;
     ASSERT_NOT_NULL(t_Test = std::dynamic_pointer_cast<Type>(scope->lookup(L"Test")));
     ASSERT_TRUE(type == t_Test);
-    */
+
 }
 
 

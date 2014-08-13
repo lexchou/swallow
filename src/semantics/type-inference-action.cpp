@@ -264,7 +264,8 @@ float TypeInferenceAction::calculateFitScore(const FunctionSymbolPtr& func, cons
 
 void TypeInferenceAction::visitFunctionCall(const IdentifierPtr& name, const FunctionCallPtr& node)
 {
-    SymbolPtr sym = symbolRegistry->lookupSymbol(name->getIdentifier());
+    const std::wstring& symbolName = name->getIdentifier();
+    SymbolPtr sym = symbolRegistry->lookupSymbol(symbolName);
     if(!sym)
     {
         error(name, Errors::E_USE_OF_UNRESOLVED_IDENTIFIER, name->getIdentifier());
@@ -276,6 +277,16 @@ void TypeInferenceAction::visitFunctionCall(const IdentifierPtr& name, const Fun
     {
         term.second->accept(this);
     }
+
+    //if symbol points to a type, then redirect it to a initializer
+    if(TypePtr type = std::dynamic_pointer_cast<Type>(sym))
+    {
+        if(type->getCategory() == Type::Class || type->getCategory() == Type::Struct)
+        {
+            sym = type->getInitializer();
+        }
+    }
+
 
     if(FunctionSymbolPtr func = std::dynamic_pointer_cast<FunctionSymbol>(sym))
     {
