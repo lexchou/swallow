@@ -61,6 +61,12 @@ public:
      * Does the value copies by value or by reference
      */
     bool isValueType()const;
+
+    /**
+     * return true if the type is a class/struct/protocol/enum
+     */
+    bool isObjectType()const;
+
     Category getCategory()const;
 
     /**

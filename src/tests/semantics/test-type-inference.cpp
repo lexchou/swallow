@@ -11,8 +11,8 @@ using namespace Swift;
 TEST(TestTypeInference, testIntLiteral)
 {
     SEMANTIC_ANALYZE(L"let a = 34");
-    IdentifierPtr a = NULL;
-    ASSERT_NOT_NULL(a = std::dynamic_pointer_cast<Identifier>(scope->lookup(L"a")));
+    SymbolPtr a = NULL;
+    ASSERT_NOT_NULL(a = scope->lookup(L"a"));
     TypePtr type = a->getType();
     ASSERT_NOT_NULL(type);
     TypePtr Int = symbolRegistry.lookupType(L"Int");
@@ -59,21 +59,37 @@ TEST(TestTypeInference, testExpression)
 TEST(TestTypeInference, testStructInstance)
 {
 
-    SEMANTIC_ANALYZE(L"struct Test {}\n"
-    L"let a = Test()"
+    SEMANTIC_ANALYZE(L"struct Test {let a = 4}\n"
+    L"let t = Test()\n"
+    L"let a = t.a"
     );
+    dumpCompilerResults(compilerResults);
     ASSERT_EQ(0, compilerResults.numResults());
 
 
-    IdentifierPtr a;
-    ASSERT_NOT_NULL(a = std::dynamic_pointer_cast<Identifier>(scope->lookup(L"a")));
-    TypePtr type = a->getType();
+    IdentifierPtr t, a;
+    ASSERT_NOT_NULL(t = std::dynamic_pointer_cast<Identifier>(scope->lookup(L"t")));
+    TypePtr type = t->getType();
     ASSERT_NOT_NULL(type);
     TypePtr t_Test;
     ASSERT_NOT_NULL(t_Test = std::dynamic_pointer_cast<Type>(scope->lookup(L"Test")));
     ASSERT_TRUE(type == t_Test);
 
+    ASSERT_NOT_NULL(t_Test->getReference());
+    ScopedStructPtr def;
+    ASSERT_NOT_NULL(def = std::dynamic_pointer_cast<ScopedStruct>(t_Test->getReference()));
+
+
+    ASSERT_NOT_NULL(a = std::dynamic_pointer_cast<Identifier>(scope->lookup(L"a")));
+    ASSERT_NOT_NULL(type = a->getType());
+    TypePtr t_Int;
+    ASSERT_NOT_NULL(t_Int = std::dynamic_pointer_cast<Type>(symbolRegistry.lookupType(L"Int")));
+    ASSERT_TRUE(type == t_Int);
+
+
+
 }
+
 
 
 

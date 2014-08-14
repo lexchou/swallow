@@ -57,15 +57,25 @@ Type::Category Type::getCategory()const
 }
 
 
+/**
+* return true if the type is a class/struct/protocol/enum
+*/
+bool Type::isObjectType()const
+{
+    return category == Class || category == Struct || category == Enum || category == Protocol;
+}
 
 bool Type::isValueType()const
 {
     switch(category)
     {
-        case Aggregate:
         case Tuple:
         case Struct:
             //TODO: String is not value type
+            return true;
+        case Aggregate:
+            if(name == L"String")
+                return false;
             return true;
         default:
             return false;

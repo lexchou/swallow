@@ -1,4 +1,5 @@
 #include "utils.h"
+#include "ast/node-serializer.h"
 
 void dumpCompilerResults(Swift::CompilerResults& compilerResults)
 {
@@ -84,7 +85,10 @@ Tracer::~Tracer()
         {
             Node* node = *iter;
             const char* nodeName = Node::nodeTypeToName(node->getNodeType());
-            ss << static_cast<const void*>(node) << "(" << nodeName << ")" <<", ";
+            NodeSerializerA serializer(ss);
+            ss << nodeName << " : " << static_cast<const void*>(node) << "(";
+            node->accept(&serializer);
+            ss << ")" << ", ";
         }
         std::cout<<ss.str()<<std::endl;
     }

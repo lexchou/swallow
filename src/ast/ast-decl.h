@@ -130,6 +130,7 @@ typedef std::shared_ptr<Program> ProgramPtr;
 
 class Import;
 typedef std::shared_ptr<Import> ImportPtr;
+typedef std::shared_ptr<class ValueBinding> ValueBindingPtr;
 class Constant;
 typedef std::shared_ptr<Constant> ConstantPtr;
 class Constants;

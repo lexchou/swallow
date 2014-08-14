@@ -163,4 +163,6 @@ TEST(TestSymbolResolve, testStructureInit)
     ASSERT_EQ(L"a", r.item);
 }
 
+
+
 #endif//TEST_TYPE_INFERENCE_H

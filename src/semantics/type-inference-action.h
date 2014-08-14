@@ -16,19 +16,21 @@ public:
     TypeInferenceAction(SymbolRegistry* symbolRegistry, CompilerResults* compilerResults);
 public:
     void visitFunctionCall(const IdentifierPtr& name, const FunctionCallPtr& node);
-    virtual void visitFunctionCall(const FunctionCallPtr& node);
-    virtual void visitOperator(const OperatorDefPtr& node);
-    virtual void visitVariable(const VariablePtr& node);
-    virtual void visitConstant(const ConstantPtr& node);
-    virtual void visitString(const StringLiteralPtr& node);
-    virtual void visitInteger(const IntegerLiteralPtr& node);
-    virtual void visitFloat(const FloatLiteralPtr& node);
-    virtual void visitConditionalOperator(const ConditionalOperatorPtr& node);
-    virtual void visitBinaryOperator(const BinaryOperatorPtr& node);
-    virtual void visitUnaryOperator(const UnaryOperatorPtr& node);
-    virtual void visitTuple(const TuplePtr& node);
-    virtual void visitIdentifier(const IdentifierPtr& node);
-    virtual void visitCompileConstant(const CompileConstantPtr& node);
+    virtual void visitFunctionCall(const FunctionCallPtr& node) override;
+    virtual void visitOperator(const OperatorDefPtr& node) override;
+    virtual void visitVariable(const VariablePtr& node) override;
+    virtual void visitConstant(const ConstantPtr& node) override;
+    virtual void visitString(const StringLiteralPtr& node) override;
+    virtual void visitInteger(const IntegerLiteralPtr& node) override;
+    virtual void visitFloat(const FloatLiteralPtr& node) override;
+    virtual void visitConditionalOperator(const ConditionalOperatorPtr& node) override;
+    virtual void visitBinaryOperator(const BinaryOperatorPtr& node) override;
+    virtual void visitUnaryOperator(const UnaryOperatorPtr& node) override;
+    virtual void visitTuple(const TuplePtr& node) override;
+    virtual void visitIdentifier(const IdentifierPtr& node) override;
+    virtual void visitCompileConstant(const CompileConstantPtr& node) override;
+    virtual void visitMemberAccess(const MemberAccessPtr& node) override;
+
 private:
     void checkTupleDefinition(const TuplePtr& tuple, const ExpressionPtr& initializer);
     TypePtr evaluateType(const ExpressionPtr& expr);

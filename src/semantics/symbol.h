@@ -20,8 +20,9 @@ public:
     SymbolPlaceHolder(const std::wstring& name, const TypePtr& type)
     :name(name), type(type){}
 public:
-    virtual const std::wstring& getName() const {return name;}
-    virtual TypePtr getType() {return type;}
+    virtual const std::wstring& getName() const override {return name;}
+    virtual TypePtr getType() override {return type;}
+    void setType(const TypePtr& type) {this->type = type;}
 private:
     std::wstring name;
     TypePtr type;

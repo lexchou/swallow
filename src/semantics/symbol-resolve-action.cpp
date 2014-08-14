@@ -74,7 +74,17 @@ void SymbolResolveAction::registerPattern(const PatternPtr& pattern)
         }
         else
         {
-            scope->addSymbol(std::static_pointer_cast<SymbolIdentifier>(id));
+            s = SymbolPtr(new SymbolPlaceHolder(id->getIdentifier(), id->getType()));
+            scope->addSymbol(s);
+            //add it to type definition
+            if(TypeDeclaration* declaration = dynamic_cast<TypeDeclaration*>(symbolRegistry->getCurrentScope()->getOwner()))
+            {
+                TypePtr ownerType = declaration->getType();
+                if(ownerType)
+                {
+                    ownerType->getSymbols()[s->getName()] = s;
+                }
+            }
         }
     }
     else if(pattern->getNodeType() == NodeType::Tuple)
@@ -281,17 +291,10 @@ void SymbolResolveAction::visitStruct(const StructDefPtr& node)
         bool hasDefaultValues = true;
         for(auto syms : type->getSymbols())
         {
-            if(SymboledConstantPtr let = std::dynamic_pointer_cast<SymboledConstant>(syms.second))
+            if(ValueBindingPtr binding = std::dynamic_pointer_cast<ValueBinding>(syms.second))
             {
-                if(!let->initializer)
-                {
-                    hasDefaultValues = false;
-                    break;
-                }
-            }
-            if(SymboledVariablePtr var = std::dynamic_pointer_cast<SymboledVariable>(syms.second))
-            {
-                if(!var->getInitializer())
+                //TODO: skip computed property
+                if(!binding->getInitializer())
                 {
                     hasDefaultValues = false;
                     break;
@@ -463,7 +466,7 @@ void SymbolResolveAction::visitFunction(const FunctionDefPtr& node)
 
 void SymbolResolveAction::visitDeinit(const DeinitializerDefPtr& node)
 {
-
+    SemanticNodeVisitor::visitDeinit(node);
 }
 
 void SymbolResolveAction::prepareParameters(const CodeBlockPtr& codeBlock, const ParametersPtr& params)

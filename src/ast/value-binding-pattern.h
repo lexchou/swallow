@@ -1,5 +1,5 @@
-#ifndef VALUE_BINDING_H
-#define VALUE_BINDING_H
+#ifndef VALUE_BINDING_PATTERN_H
+#define VALUE_BINDING_PATTERN_H
 #include "pattern.h"
 #include <string>
 
@@ -35,4 +35,4 @@ public:
 
 SWIFT_NS_END
 
-#endif//VALUE_BINDING_H
+#endif//VALUE_BINDING_PATTERN_H

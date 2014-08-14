@@ -6,7 +6,7 @@ USE_SWIFT_NS
 
 
 Constant::Constant()
-    :Declaration(NodeType::Constant), name(NULL), initializer(NULL)
+    :ValueBinding(NodeType::Constant)
 {
 }
 Constant::~Constant()

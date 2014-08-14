@@ -9,6 +9,8 @@ class SymbolIdentifier : public Identifier, public Symbol
 {
 public:
     virtual const std::wstring& getName() const {return identifier;}
+    virtual TypePtr getType() override {return Identifier::getType();}
+
 };
 
 

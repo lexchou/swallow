@@ -50,6 +50,7 @@ SET(SWIFT_PARSER_SRC ${SWIFT_TOKENIZER_SRC}
     ast/node.cpp
     ast/program.cpp
     ast/node-visitor.cpp
+    ast/node-serializer.cpp
     ast/node-visitor-decorator.cpp
     ast/expression.cpp
     ast/pattern.cpp
@@ -126,6 +127,7 @@ SET(SWIFT_PARSER_SRC ${SWIFT_TOKENIZER_SRC}
     ast/struct-def.cpp
     ast/subscript-def.cpp
     ast/type-alias.cpp
+    ast/value-binding.cpp
     ast/variable.cpp
     ast/variables.cpp
     ast/identifier.cpp

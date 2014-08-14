@@ -9,7 +9,7 @@ USE_SWIFT_NS
 
 
 Variable::Variable()
-    :Declaration(NodeType::Variable), name(NULL), declaredType(NULL), initializer(NULL), getter(NULL), setter(NULL), willSet(NULL), didSet(NULL), type(NULL)
+    :ValueBinding(NodeType::Variable)
 {
 }
 
@@ -25,23 +25,6 @@ void Variable::accept(NodeVisitor* visitor)
     accept2(visitor, &NodeVisitor::visitVariable);
 }
 
-TypePtr Variable::getType()
-{
-    return type;
-}
-void Variable::setType(const TypePtr& type)
-{
-    this->type = type;
-}
-
-void Variable::setName(const PatternPtr& pattern)
-{
-    this->name = pattern;
-}
-PatternPtr Variable::getName()
-{
-    return name;
-}
 
 void Variable::setTypeAttributes(const Attributes& attrs)
 {
@@ -59,14 +42,7 @@ TypeNodePtr Variable::getDeclaredType()
 {
     return declaredType;
 }
-void Variable::setInitializer(const ExpressionPtr& expr)
-{
-    this->initializer = expr;
-}
-ExpressionPtr Variable::getInitializer()
-{
-    return initializer;
-}
+
 
 void Variable::setSetter(const CodeBlockPtr& setter)
 {

@@ -367,6 +367,22 @@ void TypeInferenceAction::visitFunctionCall(const FunctionCallPtr& node)
 
 
 }
+void TypeInferenceAction::visitMemberAccess(const MemberAccessPtr& node)
+{
+    node->getSelf()->accept(this);
+    TypePtr selfType = node->getSelf()->getType();
+    assert(selfType != nullptr);
+
+
+    Type::SymbolMap::iterator iter = selfType->getSymbols().find(node->getField()->getIdentifier());
+    if(iter == selfType->getSymbols().end())
+    {
+        error(node->getField(), Errors::E_DOES_NOT_HAVE_A_MEMBER, node->getField()->getIdentifier());
+        return;
+    }
+    node->setType(iter->second->getType());
+}
+
 void TypeInferenceAction::visitString(const StringLiteralPtr& node)
 {
     node->setType(t_string);
@@ -500,10 +516,11 @@ void TypeInferenceAction::visitConstant(const ConstantPtr& node)
     {
         node->initializer->accept(this);
         TypePtr actualType = node->initializer->getType();
+        assert(actualType != nullptr);
         SymbolPtr sym(new SymbolPlaceHolder(id->getIdentifier(), actualType));
 
         symbolRegistry->getCurrentScope()->addSymbol(sym);//std::static_pointer_cast<SymboledConstant>(node)
-        if(id->getDeclaredType() == NULL)
+        if(id->getDeclaredType() == nullptr)
         {
             id->setType(actualType);
         }

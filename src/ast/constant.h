@@ -1,27 +1,19 @@
 #ifndef CONSTANT_H
 #define CONSTANT_H
-#include "declaration.h"
+#include "value-binding.h"
 #include <string>
 
 SWIFT_NS_BEGIN
 
-class Pattern;
-class Expression;
-class Constant : public Declaration
+class Constant : public ValueBinding
 {
 public:
     Constant();
     ~Constant();
 public:
-    using Declaration::setSpecifiers;
-    using Declaration::getSpecifiers;
-public:
     virtual void serialize(std::wostream& out);
 public://Node
     virtual void accept(NodeVisitor* visitor);
-public:
-    PatternPtr name;
-    ExpressionPtr initializer;
 };
 
 SWIFT_NS_END
