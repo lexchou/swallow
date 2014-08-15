@@ -1,12 +1,11 @@
 #include "scoped-node-factory.h"
 #include "scoped-nodes.h"
-#include "symbol-identifier.h"
 USE_SWIFT_NS
 
 
 IdentifierPtr ScopedNodeFactory::createIdentifier(const SourceInfo& state)
 {
-    return _(state, new SymbolIdentifier());
+    return NodeFactory::createIdentifier(state);
 }
 EnumDefPtr ScopedNodeFactory::createEnum(const SourceInfo& state)
 {

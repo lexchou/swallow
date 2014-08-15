@@ -95,8 +95,8 @@ SymbolRegistry::SymbolRegistry()
     currentScope->addSymbol(t_string = Type::newType(L"String", Type::Aggregate));
     currentScope->addSymbol(t_void = Type::newType(L"Void", Type::Aggregate));
     //Register built-in variables
-    currentScope->addSymbol(SymbolPtr(new SymbolPlaceHolder(L"true", t_bool)));
-    currentScope->addSymbol(SymbolPtr(new SymbolPlaceHolder(L"false", t_bool)));
+    currentScope->addSymbol(SymbolPtr(new SymbolPlaceHolder(L"true", t_bool, SymbolPlaceHolder::F_INITIALIZED)));
+    currentScope->addSymbol(SymbolPtr(new SymbolPlaceHolder(L"false", t_bool, SymbolPlaceHolder::F_INITIALIZED)));
 
 
 

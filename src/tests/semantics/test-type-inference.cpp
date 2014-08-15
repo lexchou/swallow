@@ -1,7 +1,7 @@
-#ifndef TEST_TYPE_INFERENCE_H
-#define TEST_TYPE_INFERENCE_H
-
-#include "tests/semantics/semantic-test.h"
+#include "tests/utils.h"
+#include "semantics/symbol-registry.h"
+#include "semantics/symbol.h"
+#include "semantics/scoped-nodes.h"
 #include "semantics/type.h"
 #include "swift_errors.h"
 
@@ -22,9 +22,9 @@ TEST(TestTypeInference, testIntLiteral)
 TEST(TestTypeInference, testStringLiteral)
 {
     SEMANTIC_ANALYZE(L"let a = \"345\"");
-    IdentifierPtr a = NULL;
+    SymbolPtr a = NULL;
 
-    ASSERT_NOT_NULL(a = std::dynamic_pointer_cast<Identifier>(scope->lookup(L"a")));
+    ASSERT_NOT_NULL(a = scope->lookup(L"a"));
     TypePtr type = a->getType();
     ASSERT_NOT_NULL(type);
     TypePtr String = symbolRegistry.lookupType(L"String");
@@ -48,8 +48,8 @@ TEST(TestTypeInference, testExpression)
     ASSERT_EQ(0, compilerResults.numResults());
 
 
-    IdentifierPtr a;
-    ASSERT_NOT_NULL(a = std::dynamic_pointer_cast<Identifier>(scope->lookup(L"a")));
+    SymbolPtr a;
+    ASSERT_NOT_NULL(a = scope->lookup(L"a"));
     TypePtr type = a->getType();
     ASSERT_NOT_NULL(type);
     TypePtr t_int = symbolRegistry.lookupType(L"Int");
@@ -67,8 +67,8 @@ TEST(TestTypeInference, testStructInstance)
     ASSERT_EQ(0, compilerResults.numResults());
 
 
-    IdentifierPtr t, a;
-    ASSERT_NOT_NULL(t = std::dynamic_pointer_cast<Identifier>(scope->lookup(L"t")));
+    SymbolPtr t, a;
+    ASSERT_NOT_NULL(t = scope->lookup(L"t"));
     TypePtr type = t->getType();
     ASSERT_NOT_NULL(type);
     TypePtr t_Test;
@@ -80,7 +80,7 @@ TEST(TestTypeInference, testStructInstance)
     ASSERT_NOT_NULL(def = std::dynamic_pointer_cast<ScopedStruct>(t_Test->getReference()));
 
 
-    ASSERT_NOT_NULL(a = std::dynamic_pointer_cast<Identifier>(scope->lookup(L"a")));
+    ASSERT_NOT_NULL(a = scope->lookup(L"a"));
     ASSERT_NOT_NULL(type = a->getType());
     TypePtr t_Int;
     ASSERT_NOT_NULL(t_Int = std::dynamic_pointer_cast<Type>(symbolRegistry.lookupType(L"Int")));
@@ -91,7 +91,3 @@ TEST(TestTypeInference, testStructInstance)
 }
 
 
-
-
-
-#endif//TEST_TYPE_INFERENCE_H

@@ -3,7 +3,6 @@
 #include "ast/ast.h"
 #include "common/compiler_results.h"
 #include "swift_errors.h"
-#include "symbol-identifier.h"
 #include "scoped-nodes.h"
 #include "ast/tuple.h"
 #include "function-symbol.h"
@@ -38,7 +37,7 @@ void SymbolResolveAction::verifyTuplePattern(const PatternPtr& pattern)
             error(id, Errors::E_CANNOT_ASSIGN, id->getIdentifier());
             return;
         }
-        NodePtr sym = std::dynamic_pointer_cast<Node>(symbolRegistry->lookupSymbol(id->getIdentifier()));
+        SymbolPtr sym = symbolRegistry->lookupSymbol(id->getIdentifier());
         if(!sym)
         {
             error(id, Errors::E_USE_OF_UNRESOLVED_IDENTIFIER, id->getIdentifier());
@@ -112,13 +111,13 @@ void SymbolResolveAction::visitVariables(const VariablesPtr& node)
         CodeBlockPtr willSet = v->getWillSet();
         CodeBlockPtr getter = v->getGetter();
         CodeBlockPtr setter = v->getSetter();
-        setFlag(name, true, Identifier::F_INITIALIZING);
+        setFlag(name, true, SymbolPlaceHolder::F_INITIALIZING);
         if(initializer)
         {
             initializer->accept(this);
         }
-        setFlag(name, true, Identifier::F_INITIALIZED);
-        setFlag(name, false, Identifier::F_INITIALIZING);
+        setFlag(name, true, SymbolPlaceHolder::F_INITIALIZED);
+        setFlag(name, false, SymbolPlaceHolder::F_INITIALIZING);
         if(getter)
         {
             getter->accept(this);
@@ -128,7 +127,7 @@ void SymbolResolveAction::visitVariables(const VariablesPtr& node)
             std::wstring name = v->getSetterName().empty() ? L"newValue" : v->getSetterName();
             //TODO: replace the symbol to internal value
             ScopedCodeBlockPtr cb = std::static_pointer_cast<ScopedCodeBlock>(setter);
-            cb->getScope()->addSymbol(SymbolPtr(new SymbolPlaceHolder(name, v->getType())));
+            cb->getScope()->addSymbol(SymbolPtr(new SymbolPlaceHolder(name, v->getType(), SymbolPlaceHolder::F_INITIALIZED)));
             cb->accept(this);
         }
         if(willSet)
@@ -136,7 +135,7 @@ void SymbolResolveAction::visitVariables(const VariablesPtr& node)
             std::wstring setter = v->getWillSetSetter().empty() ? L"newValue" : v->getWillSetSetter();
             //TODO: replace the symbol to internal value
             ScopedCodeBlockPtr cb = std::static_pointer_cast<ScopedCodeBlock>(willSet);
-            cb->getScope()->addSymbol(SymbolPtr(new SymbolPlaceHolder(setter, v->getType())));
+            cb->getScope()->addSymbol(SymbolPtr(new SymbolPlaceHolder(setter, v->getType(), SymbolPlaceHolder::F_INITIALIZED)));
             cb->accept(this);
         }
         if(didSet)
@@ -144,7 +143,7 @@ void SymbolResolveAction::visitVariables(const VariablesPtr& node)
             std::wstring setter = v->getDidSetSetter().empty() ? L"oldValue" : v->getDidSetSetter();
             //TODO: replace the symbol to internal value
             ScopedCodeBlockPtr cb = std::static_pointer_cast<ScopedCodeBlock>(didSet);
-            cb->getScope()->addSymbol(SymbolPtr(new SymbolPlaceHolder(setter, v->getType())));
+            cb->getScope()->addSymbol(SymbolPtr(new SymbolPlaceHolder(setter, v->getType(), SymbolPlaceHolder::F_INITIALIZED)));
             cb->accept(this);
         }
 
@@ -161,10 +160,10 @@ void SymbolResolveAction::visitConstants(const ConstantsPtr& node)
     //verify initializer
     for(const ConstantPtr& c : *node)
     {
-        setFlag(c->name, true, Identifier::F_INITIALIZING);
+        setFlag(c->name, true, SymbolPlaceHolder::F_INITIALIZING);
         c->initializer->accept(this);
-        setFlag(c->name, true, Identifier::F_INITIALIZED);
-        setFlag(c->name, false, Identifier::F_INITIALIZING);
+        setFlag(c->name, true, SymbolPlaceHolder::F_INITIALIZED);
+        setFlag(c->name, false, SymbolPlaceHolder::F_INITIALIZING);
     }
 }
 
@@ -178,22 +177,22 @@ void SymbolResolveAction::visitIdentifier(const IdentifierPtr& id)
         compilerResults->add(ErrorLevel::Error, *id->getSourceInfo(), Errors::E_USE_OF_UNRESOLVED_IDENTIFIER, id->getIdentifier());
         return;
     }
-    if(IdentifierPtr identifier = std::dynamic_pointer_cast<Identifier>(sym))
+    if(SymbolPlaceHolderPtr placeholder = std::dynamic_pointer_cast<SymbolPlaceHolder>(sym))
     {
-        if((identifier->flags & Identifier::F_INITIALIZING))
+        if((placeholder->flags & SymbolPlaceHolder::F_INITIALIZING))
         {
-            error(id, Errors::E_USE_OF_INITIALIZING_VARIABLE, id->getIdentifier());
+            error(id, Errors::E_USE_OF_INITIALIZING_VARIABLE, placeholder->getName());
         }
-        else if((identifier->flags & Identifier::F_INITIALIZED) == 0)
+        else if((placeholder->flags & SymbolPlaceHolder::F_INITIALIZED) == 0)
         {
-            error(id, Errors::E_USE_OF_UNINITIALIZED_VARIABLE, id->getIdentifier());
+            error(id, Errors::E_USE_OF_UNINITIALIZED_VARIABLE, placeholder->getName());
         }
         //check if this identifier is accessed inside a class/protocol/extension/struct/enum but defined not in program
         if(dynamic_cast<TypeDeclaration*>(symbolRegistry->getCurrentScope()->getOwner()))
         {
             if(scope->getOwner()->getNodeType() != NodeType::Program)
             {
-                error(id, Errors::E_USE_OF_FUNCTION_LOCAL_INSIDE_TYPE, id->getIdentifier());
+                error(id, Errors::E_USE_OF_FUNCTION_LOCAL_INSIDE_TYPE, placeholder->getName());
             }
         }
 
@@ -211,10 +210,14 @@ void SymbolResolveAction::setFlag(const PatternPtr& pattern, bool add, int flag)
     if(t == NodeType::Identifier)
     {
         IdentifierPtr id = std::static_pointer_cast<Identifier>(pattern);
+        SymbolPtr sym = symbolRegistry->getCurrentScope()->lookup(id->getIdentifier());
+        assert(sym != nullptr);
+        SymbolPlaceHolderPtr placeholder = std::dynamic_pointer_cast<SymbolPlaceHolder>(sym);
+        assert(placeholder != nullptr);
         if(add)
-            id->flags |= flag;
+            placeholder->flags |= flag;
         else
-            id->flags &= ~flag;
+            placeholder->flags &= ~flag;
     }
     else if(t == NodeType::Tuple)
     {

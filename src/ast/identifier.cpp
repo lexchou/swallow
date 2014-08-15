@@ -7,7 +7,6 @@ USE_SWIFT_NS
 Identifier::Identifier()
     :Expression(NodeType::Identifier)
 {
-    flags = 0;
 }
 
 Identifier::~Identifier()

@@ -11,6 +11,7 @@ class Type;
 typedef std::shared_ptr<Type> TypePtr;
 class Symbol;
 typedef std::shared_ptr<Symbol> SymbolPtr;
+typedef std::shared_ptr<class SymbolPlaceHolder> SymbolPlaceHolderPtr;
 class SymbolRegistry;
 class ScopeOwner;
 typedef std::shared_ptr<ScopeOwner> ScopeOwnerPtr;

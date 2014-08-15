@@ -1,7 +1,7 @@
-#ifndef TEST_TYPE_INFERENCE_H
-#define TEST_TYPE_INFERENCE_H
-
-#include "tests/semantics/semantic-test.h"
+#include "tests/utils.h"
+#include "semantics/symbol-registry.h"
+#include "semantics/symbol.h"
+#include "semantics/scoped-nodes.h"
 #include "semantics/type.h"
 #include "swift_errors.h"
 #include "semantics/function-symbol.h"
@@ -105,6 +105,7 @@ TEST(TestSymbolResolve, testClassVariable1)
             L"    }\n"
             L"}";
     SEMANTIC_ANALYZE(code);
+    dumpCompilerResults(compilerResults);
     ASSERT_EQ(0, compilerResults.numResults());
 }
 
@@ -163,6 +164,3 @@ TEST(TestSymbolResolve, testStructureInit)
     ASSERT_EQ(L"a", r.item);
 }
 
-
-
-#endif//TEST_TYPE_INFERENCE_H

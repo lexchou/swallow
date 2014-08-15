@@ -17,8 +17,14 @@ public:
 class SymbolPlaceHolder : public Symbol
 {
 public:
-    SymbolPlaceHolder(const std::wstring& name, const TypePtr& type)
-    :name(name), type(type){}
+    enum Flags
+    {
+        F_INITIALIZING = 1,
+        F_INITIALIZED = 2,
+    };
+public:
+    SymbolPlaceHolder(const std::wstring& name, const TypePtr& type, int flags = 0)
+    :name(name), type(type), flags(flags){}
 public:
     virtual const std::wstring& getName() const override {return name;}
     virtual TypePtr getType() override {return type;}
@@ -26,6 +32,8 @@ public:
 private:
     std::wstring name;
     TypePtr type;
+public:
+    int flags;
 
 };
 

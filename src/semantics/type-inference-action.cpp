@@ -517,18 +517,16 @@ void TypeInferenceAction::visitConstant(const ConstantPtr& node)
         node->initializer->accept(this);
         TypePtr actualType = node->initializer->getType();
         assert(actualType != nullptr);
-        SymbolPtr sym(new SymbolPlaceHolder(id->getIdentifier(), actualType));
-
-        symbolRegistry->getCurrentScope()->addSymbol(sym);//std::static_pointer_cast<SymboledConstant>(node)
-        if(id->getDeclaredType() == nullptr)
+        SymbolPtr sym = symbolRegistry->getCurrentScope()->lookup(id->getIdentifier());
+        assert(sym != nullptr);
+        if(id->getDeclaredType() != nullptr)
         {
-            id->setType(actualType);
-        }
-        else
-        {
-            //TODO check if the type is convertible
+            //TODO: check if the type is convertible
 
         }
+        SymbolPlaceHolderPtr placeholder = std::dynamic_pointer_cast<SymbolPlaceHolder>(sym);
+        assert(placeholder != nullptr);
+        placeholder->setType(actualType);
     }
     else if(TuplePtr id = std::dynamic_pointer_cast<Tuple>(node->name))
     {

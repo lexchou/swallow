@@ -1,5 +1,13 @@
 #include "utils.h"
 #include "ast/node-serializer.h"
+#include "semantics/symbol-registry.h"
+#include "semantics/symbol.h"
+#include "semantics/scoped-node-factory.h"
+#include "semantics/symbol-resolve-action.h"
+#include "semantics/type-inference-action.h"
+#include "semantics/scoped-nodes.h"
+
+
 
 void dumpCompilerResults(Swift::CompilerResults& compilerResults)
 {
@@ -54,8 +62,38 @@ Swift::ProgramPtr parseStatements(Swift::CompilerResults& compilerResults, const
     dumpCompilerResults(compilerResults);
     return ret;
 }
+Swift::ScopedProgramPtr analyzeStatement(Swift::SymbolRegistry& registry, Swift::CompilerResults& compilerResults, const char* func, const wchar_t* str)
+{
+    using namespace Swift;
+    registry.getCurrentScope()->addSymbol(SymbolPtr(new SymbolPlaceHolder(L"println", nullptr, SymbolPlaceHolder::F_INITIALIZED)));
+    ScopedNodeFactory nodeFactory;
+    Parser parser(&nodeFactory, &compilerResults);
+    parser.setFileName(L"<file>");
+    ScopedProgramPtr ret = std::dynamic_pointer_cast<ScopedProgram>(parser.parse(str));
+//ScopedProgram* f;
+    dumpCompilerResults(compilerResults);
+//d.g();
+    if(!ret)
+        return ret;
+    try
+    {
+        SymbolResolveAction symbolResolve(&registry, &compilerResults);
+        TypeInferenceAction typeInference(&registry, &compilerResults);
+        NodeVisitor* visitors[] = {&symbolResolve, &typeInference};
+        for(NodeVisitor* visitor : visitors)
+        {
+            ret->accept(visitor);
+            if(compilerResults.numResults() > 0)
+                break;
+        }
+    }
+    catch(const Abort&)
+    {
+//ignore this
+    }
 
-
+    return ret;
+}
 
 
 Tracer::Tracer(const char* file, int line, const char* func)

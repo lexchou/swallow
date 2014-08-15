@@ -1,6 +1,7 @@
 #include "symbol-scope.h"
 #include "symbol-registry.h"
 #include "type.h"
+#include <cassert>
 
 USE_SWIFT_NS
 
@@ -17,6 +18,8 @@ Node* SymbolScope::getOwner()
 }
 void SymbolScope::addSymbol(const SymbolPtr& symbol)
 {
+    SymbolMap::iterator iter = symbols.find(symbol->getName());
+    assert(iter == symbols.end() && "The symbol already exists with the same name.");
     this->symbols.insert(std::make_pair(symbol->getName(), symbol));
 }
 
