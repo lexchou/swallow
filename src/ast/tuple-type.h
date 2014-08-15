@@ -32,8 +32,6 @@ public:
     std::vector<TupleElement>::iterator begin() {return elements.begin();};
     std::vector<TupleElement>::iterator end() {return elements.end();};
 
-public:
-    virtual void serialize(std::wostream& out);
 private:
     bool variadicParameters;
     std::vector<TupleElement> elements;

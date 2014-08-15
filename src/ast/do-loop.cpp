@@ -1,7 +1,4 @@
-
 #include "do-loop.h"
-#include "code-block.h"
-#include "expression.h"
 #include "node-visitor.h"
 USE_SWIFT_NS
 
@@ -15,14 +12,7 @@ DoLoop::~DoLoop()
 
 }
 
-void DoLoop::serialize(std::wostream& out)
-{
-    using std::endl;
-    out<<L"do"<<endl;
-    getCodeBlock()->serialize(out);
-    out<<" while ";
-    getCondition()->serialize(out);
-}
+
 void DoLoop::accept(NodeVisitor* visitor)
 {
     accept2(visitor, &NodeVisitor::visitDoLoop);

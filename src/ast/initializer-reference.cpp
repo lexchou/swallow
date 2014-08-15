@@ -1,5 +1,5 @@
-#include <ast/node-visitor.h>
 #include "initializer-reference.h"
+#include <ast/node-visitor.h>
 USE_SWIFT_NS
 
 
@@ -20,12 +20,6 @@ ExpressionPtr InitializerReference::getExpression()
     return expression;
 }
 
-
-void InitializerReference::serialize(std::wostream& out)
-{
-    getExpression()->serialize(out);
-    out<<L".init";
-}
 
 void InitializerReference::accept(NodeVisitor* visitor)
 {

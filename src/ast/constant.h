@@ -11,8 +11,6 @@ public:
     Constant();
     ~Constant();
 public:
-    virtual void serialize(std::wostream& out);
-public://Node
     virtual void accept(NodeVisitor* visitor);
 };
 

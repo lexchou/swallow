@@ -1,8 +1,5 @@
-#include <ast/node-visitor.h>
 #include "function-def.h"
-#include "code-block.h"
-#include "type-node.h"
-#include "parameters.h"
+#include <ast/node-visitor.h>
 USE_SWIFT_NS
 
 
@@ -14,10 +11,6 @@ FunctionDef::FunctionDef()
 FunctionDef::~FunctionDef()
 {
 
-}
-
-void FunctionDef::serialize(std::wostream& out)
-{
 }
 
 void FunctionDef::accept(NodeVisitor* visitor)

@@ -22,22 +22,7 @@ int DictionaryLiteral::numElements()const
     return items.size();
 }
 
-void DictionaryLiteral::serialize(std::wostream& out)
-{
-    out<<L"[";
-    if(items.empty())
-        out<<L":";
-    std::vector<std::pair<ExpressionPtr, ExpressionPtr> >::iterator iter = items.begin();
-    for(; iter != items.end(); iter++)
-    {
-        if(iter != items.begin())
-            out<<L", ";
-        iter->first->serialize(out);
-        out<<L" : ";
-        iter->second->serialize(out);
-    }
-    out<<L"]";
-}
+
 void DictionaryLiteral::accept(NodeVisitor* visitor)
 {
     accept2(visitor, &NodeVisitor::visitDictionaryLiteral);

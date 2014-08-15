@@ -51,21 +51,6 @@ int SubscriptAccess::numIndices()
     return indices.size();
 }
 
-
-void SubscriptAccess::serialize(std::wostream& out)
-{
-    getSelf()->serialize(out);
-    out<<L"[";
-    for(int i = 0; i < numIndices(); i++)
-    {
-        ExpressionPtr index = getIndex(i);
-        if(i != 0)
-            out<<L", ";
-        index->serialize(out);
-    }
-    out<<L"]";
-}
-
 void SubscriptAccess::accept(NodeVisitor* visitor)
 {
     accept2(visitor, &NodeVisitor::visitSubscriptAccess);

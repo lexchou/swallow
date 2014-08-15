@@ -8,9 +8,7 @@ ProtocolDef::ProtocolDef()
     :TypeDeclaration(NodeType::Protocol)
 {
 }
-void ProtocolDef::serialize(std::wostream& out)
-{
-}
+
 void ProtocolDef::accept(NodeVisitor* visitor)
 {
     accept2(visitor, &NodeVisitor::visitProtocol);

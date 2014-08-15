@@ -18,7 +18,6 @@ public:
     TupleTypePtr getArgumentsType();
     TypeNodePtr getReturnType();
 public:
-    virtual void serialize(std::wostream& out);
     virtual void accept(NodeVisitor* visitor);
 private:
     TupleTypePtr argumentsType;

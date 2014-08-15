@@ -1,4 +1,3 @@
-
 #include "labeled-statement.h"
 #include "node-visitor.h"
 USE_SWIFT_NS
@@ -12,11 +11,7 @@ LabeledStatement::~LabeledStatement()
 {
 
 }
-void LabeledStatement::serialize(std::wostream& out)
-{
-    out<<label<<L":";
-    getStatement()->serialize(out);
-}
+
 void LabeledStatement::accept(NodeVisitor* visitor)
 {
     accept2(visitor, &NodeVisitor::visitLabeledStatement);

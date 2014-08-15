@@ -1,7 +1,5 @@
-#include <ast/node-visitor.h>
 #include "enum-def.h"
-#include "tuple-type.h"
-#include "expression.h"
+#include <ast/node-visitor.h>
 USE_SWIFT_NS
 
 
@@ -13,9 +11,7 @@ EnumDef::~EnumDef()
 {
 
 }
-void EnumDef::serialize(std::wostream& out)
-{
-}
+
 void EnumDef::accept(NodeVisitor* visitor)
 {
     accept2(visitor, &NodeVisitor::visitEnum);

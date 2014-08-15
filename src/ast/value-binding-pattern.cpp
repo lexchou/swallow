@@ -25,11 +25,7 @@ LetPattern::LetPattern()
     :ValueBindingPattern(NodeType::LetPattern)
 {
 }
-void LetPattern::serialize(std::wostream& out)
-{
-    out<<L"let ";
-    getBinding()->serialize(out);
-}
+
 void LetPattern::accept(NodeVisitor* visitor)
 {
     accept2(visitor, &NodeVisitor::visitLetPattern);
@@ -39,11 +35,7 @@ VarPattern::VarPattern()
     :ValueBindingPattern(NodeType::VarPattern)
 {
 }
-void VarPattern::serialize(std::wostream& out)
-{
-    out<<L"var ";
-    getBinding()->serialize(out);
-}
+
 void VarPattern::accept(NodeVisitor* visitor)
 {
     accept2(visitor, &NodeVisitor::visitVarPattern);

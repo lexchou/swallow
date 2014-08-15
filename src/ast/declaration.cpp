@@ -1,7 +1,5 @@
-
 #include "declaration.h"
 #include "attribute.h"
-#include "generic-parameters.h"
 #include <algorithm>
 USE_SWIFT_NS
 
@@ -11,9 +9,6 @@ Declaration::Declaration(NodeType::T nodeType)
 {
 }
 Declaration::~Declaration()
-{
-}
-void Declaration::serialize(std::wostream& out)
 {
 }
 

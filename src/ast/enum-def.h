@@ -40,7 +40,6 @@ public:
     const Constant& getConstant(int i);
     
 public:
-    virtual void serialize(std::wostream& out);
     virtual void accept(NodeVisitor* visitor);
 private:
     std::vector<AssociatedType> associatedTypes;

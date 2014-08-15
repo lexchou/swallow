@@ -1,6 +1,4 @@
-
 #include "parameters.h"
-#include "parameter.h"
 #include "node-visitor.h"
 USE_SWIFT_NS
 
@@ -15,9 +13,6 @@ Parameters::~Parameters()
 
 }
 
-void Parameters::serialize(std::wostream& out)
-{
-}
 void Parameters::accept(NodeVisitor* visitor)
 {
     accept2(visitor, &NodeVisitor::visitParameters);

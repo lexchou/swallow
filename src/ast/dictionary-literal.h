@@ -17,7 +17,6 @@ public:
     Map::iterator begin(){return items.begin();}
     Map::iterator end(){return items.end();}
 public:
-    virtual void serialize(std::wostream& out);
     virtual void accept(NodeVisitor* visitor);
 private:
     Map items;

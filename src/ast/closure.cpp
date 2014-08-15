@@ -1,7 +1,5 @@
-#include <ast/node-visitor.h>
 #include "closure.h"
-#include "parameters.h"
-#include "type-node.h"
+#include <ast/node-visitor.h>
 USE_SWIFT_NS
 
 
@@ -15,9 +13,7 @@ Closure::~Closure()
 
 }
 
-void Closure::serialize(std::wostream& out)
-{
-}
+
 void Closure::accept(NodeVisitor* visitor)
 {
     accept2(visitor, &NodeVisitor::visitClosure);

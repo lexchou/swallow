@@ -14,7 +14,6 @@ public:
     void setInnerType(const TypeNodePtr& innerType);
     TypeNodePtr getInnerType();
 public:
-    virtual void serialize(std::wostream& out);
     virtual void accept(NodeVisitor* visitor);
 private:
     TypeNodePtr innerType;

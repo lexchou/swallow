@@ -1,8 +1,4 @@
-
 #include "subscript-def.h"
-#include "type-node.h"
-#include "code-block.h"
-#include "parameters.h"
 #include "node-visitor.h"
 USE_SWIFT_NS
 
@@ -15,11 +11,6 @@ SubscriptDef::SubscriptDef()
 SubscriptDef::~SubscriptDef()
 {
 
-}
-
-void SubscriptDef::serialize(std::wostream& out)
-{
-//    out<<value;
 }
 
 void SubscriptDef::accept(NodeVisitor* visitor)

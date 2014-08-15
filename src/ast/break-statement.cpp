@@ -8,12 +8,7 @@ BreakStatement::BreakStatement()
     :Statement(NodeType::Break)
 {
 }
-void BreakStatement::serialize(std::wostream& out)
-{
-    out<<L"break";
-    if(!loop.empty())
-        out<<L" "<<loop;
-}
+
 void BreakStatement::accept(NodeVisitor* visitor)
 {
     accept2(visitor, &NodeVisitor::visitBreak);

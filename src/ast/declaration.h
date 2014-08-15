@@ -25,8 +25,6 @@ protected:
     GenericParametersPtr getGenericParameters();
     void setGenericParameters(const GenericParametersPtr& val);
     
-public:
-    virtual void serialize(std::wostream& out);
 protected:
     std::vector<AttributePtr> attributes;
     int specifiers;

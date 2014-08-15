@@ -25,17 +25,6 @@ int ArrayLiteral::numElements()const
     return elements.size();
 }
 
-void ArrayLiteral::serialize(std::wostream& out)
-{
-    out<<L"[";
-    for(ExpressionPtr el : elements)
-    {
-        el->serialize(out);
-    }
-    out<<L"]";
-}
-
-
 void ArrayLiteral::accept(NodeVisitor* visitor)
 {
     accept2(visitor, &NodeVisitor::visitArrayLiteral);

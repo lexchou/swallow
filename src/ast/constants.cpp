@@ -1,8 +1,5 @@
-#include <ast/node-visitor.h>
-#include <ast/constant.h>
 #include "constants.h"
-#include "pattern.h"
-#include "expression.h"
+#include <ast/node-visitor.h>
 USE_SWIFT_NS
 
 
@@ -29,10 +26,6 @@ ConstantPtr Constants::getConstant(int i)
     return constants[i];
 }
 
-
-void Constants::serialize(std::wostream& out)
-{
-}
 
 void Constants::accept(NodeVisitor* visitor)
 {

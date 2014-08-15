@@ -11,7 +11,6 @@ public:
     StringLiteral();
 public:
     const std::wstring& toString() const { return value;}
-    virtual void serialize(std::wostream& out);
     virtual void accept(NodeVisitor* visitor);
 public:
     std::wstring value;

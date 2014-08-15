@@ -1,7 +1,4 @@
-
 #include "switch-case.h"
-#include "expression.h"
-#include "case-statement.h"
 #include "node-visitor.h"
 USE_SWIFT_NS
 
@@ -17,13 +14,6 @@ SwitchCase::~SwitchCase()
 
 }
 
-void SwitchCase::serialize(std::wostream& out)
-{
-    out<<L"switch ";
-    getControlExpression()->serialize(out);
-    out<<L"{"<<std::endl;
-    out<<L"}"<<std::endl;
-}
 void SwitchCase::accept(NodeVisitor* visitor)
 {
     accept2(visitor, &NodeVisitor::visitSwitchCase);

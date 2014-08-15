@@ -13,7 +13,6 @@ public:
     Program();
     ~Program();
 public:
-    virtual void serialize(std::wostream& out);
     virtual void accept(NodeVisitor* visitor);
 
 

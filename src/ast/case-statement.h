@@ -34,7 +34,6 @@ public:
     StatementPtr getStatement(int idx);
     int numStatements();
 public:
-    virtual void serialize(std::wostream& out);
     virtual void accept(NodeVisitor* visitor);
 private:
     std::vector<Condition> conditions;

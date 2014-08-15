@@ -21,7 +21,6 @@ class LetPattern : public ValueBindingPattern
 {
 public:
     LetPattern();
-    virtual void serialize(std::wostream& out);
     virtual void accept(NodeVisitor* visitor);
 };
 
@@ -29,7 +28,6 @@ class VarPattern : public ValueBindingPattern
 {
 public:
     VarPattern();
-    virtual void serialize(std::wostream& out);
     virtual void accept(NodeVisitor* visitor);
 };
 

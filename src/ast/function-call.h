@@ -22,7 +22,6 @@ public:
     void setTrailingClosure(const ClosurePtr& trailingClosure);
     ClosurePtr getTrailingClosure();
 public:
-    virtual void serialize(std::wostream& out);
     virtual void accept(NodeVisitor* visitor);
 private:
     ExpressionPtr function;

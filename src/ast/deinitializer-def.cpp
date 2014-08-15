@@ -1,6 +1,4 @@
-
 #include "deinitializer-def.h"
-#include "code-block.h"
 #include "node-visitor.h"
 USE_SWIFT_NS
 
@@ -14,11 +12,6 @@ DeinitializerDef::~DeinitializerDef()
 
 }
 
-void DeinitializerDef::serialize(std::wostream& out)
-{
-    out<<L"deinit ";
-    getBody()->serialize(out);
-}
 
 void DeinitializerDef::accept(NodeVisitor* visitor)
 {

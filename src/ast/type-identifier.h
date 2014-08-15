@@ -20,8 +20,6 @@ public:
     
     void setNestedType(TypeIdentifierPtr type);
     TypeIdentifierPtr getNestedType();
-public:
-    virtual void serialize(std::wostream& out);
 private:
     std::wstring name;
     std::vector<TypeNodePtr> genericArguments;

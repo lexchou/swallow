@@ -1,6 +1,5 @@
-#include <ast/node-visitor.h>
 #include "unary-operator.h"
-#include "identifier.h"
+#include <ast/node-visitor.h>
 USE_SWIFT_NS;
 
 UnaryOperator::UnaryOperator()
@@ -31,19 +30,6 @@ void UnaryOperator::set(int i, const NodePtr& val)
         operand = std::dynamic_pointer_cast<Expression>(val);
 }
 
-void UnaryOperator::serialize(std::wostream& out)
-{
-    if(operatorType == OperatorType::PrefixUnary)
-    {
-        out<<op;
-        this->getOperand()->serialize(out);
-    }
-    else
-    {
-        this->getOperand()->serialize(out);
-        out<<op;
-    }
-}
 void UnaryOperator::accept(NodeVisitor* visitor)
 {
     accept2(visitor, &NodeVisitor::visitUnaryOperator);

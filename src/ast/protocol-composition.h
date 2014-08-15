@@ -16,8 +16,6 @@ public:
     void addProtocol(TypeIdentifierPtr protocol);
     TypeIdentifierPtr getProtocol(int i);
     int numProtocols();
-public:
-    virtual void serialize(std::wostream& out);
 private:
     std::vector<TypeIdentifierPtr> protocols;
 };

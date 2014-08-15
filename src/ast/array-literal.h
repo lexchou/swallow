@@ -14,7 +14,6 @@ public:
     ExpressionPtr getElement(int i);
     int numElements()const;
 public:
-    virtual void serialize(std::wostream& out);
     virtual void accept(NodeVisitor* visitor);
 
 

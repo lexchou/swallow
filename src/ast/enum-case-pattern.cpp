@@ -1,6 +1,5 @@
-#include <ast/node-visitor.h>
 #include "enum-case-pattern.h"
-#include "tuple.h"
+#include <ast/node-visitor.h>
 USE_SWIFT_NS
 
 
@@ -12,9 +11,7 @@ EnumCasePattern::~EnumCasePattern()
 {
 
 }
-void EnumCasePattern::serialize(std::wostream& out)
-{
-}
+
 void EnumCasePattern::accept(NodeVisitor* visitor)
 {
     accept2(visitor, &NodeVisitor::visitEnumCasePattern);

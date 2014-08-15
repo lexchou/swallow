@@ -10,7 +10,6 @@ class FallthroughStatement : public Statement
 public:
     FallthroughStatement();
 public:
-    virtual void serialize(std::wostream& out);
     virtual void accept(NodeVisitor* visitor);
 private:
 };

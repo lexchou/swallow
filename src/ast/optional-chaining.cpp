@@ -22,11 +22,6 @@ ExpressionPtr OptionalChaining::getExpression()
 }
 
 
-void OptionalChaining::serialize(std::wostream& out)
-{
-    getExpression()->serialize(out);
-    out<<L"?";
-}
 void OptionalChaining::accept(NodeVisitor* visitor)
 {
     accept2(visitor, &NodeVisitor::visitOptionalChaining);

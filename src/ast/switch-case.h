@@ -26,7 +26,6 @@ public:
     std::vector<CaseStatementPtr>::iterator begin() {return cases.begin();}
     std::vector<CaseStatementPtr>::iterator end() {return cases.end();}
 public:
-    virtual void serialize(std::wostream& out);
     virtual void accept(NodeVisitor* visitor);
 private:
     ExpressionPtr controlExpression;

@@ -10,14 +10,7 @@ BinaryOperator::BinaryOperator()
 BinaryOperator::~BinaryOperator()
 {
 }
-void BinaryOperator::serialize(std::wostream& out)
-{
-    out<<L"(";
-    getLHS()->serialize(out);
-    out<<op;
-    getRHS()->serialize(out);
-    out<<L")";    
-}
+
 void BinaryOperator::accept(NodeVisitor* visitor)
 {
     accept2(visitor, &NodeVisitor::visitBinaryOperator);

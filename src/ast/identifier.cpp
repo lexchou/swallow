@@ -1,6 +1,4 @@
 #include "identifier.h"
-#include "type-node.h"
-#include "generic-argument.h"
 #include "node-visitor.h"
 USE_SWIFT_NS
 
@@ -14,10 +12,7 @@ Identifier::~Identifier()
 
 }
 
-void Identifier::serialize(std::wostream& out)
-{
-    out<<identifier;
-}
+
 void Identifier::accept(NodeVisitor* visitor)
 {
     accept2(visitor, &NodeVisitor::visitIdentifier);

@@ -15,7 +15,6 @@ public:
     const std::wstring& getValue() const;
     void setValue(const std::wstring& value);
 public:
-    virtual void serialize(std::wostream& out);
     virtual void accept(NodeVisitor* visitor);
 private:
     std::wstring name;

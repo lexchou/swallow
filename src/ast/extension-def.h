@@ -10,7 +10,6 @@ class ExtensionDef : public TypeDeclaration
 public:
     ExtensionDef();
 public:
-    virtual void serialize(std::wostream& out);
     virtual void accept(NodeVisitor* visitor);
 public:
 };

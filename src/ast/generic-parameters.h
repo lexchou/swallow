@@ -14,8 +14,6 @@ public:
     ~GenericParameters();
     
 public:
-    virtual void serialize(std::wostream& out);
-public:
     void addGenericType(const TypeIdentifierPtr& type);
     int numGenericTypes()const;
     TypeIdentifierPtr getGenericType(int i);

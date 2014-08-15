@@ -24,8 +24,6 @@ public:
     std::vector<ConstantPtr>::iterator begin(){return constants.begin();}
     std::vector<ConstantPtr>::iterator end(){return constants.end();}
 public:
-    virtual void serialize(std::wostream& out);
-public://Node
     virtual void accept(NodeVisitor* visitor);
 public:
     std::vector<ConstantPtr> constants;

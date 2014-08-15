@@ -15,7 +15,6 @@ public:
     void setExpression(const ExpressionPtr& expr);
     ExpressionPtr getExpression();
 public:
-    virtual void serialize(std::wostream& out);
     virtual void accept(NodeVisitor* visitor);
 private:
     ExpressionPtr expression;

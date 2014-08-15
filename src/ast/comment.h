@@ -11,7 +11,6 @@ public:
 public:
 	std::wstring comment;
 public:
-    virtual void serialize(std::wostream& out);
 };
 
 SWIFT_NS_END

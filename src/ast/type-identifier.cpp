@@ -11,23 +11,6 @@ TypeIdentifier::TypeIdentifier()
 TypeIdentifier::~TypeIdentifier()
 {
 }
-void TypeIdentifier::serialize(std::wostream& out)
-{
-    out<<name;
-    if(numGenericArguments())
-    {
-        out<<L"<";
-        std::vector<TypeNodePtr>::iterator iter = genericArguments.begin();
-        for(; iter != genericArguments.end(); iter++)
-        {
-            if(iter != genericArguments.begin())
-                out<<L", ";
-            (*iter)->serialize(out);
-        }
-        out<<L">";
-    }
-}
-
 
 void TypeIdentifier::setName(const std::wstring& name)
 {

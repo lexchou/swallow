@@ -13,7 +13,6 @@ public:
     Parameters();
     ~Parameters();
 public:
-    virtual void serialize(std::wostream& out);
     virtual void accept(NodeVisitor* visitor);
 public:
     void setVariadicParameters(bool val);

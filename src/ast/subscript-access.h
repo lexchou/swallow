@@ -27,7 +27,6 @@ public:
     std::vector<ExpressionPtr>::iterator end(){return indices.end();}
 
 public:
-    virtual void serialize(std::wostream& out);
     virtual void accept(NodeVisitor* visitor);
 public:
     ExpressionPtr self;

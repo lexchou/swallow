@@ -25,7 +25,6 @@ public:
     std::vector<VariablePtr>::iterator begin() {return variables.begin();}
     std::vector<VariablePtr>::iterator end() {return variables.end();}
 public://Node
-    virtual void serialize(std::wostream& out);
     virtual void accept(NodeVisitor* visitor);
 public:
     std::vector<VariablePtr> variables;

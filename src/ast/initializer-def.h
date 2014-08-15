@@ -25,7 +25,6 @@ public:
     void setBody(const CodeBlockPtr& body);
     CodeBlockPtr getBody();
 public:
-    virtual void serialize(std::wostream& out);
     virtual void accept(NodeVisitor* visitor);
 private:
     bool convenience;

@@ -1,6 +1,4 @@
 #include "if-statement.h"
-#include "expression.h"
-#include "code-block.h"
 #include "node-visitor.h"
 USE_SWIFT_NS
 
@@ -15,18 +13,7 @@ IfStatement::~IfStatement()
 
 }
 
-void IfStatement::serialize(std::wostream& out)
-{
-    out<<L"if ";
-    getCondition()->serialize(out);
-    out<<std::endl;
-    getThen()->serialize(out);
-    if(getElse() != NULL)
-    {
-        out<<L"else";
-        getElse()->serialize(out);
-    }
-}
+
 void IfStatement::accept(NodeVisitor* visitor)
 {
     accept2(visitor, &NodeVisitor::visitIf);

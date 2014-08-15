@@ -15,16 +15,6 @@ ConditionalOperator::~ConditionalOperator()
 
 }
 
-void ConditionalOperator::serialize(std::wostream& out)
-{
-    out<<L"((";
-    this->getCondition()->serialize(out);
-    out<<L")?(";
-    this->getTrueExpression()->serialize(out);
-    out<<L"):(";
-    this->getTrueExpression()->serialize(out);
-    out<<L"))";
-}
 void ConditionalOperator::accept(NodeVisitor* visitor)
 {
     accept2(visitor, &NodeVisitor::visitConditionalOperator);

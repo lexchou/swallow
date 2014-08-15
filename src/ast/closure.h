@@ -23,7 +23,6 @@ public:
     Closure();
     ~Closure();
 public:
-    virtual void serialize(std::wostream& out);
     virtual void accept(NodeVisitor* visitor);
 public:
     CaptureSpecifier getCaptureSpecifier()const;

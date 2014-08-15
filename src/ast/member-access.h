@@ -17,7 +17,6 @@ public:
     ExpressionPtr getSelf();
     IdentifierPtr getField();
 public:
-    virtual void serialize(std::wostream& out);
     virtual void accept(NodeVisitor* visitor);
 public:
     ExpressionPtr self;

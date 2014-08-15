@@ -24,7 +24,6 @@ public:
     Parameter();
     ~Parameter();
 public:
-    virtual void serialize(std::wostream& out);
     virtual void accept(NodeVisitor* visitor);
 public:
     void setInout(bool inout);

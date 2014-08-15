@@ -22,7 +22,6 @@ public:
     std::vector<StatementPtr>::iterator begin() { return statements.begin();}
     std::vector<StatementPtr>::iterator end() { return statements.end();}
 public:
-    virtual void serialize(std::wostream& out);
     virtual void accept(NodeVisitor* visitor);
 private:
     Attributes attributes;

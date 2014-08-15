@@ -28,7 +28,6 @@ public:
     CodeBlockPtr getCodeBlock();
     
 public:
-    virtual void serialize(std::wostream& out);
     virtual void accept(NodeVisitor* visitor);
 public:
     std::vector<ExpressionPtr> inits;

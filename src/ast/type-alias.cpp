@@ -1,6 +1,4 @@
-
 #include "type-alias.h"
-#include "type-node.h"
 #include "node-visitor.h"
 USE_SWIFT_NS
 
@@ -12,11 +10,7 @@ TypeAlias::TypeAlias()
 TypeAlias::~TypeAlias()
 {
 }
-void TypeAlias::serialize(std::wostream& out)
-{
-    out<<L"typealias " << name << " = ";
-    getType()->serialize(out);
-}
+
 void TypeAlias::accept(NodeVisitor* visitor)
 {
     accept2(visitor, &NodeVisitor::visitTypeAlias);

@@ -1,7 +1,5 @@
-#include <ast/node-visitor.h>
 #include "constant.h"
-#include "pattern.h"
-#include "expression.h"
+#include <ast/node-visitor.h>
 USE_SWIFT_NS
 
 
@@ -13,9 +11,7 @@ Constant::~Constant()
 {
 
 }
-void Constant::serialize(std::wostream& out)
-{
-}
+
 
 void Constant::accept(NodeVisitor* visitor)
 {

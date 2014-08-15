@@ -1,6 +1,4 @@
-
 #include "tuple.h"
-#include "type-node.h"
 #include "node-visitor.h"
 USE_SWIFT_NS
 
@@ -11,16 +9,6 @@ Tuple::Tuple()
 }
 Tuple::~Tuple()
 {
-}
-
-void Tuple::serialize(std::wostream& out)
-{
-    out<<L"(";
-    for(const PatternPtr& p : elements)
-    {
-        p->serialize(out);
-    }
-    out<<L")";
 }
 
 void Tuple::accept(NodeVisitor* visitor)

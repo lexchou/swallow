@@ -11,11 +11,6 @@ ArrayType::ArrayType()
 ArrayType::~ArrayType()
 {
 }
-void ArrayType::serialize(std::wostream& out)
-{
-    getInnerType()->serialize(out);
-    out<<L"[]";
-}
 
 void ArrayType::setInnerType(TypeNodePtr innerType)
 {

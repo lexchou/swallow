@@ -19,11 +19,7 @@ ExpressionPtr ForcedValue::getExpression()
     return expression;
 }
 
-void ForcedValue::serialize(std::wostream& out)
-{
-    getExpression()->serialize(out);
-    out<<L"!";
-}
+
 void ForcedValue::accept(NodeVisitor* visitor)
 {
     accept2(visitor, &NodeVisitor::visitForcedValue);

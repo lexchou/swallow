@@ -13,11 +13,6 @@ GenericConstraint::~GenericConstraint()
 
 }
 
-void GenericConstraint::serialize(std::wostream& out)
-{
-    
-}
-
 
 void GenericConstraint::setIdentifier(const TypeIdentifierPtr& identifier)
 {

@@ -8,9 +8,7 @@ ClassDef::ClassDef()
     :TypeDeclaration(NodeType::Class)
 {
 }
-void ClassDef::serialize(std::wostream& out)
-{
-}
+
 void ClassDef::accept(NodeVisitor* visitor)
 {
     accept2(visitor, &NodeVisitor::visitClass);

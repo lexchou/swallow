@@ -33,7 +33,6 @@ public:
     const std::wstring& getSetterName()const;
         
 public:
-    virtual void serialize(std::wostream& out);
     virtual void accept(NodeVisitor* visitor);
 private:
     std::wstring setterName;

@@ -7,9 +7,6 @@ StructDef::StructDef()
     :TypeDeclaration(NodeType::Struct)
 {
 }
-void StructDef::serialize(std::wostream& out)
-{
-}
 
 void StructDef::accept(NodeVisitor* visitor)
 {

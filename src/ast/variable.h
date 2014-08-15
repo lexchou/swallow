@@ -42,7 +42,6 @@ public:
     void setDidSetSetter(const std::wstring& name);
     const std::wstring& getDidSetSetter()const;
 public:
-    virtual void serialize(std::wostream& out);
     virtual void accept(NodeVisitor* visitor);
 protected:
     std::wstring setterName;

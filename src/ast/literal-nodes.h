@@ -10,8 +10,6 @@ class BooleanLiteral : public Expression
 public:
     BooleanLiteral();
 public:
-    virtual void serialize(std::wostream& out);
-public:
     bool value;
 };
 

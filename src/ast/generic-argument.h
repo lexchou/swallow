@@ -12,8 +12,6 @@ public:
     GenericArgument();
     ~GenericArgument();
 public:
-    virtual void serialize(std::wostream& out);
-public:
     void addArgument(const TypeNodePtr& type);
     TypeNodePtr getArgument(int i);
     int numArguments();

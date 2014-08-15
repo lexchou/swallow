@@ -13,7 +13,6 @@ public:
     using Declaration::setGenericParameters;
     using Declaration::getGenericParameters;
 public:
-    virtual void serialize(std::wostream& out);
     virtual void accept(NodeVisitor* visitor);
 };
 

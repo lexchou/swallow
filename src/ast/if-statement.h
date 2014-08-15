@@ -25,7 +25,6 @@ public:
     StatementPtr getElse();
     
 public:
-    virtual void serialize(std::wostream& out);
     virtual void accept(NodeVisitor* visitor);
 private:
     ExpressionPtr condition;

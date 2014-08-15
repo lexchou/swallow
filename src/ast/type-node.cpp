@@ -1,6 +1,4 @@
-
 #include "type-node.h"
-#include "attribute.h"
 #include <algorithm>
 USE_SWIFT_NS
 

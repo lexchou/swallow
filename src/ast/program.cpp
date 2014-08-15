@@ -1,6 +1,4 @@
-
 #include "program.h"
-#include "statement.h"
 #include "node-visitor.h"
 USE_SWIFT_NS
 
@@ -13,12 +11,6 @@ Program::Program()
 Program::~Program()
 {
 }
-
-void Program::serialize(std::wostream& out)
-{
-
-}
-
 
 void Program::accept(NodeVisitor* visitor)
 {

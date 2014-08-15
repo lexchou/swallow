@@ -1,7 +1,5 @@
+#include "value-binding.h"
 #include <ast/node-visitor.h>
-#include "constant.h"
-#include "pattern.h"
-#include "expression.h"
 USE_SWIFT_NS
 
 

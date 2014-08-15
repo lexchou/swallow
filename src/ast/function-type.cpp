@@ -12,12 +12,6 @@ FunctionType::~FunctionType()
 {
 }
 
-void FunctionType::serialize(std::wostream& out)
-{
-    getArgumentsType()->serialize(out);
-    out<<L" -> ";
-    getReturnType()->serialize(out);
-}
 void FunctionType::accept(NodeVisitor* visitor)
 {
 //

@@ -44,7 +44,6 @@ public:
     CodeBlockPtr getBody();
 
 public:
-    virtual void serialize(std::wostream& out);
     virtual void accept(NodeVisitor* visitor);
 protected:
     std::wstring name;

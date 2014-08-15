@@ -1,7 +1,4 @@
-
 #include "initializer-def.h"
-#include "parameters.h"
-#include "code-block.h"
 #include "node-visitor.h"
 USE_SWIFT_NS
 
@@ -16,9 +13,7 @@ InitializerDef::~InitializerDef()
 
 }
 
-void InitializerDef::serialize(std::wostream& out)
-{
-}
+
 void InitializerDef::accept(NodeVisitor* visitor)
 {
     accept2(visitor, &NodeVisitor::visitInit);

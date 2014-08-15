@@ -19,7 +19,6 @@ public:
     void setCondition(const ExpressionPtr& expression);
     ExpressionPtr getCondition();
 public:
-    virtual void serialize(std::wostream& out);
     virtual void accept(NodeVisitor* visitor);
 private:
     CodeBlockPtr codeBlock;

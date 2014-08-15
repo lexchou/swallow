@@ -1,7 +1,4 @@
-
 #include "generic-parameters.h"
-#include "type-identifier.h"
-#include "generic-constraint.h"
 USE_SWIFT_NS
 
 
@@ -13,11 +10,6 @@ GenericParameters::~GenericParameters()
 {
 
 }
-void GenericParameters::serialize(std::wostream& out)
-{
-
-}
-
 
 void GenericParameters::addGenericType(const TypeIdentifierPtr& type)
 {

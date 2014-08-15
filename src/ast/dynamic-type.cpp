@@ -1,5 +1,6 @@
-#include <ast/node-visitor.h>
 #include "dynamic-type.h"
+#include <ast/node-visitor.h>
+
 USE_SWIFT_NS
 
 DynamicType::DynamicType()
@@ -19,11 +20,7 @@ ExpressionPtr DynamicType::getExpression()
     return expression;
 }
 
-void DynamicType::serialize(std::wostream& out)
-{
-    getExpression()->serialize(out);
-    out<<L".dynamicType";
-}
+
 void DynamicType::accept(NodeVisitor* visitor)
 {
     accept2(visitor, &NodeVisitor::visitDynamicType);

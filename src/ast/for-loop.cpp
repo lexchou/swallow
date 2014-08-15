@@ -1,7 +1,5 @@
 
 #include "for-loop.h"
-#include "expression.h"
-#include "code-block.h"
 #include "node-visitor.h"
 USE_SWIFT_NS
 
@@ -15,25 +13,6 @@ ForLoop::~ForLoop()
 
 }
 
-void ForLoop::serialize(std::wostream& out)
-{
-    out<<L"for ";
-    for(int i = 0; i < numInit(); i++)
-    {
-        ExpressionPtr init = getInit(i);
-        if(i > 0)
-            out<<L", ";
-        init->serialize(out);
-    }
-    out<<L"; ";
-    if(getCondition() != NULL)
-        getCondition()->serialize(out);
-    out<<L"; ";
-    if(getStep() != NULL)
-        getStep()->serialize(out);
-    out<<std::endl;
-    getCodeBlock()->serialize(out);
-}
 void ForLoop::accept(NodeVisitor* visitor)
 {
     accept2(visitor, &NodeVisitor::visitForLoop);

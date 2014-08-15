@@ -1,7 +1,5 @@
-#include <ast/node-visitor.h>
 #include "function-call.h"
-#include "parenthesized-expression.h"
-#include "closure.h"
+#include <ast/node-visitor.h>
 USE_SWIFT_NS
 
 
@@ -47,22 +45,6 @@ ClosurePtr FunctionCall::getTrailingClosure()
 
 
 
-void FunctionCall::serialize(std::wostream& out)
-{
-    getFunction()->serialize(out);
-    if(getArguments() == NULL && getTrailingClosure() == NULL)
-    {
-        out<<L"()";
-        return;
-    }
-    if(getArguments())
-        getArguments()->serialize(out);
-    if(getTrailingClosure())
-    {
-        out<<L" ";
-        getTrailingClosure()->serialize(out);
-    }
-}
 void FunctionCall::accept(NodeVisitor* visitor)
 {
     accept2(visitor, &NodeVisitor::visitFunctionCall);

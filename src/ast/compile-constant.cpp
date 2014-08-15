@@ -7,10 +7,7 @@ CompileConstant::CompileConstant()
 {
     
 }
-void CompileConstant::serialize(std::wostream& out)
-{
-    out<<name;
-}
+
 void CompileConstant::accept(NodeVisitor* visitor)
 {
     accept2(visitor, &NodeVisitor::visitCompileConstant);

@@ -13,7 +13,6 @@ public:
     Identifier();
     ~Identifier();
 public:
-    virtual void serialize(std::wostream& out);
     virtual void accept(NodeVisitor* visitor);
 public:
     const std::wstring& getIdentifier() const { return identifier;}

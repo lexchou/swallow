@@ -7,7 +7,3 @@ BooleanLiteral::BooleanLiteral()
 {
 }
 
-void BooleanLiteral::serialize(std::wostream& out)
-{
-    out<<value;
-}

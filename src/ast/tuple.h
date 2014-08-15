@@ -13,7 +13,6 @@ public:
     Tuple();
     ~Tuple();
 public:
-    virtual void serialize(std::wostream& out);
     virtual void accept(NodeVisitor* visitor);
 public:
     void add(const PatternPtr& pattern);

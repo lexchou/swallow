@@ -19,7 +19,6 @@ public:
     TypeNodePtr getType();
     
 public:
-    virtual void serialize(std::wostream& out);
     virtual void accept(NodeVisitor* visitor);
 private:
     std::wstring name;

@@ -28,8 +28,6 @@ public:
     int numExpectedTypes()const;
     TypeIdentifierPtr getExpectedType(int i);
     
-public:
-    virtual void serialize(std::wostream& out);
 private:
     ConstraintType type;
     TypeIdentifierPtr identifier;

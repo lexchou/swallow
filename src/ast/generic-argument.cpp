@@ -12,11 +12,6 @@ GenericArgument::~GenericArgument()
 {
 }
 
-void GenericArgument::serialize(std::wostream& out)
-{
-}
-
-
 void GenericArgument::addArgument(const TypeNodePtr& type)
 {
     arguments.push_back(type);

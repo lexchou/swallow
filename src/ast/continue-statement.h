@@ -13,7 +13,6 @@ public:
     void setLoop(const std::wstring& loop);
     const std::wstring& getLoop()const;
 public:
-    virtual void serialize(std::wostream& out);
     virtual void accept(NodeVisitor* visitor);
 private:
     std::wstring loop;

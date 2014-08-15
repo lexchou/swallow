@@ -7,10 +7,7 @@ StringLiteral::StringLiteral()
     :Expression(NodeType::StringLiteral)
 {
 }
-void StringLiteral::serialize(std::wostream& out)
-{
-    out<<value;
-}
+
 void StringLiteral::accept(NodeVisitor* visitor)
 {
     accept2(visitor, &NodeVisitor::visitString);

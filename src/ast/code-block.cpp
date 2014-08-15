@@ -11,16 +11,7 @@ CodeBlock::CodeBlock()
 CodeBlock::~CodeBlock()
 {
 }
-void CodeBlock::serialize(std::wostream& out)
-{
-    out<<L"{"<<std::endl;
-    for(StatementPtr st : *this)
-    {
-        st->serialize(out);
-        out<<std::endl;
-    }
-    out<<L"}"<<std::endl;
-}
+
 void CodeBlock::accept(NodeVisitor* visitor)
 {
     accept2(visitor, &NodeVisitor::visitCodeBlock);

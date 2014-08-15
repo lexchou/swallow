@@ -15,7 +15,6 @@ public:
     CodeBlockPtr getBody();
     void setBody(const CodeBlockPtr& body);
 public:
-    virtual void serialize(std::wostream& out);
     virtual void accept(NodeVisitor* visitor);
 private:
     CodeBlockPtr body;

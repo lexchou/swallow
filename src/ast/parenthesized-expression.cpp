@@ -1,5 +1,4 @@
 #include "parenthesized-expression.h"
-#include "expression.h"
 #include "node-visitor.h"
 USE_SWIFT_NS
 
@@ -25,21 +24,6 @@ void ParenthesizedExpression::append(const ExpressionPtr& expr)
 int ParenthesizedExpression::numExpressions()const
 {
     return expressions.size();
-}
-void ParenthesizedExpression::serialize(std::wostream& out)
-{
-    out<<L"(";
-    std::vector<std::pair<std::wstring, ExpressionPtr> >::iterator iter = expressions.begin();
-    for(; iter != expressions.end(); iter++)
-    {
-        if(iter != expressions.begin())
-            out<<L", ";
-        if(!iter->first.empty())
-            out<<iter->first<<" : ";
-        (iter->second)->serialize(out);
-    }
-    
-    out<<L")";
 }
 
 void ParenthesizedExpression::accept(NodeVisitor* visitor)

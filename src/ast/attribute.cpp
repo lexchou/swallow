@@ -7,10 +7,7 @@ Attribute::Attribute()
     :Node(NodeType::Attribute)
 {
 }
-void Attribute::serialize(std::wostream& out)
-{
-    out<<L"@"<<name;
-}
+
 void Attribute::setName(const std::wstring& name)
 {
     this->name = name;

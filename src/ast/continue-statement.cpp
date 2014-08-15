@@ -8,12 +8,7 @@ ContinueStatement::ContinueStatement()
     :Statement(NodeType::Continue)
 {
 }
-void ContinueStatement::serialize(std::wostream& out)
-{
-    out<<L"continue";
-    if(!loop.empty())
-        out<<L" "<<loop;
-}
+
 void ContinueStatement::accept(NodeVisitor* visitor)
 {
     accept2(visitor, &NodeVisitor::visitContinue);

@@ -20,7 +20,6 @@ public:
     std::wstring getName(int idx);
     ExpressionPtr get(int idx);
 public:
-    virtual void serialize(std::wostream& out);
     virtual void accept(NodeVisitor* visitor);
     std::vector<Term>::iterator begin() {return expressions.begin();}
     std::vector<Term>::iterator end() {return expressions.end();}
