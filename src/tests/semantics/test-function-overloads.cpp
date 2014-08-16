@@ -174,4 +174,41 @@ TEST(TestFunctionOverloads, testCurryOverload)
 
 }
 
+TEST(TestFunctionOverloads, testStructFuncOverload)
+{
+
+    SEMANTIC_ANALYZE(L"struct Test {"
+            L"func a(a : Int) -> String {}\n"
+            L"func a(a : Bool) -> Float {}\n"
+            L"}\n"
+            L"let t = Test()\n"
+            L"let a = t.a(3)"
+    );
+    dumpCompilerResults(compilerResults);
+    ASSERT_EQ(0, compilerResults.numResults());
+
+
+    SymbolPtr t, a;
+    ASSERT_NOT_NULL(t = scope->lookup(L"t"));
+    TypePtr type = t->getType();
+    ASSERT_NOT_NULL(type);
+    TypePtr t_Test;
+    ASSERT_NOT_NULL(t_Test = std::dynamic_pointer_cast<Type>(scope->lookup(L"Test")));
+    ASSERT_TRUE(type == t_Test);
+
+    ASSERT_NOT_NULL(t_Test->getReference());
+    ScopedStructPtr def;
+    ASSERT_NOT_NULL(def = std::dynamic_pointer_cast<ScopedStruct>(t_Test->getReference()));
+
+
+    ASSERT_NOT_NULL(a = scope->lookup(L"a"));
+    ASSERT_NOT_NULL(type = a->getType());
+    TypePtr t_String;
+    ASSERT_NOT_NULL(t_String = std::dynamic_pointer_cast<Type>(symbolRegistry.lookupType(L"String")));
+    ASSERT_TRUE(type == t_String);
+
+
+
+}
+
 
