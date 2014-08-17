@@ -88,6 +88,9 @@ TEST(TestFunctionOverloads, testVariadicParametersOverload2)
             L"func foo(a : Int, b : Bool) -> Int {return 0;}\n"
             L"func foo(a : Int...) -> Bool{return false;}\n"
             L"let a = foo(0), b = foo(0, true), c = foo(0, 1), d = foo()\n")
+
+    dumpCompilerResults(compilerResults);
+
     SymbolPtr a, b, c, d;
     TypePtr t_Bool = symbolRegistry.lookupType(L"Bool");
     TypePtr t_Int = symbolRegistry.lookupType(L"Int");
@@ -136,7 +139,30 @@ TEST(TestFunctionOverloads, testCovarianceOverload)
     ASSERT_TRUE(type == t_Int);
 }
 
+
 TEST(TestFunctionOverloads, testCovarianceOverload2)
+{
+    SEMANTIC_ANALYZE(
+        L"func bar(a : Bool)->Bool{return true}\n"
+            L"func bar(a : Float) -> Int {return 3}\n"
+            L"let a = bar(true), b = bar(3)");
+    SymbolPtr a, b;
+    TypePtr type;
+    ASSERT_EQ(0, compilerResults.numResults());
+
+    TypePtr t_Bool = symbolRegistry.lookupType(L"Bool");
+    TypePtr t_Int = symbolRegistry.lookupType(L"Int");
+
+    ASSERT_NOT_NULL(a = scope->lookup(L"a"));
+    ASSERT_NOT_NULL(type = a->getType());
+    ASSERT_TRUE(type == t_Bool);
+
+    ASSERT_NOT_NULL(b = scope->lookup(L"b"));
+    ASSERT_NOT_NULL(type = b->getType());
+    ASSERT_TRUE(type == t_Int);
+}
+
+TEST(TestFunctionOverloads, testCovarianceOverload3)
 {
     SEMANTIC_ANALYZE(
             L"func bar(a : Double)->Bool{return true}\n"
@@ -151,7 +177,7 @@ TEST(TestFunctionOverloads, testCovarianceOverload2)
     ASSERT_EQ(L"bar", r.item);
 }
 
-TEST(TestFunctionOverloads, testCovarianceOverload3)
+TEST(TestFunctionOverloads, testCovarianceOverload4)
 {
     SEMANTIC_ANALYZE(
             L"func bar(a : Double)->Bool{return true}\n"
@@ -215,4 +241,19 @@ TEST(TestFunctionOverloads, testStructFuncOverload)
 
 }
 
+TEST(TestFunctionOverloads, testClosureLiteral)
+{
+    SEMANTIC_ANALYZE(L"let a = {(c : Int, b : Int)->Int in return c + b}(1, 2)");
+    dumpCompilerResults(compilerResults);
+    ASSERT_EQ(0, compilerResults.numResults());
 
+
+    SymbolPtr a;
+    ASSERT_NOT_NULL(a = scope->lookup(L"a"));
+    TypePtr type = a->getType();
+    ASSERT_NOT_NULL(type);
+    TypePtr t_Int = symbolRegistry.lookupType(L"Int");
+    ASSERT_TRUE(type == t_Int);
+
+
+}

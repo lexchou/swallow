@@ -193,11 +193,11 @@ bool TypeInferenceAction::checkArgument(const Type::Parameter& parameter, const 
     return true;
 }
 
-float TypeInferenceAction::calculateFitScore(const FunctionSymbolPtr& func, const ParenthesizedExpressionPtr& arguments, bool supressErrors)
+float TypeInferenceAction::calculateFitScore(const TypePtr& func, const ParenthesizedExpressionPtr& arguments, bool supressErrors)
 {
     float score = 0;
-    const std::vector<Type::Parameter>& parameters = func->getType()->getParameters();
-    bool variadic = func->getType()->hasVariadicParameters();
+    const std::vector<Type::Parameter>& parameters = func->getParameters();
+    bool variadic = func->hasVariadicParameters();
 
     //TODO: check trailing closure
 
@@ -277,7 +277,7 @@ void TypeInferenceAction::visitFunctionCall(const SymbolPtr& sym, const Function
     if(FunctionSymbolPtr func = std::dynamic_pointer_cast<FunctionSymbol>(sym))
     {
         //verify argument
-        calculateFitScore(func, node->getArguments(), false);
+        calculateFitScore(func->getType(), node->getArguments(), false);
         node->setType(func->getReturnType());
     }
     else if(FunctionOverloadedSymbolPtr funcs = std::dynamic_pointer_cast<FunctionOverloadedSymbol>(sym))
@@ -286,7 +286,7 @@ void TypeInferenceAction::visitFunctionCall(const SymbolPtr& sym, const Function
         std::vector<ScoredFunction> candidates;
         for(FunctionSymbolPtr func : *funcs)
         {
-            float score = calculateFitScore(func, node->getArguments(), true);
+            float score = calculateFitScore(func->getType(), node->getArguments(), true);
             if(score > 0)
                 candidates.push_back(std::make_pair(score, func));
         }
@@ -316,10 +316,43 @@ void TypeInferenceAction::visitFunctionCall(const SymbolPtr& sym, const Function
     }
 
 }
+
+void TypeInferenceAction::visitReturn(const ReturnStatementPtr& node)
+{
+    SemanticNodeVisitor::visitReturn(node);
+    Node* owner = symbolRegistry->getCurrentScope()->getOwner();
+    assert(owner != nullptr);
+    TypePtr funcType;
+    switch(owner->getNodeType())
+    {
+        case NodeType::Program:
+            return;//return type checking is ignored in program scope
+        case NodeType::CodeBlock:
+            funcType = static_cast<CodeBlock*>(owner)->getType();
+            assert(funcType != nullptr);
+            break;
+        case NodeType::Closure:
+            funcType = static_cast<Closure*>(owner)->getType();
+            assert(funcType != nullptr);
+            break;
+        default:
+            assert(0 && "Unsupported scope of return keyword detected.");
+            break;
+
+    }
+    float score = 0;
+    TypePtr retType = this->getExpressionType(node->getExpression(), funcType->getType(), score);
+    TypePtr expectedType = funcType->getReturnType();
+    if(*retType != *expectedType)
+    {
+        error(node->getExpression(), Errors::E_CANNOT_CONVERT_EXPRESSION_TYPE);
+    }
+}
 void TypeInferenceAction::visitFunctionCall(const FunctionCallPtr& node)
 {
     NodeType::T nodeType = node->getFunction()->getNodeType();
     ExpressionPtr func = node->getFunction();
+    func->accept(this);
 
     switch(nodeType)
     {
@@ -347,7 +380,6 @@ void TypeInferenceAction::visitFunctionCall(const FunctionCallPtr& node)
         case NodeType::MemberAccess:
         {
             MemberAccessPtr ma = std::static_pointer_cast<MemberAccess>(func);
-            ma->accept(this);
             TypePtr selfType = ma->getSelf()->getType();
             assert(selfType != nullptr);
             SymbolPtr sym = selfType->getSymbols()[ma->getField()->getIdentifier()];
@@ -355,38 +387,19 @@ void TypeInferenceAction::visitFunctionCall(const FunctionCallPtr& node)
             visitFunctionCall(sym, node);
             break;
         }
+        case NodeType::Closure:
+        {
+            ClosurePtr closure = std::static_pointer_cast<Closure>(func);
+            TypePtr type = closure->getType();
+            assert(type != nullptr && type->getCategory() == Type::Function);
+            calculateFitScore(type, node->getArguments(), false);
+            node->setType(type->getReturnType());
+            break;
+        }
         default:
             assert(0 && "Unsupported function call");
             break;
     }
-
-    /*
-    SemanticNodeVisitor::visitFunctionCall(node);
-    ExpressionPtr func = node->getFunction();
-
-    TypePtr t = func->getType();
-    Type::Category category = t->getCategory();
-
-    if(category == Type::Function || category == Type::Closure)
-    {
-        //TODO: type reference for calling function
-        node->setType(t->getReturnType());
-    }
-    else if(category == Type::MetaType)
-    {
-        //initiate a new instance of specified type
-        node->setType(t->getInnerType());
-    }
-    else
-    {
-        //it's not a function, cannot call
-        std::wstringstream out;
-        func->serialize(out);
-        error(func, Errors::E_INVALID_CALL_OF_NON_FUNCTION_TYPE, out.str());
-        abort();
-    }
-    */
-
 
 }
 void TypeInferenceAction::visitMemberAccess(const MemberAccessPtr& node)
@@ -572,4 +585,20 @@ TypePtr TypeInferenceAction::evaluateType(const ExpressionPtr& expr)
         default:
             return nullptr;
     }
+}
+
+void TypeInferenceAction::visitClosure(const ClosurePtr& node)
+{
+    //create a function type for this
+    TypePtr returnedType = this->lookupType(node->getReturnType());
+    std::vector<Type::Parameter> params;
+    for(const ParameterPtr& param : *node->getParameters())
+    {
+        TypePtr type = lookupType(param->getDeclaredType());
+        assert(type != nullptr);
+        const std::wstring& name = param->isShorthandExternalName() ? param->getLocalName() : param->getExternalName();
+        params.push_back(Type::Parameter(name, param->isInout(), type));
+    }
+    TypePtr type = Type::newFunction(params, returnedType, node->getParameters()->isVariadicParameters());
+    node->setType(type);
 }

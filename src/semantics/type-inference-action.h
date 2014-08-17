@@ -29,6 +29,8 @@ public:
     virtual void visitIdentifier(const IdentifierPtr& node) override;
     virtual void visitCompileConstant(const CompileConstantPtr& node) override;
     virtual void visitMemberAccess(const MemberAccessPtr& node) override;
+    virtual void visitClosure(const ClosurePtr& node) override;
+    virtual void visitReturn(const ReturnStatementPtr& node) override;
 private:
     void visitFunctionCall(const IdentifierPtr& name, const FunctionCallPtr& node);
     void visitFunctionCall(const SymbolPtr& func, const FunctionCallPtr& node);
@@ -40,7 +42,7 @@ private:
      * Calculates the fit score of arguments on given function
      * @return -1 if the type is not matched
      */
-    float calculateFitScore(const FunctionSymbolPtr& func, const ParenthesizedExpressionPtr& arguments, bool supressErrors);
+    float calculateFitScore(const TypePtr& func, const ParenthesizedExpressionPtr& arguments, bool supressErrors);
     bool checkArgument(const Type::Parameter& parameter, const ParenthesizedExpression::Term& argument, bool variadic, float& score, bool supressErrors);
     TypePtr getExpressionType(const ExpressionPtr& expr, const TypePtr& hint, float& score);
 private:

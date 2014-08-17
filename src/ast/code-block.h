@@ -5,6 +5,7 @@
 #include "attribute.h"
 
 SWIFT_NS_BEGIN
+typedef std::shared_ptr<class Type> TypePtr;
 
 class CodeBlock : public Statement
 {
@@ -18,6 +19,9 @@ public:
     
     void setAttributes(const Attributes& attrs);
     const Attributes& getAttributes()const;
+
+    const TypePtr& getType()const;
+    void setType(const TypePtr& type);
 public:
     std::vector<StatementPtr>::iterator begin() { return statements.begin();}
     std::vector<StatementPtr>::iterator end() { return statements.end();}
@@ -26,6 +30,7 @@ public:
 private:
     Attributes attributes;
     std::vector<StatementPtr> statements;
+    TypePtr type;
 };
 
 SWIFT_NS_END

@@ -25,6 +25,7 @@ public:
     virtual void visitProtocol(const ProtocolDefPtr& node) override;
     virtual void visitExtension(const ExtensionDefPtr& node) override;
     virtual void visitFunction(const FunctionDefPtr& node) override;
+    virtual void visitClosure(const ClosurePtr& node) override;
     virtual void visitIdentifier(const IdentifierPtr& id) override;
     virtual void visitEnumCasePattern(const EnumCasePatternPtr& node) override;
     virtual void visitParameter(const ParameterPtr& node) override;
@@ -47,7 +48,7 @@ private:
     /**
      * Prepare parameters as symbols in given code block
      */
-    void prepareParameters(const CodeBlockPtr& codeBlock, const ParametersPtr& params);
+    void prepareParameters(SymbolScope* scope, const ParametersPtr& params);
 };
 
 SWIFT_NS_END

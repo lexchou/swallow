@@ -40,3 +40,12 @@ const Attributes& CodeBlock::getAttributes()const
 {
     return attributes;
 }
+
+const TypePtr& CodeBlock::getType()const
+{
+    return type;
+}
+void CodeBlock::setType(const TypePtr& type)
+{
+    this->type = type;
+}

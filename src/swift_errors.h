@@ -52,6 +52,8 @@ struct Errors
         E_INOUT_ARGUMENTS_CANNOT_BE_VARIADIC, // Inout arguments cannot be variadic
         E_DOES_NOT_HAVE_A_MEMBER, // 'XXX' does not have a member named '%'
 
+        E_CANNOT_CONVERT_EXPRESSION_TYPE, //Cannot convert expression's type '%' to type '%'
+
         W_PARAM_CAN_BE_EXPRESSED_MORE_SUCCINCTLY, // '% %' can be expressed more succinctly as '#%'
         W_EXTRANEOUS_SHARTP_IN_PARAMETER, //Extraneous '#' in parameter: '%' is already the keyword argument name
         //linking errors

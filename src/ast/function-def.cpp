@@ -69,3 +69,12 @@ CodeBlockPtr FunctionDef::getBody()
 {
     return body;
 }
+
+const TypePtr& FunctionDef::getType()const
+{
+    return type;
+}
+void FunctionDef::setType(const TypePtr& type)
+{
+    this->type = type;
+}

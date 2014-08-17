@@ -4,7 +4,6 @@
 #include "common/compiler_results.h"
 #include "swift_errors.h"
 #include "scoped-nodes.h"
-#include "ast/tuple.h"
 #include "function-symbol.h"
 #include "function-overloaded-symbol.h"
 #include "scope-guard.h"
@@ -338,7 +337,8 @@ void SymbolResolveAction::visitParameter(const ParameterPtr& node)
     TypePtr type = lookupType(node->getDeclaredType());
     node->setType(type);
     //check if local name is already defined
-    SymbolPtr sym = symbolRegistry->getCurrentScope()->lookup(node->getLocalName());
+    SymbolScope* scope = symbolRegistry->getCurrentScope();
+    SymbolPtr sym = scope->lookup(node->getLocalName());
     if(sym)
     {
         error(node, Errors::E_DEFINITION_CONFLICT, node->getLocalName());
@@ -348,7 +348,6 @@ void SymbolResolveAction::visitParameter(const ParameterPtr& node)
     {
         warning(node, Errors::W_PARAM_CAN_BE_EXPRESSED_MORE_SUCCINCTLY);
     }
-
 }
 void SymbolResolveAction::visitParameters(const ParametersPtr& node)
 {
@@ -418,24 +417,44 @@ FunctionSymbolPtr SymbolResolveAction::createFunctionSymbol(const FunctionDefPtr
     FunctionSymbolPtr ret(new FunctionSymbol(func->getName(), funcType, func));
     return ret;
 }
+void SymbolResolveAction::visitClosure(const ClosurePtr& node)
+{
+    ScopedClosurePtr closure = std::static_pointer_cast<ScopedClosure>(node);
+    if(node->getCapture())
+    {
+        node->getCapture()->accept(this);
+    }
+    node->getParameters()->accept(this);
+    prepareParameters(closure->getScope(), node->getParameters());
+    for(const StatementPtr& st : *node)
+    {
+        st->accept(this);
+    }
+
+
+}
 void SymbolResolveAction::visitFunction(const FunctionDefPtr& node)
 {
     {
         //enter code block's scope
         ScopedCodeBlockPtr codeBlock = std::static_pointer_cast<ScopedCodeBlock>(node->getBody());
-        ScopeGuard scope(codeBlock.get(), this);
-        (void)scope;
+        SymbolScope* scope = codeBlock->getScope();
+
+        ScopeGuard scopeGuard(codeBlock.get(), this);
+        (void)scopeGuard;
 
         for (const ParametersPtr &params : node->getParametersList())
         {
             params->accept(this);
-            prepareParameters(node->getBody(), params);
+            prepareParameters(scope, params);
         }
     }
     node->getBody()->accept(this);
 
 
     FunctionSymbolPtr func = createFunctionSymbol(node);
+    node->setType(func->getType());
+    node->getBody()->setType(func->getType());
     //check if the same symbol has been defined in this scope
     SymbolScope* scope = symbolRegistry->getCurrentScope();
     SymbolPtr oldSym = scope->lookup(func->getName());
@@ -487,9 +506,8 @@ void SymbolResolveAction::visitDeinit(const DeinitializerDefPtr& node)
     SemanticNodeVisitor::visitDeinit(node);
 }
 
-void SymbolResolveAction::prepareParameters(const CodeBlockPtr& codeBlock, const ParametersPtr& params)
+void SymbolResolveAction::prepareParameters(SymbolScope* scope, const ParametersPtr& params)
 {
-    SymbolScope* scope = std::static_pointer_cast<ScopedCodeBlock>(codeBlock)->getScope();
     //check and prepare for parameters
 
     for(const ParameterPtr& param : *params)
@@ -501,7 +519,7 @@ void SymbolResolveAction::prepareParameters(const CodeBlockPtr& codeBlock, const
             error(param, Errors::E_DEFINITION_CONFLICT, param->getLocalName());
             return;
         }
-        sym = SymbolPtr(new SymbolPlaceHolder(param->getLocalName(), param->getType()));
+        sym = SymbolPtr(new SymbolPlaceHolder(param->getLocalName(), param->getType(), SymbolPlaceHolder::F_INITIALIZED));
         scope->addSymbol(sym);
     }
 }
@@ -513,7 +531,8 @@ void SymbolResolveAction::visitInit(const InitializerDefPtr& node)
     TypePtr type = declaration->getType();
 
     node->getParameters()->accept(this);
-    prepareParameters(node->getBody(), node->getParameters());
+    ScopedCodeBlockPtr body = std::static_pointer_cast<ScopedCodeBlock>(node->getBody());
+    prepareParameters(body->getScope(), node->getParameters());
     std::vector<Type::Parameter> params;
     for(const ParameterPtr& param : *node->getParameters())
     {

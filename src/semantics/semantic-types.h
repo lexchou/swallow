@@ -32,7 +32,7 @@ typedef std::shared_ptr<ScopedClass> ScopedClassPtr;
 typedef std::shared_ptr<class ScopedStruct> ScopedStructPtr;
 typedef std::shared_ptr<class ScopedExtension> ScopedExtensionPtr;
 typedef std::shared_ptr<class ScopedProtocol> ScopedProtocolPtr;
-
+typedef std::shared_ptr<class ScopedClosure> ScopedClosurePtr;
 typedef std::shared_ptr<class SymboledVariable> SymboledVariablePtr;
 typedef std::shared_ptr<class SymboledConstant> SymboledConstantPtr;
 

@@ -9,6 +9,7 @@ SWIFT_NS_BEGIN
 class Parameters;
 class CodeBlock;
 class TypeNode;
+typedef std::shared_ptr<class Type> TypePtr;
 class FunctionDef : public Declaration
 {
 public:
@@ -43,6 +44,9 @@ public:
     void setBody(const CodeBlockPtr& body);
     CodeBlockPtr getBody();
 
+    const TypePtr& getType()const;
+    void setType(const TypePtr& type);
+
 public:
     virtual void accept(NodeVisitor* visitor);
 protected:
@@ -51,6 +55,7 @@ protected:
     std::vector<ParametersPtr> parametersList;
     TypeNodePtr returnType;
     CodeBlockPtr body;
+    TypePtr type;
 };
 
 SWIFT_NS_END
