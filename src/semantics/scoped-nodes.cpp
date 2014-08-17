@@ -5,24 +5,11 @@
 #include "ast/type-identifier.h"
 #include <cassert>
 #import <ast/identifier.h>
+#include "scope-guard.h"
 
 USE_SWIFT_NS
 
 
-struct ScopeGuard
-{
-    ScopeGuard(ScopeOwner* owner, NodeVisitor* visitor)
-    {
-        symbolRegistry = static_cast<SemanticNodeVisitor*>(visitor)->getSymbolRegistry();
-        SymbolScope* scope = owner->getScope();
-        symbolRegistry->enterScope(scope);
-    }
-    ~ScopeGuard()
-    {
-        symbolRegistry->leaveScope();
-    }
-    SymbolRegistry* symbolRegistry;
-};
 
 void ScopedProgram::accept(NodeVisitor* visitor)
 {

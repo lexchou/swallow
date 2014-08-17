@@ -80,7 +80,13 @@ void NodeSerializer::visitExtension(const ExtensionDefPtr& node)
 }
 void NodeSerializer::visitFunction(const FunctionDefPtr& node)
 {
-
+    append(L"func ");
+    append(node->getName());
+    for(const ParametersPtr& params : node->getParametersList())
+    {
+        params->accept(this);
+    }
+    node->getBody()->accept(this);
 }
 void NodeSerializer::visitDeinit(const DeinitializerDefPtr& node)
 {
@@ -164,15 +170,41 @@ void NodeSerializer::visitCase(const CaseStatementPtr& node)
 }
 void NodeSerializer::visitCodeBlock(const CodeBlockPtr& node)
 {
-
+    append(L"{");
+    for(auto st : *node)
+    {
+        st->accept(this);
+    }
+    append(L"}");
 }
 void NodeSerializer::visitParameter(const ParameterPtr& node)
 {
+    if(node->isInout())
+        append(L"inout ");
+    if(node->isShorthandExternalName())
+        append(L"#");
+    else if(!node->getExternalName().empty())
+    {
+        append(node->getExternalName());
+        append(L" ");
+    }
+    append(node->getLocalName());
 
+    append(L" : ");
+    node->getDeclaredType()->accept(this);
 }
 void NodeSerializer::visitParameters(const ParametersPtr& node)
 {
-
+    append(L"(");
+    bool first = true;
+    for(auto param : *node)
+    {
+        if(!first)
+            append(L", ");
+        param->accept(this);
+        first = false;
+    }
+    append(L")");
 }
 void NodeSerializer::visitProgram(const ProgramPtr& node)
 {
@@ -265,4 +297,35 @@ void NodeSerializer::visitInteger(const IntegerLiteralPtr& node)
 void NodeSerializer::visitFloat(const FloatLiteralPtr& node)
 {
 
+}
+
+void NodeSerializer::visitArrayType(const ArrayTypePtr& node)
+{
+    append(L"[");
+    node->getInnerType()->accept(this);
+    append(L"]");
+}
+void NodeSerializer::visitFunctionType(const FunctionTypePtr& node)
+{
+
+}
+void NodeSerializer::visitImplicitlyUnwrappedOptional(const ImplicitlyUnwrappedOptional& node)
+{
+
+}
+void NodeSerializer::visitOptionalType(const OptionalTypePtr& node)
+{
+
+}
+void NodeSerializer::visitProtocolComposition(const ProtocolCompositionPtr& node)
+{
+
+}
+void NodeSerializer::visitTupleType(const TupleTypePtr& node)
+{
+
+}
+void NodeSerializer::visitTypeIdentifier(const TypeIdentifierPtr& node)
+{
+    append(node->getName());
 }

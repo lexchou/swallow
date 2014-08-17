@@ -379,3 +379,33 @@ void NodeVisitor::visitFloat(const FloatLiteralPtr& node)
 {
 
 }
+
+
+void NodeVisitor::visitArrayType(const ArrayTypePtr& node)
+{
+
+}
+void NodeVisitor::visitFunctionType(const FunctionTypePtr& node)
+{
+
+}
+void NodeVisitor::visitImplicitlyUnwrappedOptional(const ImplicitlyUnwrappedOptional& node)
+{
+
+}
+void NodeVisitor::visitOptionalType(const OptionalTypePtr& node)
+{
+
+}
+void NodeVisitor::visitProtocolComposition(const ProtocolCompositionPtr& node)
+{
+
+}
+void NodeVisitor::visitTupleType(const TupleTypePtr& node)
+{
+
+}
+void NodeVisitor::visitTypeIdentifier(const TypeIdentifierPtr& node)
+{
+
+}

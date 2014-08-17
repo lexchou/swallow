@@ -15,7 +15,6 @@ class TypeInferenceAction : public SemanticNodeVisitor
 public:
     TypeInferenceAction(SymbolRegistry* symbolRegistry, CompilerResults* compilerResults);
 public:
-    void visitFunctionCall(const IdentifierPtr& name, const FunctionCallPtr& node);
     virtual void visitFunctionCall(const FunctionCallPtr& node) override;
     virtual void visitOperator(const OperatorDefPtr& node) override;
     virtual void visitVariable(const VariablePtr& node) override;
@@ -30,7 +29,9 @@ public:
     virtual void visitIdentifier(const IdentifierPtr& node) override;
     virtual void visitCompileConstant(const CompileConstantPtr& node) override;
     virtual void visitMemberAccess(const MemberAccessPtr& node) override;
-
+private:
+    void visitFunctionCall(const IdentifierPtr& name, const FunctionCallPtr& node);
+    void visitFunctionCall(const SymbolPtr& func, const FunctionCallPtr& node);
 private:
     void checkTupleDefinition(const TuplePtr& tuple, const ExpressionPtr& initializer);
     TypePtr evaluateType(const ExpressionPtr& expr);

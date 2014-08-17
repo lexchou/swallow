@@ -73,7 +73,7 @@ std::wstring CompilerResults::getErrorTemplate(int errorCode)
         case Errors::E_USE_OF_INITIALIZING_VARIABLE:
             return L"variable used within its own initial value";
         case Errors::E_DEFINITION_CONFLICT:
-            return L"definition conflicts with previous value";
+            return L"definition '%' conflicts with previous value";
         case Errors::E_USE_OF_FUNCTION_LOCAL_INSIDE_TYPE:
             return L"use of function local variable inside type declaration";
         case Errors::E_TUPLE_PATTERN_MUST_MATCH_TUPLE_TYPE:
@@ -85,7 +85,7 @@ std::wstring CompilerResults::getErrorTemplate(int errorCode)
         case Errors::E_OPERATOR_PRECEDENCE_OUT_OF_RANGE:
             return L"'precedence' must be in the range of 0 to 255";
         case Errors::E_UNKNOWN_BINARY_OPERATOR:
-            return L"/operator is not a known binary operator";
+            return L"operator is not a known binary operator";
         case Errors::E_IS_NOT_BINARY_OPERATOR:
             return L"'%' is not a binary operator";
         case Errors::E_NO_OVERLOAD_ACCEPTS_ARGUMENTS:

@@ -20,6 +20,8 @@ public:
     
     void setNestedType(TypeIdentifierPtr type);
     TypeIdentifierPtr getNestedType();
+public:
+    virtual void accept(NodeVisitor* visitor) override;
 private:
     std::wstring name;
     std::vector<TypeNodePtr> genericArguments;

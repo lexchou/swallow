@@ -1,5 +1,5 @@
-
 #include "type-identifier.h"
+#include "node-visitor.h"
 USE_SWIFT_NS
 
 
@@ -42,4 +42,9 @@ void TypeIdentifier::setNestedType(TypeIdentifierPtr type)
 TypeIdentifierPtr TypeIdentifier::getNestedType()
 {
     return nestedType;
+}
+
+void TypeIdentifier::accept(NodeVisitor* visitor)
+{
+    accept2(visitor, &NodeVisitor::visitTypeIdentifier);
 }

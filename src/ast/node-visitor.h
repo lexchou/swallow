@@ -49,7 +49,7 @@ public://statement
     virtual void visitProgram(const ProgramPtr& node);
     virtual void visitLetPattern(const LetPatternPtr& node);
     virtual void visitVarPattern(const VarPatternPtr& node);
-public://The following visit procedures will not be executed until manually visit them by acceptPattern
+public:
     virtual void visitConditionalOperator(const ConditionalOperatorPtr& node);
     virtual void visitBinaryOperator(const BinaryOperatorPtr& node);
     virtual void visitUnaryOperator(const UnaryOperatorPtr& node);
@@ -72,6 +72,14 @@ public://The following visit procedures will not be executed until manually visi
     virtual void visitString(const StringLiteralPtr& node);
     virtual void visitInteger(const IntegerLiteralPtr& node);
     virtual void visitFloat(const FloatLiteralPtr& node);
+public:
+    virtual void visitArrayType(const ArrayTypePtr& node);
+    virtual void visitFunctionType(const FunctionTypePtr& node);
+    virtual void visitImplicitlyUnwrappedOptional(const ImplicitlyUnwrappedOptional& node);
+    virtual void visitOptionalType(const OptionalTypePtr& node);
+    virtual void visitProtocolComposition(const ProtocolCompositionPtr& node);
+    virtual void visitTupleType(const TupleTypePtr& node);
+    virtual void visitTypeIdentifier(const TypeIdentifierPtr& node);
 };
 
 

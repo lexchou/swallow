@@ -279,3 +279,32 @@ void NodeVisitorDecorator::visitParenthesizedExpression(const ParenthesizedExpre
 {
     VISIT(visitParenthesizedExpression);
 }
+
+void NodeVisitorDecorator::visitArrayType(const ArrayTypePtr& node)
+{
+    VISIT(visitArrayType);
+}
+void NodeVisitorDecorator::visitFunctionType(const FunctionTypePtr& node)
+{
+    VISIT(visitFunctionType);
+}
+void NodeVisitorDecorator::visitImplicitlyUnwrappedOptional(const ImplicitlyUnwrappedOptional& node)
+{
+    VISIT(visitImplicitlyUnwrappedOptional);
+}
+void NodeVisitorDecorator::visitOptionalType(const OptionalTypePtr& node)
+{
+    VISIT(visitOptionalType);
+}
+void NodeVisitorDecorator::visitProtocolComposition(const ProtocolCompositionPtr& node)
+{
+    VISIT(visitProtocolComposition);
+}
+void NodeVisitorDecorator::visitTupleType(const TupleTypePtr& node)
+{
+    VISIT(visitTupleType);
+}
+void NodeVisitorDecorator::visitTypeIdentifier(const TypeIdentifierPtr& node)
+{
+    VISIT(visitTypeIdentifier);
+}

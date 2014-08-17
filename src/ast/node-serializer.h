@@ -48,7 +48,7 @@ public://statement
     virtual void visitProgram(const ProgramPtr& node) override;
     virtual void visitLetPattern(const LetPatternPtr& node) override;
     virtual void visitVarPattern(const VarPatternPtr& node) override;
-public://The following visit procedures will not be executed until manually visit them by acceptPattern
+public:
     virtual void visitConditionalOperator(const ConditionalOperatorPtr& node) override;
     virtual void visitBinaryOperator(const BinaryOperatorPtr& node) override;
     virtual void visitUnaryOperator(const UnaryOperatorPtr& node) override;
@@ -71,7 +71,14 @@ public://The following visit procedures will not be executed until manually visi
     virtual void visitString(const StringLiteralPtr& node) override;
     virtual void visitInteger(const IntegerLiteralPtr& node) override;
     virtual void visitFloat(const FloatLiteralPtr& node) override;
-
+public:
+    virtual void visitArrayType(const ArrayTypePtr& node) override;
+    virtual void visitFunctionType(const FunctionTypePtr& node) override;
+    virtual void visitImplicitlyUnwrappedOptional(const ImplicitlyUnwrappedOptional& node) override;
+    virtual void visitOptionalType(const OptionalTypePtr& node) override;
+    virtual void visitProtocolComposition(const ProtocolCompositionPtr& node) override;
+    virtual void visitTupleType(const TupleTypePtr& node) override;
+    virtual void visitTypeIdentifier(const TypeIdentifierPtr& node) override;
 protected:
     virtual void append(const wchar_t* str) = 0;
     virtual void append(const std::wstring& str) = 0;

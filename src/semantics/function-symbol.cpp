@@ -24,7 +24,7 @@ TypePtr FunctionSymbol::getReturnType()const
 {
     return type->getReturnType();
 }
-FunctionDefPtr FunctionSymbol::getDefinition()const
+FunctionDefPtr FunctionSymbol::getDefinition()
 {
-    return definition;
+    return definition.lock();
 }

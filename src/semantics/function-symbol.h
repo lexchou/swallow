@@ -7,6 +7,7 @@
 SWIFT_NS_BEGIN
 typedef std::shared_ptr<Symbol> SymbolPtr;
 typedef std::shared_ptr<class FunctionDef> FunctionDefPtr;
+typedef std::weak_ptr<class FunctionDef> FunctionDefWeakPtr;
 class FunctionSymbol : public Symbol
 {
     friend class FunctionOverloadedSymbol;
@@ -17,11 +18,11 @@ public:
     virtual const std::wstring& getName() const;
     TypePtr getReturnType()const;
     TypePtr getType();
-    FunctionDefPtr getDefinition()const;
+    FunctionDefPtr getDefinition();
 private:
     std::wstring name;
     TypePtr type;
-    FunctionDefPtr definition;
+    FunctionDefWeakPtr definition;
 };
 
 

@@ -7,6 +7,7 @@
 #include "ast/tuple.h"
 #include "function-symbol.h"
 #include "function-overloaded-symbol.h"
+#include "scope-guard.h"
 #include <cassert>
 #include <set>
 
@@ -340,7 +341,7 @@ void SymbolResolveAction::visitParameter(const ParameterPtr& node)
     SymbolPtr sym = symbolRegistry->getCurrentScope()->lookup(node->getLocalName());
     if(sym)
     {
-        error(node, Errors::E_DEFINITION_CONFLICT);
+        error(node, Errors::E_DEFINITION_CONFLICT, node->getLocalName());
         return;
     }
     if(node->getLocalName() == node->getExternalName())
@@ -392,13 +393,20 @@ TypePtr SymbolResolveAction::createFunctionType(const std::vector<ParametersPtr>
 
     std::vector<Type::Parameter> parameterTypes;
     ParametersPtr params = *begin;
-    for(const ParameterPtr& param : *params)
     {
-        param->accept(this);
-        TypePtr paramType = param->getType();
-        assert(paramType != nullptr);
-        std::wstring externalName = param->isShorthandExternalName() ? param->getLocalName() : param->getExternalName();
-        parameterTypes.push_back(Type::Parameter(externalName, param->isInout(), paramType));
+        for (const ParameterPtr &param : *params)
+        {
+            TypePtr paramType = param->getType();
+            if(!paramType)
+            {
+                param->accept(this);
+                paramType = param->getType();
+                assert(paramType != nullptr);
+            }
+            assert(paramType != nullptr);
+            std::wstring externalName = param->isShorthandExternalName() ? param->getLocalName() : param->getExternalName();
+            parameterTypes.push_back(Type::Parameter(externalName, param->isInout(), paramType));
+        }
     }
 
     return Type::newFunction(parameterTypes, returnType, params->isVariadicParameters());
@@ -412,10 +420,17 @@ FunctionSymbolPtr SymbolResolveAction::createFunctionSymbol(const FunctionDefPtr
 }
 void SymbolResolveAction::visitFunction(const FunctionDefPtr& node)
 {
-    for(const ParametersPtr& params : node->getParametersList())
     {
-        params->accept(this);
-        prepareParameters(node->getBody(), params);
+        //enter code block's scope
+        ScopedCodeBlockPtr codeBlock = std::static_pointer_cast<ScopedCodeBlock>(node->getBody());
+        ScopeGuard scope(codeBlock.get(), this);
+        (void)scope;
+
+        for (const ParametersPtr &params : node->getParametersList())
+        {
+            params->accept(this);
+            prepareParameters(node->getBody(), params);
+        }
     }
     node->getBody()->accept(this);
 

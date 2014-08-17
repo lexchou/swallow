@@ -13,6 +13,7 @@ TEST(TestFunctionOverloads, testFunc)
 {
     SEMANTIC_ANALYZE(L"func test() -> String {}\n"
         L"let a = test()");
+    dumpCompilerResults(compilerResults);
     SymbolPtr a;
     ASSERT_NOT_NULL(a = scope->lookup(L"a"));
     TypePtr type = a->getType();
@@ -26,6 +27,8 @@ TEST(TestFunctionOverloads, testOverloadedFunc)
     SEMANTIC_ANALYZE(L"func test(a : Int) -> String {}\n"
             L"func test(a : String) -> Bool {}\n"
             L"let a = test(56), b = test(\"str\")");
+
+    dumpCompilerResults(compilerResults);
     SymbolPtr a, b;
     ASSERT_NOT_NULL(a = scope->lookup(L"a"));
     TypePtr type = a->getType();
@@ -46,6 +49,7 @@ TEST(TestFunctionOverloads, testNamedParameterOverload)
             L"func test(# a : Int) -> Bool {}\n"
             L"func test(ExternalName a : String) -> Double {}\n"
             L"let a = test(56), b = test(a : 33), c = test(ExternalName : \"str\")");
+    dumpCompilerResults(compilerResults);
     SymbolPtr a, b, c;
     ASSERT_NOT_NULL(a = scope->lookup(L"a"));
     TypePtr type = a->getType();

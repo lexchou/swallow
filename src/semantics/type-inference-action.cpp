@@ -264,29 +264,15 @@ float TypeInferenceAction::calculateFitScore(const FunctionSymbolPtr& func, cons
 
 void TypeInferenceAction::visitFunctionCall(const IdentifierPtr& name, const FunctionCallPtr& node)
 {
-    const std::wstring& symbolName = name->getIdentifier();
-    SymbolPtr sym = symbolRegistry->lookupSymbol(symbolName);
-    if(!sym)
-    {
-        error(name, Errors::E_USE_OF_UNRESOLVED_IDENTIFIER, name->getIdentifier());
-        abort();
-        return;
-    }
+    //visitFunctionCall(sym, node);
+}
+void TypeInferenceAction::visitFunctionCall(const SymbolPtr& sym, const FunctionCallPtr& node)
+{
     //Prepare the arguments
     for(const ParenthesizedExpression::Term& term : *node->getArguments())
     {
         term.second->accept(this);
     }
-
-    //if symbol points to a type, then redirect it to a initializer
-    if(TypePtr type = std::dynamic_pointer_cast<Type>(sym))
-    {
-        if(type->getCategory() == Type::Class || type->getCategory() == Type::Struct)
-        {
-            sym = type->getInitializer();
-        }
-    }
-
 
     if(FunctionSymbolPtr func = std::dynamic_pointer_cast<FunctionSymbol>(sym))
     {
@@ -317,7 +303,7 @@ void TypeInferenceAction::visitFunctionCall(const IdentifierPtr& name, const Fun
             });
             if(candidates[0].first == candidates[1].first)
             {
-                error(node, Errors::E_AMBIGUOUS_USE, name->getIdentifier());
+                error(node, Errors::E_AMBIGUOUS_USE, sym->getName());
                 abort();
             }
         }
@@ -332,14 +318,49 @@ void TypeInferenceAction::visitFunctionCall(const IdentifierPtr& name, const Fun
 }
 void TypeInferenceAction::visitFunctionCall(const FunctionCallPtr& node)
 {
-    if(node->getFunction()->getNodeType() == NodeType::Identifier)
+    NodeType::T nodeType = node->getFunction()->getNodeType();
+    ExpressionPtr func = node->getFunction();
+
+    switch(nodeType)
     {
-        IdentifierPtr func = std::static_pointer_cast<Identifier>(node->getFunction());
-        visitFunctionCall(func, node);
-        return;
+        case NodeType::Identifier:
+        {
+            IdentifierPtr id = std::static_pointer_cast<Identifier>(func);
+            const std::wstring &symbolName = id->getIdentifier();
+            SymbolPtr sym = symbolRegistry->lookupSymbol(symbolName);
+            if (!sym)
+            {
+                error(id, Errors::E_USE_OF_UNRESOLVED_IDENTIFIER, symbolName);
+                return;
+            }
+            //if symbol points to a type, then redirect it to a initializer
+            if (TypePtr type = std::dynamic_pointer_cast<Type>(sym))
+            {
+                if (type->getCategory() == Type::Class || type->getCategory() == Type::Struct)
+                {
+                    sym = type->getInitializer();
+                }
+            }
+            visitFunctionCall(sym, node);
+            break;
+        }
+        case NodeType::MemberAccess:
+        {
+            MemberAccessPtr ma = std::static_pointer_cast<MemberAccess>(func);
+            ma->accept(this);
+            TypePtr selfType = ma->getSelf()->getType();
+            assert(selfType != nullptr);
+            SymbolPtr sym = selfType->getSymbols()[ma->getField()->getIdentifier()];
+            assert(sym != nullptr);//
+            visitFunctionCall(sym, node);
+            break;
+        }
+        default:
+            assert(0 && "Unsupported function call");
+            break;
     }
 
-
+    /*
     SemanticNodeVisitor::visitFunctionCall(node);
     ExpressionPtr func = node->getFunction();
 
@@ -364,6 +385,7 @@ void TypeInferenceAction::visitFunctionCall(const FunctionCallPtr& node)
         error(func, Errors::E_INVALID_CALL_OF_NON_FUNCTION_TYPE, out.str());
         abort();
     }
+    */
 
 
 }
