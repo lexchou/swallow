@@ -348,6 +348,9 @@ void SymbolResolveAction::visitParameter(const ParameterPtr& node)
     {
         warning(node, Errors::W_PARAM_CAN_BE_EXPRESSED_MORE_SUCCINCTLY);
     }
+    //In-out parameters cannot have default values, and variadic parameters cannot be marked as inout. If you mark a parameter as inout, it cannot also be marked as var or let.
+    
+
 }
 void SymbolResolveAction::visitParameters(const ParametersPtr& node)
 {

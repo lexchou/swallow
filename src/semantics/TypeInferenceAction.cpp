@@ -431,6 +431,78 @@ void TypeInferenceAction::visitFloat(const FloatLiteralPtr& node)
 {
     node->setType(t_double);
 }
+
+void TypeInferenceAction::visitArrayLiteral(const ArrayLiteralPtr& node)
+{
+    int num = node->numElements();
+    if(num == 0)
+        return;
+    struct ElementType
+    {
+        TypePtr type;
+        TypePtr hint;
+
+        ElementType(const ElementType& rhs)
+        :type(rhs.type), hint(rhs.hint)
+        {
+
+        }
+        ElementType(const ExpressionPtr& expr)
+        {
+            NodeType::T nodeType = expr->getNodeType();
+            if(nodeType == NodeType::IntegerLiteral || nodeType == NodeType::FloatLiteral)
+            {
+                hint = expr->getType();
+            }
+            else
+            {
+                type = expr->getType();
+            }
+        }
+    };
+
+    ExpressionPtr first = node->getElement(0);
+    first->accept(this);
+    ElementType last(first);
+    ElementType result(last);
+    for(int i = 1; i < num; i++)
+    {
+
+        //type = getExpressionType(el, type, score);
+    }
+    //node->setType(type);
+}
+void TypeInferenceAction::visitDictionaryLiteral(const DictionaryLiteralPtr& node)
+{
+
+}
+void TypeInferenceAction::visitParenthesizedExpression(const ParenthesizedExpressionPtr& node)
+{
+    SemanticNodeVisitor::visitParenthesizedExpression(node);
+    std::vector<TypePtr> types;
+    for(const ParenthesizedExpression::Term& element : *node)
+    {
+        TypePtr elementType = element.second->getType();
+        assert(elementType != nullptr);
+        types.push_back(elementType);
+    }
+    TypePtr type = Type::newTuple(types);
+    node->setType(type);
+}
+void TypeInferenceAction::visitTuple(const TuplePtr& node)
+{
+    SemanticNodeVisitor::visitTuple(node);
+    std::vector<TypePtr> types;
+    for(const PatternPtr& element : *node)
+    {
+        TypePtr elementType = element->getType();
+        assert(elementType != nullptr);
+        types.push_back(elementType);
+    }
+    TypePtr type = Type::newTuple(types);
+    node->setType(type);
+}
+
 void TypeInferenceAction::visitOperator(const OperatorDefPtr& node)
 {
     //register operator
@@ -498,10 +570,7 @@ void TypeInferenceAction::visitUnaryOperator(const UnaryOperatorPtr& node)
 {
 
 }
-void TypeInferenceAction::visitTuple(const TuplePtr& node)
-{
 
-}
 void TypeInferenceAction::visitIdentifier(const IdentifierPtr& node)
 {
     SymbolPtr s = symbolRegistry->lookupSymbol(node->getIdentifier());

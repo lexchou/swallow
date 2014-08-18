@@ -172,6 +172,7 @@ ADD_EXECUTABLE(TestSemantics
     tests/semantics/TestTypeInference.cpp
     tests/semantics/TestSymbolResolve.cpp
     tests/semantics/TestFunctionOverloads.cpp
+    tests/semantics/TestType.cpp
     tests/utils.cpp
     ${SWIFT_TOKENIZER_SRC} ${SWIFT_PARSER_SRC})
 target_link_libraries(TestSemantics ${GTEST_LIBS})

@@ -31,6 +31,10 @@ public:
     virtual void visitMemberAccess(const MemberAccessPtr& node) override;
     virtual void visitClosure(const ClosurePtr& node) override;
     virtual void visitReturn(const ReturnStatementPtr& node) override;
+    virtual void visitParenthesizedExpression(const ParenthesizedExpressionPtr& node) override;
+    virtual void visitArrayLiteral(const ArrayLiteralPtr& node) override;
+    virtual void visitDictionaryLiteral(const DictionaryLiteralPtr& node) override;
+
 private:
     void visitFunctionCall(const IdentifierPtr& name, const FunctionCallPtr& node);
     void visitFunctionCall(const SymbolPtr& func, const FunctionCallPtr& node);

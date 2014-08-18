@@ -1,7 +1,7 @@
 #ifndef PARSER_H
 #define PARSER_H
 #include "swift_conf.h"
-#include "tokenizer/tokens.h"
+#include "tokenizer/Token.h"
 #include <string>
 #include "ast/ast-decl.h"
 
