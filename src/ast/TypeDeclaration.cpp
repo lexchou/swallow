@@ -26,7 +26,7 @@ int TypeDeclaration::numParents()const
 TypeIdentifierPtr TypeDeclaration::getParent(int i)
 {
     if(i < 0 || i >= parents.size())
-        return NULL;
+        return nullptr;
     return parents[i];
 }
 

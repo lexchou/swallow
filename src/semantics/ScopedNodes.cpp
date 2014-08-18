@@ -4,7 +4,7 @@
 #include "SymbolRegistry.h"
 #include "ast/TypeIdentifier.h"
 #include <cassert>
-#import <ast/identifier.h>
+#include "ast/Identifier.h"
 #include "ScopeGuard.h"
 
 USE_SWIFT_NS

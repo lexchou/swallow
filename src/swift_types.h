@@ -1,7 +1,6 @@
 #ifndef SWIFT_TYPES_H
 #define SWIFT_TYPES_H
 #include "swift_conf.h"
-#include <memory>
 
 SWIFT_NS_BEGIN
 

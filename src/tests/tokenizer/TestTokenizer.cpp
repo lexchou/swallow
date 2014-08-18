@@ -1,5 +1,5 @@
-#include "tokenizer/tokens.h"
-#include "tokenizer/tokenizer.h"
+#include "tokenizer/Token.h"
+#include "tokenizer/Tokenizer.h"
 #include "tests/utils.h"
 using namespace Swift;
 

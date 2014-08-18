@@ -1,5 +1,5 @@
 #include "Parser.h"
-#include "Parser_details.h"
+#include "parser_details.h"
 #include "tokenizer/Tokenizer.h"
 #include "ast/NodeFactory.h"
 #include "ast/ast.h"

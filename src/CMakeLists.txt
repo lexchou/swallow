@@ -23,7 +23,7 @@ SET(CMAKE_CXX_FLAGS "$ENV{CXXFLAGS} -O0 -Wall -g -ggdb -std=c++0x")
 
 
 
-SET(SWIFT_TOKENIZER_SRC tokenizer/tokenizer.cpp)
+SET(SWIFT_TOKENIZER_SRC tokenizer/Tokenizer.cpp)
 SET(SWIFT_PARSER_SRC ${SWIFT_TOKENIZER_SRC}
     common/CompilerResults.cpp
     common/AutoReleasePool.cpp

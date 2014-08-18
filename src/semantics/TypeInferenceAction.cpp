@@ -10,6 +10,7 @@
 #include "FunctionSymbol.h"
 #include "FunctionOverloadedSymbol.h"
 #include <cassert>
+#include <algorithm>
 USE_SWIFT_NS
 
 

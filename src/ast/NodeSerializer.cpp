@@ -1,6 +1,6 @@
 #include "NodeSerializer.h"
 #include "ast.h"
-#include <codecvt>
+//#include <codecvt>
 
 USE_SWIFT_NS
 
@@ -23,12 +23,25 @@ NodeSerializerA::NodeSerializerA(std::ostream& out)
 {
 
 }
+
+inline std::string narrow(std::wstring const& text)
+{
+    std::locale const loc("");
+    wchar_t const* from = text.c_str();
+    std::size_t const len = text.size();
+    std::vector<char> buffer(len + 1);
+    std::use_facet<std::ctype<wchar_t> >(loc).narrow(from, from + len, '_', &buffer[0]);
+    return std::string(&buffer[0], &buffer[len]);
+}
+
 void NodeSerializerA::append(const wchar_t* str)
 {
-    typedef std::codecvt_utf8<wchar_t> convert_typeX;
-    std::wstring_convert<convert_typeX, wchar_t> converterX;
+    //typedef std::codecvt_utf8<wchar_t> convert_typeX;
+    //std::wstring_convert<convert_typeX, wchar_t> converterX;
 
-    out<<converterX.to_bytes(str);
+    //out<<converterX.to_bytes(str);
+    std::string s = narrow(str);
+    out<<s;
 }
 void NodeSerializerA::append(const std::wstring& str)
 {

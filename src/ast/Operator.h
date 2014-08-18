@@ -1,7 +1,7 @@
 #ifndef OPERATOR_H
 #define OPERATOR_H
 #include "Expression.h"
-#include "tokenizer/tokens.h"
+#include "tokenizer/Token.h"
 SWIFT_NS_BEGIN
 
 class Operator : public Expression
