@@ -1,11 +1,11 @@
 #include "utils.h"
-#include "ast/node-serializer.h"
-#include "semantics/symbol-registry.h"
-#include "semantics/symbol.h"
-#include "semantics/scoped-node-factory.h"
-#include "semantics/symbol-resolve-action.h"
-#include "semantics/type-inference-action.h"
-#include "semantics/scoped-nodes.h"
+#include "ast/NodeSerializer.h"
+#include "semantics/SymbolRegistry.h"
+#include "semantics/Symbol.h"
+#include "semantics/ScopedNodeFactory.h"
+#include "semantics/SymbolResolveAction.h"
+#include "semantics/TypeInferenceAction.h"
+#include "semantics/ScopedNodes.h"
 
 
 

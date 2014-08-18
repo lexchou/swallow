@@ -4,10 +4,10 @@
 #include <gtest/gtest.h>
 #include <iostream>
 #include <cstdlib>
-#include "parser/parser.h"
+#include "parser/Parser.h"
 #include "ast/ast.h"
-#include "ast/node-factory.h"
-#include "common/compiler_results.h"
+#include "ast/NodeFactory.h"
+#include "common/CompilerResults.h"
 #include "semantics/semantic-types.h"
 
 

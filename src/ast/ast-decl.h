@@ -16,8 +16,6 @@ typedef std::shared_ptr<Declaration> DeclarationPtr;
 class Statement;
 typedef std::shared_ptr<Statement> StatementPtr;
 
-class BooleanLiteral;
-typedef std::shared_ptr<BooleanLiteral> BooleanLiteralPtr;
 class IntegerLiteral;
 typedef std::shared_ptr<IntegerLiteral> IntegerLiteralPtr;
 class FloatLiteral;

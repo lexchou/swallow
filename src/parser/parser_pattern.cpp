@@ -1,6 +1,6 @@
-#include "parser.h"
+#include "Parser.h"
 #include "parser_details.h"
-#include "ast/node-factory.h"
+#include "ast/NodeFactory.h"
 #include "ast/ast.h"
 using namespace Swift;
 

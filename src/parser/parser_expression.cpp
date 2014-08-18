@@ -1,7 +1,7 @@
-#include "parser.h"
-#include "parser_details.h"
-#include "tokenizer/tokenizer.h"
-#include "ast/node-factory.h"
+#include "Parser.h"
+#include "Parser_details.h"
+#include "tokenizer/Tokenizer.h"
+#include "ast/NodeFactory.h"
 #include "ast/ast.h"
 #include "swift_errors.h"
 

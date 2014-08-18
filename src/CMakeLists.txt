@@ -25,9 +25,9 @@ SET(CMAKE_CXX_FLAGS "$ENV{CXXFLAGS} -O0 -Wall -g -ggdb -std=c++0x")
 
 SET(SWIFT_TOKENIZER_SRC tokenizer/tokenizer.cpp)
 SET(SWIFT_PARSER_SRC ${SWIFT_TOKENIZER_SRC}
-    common/compiler_results.cpp
-    common/auto-release-pool.cpp
-    parser/parser.cpp
+    common/CompilerResults.cpp
+    common/AutoReleasePool.cpp
+    parser/Parser.cpp
     parser/parser_expression.cpp
     parser/parser_statement.cpp
     parser/parser_declaration.cpp
@@ -35,144 +35,143 @@ SET(SWIFT_PARSER_SRC ${SWIFT_TOKENIZER_SRC}
     parser/parser_type.cpp
     parser/parser_attribute.cpp
 
-    semantics/symbol-registry.cpp
-    semantics/symbol-scope.cpp
-    semantics/scope-owner.cpp
-    semantics/scoped-nodes.cpp
-    semantics/scoped-node-factory.cpp
-    semantics/semantic-node-visitor.cpp
-    semantics/type.cpp
-    semantics/type-inference-action.cpp
-    semantics/symbol-resolve-action.cpp
-    semantics/function-symbol.cpp
-    semantics/function-overloaded-symbol.cpp
-    semantics/scope-guard.cpp
+    semantics/SymbolRegistry.cpp
+    semantics/SymbolScope.cpp
+    semantics/ScopeOwner.cpp
+    semantics/ScopedNodes.cpp
+    semantics/ScopedNodeFactory.cpp
+    semantics/SemanticNodeVisitor.cpp
+    semantics/Type.cpp
+    semantics/TypeInferenceAction.cpp
+    semantics/SymbolResolveAction.cpp
+    semantics/FunctionSymbol.cpp
+    semantics/FunctionOverloadedSymbol.cpp
+    semantics/ScopeGuard.cpp
 
-    ast/node.cpp
-    ast/program.cpp
-    ast/node-visitor.cpp
-    ast/node-serializer.cpp
-    ast/node-visitor-decorator.cpp
-    ast/expression.cpp
-    ast/pattern.cpp
-    ast/comment.cpp
-    ast/node-factory.cpp
-    ast/binary-operator.cpp
-    ast/unary-operator.cpp
-    ast/in-out-parameter.cpp
-    ast/member-access.cpp
-    ast/subscript-access.cpp
-    ast/type-check.cpp
-    ast/type-cast.cpp
-    ast/assignment.cpp
-    ast/conditional-operator.cpp
-    ast/type-node.cpp
-    ast/operator.cpp
-    ast/parenthesized-expression.cpp
-    ast/function-call.cpp
-    ast/initializer-reference.cpp
-    ast/self-expression.cpp
-    ast/dynamic-type.cpp
-    ast/forced-value.cpp
-    ast/optional-chaining.cpp
-    ast/integer-literal.cpp
-    ast/float-literal.cpp
-    ast/string-literal.cpp
-    ast/compile-constant.cpp
+    ast/Node.cpp
+    ast/Program.cpp
+    ast/NodeVisitor.cpp
+    ast/NodeSerializer.cpp
+    ast/NodeVisitorDecorator.cpp
+    ast/Expression.cpp
+    ast/Pattern.cpp
+    ast/Comment.cpp
+    ast/NodeFactory.cpp
+    ast/BinaryOperator.cpp
+    ast/UnaryOperator.cpp
+    ast/InOutParameter.cpp
+    ast/MemberAccess.cpp
+    ast/SubscriptAccess.cpp
+    ast/TypeCheck.cpp
+    ast/TypeCast.cpp
+    ast/Assignment.cpp
+    ast/ConditionalOperator.cpp
+    ast/TypeNode.cpp
+    ast/Operator.cpp
+    ast/ParenthesizedExpression.cpp
+    ast/FunctionCall.cpp
+    ast/InitializerReference.cpp
+    ast/SelfExpression.cpp
+    ast/DynamicType.cpp
+    ast/ForcedValue.cpp
+    ast/OptionalChaining.cpp
+    ast/IntegerLiteral.cpp
+    ast/FloatLiteral.cpp
+    ast/StringLiteral.cpp
+    ast/CompileConstant.cpp
 
-    ast/break-statement.cpp
-    ast/continue-statement.cpp
-    ast/do-loop.cpp
-    ast/fallthrough-statement.cpp
-    ast/for-loop.cpp
-    ast/for-in-loop.cpp
-    ast/if-statement.cpp
-    ast/labeled-statement.cpp
-    ast/return-statement.cpp
-    ast/statement.cpp
-    ast/switch-case.cpp
-    ast/case-statement.cpp
-    ast/while-loop.cpp
-    ast/code-block.cpp
-    ast/value-binding-pattern.cpp
-    ast/tuple.cpp
-    ast/closure.cpp
-    ast/enum-case-pattern.cpp
+    ast/BreakStatement.cpp
+    ast/ContinueStatement.cpp
+    ast/DoLoop.cpp
+    ast/FallthroughStatement.cpp
+    ast/ForLoop.cpp
+    ast/ForInLoop.cpp
+    ast/IfStatement.cpp
+    ast/LabeledStatement.cpp
+    ast/ReturnStatement.cpp
+    ast/Statement.cpp
+    ast/SwitchCase.cpp
+    ast/CaseStatement.cpp
+    ast/WhileLoop.cpp
+    ast/CodeBlock.cpp
+    ast/ValueBindingPattern.cpp
+    ast/Tuple.cpp
+    ast/Closure.cpp
+    ast/EnumCasePattern.cpp
 
-    ast/type-node.cpp
-    ast/type-identifier.cpp
-    ast/function-type.cpp
-    ast/array-type.cpp
-    ast/optional-type.cpp
-    ast/implicitly-unwrapped-optional.cpp
-    ast/tuple-type.cpp
-    ast/protocol-composition.cpp
+    ast/TypeNode.cpp
+    ast/TypeIdentifier.cpp
+    ast/FunctionType.cpp
+    ast/ArrayType.cpp
+    ast/OptionalType.cpp
+    ast/ImplicitlyUnwrappedOptional.cpp
+    ast/TupleType.cpp
+    ast/ProtocolComposition.cpp
 
-    ast/literal-nodes.cpp
-    ast/dictionary-literal.cpp
-    ast/array-literal.cpp
-    ast/attribute.cpp
+    ast/DictionaryLiteral.cpp
+    ast/ArrayLiteral.cpp
+    ast/Attribute.cpp
 
-    ast/class-def.cpp
-    ast/constant.cpp
-    ast/constants.cpp
-    ast/declaration.cpp
-    ast/deinitializer-def.cpp
-    ast/initializer-def.cpp
-    ast/enum-def.cpp
-    ast/extension-def.cpp
-    ast/function-def.cpp
-    ast/import.cpp
-    ast/operator-def.cpp
-    ast/protocol-def.cpp
-    ast/struct-def.cpp
-    ast/subscript-def.cpp
-    ast/type-alias.cpp
-    ast/value-binding.cpp
-    ast/variable.cpp
-    ast/variables.cpp
-    ast/identifier.cpp
-    ast/generic-argument.cpp
-    ast/parameters.cpp
-    ast/parameter.cpp
-    ast/type-declaration.cpp
-    ast/generic-parameters.cpp
-    ast/generic-constraint.cpp
+    ast/ClassDef.cpp
+    ast/Constant.cpp
+    ast/Constants.cpp
+    ast/Declaration.cpp
+    ast/DeinitializerDef.cpp
+    ast/InitializerDef.cpp
+    ast/EnumDef.cpp
+    ast/ExtensionDef.cpp
+    ast/FunctionDef.cpp
+    ast/Import.cpp
+    ast/OperatorDef.cpp
+    ast/ProtocolDef.cpp
+    ast/StructDef.cpp
+    ast/SubscriptDef.cpp
+    ast/TypeAlias.cpp
+    ast/ValueBinding.cpp
+    ast/Variable.cpp
+    ast/Variables.cpp
+    ast/Identifier.cpp
+    ast/GenericArgument.cpp
+    ast/Parameters.cpp
+    ast/Parameter.cpp
+    ast/TypeDeclaration.cpp
+    ast/GenericParameters.cpp
+    ast/GenericConstraint.cpp
     )
-SET(SWIFT_SRC main.cpp tokenizer/tokenizer.cpp)
+SET(SWIFT_SRC main.cpp tokenizer/Tokenizer.cpp)
 
 
 add_definitions(-DTRACE_NODE)
 
 enable_testing()
 ADD_EXECUTABLE(TestParser
-		tests/parser/test-parser.cpp 
-		tests/parser/test-operator-expression.cpp
-		tests/parser/test-literal-expression.cpp
-		tests/parser/test-postfix-expression.cpp
-		tests/parser/test-type.cpp
-		tests/parser/test-generic.cpp
-		tests/parser/test-declaration.cpp
-		tests/parser/test-func.cpp
-		tests/parser/test-statement.cpp
-		tests/parser/test-enum.cpp
-		tests/parser/test-class.cpp
-		tests/parser/test-closure.cpp
-        tests/parser/test-extension.cpp
-        tests/parser/test-protocol.cpp
+		tests/parser/TestParser.cpp 
+		tests/parser/TestOperatorExpression.cpp
+		tests/parser/TestLiteralExpression.cpp
+		tests/parser/TestPostfixExpression.cpp
+		tests/parser/TestType.cpp
+		tests/parser/TestGeneric.cpp
+		tests/parser/TestDeclaration.cpp
+		tests/parser/TestFunc.cpp
+		tests/parser/TestStatement.cpp
+		tests/parser/TestEnum.cpp
+		tests/parser/TestClass.cpp
+		tests/parser/TestClosure.cpp
+        tests/parser/TestExtension.cpp
+        tests/parser/TestProtocol.cpp
         tests/utils.cpp
 		${SWIFT_TOKENIZER_SRC} ${SWIFT_PARSER_SRC})
 target_link_libraries(TestParser ${GTEST_LIBS})
 
-ADD_EXECUTABLE(TestTokenizer tests/tokenizer/test-tokenizer.cpp ${SWIFT_TOKENIZER_SRC})
+ADD_EXECUTABLE(TestTokenizer tests/tokenizer/TestTokenizer.cpp ${SWIFT_TOKENIZER_SRC})
 target_link_libraries(TestTokenizer ${GTEST_LIBS})
 
 ADD_EXECUTABLE(TestSemantics
-    tests/semantics/test-semantics.cpp
-    tests/semantics/test-constant-folding.cpp
-    tests/semantics/test-type-inference.cpp
-    tests/semantics/test-symbol-resolve.cpp
-    tests/semantics/test-function-overloads.cpp
+    tests/semantics/TestSemantics.cpp
+    tests/semantics/TestConstantFolding.cpp
+    tests/semantics/TestTypeInference.cpp
+    tests/semantics/TestSymbolResolve.cpp
+    tests/semantics/TestFunctionOverloads.cpp
     tests/utils.cpp
     ${SWIFT_TOKENIZER_SRC} ${SWIFT_PARSER_SRC})
 target_link_libraries(TestSemantics ${GTEST_LIBS})
