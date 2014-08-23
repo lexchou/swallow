@@ -49,6 +49,15 @@ private:
     float calculateFitScore(const TypePtr& func, const ParenthesizedExpressionPtr& arguments, bool supressErrors);
     bool checkArgument(const Type::Parameter& parameter, const ParenthesizedExpression::Term& argument, bool variadic, float& score, bool supressErrors);
     TypePtr getExpressionType(const ExpressionPtr& expr, const TypePtr& hint, float& score);
+
+    /**
+     * Check if the given expression can be converted to given type
+     */
+    void canConvertTo(const ExpressionPtr, const TypePtr& type);
+
+    bool isInteger(const TypePtr& type);
+    bool isNumber(const TypePtr& type);
+    bool isFloat(const TypePtr& type);
 private:
     TypePtr t_int, t_uint, t_int8, t_uint8, t_int16, t_uint16, t_int32, t_uint32, t_int64, t_uint64;
     TypePtr t_float, t_double;
@@ -56,6 +65,8 @@ private:
     std::vector<TypePtr> t_ints;
     TypePtr t_string;
     TypePtr t_bool;
+    //hint for parsing Array/tuple/dictionary literal
+    TypePtr t_hint;
 
 };
 

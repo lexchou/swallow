@@ -14,6 +14,31 @@
 USE_SWIFT_NS
 
 
+template<class T>
+struct StackedValueGuard
+{
+    StackedValueGuard(T & value)
+    :ref(value), value(value)
+    {
+
+    }
+    void set(const T& val)
+    {
+        ref = val;
+    }
+
+    ~StackedValueGuard()
+    {
+        ref = value;
+    }
+
+    T& ref;
+    T value;
+
+};
+
+
+
 TypeInferenceAction::TypeInferenceAction(SymbolRegistry* symbolRegistry, CompilerResults* compilerResults)
     :SemanticNodeVisitor(symbolRegistry, compilerResults)
 {
@@ -53,6 +78,30 @@ TypeInferenceAction::TypeInferenceAction(SymbolRegistry* symbolRegistry, Compile
     t_numbers.push_back(t_double);
     t_numbers.push_back(t_float);
 
+}
+
+
+bool TypeInferenceAction::isInteger(const TypePtr& type)
+{
+    for(const TypePtr& t : t_ints)
+    {
+        if(t == type)
+            return true;
+    }
+    return false;
+}
+bool TypeInferenceAction::isNumber(const TypePtr& type)
+{
+    if(isFloat(type))
+        return true;
+    if(isInteger(type))
+        return true;
+}
+bool TypeInferenceAction::isFloat(const TypePtr& type)
+{
+    if(type == t_float || type == t_double)
+        return true;
+    return false;
 }
 
 void TypeInferenceAction::checkTupleDefinition(const TuplePtr& tuple, const ExpressionPtr& initializer)
@@ -118,11 +167,13 @@ TypePtr TypeInferenceAction::getExpressionType(const ExpressionPtr& expr, const 
     if(expr->getNodeType() == NodeType::IntegerLiteral && hint != nullptr)
     {
         IntegerLiteralPtr literal = std::static_pointer_cast<IntegerLiteral>(expr);
-        if(hint == t_float || hint == t_double)
+        if(isFloat(hint))
         {
             score  = 0.5;
             return hint;
         }
+        if(isInteger(hint))
+            return hint;
         for(const TypePtr& t : t_ints)
         {
             if(t == hint)
@@ -132,7 +183,7 @@ TypePtr TypeInferenceAction::getExpressionType(const ExpressionPtr& expr, const 
     if(expr->getNodeType() == NodeType::FloatLiteral && hint != nullptr)
     {
         FloatLiteralPtr literal = std::static_pointer_cast<FloatLiteral>(expr);
-        if(hint == t_float || hint == t_double)
+        if(isFloat(hint))
             return hint;
     }
     return expr->getType();
@@ -432,45 +483,71 @@ void TypeInferenceAction::visitFloat(const FloatLiteralPtr& node)
     node->setType(t_double);
 }
 
+void TypeInferenceAction::canConvertTo(const ExpressionPtr& expr, const TypePtr& type)
+{
+    switch(expr->getNodeType())
+    {
+        case NodeType::IntegerLiteral:
+            return isNumber(type);
+        case NodeType::FloatLiteral:
+            return isFloat(type);
+
+    }
+}
+
 void TypeInferenceAction::visitArrayLiteral(const ArrayLiteralPtr& node)
 {
     int num = node->numElements();
     if(num == 0)
+    {
+        if(!t_hint)//cannot define an empty array without type hint.
+            error(node, Errors::E_CANNOT_DEFINE_EMPTY_ARRAY_WITHOUT_TYPE);
         return;
-    struct ElementType
-    {
-        TypePtr type;
-        TypePtr hint;
-
-        ElementType(const ElementType& rhs)
-        :type(rhs.type), hint(rhs.hint)
-        {
-
-        }
-        ElementType(const ExpressionPtr& expr)
-        {
-            NodeType::T nodeType = expr->getNodeType();
-            if(nodeType == NodeType::IntegerLiteral || nodeType == NodeType::FloatLiteral)
-            {
-                hint = expr->getType();
-            }
-            else
-            {
-                type = expr->getType();
-            }
-        }
-    };
-
-    ExpressionPtr first = node->getElement(0);
-    first->accept(this);
-    ElementType last(first);
-    ElementType result(last);
-    for(int i = 1; i < num; i++)
-    {
-
-        //type = getExpressionType(el, type, score);
     }
-    //node->setType(type);
+    bool hasHint = t_hint != nullptr;
+    TypePtr type = t_hint;
+    TypePtr hint;
+    for(const ExpressionPtr& el : *node)
+    {
+        el->accept(this);
+        if(type != nullptr)
+        {
+            //check if element can be converted into given type
+            if(!canConvertTo(el, type))
+            {
+                error(el, Errors::E_CANNOT_CONVERT_EXPRESSION_TYPE, type->getName());
+            }
+        }
+        else
+        {
+            switch(el->getNodeType())
+            {
+                case NodeType::IntegerLiteral:
+                    hint = t_int;
+                    break;
+                case NodeType::FloatLiteral:
+                    hint = t_double;
+                    break;
+                default:
+                    type = el->getType();
+                    if(hint)
+                    {
+                        //check if the hint can be converted to type
+                        bool success = (hint == t_double && isFloat(type)) || (hint == t_int && isNumber(type));
+                        if(!success)
+                        {
+                            error(el, Errors::E_ARRAY_CONTAINS_DIFFERENT_TYPES);
+                        }
+
+                    }
+                    break;
+            }
+        }
+    }
+
+
+
+
 }
 void TypeInferenceAction::visitDictionaryLiteral(const DictionaryLiteralPtr& node)
 {
@@ -616,9 +693,21 @@ void TypeInferenceAction::visitVariable(const VariablePtr& node)
 
 void TypeInferenceAction::visitConstant(const ConstantPtr& node)
 {
+    if(!node->getInitializer())
+    {
+        error(node->getInitializer(), Errors::E_LET_REQUIRES_INITIALIZER);
+        return;
+    }
+
+
     //TypePtr type = evaluateType(node->initializer);
     if(IdentifierPtr id = std::dynamic_pointer_cast<Identifier>(node->name))
     {
+        TypePtr declaredType = lookupType(id->getDeclaredType());
+        StackedValueGuard<TypePtr> guard(t_hint);
+        guard.set(declaredType);
+
+
         node->initializer->accept(this);
         TypePtr actualType = node->initializer->getType();
         assert(actualType != nullptr);

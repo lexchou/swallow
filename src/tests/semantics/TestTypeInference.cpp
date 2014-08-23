@@ -60,7 +60,6 @@ TEST(TestTypeInference, testNamedTupleLiteral)
 
 TEST(TestTypeInference, testArrayLiteral)
 {
-    /*
     SEMANTIC_ANALYZE(L"let a = [1, 2]");
     SymbolPtr a = NULL;
     ASSERT_NOT_NULL(a = scope->lookup(L"a"));
@@ -72,7 +71,6 @@ TEST(TestTypeInference, testArrayLiteral)
     t_Int = symbolRegistry.lookupType(L"Int");
     t_Bool = symbolRegistry.lookupType(L"Bool");
     t_String = symbolRegistry.lookupType(L"String");
-    */
 }
 
 TEST(TestTypeInference, testDictionaryLiteral)

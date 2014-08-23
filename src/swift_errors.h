@@ -53,6 +53,9 @@ struct Errors
         E_DOES_NOT_HAVE_A_MEMBER, // 'XXX' does not have a member named '%'
 
         E_CANNOT_CONVERT_EXPRESSION_TYPE, //Cannot convert expression's type '%' to type '%'
+        E_LET_REQUIRES_INITIALIZER, //'let' declarations require an initializer expression
+        E_CANNOT_DEFINE_EMPTY_ARRAY_WITHOUT_TYPE, // cannot define an empty array without type declaration.
+        E_ARRAY_CONTAINS_DIFFERENT_TYPES, // Array contains different types
 
         W_PARAM_CAN_BE_EXPRESSED_MORE_SUCCINCTLY, // '% %' can be expressed more succinctly as '#%'
         W_EXTRANEOUS_SHARTP_IN_PARAMETER, //Extraneous '#' in parameter: '%' is already the keyword argument name
