@@ -29,3 +29,11 @@ void ArrayLiteral::accept(NodeVisitor* visitor)
 {
     accept2(visitor, &NodeVisitor::visitArrayLiteral);
 }
+std::vector<ExpressionPtr>::iterator ArrayLiteral::begin()
+{
+    return elements.begin();
+}
+std::vector<ExpressionPtr>::iterator ArrayLiteral::end()
+{
+    return elements.end();
+}

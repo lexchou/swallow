@@ -96,6 +96,7 @@ bool TypeInferenceAction::isNumber(const TypePtr& type)
         return true;
     if(isInteger(type))
         return true;
+    return false;
 }
 bool TypeInferenceAction::isFloat(const TypePtr& type)
 {
@@ -483,7 +484,7 @@ void TypeInferenceAction::visitFloat(const FloatLiteralPtr& node)
     node->setType(t_double);
 }
 
-void TypeInferenceAction::canConvertTo(const ExpressionPtr& expr, const TypePtr& type)
+bool TypeInferenceAction::canConvertTo(const ExpressionPtr& expr, const TypePtr& type)
 {
     switch(expr->getNodeType())
     {
@@ -491,8 +492,10 @@ void TypeInferenceAction::canConvertTo(const ExpressionPtr& expr, const TypePtr&
             return isNumber(type);
         case NodeType::FloatLiteral:
             return isFloat(type);
-
+        default:
+            return false;
     }
+    return false;
 }
 
 void TypeInferenceAction::visitArrayLiteral(const ArrayLiteralPtr& node)

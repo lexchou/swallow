@@ -14,7 +14,7 @@ SWIFT_NS_BEGIN
 typedef std::shared_ptr<class TypeDeclaration> TypeDeclarationPtr;
 typedef std::weak_ptr<class TypeDeclaration> TypeDeclarationWeakPtr;
 
-class Type : public Symbol
+class Type : public Symbol, public  std::enable_shared_from_this<Symbol>
 {
     friend class SymbolRegistry;
     friend class SymbolResolveAction;
@@ -52,11 +52,16 @@ private:
 public:
     static TypePtr newArrayType(TypePtr elementType);
     static TypePtr newDictionaryType(TypePtr keyType, TypePtr valueType);
-    static TypePtr newType(const std::wstring& name, Category category, const TypeDeclarationPtr& reference = nullptr);
+    static TypePtr newType(const std::wstring& name, Category category, const TypeDeclarationPtr& reference = nullptr, const TypePtr& parentType = nullptr);
     static TypePtr newTuple(const std::vector<TypePtr>& types);
     static TypePtr newTypeReference(const TypePtr& innerType);
     static TypePtr newFunction(const std::vector<Parameter>& parameters, const TypePtr& returnType, bool hasVariadicParameters);
-public:
+public://methods
+    /**
+     * Gets the common parent class between current class and rhs with the minimum inheritance distance.
+     */
+    TypePtr getCommonParent(const TypePtr& rhs);
+public://properties
     /**
      * Does the value copies by value or by reference
      */
@@ -175,6 +180,8 @@ private:
     bool variadicParameters;
     std::vector<TypePtr> elementTypes;
     SymbolMap symbols;
+
+    int inheritantDepth;
 };
 
 

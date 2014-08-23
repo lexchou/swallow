@@ -53,7 +53,7 @@ private:
     /**
      * Check if the given expression can be converted to given type
      */
-    void canConvertTo(const ExpressionPtr, const TypePtr& type);
+    bool canConvertTo(const ExpressionPtr&, const TypePtr& type);
 
     bool isInteger(const TypePtr& type);
     bool isNumber(const TypePtr& type);

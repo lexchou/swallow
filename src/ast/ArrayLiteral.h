@@ -16,6 +16,8 @@ public:
 public:
     virtual void accept(NodeVisitor* visitor);
 
+    std::vector<ExpressionPtr>::iterator begin();
+    std::vector<ExpressionPtr>::iterator end();
 
 public:
     std::vector<ExpressionPtr> elements;

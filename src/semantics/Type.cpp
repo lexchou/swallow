@@ -4,7 +4,7 @@ USE_SWIFT_NS
 
 
 Type::Type(const std::wstring& name, Category category, TypePtr keyType, TypePtr valueType)
-:name(name), category(category), keyType(keyType), valueType(valueType)
+:name(name), category(category), keyType(keyType), valueType(valueType), inheritantDepth(0)
 {
 
 }
@@ -15,10 +15,13 @@ TypePtr Type::newDictionaryType(TypePtr keyType, TypePtr valueType)
 {
     return TypePtr(new Type(L"", Dictionary, keyType, valueType));
 }
-TypePtr Type::newType(const std::wstring& name, Category category, const TypeDeclarationPtr& reference)
+TypePtr Type::newType(const std::wstring& name, Category category, const TypeDeclarationPtr& reference, const TypePtr& parentType)
 {
     TypePtr ret = TypePtr(new Type(name, category, nullptr, nullptr));
     ret->reference = reference;
+    ret->parentType = parentType;
+    if(parentType)
+        ret->inheritantDepth = parentType->inheritantDepth + 1;
     return ret;
 }
 
@@ -51,6 +54,35 @@ TypePtr Type::newFunction(const std::vector<Parameter>& parameters, const TypePt
     return TypePtr(ret);
 }
 
+/**
+ * Gets the common parent class between current class and rhs with the minimum inheritance distance.
+ */
+TypePtr Type::getCommonParent(const TypePtr& rhs)
+{
+    if(rhs == nullptr || this == rhs.get())
+        return rhs;
+    TypePtr a;
+    if(parentType)
+        a = parentType->getCommonParent(rhs);
+
+    TypePtr pthis = std::static_pointer_cast<Type>(shared_from_this());
+    TypePtr b = rhs->getCommonParent(parentType);
+    if(a && b)
+    {
+        if(a->inheritantDepth > b->inheritantDepth)
+            return a;
+        else
+            return b;
+    }
+    if(a)
+        return a;
+    if(b)
+        return b;
+    return nullptr;
+}
+
+
+
 Type::Category Type::getCategory()const
 {
     return category;
@@ -58,8 +90,8 @@ Type::Category Type::getCategory()const
 
 
 /**
-* return true if the type is a class/struct/protocol/enum
-*/
+ * return true if the type is a class/struct/protocol/enum
+ */
 bool Type::isObjectType()const
 {
     return category == Class || category == Struct || category == Enum || category == Protocol;
