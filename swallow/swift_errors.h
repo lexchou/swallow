@@ -56,6 +56,10 @@ struct Errors
         E_LET_REQUIRES_INITIALIZER, //'let' declarations require an initializer expression
         E_CANNOT_DEFINE_EMPTY_ARRAY_WITHOUT_TYPE, // cannot define an empty array without type declaration.
         E_ARRAY_CONTAINS_DIFFERENT_TYPES, // Array contains different types
+        E_TYPE_DOES_NOT_CONFORM_TO_ARRAY_PROTOCOL, // Type '%' does not conform to ArrayLiteralConvertible protocol
+        E_SUPERCLASS_MUST_APPEAR_FIRST_IN_INHERITANCE_CLAUSE, // Superclass '%' must appear first in the inheritance clause
+        E_INHERITANCE_FROM_NONE_PROTOCOL_NON_CLASS_TYPE, //Inheritance from none-protocol, non-class type '%'
+        E_INHERITANCE_FROM_NONE_PROTOCOL_TYPE, //Inheritance from none-protocol type '%'
 
         W_PARAM_CAN_BE_EXPRESSED_MORE_SUCCINCTLY, // '% %' can be expressed more succinctly as '#%'
         W_EXTRANEOUS_SHARTP_IN_PARAMETER, //Extraneous '#' in parameter: '%' is already the keyword argument name

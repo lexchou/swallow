@@ -52,7 +52,7 @@ private:
 public:
     static TypePtr newArrayType(TypePtr elementType);
     static TypePtr newDictionaryType(TypePtr keyType, TypePtr valueType);
-    static TypePtr newType(const std::wstring& name, Category category, const TypeDeclarationPtr& reference = nullptr, const TypePtr& parentType = nullptr);
+    static TypePtr newType(const std::wstring& name, Category category, const TypeDeclarationPtr& reference = nullptr, const TypePtr& parentType = nullptr, const std::vector<TypePtr>& protocols = std::vector<TypePtr>());
     static TypePtr newTuple(const std::vector<TypePtr>& types);
     static TypePtr newTypeReference(const TypePtr& innerType);
     static TypePtr newFunction(const std::vector<Parameter>& parameters, const TypePtr& returnType, bool hasVariadicParameters);
@@ -171,6 +171,8 @@ private:
 
     Category category;
     TypePtr parentType;
+    std::vector<TypePtr> protocols;
+
     TypePtr keyType;
     TypePtr valueType;
     TypePtr innerType;

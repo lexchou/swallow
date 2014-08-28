@@ -16,11 +16,16 @@ Node* SymbolScope::getOwner()
 {
     return owner;
 }
+
+void SymbolScope::addSymbol(const std::wstring& name, const SymbolPtr& symbol)
+{
+    SymbolMap::iterator iter = symbols.find(name);
+    assert(iter == symbols.end() && "The symbol already exists with the same name.");
+    this->symbols.insert(std::make_pair(name, symbol));
+}
 void SymbolScope::addSymbol(const SymbolPtr& symbol)
 {
-    SymbolMap::iterator iter = symbols.find(symbol->getName());
-    assert(iter == symbols.end() && "The symbol already exists with the same name.");
-    this->symbols.insert(std::make_pair(symbol->getName(), symbol));
+    addSymbol(symbol->getName(), symbol);
 }
 
 void SymbolScope::removeSymbol(const SymbolPtr& symbol)

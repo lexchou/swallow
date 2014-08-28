@@ -11,31 +11,10 @@
 #include "FunctionOverloadedSymbol.h"
 #include <cassert>
 #include <algorithm>
+#include "ast/NodeSerializer.h"
 USE_SWIFT_NS
 
 
-template<class T>
-struct StackedValueGuard
-{
-    StackedValueGuard(T & value)
-    :ref(value), value(value)
-    {
-
-    }
-    void set(const T& val)
-    {
-        ref = val;
-    }
-
-    ~StackedValueGuard()
-    {
-        ref = value;
-    }
-
-    T& ref;
-    T value;
-
-};
 
 
 
@@ -113,7 +92,8 @@ void TypeInferenceAction::checkTupleDefinition(const TuplePtr& tuple, const Expr
     if(!type)
     {
         std::wstringstream out;
-        declaredType->serialize(out);
+        NodeSerializerW serializer(out);
+        declaredType->accept(&serializer);
         error(tuple, Errors::E_USE_OF_UNDECLARED_TYPE, out.str());
         return;
     }
@@ -121,7 +101,8 @@ void TypeInferenceAction::checkTupleDefinition(const TuplePtr& tuple, const Expr
     {
         //tuple definition must have a tuple type definition
         std::wstringstream out;
-        declaredType->serialize(out);
+        NodeSerializerW serializer(out);
+        declaredType->accept(&serializer);
         error(tuple, Errors::E_TUPLE_PATTERN_MUST_MATCH_TUPLE_TYPE, out.str());
         return;
     }
@@ -129,7 +110,8 @@ void TypeInferenceAction::checkTupleDefinition(const TuplePtr& tuple, const Expr
     {
         //tuple pattern has the wrong length for tuple type '%'
         std::wstringstream out;
-        declaredType->serialize(out);
+        NodeSerializerW serializer(out);
+        declaredType->accept(&serializer);
         error(tuple, Errors::E_TUPLE_PATTERN_MUST_MATCH_TUPLE_TYPE, out.str());
         return;
     }
@@ -141,7 +123,8 @@ void TypeInferenceAction::checkTupleDefinition(const TuplePtr& tuple, const Expr
         {
             //tuple pattern has the wrong length for tuple type '%'
             std::wstringstream out;
-            declaredType->serialize(out);
+            NodeSerializerW serializer(out);
+            declaredType->accept(&serializer);
             error(initializer, Errors::E_TUPLE_TYPES_HAVE_A_DIFFERENT_NUMBER_OF_ELEMENT, out.str());
             return;
         }
@@ -501,6 +484,23 @@ bool TypeInferenceAction::canConvertTo(const ExpressionPtr& expr, const TypePtr&
 void TypeInferenceAction::visitArrayLiteral(const ArrayLiteralPtr& node)
 {
     int num = node->numElements();
+
+    if(t_hint)
+    {
+        //TODO if hint specified, it must be Array type nor conform to ArrayLiteralConvertible protocol
+        if(t_hint->getCategory() != Type::Array)
+        {
+            bool conformToArrayLiteralConvertible = false;
+            if(!conformToArrayLiteralConvertible)
+            {
+                error(node, Errors::E_TYPE_DOES_NOT_CONFORM_TO_ARRAY_PROTOCOL, t_hint->getName());
+                return;
+            }
+        }
+    }
+
+
+
     if(num == 0)
     {
         if(!t_hint)//cannot define an empty array without type hint.
@@ -508,7 +508,7 @@ void TypeInferenceAction::visitArrayLiteral(const ArrayLiteralPtr& node)
         return;
     }
     bool hasHint = t_hint != nullptr;
-    TypePtr type = t_hint;
+    TypePtr type = t_hint != nullptr ? t_hint->getInnerType() : nullptr;
     TypePtr hint;
     for(const ExpressionPtr& el : *node)
     {
@@ -548,9 +548,12 @@ void TypeInferenceAction::visitArrayLiteral(const ArrayLiteralPtr& node)
         }
     }
 
+    assert(type != nullptr || hint != nullptr);
 
+    if(!type && hint)
+        type = hint;
 
-
+    node->setType(Type::newArrayType(type));
 }
 void TypeInferenceAction::visitDictionaryLiteral(const DictionaryLiteralPtr& node)
 {

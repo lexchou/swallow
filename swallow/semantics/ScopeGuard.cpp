@@ -13,6 +13,14 @@ ScopeGuard::ScopeGuard(ScopeOwner* owner, NodeVisitor* visitor)
     {
         symbolRegistry = dynamic_cast<SemanticNodeVisitor *>(visitor)->getSymbolRegistry();
         SymbolScope *scope = owner->getScope();
+        if(symbolRegistry->getCurrentScope() == scope)
+        {
+            //func and code block will shares the same scope,
+            //do not enter the same scope twice
+            symbolRegistry = nullptr;
+            return;
+        }
+
         symbolRegistry->enterScope(scope);
     }
 }

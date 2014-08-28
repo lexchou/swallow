@@ -7,6 +7,7 @@
 #include "FunctionSymbol.h"
 #include "FunctionOverloadedSymbol.h"
 #include "ScopeGuard.h"
+#include "ast/NodeSerializer.h"
 #include <cassert>
 #include <set>
 
@@ -230,7 +231,7 @@ void SymbolResolveAction::setFlag(const PatternPtr& pattern, bool add, int flag)
 
 }
 
-void SymbolResolveAction::defineType(const std::shared_ptr<TypeDeclaration>& node, Type::Category category)
+TypePtr SymbolResolveAction::defineType(const std::shared_ptr<TypeDeclaration>& node, Type::Category category)
 {
     TypeIdentifierPtr id = node->getIdentifier();
     SymbolScope* scope = NULL;
@@ -244,40 +245,91 @@ void SymbolResolveAction::defineType(const std::shared_ptr<TypeDeclaration>& nod
     {
         //invalid redeclaration of type T
         error(node, Errors::E_INVALID_REDECLARATION, id->getName());
-        return;
+        return nullptr;
     }
-    //check for parent class or protocol
-    for(const TypeIdentifierPtr& parent : node->parents)
+
+
+    //check inheritance clause
+    TypePtr parent = nullptr;
+    std::vector<TypePtr> protocols;
+    bool first = true;
+
+    for(const TypeIdentifierPtr& parentType : node->getParents())
     {
-        //check the parent must be a defined type
-        type = symbolRegistry->lookupType(parent->getName());
-        if(!type)
+        parentType->accept(this);
+        TypePtr ptr = this->lookupType(parentType);
+        if(ptr->getCategory() == Type::Class && category == Type::Class)
         {
-            error(node, Errors::E_USE_OF_UNDECLARED_TYPE, parent->getName());
-            return;
+            if(!first)
+            {
+                //only the first type can be class type
+                std::wstringstream out;
+                NodeSerializerW serializer(out);
+                parentType->accept(&serializer);
+                error(parentType, Errors::E_SUPERCLASS_MUST_APPEAR_FIRST_IN_INHERITANCE_CLAUSE, out.str());
+                return nullptr;
+            }
+            parent = ptr;
+        }
+        else if(ptr->getCategory() == Type::Protocol)
+        {
+            protocols.push_back(ptr);
+        }
+        else
+        {
+            std::wstringstream out;
+            NodeSerializerW serializer(out);
+            parentType->accept(&serializer);
+            if(category == Type::Class)
+                error(parentType, Errors::E_INHERITANCE_FROM_NONE_PROTOCOL_NON_CLASS_TYPE, out.str());
+            else
+                error(parentType, Errors::E_INHERITANCE_FROM_NONE_PROTOCOL_TYPE, out.str());
+            return nullptr;
         }
     }
+
+
     //register this type
-    if(node->getType())
-    {
-        currentScope->addSymbol(node->getType());
-    }
+    type = Type::newType(node->getIdentifier()->getName(), category, node, parent, protocols);
+    node->setType(type);
+    currentScope->addSymbol(type);
+
+    return type;
 }
 
-
+void SymbolResolveAction::visitTypeAlias(const TypeAliasPtr& node)
+{
+    SymbolScope* scope = nullptr;
+    TypePtr type;
+    SymbolScope* currentScope = symbolRegistry->getCurrentScope();
+    //check if this type is already defined
+    symbolRegistry->lookupType(node->getName(), &scope, &type);
+    if(type && scope == currentScope)
+    {
+        //invalid redeclaration of type T
+        error(node, Errors::E_INVALID_REDECLARATION, node->getName());
+        return;
+    }
+    type = lookupType(node->getType());
+    symbolRegistry->getCurrentScope()->addSymbol(node->getName(), type);
+}
 void SymbolResolveAction::visitClass(const ClassDefPtr& node)
 {
-    TypePtr type = Type::newType(node->getIdentifier()->getName(), Type::Class, node);
-    node->setType(type);
-    defineType(node, Type::Class);
+    TypePtr type = defineType(node, Type::Class);
+
+    StackedValueGuard<TypePtr> currentType(this->currentType);
+    currentType.set(type);
+
     NodeVisitor::visitClass(node);
 }
 void SymbolResolveAction::visitStruct(const StructDefPtr& node)
 {
-    TypePtr type = Type::newType(node->getIdentifier()->getName(), Type::Struct, node);
+    TypePtr type = defineType(node, Type::Struct);
     type->initializer = FunctionOverloadedSymbolPtr(new FunctionOverloadedSymbol());
-    node->setType(type);
-    defineType(node, Type::Struct);
+
+    StackedValueGuard<TypePtr> currentType(this->currentType);
+    currentType.set(type);
+
     NodeVisitor::visitStruct(node);
     /*
     Rule of initializers for structure:
@@ -324,7 +376,11 @@ void SymbolResolveAction::visitEnum(const EnumDefPtr& node)
 }
 void SymbolResolveAction::visitProtocol(const ProtocolDefPtr& node)
 {
-    defineType(node, Type::Protocol);
+    TypePtr type = defineType(node, Type::Protocol);
+
+    StackedValueGuard<TypePtr> currentType(this->currentType);
+    currentType.set(type);
+
     NodeVisitor::visitProtocol(node);
 }
 void SymbolResolveAction::visitExtension(const ExtensionDefPtr& node)
@@ -438,21 +494,22 @@ void SymbolResolveAction::visitClosure(const ClosurePtr& node)
 }
 void SymbolResolveAction::visitFunction(const FunctionDefPtr& node)
 {
+
+    //enter code block's scope
     {
-        //enter code block's scope
         ScopedCodeBlockPtr codeBlock = std::static_pointer_cast<ScopedCodeBlock>(node->getBody());
-        SymbolScope* scope = codeBlock->getScope();
+        SymbolScope *scope = codeBlock->getScope();
 
         ScopeGuard scopeGuard(codeBlock.get(), this);
-        (void)scopeGuard;
+        (void) scopeGuard;
 
         for (const ParametersPtr &params : node->getParametersList())
         {
             params->accept(this);
             prepareParameters(scope, params);
         }
+        node->getBody()->accept(this);
     }
-    node->getBody()->accept(this);
 
 
     FunctionSymbolPtr func = createFunctionSymbol(node);

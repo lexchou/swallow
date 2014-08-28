@@ -2,13 +2,13 @@ PROJECT(swallow)
 cmake_minimum_required(VERSION 2.6)
 set(CMAKE_BUILD_TYPE Release)
 
-FIND_PATH(GTEST_DIR libgtest.a
-    ../gtest-1.7.0
-    /usr/lib
-    /usr/lib/x86_64-linux-gnu/
-)
+#FIND_PATH(GTEST_DIR libgtest.a
+#    ../gtest-1.7.0
+#    /usr/lib
+#    /usr/lib/x86_64-linux-gnu/
+#)
 SET(GTEST_LIBS gtest gtest_main pthread)
-LINK_DIRECTORIES(${GTEST_DIR})
+#LINK_DIRECTORIES(${GTEST_DIR})
 
 INCLUDE_DIRECTORIES(
     ${PROJECT_SOURCE_DIR}
@@ -145,6 +145,8 @@ SET(SWALLOW_SRC
 add_definitions(-DTRACE_NODE)
 
 add_library(swallow SHARED ${SWALLOW_SRC})
+add_executable(swallow_main main.cpp)
+
 
 #enable_testing()
 #ADD_EXECUTABLE(TestParser

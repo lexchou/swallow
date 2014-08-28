@@ -63,15 +63,75 @@ TEST(TestTypeInference, testArrayLiteral)
     SEMANTIC_ANALYZE(L"let a = [1, 2]");
     SymbolPtr a = NULL;
     ASSERT_NOT_NULL(a = scope->lookup(L"a"));
-    TypePtr type = a->getType(), t_Int, t_Bool, t_String;
-    ASSERT_NOT_NULL(type);
-    ASSERT_EQ(Type::Tuple, type->getCategory());
-    ASSERT_EQ(3, type->numElementTypes());
-
+    TypePtr type = a->getType(), t_Int, innerType;
     t_Int = symbolRegistry.lookupType(L"Int");
-    t_Bool = symbolRegistry.lookupType(L"Bool");
-    t_String = symbolRegistry.lookupType(L"String");
+
+    ASSERT_NOT_NULL(type);
+    ASSERT_EQ(Type::Array, type->getCategory());
+
+    ASSERT_NOT_NULL(innerType = type->getInnerType());
+    ASSERT_EQ(t_Int, innerType);
+
+
 }
+
+TEST(TestTypeInference, testArrayLiteral2)
+{
+    SEMANTIC_ANALYZE(L"let a = [1, 3.4]");
+    SymbolPtr a = NULL;
+    ASSERT_NOT_NULL(a = scope->lookup(L"a"));
+    TypePtr type = a->getType(), t_Double, innerType;
+    t_Double = symbolRegistry.lookupType(L"Double");
+
+    ASSERT_NOT_NULL(type);
+    ASSERT_EQ(Type::Array, type->getCategory());
+
+    ASSERT_NOT_NULL(innerType = type->getInnerType());
+    ASSERT_EQ(t_Double, innerType);
+
+
+}
+
+TEST(TestTypeInference, testArrayLiteral3)
+{
+    SEMANTIC_ANALYZE(L"let a : Int8[] = [1, 3]");
+    SymbolPtr a = NULL;
+    ASSERT_NOT_NULL(a = scope->lookup(L"a"));
+    TypePtr type = a->getType(), Int8, innerType;
+    Int8 = symbolRegistry.lookupType(L"Int8");
+
+    ASSERT_NOT_NULL(type);
+    ASSERT_EQ(Type::Array, type->getCategory());
+
+    ASSERT_NOT_NULL(innerType = type->getInnerType());
+    ASSERT_EQ(Int8, innerType);
+}
+
+TEST(TestTypeInference, testArrayLiteral4)
+{
+/*
+    SEMANTIC_ANALYZE(L"class Base {}  "
+            "class Base2 : Base{}  "
+            "class Child1 : Base2{}  "
+            "class Child2 : Base2{}"
+            "let a : Int8[] = [1, 3]");
+    SymbolPtr a = NULL;
+    ASSERT_NOT_NULL(a = scope->lookup(L"a"));
+    TypePtr type = a->getType(), innerType;
+    TypePtr t_Base2 = std::dynamic_pointer_cast<Type>(scope->lookup(L"Base2"));
+    ASSERT_NOT_NULL(t_Base2);
+    ASSERT_NOT_NULL(type);
+    ASSERT_EQ(Type::Array, type->getCategory());
+
+    ASSERT_NOT_NULL(innerType = type->getInnerType());
+    ASSERT_EQ(t_Base2, innerType);
+    */
+}
+
+//TODO: Test ArrayLiteralConvertible protocol
+//TODO: Test array literal errors
+
+
 
 TEST(TestTypeInference, testDictionaryLiteral)
 {

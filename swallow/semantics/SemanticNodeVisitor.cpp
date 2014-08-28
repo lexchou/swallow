@@ -9,7 +9,9 @@
 #include "ast/TupleType.h"
 #include "ast/FunctionType.h"
 #include "ast/ArrayType.h"
+#include <cassert>
 #include "swift_errors.h"
+#include "ast/NodeSerializer.h"
 
 
 USE_SWIFT_NS
@@ -39,6 +41,8 @@ void SemanticNodeVisitor::warning(const NodePtr& node, int code, const std::wstr
 
 TypePtr SemanticNodeVisitor::lookupType(const TypeNodePtr& type)
 {
+    if(!type)
+        return nullptr;
     if(TypeIdentifierPtr id = std::dynamic_pointer_cast<TypeIdentifier>(type))
     {
         //TODO: make a generic type if possible
@@ -46,7 +50,8 @@ TypePtr SemanticNodeVisitor::lookupType(const TypeNodePtr& type)
         if(!ret)
         {
             std::wstringstream out;
-            type->serialize(out);
+            NodeSerializerW serializer(out);
+            type->accept(&serializer);
             error(type, Errors::E_USE_OF_UNDECLARED_TYPE, out.str());
             abort();
         }
@@ -75,5 +80,6 @@ TypePtr SemanticNodeVisitor::lookupType(const TypeNodePtr& type)
             retType = lookupType(func->getReturnType());
         }
     }
+    assert(0 && "Unsupported type");
     return nullptr;
 }

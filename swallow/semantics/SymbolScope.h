@@ -41,6 +41,8 @@ public:
 public:
     void removeSymbol(const SymbolPtr& symbol);
     void addSymbol(const SymbolPtr& symbol);
+    void addSymbol(const std::wstring& name, const SymbolPtr& symbol);
+
     SymbolPtr lookup(const std::wstring& name);
     Node* getOwner();
     SymbolScope* getParentScope() {return parent;}

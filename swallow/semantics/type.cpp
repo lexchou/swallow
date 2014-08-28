@@ -1,4 +1,5 @@
 #include "Type.h"
+#include <cassert>
 
 USE_SWIFT_NS
 
@@ -15,11 +16,12 @@ TypePtr Type::newDictionaryType(TypePtr keyType, TypePtr valueType)
 {
     return TypePtr(new Type(L"", Dictionary, keyType, valueType));
 }
-TypePtr Type::newType(const std::wstring& name, Category category, const TypeDeclarationPtr& reference, const TypePtr& parentType)
+TypePtr Type::newType(const std::wstring& name, Category category, const TypeDeclarationPtr& reference, const TypePtr& parentType, const std::vector<TypePtr>& protocols)
 {
     TypePtr ret = TypePtr(new Type(name, category, nullptr, nullptr));
     ret->reference = reference;
     ret->parentType = parentType;
+    ret->protocols = protocols;
     if(parentType)
         ret->inheritantDepth = parentType->inheritantDepth + 1;
     return ret;
@@ -35,7 +37,10 @@ TypePtr Type::newTypeReference(const TypePtr& innerType)
 
 TypePtr Type::newArrayType(TypePtr elementType)
 {
-    return TypePtr(new Type(L"", Array, nullptr, elementType));
+    assert(elementType != nullptr);
+    TypePtr ret(new Type(L"", Array, nullptr, nullptr));
+    ret->innerType = elementType;
+    return ret;
 }
 
 TypePtr Type::newTuple(const std::vector<TypePtr>& types)

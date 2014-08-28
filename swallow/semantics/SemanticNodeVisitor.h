@@ -41,6 +41,31 @@ protected:
     CompilerResults* compilerResults;
 };
 
+
+    template<class T>
+    struct StackedValueGuard
+    {
+        StackedValueGuard(T & value)
+                :ref(value), value(value)
+        {
+
+        }
+        void set(const T& val)
+        {
+            ref = val;
+        }
+
+        ~StackedValueGuard()
+        {
+            ref = value;
+        }
+
+        T& ref;
+        T value;
+
+    };
+
+
 SWIFT_NS_END
 
 

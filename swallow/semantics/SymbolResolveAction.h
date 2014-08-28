@@ -19,6 +19,7 @@ public:
     virtual void visitAssignment(const AssignmentPtr& node) override;
     virtual void visitVariables(const VariablesPtr& node) override;
     virtual void visitConstants(const ConstantsPtr& node) override;
+    virtual void visitTypeAlias(const TypeAliasPtr& node) override;
     virtual void visitClass(const ClassDefPtr& node) override;
     virtual void visitStruct(const StructDefPtr& node) override;
     virtual void visitEnum(const EnumDefPtr& node) override;
@@ -34,7 +35,7 @@ public:
     virtual void visitParameters(const ParametersPtr& node) override;
 
 private:
-    void defineType(const std::shared_ptr<TypeDeclaration>& node, Type::Category category);
+    TypePtr defineType(const std::shared_ptr<TypeDeclaration>& node, Type::Category category);
     //Register all symbols in the pattern
     void registerPattern(const PatternPtr& pattern);
     //Verify each symbol in the tuple is initialized
@@ -49,6 +50,8 @@ private:
      * Prepare parameters as symbols in given code block
      */
     void prepareParameters(SymbolScope* scope, const ParametersPtr& params);
+private:
+    TypePtr currentType;
 };
 
 SWIFT_NS_END

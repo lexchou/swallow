@@ -117,8 +117,6 @@ protected:
     }
 
 public:
-    virtual void serialize(std::wostream& out) {};
-
     /**
      * Used for debugging, convert node type into it's class name
      */

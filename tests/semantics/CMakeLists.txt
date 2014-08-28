@@ -1,11 +1,11 @@
 PROJECT(swift)
 cmake_minimum_required(VERSION 2.6)
 
-FIND_PATH(GTEST_DIR libgtest.a
-    ../../gtest-1.7.0
-)
+#FIND_PATH(GTEST_DIR libgtest.a
+#    ../../gtest-1.7.0
+#)
 SET(GTEST_LIBS gtest gtest_main pthread)
-LINK_DIRECTORIES(${GTEST_DIR})
+#LINK_DIRECTORIES(gtest-1.7.0)
 
 INCLUDE_DIRECTORIES(
     ${PROJECT_SOURCE_DIR}
@@ -29,6 +29,7 @@ ADD_EXECUTABLE(TestSemantics
     TestSymbolResolve.cpp
     TestFunctionOverloads.cpp
     TestType.cpp
+    TestProtocol.cpp
     ../utils.cpp
     )
 target_link_libraries(TestSemantics swallow ${GTEST_LIBS})

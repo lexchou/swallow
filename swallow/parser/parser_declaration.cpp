@@ -589,6 +589,10 @@ DeclarationPtr Parser::parseFunc(const std::vector<AttributePtr>& attrs, int spe
         CodeBlockPtr body = parseCodeBlock();
         ret->setBody(body);
     }
+    else
+    {
+        ret->setBody(nodeFactory->createCodeBlock(*ret->getSourceInfo()));
+    }
     return ret;
 }
 
