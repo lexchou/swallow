@@ -45,7 +45,8 @@ public:
         Extension,
         Function,
         Closure,
-        MetaType
+        MetaType,
+        Placeholder
     };
 private:
     Type(const std::wstring& name, Category category, TypePtr keyType, TypePtr valueType);
@@ -56,6 +57,13 @@ public:
     static TypePtr newTuple(const std::vector<TypePtr>& types);
     static TypePtr newTypeReference(const TypePtr& innerType);
     static TypePtr newFunction(const std::vector<Parameter>& parameters, const TypePtr& returnType, bool hasVariadicParameters);
+
+    /**
+     * A type place holder for protocol's typealias
+     */
+    static const TypePtr& getPlaceHolder();
+
+    static bool equals(const TypePtr& lhs, const TypePtr& rhs);
 public://methods
     /**
      * Gets the common parent class between current class and rhs with the minimum inheritance distance.
@@ -89,7 +97,11 @@ public://properties
     /**
      * Gets the parent type that defined this type
      */
-    TypePtr getParentType();
+    TypePtr getParentType()const;
+    /**
+     * Gets the protocols that this type conform to
+     */
+    const std::vector<TypePtr>& getProtocols()const;
 
     /**
      * Gets the module name where defined this type
@@ -100,12 +112,12 @@ public://properties
     /**
      * Gets the element type of the Array type
      */
-    TypePtr getElementType();
+    TypePtr getElementType() const;
 
     /**
      * Gets the element type of the tuple type
      */
-    TypePtr getElementType(int index);
+    TypePtr getElementType(int index) const;
 
     /**
      * Gets the number of element types of the tuple type
@@ -115,12 +127,12 @@ public://properties
     /**
      * Gets the key type of the dictionary type
      */
-    TypePtr getKeyType();
+    TypePtr getKeyType() const;
 
     /**
      * Gets the value type of the dictionary type
      */
-    TypePtr getValueType();
+    TypePtr getValueType() const;
 
     /**
      * Gets which declaration this type referenced to
@@ -130,17 +142,17 @@ public://properties
     /**
      * Gets the inner type for Reference category.
      */
-    TypePtr getInnerType();
+    TypePtr getInnerType() const;
 
     /**
      * Gets the return type if it's a function/closure type
      */
-    TypePtr getReturnType();
+    TypePtr getReturnType() const;
 
     /**
      * Gets the parameter types if it's a function/closure type
      */
-    const std::vector<Parameter>& getParameters();
+    const std::vector<Parameter>& getParameters() const;
 
     /**
      * Check if the function has variadic parameters

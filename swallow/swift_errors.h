@@ -60,6 +60,9 @@ struct Errors
         E_SUPERCLASS_MUST_APPEAR_FIRST_IN_INHERITANCE_CLAUSE, // Superclass '%' must appear first in the inheritance clause
         E_INHERITANCE_FROM_NONE_PROTOCOL_NON_CLASS_TYPE, //Inheritance from none-protocol, non-class type '%'
         E_INHERITANCE_FROM_NONE_PROTOCOL_TYPE, //Inheritance from none-protocol type '%'
+        E_DEFAULT_ARGUMENT_NOT_PERMITTED_IN_A_PROTOCOL_METHOD, //Default argument not permitted in a protocol method
+        E_TYPE_DOES_NOT_CONFORM_TO_PROTOCOL_UNIMPLEMENTED_FUNCTION,// Type % does not conform to protocol %, unimplemeneted function %
+
 
         W_PARAM_CAN_BE_EXPRESSED_MORE_SUCCINCTLY, // '% %' can be expressed more succinctly as '#%'
         W_EXTRANEOUS_SHARTP_IN_PARAMETER, //Extraneous '#' in parameter: '%' is already the keyword argument name

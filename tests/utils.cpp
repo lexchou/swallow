@@ -5,6 +5,7 @@
 #include "semantics/ScopedNodeFactory.h"
 #include "semantics/SymbolResolveAction.h"
 #include "semantics/TypeInferenceAction.h"
+#include "semantics/TypeVerificationAction.h"
 #include "semantics/ScopedNodes.h"
 
 
@@ -71,7 +72,7 @@ Swift::ScopedProgramPtr analyzeStatement(Swift::SymbolRegistry& registry, Swift:
     parser.setFileName(L"<file>");
     ScopedProgramPtr ret = std::dynamic_pointer_cast<ScopedProgram>(parser.parse(str));
 //ScopedProgram* f;
-    dumpCompilerResults(compilerResults);
+    //cdumpCompilerResults(compilerResults);
 //d.g();
     if(!ret)
         return ret;
@@ -79,7 +80,8 @@ Swift::ScopedProgramPtr analyzeStatement(Swift::SymbolRegistry& registry, Swift:
     {
         SymbolResolveAction symbolResolve(&registry, &compilerResults);
         TypeInferenceAction typeInference(&registry, &compilerResults);
-        NodeVisitor* visitors[] = {&symbolResolve, &typeInference};
+        TypeVerificationAction typeVerification(&registry, &compilerResults);
+        NodeVisitor* visitors[] = {&symbolResolve, &typeInference, &typeVerification};
         for(NodeVisitor* visitor : visitors)
         {
             ret->accept(visitor);

@@ -10,7 +10,22 @@ Type::Type(const std::wstring& name, Category category, TypePtr keyType, TypePtr
 
 }
 
-
+bool Type::equals(const TypePtr& lhs, const TypePtr& rhs)
+{
+    if(lhs == rhs)
+        return true;
+    if(lhs == nullptr || rhs == nullptr)
+        return false;
+    return *lhs == *rhs;
+}
+/**
+* A type place holder for protocol's typealias
+*/
+const TypePtr& Type::getPlaceHolder()
+{
+    static TypePtr placeholder(new Type(L"", Type::Placeholder, nullptr, nullptr));
+    return placeholder;
+}
 
 TypePtr Type::newDictionaryType(TypePtr keyType, TypePtr valueType)
 {
@@ -129,20 +144,25 @@ const std::wstring& Type::getFullName() const
 {
     return fullName;
 }
-TypePtr Type::getParentType()
+TypePtr Type::getParentType()const
 {
     return parentType;
+}
+
+const std::vector<TypePtr>& Type::getProtocols() const
+{
+    return protocols;
 }
 
 const std::wstring& Type::getModuleName() const
 {
     return moduleName;
 }
-TypePtr Type::getElementType()
+TypePtr Type::getElementType() const
 {
     return getElementType(0);
 }
-TypePtr Type::getElementType(int index)
+TypePtr Type::getElementType(int index) const
 {
     if(index >= elementTypes.size() || index < 0)
         return nullptr;
@@ -152,12 +172,12 @@ int Type::numElementTypes()const
 {
     return elementTypes.size();
 }
-TypePtr Type::getKeyType()
+TypePtr Type::getKeyType() const
 {
     return keyType;
 }
 
-TypePtr Type::getValueType()
+TypePtr Type::getValueType() const
 {
     return valueType;
 }
@@ -168,19 +188,19 @@ TypeDeclarationPtr Type::getReference()const
     return reference.lock();
 }
 
-TypePtr Type::getInnerType()
+TypePtr Type::getInnerType() const
 {
     return innerType;
 }
 
 
-TypePtr Type::getReturnType()
+TypePtr Type::getReturnType() const
 {
     return returnType;
 }
 
 
-const std::vector<Type::Parameter>& Type::getParameters()
+const std::vector<Type::Parameter>& Type::getParameters() const
 {
     return parameters;
 }
@@ -251,7 +271,7 @@ bool Type::operator ==(const Type& rhs)const
         case Function:
         case Closure:
         {
-            if(*returnType != *rhs.returnType)
+            if(!Type::equals(returnType, rhs.returnType))
                 return false;
             if(parameters.size() != rhs.parameters.size())
                 return false;
@@ -269,6 +289,8 @@ bool Type::operator ==(const Type& rhs)const
             }
             break;
         }
+        case Placeholder:
+            return true;
     }
 
     return true;

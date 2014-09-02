@@ -46,7 +46,7 @@ struct Tracer
     Swift::SymbolRegistry symbolRegistry; \
     Swift::CompilerResults compilerResults; \
     ScopedProgramPtr root = analyzeStatement(symbolRegistry, compilerResults, __FUNCTION__, (s)); \
-    Swift::SymbolScope* scope = root->getScope(); \
+    Swift::SymbolScope* scope = root ? root->getScope() : nullptr; \
     (void)scope;
 
 #endif//TEST_UTILS_H

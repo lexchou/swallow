@@ -47,6 +47,7 @@ SET(SWALLOW_SRC
     semantics/Type.cpp
     semantics/TypeInferenceAction.cpp
     semantics/SymbolResolveAction.cpp
+    semantics/TypeVerificationAction.cpp
     semantics/FunctionSymbol.cpp
     semantics/FunctionOverloadedSymbol.cpp
     semantics/ScopeGuard.cpp
