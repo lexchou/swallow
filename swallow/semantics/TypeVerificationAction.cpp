@@ -68,7 +68,15 @@ void TypeVerificationAction::verifyProtocolConform(const TypePtr& type, const Ty
         else if(requirement == Type::getPlaceHolder())
         {
             //verify inner type
-
+            SymbolPtr sym = type->getSymbols()[entry.first];
+            if(!(std::dynamic_pointer_cast<Type>(sym)))
+            {
+                error(type->getReference(), Errors::E_TYPE_DOES_NOT_CONFORM_TO_PROTOCOL_UNIMPLEMENTED_TYPE, entry.first);
+            }
+        }
+        else if(TypePtr type = std::dynamic_pointer_cast<Type>(requirement))
+        {
+            //type can be ignored
         }
         else
         {

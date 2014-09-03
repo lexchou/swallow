@@ -229,6 +229,55 @@ TEST(TestDeclaration, testOperator)
 
 }
 
-    
+TEST(TestDeclaration, TypeAlias)
+{
+    PARSE_STATEMENT(L"typealias NewType = Int");
+    ASSERT_EQ(0, compilerResults.numResults());
+    TypeAliasPtr typealias;
+    TypeIdentifierPtr Int;
+    ASSERT_NOT_NULL(typealias = std::dynamic_pointer_cast<TypeAlias>(root));
+    ASSERT_EQ(L"NewType", typealias->getName());
+    ASSERT_NOT_NULL(Int = std::dynamic_pointer_cast<TypeIdentifier>(typealias->getType()));
+    ASSERT_EQ(L"Int", Int->getName());
+}
+
+TEST(TestDeclaration, TypeAlias_Protocol)
+{
+    PARSE_STATEMENT(L"protocol MyProtocol { typealias NewType = Int }");
+    ASSERT_EQ(0, compilerResults.numResults());
+    ProtocolDefPtr protocol;
+    TypeAliasPtr typealias;
+    TypeIdentifierPtr Int;
+    ASSERT_NOT_NULL(protocol = std::dynamic_pointer_cast<ProtocolDef>(root));
+    ASSERT_EQ(1, protocol->numDeclarations());
+
+    ASSERT_NOT_NULL(typealias = std::dynamic_pointer_cast<TypeAlias>(protocol->getDeclaration(0)));
+    ASSERT_EQ(L"NewType", typealias->getName());
+    ASSERT_NOT_NULL(Int = std::dynamic_pointer_cast<TypeIdentifier>(typealias->getType()));
+    ASSERT_EQ(L"Int", Int->getName());
+}
+
+TEST(TestDeclaration, TypeAlias_ProtocolNoType)
+{
+    PARSE_STATEMENT(L"protocol MyProtocol { typealias NewType }");
+    ASSERT_EQ(0, compilerResults.numResults());
+    ProtocolDefPtr protocol;
+    TypeAliasPtr typealias;
+    TypeIdentifierPtr Int;
+    ASSERT_NOT_NULL(protocol = std::dynamic_pointer_cast<ProtocolDef>(root));
+    ASSERT_EQ(1, protocol->numDeclarations());
+
+    ASSERT_NOT_NULL(typealias = std::dynamic_pointer_cast<TypeAlias>(protocol->getDeclaration(0)));
+    ASSERT_EQ(L"NewType", typealias->getName());
+    ASSERT_NULL(typealias->getType());
+
+}
+
+
+TEST(TestDeclaration, TypeAlias_NoType)
+{
+    PARSE_STATEMENT(L"typealias NewType");
+    ASSERT_EQ(1, compilerResults.numResults());
+}
 
 

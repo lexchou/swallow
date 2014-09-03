@@ -294,6 +294,8 @@ TypePtr SymbolResolveAction::defineType(const std::shared_ptr<TypeDeclaration>& 
     node->setType(type);
     currentScope->addSymbol(type);
 
+    if(currentType)
+        currentType->getSymbols()[type->getName()] = type;
     return type;
 }
 
@@ -302,6 +304,7 @@ void SymbolResolveAction::visitTypeAlias(const TypeAliasPtr& node)
     SymbolScope* scope = nullptr;
     TypePtr type;
     SymbolScope* currentScope = symbolRegistry->getCurrentScope();
+
     //check if this type is already defined
     symbolRegistry->lookupType(node->getName(), &scope, &type);
     if(type && scope == currentScope)
@@ -310,9 +313,20 @@ void SymbolResolveAction::visitTypeAlias(const TypeAliasPtr& node)
         error(node, Errors::E_INVALID_REDECLARATION, node->getName());
         return;
     }
-    type = lookupType(node->getType());
-    symbolRegistry->getCurrentScope()->addSymbol(node->getName(), type);
+    if(currentType && currentType->getCategory() == Type::Protocol && !node->getType())
+    {
+        //register a type place holder for protocol
+        type = Type::getPlaceHolder();
+    }
+    else
+    {
+        type = lookupType(node->getType());
+    }
+    currentScope->addSymbol(node->getName(), type);
+    if(currentType)
+        currentType->getSymbols()[node->getName()] = type;
 }
+
 void SymbolResolveAction::visitClass(const ClassDefPtr& node)
 {
     TypePtr type = defineType(node, Type::Class);

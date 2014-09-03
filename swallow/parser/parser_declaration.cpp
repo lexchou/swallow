@@ -536,8 +536,20 @@ DeclarationPtr Parser::parseTypealias(const Attributes& attrs)
     Token token;
     expect(Keyword::Typealias, token);
     expect_identifier(token);
-    expect(L"=");
-    TypeNodePtr type = parseType();
+    TypeNodePtr type = nullptr;
+
+    if(this->flags & UNDER_PROTOCOL)
+    {
+        if (match(L"="))
+        {
+            type = parseType();
+        }
+    }
+    else
+    {
+        expect(L"=");
+        type = parseType();
+    }
     TypeAliasPtr ret = nodeFactory->createTypealias(token.state);
     ret->setAttributes(attrs);
     ret->setName(token.token);

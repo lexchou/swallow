@@ -62,7 +62,7 @@ struct Errors
         E_INHERITANCE_FROM_NONE_PROTOCOL_TYPE, //Inheritance from none-protocol type '%'
         E_DEFAULT_ARGUMENT_NOT_PERMITTED_IN_A_PROTOCOL_METHOD, //Default argument not permitted in a protocol method
         E_TYPE_DOES_NOT_CONFORM_TO_PROTOCOL_UNIMPLEMENTED_FUNCTION,// Type % does not conform to protocol %, unimplemeneted function %
-
+        E_TYPE_DOES_NOT_CONFORM_TO_PROTOCOL_UNIMPLEMENTED_TYPE, //Type % does not conform to protocol %, unimplemented type %
 
         W_PARAM_CAN_BE_EXPRESSED_MORE_SUCCINCTLY, // '% %' can be expressed more succinctly as '#%'
         W_EXTRANEOUS_SHARTP_IN_PARAMETER, //Extraneous '#' in parameter: '%' is already the keyword argument name

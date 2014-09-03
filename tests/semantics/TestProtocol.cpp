@@ -81,6 +81,40 @@ TEST(TestProtocol, MethodRequirements_NotImpl)
             "class Test : MyProtocol { \n"
             "}");
     ASSERT_EQ(1, compilerResults.numResults());
+    auto res = compilerResults.getResult(0);
+    ASSERT_EQ(Errors::E_TYPE_DOES_NOT_CONFORM_TO_PROTOCOL_UNIMPLEMENTED_FUNCTION, res.code);
 }
 
+TEST(TestProtocol, TypeRequirements)
+{
+    SEMANTIC_ANALYZE(L"protocol MyProtocol {\n"
+            "typealias Element\n"
+            "}\n"
+            "class Test : MyProtocol\n"
+            "{\n"
+            "  class Element {}\n"
+            "}\n");
+    ASSERT_EQ(0, compilerResults.numResults());
+}
 
+TEST(TestProtocol, TypeRequirements_Impl)
+{
+    SEMANTIC_ANALYZE(L"protocol MyProtocol {\n"
+            "typealias Element\n"
+            "}\n"
+            "class Test : MyProtocol\n"
+            "{\n"
+            "}\n");
+    ASSERT_EQ(1, compilerResults.numResults());
+    auto res = compilerResults.getResult(0);
+    ASSERT_EQ(Errors::E_TYPE_DOES_NOT_CONFORM_TO_PROTOCOL_UNIMPLEMENTED_TYPE, res.code);
+}
+
+TEST(TestProtocol, TypeInheritance)
+{
+    SEMANTIC_ANALYZE(L"protocol MyProtocol { typealias Element = Int }\n"
+            "class Test : MyProtocol {}");
+    //TODO: type inference for let a : Test.Element
+    ASSERT_EQ(0, compilerResults.numResults());
+
+}
