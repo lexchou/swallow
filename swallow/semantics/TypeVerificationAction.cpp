@@ -10,31 +10,57 @@ TypeVerificationAction::TypeVerificationAction(SymbolRegistry* symbolRegistry, C
 :SemanticNodeVisitor(symbolRegistry, compilerResults)
 {
 }
-
+void TypeVerificationAction::visitConstants(const ConstantsPtr& node)
+{
+    if(currentType && currentType->getCategory() == Type::Protocol)
+    {
+        error(node, Errors::E_PROTOCOL_CANNOT_DEFINE_LET_CONSTANT);
+    }
+}
+void TypeVerificationAction::visitVariable(const VariablePtr& node)
+{
+    if(currentType && currentType->getCategory() == Type::Protocol)
+    {
+        if (!node->getGetter() && !node->getSetter() && !node->getWillSet() && !node->getDidSet())
+        {
+            error(node, Errors::E_PROTOCOL_VAR_MUST_BE_COMPUTED_PROPERTY);
+        }
+    }
+}
 void TypeVerificationAction::visitClass(const ClassDefPtr& node)
 {
     const TypePtr& type = node->getType();
     assert(type != nullptr);
     verifyProtocolConform(type);
+    StackedValueGuard<TypePtr> currentType(this->currentType);
+    currentType.set(type);
+    SemanticNodeVisitor::visitClass(node);
 }
 
 void TypeVerificationAction::visitStruct(const StructDefPtr& node)
 {
-
     const TypePtr& type = node->getType();
     assert(type != nullptr);
     verifyProtocolConform(type);
+    StackedValueGuard<TypePtr> currentType(this->currentType);
+    currentType.set(type);
+    SemanticNodeVisitor::visitStruct(node);
 }
 void TypeVerificationAction::visitEnum(const EnumDefPtr& node)
 {
-
+    //StackedValueGuard<TypePtr> currentType(this->currentType);
+    //currentType.set(type);
+    SemanticNodeVisitor::visitEnum(node);
 }
 void TypeVerificationAction::visitExtension(const ExtensionDefPtr& node)
 {
-
+    SemanticNodeVisitor::visitExtension(node);
 }
 void TypeVerificationAction::visitProtocol(const ProtocolDefPtr& node)
 {
+    StackedValueGuard<TypePtr> currentType(this->currentType);
+    currentType.set(node->getType());
+    SemanticNodeVisitor::visitProtocol(node);
 }
 
 /**

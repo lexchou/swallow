@@ -118,3 +118,23 @@ TEST(TestProtocol, TypeInheritance)
     ASSERT_EQ(0, compilerResults.numResults());
 
 }
+
+TEST(TestProtocol, Let)
+{
+    SEMANTIC_ANALYZE(L"protocol MyProtocol {\n"
+            "let a : Int = 3\n"
+            "}");
+    ASSERT_EQ(1, compilerResults.numResults());
+    auto res = compilerResults.getResult(0);
+    ASSERT_EQ(Errors::E_PROTOCOL_CANNOT_DEFINE_LET_CONSTANT, res.code);
+}
+
+TEST(TestProtocol, Var)
+{
+    SEMANTIC_ANALYZE(L"protocol MyProtocol {\n"
+            "var a : Int = 3\n"
+            "}");
+    ASSERT_EQ(1, compilerResults.numResults());
+    auto res = compilerResults.getResult(0);
+    ASSERT_EQ(Errors::E_PROTOCOL_VAR_MUST_BE_COMPUTED_PROPERTY, res.code);
+}

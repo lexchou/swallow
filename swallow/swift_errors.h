@@ -63,6 +63,8 @@ struct Errors
         E_DEFAULT_ARGUMENT_NOT_PERMITTED_IN_A_PROTOCOL_METHOD, //Default argument not permitted in a protocol method
         E_TYPE_DOES_NOT_CONFORM_TO_PROTOCOL_UNIMPLEMENTED_FUNCTION,// Type % does not conform to protocol %, unimplemeneted function %
         E_TYPE_DOES_NOT_CONFORM_TO_PROTOCOL_UNIMPLEMENTED_TYPE, //Type % does not conform to protocol %, unimplemented type %
+        E_PROTOCOL_CANNOT_DEFINE_LET_CONSTANT, // Protocol % cannot define let constant
+        E_PROTOCOL_VAR_MUST_BE_COMPUTED_PROPERTY, // Protocol %'s variable must be a computed property
 
         W_PARAM_CAN_BE_EXPRESSED_MORE_SUCCINCTLY, // '% %' can be expressed more succinctly as '#%'
         W_EXTRANEOUS_SHARTP_IN_PARAMETER, //Extraneous '#' in parameter: '%' is already the keyword argument name
