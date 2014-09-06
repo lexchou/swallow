@@ -78,10 +78,9 @@ public:
     
     
     virtual ImportPtr createImport(const SourceInfo& state);
-    virtual ConstantPtr createConstant(const SourceInfo& state);
-    virtual ConstantsPtr createConstants(const SourceInfo& state);
-    virtual VariablesPtr createVariables(const SourceInfo& state);
-    virtual VariablePtr createVariable(const SourceInfo& state);
+    virtual ValueBindingPtr createValueBinding(const SourceInfo& state);
+    virtual ValueBindingsPtr createValueBindings(const SourceInfo& state);
+    virtual ComputedPropertyPtr createComputedProperty(const SourceInfo& state);
     virtual TypeAliasPtr createTypealias(const SourceInfo& state);
     virtual FunctionDefPtr createFunction(const SourceInfo& state);
     virtual ParametersPtr createParameters(const SourceInfo& state);

@@ -62,14 +62,14 @@ TEST(TestGeneric, testStruct)
 TEST(TestGeneric, testVar)
 {
     PARSE_STATEMENT(L"var stackOfStrings = Stack<String>()");
-    VariablesPtr vars;
-    VariablePtr var;
+    ValueBindingsPtr vars;
+    ValueBindingPtr var;
     FunctionCallPtr call;
     IdentifierPtr id;
     GenericArgumentPtr arg;
-    ASSERT_NOT_NULL(vars = std::dynamic_pointer_cast<Variables>(root));
-    ASSERT_EQ(1, vars->numVariables());
-    ASSERT_NOT_NULL(var = std::dynamic_pointer_cast<Variable>(vars->getVariable(0)));
+    ASSERT_NOT_NULL(vars = std::dynamic_pointer_cast<ValueBindings>(root));
+    ASSERT_EQ(1, vars->numBindings());
+    ASSERT_NOT_NULL(var = std::dynamic_pointer_cast<ValueBinding>(vars->get(0)));
     ASSERT_NOT_NULL(call = std::dynamic_pointer_cast<FunctionCall>(var->getInitializer()));
     ASSERT_NOT_NULL(id = std::dynamic_pointer_cast<Identifier>(call->getFunction()));
     ASSERT_NOT_NULL(arg = id->getGenericArgument());

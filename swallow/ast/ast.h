@@ -65,10 +65,9 @@
 
 #include "Declaration.h"
 #include "Import.h"
-#include "Constant.h"
-#include "Constants.h"
-#include "Variable.h"
-#include "Variables.h"
+#include "ValueBinding.h"
+#include "ValueBindings.h"
+#include "ComputedProperty.h"
 #include "TypeAlias.h"
 #include "FunctionDef.h"
 #include "Parameters.h"

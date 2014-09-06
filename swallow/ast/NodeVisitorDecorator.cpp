@@ -135,23 +135,19 @@ void NodeVisitorDecorator::visitVarPattern(const VarPatternPtr& node)
 }
 
 
-void NodeVisitorDecorator::visitVariables(const VariablesPtr& node)
+void NodeVisitorDecorator::visitValueBindings(const ValueBindingsPtr &node)
 {
-    VISIT(visitVariables);
+    VISIT(visitValueBindings);
 }
 
-void NodeVisitorDecorator::visitVariable(const VariablePtr& node)
+void NodeVisitorDecorator::visitValueBinding(const ValueBindingPtr &node)
 {
-    VISIT(visitVariable);
+    VISIT(visitValueBinding);
 }
 
-void NodeVisitorDecorator::visitConstant(const ConstantPtr& node)
+void NodeVisitorDecorator::visitComputedProperty(const ComputedPropertyPtr &node)
 {
-    VISIT(visitConstant);
-}
-void NodeVisitorDecorator::visitConstants(const ConstantsPtr& node)
-{
-    VISIT(visitConstants);
+    VISIT(visitComputedProperty);
 }
 
 void NodeVisitorDecorator::visitAssignment(const AssignmentPtr& node)

@@ -32,8 +32,7 @@ struct NodeType
         Comment,
         CompileConstant,
         ConditionalOperator,
-        Constant,
-        Constants,
+        ComputedProperty,
         Continue,
         Deinit,
         DictionaryLiteral,
@@ -87,8 +86,8 @@ struct NodeType
         TypeCheck,
         TypeIdentifier,
         UnaryOperator,
-        Variable,
-        Variables,
+        ValueBinding,
+        ValueBindings,
         VarPattern,
         While
     };

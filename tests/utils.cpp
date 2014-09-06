@@ -7,6 +7,8 @@
 #include "semantics/TypeInferenceAction.h"
 #include "semantics/TypeVerificationAction.h"
 #include "semantics/ScopedNodes.h"
+#include "semantics/FunctionSymbol.h"
+#include "semantics/FunctionOverloadedSymbol.h"
 
 
 
@@ -66,7 +68,16 @@ Swift::ProgramPtr parseStatements(Swift::CompilerResults& compilerResults, const
 Swift::ScopedProgramPtr analyzeStatement(Swift::SymbolRegistry& registry, Swift::CompilerResults& compilerResults, const char* func, const wchar_t* str)
 {
     using namespace Swift;
-    registry.getCurrentScope()->addSymbol(SymbolPtr(new SymbolPlaceHolder(L"println", nullptr, SymbolPlaceHolder::F_INITIALIZED)));
+
+    FunctionOverloadedSymbolPtr println(new FunctionOverloadedSymbol());
+    {
+        TypePtr t_int = registry.lookupType(L"Int");
+        std::vector<Type::Parameter> parameters = {Type::Parameter(t_int)};
+        TypePtr type = Type::newFunction(parameters, nullptr, false);
+        FunctionSymbolPtr println_int(new FunctionSymbol(L"println", type, nullptr));
+        println->add(println_int);
+    }
+    registry.getCurrentScope()->addSymbol(L"println", SymbolPtr(println));
     ScopedNodeFactory nodeFactory;
     Parser parser(&nodeFactory, &compilerResults);
     parser.setFileName(L"<file>");

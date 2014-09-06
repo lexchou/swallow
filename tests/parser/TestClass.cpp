@@ -22,15 +22,15 @@ TEST(TestClass, testClass)
                        L"var name: String? "
                        L"}");
     ClassDefPtr c;
-    VariablesPtr vars;
+    ValueBindingsPtr vars;
     ASSERT_NOT_NULL(c = std::dynamic_pointer_cast<ClassDef>(root));
     ASSERT_EQ(L"VideoMode", std::static_pointer_cast<TypeIdentifier>(c->getIdentifier())->getName());
     ASSERT_EQ(4, c->numDeclarations());
 
-    ASSERT_NOT_NULL(vars = std::dynamic_pointer_cast<Variables>(c->getDeclaration(0)));
-    ASSERT_NOT_NULL(vars = std::dynamic_pointer_cast<Variables>(c->getDeclaration(1)));
-    ASSERT_NOT_NULL(vars = std::dynamic_pointer_cast<Variables>(c->getDeclaration(2)));
-    ASSERT_NOT_NULL(vars = std::dynamic_pointer_cast<Variables>(c->getDeclaration(3)));
+    ASSERT_NOT_NULL(vars = std::dynamic_pointer_cast<ValueBindings>(c->getDeclaration(0)));
+    ASSERT_NOT_NULL(vars = std::dynamic_pointer_cast<ValueBindings>(c->getDeclaration(1)));
+    ASSERT_NOT_NULL(vars = std::dynamic_pointer_cast<ValueBindings>(c->getDeclaration(2)));
+    ASSERT_NOT_NULL(vars = std::dynamic_pointer_cast<ValueBindings>(c->getDeclaration(3)));
 
 
 
@@ -49,40 +49,40 @@ TEST(TestClass, testComputedProperty)
                        L"}"
                        L"}");
     StructDefPtr s;
-    VariablesPtr vars;
-    VariablePtr var;
     IdentifierPtr id;
-    FunctionCallPtr call;
-    CodeBlockPtr cb;
     ASSERT_NOT_NULL(s = std::dynamic_pointer_cast<StructDef>(root));
     ASSERT_EQ(2, s->numDeclarations());
-    ASSERT_NOT_NULL(vars = std::dynamic_pointer_cast<Variables>(s->getDeclaration(0)));
-    ASSERT_EQ(1, vars->numVariables());
-    ASSERT_NOT_NULL(var = vars->getVariable(0));
-    ASSERT_EQ(L"origin", std::dynamic_pointer_cast<Identifier>(var->getName())->getIdentifier());
-    ASSERT_NOT_NULL(call = std::dynamic_pointer_cast<FunctionCall>(var->getInitializer()));
-    ASSERT_EQ(0, call->getArguments()->numExpressions());
-    ASSERT_NOT_NULL(id = std::dynamic_pointer_cast<Identifier>(call->getFunction()));
-    ASSERT_EQ(L"Point", id->getIdentifier());
+    {
+        ValueBindingsPtr vars;
+        ValueBindingPtr var;
+        FunctionCallPtr call;
+        ASSERT_NOT_NULL(vars = std::dynamic_pointer_cast<ValueBindings>(s->getDeclaration(0)));
+        ASSERT_EQ(1, vars->numBindings());
+        ASSERT_NOT_NULL(var = vars->get(0));
+        ASSERT_EQ(L"origin", std::dynamic_pointer_cast<Identifier>(var->getName())->getIdentifier());
+        ASSERT_NOT_NULL(call = std::dynamic_pointer_cast<FunctionCall>(var->getInitializer()));
+        ASSERT_EQ(0, call->getArguments()->numExpressions());
+        ASSERT_NOT_NULL(id = std::dynamic_pointer_cast<Identifier>(call->getFunction()));
+        ASSERT_EQ(L"Point", id->getIdentifier());
+    }
+    {
+        ComputedPropertyPtr prop;
+        CodeBlockPtr cb;
+        ASSERT_NOT_NULL(prop = std::dynamic_pointer_cast<ComputedProperty>(s->getDeclaration(1)));
+        ASSERT_EQ(L"center", prop->getName());
+        ASSERT_NULL(prop->getInitializer());
+        ASSERT_NULL(prop->getDidSet());
+        ASSERT_NULL(prop->getWillSet());
+        ASSERT_NOT_NULL(cb = prop->getGetter());
+        ASSERT_EQ(1, cb->numStatements());
+        ASSERT_NOT_NULL(std::dynamic_pointer_cast<ReturnStatement>(cb->getStatement(0)));
 
 
-    ASSERT_NOT_NULL(vars = std::dynamic_pointer_cast<Variables>(s->getDeclaration(1)));
-    ASSERT_EQ(1, vars->numVariables());
-    ASSERT_NOT_NULL(var = vars->getVariable(0));
-    ASSERT_EQ(L"center", std::dynamic_pointer_cast<Identifier>(var->getName())->getIdentifier());
-    ASSERT_NULL(var->getInitializer());
-    ASSERT_NULL(var->getDidSet());
-    ASSERT_NULL(var->getWillSet());
-    ASSERT_NOT_NULL(cb = var->getGetter());
-    ASSERT_EQ(1, cb->numStatements());
-    ASSERT_NOT_NULL(std::dynamic_pointer_cast<ReturnStatement>(cb->getStatement(0)));
-
-
-    ASSERT_NOT_NULL(cb = var->getSetter());
-    ASSERT_EQ(L"newCenter", var->getSetterName());
-    ASSERT_EQ(1, cb->numStatements());
-    ASSERT_NOT_NULL(std::dynamic_pointer_cast<Assignment>(cb->getStatement(0)));
-
+        ASSERT_NOT_NULL(cb = prop->getSetter());
+        ASSERT_EQ(L"newCenter", prop->getSetterName());
+        ASSERT_EQ(1, cb->numStatements());
+        ASSERT_NOT_NULL(std::dynamic_pointer_cast<Assignment>(cb->getStatement(0)));
+    }
 
 }
 
@@ -101,40 +101,40 @@ TEST(TestClass, testShorthandSetter)
                        L"}"
                        L"}");
     StructDefPtr s;
-    VariablesPtr vars;
-    VariablePtr var;
-    IdentifierPtr id;
-    FunctionCallPtr call;
-    CodeBlockPtr cb;
     ASSERT_NOT_NULL(s = std::dynamic_pointer_cast<StructDef>(root));
     ASSERT_EQ(2, s->numDeclarations());
-    ASSERT_NOT_NULL(vars = std::dynamic_pointer_cast<Variables>(s->getDeclaration(0)));
-    ASSERT_EQ(1, vars->numVariables());
-    ASSERT_NOT_NULL(var = vars->getVariable(0));
-    ASSERT_EQ(L"origin", std::dynamic_pointer_cast<Identifier>(var->getName())->getIdentifier());
-    ASSERT_NOT_NULL(call = std::dynamic_pointer_cast<FunctionCall>(var->getInitializer()));
-    ASSERT_EQ(0, call->getArguments()->numExpressions());
-    ASSERT_NOT_NULL(id = std::dynamic_pointer_cast<Identifier>(call->getFunction()));
-    ASSERT_EQ(L"Point", id->getIdentifier());
+    {
+        IdentifierPtr id;
+        ValueBindingsPtr vars;
+        ValueBindingPtr var;
+        FunctionCallPtr call;
+        ASSERT_NOT_NULL(vars = std::dynamic_pointer_cast<ValueBindings>(s->getDeclaration(0)));
+        ASSERT_EQ(1, vars->numBindings());
+        ASSERT_NOT_NULL(var = vars->get(0));
+        ASSERT_EQ(L"origin", std::dynamic_pointer_cast<Identifier>(var->getName())->getIdentifier());
+        ASSERT_NOT_NULL(call = std::dynamic_pointer_cast<FunctionCall>(var->getInitializer()));
+        ASSERT_EQ(0, call->getArguments()->numExpressions());
+        ASSERT_NOT_NULL(id = std::dynamic_pointer_cast<Identifier>(call->getFunction()));
+        ASSERT_EQ(L"Point", id->getIdentifier());
+    }
+    {
+        ComputedPropertyPtr prop;
+        CodeBlockPtr cb;
+        ASSERT_NOT_NULL(prop = std::dynamic_pointer_cast<ComputedProperty>(s->getDeclaration(1)));
+        ASSERT_EQ(L"center", prop->getName());
+        ASSERT_NULL(prop->getInitializer());
+        ASSERT_NULL(prop->getDidSet());
+        ASSERT_NULL(prop->getWillSet());
+        ASSERT_NOT_NULL(cb = prop->getGetter());
+        ASSERT_EQ(1, cb->numStatements());
+        ASSERT_NOT_NULL(std::dynamic_pointer_cast<ReturnStatement>(cb->getStatement(0)));
 
 
-    ASSERT_NOT_NULL(vars = std::dynamic_pointer_cast<Variables>(s->getDeclaration(1)));
-    ASSERT_EQ(1, vars->numVariables());
-    ASSERT_NOT_NULL(var = vars->getVariable(0));
-    ASSERT_EQ(L"center", std::dynamic_pointer_cast<Identifier>(var->getName())->getIdentifier());
-    ASSERT_NULL(var->getInitializer());
-    ASSERT_NULL(var->getDidSet());
-    ASSERT_NULL(var->getWillSet());
-    ASSERT_NOT_NULL(cb = var->getGetter());
-    ASSERT_EQ(1, cb->numStatements());
-    ASSERT_NOT_NULL(std::dynamic_pointer_cast<ReturnStatement>(cb->getStatement(0)));
-
-
-    ASSERT_NOT_NULL(cb = var->getSetter());
-    ASSERT_EQ(L"", var->getSetterName());
-    ASSERT_EQ(1, cb->numStatements());
-    ASSERT_NOT_NULL(std::dynamic_pointer_cast<Assignment>(cb->getStatement(0)));
-
+        ASSERT_NOT_NULL(cb = prop->getSetter());
+        ASSERT_EQ(L"", prop->getSetterName());
+        ASSERT_EQ(1, cb->numStatements());
+        ASSERT_NOT_NULL(std::dynamic_pointer_cast<Assignment>(cb->getStatement(0)));
+    }
 
 }
 
@@ -152,41 +152,42 @@ TEST(TestClass, testShorthandSetter2)
                        L"}"
                        L"}");
     StructDefPtr s;
-    VariablesPtr vars;
-    VariablePtr var;
-    IdentifierPtr id;
-    FunctionCallPtr call;
-    CodeBlockPtr cb;
     ASSERT_NOT_NULL(s = std::dynamic_pointer_cast<StructDef>(root));
     ASSERT_EQ(2, s->numDeclarations());
-    ASSERT_NOT_NULL(vars = std::dynamic_pointer_cast<Variables>(s->getDeclaration(0)));
-    ASSERT_EQ(1, vars->numVariables());
-    ASSERT_NOT_NULL(var = vars->getVariable(0));
-    ASSERT_EQ(L"origin", std::dynamic_pointer_cast<Identifier>(var->getName())->getIdentifier());
-    ASSERT_NOT_NULL(call = std::dynamic_pointer_cast<FunctionCall>(var->getInitializer()));
-    ASSERT_EQ(0, call->getArguments()->numExpressions());
-    ASSERT_NOT_NULL(id = std::dynamic_pointer_cast<Identifier>(call->getFunction()));
-    ASSERT_EQ(L"Point", id->getIdentifier());
+    {
+        ValueBindingsPtr vars;
+        ValueBindingPtr var;
+        IdentifierPtr id;
+        FunctionCallPtr call;
+        ASSERT_NOT_NULL(vars = std::dynamic_pointer_cast<ValueBindings>(s->getDeclaration(0)));
+        ASSERT_EQ(1, vars->numBindings());
+        ASSERT_NOT_NULL(var = vars->get(0));
+        ASSERT_EQ(L"origin", std::dynamic_pointer_cast<Identifier>(var->getName())->getIdentifier());
+        ASSERT_NOT_NULL(call = std::dynamic_pointer_cast<FunctionCall>(var->getInitializer()));
+        ASSERT_EQ(0, call->getArguments()->numExpressions());
+        ASSERT_NOT_NULL(id = std::dynamic_pointer_cast<Identifier>(call->getFunction()));
+        ASSERT_EQ(L"Point", id->getIdentifier());
+    }
+
+    {
+        ComputedPropertyPtr prop;
+        CodeBlockPtr cb;
+        ASSERT_NOT_NULL(prop = std::dynamic_pointer_cast<ComputedProperty>(s->getDeclaration(1)));
+        ASSERT_EQ(L"center", prop->getName());
+        ASSERT_NULL(prop->getInitializer());
+        ASSERT_NULL(prop->getDidSet());
+        ASSERT_NULL(prop->getWillSet());
+        ASSERT_NOT_NULL(cb = prop->getGetter());
+        ASSERT_EQ(1, cb->numStatements());
+        ASSERT_NOT_NULL(std::dynamic_pointer_cast<ReturnStatement>(cb->getStatement(0)));
 
 
-    ASSERT_NOT_NULL(vars = std::dynamic_pointer_cast<Variables>(s->getDeclaration(1)));
-    ASSERT_EQ(1, vars->numVariables());
-    ASSERT_NOT_NULL(var = vars->getVariable(0));
-    ASSERT_EQ(L"center", std::dynamic_pointer_cast<Identifier>(var->getName())->getIdentifier());
-    ASSERT_NULL(var->getInitializer());
-    ASSERT_NULL(var->getDidSet());
-    ASSERT_NULL(var->getWillSet());
-    ASSERT_NOT_NULL(cb = var->getGetter());
-    ASSERT_EQ(1, cb->numStatements());
-    ASSERT_NOT_NULL(std::dynamic_pointer_cast<ReturnStatement>(cb->getStatement(0)));
+        ASSERT_NOT_NULL(cb = prop->getSetter());
+        ASSERT_EQ(L"", prop->getSetterName());
+        ASSERT_EQ(1, cb->numStatements());
+        ASSERT_NOT_NULL(std::dynamic_pointer_cast<Assignment>(cb->getStatement(0)));
 
-
-    ASSERT_NOT_NULL(cb = var->getSetter());
-    ASSERT_EQ(L"", var->getSetterName());
-    ASSERT_EQ(1, cb->numStatements());
-    ASSERT_NOT_NULL(std::dynamic_pointer_cast<Assignment>(cb->getStatement(0)));
-
-
+    }
 }
 
 TEST(TestClass, testShorthandSetter3)
@@ -200,37 +201,37 @@ TEST(TestClass, testShorthandSetter3)
                        L"}"
                        L"}");
     StructDefPtr s;
-    VariablesPtr vars;
-    VariablePtr var;
-    IdentifierPtr id;
-    FunctionCallPtr call;
-    CodeBlockPtr cb;
     ASSERT_NOT_NULL(s = std::dynamic_pointer_cast<StructDef>(root));
     ASSERT_EQ(2, s->numDeclarations());
-    ASSERT_NOT_NULL(vars = std::dynamic_pointer_cast<Variables>(s->getDeclaration(0)));
-    ASSERT_EQ(1, vars->numVariables());
-    ASSERT_NOT_NULL(var = vars->getVariable(0));
-    ASSERT_EQ(L"origin", std::dynamic_pointer_cast<Identifier>(var->getName())->getIdentifier());
-    ASSERT_NOT_NULL(call = std::dynamic_pointer_cast<FunctionCall>(var->getInitializer()));
-    ASSERT_EQ(0, call->getArguments()->numExpressions());
-    ASSERT_NOT_NULL(id = std::dynamic_pointer_cast<Identifier>(call->getFunction()));
-    ASSERT_EQ(L"Point", id->getIdentifier());
+    {
+        ValueBindingsPtr vars;
+        ValueBindingPtr var;
+        IdentifierPtr id;
+        FunctionCallPtr call;
+        ASSERT_NOT_NULL(vars = std::dynamic_pointer_cast<ValueBindings>(s->getDeclaration(0)));
+        ASSERT_EQ(1, vars->numBindings());
+        ASSERT_NOT_NULL(var = vars->get(0));
+        ASSERT_EQ(L"origin", std::dynamic_pointer_cast<Identifier>(var->getName())->getIdentifier());
+        ASSERT_NOT_NULL(call = std::dynamic_pointer_cast<FunctionCall>(var->getInitializer()));
+        ASSERT_EQ(0, call->getArguments()->numExpressions());
+        ASSERT_NOT_NULL(id = std::dynamic_pointer_cast<Identifier>(call->getFunction()));
+        ASSERT_EQ(L"Point", id->getIdentifier());
+    }
+    {
+        ComputedPropertyPtr prop;
+        CodeBlockPtr cb;
+        ASSERT_NOT_NULL(prop = std::dynamic_pointer_cast<ComputedProperty>(s->getDeclaration(1)));
+        ASSERT_EQ(L"center", prop->getName());
+        ASSERT_NULL(prop->getInitializer());
+        ASSERT_NULL(prop->getDidSet());
+        ASSERT_NULL(prop->getWillSet());
+        ASSERT_NOT_NULL(cb = prop->getGetter());
+        ASSERT_EQ(1, cb->numStatements());
+        ASSERT_NOT_NULL(std::dynamic_pointer_cast<ReturnStatement>(cb->getStatement(0)));
 
 
-    ASSERT_NOT_NULL(vars = std::dynamic_pointer_cast<Variables>(s->getDeclaration(1)));
-    ASSERT_EQ(1, vars->numVariables());
-    ASSERT_NOT_NULL(var = vars->getVariable(0));
-    ASSERT_EQ(L"center", std::dynamic_pointer_cast<Identifier>(var->getName())->getIdentifier());
-    ASSERT_NULL(var->getInitializer());
-    ASSERT_NULL(var->getDidSet());
-    ASSERT_NULL(var->getWillSet());
-    ASSERT_NOT_NULL(cb = var->getGetter());
-    ASSERT_EQ(1, cb->numStatements());
-    ASSERT_NOT_NULL(std::dynamic_pointer_cast<ReturnStatement>(cb->getStatement(0)));
-
-
-    ASSERT_NULL(var->getSetter());
-
+        ASSERT_NULL(prop->getSetter());
+    }
 }
 
 TEST(TestClass, testReadonlyComputedProperty)
@@ -242,25 +243,22 @@ TEST(TestClass, testReadonlyComputedProperty)
                        L"} "
                        L"}");
     StructDefPtr s;
-    VariablesPtr vars;
-    VariablePtr var;
-    CodeBlockPtr cb;
+
     ASSERT_NOT_NULL(s = std::dynamic_pointer_cast<StructDef>(root));
     ASSERT_EQ(2, s->numDeclarations());
-
-
-    ASSERT_NOT_NULL(vars = std::dynamic_pointer_cast<Variables>(s->getDeclaration(1)));
-    ASSERT_EQ(1, vars->numVariables());
-    ASSERT_NOT_NULL(var = vars->getVariable(0));
-    ASSERT_EQ(L"volume", std::dynamic_pointer_cast<Identifier>(var->getName())->getIdentifier());
-    ASSERT_NULL(var->getInitializer());
-    ASSERT_NULL(var->getDidSet());
-    ASSERT_NULL(var->getWillSet());
-    ASSERT_NULL(var->getSetter());
-    ASSERT_NOT_NULL(cb = var->getGetter());
-    ASSERT_EQ(1, cb->numStatements());
-    ASSERT_NOT_NULL(std::dynamic_pointer_cast<ReturnStatement>(cb->getStatement(0)));
-
+    {
+        ComputedPropertyPtr prop;
+        CodeBlockPtr cb;
+        ASSERT_NOT_NULL(prop = std::dynamic_pointer_cast<ComputedProperty>(s->getDeclaration(1)));
+        ASSERT_EQ(L"volume", prop->getName());
+        ASSERT_NULL(prop->getInitializer());
+        ASSERT_NULL(prop->getDidSet());
+        ASSERT_NULL(prop->getWillSet());
+        ASSERT_NULL(prop->getSetter());
+        ASSERT_NOT_NULL(cb = prop->getGetter());
+        ASSERT_EQ(1, cb->numStatements());
+        ASSERT_NOT_NULL(std::dynamic_pointer_cast<ReturnStatement>(cb->getStatement(0)));
+    }
 }
 TEST(TestClass, testPropertyObservers)
 {
@@ -278,18 +276,15 @@ TEST(TestClass, testPropertyObservers)
                        L"}");
 
     ClassDefPtr s;
-    VariablesPtr vars;
-    VariablePtr var;
+    ComputedPropertyPtr var;
     CodeBlockPtr cb;
     IntegerLiteralPtr i;
     ASSERT_NOT_NULL(s = std::dynamic_pointer_cast<ClassDef>(root));
     ASSERT_EQ(1, s->numDeclarations());
 
 
-    ASSERT_NOT_NULL(vars = std::dynamic_pointer_cast<Variables>(s->getDeclaration(0)));
-    ASSERT_EQ(1, vars->numVariables());
-    ASSERT_NOT_NULL(var = vars->getVariable(0));
-    ASSERT_EQ(L"totalSteps", std::dynamic_pointer_cast<Identifier>(var->getName())->getIdentifier());
+    ASSERT_NOT_NULL(var = std::dynamic_pointer_cast<ComputedProperty>(s->getDeclaration(0)));
+    ASSERT_EQ(L"totalSteps", var->getName());
     ASSERT_NOT_NULL(i = std::dynamic_pointer_cast<IntegerLiteral>(var->getInitializer()));
     ASSERT_NULL(var->getSetter());
     ASSERT_NULL(var->getGetter());
@@ -322,28 +317,25 @@ TEST(TestClass, testPropertyObservers2)
                        L"}");
 
     ClassDefPtr s;
-    VariablesPtr vars;
-    VariablePtr var;
+    ComputedPropertyPtr prop;
     CodeBlockPtr cb;
     IntegerLiteralPtr i;
     ASSERT_NOT_NULL(s = std::dynamic_pointer_cast<ClassDef>(root));
     ASSERT_EQ(1, s->numDeclarations());
 
 
-    ASSERT_NOT_NULL(vars = std::dynamic_pointer_cast<Variables>(s->getDeclaration(0)));
-    ASSERT_EQ(1, vars->numVariables());
-    ASSERT_NOT_NULL(var = vars->getVariable(0));
-    ASSERT_EQ(L"totalSteps", std::dynamic_pointer_cast<Identifier>(var->getName())->getIdentifier());
-    ASSERT_NOT_NULL(i = std::dynamic_pointer_cast<IntegerLiteral>(var->getInitializer()));
-    ASSERT_NULL(var->getSetter());
-    ASSERT_NULL(var->getGetter());
+    ASSERT_NOT_NULL(prop = std::dynamic_pointer_cast<ComputedProperty>(s->getDeclaration(0)));
+    ASSERT_EQ(L"totalSteps", prop->getName());
+    ASSERT_NOT_NULL(i = std::dynamic_pointer_cast<IntegerLiteral>(prop->getInitializer()));
+    ASSERT_NULL(prop->getSetter());
+    ASSERT_NULL(prop->getGetter());
 
 
-    ASSERT_NOT_NULL(cb = var->getWillSet());
+    ASSERT_NOT_NULL(cb = prop->getWillSet());
     ASSERT_EQ(1, cb->numStatements());
     ASSERT_NOT_NULL(std::dynamic_pointer_cast<FunctionCall>(cb->getStatement(0)));
 
-    ASSERT_NOT_NULL(cb = var->getDidSet());
+    ASSERT_NOT_NULL(cb = prop->getDidSet());
     ASSERT_EQ(1, cb->numStatements());
     ASSERT_NOT_NULL(std::dynamic_pointer_cast<IfStatement>(cb->getStatement(0)));
 
@@ -361,18 +353,15 @@ TEST(TestClass, testPropertyObservers3)
                        L"}");
 
     ClassDefPtr s;
-    VariablesPtr vars;
-    VariablePtr var;
+    ComputedPropertyPtr var;
     CodeBlockPtr cb;
     IntegerLiteralPtr i;
     ASSERT_NOT_NULL(s = std::dynamic_pointer_cast<ClassDef>(root));
     ASSERT_EQ(1, s->numDeclarations());
 
 
-    ASSERT_NOT_NULL(vars = std::dynamic_pointer_cast<Variables>(s->getDeclaration(0)));
-    ASSERT_EQ(1, vars->numVariables());
-    ASSERT_NOT_NULL(var = vars->getVariable(0));
-    ASSERT_EQ(L"totalSteps", std::dynamic_pointer_cast<Identifier>(var->getName())->getIdentifier());
+    ASSERT_NOT_NULL(var = std::dynamic_pointer_cast<ComputedProperty>(s->getDeclaration(0)));
+    ASSERT_EQ(L"totalSteps", var->getName());
     ASSERT_NOT_NULL(i = std::dynamic_pointer_cast<IntegerLiteral>(var->getInitializer()));
     ASSERT_NULL(var->getSetter());
     ASSERT_NULL(var->getGetter());
@@ -395,15 +384,17 @@ void testTypeProperty_Struct()
                        L"}"
                        L"}");
     StructDefPtr s;
-    VariablesPtr vars;
     ASSERT_NOT_NULL(s = std::dynamic_pointer_cast<StructDef>(root));
     ASSERT_EQ(2, s->numDeclarations());
 
-    ASSERT_NOT_NULL(vars = std::dynamic_pointer_cast<Variables>(s->getDeclaration(0)));
-    ASSERT_EQ((int)TypeSpecifier::Static, vars->getSpecifiers());
 
-    ASSERT_NOT_NULL(vars = std::dynamic_pointer_cast<Variables>(s->getDeclaration(1)));
-    ASSERT_EQ((int)TypeSpecifier::Static, vars->getSpecifiers());
+    ValueBindingsPtr storedTypeProperty;
+    ASSERT_NOT_NULL(storedTypeProperty = std::dynamic_pointer_cast<ValueBindings>(s->getDeclaration(0)));
+    ASSERT_EQ((int)TypeSpecifier::Static, storedTypeProperty->getSpecifiers());
+
+    ComputedPropertyPtr computedTypeProperty;
+    ASSERT_NOT_NULL(computedTypeProperty = std::dynamic_pointer_cast<ComputedProperty>(s->getDeclaration(1)));
+    ASSERT_EQ((int)TypeSpecifier::Static, computedTypeProperty->getSpecifiers());
 
 }
 
@@ -416,15 +407,19 @@ void testTypeProperty_Class()
                        L"}"
                        L"}");
     ClassDefPtr s;
-    VariablesPtr vars;
+
+    ValueBindingsPtr vars;
     ASSERT_NOT_NULL(s = std::dynamic_pointer_cast<ClassDef>(root));
     ASSERT_EQ(2, s->numDeclarations());
 
-    ASSERT_NOT_NULL(vars = std::dynamic_pointer_cast<Variables>(s->getDeclaration(0)));
-    ASSERT_EQ((int)TypeSpecifier::Static, vars->getSpecifiers());
+    ValueBindingsPtr storedTypeProperty;
+    ASSERT_NOT_NULL(storedTypeProperty = std::dynamic_pointer_cast<ValueBindings>(s->getDeclaration(0)));
+    ASSERT_EQ((int)TypeSpecifier::Static, storedTypeProperty->getSpecifiers());
 
-    ASSERT_NOT_NULL(vars = std::dynamic_pointer_cast<Variables>(s->getDeclaration(1)));
-    ASSERT_EQ((int)TypeSpecifier::Static, vars->getSpecifiers());
+    ComputedPropertyPtr computedTypeProperty;
+    ASSERT_NOT_NULL(computedTypeProperty = std::dynamic_pointer_cast<ComputedProperty>(s->getDeclaration(1)));
+    ASSERT_EQ((int)TypeSpecifier::Static, computedTypeProperty->getSpecifiers());
+
 
 }
 
@@ -437,15 +432,16 @@ void testTypeProperty_Enum()
                        L"}"
                        L"}");
     EnumDefPtr s;
-    VariablesPtr vars;
     ASSERT_NOT_NULL(s = std::dynamic_pointer_cast<EnumDef>(root));
     ASSERT_EQ(2, s->numDeclarations());
 
-    ASSERT_NOT_NULL(vars = std::dynamic_pointer_cast<Variables>(s->getDeclaration(0)));
-    ASSERT_EQ((int)TypeSpecifier::Static, vars->getSpecifiers());
+    ValueBindingsPtr storedTypeProperty;
+    ASSERT_NOT_NULL(storedTypeProperty = std::dynamic_pointer_cast<ValueBindings>(s->getDeclaration(0)));
+    ASSERT_EQ((int)TypeSpecifier::Static, storedTypeProperty->getSpecifiers());
 
-    ASSERT_NOT_NULL(vars = std::dynamic_pointer_cast<Variables>(s->getDeclaration(1)));
-    ASSERT_EQ((int)TypeSpecifier::Static, vars->getSpecifiers());
+    ComputedPropertyPtr computedTypeProperty;
+    ASSERT_NOT_NULL(computedTypeProperty = std::dynamic_pointer_cast<ComputedProperty>(s->getDeclaration(1)));
+    ASSERT_EQ((int)TypeSpecifier::Static, computedTypeProperty->getSpecifiers());
 
 }
 
@@ -460,12 +456,12 @@ TEST(TestClass, testMethod)
                        L"}");
 
     StructDefPtr s;
-    VariablesPtr vars;
+    ValueBindingsPtr vars;
     FunctionDefPtr f;
     ASSERT_NOT_NULL(s = std::dynamic_pointer_cast<StructDef>(root));
     ASSERT_EQ(2, s->numDeclarations());
 
-    ASSERT_NOT_NULL(vars = std::dynamic_pointer_cast<Variables>(s->getDeclaration(0)));
+    ASSERT_NOT_NULL(vars = std::dynamic_pointer_cast<ValueBindings>(s->getDeclaration(0)));
     ASSERT_EQ(0, vars->getSpecifiers());
 
     ASSERT_NOT_NULL(f = std::dynamic_pointer_cast<FunctionDef>(s->getDeclaration(1)));
@@ -684,15 +680,13 @@ void testOverride_Var()
     ASSERT_EQ(L"Car", t->getName());
 
 
-    VariablesPtr vars;
+    ValueBindingsPtr vars;
     ASSERT_EQ(1, c->numDeclarations());
-    ASSERT_NOT_NULL(vars = std::dynamic_pointer_cast<Variables>(c->getDeclaration(0)));
-    ASSERT_EQ(1, vars->numVariables());
-    VariablePtr var;
-    ASSERT_NOT_NULL(var = vars->getVariable(0));
-    IdentifierPtr id;
-    ASSERT_NOT_NULL(id = std::dynamic_pointer_cast<Identifier>(var->getName()));
-    ASSERT_EQ(L"speed", id->getIdentifier());
+    ASSERT_NOT_NULL(vars = std::dynamic_pointer_cast<ValueBindings>(c->getDeclaration(0)));
+    ASSERT_EQ(1, vars->numBindings());
+    ComputedPropertyPtr var;
+    ASSERT_NOT_NULL(var = std::dynamic_pointer_cast<ComputedProperty>(vars->get(0)));
+    ASSERT_EQ(L"speed", var->getName());
     ASSERT_EQ((int)TypeSpecifier::Override, var->getSpecifiers());
 
 
@@ -721,18 +715,11 @@ void testOverride_PropertyObservers()
     ASSERT_EQ(L"Car", t->getName());
 
 
-    VariablesPtr vars;
+    ComputedPropertyPtr var;
     ASSERT_EQ(3, c->numDeclarations());
-    ASSERT_NOT_NULL(vars = std::dynamic_pointer_cast<Variables>(c->getDeclaration(1)));
-    ASSERT_EQ(1, vars->numVariables());
-    VariablePtr var;
-    ASSERT_NOT_NULL(var = vars->getVariable(0));
-    IdentifierPtr id;
-    ASSERT_NOT_NULL(id = std::dynamic_pointer_cast<Identifier>(var->getName()));
-    ASSERT_EQ(L"speed", id->getIdentifier());
+    ASSERT_NOT_NULL(var = std::dynamic_pointer_cast<ComputedProperty>(c->getDeclaration(1)));
+    ASSERT_EQ(L"speed", var->getName());
     ASSERT_EQ((int)TypeSpecifier::Override, var->getSpecifiers());
-
-
 
 }
 
@@ -763,11 +750,11 @@ TEST(TestClass, testFinalAttribute)
     ASSERT_EQ(L"Car", t->getName());
 
     ASSERT_EQ(3, c->numDeclarations());
-    VariablesPtr vars;
+    ValueBindingsPtr vars;
     FunctionDefPtr func;
     SubscriptDefPtr sub;
 
-    ASSERT_NOT_NULL(vars = std::dynamic_pointer_cast<Variables>(c->getDeclaration(0)));
+    ASSERT_NOT_NULL(vars = std::dynamic_pointer_cast<ValueBindings>(c->getDeclaration(0)));
     ASSERT_EQ(1, (int)vars->getAttributes().size());
     ASSERT_EQ(L"final", vars->getAttributes().front()->getName());
 
@@ -794,14 +781,14 @@ TEST(TestClass, testInit)
                     L"}\n"
                     L"}\n");
     StructDefPtr s;
-    ConstantsPtr let;
+    ValueBindingsPtr let;
     InitializerDefPtr init;
     ParametersPtr params;
 
     ASSERT_NOT_NULL(s = std::dynamic_pointer_cast<StructDef>(root));
     ASSERT_EQ(2, s->numDeclarations());
 
-    ASSERT_NOT_NULL(let = std::dynamic_pointer_cast<Constants>(s->getDeclaration(0)));
+    ASSERT_NOT_NULL(let = std::dynamic_pointer_cast<ValueBindings>(s->getDeclaration(0)));
     ASSERT_NOT_NULL(init = std::dynamic_pointer_cast<InitializerDef>(s->getDeclaration(1)));
     ASSERT_FALSE(init->isConvenience());
     ASSERT_NOT_NULL(params = std::dynamic_pointer_cast<Parameters>(init->getParameters()));
@@ -895,13 +882,13 @@ TEST(TestClass, testWeakReference)
                     L"}");
 
     ClassDefPtr s;
-    VariablesPtr vars;
+    ValueBindingsPtr vars;
 
 
     ASSERT_NOT_NULL(s = std::dynamic_pointer_cast<ClassDef>(root));
     ASSERT_EQ(4, s->numDeclarations());
 
-    ASSERT_NOT_NULL(vars = std::dynamic_pointer_cast<Variables>(s->getDeclaration(2)));
+    ASSERT_NOT_NULL(vars = std::dynamic_pointer_cast<ValueBindings>(s->getDeclaration(2)));
     ASSERT_TRUE(vars->getSpecifiers() && TypeSpecifier::Weak);
 
 }
@@ -919,13 +906,13 @@ TEST(TestClass, testUnownedReference)
                     L"}");
 
     ClassDefPtr s;
-    ConstantsPtr let;
+    ValueBindingsPtr let;
 
 
     ASSERT_NOT_NULL(s = std::dynamic_pointer_cast<ClassDef>(root));
     ASSERT_EQ(4, s->numDeclarations());
 
-    ASSERT_NOT_NULL(let = std::dynamic_pointer_cast<Constants>(s->getDeclaration(1)));
+    ASSERT_NOT_NULL(let = std::dynamic_pointer_cast<ValueBindings>(s->getDeclaration(1)));
     ASSERT_TRUE(let->getSpecifiers() && TypeSpecifier::Unowned);
 
 }

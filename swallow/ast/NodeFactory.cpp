@@ -242,23 +242,19 @@ ImportPtr NodeFactory::createImport(const SourceInfo&state)
 {
     return _(state, new Import());
 }
-ConstantPtr NodeFactory::createConstant(const SourceInfo&state)
+ComputedPropertyPtr NodeFactory::createComputedProperty(const SourceInfo &state)
 {
-    return _(state, new Constant());
-}
-ConstantsPtr NodeFactory::createConstants(const SourceInfo&state)
-{
-    return _(state, new Constants());
+    return _(state, new ComputedProperty());
 }
 
-VariablesPtr NodeFactory::createVariables(const SourceInfo&state)
+ValueBindingPtr NodeFactory::createValueBinding(const SourceInfo &state)
 {
-    return _(state, new Variables());
+    return _(state, new ValueBinding());
 }
 
-VariablePtr NodeFactory::createVariable(const SourceInfo& state)
+ValueBindingsPtr NodeFactory::createValueBindings(const SourceInfo& state)
 {
-    return  _(state, new Variable());
+    return  _(state, new ValueBindings());
 }
 TypeAliasPtr NodeFactory::createTypealias(const SourceInfo&state)
 {

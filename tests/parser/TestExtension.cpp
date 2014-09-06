@@ -26,17 +26,14 @@ TEST(TestExtension, testComputedProperty)
                     L"var ft: Double { return self / 3.28084 }\n"
                     L"}");
     ExtensionDefPtr s;
-    VariablesPtr vars;
-    VariablePtr var;
+    ComputedPropertyPtr var;
     CodeBlockPtr cb;
     ReturnStatementPtr ret;
     ASSERT_NOT_NULL(s = std::dynamic_pointer_cast<ExtensionDef>(root));
     ASSERT_EQ(5, s->numDeclarations());
 
-    ASSERT_NOT_NULL(vars = std::dynamic_pointer_cast<Variables>(s->getDeclaration(0)));
-    ASSERT_EQ(1, vars->numVariables());
-    ASSERT_NOT_NULL(var = vars->getVariable(0));
-    ASSERT_EQ(L"km", std::dynamic_pointer_cast<Identifier>(var->getName())->getIdentifier());
+    ASSERT_NOT_NULL(var = std::dynamic_pointer_cast<ComputedProperty>(s->getDeclaration(0)));
+    ASSERT_EQ(L"km", var->getName());
     ASSERT_EQ(L"Double", std::dynamic_pointer_cast<TypeIdentifier>(var->getDeclaredType())->getName());
     ASSERT_NULL(var->getInitializer());
     ASSERT_NOT_NULL(cb = var->getGetter());
@@ -44,10 +41,8 @@ TEST(TestExtension, testComputedProperty)
     ASSERT_NOT_NULL(ret = std::dynamic_pointer_cast<ReturnStatement>(cb->getStatement(0)));
 
 
-    ASSERT_NOT_NULL(vars = std::dynamic_pointer_cast<Variables>(s->getDeclaration(1)));
-    ASSERT_EQ(1, vars->numVariables());
-    ASSERT_NOT_NULL(var = vars->getVariable(0));
-    ASSERT_EQ(L"m", std::dynamic_pointer_cast<Identifier>(var->getName())->getIdentifier());
+    ASSERT_NOT_NULL(var = std::dynamic_pointer_cast<ComputedProperty>(s->getDeclaration(1)));
+    ASSERT_EQ(L"m", var->getName());
     ASSERT_EQ(L"Double", std::dynamic_pointer_cast<TypeIdentifier>(var->getDeclaredType())->getName());
     ASSERT_NULL(var->getInitializer());
     ASSERT_NOT_NULL(cb = var->getGetter());
@@ -186,8 +181,7 @@ TEST(TestExtension, testNestedType)
 
     ExtensionDefPtr s;
     EnumDefPtr e;
-    VariablesPtr vars;
-    VariablePtr kind;
+    ComputedPropertyPtr kind;
 
     ASSERT_NOT_NULL(s = std::dynamic_pointer_cast<ExtensionDef>(root));
     ASSERT_EQ(2, s->numDeclarations());
@@ -195,10 +189,8 @@ TEST(TestExtension, testNestedType)
     ASSERT_NOT_NULL(e = std::dynamic_pointer_cast<EnumDef>(s->getDeclaration(0)));
     ASSERT_EQ(L"Kind", std::dynamic_pointer_cast<TypeIdentifier>(e->getIdentifier())->getName());
 
-    ASSERT_NOT_NULL(vars = std::dynamic_pointer_cast<Variables>(s->getDeclaration(1)));
-    ASSERT_EQ(1, vars->numVariables());
-    ASSERT_NOT_NULL(kind = vars->getVariable(0));
-    ASSERT_EQ(L"kind", std::dynamic_pointer_cast<Identifier>(kind->getName())->getIdentifier());
+    ASSERT_NOT_NULL(kind = std::dynamic_pointer_cast<ComputedProperty>(s->getDeclaration(1)));
+    ASSERT_EQ(L"kind", kind->getName());
 
 
 }

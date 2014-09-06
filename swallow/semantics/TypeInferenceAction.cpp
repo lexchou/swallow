@@ -693,11 +693,7 @@ void TypeInferenceAction::visitCompileConstant(const CompileConstantPtr& node)
 
 
 
-void TypeInferenceAction::visitVariable(const VariablePtr& node)
-{
-}
-
-void TypeInferenceAction::visitConstant(const ConstantPtr& node)
+void TypeInferenceAction::visitValueBinding(const ValueBindingPtr& node)
 {
     if(!node->getInitializer())
     {

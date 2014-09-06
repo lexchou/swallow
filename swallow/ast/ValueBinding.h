@@ -11,13 +11,18 @@ typedef std::shared_ptr<class Type> TypePtr;
 class ValueBinding : public Declaration
 {
 public:
-    ValueBinding(NodeType::T nodeType)
-            :Declaration(nodeType)
-    {}
+    ValueBinding();
 public:
     using Declaration::setSpecifiers;
     using Declaration::getSpecifiers;
 public:
+
+    void setTypeAttributes(const Attributes& attrs);
+    const Attributes& getTypeAttributes() const;
+
+    void setDeclaredType(const TypeNodePtr& t);
+    TypeNodePtr getDeclaredType();
+
     const TypePtr& getType()const;
     void setType(const TypePtr& type);
 
@@ -27,9 +32,13 @@ public:
     void setInitializer(const ExpressionPtr& initializer);
     const ExpressionPtr& getInitializer()const;
 public:
+    virtual void accept(NodeVisitor* visitor) override;
+public:
     PatternPtr name;
     ExpressionPtr initializer;
     TypePtr type;
+    TypeNodePtr declaredType;
+    Attributes typeAttributes;
 };
 
 SWIFT_NS_END

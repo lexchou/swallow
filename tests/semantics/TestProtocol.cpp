@@ -138,3 +138,13 @@ TEST(TestProtocol, Var)
     auto res = compilerResults.getResult(0);
     ASSERT_EQ(Errors::E_PROTOCOL_VAR_MUST_BE_COMPUTED_PROPERTY, res.code);
 }
+
+TEST(TestProtocol, ReadOnlyComputedProperty)
+{
+    SEMANTIC_ANALYZE(L"protocol MyProtocol {\n"
+            "var a : Int {get}\n"
+            "}");
+    ASSERT_EQ(1, compilerResults.numResults());
+    auto res = compilerResults.getResult(0);
+    ASSERT_EQ(Errors::E_PROTOCOL_VAR_MUST_BE_COMPUTED_PROPERTY, res.code);
+}

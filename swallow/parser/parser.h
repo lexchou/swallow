@@ -69,10 +69,10 @@ private://declaration
     DeclarationPtr parseImport(const std::vector<AttributePtr>& attrs);
     DeclarationPtr parseLet(const std::vector<AttributePtr>& attrs, int specifiers);
     DeclarationPtr parseVar(const std::vector<AttributePtr>& attrs, int specifiers);
-    VariablePtr parseVariableDeclaration();
-    void parseWillSetDidSetBlock(const VariablePtr& variable);
-    void parseWillSetClause(const VariablePtr& variable, bool opt);
-    void parseDidSetClause(const VariablePtr& variable, bool opt);
+    ValueBindingPtr parseVariableDeclaration();
+    void parseWillSetDidSetBlock(const ComputedPropertyPtr& property);
+    void parseWillSetClause(const ComputedPropertyPtr& property, bool opt);
+    void parseDidSetClause(const ComputedPropertyPtr& property, bool opt);
     
     std::pair<CodeBlockPtr, std::pair<std::wstring, CodeBlockPtr> > parseGetterSetterBlock();
     std::pair<std::wstring, CodeBlockPtr> parseSetterClause();

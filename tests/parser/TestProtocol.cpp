@@ -45,23 +45,18 @@ TEST(TestProtocol, testPropertyRequirements)
     ProtocolDefPtr p;
     ASSERT_NOT_NULL(p = std::dynamic_pointer_cast<ProtocolDef>(root));
     ASSERT_EQ(2, p->numDeclarations());
-    VariablesPtr vars;
-    VariablePtr var;
+    ComputedPropertyPtr var;
 
-    ASSERT_NOT_NULL(vars = std::dynamic_pointer_cast<Variables>(p->getDeclaration(0)));
-    ASSERT_EQ(1, vars->numVariables());
-    ASSERT_NOT_NULL(var = vars->getVariable(0));
-    ASSERT_EQ(L"mustBeSettable", std::dynamic_pointer_cast<Identifier>(var->getName())->getIdentifier());
-    ASSERT_EQ(0, vars->getSpecifiers());
+    ASSERT_NOT_NULL(var = std::dynamic_pointer_cast<ComputedProperty>(p->getDeclaration(0)));
+    ASSERT_EQ(L"mustBeSettable", var->getName());
+    ASSERT_EQ(0, var->getSpecifiers());
     ASSERT_NOT_NULL(var->getGetter());
     ASSERT_NOT_NULL(var->getSetter());
 
 
 
-    ASSERT_NOT_NULL(vars = std::dynamic_pointer_cast<Variables>(p->getDeclaration(1)));
-    ASSERT_EQ(1, vars->numVariables());
-    ASSERT_NOT_NULL(var = vars->getVariable(0));
-    ASSERT_EQ(L"doesNotNeedToBeSettable", std::dynamic_pointer_cast<Identifier>(var->getName())->getIdentifier());
+    ASSERT_NOT_NULL(var = std::dynamic_pointer_cast<ComputedProperty>(p->getDeclaration(1)));
+    ASSERT_EQ(L"doesNotNeedToBeSettable", var->getName());
     ASSERT_NOT_NULL(var->getGetter());
     ASSERT_NULL(var->getSetter());
 
@@ -75,14 +70,11 @@ TEST(TestProtocol, testPropertyRequirements2)
     ProtocolDefPtr p;
     ASSERT_NOT_NULL(p = std::dynamic_pointer_cast<ProtocolDef>(root));
     ASSERT_EQ(1, p->numDeclarations());
-    VariablesPtr vars;
-    VariablePtr var;
+    ComputedPropertyPtr var;
 
-    ASSERT_NOT_NULL(vars = std::dynamic_pointer_cast<Variables>(p->getDeclaration(0)));
-    ASSERT_EQ(1, vars->numVariables());
-    ASSERT_NOT_NULL(var = vars->getVariable(0));
-    ASSERT_EQ((int)TypeSpecifier::Class, vars->getSpecifiers());
-    ASSERT_EQ(L"someTypeProperty", std::dynamic_pointer_cast<Identifier>(var->getName())->getIdentifier());
+    ASSERT_NOT_NULL(var = std::dynamic_pointer_cast<ComputedProperty>(p->getDeclaration(0)));
+    ASSERT_EQ((int)TypeSpecifier::Class, var->getSpecifiers());
+    ASSERT_EQ(L"someTypeProperty", var->getName());
     ASSERT_NOT_NULL(var->getGetter());
     ASSERT_NOT_NULL(var->getSetter());
 
@@ -95,14 +87,11 @@ TEST(TestProtocol, testPropertyRequirements3)
     ProtocolDefPtr p;
     ASSERT_NOT_NULL(p = std::dynamic_pointer_cast<ProtocolDef>(root));
     ASSERT_EQ(1, p->numDeclarations());
-    VariablesPtr vars;
-    VariablePtr var;
+    ComputedPropertyPtr var;
 
-    ASSERT_NOT_NULL(vars = std::dynamic_pointer_cast<Variables>(p->getDeclaration(0)));
-    ASSERT_EQ(1, vars->numVariables());
-    ASSERT_NOT_NULL(var = vars->getVariable(0));
-    ASSERT_EQ(0, vars->getSpecifiers());
-    ASSERT_EQ(L"fullName", std::dynamic_pointer_cast<Identifier>(var->getName())->getIdentifier());
+    ASSERT_NOT_NULL(var = std::dynamic_pointer_cast<ComputedProperty>(p->getDeclaration(0)));
+    ASSERT_EQ(0, var->getSpecifiers());
+    ASSERT_EQ(L"fullName", var->getName());
     ASSERT_NOT_NULL(var->getGetter());
     ASSERT_NULL(var->getSetter());
 
@@ -204,15 +193,12 @@ TEST(TestProtocol, testOptional)
     //ASSERT_NULL(f->getBody());
     ASSERT_NOT_NULL(f->getAttribute(L"optional"));
 
-    VariablesPtr vars;
-    VariablePtr var;
+    ComputedPropertyPtr var;
 
-    ASSERT_NOT_NULL(vars = std::dynamic_pointer_cast<Variables>(p->getDeclaration(1)));
-    ASSERT_NOT_NULL(vars->getAttribute(L"optional"));
-    ASSERT_EQ(1, vars->numVariables());
-    ASSERT_NOT_NULL(var = vars->getVariable(0));
-    ASSERT_EQ(0, vars->getSpecifiers());
-    ASSERT_EQ(L"fixedIncrement", std::dynamic_pointer_cast<Identifier>(var->getName())->getIdentifier());
+    ASSERT_NOT_NULL(var = std::dynamic_pointer_cast<ComputedProperty>(p->getDeclaration(1)));
+    ASSERT_NOT_NULL(var->getAttribute(L"optional"));
+    ASSERT_EQ(0, var->getSpecifiers());
+    ASSERT_EQ(L"fixedIncrement", var->getName());
     ASSERT_NOT_NULL(var->getGetter());
     ASSERT_NULL(var->getSetter());
 

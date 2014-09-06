@@ -86,20 +86,21 @@ TEST(TestDeclaration, testImportKind_Func)
 TEST(TestDeclaration, testLet)
 {
     PARSE_STATEMENT(L"let a : Int[] = [1, 2, 3]");
-    ConstantsPtr c;
+    ValueBindingsPtr c;
     IdentifierPtr id;
     ArrayLiteralPtr value;
     ArrayTypePtr type;
     TypeIdentifierPtr Int;
-    ASSERT_NOT_NULL(c = std::dynamic_pointer_cast<Constants>(root));
-    ASSERT_EQ(1, c->numConstants());
-    ASSERT_NOT_NULL(id = std::dynamic_pointer_cast<Identifier>(c->getConstant(0)->name));
+    ASSERT_NOT_NULL(c = std::dynamic_pointer_cast<ValueBindings>(root));
+    ASSERT_TRUE(c->isReadOnly());
+    ASSERT_EQ(1, c->numBindings());
+    ASSERT_NOT_NULL(id = std::dynamic_pointer_cast<Identifier>(c->get(0)->name));
     ASSERT_EQ(L"a", id->getIdentifier());
     ASSERT_NOT_NULL(type = std::dynamic_pointer_cast<ArrayType>(id->getDeclaredType()));
     ASSERT_NOT_NULL(Int = std::dynamic_pointer_cast<TypeIdentifier>(type->getInnerType()));
     ASSERT_EQ(L"Int", Int->getName());
 
-    ASSERT_NOT_NULL(value = std::dynamic_pointer_cast<ArrayLiteral>(c->getConstant(0)->initializer));
+    ASSERT_NOT_NULL(value = std::dynamic_pointer_cast<ArrayLiteral>(c->get(0)->initializer));
     ASSERT_EQ(3, value->numElements());
     ASSERT_EQ(L"1", std::dynamic_pointer_cast<IntegerLiteral>(value->getElement(0))->valueAsString);
     ASSERT_EQ(L"2", std::dynamic_pointer_cast<IntegerLiteral>(value->getElement(1))->valueAsString);
@@ -110,18 +111,19 @@ TEST(TestDeclaration, testLet)
 TEST(TestDeclaration, testLet_Multiple)
 {
     PARSE_STATEMENT(L"let a=[k1 : 1, k2 : 2], b : Int = 2");
-    ConstantsPtr c;
+    ValueBindingsPtr c;
     IdentifierPtr id;
     TypeIdentifierPtr Int;
     DictionaryLiteralPtr dict;
-    ASSERT_NOT_NULL(c = std::dynamic_pointer_cast<Constants>(root));
-    ASSERT_EQ(2, c->numConstants());
-    ASSERT_NOT_NULL(id = std::dynamic_pointer_cast<Identifier>(c->getConstant(0)->name));
+    ASSERT_NOT_NULL(c = std::dynamic_pointer_cast<ValueBindings>(root));
+    ASSERT_TRUE(c->isReadOnly());
+    ASSERT_EQ(2, c->numBindings());
+    ASSERT_NOT_NULL(id = std::dynamic_pointer_cast<Identifier>(c->get(0)->name));
     ASSERT_EQ(L"a", id->getIdentifier());
-    ASSERT_NOT_NULL(dict = std::dynamic_pointer_cast<DictionaryLiteral>(c->getConstant(0)->initializer));
+    ASSERT_NOT_NULL(dict = std::dynamic_pointer_cast<DictionaryLiteral>(c->get(0)->initializer));
     ASSERT_EQ(2, dict->numElements());
 
-    ASSERT_NOT_NULL(id = std::dynamic_pointer_cast<Identifier>(c->getConstant(1)->name));
+    ASSERT_NOT_NULL(id = std::dynamic_pointer_cast<Identifier>(c->get(1)->name));
     ASSERT_EQ(L"b", id->getIdentifier());
     ASSERT_NOT_NULL(Int = std::dynamic_pointer_cast<TypeIdentifier>(id->getDeclaredType()));
     ASSERT_EQ(L"Int", Int->getName());
@@ -131,15 +133,16 @@ TEST(TestDeclaration, testLet_Multiple)
 TEST(TestDeclaration, testLet_Tuple)
 {
     PARSE_STATEMENT(L"let (a, b) : Int = (1, 2)");
-    ConstantsPtr c;
+    ValueBindingsPtr c;
     TuplePtr tuple;
     TypeIdentifierPtr type;
     ParenthesizedExpressionPtr p;
-    ASSERT_NOT_NULL(c = std::dynamic_pointer_cast<Constants>(root));
-    ASSERT_NOT_NULL(tuple = std::dynamic_pointer_cast<Tuple>(c->getConstant(0)->name));
+    ASSERT_NOT_NULL(c = std::dynamic_pointer_cast<ValueBindings>(root));
+    ASSERT_TRUE(c->isReadOnly());
+    ASSERT_NOT_NULL(tuple = std::dynamic_pointer_cast<Tuple>(c->get(0)->name));
     ASSERT_EQ(2, tuple->numElements());
     ASSERT_NOT_NULL(type = std::dynamic_pointer_cast<TypeIdentifier>(tuple->getDeclaredType()));
-    ASSERT_NOT_NULL(p = std::dynamic_pointer_cast<ParenthesizedExpression>(c->getConstant(0)->initializer));
+    ASSERT_NOT_NULL(p = std::dynamic_pointer_cast<ParenthesizedExpression>(c->get(0)->initializer));
     ASSERT_EQ(2, p->numExpressions());
 
 }
@@ -147,14 +150,15 @@ TEST(TestDeclaration, testLet_Tuple)
 TEST(TestDeclaration, testVar)
 {
     PARSE_STATEMENT(L"var currentLoginAttempt = 0");
-    VariablesPtr vars;
-    VariablePtr var;
+    ValueBindingsPtr vars;
+    ValueBindingPtr var;
     IdentifierPtr id;
     IntegerLiteralPtr i;
 
-    ASSERT_NOT_NULL(vars = std::dynamic_pointer_cast<Variables>(root));
-    ASSERT_EQ(1, vars->numVariables());
-    ASSERT_NOT_NULL(var = std::dynamic_pointer_cast<Variable>(vars->getVariable(0)));
+    ASSERT_NOT_NULL(vars = std::dynamic_pointer_cast<ValueBindings>(root));
+    ASSERT_TRUE(!vars->isReadOnly());
+    ASSERT_EQ(1, vars->numBindings());
+    ASSERT_NOT_NULL(var = std::dynamic_pointer_cast<ValueBinding>(vars->get(0)));
     ASSERT_NOT_NULL(id = std::dynamic_pointer_cast<Identifier>(var->getName()));
     ASSERT_EQ(L"currentLoginAttempt", id->getIdentifier());
 
@@ -166,29 +170,30 @@ TEST(TestDeclaration, testVar)
 TEST(TestDeclaration, testVar_Multiple)
 {
     PARSE_STATEMENT(L"var x = 0.0, y = 0.0, z = 0.0");
-    VariablesPtr vars;
-    VariablePtr var;
+    ValueBindingsPtr vars;
+    ValueBindingPtr var;
     IdentifierPtr id;
     FloatLiteralPtr f;
 
-    ASSERT_NOT_NULL(vars = std::dynamic_pointer_cast<Variables>(root));
-    ASSERT_EQ(3, vars->numVariables());
+    ASSERT_NOT_NULL(vars = std::dynamic_pointer_cast<ValueBindings>(root));
+    ASSERT_TRUE(!vars->isReadOnly());
+    ASSERT_EQ(3, vars->numBindings());
 
-    ASSERT_NOT_NULL(var = std::dynamic_pointer_cast<Variable>(vars->getVariable(0)));
+    ASSERT_NOT_NULL(var = std::dynamic_pointer_cast<ValueBinding>(vars->get(0)));
     ASSERT_NOT_NULL(id = std::dynamic_pointer_cast<Identifier>(var->getName()));
     ASSERT_EQ(L"x", id->getIdentifier());
     ASSERT_NOT_NULL(f = std::dynamic_pointer_cast<FloatLiteral>(var->getInitializer()));
     ASSERT_EQ(L"0.0", f->valueAsString);
 
 
-    ASSERT_NOT_NULL(var = std::dynamic_pointer_cast<Variable>(vars->getVariable(1)));
+    ASSERT_NOT_NULL(var = std::dynamic_pointer_cast<ValueBinding>(vars->get(1)));
     ASSERT_NOT_NULL(id = std::dynamic_pointer_cast<Identifier>(var->getName()));
     ASSERT_EQ(L"y", id->getIdentifier());
     ASSERT_NOT_NULL(f = std::dynamic_pointer_cast<FloatLiteral>(var->getInitializer()));
     ASSERT_EQ(L"0.0", f->valueAsString);
 
 
-    ASSERT_NOT_NULL(var = std::dynamic_pointer_cast<Variable>(vars->getVariable(2)));
+    ASSERT_NOT_NULL(var = std::dynamic_pointer_cast<ValueBinding>(vars->get(2)));
     ASSERT_NOT_NULL(id = std::dynamic_pointer_cast<Identifier>(var->getName()));
     ASSERT_EQ(L"z", id->getIdentifier());
     ASSERT_NOT_NULL(f = std::dynamic_pointer_cast<FloatLiteral>(var->getInitializer()));
@@ -200,14 +205,15 @@ TEST(TestDeclaration, testVar_Multiple)
 TEST(TestDeclaration, testVar_Typed)
 {
     PARSE_STATEMENT(L"var welcomeMessage: String");
-    VariablesPtr vars;
-    VariablePtr var;
+    ValueBindingsPtr vars;
+    ValueBindingPtr var;
     IdentifierPtr id;
     TypeIdentifierPtr t;
 
-    ASSERT_NOT_NULL(vars = std::dynamic_pointer_cast<Variables>(root));
-    ASSERT_EQ(1, vars->numVariables());
-    ASSERT_NOT_NULL(var = std::dynamic_pointer_cast<Variable>(vars->getVariable(0)));
+    ASSERT_NOT_NULL(vars = std::dynamic_pointer_cast<ValueBindings>(root));
+    ASSERT_TRUE(!vars->isReadOnly());
+    ASSERT_EQ(1, vars->numBindings());
+    ASSERT_NOT_NULL(var = std::dynamic_pointer_cast<ValueBinding>(vars->get(0)));
     ASSERT_NOT_NULL(id = std::dynamic_pointer_cast<Identifier>(var->getName()));
     ASSERT_EQ(L"welcomeMessage", id->getIdentifier());
 

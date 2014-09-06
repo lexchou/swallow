@@ -17,8 +17,7 @@ public:
 public:
     virtual void visitFunctionCall(const FunctionCallPtr& node) override;
     virtual void visitOperator(const OperatorDefPtr& node) override;
-    virtual void visitVariable(const VariablePtr& node) override;
-    virtual void visitConstant(const ConstantPtr& node) override;
+    virtual void visitValueBinding(const ValueBindingPtr& node) override;
     virtual void visitString(const StringLiteralPtr& node) override;
     virtual void visitInteger(const IntegerLiteralPtr& node) override;
     virtual void visitFloat(const FloatLiteralPtr& node) override;

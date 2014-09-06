@@ -10,10 +10,9 @@ SWIFT_NS_BEGIN
 class NodeSerializer : public NodeVisitor
 {
 public:
-    virtual void visitVariables(const VariablesPtr& node) override;
-    virtual void visitVariable(const VariablePtr& node) override;
-    virtual void visitConstant(const ConstantPtr& node) override;
-    virtual void visitConstants(const ConstantsPtr& node) override;
+    virtual void visitValueBindings(const ValueBindingsPtr& node);
+    virtual void visitComputedProperty(const ComputedPropertyPtr& node);
+    virtual void visitValueBinding(const ValueBindingPtr& node);
     virtual void visitAssignment(const AssignmentPtr& node) override;
     virtual void visitClass(const ClassDefPtr& node) override;
     virtual void visitStruct(const StructDefPtr& node) override;

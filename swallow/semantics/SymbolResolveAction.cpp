@@ -97,21 +97,65 @@ void SymbolResolveAction::registerPattern(const PatternPtr& pattern)
     }
 }
 
-void SymbolResolveAction::visitVariables(const VariablesPtr& node)
+void SymbolResolveAction::visitComputedProperty(const ComputedPropertyPtr& node)
 {
-    for(const VariablePtr& var : *node)
+
+    CodeBlockPtr didSet = node->getDidSet();
+    CodeBlockPtr willSet = node->getWillSet();
+    CodeBlockPtr getter = node->getGetter();
+    CodeBlockPtr setter = node->getSetter();
+    TypePtr type = lookupType(node->getDeclaredType());
+    node->setType(type);
+    //prepare type for getter/setter
+    std::vector<Type::Parameter> params;
+    TypePtr getterType = Type::newFunction(params, type, nullptr);
+    params.push_back(Type::Parameter(type));
+    TypePtr setterType = Type::newFunction(params, nullptr, false);
+
+    if(getter)
+    {
+        getter->setType(getterType);
+        getter->accept(this);
+    }
+    if(setter)
+    {
+        std::wstring name = node->getSetterName().empty() ? L"newValue" : node->getSetterName();
+        //TODO: replace the symbol to internal value
+        ScopedCodeBlockPtr cb = std::static_pointer_cast<ScopedCodeBlock>(setter);
+        cb->setType(setterType);
+        cb->getScope()->addSymbol(SymbolPtr(new SymbolPlaceHolder(name, type, SymbolPlaceHolder::F_INITIALIZED)));
+        cb->accept(this);
+    }
+    if(willSet)
+    {
+        std::wstring setter = node->getWillSetSetter().empty() ? L"newValue" : node->getWillSetSetter();
+        //TODO: replace the symbol to internal value
+        ScopedCodeBlockPtr cb = std::static_pointer_cast<ScopedCodeBlock>(willSet);
+        cb->setType(setterType);
+        cb->getScope()->addSymbol(SymbolPtr(new SymbolPlaceHolder(setter, type, SymbolPlaceHolder::F_INITIALIZED)));
+        cb->accept(this);
+    }
+    if(didSet)
+    {
+        std::wstring setter = node->getDidSetSetter().empty() ? L"oldValue" : node->getDidSetSetter();
+        //TODO: replace the symbol to internal value
+        ScopedCodeBlockPtr cb = std::static_pointer_cast<ScopedCodeBlock>(didSet);
+        cb->setType(setterType);
+        cb->getScope()->addSymbol(SymbolPtr(new SymbolPlaceHolder(setter, type, SymbolPlaceHolder::F_INITIALIZED)));
+        cb->accept(this);
+    }
+}
+void SymbolResolveAction::visitValueBindings(const ValueBindingsPtr& node)
+{
+    for(const ValueBindingPtr& var : *node)
     {
         PatternPtr name = var->getName();
         registerPattern(name);
     }
-    for(const VariablePtr& v : *node)
+    for(const ValueBindingPtr& v : *node)
     {
         PatternPtr name = v->getName();
         ExpressionPtr initializer = v->getInitializer();
-        CodeBlockPtr didSet = v->getDidSet();
-        CodeBlockPtr willSet = v->getWillSet();
-        CodeBlockPtr getter = v->getGetter();
-        CodeBlockPtr setter = v->getSetter();
         setFlag(name, true, SymbolPlaceHolder::F_INITIALIZING);
         if(initializer)
         {
@@ -119,52 +163,6 @@ void SymbolResolveAction::visitVariables(const VariablesPtr& node)
         }
         setFlag(name, true, SymbolPlaceHolder::F_INITIALIZED);
         setFlag(name, false, SymbolPlaceHolder::F_INITIALIZING);
-        if(getter)
-        {
-            getter->accept(this);
-        }
-        if(setter)
-        {
-            std::wstring name = v->getSetterName().empty() ? L"newValue" : v->getSetterName();
-            //TODO: replace the symbol to internal value
-            ScopedCodeBlockPtr cb = std::static_pointer_cast<ScopedCodeBlock>(setter);
-            cb->getScope()->addSymbol(SymbolPtr(new SymbolPlaceHolder(name, v->getType(), SymbolPlaceHolder::F_INITIALIZED)));
-            cb->accept(this);
-        }
-        if(willSet)
-        {
-            std::wstring setter = v->getWillSetSetter().empty() ? L"newValue" : v->getWillSetSetter();
-            //TODO: replace the symbol to internal value
-            ScopedCodeBlockPtr cb = std::static_pointer_cast<ScopedCodeBlock>(willSet);
-            cb->getScope()->addSymbol(SymbolPtr(new SymbolPlaceHolder(setter, v->getType(), SymbolPlaceHolder::F_INITIALIZED)));
-            cb->accept(this);
-        }
-        if(didSet)
-        {
-            std::wstring setter = v->getDidSetSetter().empty() ? L"oldValue" : v->getDidSetSetter();
-            //TODO: replace the symbol to internal value
-            ScopedCodeBlockPtr cb = std::static_pointer_cast<ScopedCodeBlock>(didSet);
-            cb->getScope()->addSymbol(SymbolPtr(new SymbolPlaceHolder(setter, v->getType(), SymbolPlaceHolder::F_INITIALIZED)));
-            cb->accept(this);
-        }
-
-    }
-
-}
-
-void SymbolResolveAction::visitConstants(const ConstantsPtr& node)
-{
-    for(const ConstantPtr& c : *node)
-    {
-        registerPattern(c->name);
-    }
-    //verify initializer
-    for(const ConstantPtr& c : *node)
-    {
-        setFlag(c->name, true, SymbolPlaceHolder::F_INITIALIZING);
-        c->initializer->accept(this);
-        setFlag(c->name, true, SymbolPlaceHolder::F_INITIALIZED);
-        setFlag(c->name, false, SymbolPlaceHolder::F_INITIALIZING);
     }
 }
 

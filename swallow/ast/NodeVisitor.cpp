@@ -172,15 +172,15 @@ void NodeVisitor::visitVarPattern(const VarPatternPtr& node)
 }
 
 
-void NodeVisitor::visitVariables(const VariablesPtr& node)
+void NodeVisitor::visitValueBindings(const ValueBindingsPtr &node)
 {
-    for(VariablePtr var : *node)
+    for(ValueBindingPtr var : *node)
     {
         ACCEPT(var);
     }
 }
 
-void NodeVisitor::visitVariable(const VariablePtr& node)
+void NodeVisitor::visitComputedProperty(const ComputedPropertyPtr& node)
 {
     ACCEPT(node->getInitializer());
     ACCEPT(node->getGetter());
@@ -189,17 +189,9 @@ void NodeVisitor::visitVariable(const VariablePtr& node)
     ACCEPT(node->getDidSet());
 }
 
-
-void NodeVisitor::visitConstant(const ConstantPtr& node)
+void NodeVisitor::visitValueBinding(const ValueBindingPtr &node)
 {
-    ACCEPT(node->initializer);
-}
-void NodeVisitor::visitConstants(const ConstantsPtr& node)
-{
-    for(auto c : *node)
-    {
-        ACCEPT(c);
-    }
+    ACCEPT(node->getInitializer());
 }
 
 void NodeVisitor::visitAssignment(const AssignmentPtr& node)

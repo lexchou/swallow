@@ -51,19 +51,15 @@ void NodeSerializerA::append(const std::wstring& str)
 
 
 
-void NodeSerializer::visitVariables(const VariablesPtr& node)
+void NodeSerializer::visitValueBindings(const ValueBindingsPtr &node)
 {
 
 }
-void NodeSerializer::visitVariable(const VariablePtr& node)
+void NodeSerializer::visitValueBinding(const ValueBindingPtr &node)
 {
 
 }
-void NodeSerializer::visitConstant(const ConstantPtr& node)
-{
-
-}
-void NodeSerializer::visitConstants(const ConstantsPtr& node)
+void NodeSerializer::visitComputedProperty(const ComputedPropertyPtr &node)
 {
 
 }

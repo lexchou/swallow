@@ -117,8 +117,6 @@ SET(SWALLOW_SRC
     ast/Attribute.cpp
 
     ast/ClassDef.cpp
-    ast/Constant.cpp
-    ast/Constants.cpp
     ast/Declaration.cpp
     ast/DeinitializerDef.cpp
     ast/InitializerDef.cpp
@@ -132,8 +130,8 @@ SET(SWALLOW_SRC
     ast/SubscriptDef.cpp
     ast/TypeAlias.cpp
     ast/ValueBinding.cpp
-    ast/Variable.cpp
-    ast/Variables.cpp
+    ast/ValueBindings.cpp
+    ast/ComputedProperty.cpp
     ast/Identifier.cpp
     ast/GenericArgument.cpp
     ast/Parameters.cpp

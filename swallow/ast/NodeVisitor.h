@@ -11,10 +11,9 @@ class NodeVisitor
 public:
     virtual ~NodeVisitor(){}
 public:
-    virtual void visitVariables(const VariablesPtr& node);
-    virtual void visitVariable(const VariablePtr& node);
-    virtual void visitConstant(const ConstantPtr& node);
-    virtual void visitConstants(const ConstantsPtr& node);
+    virtual void visitValueBindings(const ValueBindingsPtr& node);
+    virtual void visitComputedProperty(const ComputedPropertyPtr& node);
+    virtual void visitValueBinding(const ValueBindingPtr& node);
     virtual void visitAssignment(const AssignmentPtr& node);
     virtual void visitClass(const ClassDefPtr& node);
     virtual void visitStruct(const StructDefPtr& node);

@@ -10,10 +10,9 @@ class NodeVisitorDecorator : public NodeVisitor
 public:
     NodeVisitorDecorator(NodeVisitor* visitor);
 public:
-    virtual void visitVariables(const VariablesPtr& node) override;
-    virtual void visitVariable(const VariablePtr& node) override;
-    virtual void visitConstant(const ConstantPtr& node) override;
-    virtual void visitConstants(const ConstantsPtr& node) override;
+    virtual void visitValueBindings(const ValueBindingsPtr& node) override;
+    virtual void visitValueBinding(const ValueBindingPtr& node) override;
+    virtual void visitComputedProperty(const ComputedPropertyPtr& node) override;
     virtual void visitAssignment(const AssignmentPtr& node) override;
     virtual void visitClass(const ClassDefPtr& node) override;
     virtual void visitStruct(const StructDefPtr& node) override;

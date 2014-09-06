@@ -226,7 +226,8 @@ DeclarationPtr Parser::parseLet(const std::vector<AttributePtr>& attrs, int spec
     Token token;
     Flags flag(this, UNDER_LET);
     expect(Keyword::Let, token);
-    ConstantsPtr ret = nodeFactory->createConstants(token.state);
+    ValueBindingsPtr ret = nodeFactory->createValueBindings(token.state);
+    ret->setReadOnly(true);
     ret->setAttributes(attrs);
     ret->setSpecifiers(specifiers);
     do
@@ -238,7 +239,7 @@ DeclarationPtr Parser::parseLet(const std::vector<AttributePtr>& attrs, int spec
             initializer = parseExpression();
         }
 
-        ConstantPtr constant = nodeFactory->createConstant(*pattern->getSourceInfo());
+        ValueBindingPtr constant = nodeFactory->createValueBinding(*pattern->getSourceInfo());
         constant->setAttributes(attrs);
         constant->setSpecifiers(specifiers);
         constant->name = pattern;
@@ -249,7 +250,7 @@ DeclarationPtr Parser::parseLet(const std::vector<AttributePtr>& attrs, int spec
 }
 
 
-VariablePtr Parser::parseVariableDeclaration()
+ValueBindingPtr Parser::parseVariableDeclaration()
 {
     Token token;
     Attributes attrs;
@@ -266,7 +267,7 @@ VariablePtr Parser::parseVariableDeclaration()
         Flags flags(this, SUPPRESS_TRAILING_CLOSURE);
         val = parseExpression();
     }
-    VariablePtr ret = nodeFactory->createVariable(*key->getSourceInfo());
+    ValueBindingPtr ret = nodeFactory->createValueBinding(*key->getSourceInfo());
     ret->setName(key);
     ret->setTypeAttributes(attrs);
     ret->setDeclaredType(type);
@@ -286,23 +287,25 @@ VariablePtr Parser::parseVariableDeclaration()
 */
 DeclarationPtr Parser::parseVar(const std::vector<AttributePtr>& attrs, int specifiers)
 {
+
     Token token;
     expect(Keyword::Var, token);
     Flags flags(this, UNDER_VAR);
     //try read it as pattern-initializer-list
-    VariablesPtr ret = nodeFactory->createVariables(token.state);
+    ValueBindingsPtr ret = nodeFactory->createValueBindings(token.state);
+    ret->setReadOnly(false);
     ret->setAttributes(attrs);
     ret->setSpecifiers(specifiers);
-    VariablePtr var = parseVariableDeclaration();
-    ret->addVariable(var);
+    ValueBindingPtr var = parseVariableDeclaration();
     var->setSpecifiers(specifiers);
+    ret->add(var);
     if(predicate(L","))
     {
         while(match(L","))
         {
             var = parseVariableDeclaration();
             var->setSpecifiers(specifiers);
-            ret->addVariable(var);
+            ret->add(var);
         }
         return ret;
     }
@@ -310,6 +313,20 @@ DeclarationPtr Parser::parseVar(const std::vector<AttributePtr>& attrs, int spec
     if(!match(L"{"))
         return ret;
     peek(token);
+    IdentifierPtr name = std::dynamic_pointer_cast<Identifier>(var->getName());
+    tassert(token, name != nullptr, Errors::E_GETTER_SETTER_CAN_ONLY_BE_DEFINED_FOR_A_SINGLE_VARIABLE, L"");
+
+
+    ComputedPropertyPtr prop = nodeFactory->createComputedProperty(*var->getSourceInfo());
+    prop->setAttributes(attrs);
+    prop->setSpecifiers(specifiers);
+    prop->setTypeAttributes(var->getTypeAttributes());
+    prop->setName(name->getIdentifier());
+    prop->setDeclaredType(var->getDeclaredType());
+    prop->setInitializer(var->getInitializer());
+    var = nullptr;
+    ret = nullptr;
+
     if(token.type != TokenType::CloseBrace)
     {
         Flags flags(this, SUPPRESS_TRAILING_CLOSURE);
@@ -322,27 +339,27 @@ DeclarationPtr Parser::parseVar(const std::vector<AttributePtr>& attrs, int spec
                     // variable-declaration → variable-declaration-head variable-name type-annotation getter-setter-keyword-block
                     //no code block for getter/setter for protocol
                     std::pair<CodeBlockPtr, CodeBlockPtr> r = parseGetterSetterKeywordBlock();
-                    var->setGetter(r.first);
-                    var->setSetter(r.second);
+                    prop->setGetter(r.first);
+                    prop->setSetter(r.second);
                 }
                 else
                 {
                     //  variable-declaration → variable-declaration-head variable-name type-annotation getter-setter-block
                     std::pair<CodeBlockPtr, std::pair<std::wstring, CodeBlockPtr> > r = parseGetterSetterBlock();
-                    var->setGetter(r.first);
-                    var->setSetterName(r.second.first);
-                    var->setSetter(r.second.second);
+                    prop->setGetter(r.first);
+                    prop->setSetterName(r.second.first);
+                    prop->setSetter(r.second.second);
                 }
                 break;
             case Keyword::WillSet:
             case Keyword::DidSet:
                 //  variable-declaration → variable-declaration-head variable-name type-annotation initializer opt willSet-didSet-block
-                parseWillSetDidSetBlock(var);
+                parseWillSetDidSetBlock(prop);
                 break;
             default:
                 //‌ variable-declaration → variable-declaration-head variable-name type-annotation code-block
                 CodeBlockPtr getter = nodeFactory->createCodeBlock(token.state);
-                var->setGetter(getter);
+                prop->setGetter(getter);
                 do
                 {
                     StatementPtr st = parseStatement();
@@ -353,13 +370,13 @@ DeclarationPtr Parser::parseVar(const std::vector<AttributePtr>& attrs, int spec
         
     }
     expect(L"}");
-    return ret;
+    return prop;
 }
 
 /*
 willSet-clause → attributes opt willSet setter-name opt code-block
 */
-void Parser::parseWillSetClause(const VariablePtr& variable, bool opt)
+void Parser::parseWillSetClause(const ComputedPropertyPtr& property, bool opt)
 {
     Token token;
     if(!peek(token))
@@ -372,16 +389,16 @@ void Parser::parseWillSetClause(const VariablePtr& variable, bool opt)
     if(match(L"("))
     {
         expect_identifier(token);
-        variable->setWillSetSetter(token.token);
+        property->setWillSetSetter(token.token);
         expect(L")");
     }
     CodeBlockPtr cb = parseCodeBlock();
-    variable->setWillSet(cb);
+    property->setWillSet(cb);
 }
 /*
  ‌ didSet-clause → attributes opt didSet setter-name opt code-block
 */
-void Parser::parseDidSetClause(const VariablePtr& variable, bool opt)
+void Parser::parseDidSetClause(const ComputedPropertyPtr& property, bool opt)
 {
     Token token;
     if(!peek(token))
@@ -394,18 +411,18 @@ void Parser::parseDidSetClause(const VariablePtr& variable, bool opt)
     if(match(L"("))
     {
         expect_identifier(token);
-        variable->setDidSetSetter(token.token);
+        property->setDidSetSetter(token.token);
         expect(L")");
     }
     CodeBlockPtr cb = parseCodeBlock();
-    variable->setDidSet(cb);
+    property->setDidSet(cb);
 }
 
 /*
  ‌ willSet-didSet-block → {willSet-clause didSet-clause opt}
  ‌ willSet-didSet-block → {didSet-clause willSet-clause}
  */
-void Parser::parseWillSetDidSetBlock(const VariablePtr& variable)
+void Parser::parseWillSetDidSetBlock(const ComputedPropertyPtr& property)
 {
     Token token;
     Attributes attrs;
@@ -414,14 +431,14 @@ void Parser::parseWillSetDidSetBlock(const VariablePtr& variable)
     if(predicate(L"willSet"))
     {
         //willSet-didSet-block → {willSet-clause didSet-clause opt}
-        parseWillSetClause(variable, false);
-        parseDidSetClause(variable, true);
+        parseWillSetClause(property, false);
+        parseDidSetClause(property, true);
         return;
     }
     if(predicate(L"didSet"))
     {
-        parseDidSetClause(variable, false);
-        parseWillSetClause(variable, true);
+        parseDidSetClause(property, false);
+        parseWillSetClause(property, true);
     }
 }
 

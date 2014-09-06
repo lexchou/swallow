@@ -39,14 +39,6 @@ ClosurePtr ScopedNodeFactory::createClosure(const SourceInfo& state)
 {
     return _(state, new ScopedClosure());
 }
-ConstantPtr ScopedNodeFactory::createConstant(const SourceInfo& state)
-{
-    return _(state, new SymboledConstant());
-}
-VariablePtr ScopedNodeFactory::createVariable(const SourceInfo& state)
-{
-    return _(state, new SymboledVariable());
-}
 FunctionDefPtr ScopedNodeFactory::createFunction(const SourceInfo& state)
 {
     return _(state, new SymboledFunction());

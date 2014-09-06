@@ -2,6 +2,32 @@
 #include "NodeVisitor.h"
 USE_SWIFT_NS
 
+ValueBinding::ValueBinding()
+    :Declaration(NodeType::ValueBinding)
+{
+}
+
+void ValueBinding::accept(NodeVisitor* visitor)
+{
+    accept2(visitor, &NodeVisitor::visitValueBinding);
+}
+
+void ValueBinding::setTypeAttributes(const Attributes& attrs)
+{
+    typeAttributes = attrs;
+}
+const Attributes& ValueBinding::getTypeAttributes() const
+{
+    return typeAttributes;
+}
+void ValueBinding::setDeclaredType(const TypeNodePtr& t)
+{
+    this->declaredType = t;
+}
+TypeNodePtr ValueBinding::getDeclaredType()
+{
+    return declaredType;
+}
 
 const TypePtr& ValueBinding::getType()const
 {

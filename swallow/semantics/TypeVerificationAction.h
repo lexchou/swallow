@@ -19,8 +19,8 @@ SWIFT_NS_BEGIN
     public:
         TypeVerificationAction(SymbolRegistry* symbolRegistry, CompilerResults* compilerResults);
     public:
-        virtual void visitConstants(const ConstantsPtr& node) override;
-        virtual void visitVariable(const VariablePtr& node) override;
+        virtual void visitValueBindings(const ValueBindingsPtr& node) override;
+        virtual void visitValueBinding(const ValueBindingPtr& node) override;
         virtual void visitClass(const ClassDefPtr& node) override;
         virtual void visitStruct(const StructDefPtr& node) override;
         virtual void visitEnum(const EnumDefPtr& node) override;

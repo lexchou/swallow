@@ -10,21 +10,20 @@ TypeVerificationAction::TypeVerificationAction(SymbolRegistry* symbolRegistry, C
 :SemanticNodeVisitor(symbolRegistry, compilerResults)
 {
 }
-void TypeVerificationAction::visitConstants(const ConstantsPtr& node)
+void TypeVerificationAction::visitValueBindings(const ValueBindingsPtr& node)
 {
-    if(currentType && currentType->getCategory() == Type::Protocol)
+    if(node->isReadOnly() && currentType && currentType->getCategory() == Type::Protocol)
     {
         error(node, Errors::E_PROTOCOL_CANNOT_DEFINE_LET_CONSTANT);
+        return;
     }
+    SemanticNodeVisitor::visitValueBindings(node);
 }
-void TypeVerificationAction::visitVariable(const VariablePtr& node)
+void TypeVerificationAction::visitValueBinding(const ValueBindingPtr &node)
 {
     if(currentType && currentType->getCategory() == Type::Protocol)
     {
-        if (!node->getGetter() && !node->getSetter() && !node->getWillSet() && !node->getDidSet())
-        {
-            error(node, Errors::E_PROTOCOL_VAR_MUST_BE_COMPUTED_PROPERTY);
-        }
+        error(node, Errors::E_PROTOCOL_VAR_MUST_BE_COMPUTED_PROPERTY);
     }
 }
 void TypeVerificationAction::visitClass(const ClassDefPtr& node)

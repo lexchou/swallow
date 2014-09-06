@@ -91,14 +91,3 @@ const std::wstring& SymboledFunction::getName()const
 
 
 
-const std::wstring& SymboledVariable::getName()const
-{
-    IdentifierPtr id = std::dynamic_pointer_cast<Identifier>(name);
-    return id->getIdentifier();
-}
-
-const std::wstring& SymboledConstant::getName()const
-{
-    IdentifierPtr id = std::dynamic_pointer_cast<Identifier>(this->name);
-    return id->getIdentifier();
-}

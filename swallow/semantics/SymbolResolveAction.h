@@ -17,8 +17,8 @@ public:
     SymbolResolveAction(SymbolRegistry* symbolRegistry, CompilerResults* compilerResults);
 public:
     virtual void visitAssignment(const AssignmentPtr& node) override;
-    virtual void visitVariables(const VariablesPtr& node) override;
-    virtual void visitConstants(const ConstantsPtr& node) override;
+    virtual void visitComputedProperty(const ComputedPropertyPtr& node) override;
+    virtual void visitValueBindings(const ValueBindingsPtr& node) override;
     virtual void visitTypeAlias(const TypeAliasPtr& node) override;
     virtual void visitClass(const ClassDefPtr& node) override;
     virtual void visitStruct(const StructDefPtr& node) override;

@@ -17,8 +17,6 @@ public:
     virtual CodeBlockPtr createCodeBlock(const SourceInfo& state) override;
     virtual ClosurePtr createClosure(const SourceInfo& state) override;
 
-    virtual ConstantPtr createConstant(const SourceInfo& state) override;
-    virtual VariablePtr createVariable(const SourceInfo& state) override;
     virtual FunctionDefPtr createFunction(const SourceInfo& state) override;
 
 

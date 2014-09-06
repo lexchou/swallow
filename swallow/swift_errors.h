@@ -22,7 +22,7 @@ struct Errors
         E_UNDEFINED_INFIX_OPERATOR, // Undefined infix operator %
         E_EXPECT_CAPTURE_SPECIFIER, // The capture specifier is not specified.
         E_EXPECT_CASE, // case/default is expected in switch/case statement
-
+        E_GETTER_SETTER_CAN_ONLY_BE_DEFINED_FOR_A_SINGLE_VARIABLE, // Getter/setter can only be defined for a single variable
         
         //semantic errors
         E_INVALID_REDECLARATION, // Invalid redeclaration of type %

@@ -11,8 +11,6 @@
 #include "ast/Closure.h"
 #include "ScopeOwner.h"
 #include "ast/FunctionDef.h"
-#include "ast/Constant.h"
-#include "ast/Variable.h"
 #include "Symbol.h"
 
 SWIFT_NS_BEGIN
@@ -77,22 +75,9 @@ public:
 
 
 
-class SymboledVariable : public Variable, public Symbol
-{
-public:
-    virtual const std::wstring& getName()const override;
-};
-class SymboledConstant : public Constant, public Symbol
-{
-public:
-    virtual const std::wstring& getName()const override;
-};
-
 
 
 SWIFT_NS_END
-
-
 
 
 #endif//SCOPED_NODES_H
