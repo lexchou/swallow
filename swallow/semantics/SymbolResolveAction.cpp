@@ -62,7 +62,6 @@ void SymbolResolveAction::verifyTuplePattern(const PatternPtr& pattern)
 
 void SymbolResolveAction::registerPattern(const PatternPtr& pattern)
 {
-    SymbolScope* scope = symbolRegistry->getCurrentScope();
     if(pattern->getNodeType() == NodeType::Identifier)
     {
         IdentifierPtr id = std::static_pointer_cast<Identifier>(pattern);
@@ -74,17 +73,8 @@ void SymbolResolveAction::registerPattern(const PatternPtr& pattern)
         }
         else
         {
-            s = SymbolPtr(new SymbolPlaceHolder(id->getIdentifier(), id->getType()));
-            scope->addSymbol(s);
-            //add it to type definition
-            if(TypeDeclaration* declaration = dynamic_cast<TypeDeclaration*>(symbolRegistry->getCurrentScope()->getOwner()))
-            {
-                TypePtr ownerType = declaration->getType();
-                if(ownerType)
-                {
-                    ownerType->getSymbols()[s->getName()] = s;
-                }
-            }
+            SymbolPlaceHolderPtr pattern(new SymbolPlaceHolder(id->getIdentifier(), id->getType(), SymbolPlaceHolder::R_LOCAL_VARIABLE, 0));
+            registerSymbol(pattern);
         }
     }
     else if(pattern->getNodeType() == NodeType::Tuple)
@@ -123,7 +113,7 @@ void SymbolResolveAction::visitComputedProperty(const ComputedPropertyPtr& node)
         //TODO: replace the symbol to internal value
         ScopedCodeBlockPtr cb = std::static_pointer_cast<ScopedCodeBlock>(setter);
         cb->setType(setterType);
-        cb->getScope()->addSymbol(SymbolPtr(new SymbolPlaceHolder(name, type, SymbolPlaceHolder::F_INITIALIZED)));
+        cb->getScope()->addSymbol(SymbolPtr(new SymbolPlaceHolder(name, type, SymbolPlaceHolder::R_PARAMETER, SymbolPlaceHolder::F_INITIALIZED)));
         cb->accept(this);
     }
     if(willSet)
@@ -132,7 +122,7 @@ void SymbolResolveAction::visitComputedProperty(const ComputedPropertyPtr& node)
         //TODO: replace the symbol to internal value
         ScopedCodeBlockPtr cb = std::static_pointer_cast<ScopedCodeBlock>(willSet);
         cb->setType(setterType);
-        cb->getScope()->addSymbol(SymbolPtr(new SymbolPlaceHolder(setter, type, SymbolPlaceHolder::F_INITIALIZED)));
+        cb->getScope()->addSymbol(SymbolPtr(new SymbolPlaceHolder(setter, type, SymbolPlaceHolder::R_PARAMETER, SymbolPlaceHolder::F_INITIALIZED)));
         cb->accept(this);
     }
     if(didSet)
@@ -141,8 +131,39 @@ void SymbolResolveAction::visitComputedProperty(const ComputedPropertyPtr& node)
         //TODO: replace the symbol to internal value
         ScopedCodeBlockPtr cb = std::static_pointer_cast<ScopedCodeBlock>(didSet);
         cb->setType(setterType);
-        cb->getScope()->addSymbol(SymbolPtr(new SymbolPlaceHolder(setter, type, SymbolPlaceHolder::F_INITIALIZED)));
+        cb->getScope()->addSymbol(SymbolPtr(new SymbolPlaceHolder(setter, type, SymbolPlaceHolder::R_PARAMETER, SymbolPlaceHolder::F_INITIALIZED)));
         cb->accept(this);
+    }
+    //register symbol
+    int flags = SymbolPlaceHolder::F_INITIALIZED;
+    if(didSet || willSet)
+        flags |= SymbolPlaceHolder::F_READABLE | SymbolPlaceHolder::F_WRITABLE;
+    if(setter)
+        flags |= SymbolPlaceHolder::F_WRITABLE;
+    if(getter)
+        flags |= SymbolPlaceHolder::F_READABLE;
+    SymbolPlaceHolderPtr symbol(new SymbolPlaceHolder(node->getName(), type, SymbolPlaceHolder::R_PROPERTY, flags));
+    registerSymbol(symbol);
+}
+void SymbolResolveAction::registerSymbol(const SymbolPlaceHolderPtr& symbol)
+{
+    SymbolScope* scope = symbolRegistry->getCurrentScope();
+    NodeType::T nodeType = scope->getOwner()->getNodeType();
+    if(nodeType != NodeType::Program)
+        symbol->flags |= SymbolPlaceHolder::F_MEMBER;
+    scope->addSymbol(symbol);
+    switch(nodeType)
+    {
+        case NodeType::Class:
+        case NodeType::Struct:
+        case NodeType::Protocol:
+        case NodeType::Extension:
+        case NodeType::Enum:
+            assert(currentType != nullptr);
+            currentType->getSymbols()[symbol->getName()] = symbol;
+            break;
+        default:
+            break;
     }
 }
 void SymbolResolveAction::visitValueBindings(const ValueBindingsPtr& node)
@@ -597,7 +618,7 @@ void SymbolResolveAction::prepareParameters(SymbolScope* scope, const Parameters
             error(param, Errors::E_DEFINITION_CONFLICT, param->getLocalName());
             return;
         }
-        sym = SymbolPtr(new SymbolPlaceHolder(param->getLocalName(), param->getType(), SymbolPlaceHolder::F_INITIALIZED));
+        sym = SymbolPtr(new SymbolPlaceHolder(param->getLocalName(), param->getType(), SymbolPlaceHolder::R_PARAMETER, SymbolPlaceHolder::F_INITIALIZED));
         scope->addSymbol(sym);
     }
 }

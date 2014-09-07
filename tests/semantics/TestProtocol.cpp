@@ -144,7 +144,16 @@ TEST(TestProtocol, ReadOnlyComputedProperty)
     SEMANTIC_ANALYZE(L"protocol MyProtocol {\n"
             "var a : Int {get}\n"
             "}");
-    ASSERT_EQ(1, compilerResults.numResults());
-    auto res = compilerResults.getResult(0);
-    ASSERT_EQ(Errors::E_PROTOCOL_VAR_MUST_BE_COMPUTED_PROPERTY, res.code);
+    ASSERT_EQ(0, compilerResults.numResults());
+
+    TypePtr RandomNumberGenerator;
+    ASSERT_NOT_NULL(RandomNumberGenerator = std::dynamic_pointer_cast<Type>(scope->lookup(L"MyProtocol")));
+    SymbolPtr sym = RandomNumberGenerator->getSymbols()[L"a"];
+    SymbolPlaceHolderPtr a;
+
+    ASSERT_NOT_NULL(a = std::dynamic_pointer_cast<SymbolPlaceHolder>(sym));
+    ASSERT_TRUE((a->flags & SymbolPlaceHolder::F_MEMBER) != 0);
+    ASSERT_TRUE((a->flags & SymbolPlaceHolder::F_READABLE) != 0);
+    ASSERT_TRUE((a->flags & SymbolPlaceHolder::F_WRITABLE) == 0);
+
 }

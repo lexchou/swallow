@@ -50,6 +50,7 @@ private:
      * Prepare parameters as symbols in given code block
      */
     void prepareParameters(SymbolScope* scope, const ParametersPtr& params);
+    void registerSymbol(const SymbolPlaceHolderPtr& symbol);
 private:
     TypePtr currentType;
 };
