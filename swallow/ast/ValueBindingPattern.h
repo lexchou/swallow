@@ -8,28 +8,26 @@ SWIFT_NS_BEGIN
 class ValueBindingPattern : public Pattern
 {
 public:
-    ValueBindingPattern(NodeType::T nodeType);
+    ValueBindingPattern();
     ~ValueBindingPattern();
 public:
     void setBinding(const PatternPtr& st);
-    PatternPtr getBinding();
+    PatternPtr getBinding() const;
+
+    bool isReadOnly() const;
+    void setReadOnly(bool readonly);
+
+    TypeNodePtr getDeclaredType()const;
+    void setDeclaredType(const TypeNodePtr& type);
+public:
+    void accept(NodeVisitor* visitor);
 protected:
+    TypeNodePtr declaredType;
+    bool readonly;
     PatternPtr binding;
 };
 
-class LetPattern : public ValueBindingPattern
-{
-public:
-    LetPattern();
-    virtual void accept(NodeVisitor* visitor);
-};
 
-class VarPattern : public ValueBindingPattern
-{
-public:
-    VarPattern();
-    virtual void accept(NodeVisitor* visitor);
-};
 
 SWIFT_NS_END
 

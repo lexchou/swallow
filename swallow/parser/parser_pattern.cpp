@@ -27,9 +27,11 @@ PatternPtr Parser::parsePattern()
             // pattern → identifier-pattern type-annotationopt
             case Keyword::_:
             {
-                IdentifierPtr ret = nodeFactory->createIdentifier(token.state);
-                ret->setIdentifier(token.token);
-                if((flags & (UNDER_VAR | UNDER_CASE)) == 0)//type annotation is not parsed when it's inside a let/var
+                TypedPatternPtr ret = nodeFactory->createTypedPattern(token.state);
+                IdentifierPtr id = nodeFactory->createIdentifier(token.state);
+                id->setIdentifier(token.token);
+                ret->setPattern(id);
+                if((flags & UNDER_CASE) == 0)//type annotation is not parsed when it's inside a let/var
                 {
                     if(match(L":"))
                     {
@@ -41,18 +43,22 @@ PatternPtr Parser::parsePattern()
             }
             // pattern → value-binding-pattern
             case Keyword::Var:
-            {
-                VarPatternPtr let = nodeFactory->createVarPattern(token.state);
-                PatternPtr binding = parsePattern();
-                let->setBinding(binding);
-                return let;
-            }
             case Keyword::Let:
             {
-                LetPatternPtr let = nodeFactory->createLetPattern(token.state);
+                ValueBindingPatternPtr ret = nodeFactory->createValueBindingPattern(token.state);
                 PatternPtr binding = parsePattern();
-                let->setBinding(binding);
-                return let;
+                if(TypedPatternPtr p = std::dynamic_pointer_cast<TypedPattern>(binding))
+                {
+                    ret->setBinding(p->getPattern());
+                    ret->setDeclaredType(p->getDeclaredType());
+                }
+                else
+                {
+                    ret->setBinding(binding);
+                }
+                ret->setReadOnly(token.identifier.keyword == Keyword::Let);
+
+                return ret;
             }
             default:
                 break;

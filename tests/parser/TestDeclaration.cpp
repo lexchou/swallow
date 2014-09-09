@@ -88,15 +88,17 @@ TEST(TestDeclaration, testLet)
     PARSE_STATEMENT(L"let a : Int[] = [1, 2, 3]");
     ValueBindingsPtr c;
     IdentifierPtr id;
+    ValueBindingPtr a;
     ArrayLiteralPtr value;
     ArrayTypePtr type;
     TypeIdentifierPtr Int;
     ASSERT_NOT_NULL(c = std::dynamic_pointer_cast<ValueBindings>(root));
     ASSERT_TRUE(c->isReadOnly());
     ASSERT_EQ(1, c->numBindings());
-    ASSERT_NOT_NULL(id = std::dynamic_pointer_cast<Identifier>(c->get(0)->name));
+    ASSERT_NOT_NULL(a = c->get(0));
+    ASSERT_NOT_NULL(id = std::dynamic_pointer_cast<Identifier>(a->name));
     ASSERT_EQ(L"a", id->getIdentifier());
-    ASSERT_NOT_NULL(type = std::dynamic_pointer_cast<ArrayType>(id->getDeclaredType()));
+    ASSERT_NOT_NULL(type = std::dynamic_pointer_cast<ArrayType>(a->getDeclaredType()));
     ASSERT_NOT_NULL(Int = std::dynamic_pointer_cast<TypeIdentifier>(type->getInnerType()));
     ASSERT_EQ(L"Int", Int->getName());
 
@@ -112,6 +114,7 @@ TEST(TestDeclaration, testLet_Multiple)
 {
     PARSE_STATEMENT(L"let a=[k1 : 1, k2 : 2], b : Int = 2");
     ValueBindingsPtr c;
+    ValueBindingPtr b;
     IdentifierPtr id;
     TypeIdentifierPtr Int;
     DictionaryLiteralPtr dict;
@@ -123,9 +126,10 @@ TEST(TestDeclaration, testLet_Multiple)
     ASSERT_NOT_NULL(dict = std::dynamic_pointer_cast<DictionaryLiteral>(c->get(0)->initializer));
     ASSERT_EQ(2, dict->numElements());
 
-    ASSERT_NOT_NULL(id = std::dynamic_pointer_cast<Identifier>(c->get(1)->name));
+    ASSERT_NOT_NULL(b = c->get(1));
+    ASSERT_NOT_NULL(id = std::dynamic_pointer_cast<Identifier>(b->name));
     ASSERT_EQ(L"b", id->getIdentifier());
-    ASSERT_NOT_NULL(Int = std::dynamic_pointer_cast<TypeIdentifier>(id->getDeclaredType()));
+    ASSERT_NOT_NULL(Int = std::dynamic_pointer_cast<TypeIdentifier>(b->getDeclaredType()));
     ASSERT_EQ(L"Int", Int->getName());
 
 }

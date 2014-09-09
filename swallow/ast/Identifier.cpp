@@ -19,14 +19,6 @@ void Identifier::accept(NodeVisitor* visitor)
 }
 
 
-void Identifier::setDeclaredType(const TypeNodePtr& type)
-{
-    this->declaredType = type;
-}
-TypeNodePtr Identifier::getDeclaredType()
-{
-    return declaredType;
-}
 
 GenericArgumentPtr Identifier::getGenericArgument()
 {

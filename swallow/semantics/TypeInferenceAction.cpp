@@ -131,9 +131,9 @@ void TypeInferenceAction::checkTupleDefinition(const TuplePtr& tuple, const Expr
     }
 
 
-    for(const PatternPtr& p : *tuple)
+    for(const Tuple::Element& p : *tuple)
     {
-        NodeType::T nodeType = p->getNodeType();
+        NodeType::T nodeType = p.element->getNodeType();
         if(nodeType != NodeType::Identifier)
         {
 
@@ -576,9 +576,9 @@ void TypeInferenceAction::visitTuple(const TuplePtr& node)
 {
     SemanticNodeVisitor::visitTuple(node);
     std::vector<TypePtr> types;
-    for(const PatternPtr& element : *node)
+    for(const Tuple::Element& element : *node)
     {
-        TypePtr elementType = element->getType();
+        TypePtr elementType = element.element->getType();
         assert(elementType != nullptr);
         types.push_back(elementType);
     }
@@ -695,34 +695,48 @@ void TypeInferenceAction::visitCompileConstant(const CompileConstantPtr& node)
 
 void TypeInferenceAction::visitValueBinding(const ValueBindingPtr& node)
 {
-    if(!node->getInitializer())
+    /*if(!node->getInitializer())
     {
         error(node->getInitializer(), Errors::E_LET_REQUIRES_INITIALIZER);
         return;
     }
+    */
 
 
     //TypePtr type = evaluateType(node->initializer);
     if(IdentifierPtr id = std::dynamic_pointer_cast<Identifier>(node->name))
     {
-        TypePtr declaredType = lookupType(id->getDeclaredType());
+        TypePtr declaredType = lookupType(node->getDeclaredType());//node->getDeclaredType() == nullptr ? id->getDeclaredType() : node->getDeclaredType());
         StackedValueGuard<TypePtr> guard(t_hint);
         guard.set(declaredType);
-
-
-        node->initializer->accept(this);
-        TypePtr actualType = node->initializer->getType();
-        assert(actualType != nullptr);
+        if(!declaredType && !node->initializer)
+        {
+            error(node, Errors::E_TYPE_ANNOTATION_MISSING_IN_PATTERN);
+            return;
+        }
         SymbolPtr sym = symbolRegistry->getCurrentScope()->lookup(id->getIdentifier());
         assert(sym != nullptr);
-        if(id->getDeclaredType() != nullptr)
-        {
-            //TODO: check if the type is convertible
-
-        }
         SymbolPlaceHolderPtr placeholder = std::dynamic_pointer_cast<SymbolPlaceHolder>(sym);
         assert(placeholder != nullptr);
-        placeholder->setType(actualType);
+        if(declaredType)
+        {
+            placeholder->setType(declaredType);
+        }
+        if(node->initializer)
+        {
+            node->initializer->accept(this);
+            TypePtr actualType = node->initializer->getType();
+            assert(actualType != nullptr);
+            if(declaredType && !canConvertTo(node->initializer, declaredType))
+            {
+                error(node, Errors::E_CANNOT_CONVERT_EXPRESSION_TYPE);
+                return;
+            }
+
+            if(!declaredType)
+                placeholder->setType(actualType);
+        }
+        assert(placeholder->getType() != nullptr);
     }
     else if(TuplePtr id = std::dynamic_pointer_cast<Tuple>(node->name))
     {

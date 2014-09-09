@@ -61,7 +61,6 @@ struct NodeType
         InitRef,
         IntegerLiteral,
         LabeledStatement,
-        LetPattern,
         MemberAccess,
         Operator,
         OptionalChaining,
@@ -81,6 +80,7 @@ struct NodeType
         SwitchCase,
         Tuple,
         TupleType,
+        TypedPattern,
         TypeAlias,
         TypeCase,
         TypeCheck,
@@ -88,7 +88,7 @@ struct NodeType
         UnaryOperator,
         ValueBinding,
         ValueBindings,
-        VarPattern,
+        ValueBindingPattern,
         While
     };
 };

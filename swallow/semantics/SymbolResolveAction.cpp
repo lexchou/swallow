@@ -47,9 +47,9 @@ void SymbolResolveAction::verifyTuplePattern(const PatternPtr& pattern)
     else if(pattern->getNodeType() == NodeType::Tuple)
     {
         TuplePtr tuple = std::static_pointer_cast<Tuple>(pattern);
-        for(const PatternPtr& element : tuple->elements)
+        for(const Tuple::Element& element : tuple->elements)
         {
-            verifyTuplePattern(element);
+            verifyTuplePattern(element.element);
         }
     }
     else
@@ -80,9 +80,9 @@ void SymbolResolveAction::registerPattern(const PatternPtr& pattern)
     else if(pattern->getNodeType() == NodeType::Tuple)
     {
         TuplePtr tuple = std::static_pointer_cast<Tuple>(pattern);
-        for(const PatternPtr& element : tuple->elements)
+        for(const Tuple::Element& element : tuple->elements)
         {
-            registerPattern(element);
+            registerPattern(element.element);
         }
     }
 }
@@ -173,11 +173,16 @@ void SymbolResolveAction::visitValueBindings(const ValueBindingsPtr& node)
         PatternPtr name = var->getName();
         registerPattern(name);
     }
+    int flags = SymbolPlaceHolder::F_INITIALIZING | SymbolPlaceHolder::F_READABLE;
+    if(dynamic_cast<TypeDeclaration*>(symbolRegistry->getCurrentScope()->getOwner()))
+        flags |= SymbolPlaceHolder::F_MEMBER;
+    if(!node->isReadOnly())
+        flags |= SymbolPlaceHolder::F_WRITABLE;
     for(const ValueBindingPtr& v : *node)
     {
         PatternPtr name = v->getName();
         ExpressionPtr initializer = v->getInitializer();
-        setFlag(name, true, SymbolPlaceHolder::F_INITIALIZING);
+        setFlag(name, true, flags);
         if(initializer)
         {
             initializer->accept(this);
@@ -242,9 +247,9 @@ void SymbolResolveAction::setFlag(const PatternPtr& pattern, bool add, int flag)
     else if(t == NodeType::Tuple)
     {
         TuplePtr tuple = std::static_pointer_cast<Tuple>(pattern);
-        for(const PatternPtr& element : tuple->elements)
+        for(const Tuple::Element& element : tuple->elements)
         {
-            setFlag(element, add, flag);
+            setFlag(element.element, add, flag);
         }
     }
 

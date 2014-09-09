@@ -24,6 +24,7 @@ public:
     virtual UnaryOperatorPtr createUnary(const SourceInfo& state);
     virtual BinaryOperatorPtr createBinary(const SourceInfo& state);
 
+    virtual TypedPatternPtr createTypedPattern(const SourceInfo& state);
     virtual IdentifierPtr createIdentifier(const SourceInfo& state);
     virtual GenericArgumentPtr createGenericArgument(const SourceInfo& state);
     virtual InOutParameterPtr createInOutParameter(const SourceInfo& state);
@@ -60,8 +61,7 @@ public:
     virtual ReturnStatementPtr createReturn(const SourceInfo& state);
     virtual LabeledStatementPtr createLabel(const SourceInfo& state);
     virtual CodeBlockPtr createCodeBlock(const SourceInfo& state);
-    virtual LetPatternPtr createLetPattern(const SourceInfo& state);
-    virtual VarPatternPtr createVarPattern(const SourceInfo& state);
+    virtual ValueBindingPatternPtr createValueBindingPattern(const SourceInfo& state);
     virtual TuplePtr createTuple(const SourceInfo& state);
     virtual ClosurePtr createClosure(const SourceInfo& state);
     virtual EnumCasePatternPtr createEnumCasePattern(const SourceInfo& state);

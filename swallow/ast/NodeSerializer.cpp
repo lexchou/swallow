@@ -219,11 +219,8 @@ void NodeSerializer::visitProgram(const ProgramPtr& node)
 {
 
 }
-void NodeSerializer::visitLetPattern(const LetPatternPtr& node)
-{
 
-}
-void NodeSerializer::visitVarPattern(const VarPatternPtr& node)
+void NodeSerializer::visitValueBindingPattern(const ValueBindingPatternPtr& node)
 {
 
 }

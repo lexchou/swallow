@@ -43,6 +43,10 @@ UnaryOperatorPtr NodeFactory::createUnary(const SourceInfo&state)
 {
     return _(state, new UnaryOperator());
 }
+TypedPatternPtr NodeFactory::createTypedPattern(const SourceInfo &state)
+{
+    return _(state, new TypedPattern());
+}
 IdentifierPtr NodeFactory::createIdentifier(const SourceInfo&state)
 {
     return _(state, new Identifier());
@@ -181,13 +185,9 @@ CodeBlockPtr NodeFactory::createCodeBlock(const SourceInfo& state)
 {
     return _(state, new CodeBlock());
 }
-LetPatternPtr NodeFactory::createLetPattern(const SourceInfo& state)
+ValueBindingPatternPtr NodeFactory::createValueBindingPattern(const SourceInfo& state)
 {
-    return _(state, new LetPattern());
-}
-VarPatternPtr NodeFactory::createVarPattern(const SourceInfo& state)
-{
-    return _(state, new VarPattern());
+    return _(state, new ValueBindingPattern());
 }
 TuplePtr NodeFactory::createTuple(const SourceInfo& state)
 {

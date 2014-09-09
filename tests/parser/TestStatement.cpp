@@ -500,7 +500,7 @@ TEST(TestStatement, testSwitch_AssociatedValues)
     CaseStatementPtr c;
     EnumCasePatternPtr e;
     TuplePtr t;
-    LetPatternPtr let;
+    ValueBindingPatternPtr let;
     IdentifierPtr id;
     ASSERT_NOT_NULL(sc = std::dynamic_pointer_cast<SwitchCase>(root));
     ASSERT_EQ(2, sc->numCases());
@@ -513,15 +513,18 @@ TEST(TestStatement, testSwitch_AssociatedValues)
     ASSERT_NOT_NULL(t = e->getAssociatedBinding());
     ASSERT_EQ(3, t->numElements());
 
-    ASSERT_NOT_NULL(let = std::dynamic_pointer_cast<LetPattern>(t->getElement(0)));
+    ASSERT_NOT_NULL(let = std::dynamic_pointer_cast<ValueBindingPattern>(t->getElement(0)));
+    ASSERT_TRUE(let->isReadOnly());
     ASSERT_NOT_NULL(id = std::dynamic_pointer_cast<Identifier>(let->getBinding()));
     ASSERT_EQ(L"numberSystem", id->getIdentifier());
 
-    ASSERT_NOT_NULL(let = std::dynamic_pointer_cast<LetPattern>(t->getElement(1)));
+    ASSERT_NOT_NULL(let = std::dynamic_pointer_cast<ValueBindingPattern>(t->getElement(1)));
+    ASSERT_TRUE(let->isReadOnly());
     ASSERT_NOT_NULL(id = std::dynamic_pointer_cast<Identifier>(let->getBinding()));
     ASSERT_EQ(L"identifier", id->getIdentifier());
 
-    ASSERT_NOT_NULL(let = std::dynamic_pointer_cast<LetPattern>(t->getElement(2)));
+    ASSERT_NOT_NULL(let = std::dynamic_pointer_cast<ValueBindingPattern>(t->getElement(2)));
+    ASSERT_TRUE(let->isReadOnly());
     ASSERT_NOT_NULL(id = std::dynamic_pointer_cast<Identifier>(let->getBinding()));
     ASSERT_EQ(L"check", id->getIdentifier());
 

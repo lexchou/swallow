@@ -10,6 +10,16 @@ class TypeNode;
 class Tuple : public Expression
 {
 public:
+    struct Element
+    {
+        PatternPtr element;
+        TypeNodePtr declaredType;
+        Element(){}
+        Element(const PatternPtr& element, const TypeNodePtr& declaredType)
+                :element(element), declaredType(declaredType)
+        {}
+    };
+public:
     Tuple();
     ~Tuple();
 public:
@@ -22,12 +32,12 @@ public:
     TypeNodePtr getDeclaredType();
     void setDeclaredType(const TypeNodePtr& type);
 
-    std::vector<PatternPtr>::iterator begin(){return elements.begin();}
-    std::vector<PatternPtr>::iterator end(){return elements.end();}
+    std::vector<Element>::iterator begin(){return elements.begin();}
+    std::vector<Element>::iterator end(){return elements.end();}
 
 public:
     TypeNodePtr declaredType;
-    std::vector<PatternPtr> elements;
+    std::vector<Element> elements;
 };
 
 SWIFT_NS_END

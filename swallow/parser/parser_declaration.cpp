@@ -243,6 +243,13 @@ DeclarationPtr Parser::parseLet(const std::vector<AttributePtr>& attrs, int spec
         constant->setAttributes(attrs);
         constant->setSpecifiers(specifiers);
         constant->name = pattern;
+        TypedPatternPtr typedPattern = std::dynamic_pointer_cast<TypedPattern>(pattern);
+        if(typedPattern)
+        {
+            //promote typed pattern
+            constant->setDeclaredType(typedPattern->getDeclaredType());
+            constant->setName(typedPattern->getPattern());
+        }
         constant->initializer = initializer;
         ret->add(constant);
     }while(match(L","));
@@ -268,9 +275,17 @@ ValueBindingPtr Parser::parseVariableDeclaration()
         val = parseExpression();
     }
     ValueBindingPtr ret = nodeFactory->createValueBinding(*key->getSourceInfo());
-    ret->setName(key);
+    if(TypedPatternPtr p = std::dynamic_pointer_cast<TypedPattern>(key))
+    {
+        ret->setName(p->getPattern());
+        ret->setDeclaredType(p->getDeclaredType());
+    }
+    else
+    {
+        ret->setName(key);
+        ret->setDeclaredType(type);
+    }
     ret->setTypeAttributes(attrs);
-    ret->setDeclaredType(type);
     ret->setInitializer(val);
     return ret;
 }

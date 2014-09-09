@@ -46,8 +46,7 @@ public://statement
     virtual void visitParameter(const ParameterPtr& node);
     virtual void visitParameters(const ParametersPtr& node);
     virtual void visitProgram(const ProgramPtr& node);
-    virtual void visitLetPattern(const LetPatternPtr& node);
-    virtual void visitVarPattern(const VarPatternPtr& node);
+    virtual void visitValueBindingPattern(const ValueBindingPatternPtr& node);
 public:
     virtual void visitConditionalOperator(const ConditionalOperatorPtr& node);
     virtual void visitBinaryOperator(const BinaryOperatorPtr& node);
@@ -61,7 +60,7 @@ public:
     virtual void visitClosure(const ClosurePtr& node);
     virtual void visitSelf(const SelfExpressionPtr& node);
     virtual void visitInitializerReference(const InitializerReferencePtr& node);
-
+    virtual void visitTypedPattern(const TypedPatternPtr& node);
     virtual void visitEnumCasePattern(const EnumCasePatternPtr& node);
     virtual void visitDynamicType(const DynamicTypePtr& node);
     virtual void visitForcedValue(const ForcedValuePtr& node);

@@ -3,39 +3,41 @@
 USE_SWIFT_NS
 
 
-ValueBindingPattern::ValueBindingPattern(NodeType::T nodeType)
-    :Pattern(nodeType), binding(NULL)
+ValueBindingPattern::ValueBindingPattern()
+    :Pattern(NodeType::ValueBindingPattern), readonly(false), binding(NULL)
 {
 }
 ValueBindingPattern::~ValueBindingPattern()
 {
 }
-
+bool ValueBindingPattern::isReadOnly() const
+{
+    return readonly;
+}
+void ValueBindingPattern::setReadOnly(bool readonly)
+{
+    this->readonly = readonly;
+}
 void ValueBindingPattern::setBinding(const PatternPtr& st)
 {
     this->binding = st;
 }
-PatternPtr ValueBindingPattern::getBinding()
+PatternPtr ValueBindingPattern::getBinding() const
 {
     return binding;
 }
 
-LetPattern::LetPattern()
-    :ValueBindingPattern(NodeType::LetPattern)
+TypeNodePtr ValueBindingPattern::getDeclaredType()const
 {
+    return declaredType;
+}
+void ValueBindingPattern::setDeclaredType(const TypeNodePtr& type)
+{
+    declaredType = type;
 }
 
-void LetPattern::accept(NodeVisitor* visitor)
-{
-    accept2(visitor, &NodeVisitor::visitLetPattern);
-}
 
-VarPattern::VarPattern()
-    :ValueBindingPattern(NodeType::VarPattern)
+void ValueBindingPattern::accept(NodeVisitor* visitor)
 {
-}
-
-void VarPattern::accept(NodeVisitor* visitor)
-{
-    accept2(visitor, &NodeVisitor::visitVarPattern);
+    accept2(visitor, &NodeVisitor::visitValueBindingPattern);
 }

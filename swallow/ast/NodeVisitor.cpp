@@ -162,12 +162,7 @@ void NodeVisitor::visitProgram(const ProgramPtr& node)
     }
 }
 
-void NodeVisitor::visitLetPattern(const LetPatternPtr& node)
-{
-
-}
-
-void NodeVisitor::visitVarPattern(const VarPatternPtr& node)
+void NodeVisitor::visitValueBindingPattern(const ValueBindingPatternPtr& node)
 {
 }
 
@@ -275,9 +270,9 @@ void NodeVisitor::visitUnaryOperator(const UnaryOperatorPtr& node)
 
 void NodeVisitor::visitTuple(const TuplePtr& node)
 {
-    for(const PatternPtr& p : *node)
+    for(const Tuple::Element& p : *node)
     {
-        ACCEPT(p);
+        ACCEPT(p.element);
     }
 }
 
@@ -285,7 +280,10 @@ void NodeVisitor::visitIdentifier(const IdentifierPtr& node)
 {
 
 }
-
+void NodeVisitor::visitTypedPattern(const TypedPatternPtr& node)
+{
+    ACCEPT(node->getPattern());
+}
 void NodeVisitor::visitCompileConstant(const CompileConstantPtr& node)
 {
 }

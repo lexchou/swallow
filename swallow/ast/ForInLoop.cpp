@@ -45,3 +45,11 @@ CodeBlockPtr ForInLoop::getCodeBlock()
 {
     return codeBlock;
 }
+void ForInLoop::setDeclaredType(const TypeNodePtr& type)
+{
+    this->declaredType = type;
+}
+TypeNodePtr ForInLoop::getDeclaredType()const
+{
+    return declaredType;
+}

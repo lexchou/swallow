@@ -15,6 +15,7 @@
 #include "DictionaryLiteral.h"
 
 #include "Identifier.h"
+#include "TypedPattern.h"
 #include "GenericArgument.h"
 #include "Comment.h"
 #include "MemberAccess.h"

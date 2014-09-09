@@ -1,5 +1,7 @@
+#include <semantics/type.h>
 #include "CodeBlock.h"
 #include "NodeVisitor.h"
+#include <cassert>
 USE_SWIFT_NS
 
 
@@ -47,4 +49,5 @@ const TypePtr& CodeBlock::getType()const
 void CodeBlock::setType(const TypePtr& type)
 {
     this->type = type;
+    assert(type && type->getCategory() == Type::Function);
 }

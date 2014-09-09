@@ -25,9 +25,12 @@ public:
     
     void setCodeBlock(const CodeBlockPtr& val);
     CodeBlockPtr getCodeBlock();
-    
+
+    void setDeclaredType(const TypeNodePtr& type);
+    TypeNodePtr getDeclaredType()const;
 private:
     PatternPtr loopVars;
+    TypeNodePtr declaredType;
     ExpressionPtr container;
     CodeBlockPtr codeBlock;
 };

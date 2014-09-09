@@ -45,8 +45,7 @@ public://statement
     virtual void visitParameter(const ParameterPtr& node) override;
     virtual void visitParameters(const ParametersPtr& node) override;
     virtual void visitProgram(const ProgramPtr& node) override;
-    virtual void visitLetPattern(const LetPatternPtr& node) override;
-    virtual void visitVarPattern(const VarPatternPtr& node) override;
+    virtual void visitValueBindingPattern(const ValueBindingPatternPtr& node) override;
 public:
     virtual void visitConditionalOperator(const ConditionalOperatorPtr& node) override;
     virtual void visitBinaryOperator(const BinaryOperatorPtr& node) override;

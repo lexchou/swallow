@@ -148,7 +148,15 @@ StatementPtr Parser::parseForIn()
     ExpressionPtr container = parseExpression();
     flags -= SUPPRESS_TRAILING_CLOSURE;
     CodeBlockPtr codeBlock = parseCodeBlock();
-    ret->setLoopVars(loopVars);
+    if(TypedPatternPtr var = std::dynamic_pointer_cast<TypedPattern>(loopVars))
+    {
+        ret->setLoopVars(var->getPattern());
+        ret->setDeclaredType(var->getDeclaredType());
+    }
+    else
+    {
+        ret->setLoopVars(loopVars);
+    }
     ret->setContainer(container);
     ret->setCodeBlock(codeBlock);
     return ret;

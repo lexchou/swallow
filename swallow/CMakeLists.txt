@@ -62,6 +62,7 @@ SET(SWALLOW_SRC
     ast/Comment.cpp
     ast/NodeFactory.cpp
     ast/BinaryOperator.cpp
+    ast/TypedPattern.cpp
     ast/UnaryOperator.cpp
     ast/InOutParameter.cpp
     ast/MemberAccess.cpp

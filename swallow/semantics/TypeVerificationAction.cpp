@@ -99,13 +99,26 @@ void TypeVerificationAction::verifyProtocolConform(const TypePtr& type, const Ty
                 error(type->getReference(), Errors::E_TYPE_DOES_NOT_CONFORM_TO_PROTOCOL_UNIMPLEMENTED_TYPE, entry.first);
             }
         }
-        else if(TypePtr type = std::dynamic_pointer_cast<Type>(requirement))
+        else if(TypePtr t = std::dynamic_pointer_cast<Type>(requirement))
         {
             //type can be ignored
         }
-        else
+        else if(SymbolPlaceHolderPtr prop = std::dynamic_pointer_cast<SymbolPlaceHolder>(requirement))
         {
             //verify computed properties
+            assert(prop->flags & SymbolPlaceHolder::F_MEMBER && prop->getRole() == SymbolPlaceHolder::R_PROPERTY);
+            SymbolPtr sym = type->getSymbols()[entry.first];
+            SymbolPlaceHolderPtr sp = std::dynamic_pointer_cast<SymbolPlaceHolder>(sym);
+            if(!sp)
+            {
+                error(type->getReference(), Errors::E_TYPE_DOES_NOT_CONFORM_TO_PROTOCOL_UNIMPLEMENTED_PROPERTY, entry.first);
+            }
+            bool expectedSetter = prop->flags & SymbolPlaceHolder::F_WRITABLE;
+            bool actualSetter = sp->flags & SymbolPlaceHolder::F_WRITABLE;
+            if(expectedSetter && !actualSetter)
+            {
+                error(type->getReference(), Errors::E_TYPE_DOES_NOT_CONFORM_TO_PROTOCOL_UNWRITABLE_PROPERTY, entry.first);
+            }
         }
     }
 }
@@ -119,7 +132,7 @@ void TypeVerificationAction::verifyProtocolFunction(const TypePtr& type, const T
         error(type->getReference(), Errors::E_TYPE_DOES_NOT_CONFORM_TO_PROTOCOL_UNIMPLEMENTED_FUNCTION, expected->getName());
         return;
     }
-    if(const FunctionSymbolPtr& func = std::dynamic_pointer_cast<FunctionSymbol>(sym))
+    else if(const FunctionSymbolPtr& func = std::dynamic_pointer_cast<FunctionSymbol>(sym))
     {
         //verify if they're the same type
         TypePtr funcType = func->getType();
@@ -130,7 +143,7 @@ void TypeVerificationAction::verifyProtocolFunction(const TypePtr& type, const T
         }
         return;
     }
-    if(FunctionOverloadedSymbolPtr funcs = std::dynamic_pointer_cast<FunctionOverloadedSymbol>(sym))
+    else if(FunctionOverloadedSymbolPtr funcs = std::dynamic_pointer_cast<FunctionOverloadedSymbol>(sym))
     {
         //verify if they're the same type
         bool found = false;
@@ -145,6 +158,11 @@ void TypeVerificationAction::verifyProtocolFunction(const TypePtr& type, const T
         if(!found)
             error(type->getReference(), Errors::E_TYPE_DOES_NOT_CONFORM_TO_PROTOCOL_UNIMPLEMENTED_FUNCTION, expected->getName());
         return;
+    }
+    else if(SymbolPlaceHolderPtr prop = std::dynamic_pointer_cast<SymbolPlaceHolder>(sym))
+    {
+
+
     }
     error(type->getReference(), Errors::E_TYPE_DOES_NOT_CONFORM_TO_PROTOCOL_UNIMPLEMENTED_FUNCTION, expected->getName());
 }
