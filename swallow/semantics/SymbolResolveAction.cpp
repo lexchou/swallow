@@ -515,10 +515,36 @@ TypePtr SymbolResolveAction::createFunctionType(const std::vector<ParametersPtr>
 }
 FunctionSymbolPtr SymbolResolveAction::createFunctionSymbol(const FunctionDefPtr& func)
 {
+    std::map<std::wstring, TypePtr> genericTypes;
+
+
+
     TypePtr retType = lookupType(func->getReturnType());
     TypePtr funcType = createFunctionType(func->getParametersList().begin(), func->getParametersList().end(), retType);
     FunctionSymbolPtr ret(new FunctionSymbol(func->getName(), funcType, func));
     return ret;
+}
+void SymbolResolveAction::prepareGenericTypes(const FunctionDefPtr& func, std::map<std::wstring, TypePtr>& genericTypes)
+{
+    if (!func->getGenericParameters())
+        return;
+    for (const TypeIdentifierPtr &typeId : *func->getGenericParameters())
+    {
+        if (typeId->getNestedType())
+        {
+            error(typeId->getNestedType(), Errors::E_NESTED_TYPE_IS_NOT_ALLOWED_HERE);
+            continue;
+        }
+        std::wstring name = typeId->getName();
+        if (genericTypes.find(name) != genericTypes.end())
+        {
+            error(typeId, Errors::E_DEFINITION_CONFLICT);
+            continue;
+        }
+        std::vector<TypePtr> protocols;
+        TypePtr type = Type::newType(name, Type::Placeholder, nullptr, nullptr, protocols);
+        genericTypes.insert(std::make_pair(name, type));
+    }
 }
 void SymbolResolveAction::visitClosure(const ClosurePtr& node)
 {
@@ -538,6 +564,8 @@ void SymbolResolveAction::visitClosure(const ClosurePtr& node)
 }
 void SymbolResolveAction::visitFunction(const FunctionDefPtr& node)
 {
+    std::map<std::wstring, TypePtr> genericTypes;
+    prepareGenericTypes(node, genericTypes);
 
     //enter code block's scope
     {
@@ -546,6 +574,11 @@ void SymbolResolveAction::visitFunction(const FunctionDefPtr& node)
 
         ScopeGuard scopeGuard(codeBlock.get(), this);
         (void) scopeGuard;
+
+        for(auto entry : genericTypes)
+        {
+            scope->addSymbol(entry.first, entry.second);
+        }
 
         for (const ParametersPtr &params : node->getParametersList())
         {

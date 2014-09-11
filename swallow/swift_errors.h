@@ -68,6 +68,8 @@ struct Errors
         E_TYPE_DOES_NOT_CONFORM_TO_PROTOCOL_UNIMPLEMENTED_PROPERTY,
         E_TYPE_DOES_NOT_CONFORM_TO_PROTOCOL_UNWRITABLE_PROPERTY,
         E_TYPE_ANNOTATION_MISSING_IN_PATTERN, // Type annotation missing in pattern
+        E_NESTED_TYPE_IS_NOT_ALLOWED_HERE,
+
 
         W_PARAM_CAN_BE_EXPRESSED_MORE_SUCCINCTLY, // '% %' can be expressed more succinctly as '#%'
         W_EXTRANEOUS_SHARTP_IN_PARAMETER, //Extraneous '#' in parameter: '%' is already the keyword argument name

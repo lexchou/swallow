@@ -22,11 +22,14 @@ public:
     void addConstraint(const GenericConstraintPtr& constraint);
     int numConstraints()const;
     GenericConstraintPtr getConstraint(int i);
-    
+
+    std::vector<TypeIdentifierPtr>::iterator begin() { return genericTypes.begin();}
+    std::vector<TypeIdentifierPtr>::iterator end() { return genericTypes.end();}
+
 private:
     std::vector<GenericConstraintPtr> constraints;
     std::vector<TypeIdentifierPtr> genericTypes;
-    
+
 };
 
 SWIFT_NS_END
