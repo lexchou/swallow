@@ -4,7 +4,7 @@
 #include "semantics/ScopedNodes.h"
 #include "semantics/Type.h"
 #include "swift_errors.h"
-
+#include "semantics/GlobalScope.h"
 
 using namespace Swift;
 
@@ -67,9 +67,9 @@ TEST(TestTypeInference, testArrayLiteral)
     t_Int = symbolRegistry.lookupType(L"Int");
 
     ASSERT_NOT_NULL(type);
-    ASSERT_EQ(Type::Array, type->getCategory());
+    ASSERT_EQ(symbolRegistry.getGlobalScope()->t_Array, type->getInnerType());
 
-    ASSERT_NOT_NULL(innerType = type->getInnerType());
+    ASSERT_NOT_NULL(innerType = type->getGenericTypes()[0]);
     ASSERT_EQ(t_Int, innerType);
 
 
@@ -84,9 +84,9 @@ TEST(TestTypeInference, testArrayLiteral2)
     t_Double = symbolRegistry.lookupType(L"Double");
 
     ASSERT_NOT_NULL(type);
-    ASSERT_EQ(Type::Array, type->getCategory());
+    ASSERT_EQ(symbolRegistry.getGlobalScope()->t_Array, type->getInnerType());
 
-    ASSERT_NOT_NULL(innerType = type->getInnerType());
+    ASSERT_NOT_NULL(innerType = type->getGenericTypes()[0]);
     ASSERT_EQ(t_Double, innerType);
 
 
@@ -97,13 +97,14 @@ TEST(TestTypeInference, testArrayLiteral3)
     SEMANTIC_ANALYZE(L"let a : Int8[] = [1, 3]");
     SymbolPtr a = NULL;
     ASSERT_NOT_NULL(a = scope->lookup(L"a"));
-    TypePtr type = a->getType(), Int8, innerType;
+    TypePtr type = a->getType(), Int8;
     Int8 = symbolRegistry.lookupType(L"Int8");
 
     ASSERT_NOT_NULL(type);
-    ASSERT_EQ(Type::Array, type->getCategory());
+    ASSERT_EQ(Type::Specialized, type->getCategory());
+    ASSERT_EQ(symbolRegistry.getGlobalScope()->t_Array, type->getInnerType());
 
-    ASSERT_NOT_NULL(innerType = type->getInnerType());
+    TypePtr innerType = type->getGenericTypes()[0];
     ASSERT_EQ(Int8, innerType);
 }
 

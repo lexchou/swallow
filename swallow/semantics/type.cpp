@@ -4,8 +4,8 @@
 USE_SWIFT_NS
 
 
-Type::Type(const std::wstring& name, Category category, TypePtr keyType, TypePtr valueType)
-:name(name), category(category), keyType(keyType), valueType(valueType), inheritantDepth(0)
+Type::Type(Category category)
+:category(category)
 {
 
 }
@@ -23,20 +23,18 @@ bool Type::equals(const TypePtr& lhs, const TypePtr& rhs)
 */
 const TypePtr& Type::getPlaceHolder()
 {
-    static TypePtr placeholder(new Type(L"", Type::Placeholder, nullptr, nullptr));
+    static TypePtr placeholder(new Type(Type::Placeholder));
     return placeholder;
 }
 
-TypePtr Type::newDictionaryType(TypePtr keyType, TypePtr valueType)
+TypePtr Type::newType(const std::wstring& name, Category category, const TypeDeclarationPtr& reference, const TypePtr& parentType, const std::vector<TypePtr>& protocols, const std::vector<TypePtr>& genericTypes)
 {
-    return TypePtr(new Type(L"", Dictionary, keyType, valueType));
-}
-TypePtr Type::newType(const std::wstring& name, Category category, const TypeDeclarationPtr& reference, const TypePtr& parentType, const std::vector<TypePtr>& protocols)
-{
-    TypePtr ret = TypePtr(new Type(name, category, nullptr, nullptr));
+    TypePtr ret = TypePtr(new Type(category));
+    ret->name = name;
     ret->reference = reference;
     ret->parentType = parentType;
     ret->protocols = protocols;
+    ret->genericTypes = genericTypes;
     if(parentType)
         ret->inheritantDepth = parentType->inheritantDepth + 1;
     return ret;
@@ -44,35 +42,42 @@ TypePtr Type::newType(const std::wstring& name, Category category, const TypeDec
 
 TypePtr Type::newTypeReference(const TypePtr& innerType)
 {
-    TypePtr ret(new Type(L"", MetaType, nullptr, nullptr));
+    TypePtr ret(new Type(MetaType));
     ret->innerType = innerType;
     return ret;
 }
 
 
-TypePtr Type::newArrayType(TypePtr elementType)
-{
-    assert(elementType != nullptr);
-    TypePtr ret(new Type(L"", Array, nullptr, nullptr));
-    ret->innerType = elementType;
-    return ret;
-}
-
 TypePtr Type::newTuple(const std::vector<TypePtr>& types)
 {
-    Type* ret = new Type(L"", Tuple, nullptr, nullptr);
+    Type* ret = new Type(Tuple);
     ret->elementTypes = types;
     return TypePtr(ret);
 }
 
 TypePtr Type::newFunction(const std::vector<Parameter>& parameters, const TypePtr& returnType, bool hasVariadicParameters)
 {
-    Type* ret = new Type(L"", Function, nullptr, nullptr);
+    Type* ret = new Type(Function);
     ret->parameters = parameters;
     ret->returnType = returnType;
     ret->variadicParameters = hasVariadicParameters;
     return TypePtr(ret);
 }
+TypePtr Type::newSpecializedType(const TypePtr& innerType, const std::vector<TypePtr>& arguments)
+{
+    Type* ret = new Type(Specialized);
+    ret->innerType = innerType;
+    ret->genericTypes = arguments;
+    return TypePtr(ret);
+}
+TypePtr Type::newSpecializedType(const TypePtr& innerType, const TypePtr& argument)
+{
+    Type* ret = new Type(Specialized);
+    ret->innerType = innerType;
+    ret->genericTypes.push_back(argument);
+    return TypePtr(ret);
+}
+
 
 /**
  * Gets the common parent class between current class and rhs with the minimum inheritance distance.
@@ -172,15 +177,7 @@ int Type::numElementTypes()const
 {
     return elementTypes.size();
 }
-TypePtr Type::getKeyType() const
-{
-    return keyType;
-}
 
-TypePtr Type::getValueType() const
-{
-    return valueType;
-}
 TypeDeclarationPtr Type::getReference()const
 {
     if(reference.expired())
@@ -210,7 +207,15 @@ bool Type::hasVariadicParameters()const
     return variadicParameters;
 }
 
+bool Type::isGenericType()const
+{
+    return this->category != Specialized && !genericTypes.empty();
+}
 
+std::vector<TypePtr>& Type::getGenericTypes()
+{
+    return genericTypes;
+}
 
 FunctionOverloadedSymbolPtr Type::getInitializer()
 {
@@ -245,7 +250,6 @@ bool Type::operator ==(const Type& rhs)const
                 return false;
             //TODO: check generic parameters
             break;
-        case Array:
         case Tuple:
         {
             if (!elementTypes.empty() && !rhs.elementTypes.empty())
@@ -258,12 +262,6 @@ bool Type::operator ==(const Type& rhs)const
             }
             break;
         }
-        case Dictionary:
-            if(*keyType != *rhs.keyType)
-                return false;
-            if(*valueType != *rhs.valueType)
-                return false;
-            break;
         case MetaType:
             if(*innerType != *rhs.innerType)
                 return false;
@@ -288,6 +286,21 @@ bool Type::operator ==(const Type& rhs)const
                     return false;
             }
             break;
+        }
+        case Specialized:
+        {
+            if (!Type::equals(innerType, rhs.innerType))
+                return false;
+            if (genericTypes.size() != rhs.genericTypes.size())
+                return false;
+            auto iter = genericTypes.begin();
+            auto iter2 = rhs.genericTypes.begin();
+            for(; iter != genericTypes.end(); iter++, iter2++)
+            {
+                if(!Type::equals(*iter, *iter2))
+                    return false;
+            }
+            return true;
         }
         case Placeholder:
             return true;

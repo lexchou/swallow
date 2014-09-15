@@ -35,7 +35,7 @@ protected:
      * Convert a AST TypeNode into symboled Type
      */
     TypePtr lookupType(const TypeNodePtr& type);
-
+    std::wstring toString(const NodePtr& node);
 protected:
     SymbolRegistry* symbolRegistry;
     CompilerResults* compilerResults;

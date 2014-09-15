@@ -68,7 +68,11 @@ struct Errors
         E_TYPE_DOES_NOT_CONFORM_TO_PROTOCOL_UNIMPLEMENTED_PROPERTY,
         E_TYPE_DOES_NOT_CONFORM_TO_PROTOCOL_UNWRITABLE_PROPERTY,
         E_TYPE_ANNOTATION_MISSING_IN_PATTERN, // Type annotation missing in pattern
-        E_NESTED_TYPE_IS_NOT_ALLOWED_HERE,
+        E_NESTED_TYPE_IS_NOT_ALLOWED_HERE, // Nested type is not allowed here
+        E_GENERIC_TYPE_ARGUMENT_REQUIRED, // Generic type argument required
+        E_GENERIC_TYPE_SPECIALIZED_WITH_TOO_MANY_TYPE_PARAMETERS, //Generic type '%' specialized with too many type parameters(got 2, but expected 1)
+        E_GENERIC_TYPE_SPECIALIZED_WITH_INSUFFICIENT_TYPE_PARAMETERS, //Generic type '%' specialized with insufficient type parameters(got 1, but expected 2);
+        E_CANNOT_SPECIALIZE_NON_GENERIC_TYPE, //Cannot specialize non-generic type '%'
 
 
         W_PARAM_CAN_BE_EXPRESSED_MORE_SUCCINCTLY, // '% %' can be expressed more succinctly as '#%'

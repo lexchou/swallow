@@ -12,19 +12,17 @@ SWIFT_NS_BEGIN
 struct OperatorInfo;
 class TypeNode;
 typedef std::shared_ptr<TypeNode> TypeNodePtr;
+class GlobalScope;
 class SymbolRegistry
 {
     friend class SymbolScope;
 public:
     SymbolRegistry();
+    ~SymbolRegistry();
 public:
     bool registerOperator(const std::wstring& name, OperatorType::T type, Associativity::T associativity = Associativity::None, int precedence = 100);
     bool registerOperator(SymbolScope* scope, const std::wstring& name, OperatorType::T type, Associativity::T associativity = Associativity::None, int precedence = 100);
 
-    /**
-     * Register the implementation of binary operator
-     */
-    bool registerOperatorFunction(SymbolScope* scope, const std::wstring& name, const TypePtr& returnType, const TypePtr& lhs, const TypePtr& rhs);
     OperatorInfo* getOperator(const std::wstring& name);
     OperatorInfo* getOperator(SymbolScope* scope, const std::wstring& name);
 
@@ -33,6 +31,7 @@ public:
     bool isInfixOperator(const std::wstring& name);
 
     SymbolScope* getCurrentScope();
+    GlobalScope* getGlobalScope();
     SymbolScope* getFileScope();
     void setFileScope(SymbolScope* scope);
 
@@ -52,7 +51,7 @@ public:
 private:
     std::stack<SymbolScope*> scopes;
     SymbolScope* currentScope;
-    SymbolScope topScope;
+    GlobalScope* globalScope;
     SymbolScope* fileScope;
 };
 

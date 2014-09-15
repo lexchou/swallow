@@ -51,7 +51,7 @@ private:
      */
     void prepareParameters(SymbolScope* scope, const ParametersPtr& params);
     void registerSymbol(const SymbolPlaceHolderPtr& symbol);
-    void prepareGenericTypes(const FunctionDefPtr& func, std::map<std::wstring, TypePtr>& genericTypes);
+    void prepareGenericTypes(const GenericParametersPtr& params, std::vector<std::pair<std::wstring, TypePtr> >& genericTypes);
 private:
     TypePtr currentType;
 };

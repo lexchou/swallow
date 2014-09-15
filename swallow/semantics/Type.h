@@ -36,10 +36,9 @@ public:
     {
         Aggregate,
         Tuple,
-        Array,
-        Dictionary,
         Class,
         Struct,
+        Specialized,
         Enum,
         Protocol,
         Extension,
@@ -49,15 +48,14 @@ public:
         Placeholder
     };
 private:
-    Type(const std::wstring& name, Category category, TypePtr keyType, TypePtr valueType);
+    Type(Category category);
 public:
-    static TypePtr newArrayType(TypePtr elementType);
-    static TypePtr newDictionaryType(TypePtr keyType, TypePtr valueType);
-    static TypePtr newType(const std::wstring& name, Category category, const TypeDeclarationPtr& reference = nullptr, const TypePtr& parentType = nullptr, const std::vector<TypePtr>& protocols = std::vector<TypePtr>());
+    static TypePtr newType(const std::wstring& name, Category category, const TypeDeclarationPtr& reference = nullptr, const TypePtr& parentType = nullptr, const std::vector<TypePtr>& protocols = std::vector<TypePtr>(), const std::vector<TypePtr>& genericTypes = std::vector<TypePtr>());
     static TypePtr newTuple(const std::vector<TypePtr>& types);
     static TypePtr newTypeReference(const TypePtr& innerType);
     static TypePtr newFunction(const std::vector<Parameter>& parameters, const TypePtr& returnType, bool hasVariadicParameters);
-
+    static TypePtr newSpecializedType(const TypePtr& innerType, const std::vector<TypePtr>& arguments);
+    static TypePtr newSpecializedType(const TypePtr& innerType, const TypePtr& argument);
     /**
      * A type place holder for protocol's typealias
      */
@@ -170,6 +168,16 @@ public://properties
      */
     SymbolMap& getSymbols();
 
+    /**
+     * Check if this is a generic type
+     */
+    bool isGenericType()const;
+
+    /*
+     * Gets the generic parameters/arguments required by this type to specialize a concrete type
+     */
+    std::vector<TypePtr>& getGenericTypes();
+
 public:
     bool operator ==(const Type& rhs)const;
     bool operator !=(const Type& rhs)const;
@@ -184,9 +192,7 @@ private:
     Category category;
     TypePtr parentType;
     std::vector<TypePtr> protocols;
-
-    TypePtr keyType;
-    TypePtr valueType;
+    std::vector<TypePtr> genericTypes;
     TypePtr innerType;
     TypePtr returnType;
     std::vector<Parameter> parameters;

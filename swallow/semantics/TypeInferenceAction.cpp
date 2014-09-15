@@ -12,6 +12,8 @@
 #include <cassert>
 #include <algorithm>
 #include "ast/NodeSerializer.h"
+#include "GlobalScope.h"
+
 USE_SWIFT_NS
 
 
@@ -21,48 +23,15 @@ USE_SWIFT_NS
 TypeInferenceAction::TypeInferenceAction(SymbolRegistry* symbolRegistry, CompilerResults* compilerResults)
     :SemanticNodeVisitor(symbolRegistry, compilerResults)
 {
-    t_int = symbolRegistry->lookupType(L"Int");
-    t_uint = symbolRegistry->lookupType(L"UInt");
-    t_int8 = symbolRegistry->lookupType(L"Int8");
-    t_uint8 = symbolRegistry->lookupType(L"UInt8");
-    t_int16 = symbolRegistry->lookupType(L"Int16");
-    t_uint16 = symbolRegistry->lookupType(L"UInt16");
-    t_int32 = symbolRegistry->lookupType(L"Int32");
-    t_uint32 = symbolRegistry->lookupType(L"UInt32");
-    t_int64 = symbolRegistry->lookupType(L"Int64");
-    t_uint64 = symbolRegistry->lookupType(L"UInt64");
 
-
-    t_bool = symbolRegistry->lookupType(L"Bool");
-    t_double = symbolRegistry->lookupType(L"Double");
-    t_float = symbolRegistry->lookupType(L"Float");
-    t_string = symbolRegistry->lookupType(L"String");
-
-
-    t_ints.push_back(t_int);
-    t_ints.push_back(t_uint);
-    t_ints.push_back(t_int8);
-    t_ints.push_back(t_uint8);
-    t_ints.push_back(t_int16);
-    t_ints.push_back(t_uint16);
-    t_ints.push_back(t_int32);
-    t_ints.push_back(t_uint32);
-    t_ints.push_back(t_int64);
-    t_ints.push_back(t_uint64);
-
-    for(const TypePtr& t : t_ints)
-    {
-        t_numbers.push_back(t);
-    }
-    t_numbers.push_back(t_double);
-    t_numbers.push_back(t_float);
 
 }
 
 
 bool TypeInferenceAction::isInteger(const TypePtr& type)
 {
-    for(const TypePtr& t : t_ints)
+    GlobalScope* scope = symbolRegistry->getGlobalScope();
+    for(const TypePtr& t : scope->t_Ints)
     {
         if(t == type)
             return true;
@@ -79,7 +48,8 @@ bool TypeInferenceAction::isNumber(const TypePtr& type)
 }
 bool TypeInferenceAction::isFloat(const TypePtr& type)
 {
-    if(type == t_float || type == t_double)
+    GlobalScope* scope = symbolRegistry->getGlobalScope();
+    if(type == scope->t_Float || type == scope->t_Double)
         return true;
     return false;
 }
@@ -148,6 +118,7 @@ TypePtr TypeInferenceAction::getExpressionType(const ExpressionPtr& expr, const 
     if(expr->getType() == nullptr)
         expr->accept(this);
     score = 1;
+    GlobalScope* scope = symbolRegistry->getGlobalScope();
     if(expr->getNodeType() == NodeType::IntegerLiteral && hint != nullptr)
     {
         IntegerLiteralPtr literal = std::static_pointer_cast<IntegerLiteral>(expr);
@@ -158,7 +129,7 @@ TypePtr TypeInferenceAction::getExpressionType(const ExpressionPtr& expr, const 
         }
         if(isInteger(hint))
             return hint;
-        for(const TypePtr& t : t_ints)
+        for(const TypePtr& t : scope->t_Ints)
         {
             if(t == hint)
                 return t;
@@ -433,7 +404,7 @@ void TypeInferenceAction::visitFunctionCall(const FunctionCallPtr& node)
             break;
         }
         default:
-            assert(0 && "Unsupported function call");
+            error(func, Errors::E_INVALID_CALL_OF_NON_FUNCTION_TYPE);
             break;
     }
 
@@ -456,15 +427,18 @@ void TypeInferenceAction::visitMemberAccess(const MemberAccessPtr& node)
 
 void TypeInferenceAction::visitString(const StringLiteralPtr& node)
 {
-    node->setType(t_string);
+    GlobalScope* scope = symbolRegistry->getGlobalScope();
+    node->setType(scope->t_String);
 }
 void TypeInferenceAction::visitInteger(const IntegerLiteralPtr& node)
 {
-    node->setType(t_int);
+    GlobalScope* scope = symbolRegistry->getGlobalScope();
+    node->setType(scope->t_Int);
 }
 void TypeInferenceAction::visitFloat(const FloatLiteralPtr& node)
 {
-    node->setType(t_double);
+    GlobalScope* scope = symbolRegistry->getGlobalScope();
+    node->setType(scope->t_Double);
 }
 
 bool TypeInferenceAction::canConvertTo(const ExpressionPtr& expr, const TypePtr& type)
@@ -484,11 +458,11 @@ bool TypeInferenceAction::canConvertTo(const ExpressionPtr& expr, const TypePtr&
 void TypeInferenceAction::visitArrayLiteral(const ArrayLiteralPtr& node)
 {
     int num = node->numElements();
-
+    GlobalScope* scope = symbolRegistry->getGlobalScope();
     if(t_hint)
     {
         //TODO if hint specified, it must be Array type nor conform to ArrayLiteralConvertible protocol
-        if(t_hint->getCategory() != Type::Array)
+        if(t_hint->getInnerType() != scope->t_Array)
         {
             bool conformToArrayLiteralConvertible = false;
             if(!conformToArrayLiteralConvertible)
@@ -526,17 +500,17 @@ void TypeInferenceAction::visitArrayLiteral(const ArrayLiteralPtr& node)
             switch(el->getNodeType())
             {
                 case NodeType::IntegerLiteral:
-                    hint = t_int;
+                    hint = scope->t_Int;
                     break;
                 case NodeType::FloatLiteral:
-                    hint = t_double;
+                    hint = scope->t_Double;
                     break;
                 default:
                     type = el->getType();
                     if(hint)
                     {
                         //check if the hint can be converted to type
-                        bool success = (hint == t_double && isFloat(type)) || (hint == t_int && isNumber(type));
+                        bool success = (hint == scope->t_Double && isFloat(type)) || (hint == scope->t_Int && isNumber(type));
                         if(!success)
                         {
                             error(el, Errors::E_ARRAY_CONTAINS_DIFFERENT_TYPES);
@@ -553,7 +527,8 @@ void TypeInferenceAction::visitArrayLiteral(const ArrayLiteralPtr& node)
     if(!type && hint)
         type = hint;
 
-    node->setType(Type::newArrayType(type));
+    TypePtr arrayType = Type::newSpecializedType(scope->t_Array, type);
+    node->setType(arrayType);
 }
 void TypeInferenceAction::visitDictionaryLiteral(const DictionaryLiteralPtr& node)
 {
@@ -676,13 +651,14 @@ void TypeInferenceAction::visitIdentifier(const IdentifierPtr& node)
 void TypeInferenceAction::visitCompileConstant(const CompileConstantPtr& node)
 {
     const std::wstring& name = node->getName();
+    GlobalScope* scope = symbolRegistry->getGlobalScope();
     if(name == L"__LINE__" || name == L"__COLUMN__")
     {
-        node->setType(t_int);
+        node->setType(scope->t_Int);
     }
     else if(name == L"__FUNCTION__" || name == L"__FILE__")
     {
-        node->setType(t_string);
+        node->setType(scope->t_String);
     }
     else
     {

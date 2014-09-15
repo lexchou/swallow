@@ -51,6 +51,7 @@ SET(SWALLOW_SRC
     semantics/FunctionSymbol.cpp
     semantics/FunctionOverloadedSymbol.cpp
     semantics/ScopeGuard.cpp
+    semantics/GlobalScope.cpp
 
     ast/Node.cpp
     ast/Program.cpp

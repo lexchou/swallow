@@ -20,6 +20,9 @@ public:
     
     void setNestedType(TypeIdentifierPtr type);
     TypeIdentifierPtr getNestedType();
+
+    std::vector<TypeNodePtr>::iterator begin() { return genericArguments.begin();}
+    std::vector<TypeNodePtr>::iterator end() { return genericArguments.end();}
 public:
     virtual void accept(NodeVisitor* visitor) override;
 private:

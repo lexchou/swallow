@@ -12,7 +12,8 @@
 #include <cassert>
 #include "swift_errors.h"
 #include "ast/NodeSerializer.h"
-
+#include "GlobalScope.h"
+#include "ast/OptionalType.h"
 
 USE_SWIFT_NS
 
@@ -38,7 +39,13 @@ void SemanticNodeVisitor::warning(const NodePtr& node, int code, const std::wstr
     compilerResults->add(ErrorLevel::Warning, *node->getSourceInfo(), code, item);
 }
 
-
+std::wstring SemanticNodeVisitor::toString(const NodePtr& node)
+{
+    std::wstringstream out;
+    NodeSerializerW serializer(out);
+    node->accept(&serializer);
+    return out.str();
+}
 TypePtr SemanticNodeVisitor::lookupType(const TypeNodePtr& type)
 {
     if(!type)
@@ -49,12 +56,46 @@ TypePtr SemanticNodeVisitor::lookupType(const TypeNodePtr& type)
         TypePtr ret = symbolRegistry->lookupType(id->getName());
         if(!ret)
         {
-            std::wstringstream out;
-            NodeSerializerW serializer(out);
-            type->accept(&serializer);
-            error(type, Errors::E_USE_OF_UNDECLARED_TYPE, out.str());
+            std::wstring str = toString(type);
+            error(type, Errors::E_USE_OF_UNDECLARED_TYPE, str);
             abort();
         }
+        if(!ret->isGenericType() && id->numGenericArguments() == 0)
+            return ret;
+        if(!ret->isGenericType() && id->numGenericArguments() > 0)
+        {
+            std::wstring str = toString(type);
+            error(id, Errors::E_CANNOT_SPECIALIZE_NON_GENERIC_TYPE, str);
+            return nullptr;
+        }
+        if(ret->isGenericType() && id->numGenericArguments() == 0)
+        {
+            std::wstring str = toString(type);
+            error(id, Errors::E_GENERIC_TYPE_ARGUMENT_REQUIRED, str);
+            return nullptr;
+        }
+        if(id->numGenericArguments() > ret->getGenericTypes().size())
+        {
+            std::wstring str = toString(type);
+            error(id, Errors::E_GENERIC_TYPE_SPECIALIZED_WITH_TOO_MANY_TYPE_PARAMETERS, str);
+            return nullptr;
+        }
+        if(id->numGenericArguments() < ret->getGenericTypes().size())
+        {
+            std::wstring str = toString(type);
+            error(id, Errors::E_GENERIC_TYPE_SPECIALIZED_WITH_INSUFFICIENT_TYPE_PARAMETERS, str);
+            return nullptr;
+        }
+        //check type
+        std::vector<TypePtr> typeArguments;
+        for(auto arg : *id)
+        {
+            TypePtr argType = lookupType(arg);
+            if(!argType)
+                return nullptr;
+            typeArguments.push_back(argType);
+        }
+        ret = Type::newSpecializedType(ret, typeArguments);
         return ret;
     }
     if(TupleTypePtr tuple = std::dynamic_pointer_cast<TupleType>(type))
@@ -69,8 +110,25 @@ TypePtr SemanticNodeVisitor::lookupType(const TypeNodePtr& type)
     }
     if(ArrayTypePtr array = std::dynamic_pointer_cast<ArrayType>(type))
     {
+        GlobalScope* scope = symbolRegistry->getGlobalScope();
+        TypePtr Array = scope->t_Array;
         TypePtr innerType = lookupType(array->getInnerType());
-        return Type::newArrayType(innerType);
+        assert(innerType != nullptr);
+        assert(Array != nullptr);
+        std::vector<TypePtr> typeArguments = {innerType};
+        TypePtr ret = Type::newSpecializedType(Array, typeArguments);
+        return ret;
+    }
+    if(OptionalTypePtr opt = std::dynamic_pointer_cast<OptionalType>(type))
+    {
+        GlobalScope* scope = symbolRegistry->getGlobalScope();
+        TypePtr Optional = scope->t_Optional;
+        TypePtr innerType = lookupType(opt->getInnerType());
+        assert(innerType != nullptr);
+        assert(Optional != nullptr);
+        std::vector<TypePtr> typeArguments = {innerType};
+        TypePtr ret = Type::newSpecializedType(Optional, typeArguments);
+        return ret;
     }
     if(FunctionTypePtr func = std::dynamic_pointer_cast<FunctionType>(type))
     {

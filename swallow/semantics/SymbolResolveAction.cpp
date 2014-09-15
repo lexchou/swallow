@@ -12,7 +12,7 @@
 #include <set>
 
 USE_SWIFT_NS
-
+using namespace std;
 SymbolResolveAction::SymbolResolveAction(SymbolRegistry* symbolRegistry, CompilerResults* compilerResults)
     :SemanticNodeVisitor(symbolRegistry, compilerResults)
 {
@@ -271,7 +271,23 @@ TypePtr SymbolResolveAction::defineType(const std::shared_ptr<TypeDeclaration>& 
         error(node, Errors::E_INVALID_REDECLARATION, id->getName());
         return nullptr;
     }
-
+    //prepare for generic types
+    std::vector<TypePtr> genericTypes;
+    GenericParametersPtr genericParams;
+    if(node->getNodeType() == NodeType::Class)
+        genericParams = std::static_pointer_cast<ClassDef>(node)->getGenericParameters();
+    else if(node->getNodeType() == NodeType::Struct)
+        genericParams = std::static_pointer_cast<StructDef>(node)->getGenericParameters();
+    if(genericParams)
+    {
+        std::vector<std::pair<std::wstring, TypePtr> > tmp;
+        this->prepareGenericTypes(genericParams, tmp);
+        for(auto entry : tmp)
+        {
+            currentScope->addSymbol(entry.first, entry.second);
+            genericTypes.push_back(entry.second);
+        }
+    }
 
     //check inheritance clause
     TypePtr parent = nullptr;
@@ -314,7 +330,7 @@ TypePtr SymbolResolveAction::defineType(const std::shared_ptr<TypeDeclaration>& 
 
 
     //register this type
-    type = Type::newType(node->getIdentifier()->getName(), category, node, parent, protocols);
+    type = Type::newType(node->getIdentifier()->getName(), category, node, parent, protocols, genericTypes);
     node->setType(type);
     currentScope->addSymbol(type);
 
@@ -524,11 +540,10 @@ FunctionSymbolPtr SymbolResolveAction::createFunctionSymbol(const FunctionDefPtr
     FunctionSymbolPtr ret(new FunctionSymbol(func->getName(), funcType, func));
     return ret;
 }
-void SymbolResolveAction::prepareGenericTypes(const FunctionDefPtr& func, std::map<std::wstring, TypePtr>& genericTypes)
+void SymbolResolveAction::prepareGenericTypes(const GenericParametersPtr& params, std::vector<std::pair<std::wstring, TypePtr>> & genericTypes)
 {
-    if (!func->getGenericParameters())
-        return;
-    for (const TypeIdentifierPtr &typeId : *func->getGenericParameters())
+    std::set<std::wstring> names;
+    for (const TypeIdentifierPtr &typeId : *params)
     {
         if (typeId->getNestedType())
         {
@@ -536,14 +551,15 @@ void SymbolResolveAction::prepareGenericTypes(const FunctionDefPtr& func, std::m
             continue;
         }
         std::wstring name = typeId->getName();
-        if (genericTypes.find(name) != genericTypes.end())
+        if (names.find(name) != names.end())
         {
             error(typeId, Errors::E_DEFINITION_CONFLICT);
             continue;
         }
         std::vector<TypePtr> protocols;
         TypePtr type = Type::newType(name, Type::Placeholder, nullptr, nullptr, protocols);
-        genericTypes.insert(std::make_pair(name, type));
+        genericTypes.push_back(std::make_pair(name, type));
+        names.insert(name);
     }
 }
 void SymbolResolveAction::visitClosure(const ClosurePtr& node)
@@ -564,8 +580,9 @@ void SymbolResolveAction::visitClosure(const ClosurePtr& node)
 }
 void SymbolResolveAction::visitFunction(const FunctionDefPtr& node)
 {
-    std::map<std::wstring, TypePtr> genericTypes;
-    prepareGenericTypes(node, genericTypes);
+    vector<pair<wstring, TypePtr> > genericTypes;
+    if(node->getGenericParameters())
+        prepareGenericTypes(node->getGenericParameters(), genericTypes);
 
     //enter code block's scope
     {
