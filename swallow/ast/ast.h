@@ -82,7 +82,7 @@
 #include "ExtensionDef.h"
 #include "SubscriptDef.h"
 #include "OperatorDef.h"
-#include "GenericParameters.h"
-#include "GenericConstraint.h"
+#include "GenericParametersDef.h"
+#include "GenericConstraintDef.h"
 
 #endif//AST_H

@@ -10,8 +10,8 @@ class StructDef : public TypeDeclaration
 public:
     StructDef();
 public:
-    using Declaration::setGenericParameters;
-    using Declaration::getGenericParameters;
+    using Declaration::setGenericParametersDef;
+    using Declaration::getGenericParametersDef;
 public:
     virtual void accept(NodeVisitor* visitor);
 };

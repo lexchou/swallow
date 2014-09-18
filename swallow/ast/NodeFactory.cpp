@@ -308,13 +308,13 @@ OperatorDefPtr NodeFactory::createOperator(const SourceInfo&state)
 {
     return _(state, new OperatorDef());
 }
-GenericConstraintPtr NodeFactory::createGenericConstraint(const SourceInfo& state)
+GenericConstraintDefPtr NodeFactory::createGenericConstraintDef(const SourceInfo& state)
 {
-    return _(state, new GenericConstraint());
+    return _(state, new GenericConstraintDef());
 }
-GenericParametersPtr NodeFactory::createGenericParameters(const SourceInfo& state)
+GenericParametersDefPtr NodeFactory::createGenericParametersDef(const SourceInfo& state)
 {
-    return _(state, new GenericParameters());
+    return _(state, new GenericParametersDef());
 }
 
 

@@ -10,12 +10,12 @@ TEST(TestGeneric, testFunc)
                     L"b = temporaryA\n"
                     L"}");
     FunctionDefPtr f;
-    GenericParametersPtr gp;
+    GenericParametersDefPtr gp;
     TypeIdentifierPtr type;
     ParametersPtr params;
     ParameterPtr param;
     ASSERT_NOT_NULL(f = std::dynamic_pointer_cast<FunctionDef>(root));
-    ASSERT_NOT_NULL(gp = std::dynamic_pointer_cast<GenericParameters>(f->getGenericParameters()));
+    ASSERT_NOT_NULL(gp = std::dynamic_pointer_cast<GenericParametersDef>(f->getGenericParametersDef()));
     ASSERT_EQ(1, gp->numGenericTypes());
     ASSERT_NOT_NULL(type = std::dynamic_pointer_cast<TypeIdentifier>(gp->getGenericType(0)));
     ASSERT_EQ(L"T", type->getName());
@@ -49,10 +49,10 @@ TEST(TestGeneric, testStruct)
                     L"}\n"
                     L"}");
     StructDefPtr s;
-    GenericParametersPtr gp;
+    GenericParametersDefPtr gp;
     TypeIdentifierPtr type;
     ASSERT_NOT_NULL(s = std::dynamic_pointer_cast<StructDef>(root));
-    ASSERT_NOT_NULL(gp = std::dynamic_pointer_cast<GenericParameters>(s->getGenericParameters()));
+    ASSERT_NOT_NULL(gp = std::dynamic_pointer_cast<GenericParametersDef>(s->getGenericParametersDef()));
     ASSERT_EQ(1, gp->numGenericTypes());
     ASSERT_NOT_NULL(type = std::dynamic_pointer_cast<TypeIdentifier>(gp->getGenericType(0)));
     ASSERT_EQ(L"T", type->getName());
@@ -80,11 +80,11 @@ TEST(TestGeneric, testTypeConstraint)
     PARSE_STATEMENT(L"func someFunction<T: SomeClass, U: SomeProtocol>(someT: T, someU: U) {\n"
                     L"}");
     FunctionDefPtr f;
-    GenericParametersPtr params;
+    GenericParametersDefPtr params;
     TypeIdentifierPtr type;
-    GenericConstraintPtr constraint;
+    GenericConstraintDefPtr constraint;
     ASSERT_NOT_NULL(f = std::dynamic_pointer_cast<FunctionDef>(root));
-    ASSERT_NOT_NULL(params = f->getGenericParameters());
+    ASSERT_NOT_NULL(params = f->getGenericParametersDef());
     ASSERT_EQ(2, params->numGenericTypes());
     ASSERT_EQ(2, params->numConstraints());
 
@@ -95,7 +95,7 @@ TEST(TestGeneric, testTypeConstraint)
 
     ASSERT_NOT_NULL(constraint = params->getConstraint(0));
     ASSERT_EQ(1, constraint->numExpectedTypes());
-    ASSERT_EQ(GenericConstraint::DerivedFrom, constraint->getConstraintType());
+    ASSERT_EQ(GenericConstraintDef::DerivedFrom, constraint->getConstraintType());
     ASSERT_NOT_NULL(type = constraint->getIdentifier());
     ASSERT_EQ(L"T", type->getName());
     ASSERT_NOT_NULL(type = constraint->getExpectedType(0));
@@ -103,7 +103,7 @@ TEST(TestGeneric, testTypeConstraint)
 
     ASSERT_NOT_NULL(constraint = params->getConstraint(1));
     ASSERT_EQ(1, constraint->numExpectedTypes());
-    ASSERT_EQ(GenericConstraint::DerivedFrom, constraint->getConstraintType());
+    ASSERT_EQ(GenericConstraintDef::DerivedFrom, constraint->getConstraintType());
     ASSERT_NOT_NULL(type = constraint->getIdentifier());
     ASSERT_EQ(L"U", type->getName());
     ASSERT_NOT_NULL(type = constraint->getExpectedType(0));
@@ -124,11 +124,11 @@ TEST(TestGeneric, testTypeConstraint2)
 
 
     FunctionDefPtr f;
-    GenericParametersPtr params;
+    GenericParametersDefPtr params;
     TypeIdentifierPtr type;
-    GenericConstraintPtr constraint;
+    GenericConstraintDefPtr constraint;
     ASSERT_NOT_NULL(f = std::dynamic_pointer_cast<FunctionDef>(root));
-    ASSERT_NOT_NULL(params = f->getGenericParameters());
+    ASSERT_NOT_NULL(params = f->getGenericParametersDef());
     ASSERT_EQ(1, params->numGenericTypes());
     ASSERT_EQ(1, params->numConstraints());
 
@@ -138,7 +138,7 @@ TEST(TestGeneric, testTypeConstraint2)
 
     ASSERT_NOT_NULL(constraint = params->getConstraint(0));
     ASSERT_EQ(1, constraint->numExpectedTypes());
-    ASSERT_EQ(GenericConstraint::DerivedFrom, constraint->getConstraintType());
+    ASSERT_EQ(GenericConstraintDef::DerivedFrom, constraint->getConstraintType());
     ASSERT_NOT_NULL(type = constraint->getIdentifier());
     ASSERT_EQ(L"T", type->getName());
     ASSERT_NOT_NULL(type = constraint->getExpectedType(0));
@@ -161,11 +161,11 @@ TEST(TestGeneric, testWhereClause)
                     L"}");
 
     FunctionDefPtr f;
-    GenericParametersPtr params;
+    GenericParametersDefPtr params;
     TypeIdentifierPtr type;
-    GenericConstraintPtr constraint;
+    GenericConstraintDefPtr constraint;
     ASSERT_NOT_NULL(f = std::dynamic_pointer_cast<FunctionDef>(root));
-    ASSERT_NOT_NULL(params = f->getGenericParameters());
+    ASSERT_NOT_NULL(params = f->getGenericParametersDef());
     ASSERT_EQ(2, params->numGenericTypes());
     ASSERT_EQ(4, params->numConstraints());
 
@@ -176,7 +176,7 @@ TEST(TestGeneric, testWhereClause)
 
     ASSERT_NOT_NULL(constraint = params->getConstraint(0));
     ASSERT_EQ(1, constraint->numExpectedTypes());
-    ASSERT_EQ(GenericConstraint::DerivedFrom, constraint->getConstraintType());
+    ASSERT_EQ(GenericConstraintDef::DerivedFrom, constraint->getConstraintType());
     ASSERT_NOT_NULL(type = constraint->getIdentifier());
     ASSERT_EQ(L"C1", type->getName());
     ASSERT_NOT_NULL(type = constraint->getExpectedType(0));
@@ -184,7 +184,7 @@ TEST(TestGeneric, testWhereClause)
 
     ASSERT_NOT_NULL(constraint = params->getConstraint(1));
     ASSERT_EQ(1, constraint->numExpectedTypes());
-    ASSERT_EQ(GenericConstraint::DerivedFrom, constraint->getConstraintType());
+    ASSERT_EQ(GenericConstraintDef::DerivedFrom, constraint->getConstraintType());
     ASSERT_NOT_NULL(type = constraint->getIdentifier());
     ASSERT_EQ(L"C2", type->getName());
     ASSERT_NOT_NULL(type = constraint->getExpectedType(0));
@@ -192,7 +192,7 @@ TEST(TestGeneric, testWhereClause)
 
     ASSERT_NOT_NULL(constraint = params->getConstraint(2));
     ASSERT_EQ(1, constraint->numExpectedTypes());
-    ASSERT_EQ(GenericConstraint::EqualsTo, constraint->getConstraintType());
+    ASSERT_EQ(GenericConstraintDef::EqualsTo, constraint->getConstraintType());
     ASSERT_NOT_NULL(type = constraint->getIdentifier());
     ASSERT_EQ(L"C1", type->getName());
     ASSERT_NOT_NULL(type = type->getNestedType());
@@ -204,7 +204,7 @@ TEST(TestGeneric, testWhereClause)
 
     ASSERT_NOT_NULL(constraint = params->getConstraint(3));
     ASSERT_EQ(1, constraint->numExpectedTypes());
-    ASSERT_EQ(GenericConstraint::DerivedFrom, constraint->getConstraintType());
+    ASSERT_EQ(GenericConstraintDef::DerivedFrom, constraint->getConstraintType());
     ASSERT_NOT_NULL(type = constraint->getIdentifier());
     ASSERT_EQ(L"C1", type->getName());
     ASSERT_NOT_NULL(type = type->getNestedType());

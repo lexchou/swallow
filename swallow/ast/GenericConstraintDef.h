@@ -6,7 +6,7 @@
 SWIFT_NS_BEGIN
 class TypeIdentifier;
 
-class GenericConstraint : public Node
+class GenericConstraintDef : public Node
 {
 public:
     enum ConstraintType
@@ -15,8 +15,8 @@ public:
         DerivedFrom
     };
 public:
-    GenericConstraint();
-    ~GenericConstraint();
+    GenericConstraintDef();
+    ~GenericConstraintDef();
 public:
     void setIdentifier(const TypeIdentifierPtr& identifier);
     TypeIdentifierPtr getIdentifier();

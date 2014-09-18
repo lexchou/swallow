@@ -8,7 +8,7 @@
 SWIFT_NS_BEGIN
 
 class Attribute;
-class GenericParameters;
+class GenericParametersDef;
 class Declaration : public Statement
 {
 public:
@@ -22,13 +22,13 @@ protected:
     int getSpecifiers();
     void setSpecifiers(int specifiers);
     
-    GenericParametersPtr getGenericParameters();
-    void setGenericParameters(const GenericParametersPtr& val);
+    GenericParametersDefPtr getGenericParametersDef();
+    void setGenericParametersDef(const GenericParametersDefPtr& val);
     
 protected:
     std::vector<AttributePtr> attributes;
     int specifiers;
-    GenericParametersPtr genericParameters;
+    GenericParametersDefPtr genericParameters;
 };
 
 SWIFT_NS_END

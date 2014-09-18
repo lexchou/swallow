@@ -35,6 +35,10 @@ TypePtr Type::newType(const std::wstring& name, Category category, const TypeDec
     ret->parentType = parentType;
     ret->protocols = protocols;
     ret->genericTypes = genericTypes;
+    for(const TypePtr& type : genericTypes)
+    {
+        ret->genericTypeByName.insert(std::make_pair(type->getName(), type));
+    }
     if(parentType)
         ret->inheritantDepth = parentType->inheritantDepth + 1;
     return ret;

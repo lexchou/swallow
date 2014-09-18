@@ -10,8 +10,8 @@ class ClassDef : public TypeDeclaration
 public:
     ClassDef();
 public:
-    using Declaration::setGenericParameters;
-    using Declaration::getGenericParameters;
+    using Declaration::setGenericParametersDef;
+    using Declaration::getGenericParametersDef;
 public:
     virtual void accept(NodeVisitor* visitor);
 private:

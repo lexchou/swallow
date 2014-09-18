@@ -29,7 +29,7 @@ private:
     TupleTypePtr parseTupleType();
     TypeIdentifierPtr parseTypeIdentifier();
     ProtocolCompositionPtr parseProtocolComposition();
-    GenericParametersPtr parseGenericParameters();
+    GenericParametersDefPtr parseGenericParametersDef();
 private://statement
     StatementPtr parseStatement();
     StatementPtr parseLoopStatement();

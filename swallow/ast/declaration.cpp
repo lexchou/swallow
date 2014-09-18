@@ -44,11 +44,11 @@ void Declaration::setSpecifiers(int specifiers)
 }
 
 
-GenericParametersPtr Declaration::getGenericParameters()
+GenericParametersDefPtr Declaration::getGenericParametersDef()
 {
     return genericParameters;
 }
-void Declaration::setGenericParameters(const GenericParametersPtr& val)
+void Declaration::setGenericParametersDef(const GenericParametersDefPtr& val)
 {
     genericParameters = val;
 }

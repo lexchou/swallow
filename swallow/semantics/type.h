@@ -193,6 +193,7 @@ private:
     TypePtr parentType;
     std::vector<TypePtr> protocols;
     std::vector<TypePtr> genericTypes;
+    std::map<std::wstring, TypePtr> genericTypeByName;
     TypePtr innerType;
     TypePtr returnType;
     std::vector<Parameter> parameters;

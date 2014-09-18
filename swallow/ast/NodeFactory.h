@@ -94,8 +94,8 @@ public:
     virtual ExtensionDefPtr createExtension(const SourceInfo& state);
     virtual SubscriptDefPtr createSubscript(const SourceInfo& state);
     virtual OperatorDefPtr createOperator(const SourceInfo& state);
-    virtual GenericConstraintPtr createGenericConstraint(const SourceInfo& state);
-    virtual GenericParametersPtr createGenericParameters(const SourceInfo& state);
+    virtual GenericConstraintDefPtr createGenericConstraintDef(const SourceInfo& state);
+    virtual GenericParametersDefPtr createGenericParametersDef(const SourceInfo& state);
 
 
 public:

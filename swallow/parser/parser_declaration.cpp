@@ -611,8 +611,8 @@ DeclarationPtr Parser::parseFunc(const std::vector<AttributePtr>& attrs, int spe
     ret->setName(token.token);
     if(predicate(L"<"))
     {
-        GenericParametersPtr params = this->parseGenericParameters();
-        ret->setGenericParameters(params);
+        GenericParametersDefPtr params = this->parseGenericParametersDef();
+        ret->setGenericParametersDef(params);
     }
     do
     {
@@ -853,8 +853,8 @@ DeclarationPtr Parser::parseStruct(const std::vector<AttributePtr>& attrs)
 
     if(predicate(L"<"))
     {
-        GenericParametersPtr params = parseGenericParameters();
-        ret->setGenericParameters(params);
+        GenericParametersDefPtr params = parseGenericParametersDef();
+        ret->setGenericParametersDef(params);
     }
     
     
@@ -899,8 +899,8 @@ DeclarationPtr Parser::parseClass(const std::vector<AttributePtr>& attrs)
     ret->setIdentifier(typeId);
     if(predicate(L"<"))
     {
-        GenericParametersPtr params = parseGenericParameters();
-        ret->setGenericParameters(params);
+        GenericParametersDefPtr params = parseGenericParametersDef();
+        ret->setGenericParametersDef(params);
     }
     if(match(L":"))
     {
@@ -1009,8 +1009,8 @@ DeclarationPtr Parser::parseInit(const std::vector<AttributePtr>& attrs)
     ret->setAttributes(attrs);
     if(predicate(L"<"))
     {
-        GenericParametersPtr params = this->parseGenericParameters();
-        ret->setGenericParameters(params);   
+        GenericParametersDefPtr params = this->parseGenericParametersDef();
+        ret->setGenericParametersDef(params);
     }
     ParametersPtr parameters = parseParameterClause();
     CodeBlockPtr body = parseCodeBlock();

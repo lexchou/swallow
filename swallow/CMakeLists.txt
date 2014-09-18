@@ -139,8 +139,8 @@ SET(SWALLOW_SRC
     ast/Parameters.cpp
     ast/Parameter.cpp
     ast/TypeDeclaration.cpp
-    ast/GenericParameters.cpp
-    ast/GenericConstraint.cpp
+    ast/GenericParametersDef.cpp
+    ast/GenericConstraintDef.cpp
     )
 
 add_definitions(-DTRACE_NODE)

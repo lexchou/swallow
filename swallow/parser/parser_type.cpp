@@ -220,11 +220,11 @@ ProtocolCompositionPtr Parser::parseProtocolComposition()
  ‌ generic-argument → type
  */
 
-GenericParametersPtr Parser::parseGenericParameters()
+GenericParametersDefPtr Parser::parseGenericParametersDef()
 {
     Token token;
     expect(L"<", token);
-    GenericParametersPtr ret = nodeFactory->createGenericParameters(token.state);
+    GenericParametersDefPtr ret = nodeFactory->createGenericParametersDef(token.state);
     // ‌ generic-parameter-list → generic-parameter | generic-parameter,generic-parameter-list
     do
     {
@@ -240,11 +240,11 @@ GenericParametersPtr Parser::parseGenericParameters()
         {
             TypeIdentifierPtr expectedType = parseTypeIdentifier();
             
-            GenericConstraintPtr c = nodeFactory->createGenericConstraint(token.state);
+            GenericConstraintDefPtr c = nodeFactory->createGenericConstraintDef(token.state);
             typeId = nodeFactory->createTypeIdentifier(token.state);
             typeId->setName(typeName);
             c->setIdentifier(typeId);
-            c->setConstraintType(GenericConstraint::DerivedFrom);
+            c->setConstraintType(GenericConstraintDef::DerivedFrom);
             c->addExpectedType(expectedType);
             ret->addConstraint(c);
         }
@@ -257,14 +257,14 @@ GenericParametersPtr Parser::parseGenericParameters()
         {
             TypeIdentifierPtr type = parseTypeIdentifier();
             // requirement → conformance-requirement | same-type-requirement
-            GenericConstraintPtr c = nodeFactory->createGenericConstraint(*type->getSourceInfo());
+            GenericConstraintDefPtr c = nodeFactory->createGenericConstraintDef(*type->getSourceInfo());
             ret->addConstraint(c);
             c->setIdentifier(type);
             if(match(L":"))
             {
                 // conformance-requirement → type-identifier:type-identifier
                 // conformance-requirement → type-identifier:protocol-composition-type
-                c->setConstraintType(GenericConstraint::DerivedFrom);
+                c->setConstraintType(GenericConstraintDef::DerivedFrom);
                 do
                 {
                     TypeIdentifierPtr expectedType = parseTypeIdentifier();
@@ -275,7 +275,7 @@ GenericParametersPtr Parser::parseGenericParameters()
             {
                 // same-type-requirement → type-identifier==type-identifier
                 TypeIdentifierPtr expectedType = parseTypeIdentifier();
-                c->setConstraintType(GenericConstraint::EqualsTo);
+                c->setConstraintType(GenericConstraintDef::EqualsTo);
                 c->addExpectedType(expectedType);
             }
         } while (match(L","));

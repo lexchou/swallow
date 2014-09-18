@@ -4,14 +4,14 @@
 #include <string>
 
 SWIFT_NS_BEGIN
-class GenericConstraint;
+class GenericConstraintDef;
 class TypeIdentifier;
 
-class GenericParameters : public Node
+class GenericParametersDef : public Node
 {
 public:
-    GenericParameters();
-    ~GenericParameters();
+    GenericParametersDef();
+    ~GenericParametersDef();
     
 public:
     void addGenericType(const TypeIdentifierPtr& type);
@@ -19,15 +19,15 @@ public:
     TypeIdentifierPtr getGenericType(int i);
     
     
-    void addConstraint(const GenericConstraintPtr& constraint);
+    void addConstraint(const GenericConstraintDefPtr& constraint);
     int numConstraints()const;
-    GenericConstraintPtr getConstraint(int i);
+    GenericConstraintDefPtr getConstraint(int i);
 
     std::vector<TypeIdentifierPtr>::iterator begin() { return genericTypes.begin();}
     std::vector<TypeIdentifierPtr>::iterator end() { return genericTypes.end();}
 
 private:
-    std::vector<GenericConstraintPtr> constraints;
+    std::vector<GenericConstraintDefPtr> constraints;
     std::vector<TypeIdentifierPtr> genericTypes;
 
 };

@@ -273,11 +273,11 @@ TypePtr SymbolResolveAction::defineType(const std::shared_ptr<TypeDeclaration>& 
     }
     //prepare for generic types
     std::vector<TypePtr> genericTypes;
-    GenericParametersPtr genericParams;
+    GenericParametersDefPtr genericParams;
     if(node->getNodeType() == NodeType::Class)
-        genericParams = std::static_pointer_cast<ClassDef>(node)->getGenericParameters();
+        genericParams = std::static_pointer_cast<ClassDef>(node)->getGenericParametersDef();
     else if(node->getNodeType() == NodeType::Struct)
-        genericParams = std::static_pointer_cast<StructDef>(node)->getGenericParameters();
+        genericParams = std::static_pointer_cast<StructDef>(node)->getGenericParametersDef();
     if(genericParams)
     {
         std::vector<std::pair<std::wstring, TypePtr> > tmp;
@@ -540,7 +540,7 @@ FunctionSymbolPtr SymbolResolveAction::createFunctionSymbol(const FunctionDefPtr
     FunctionSymbolPtr ret(new FunctionSymbol(func->getName(), funcType, func));
     return ret;
 }
-void SymbolResolveAction::prepareGenericTypes(const GenericParametersPtr& params, std::vector<std::pair<std::wstring, TypePtr>> & genericTypes)
+void SymbolResolveAction::prepareGenericTypes(const GenericParametersDefPtr& params, std::vector<std::pair<std::wstring, TypePtr>> & genericTypes)
 {
     std::set<std::wstring> names;
     for (const TypeIdentifierPtr &typeId : *params)
@@ -581,8 +581,8 @@ void SymbolResolveAction::visitClosure(const ClosurePtr& node)
 void SymbolResolveAction::visitFunction(const FunctionDefPtr& node)
 {
     vector<pair<wstring, TypePtr> > genericTypes;
-    if(node->getGenericParameters())
-        prepareGenericTypes(node->getGenericParameters(), genericTypes);
+    if(node->getGenericParametersDef())
+        prepareGenericTypes(node->getGenericParametersDef(), genericTypes);
 
     //enter code block's scope
     {
