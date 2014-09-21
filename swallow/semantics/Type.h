@@ -13,7 +13,7 @@ SWIFT_NS_BEGIN
 
 typedef std::shared_ptr<class TypeDeclaration> TypeDeclarationPtr;
 typedef std::weak_ptr<class TypeDeclaration> TypeDeclarationWeakPtr;
-
+typedef std::shared_ptr<class GenericDefinition> GenericDefinitionPtr;
 class Type : public Symbol, public  std::enable_shared_from_this<Symbol>
 {
     friend class SymbolRegistry;
@@ -50,7 +50,7 @@ public:
 private:
     Type(Category category);
 public:
-    static TypePtr newType(const std::wstring& name, Category category, const TypeDeclarationPtr& reference = nullptr, const TypePtr& parentType = nullptr, const std::vector<TypePtr>& protocols = std::vector<TypePtr>(), const std::vector<TypePtr>& genericTypes = std::vector<TypePtr>());
+    static TypePtr newType(const std::wstring& name, Category category, const TypeDeclarationPtr& reference = nullptr, const TypePtr& parentType = nullptr, const std::vector<TypePtr>& protocols = std::vector<TypePtr>(), const GenericDefinitionPtr& generic = nullptr);
     static TypePtr newTuple(const std::vector<TypePtr>& types);
     static TypePtr newTypeReference(const TypePtr& innerType);
     static TypePtr newFunction(const std::vector<Parameter>& parameters, const TypePtr& returnType, bool hasVariadicParameters);
@@ -174,9 +174,14 @@ public://properties
     bool isGenericType()const;
 
     /*
-     * Gets the generic parameters/arguments required by this type to specialize a concrete type
+     * Gets the generic arguments that used to specialize a concrete type
      */
-    std::vector<TypePtr>& getGenericTypes();
+    std::vector<TypePtr>& getGenericArguments();
+
+    /**
+     * Gets the generic definition
+     */
+    const GenericDefinitionPtr& getGenericDefinition();
 
 public:
     bool operator ==(const Type& rhs)const;
@@ -192,8 +197,8 @@ private:
     Category category;
     TypePtr parentType;
     std::vector<TypePtr> protocols;
-    std::vector<TypePtr> genericTypes;
-    std::map<std::wstring, TypePtr> genericTypeByName;
+    GenericDefinitionPtr genericDefinition;
+    std::vector<TypePtr> genericArguments;
     TypePtr innerType;
     TypePtr returnType;
     std::vector<Parameter> parameters;

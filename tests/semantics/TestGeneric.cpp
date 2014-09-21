@@ -48,8 +48,8 @@ TEST(TestGeneric, Use_GenericType)
     ASSERT_NOT_NULL(type = stackOfInts->getType());
     ASSERT_EQ(Type::Specialized, type->getCategory());
     ASSERT_EQ(Stack, type->getInnerType());
-    ASSERT_EQ(1, type->getGenericTypes().size());
-    ASSERT_EQ(Int, type->getGenericTypes()[0]);
+    ASSERT_EQ(1, type->getGenericArguments().size());
+    ASSERT_EQ(Int, type->getGenericArguments()[0]);
 
 
 }

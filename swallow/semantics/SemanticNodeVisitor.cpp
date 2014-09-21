@@ -14,6 +14,7 @@
 #include "ast/NodeSerializer.h"
 #include "GlobalScope.h"
 #include "ast/OptionalType.h"
+#include "GenericDefinition.h"
 
 USE_SWIFT_NS
 
@@ -60,27 +61,28 @@ TypePtr SemanticNodeVisitor::lookupType(const TypeNodePtr& type)
             error(type, Errors::E_USE_OF_UNDECLARED_TYPE, str);
             abort();
         }
-        if(!ret->isGenericType() && id->numGenericArguments() == 0)
+        GenericDefinitionPtr generic = ret->getGenericDefinition();
+        if(generic == nullptr && id->numGenericArguments() == 0)
             return ret;
-        if(!ret->isGenericType() && id->numGenericArguments() > 0)
+        if(generic == nullptr && id->numGenericArguments() > 0)
         {
             std::wstring str = toString(type);
             error(id, Errors::E_CANNOT_SPECIALIZE_NON_GENERIC_TYPE, str);
             return nullptr;
         }
-        if(ret->isGenericType() && id->numGenericArguments() == 0)
+        if(generic != nullptr && id->numGenericArguments() == 0)
         {
             std::wstring str = toString(type);
             error(id, Errors::E_GENERIC_TYPE_ARGUMENT_REQUIRED, str);
             return nullptr;
         }
-        if(id->numGenericArguments() > ret->getGenericTypes().size())
+        if(id->numGenericArguments() > generic->numParameters())
         {
             std::wstring str = toString(type);
             error(id, Errors::E_GENERIC_TYPE_SPECIALIZED_WITH_TOO_MANY_TYPE_PARAMETERS, str);
             return nullptr;
         }
-        if(id->numGenericArguments() < ret->getGenericTypes().size())
+        if(id->numGenericArguments() < generic->numParameters())
         {
             std::wstring str = toString(type);
             error(id, Errors::E_GENERIC_TYPE_SPECIALIZED_WITH_INSUFFICIENT_TYPE_PARAMETERS, str);

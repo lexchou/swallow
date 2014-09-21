@@ -1,5 +1,6 @@
 #include "Type.h"
 #include <cassert>
+#include "GenericDefinition.h"
 
 USE_SWIFT_NS
 
@@ -27,18 +28,14 @@ const TypePtr& Type::getPlaceHolder()
     return placeholder;
 }
 
-TypePtr Type::newType(const std::wstring& name, Category category, const TypeDeclarationPtr& reference, const TypePtr& parentType, const std::vector<TypePtr>& protocols, const std::vector<TypePtr>& genericTypes)
+TypePtr Type::newType(const std::wstring& name, Category category, const TypeDeclarationPtr& reference, const TypePtr& parentType, const std::vector<TypePtr>& protocols, const GenericDefinitionPtr& generic)
 {
     TypePtr ret = TypePtr(new Type(category));
     ret->name = name;
     ret->reference = reference;
     ret->parentType = parentType;
     ret->protocols = protocols;
-    ret->genericTypes = genericTypes;
-    for(const TypePtr& type : genericTypes)
-    {
-        ret->genericTypeByName.insert(std::make_pair(type->getName(), type));
-    }
+    ret->genericDefinition = generic;
     if(parentType)
         ret->inheritantDepth = parentType->inheritantDepth + 1;
     return ret;
@@ -71,14 +68,14 @@ TypePtr Type::newSpecializedType(const TypePtr& innerType, const std::vector<Typ
 {
     Type* ret = new Type(Specialized);
     ret->innerType = innerType;
-    ret->genericTypes = arguments;
+    ret->genericArguments = arguments;
     return TypePtr(ret);
 }
 TypePtr Type::newSpecializedType(const TypePtr& innerType, const TypePtr& argument)
 {
     Type* ret = new Type(Specialized);
     ret->innerType = innerType;
-    ret->genericTypes.push_back(argument);
+    ret->genericArguments.push_back(argument);
     return TypePtr(ret);
 }
 
@@ -213,12 +210,16 @@ bool Type::hasVariadicParameters()const
 
 bool Type::isGenericType()const
 {
-    return this->category != Specialized && !genericTypes.empty();
+    return this->category != Specialized && genericDefinition != nullptr;
 }
 
-std::vector<TypePtr>& Type::getGenericTypes()
+std::vector<TypePtr>& Type::getGenericArguments()
 {
-    return genericTypes;
+    return genericArguments;
+}
+const GenericDefinitionPtr& Type::getGenericDefinition()
+{
+    return genericDefinition;
 }
 
 FunctionOverloadedSymbolPtr Type::getInitializer()
@@ -228,6 +229,17 @@ FunctionOverloadedSymbolPtr Type::getInitializer()
 Type::SymbolMap& Type::getSymbols()
 {
     return symbols;
+}
+
+static bool isGenericDefinitionEquals(const GenericDefinitionPtr& a, const GenericDefinitionPtr& b)
+{
+    if(a == b)
+        return true;
+    if(a == nullptr || b == nullptr)
+        return false;
+    if(a->equals(b))
+        return true;
+    return false;
 }
 
 bool Type::operator ==(const Type& rhs)const
@@ -252,7 +264,8 @@ bool Type::operator ==(const Type& rhs)const
                 return false;
             if(getReference() != rhs.getReference())
                 return false;
-            //TODO: check generic parameters
+            if(!isGenericDefinitionEquals(genericDefinition, rhs.genericDefinition))
+                return false;
             break;
         case Tuple:
         {
@@ -295,11 +308,11 @@ bool Type::operator ==(const Type& rhs)const
         {
             if (!Type::equals(innerType, rhs.innerType))
                 return false;
-            if (genericTypes.size() != rhs.genericTypes.size())
+            if (genericArguments.size() != rhs.genericArguments.size())
                 return false;
-            auto iter = genericTypes.begin();
-            auto iter2 = rhs.genericTypes.begin();
-            for(; iter != genericTypes.end(); iter++, iter2++)
+            auto iter = genericArguments.begin();
+            auto iter2 = rhs.genericArguments.begin();
+            for(; iter != genericArguments.end(); iter++, iter2++)
             {
                 if(!Type::equals(*iter, *iter2))
                     return false;

@@ -8,6 +8,7 @@
 #include "FunctionOverloadedSymbol.h"
 #include "ScopeGuard.h"
 #include "ast/NodeSerializer.h"
+#include "GenericDefinition.h"
 #include <cassert>
 #include <set>
 
@@ -272,7 +273,7 @@ TypePtr SymbolResolveAction::defineType(const std::shared_ptr<TypeDeclaration>& 
         return nullptr;
     }
     //prepare for generic types
-    std::vector<TypePtr> genericTypes;
+    GenericDefinitionPtr generic;
     GenericParametersDefPtr genericParams;
     if(node->getNodeType() == NodeType::Class)
         genericParams = std::static_pointer_cast<ClassDef>(node)->getGenericParametersDef();
@@ -280,12 +281,10 @@ TypePtr SymbolResolveAction::defineType(const std::shared_ptr<TypeDeclaration>& 
         genericParams = std::static_pointer_cast<StructDef>(node)->getGenericParametersDef();
     if(genericParams)
     {
-        std::vector<std::pair<std::wstring, TypePtr> > tmp;
-        this->prepareGenericTypes(genericParams, tmp);
-        for(auto entry : tmp)
+        generic = prepareGenericTypes(genericParams);
+        for(auto entry : generic->getTypeMap())
         {
             currentScope->addSymbol(entry.first, entry.second);
-            genericTypes.push_back(entry.second);
         }
     }
 
@@ -309,6 +308,7 @@ TypePtr SymbolResolveAction::defineType(const std::shared_ptr<TypeDeclaration>& 
                 error(parentType, Errors::E_SUPERCLASS_MUST_APPEAR_FIRST_IN_INHERITANCE_CLAUSE, out.str());
                 return nullptr;
             }
+            first = false;
             parent = ptr;
         }
         else if(ptr->getCategory() == Type::Protocol)
@@ -330,7 +330,7 @@ TypePtr SymbolResolveAction::defineType(const std::shared_ptr<TypeDeclaration>& 
 
 
     //register this type
-    type = Type::newType(node->getIdentifier()->getName(), category, node, parent, protocols, genericTypes);
+    type = Type::newType(node->getIdentifier()->getName(), category, node, parent, protocols, generic);
     node->setType(type);
     currentScope->addSymbol(type);
 
@@ -540,9 +540,9 @@ FunctionSymbolPtr SymbolResolveAction::createFunctionSymbol(const FunctionDefPtr
     FunctionSymbolPtr ret(new FunctionSymbol(func->getName(), funcType, func));
     return ret;
 }
-void SymbolResolveAction::prepareGenericTypes(const GenericParametersDefPtr& params, std::vector<std::pair<std::wstring, TypePtr>> & genericTypes)
+GenericDefinitionPtr SymbolResolveAction::prepareGenericTypes(const GenericParametersDefPtr& params)
 {
-    std::set<std::wstring> names;
+    GenericDefinitionPtr ret(new GenericDefinition());
     for (const TypeIdentifierPtr &typeId : *params)
     {
         if (typeId->getNestedType())
@@ -551,16 +551,19 @@ void SymbolResolveAction::prepareGenericTypes(const GenericParametersDefPtr& par
             continue;
         }
         std::wstring name = typeId->getName();
-        if (names.find(name) != names.end())
+        TypePtr old = ret->get(name);
+        if (old != nullptr)
         {
             error(typeId, Errors::E_DEFINITION_CONFLICT);
             continue;
         }
         std::vector<TypePtr> protocols;
         TypePtr type = Type::newType(name, Type::Placeholder, nullptr, nullptr, protocols);
-        genericTypes.push_back(std::make_pair(name, type));
-        names.insert(name);
+        ret->add(name, type);
     }
+    //TODO: add constraint
+
+    return ret;
 }
 void SymbolResolveAction::visitClosure(const ClosurePtr& node)
 {
@@ -580,9 +583,9 @@ void SymbolResolveAction::visitClosure(const ClosurePtr& node)
 }
 void SymbolResolveAction::visitFunction(const FunctionDefPtr& node)
 {
-    vector<pair<wstring, TypePtr> > genericTypes;
+    GenericDefinitionPtr generic;
     if(node->getGenericParametersDef())
-        prepareGenericTypes(node->getGenericParametersDef(), genericTypes);
+        generic = prepareGenericTypes(node->getGenericParametersDef());
 
     //enter code block's scope
     {
@@ -592,9 +595,12 @@ void SymbolResolveAction::visitFunction(const FunctionDefPtr& node)
         ScopeGuard scopeGuard(codeBlock.get(), this);
         (void) scopeGuard;
 
-        for(auto entry : genericTypes)
+        if(generic)
         {
-            scope->addSymbol(entry.first, entry.second);
+            for (auto entry : generic->getTypeMap())
+            {
+                scope->addSymbol(entry.first, entry.second);
+            }
         }
 
         for (const ParametersPtr &params : node->getParametersList())

@@ -2,6 +2,7 @@
 #include "type.h"
 #include "FunctionSymbol.h"
 #include "FunctionOverloadedSymbol.h"
+#include "GenericDefinition.h"
 
 USE_SWIFT_NS
 
@@ -33,14 +34,16 @@ void GlobalScope::initPrimitiveTypes()
     addSymbol(s_False = SymbolPtr(new SymbolPlaceHolder(L"false", t_Bool, SymbolPlaceHolder::R_LOCAL_VARIABLE, SymbolPlaceHolder::F_INITIALIZED)));
     {
         TypePtr T = Type::newType(L"T", Type::Placeholder);
-        std::vector<TypePtr> genericTypes = {T};
-        t_Array = Type::newType(L"Array", Type::Struct, nullptr, nullptr, std::vector<TypePtr>(), genericTypes);
+        GenericDefinitionPtr generic(new GenericDefinition());
+        generic->add(L"T", T);
+        t_Array = Type::newType(L"Array", Type::Struct, nullptr, nullptr, std::vector<TypePtr>(), generic);
         addSymbol(t_Array);
     }
     {
         TypePtr T = Type::newType(L"T", Type::Placeholder);
-        std::vector<TypePtr> genericTypes = {T};
-        t_Optional = Type::newType(L"Optional", Type::Struct, nullptr, nullptr, std::vector<TypePtr>(), genericTypes);
+        GenericDefinitionPtr generic(new GenericDefinition());
+        generic->add(L"T", T);
+        t_Optional = Type::newType(L"Optional", Type::Struct, nullptr, nullptr, std::vector<TypePtr>(), generic);
         addSymbol(t_Optional);
     }
 }
