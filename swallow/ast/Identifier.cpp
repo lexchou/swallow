@@ -20,11 +20,11 @@ void Identifier::accept(NodeVisitor* visitor)
 
 
 
-GenericArgumentPtr Identifier::getGenericArgument()
+GenericArgumentDefPtr Identifier::getGenericArgumentDef() const
 {
-    return genericArgument;
+    return genericArgumentDef;
 }
-void Identifier::setGenericArgument(const GenericArgumentPtr& val)
+void Identifier::setGenericArgumentDef(const GenericArgumentDefPtr& val)
 {
-    genericArgument = val;
+    genericArgumentDef = val;
 }

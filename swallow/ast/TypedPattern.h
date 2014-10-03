@@ -21,12 +21,12 @@ public:
     void setDeclaredType(const TypeNodePtr& type);
     TypeNodePtr getDeclaredType();
     
-    GenericArgumentPtr getGenericArgument();
-    void setGenericArgument(const GenericArgumentPtr& val);
+    GenericArgumentDefPtr getGenericArgumentDef();
+    void setGenericArgumentDef(const GenericArgumentDefPtr& val);
 protected:
     PatternPtr pattern;
     TypeNodePtr declaredType;
-    GenericArgumentPtr genericArgument;
+    GenericArgumentDefPtr genericArgumentDef;
 };
 
 SWIFT_NS_END

@@ -24,14 +24,13 @@ public:
     void setConstraintType(ConstraintType constraint);
     ConstraintType getConstraintType()const;
     
-    void addExpectedType(const TypeIdentifierPtr& expectedIdentifier);
-    int numExpectedTypes()const;
-    TypeIdentifierPtr getExpectedType(int i);
+    void setExpectedType(const TypeIdentifierPtr& expectedIdentifier);
+    TypeIdentifierPtr getExpectedType()const;
     
 private:
     ConstraintType type;
     TypeIdentifierPtr identifier;
-    std::vector<TypeIdentifierPtr> expectedTypes;
+    TypeIdentifierPtr expectedType;
 };
 
 SWIFT_NS_END

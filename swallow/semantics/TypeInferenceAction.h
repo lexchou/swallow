@@ -46,7 +46,7 @@ private:
      * @return -1 if the type is not matched
      */
     float calculateFitScore(const TypePtr& func, const ParenthesizedExpressionPtr& arguments, bool supressErrors);
-    bool checkArgument(const Type::Parameter& parameter, const ParenthesizedExpression::Term& argument, bool variadic, float& score, bool supressErrors);
+    bool checkArgument(const TypePtr& funcType, const Type::Parameter& parameter, const ParenthesizedExpression::Term& argument, bool variadic, float& score, bool supressErrors);
     TypePtr getExpressionType(const ExpressionPtr& expr, const TypePtr& hint, float& score);
 
     /**

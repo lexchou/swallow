@@ -1093,7 +1093,9 @@ DeclarationPtr Parser::parseSubscript(const std::vector<AttributePtr>& attrs)
     
     if(flags & UNDER_PROTOCOL)
     {
+        expect(L"{");
         std::pair<CodeBlockPtr, CodeBlockPtr> accessors = parseGetterSetterKeywordBlock();
+        expect(L"}");
         ret->setGetter(accessors.first);
         ret->setSetter(accessors.second);
     }

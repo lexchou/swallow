@@ -16,7 +16,7 @@
 
 #include "Identifier.h"
 #include "TypedPattern.h"
-#include "GenericArgument.h"
+#include "GenericArgumentDef.h"
 #include "Comment.h"
 #include "MemberAccess.h"
 #include "SubscriptAccess.h"

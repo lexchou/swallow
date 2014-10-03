@@ -26,7 +26,7 @@ public:
 
     virtual TypedPatternPtr createTypedPattern(const SourceInfo& state);
     virtual IdentifierPtr createIdentifier(const SourceInfo& state);
-    virtual GenericArgumentPtr createGenericArgument(const SourceInfo& state);
+    virtual GenericArgumentDefPtr createGenericArgumentDef(const SourceInfo& state);
     virtual InOutParameterPtr createInOutParameter(const SourceInfo& state);
 
     virtual ArrayLiteralPtr createArrayLiteral(const SourceInfo& state);

@@ -20,7 +20,7 @@ Swift::NodePtr parseStatement(Swift::CompilerResults& compilerResults, const cha
 Swift::ProgramPtr parseStatements(Swift::CompilerResults& compilerResults, const char* func, const wchar_t* str);
 
 Swift::ScopedProgramPtr analyzeStatement(Swift::SymbolRegistry& registry, Swift::CompilerResults& compilerResults, const char* func, const wchar_t* str);
-
+std::wstring readFile(const char* fileName);
 
 
 
@@ -48,6 +48,8 @@ struct Tracer
     ScopedProgramPtr root = analyzeStatement(symbolRegistry, compilerResults, __FUNCTION__, (s)); \
     Swift::SymbolScope* scope = root ? root->getScope() : nullptr; \
     (void)scope;
+#define SEMANTIC_ANALYZE_F(fileName) std::wstring content = readFile(fileName); \
+    SEMANTIC_ANALYZE(content.c_str());
 
 #endif//TEST_UTILS_H
 

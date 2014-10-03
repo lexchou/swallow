@@ -13,6 +13,7 @@
 #include <algorithm>
 #include "ast/NodeSerializer.h"
 #include "GlobalScope.h"
+#include "GenericDefinition.h"
 
 USE_SWIFT_NS
 
@@ -151,7 +152,7 @@ TypePtr TypeInferenceAction::getExpressionType(const ExpressionPtr& expr, const 
  * @param score
  * @param supressErrors
  */
-bool TypeInferenceAction::checkArgument(const Type::Parameter& parameter, const ParenthesizedExpression::Term& argument, bool variadic, float& score, bool supressErrors)
+bool TypeInferenceAction::checkArgument(const TypePtr& funcType, const Type::Parameter& parameter, const ParenthesizedExpression::Term& argument, bool variadic, float& score, bool supressErrors)
 {
 
     const std::wstring name = argument.first;
@@ -186,8 +187,22 @@ bool TypeInferenceAction::checkArgument(const Type::Parameter& parameter, const 
             return false;
         }
     }
-
-    if(*argType != *parameter.type)
+    if(parameter.type->getCategory() == Type::GenericParameter)
+    {
+        //check for type constraint
+        GenericDefinitionPtr generic = funcType->getGenericDefinition();
+        assert(generic != nullptr);
+        TypePtr expectedType;
+        bool constraintSatisfied = generic->validate(parameter.type->getName(), argType, expectedType);
+        if(!constraintSatisfied)
+        {
+            if(supressErrors)
+                return false;
+            error(argument.second, Errors::E_TYPE_DOES_NOT_CONFORM_TO_PROTOCOL_2, argType->getName(), expectedType->getName());
+            abort();
+        }
+    }
+    else if(*argType != *parameter.type)
     {
         if (!supressErrors)
         {
@@ -216,7 +231,7 @@ float TypeInferenceAction::calculateFitScore(const TypePtr& func, const Parenthe
     {
         const Type::Parameter& parameter = *paramIter;
         const ParenthesizedExpression::Term& argument = *argumentIter;
-        bool ret = checkArgument(parameter, argument, false, score, supressErrors);
+        bool ret = checkArgument(func, parameter, argument, false, score, supressErrors);
         if(!ret)
             return -1;
     }
@@ -251,7 +266,7 @@ float TypeInferenceAction::calculateFitScore(const TypePtr& func, const Parenthe
         //the first variadic argument must have a label if the parameter got a label
         if(!parameter.name.empty())
         {
-            bool ret = checkArgument(parameter, *argumentIter++, false, score, supressErrors);
+            bool ret = checkArgument(func, parameter, *argumentIter++, false, score, supressErrors);
             if(!ret)
                 return -1;
         }
@@ -259,7 +274,7 @@ float TypeInferenceAction::calculateFitScore(const TypePtr& func, const Parenthe
         //check rest argument
         for(;argumentIter != arguments->end(); argumentIter++)
         {
-            bool ret = checkArgument(parameter, *argumentIter, true, score, supressErrors);
+            bool ret = checkArgument(func, parameter, *argumentIter, true, score, supressErrors);
             if(!ret)
                 return -1;
         }
@@ -389,7 +404,7 @@ void TypeInferenceAction::visitFunctionCall(const FunctionCallPtr& node)
             MemberAccessPtr ma = std::static_pointer_cast<MemberAccess>(func);
             TypePtr selfType = ma->getSelf()->getType();
             assert(selfType != nullptr);
-            SymbolPtr sym = selfType->getSymbols()[ma->getField()->getIdentifier()];
+            SymbolPtr sym = selfType->getMember(ma->getField()->getIdentifier());
             assert(sym != nullptr);//
             visitFunctionCall(sym, node);
             break;
@@ -403,9 +418,37 @@ void TypeInferenceAction::visitFunctionCall(const FunctionCallPtr& node)
             node->setType(type->getReturnType());
             break;
         }
+        case NodeType::ArrayLiteral:
+        {
+            //check if it's an array expression
+            ArrayLiteralPtr array = std::static_pointer_cast<ArrayLiteral>(func);
+            if(array->numElements() != 1 || (*array->begin())->getNodeType() != NodeType::Identifier)
+            {
+                error(func, Errors::E_INVALID_CALL_OF_NON_FUNCTION_TYPE);
+                break;
+            }
+            IdentifierPtr typeName = std::static_pointer_cast<Identifier>(*array->begin());
+            SymbolPtr sym = symbolRegistry->lookupSymbol(typeName->getIdentifier());
+            TypePtr type = std::dynamic_pointer_cast<Type>(sym);
+            if(!type)
+            {
+                error(func, Errors::E_INVALID_CALL_OF_NON_FUNCTION_TYPE);
+                break;
+            }
+            TypePtr Array = symbolRegistry->getGlobalScope()->t_Array;
+            TypePtr arrayType = Type::newSpecializedType(Array, type);
+            node->setType(arrayType);
+            break;
+        }
+        case NodeType::DictionaryLiteral:
+        {
+            break;
+        }
         default:
+        {
             error(func, Errors::E_INVALID_CALL_OF_NON_FUNCTION_TYPE);
             break;
+        }
     }
 
 }
@@ -416,13 +459,13 @@ void TypeInferenceAction::visitMemberAccess(const MemberAccessPtr& node)
     assert(selfType != nullptr);
 
 
-    Type::SymbolMap::iterator iter = selfType->getSymbols().find(node->getField()->getIdentifier());
-    if(iter == selfType->getSymbols().end())
+    SymbolPtr member = selfType->getMember(node->getField()->getIdentifier());
+    if(member == nullptr)
     {
         error(node->getField(), Errors::E_DOES_NOT_HAVE_A_MEMBER, node->getField()->getIdentifier());
         return;
     }
-    node->setType(iter->second->getType());
+    node->setType(member->getType());
 }
 
 void TypeInferenceAction::visitString(const StringLiteralPtr& node)

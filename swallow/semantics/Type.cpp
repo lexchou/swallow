@@ -1,14 +1,19 @@
 #include "Type.h"
 #include <cassert>
 #include "GenericDefinition.h"
+#include "GenericArgument.h"
 
 USE_SWIFT_NS
 
+using namespace std;
 
 Type::Type(Category category)
 :category(category)
 {
-
+    _containsAssociatedType = -1;
+    _containsSelfType = -1;
+    variadicParameters = false;
+    inheritantDepth = 0;
 }
 
 bool Type::equals(const TypePtr& lhs, const TypePtr& rhs)
@@ -24,7 +29,7 @@ bool Type::equals(const TypePtr& lhs, const TypePtr& rhs)
 */
 const TypePtr& Type::getPlaceHolder()
 {
-    static TypePtr placeholder(new Type(Type::Placeholder));
+    static TypePtr placeholder(new Type(Type::GenericParameter));
     return placeholder;
 }
 
@@ -36,6 +41,12 @@ TypePtr Type::newType(const std::wstring& name, Category category, const TypeDec
     ret->parentType = parentType;
     ret->protocols = protocols;
     ret->genericDefinition = generic;
+    if(parentType)
+        ret->addParentTypesFrom(parentType);
+    for(const TypePtr& t : protocols)
+    {
+        ret->addParentTypesFrom(t);
+    }
     if(parentType)
         ret->inheritantDepth = parentType->inheritantDepth + 1;
     return ret;
@@ -56,26 +67,32 @@ TypePtr Type::newTuple(const std::vector<TypePtr>& types)
     return TypePtr(ret);
 }
 
-TypePtr Type::newFunction(const std::vector<Parameter>& parameters, const TypePtr& returnType, bool hasVariadicParameters)
+TypePtr Type::newFunction(const std::vector<Parameter>& parameters, const TypePtr& returnType, bool hasVariadicParameters, const GenericDefinitionPtr& generic)
 {
     Type* ret = new Type(Function);
     ret->parameters = parameters;
     ret->returnType = returnType;
     ret->variadicParameters = hasVariadicParameters;
+    ret->genericDefinition = generic;
     return TypePtr(ret);
 }
-TypePtr Type::newSpecializedType(const TypePtr& innerType, const std::vector<TypePtr>& arguments)
+TypePtr Type::newSpecializedType(const TypePtr& innerType, const GenericArgumentPtr& arguments)
 {
     Type* ret = new Type(Specialized);
     ret->innerType = innerType;
     ret->genericArguments = arguments;
+    //copy members from innerType and update types with given argument
+    //replace parents and protocols to apply with the generic arguments
     return TypePtr(ret);
 }
 TypePtr Type::newSpecializedType(const TypePtr& innerType, const TypePtr& argument)
 {
+    GenericArgumentPtr arguments(new GenericArgument());
+    arguments->add(argument);
+
     Type* ret = new Type(Specialized);
     ret->innerType = innerType;
-    ret->genericArguments.push_back(argument);
+    ret->genericArguments = arguments;
     return TypePtr(ret);
 }
 
@@ -154,10 +171,23 @@ TypePtr Type::getParentType()const
 {
     return parentType;
 }
+void Type::setParentType(const TypePtr &type)
+{
+    this->parentType = type;
+}
 
 const std::vector<TypePtr>& Type::getProtocols() const
 {
     return protocols;
+}
+void Type::addProtocol(const TypePtr &protocol)
+{
+    protocols.push_back(protocol);
+    auto iter = parents.find(protocol);
+    if(iter == parents.end())
+        parents.insert(make_pair(protocol, 1));
+    else
+        iter->second = 1;
 }
 
 const std::wstring& Type::getModuleName() const
@@ -213,11 +243,11 @@ bool Type::isGenericType()const
     return this->category != Specialized && genericDefinition != nullptr;
 }
 
-std::vector<TypePtr>& Type::getGenericArguments()
+const GenericArgumentPtr& Type::getGenericArguments() const
 {
     return genericArguments;
 }
-const GenericDefinitionPtr& Type::getGenericDefinition()
+const GenericDefinitionPtr& Type::getGenericDefinition() const
 {
     return genericDefinition;
 }
@@ -226,9 +256,35 @@ FunctionOverloadedSymbolPtr Type::getInitializer()
 {
     return initializer;
 }
-Type::SymbolMap& Type::getSymbols()
+
+bool Type::isKindOf(const TypePtr &protocolOrBase) const
 {
-    return symbols;
+    assert(protocolOrBase != nullptr);
+    if(protocolOrBase->getCategory() != Class && protocolOrBase->getCategory() != Protocol)
+        return false;
+    auto iter = parents.find(protocolOrBase);
+    return iter != parents.end();
+}
+
+void Type::addParentTypesFrom(const TypePtr& type)
+{
+    for(auto parent : type->parents)
+    {
+        addParentType(parent.first, parent.second + 1);
+    }
+    addParentType(type, 1);
+}
+void Type::addParentType(const TypePtr& type, int distance)
+{
+    auto iter = parents.find(type);
+    if(iter == parents.end())
+    {
+        parents.insert(std::make_pair(type, distance));
+    }
+    else if(iter->second > distance)
+    {
+        iter->second = distance;
+    }
 }
 
 static bool isGenericDefinitionEquals(const GenericDefinitionPtr& a, const GenericDefinitionPtr& b)
@@ -240,6 +296,183 @@ static bool isGenericDefinitionEquals(const GenericDefinitionPtr& a, const Gener
     if(a->equals(b))
         return true;
     return false;
+}
+
+TypePtr Type::getType()
+{
+    return nullptr;
+}
+void Type::addMember(const SymbolPtr& symbol)
+{
+    addMember(symbol->getName(), symbol);
+}
+
+void Type::addMember(const std::wstring& name, const SymbolPtr& member)
+{
+    symbols.insert(std::make_pair(name, member));
+    if(SymbolPlaceHolderPtr s = dynamic_pointer_cast<SymbolPlaceHolder>(member))
+    {
+        storedProperties.push_back(s);
+    }
+}
+
+SymbolPtr Type::getMember(const std::wstring& name) const
+{
+    SymbolPtr ret = getDeclaredMember(name);
+    //look for directly declared member
+    if(ret)
+        return ret;
+    //check in base type
+    if(category != Protocol && category != GenericParameter)
+    {
+        if(parentType != nullptr)
+        {
+            ret = parentType->getMember(name);
+            if(ret)
+                return ret;
+        }
+        //TODO: check from extensions
+        return nullptr;
+    }
+    else
+    {
+        //look from all protocols
+        for(auto entry : parents)
+        {
+            ret = entry.first->getDeclaredMember(name);
+            if(ret)
+                return ret;
+        }
+        return nullptr;
+    }
+}
+SymbolPtr Type::getDeclaredMember(const std::wstring& name) const
+{
+    auto iter = symbols.find(name);
+    if(iter == symbols.end())
+        return nullptr;
+    return iter->second;
+}
+const Type::SymbolMap& Type::getDeclaredMembers() const
+{
+    return symbols;
+}
+
+bool Type::containsSelfType() const
+{
+    if (_containsSelfType != -1)
+        return _containsSelfType == 1;
+    bool ret = containsSelfTypeImpl();
+    _containsSelfType = ret ? 1 : 0;
+    return ret;
+}
+bool Type::containsSelfTypeImpl() const
+{
+    if(category == Self)
+        return true;
+    if(category == Function || category == Closure)
+    {
+        if(returnType && returnType->containsSelfType())
+            return true;
+        //check parameter type
+        for(auto param : parameters)
+        {
+            if(param.type->containsSelfType())
+                return true;
+        }
+    }
+    else if(category == Specialized)
+    {
+        if(innerType->containsSelfType())
+            return true;
+        if(genericDefinition)
+        {
+            for(const TypePtr& param : genericDefinition->getParameters())
+            {
+                if(param->containsSelfType())
+                    return true;
+            }
+        }
+
+    }
+    else if(category == Tuple)
+    {
+        for(const TypePtr& t : elementTypes)
+        {
+            if(t->containsSelfType())
+                return true;
+        }
+    }
+    else
+    {
+        //check all symbols
+        for(auto member : symbols)
+        {
+            if(TypePtr type = dynamic_pointer_cast<Type>(member.second))
+            {
+                if(type->containsSelfType())
+                    return true;
+            }
+            else if(TypePtr type = member.second->getType())
+            {
+                if(type->containsSelfType())
+                    return true;
+            }
+        }
+    }
+    return false;
+}
+
+bool Type::containsAssociatedType() const
+{
+    if(_containsAssociatedType != -1)
+        return _containsAssociatedType == 1;
+    _containsAssociatedType = 0;
+    for(auto entry : symbols)
+    {
+        if(dynamic_pointer_cast<Type>(entry.second))
+        {
+            _containsAssociatedType = 1;
+            return true;
+        }
+    }
+    return false;
+}
+/**
+* Check if this type's generic arguments contains generic parameters
+*/
+bool Type::containsGenericParameters() const
+{
+    if(genericArguments == nullptr)
+        return false;
+    for(const TypePtr& type : *this->genericArguments)
+    {
+        if(type->category == GenericParameter)
+            return true;
+        if(type->containsGenericParameters())
+            return true;
+    }
+    return false;
+}
+TypePtr Type::getAssociatedType(const std::wstring& name) const
+{
+    SymbolPtr symbol = getMember(name);
+    if(symbol == nullptr)
+        return nullptr;
+    TypePtr ret = dynamic_pointer_cast<Type>(symbol);
+    return ret;
+}
+TypePtr Type::getDeclaredAssociatedType(const std::wstring& name) const
+{
+    SymbolPtr symbol = getDeclaredMember(name);
+    if(symbol == nullptr)
+        return nullptr;
+    TypePtr ret = dynamic_pointer_cast<Type>(symbol);
+    return ret;
+}
+const std::vector<SymbolPtr>& Type::getDeclaredStoredProperties() const
+{
+    return storedProperties;
 }
 
 bool Type::operator ==(const Type& rhs)const
@@ -292,6 +525,8 @@ bool Type::operator ==(const Type& rhs)const
                 return false;
             if(variadicParameters != rhs.variadicParameters)
                 return false;
+            if(!isGenericDefinitionEquals(genericDefinition, rhs.genericDefinition))
+                return false;
             auto iter = parameters.begin(), iter2 = rhs.parameters.begin();
             for(; iter != parameters.end(); iter++, iter2++)
             {
@@ -308,18 +543,23 @@ bool Type::operator ==(const Type& rhs)const
         {
             if (!Type::equals(innerType, rhs.innerType))
                 return false;
-            if (genericArguments.size() != rhs.genericArguments.size())
-                return false;
-            auto iter = genericArguments.begin();
-            auto iter2 = rhs.genericArguments.begin();
-            for(; iter != genericArguments.end(); iter++, iter2++)
+            if(genericArguments != nullptr && rhs.genericArguments != nullptr)
             {
-                if(!Type::equals(*iter, *iter2))
+                if (genericArguments->size() != rhs.genericArguments->size())
                     return false;
+                auto iter = genericArguments->begin();
+                auto iter2 = rhs.genericArguments->begin();
+                for (; iter != genericArguments->end(); iter++, iter2++)
+                {
+                    if (!Type::equals(*iter, *iter2))
+                        return false;
+                }
             }
-            return true;
+            if(genericArguments == nullptr && rhs.genericArguments == nullptr)
+                return true;
+            return false;
         }
-        case Placeholder:
+        case GenericParameter:
             return true;
     }
 

@@ -51,9 +51,9 @@ IdentifierPtr NodeFactory::createIdentifier(const SourceInfo&state)
 {
     return _(state, new Identifier());
 }
-GenericArgumentPtr NodeFactory::createGenericArgument(const SourceInfo& state)
+GenericArgumentDefPtr NodeFactory::createGenericArgumentDef(const SourceInfo& state)
 {
-    return _(state, new GenericArgument());
+    return _(state, new GenericArgumentDef());
 }
 InOutParameterPtr NodeFactory::createInOutParameter(const SourceInfo&state)
 {

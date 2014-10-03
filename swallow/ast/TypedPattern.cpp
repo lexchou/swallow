@@ -35,11 +35,11 @@ TypeNodePtr TypedPattern::getDeclaredType()
     return declaredType;
 }
 
-GenericArgumentPtr TypedPattern::getGenericArgument()
+GenericArgumentDefPtr TypedPattern::getGenericArgumentDef()
 {
-    return genericArgument;
+    return genericArgumentDef;
 }
-void TypedPattern::setGenericArgument(const GenericArgumentPtr& val)
+void TypedPattern::setGenericArgumentDef(const GenericArgumentDefPtr& val)
 {
-    genericArgument = val;
+    genericArgumentDef = val;
 }

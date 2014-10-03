@@ -53,6 +53,7 @@ SET(SWALLOW_SRC
     semantics/ScopeGuard.cpp
     semantics/GlobalScope.cpp
     semantics/GenericDefinition.cpp
+    semantics/GenericArgument.cpp
 
     ast/Node.cpp
     ast/Program.cpp
@@ -136,7 +137,7 @@ SET(SWALLOW_SRC
     ast/ValueBindings.cpp
     ast/ComputedProperty.cpp
     ast/Identifier.cpp
-    ast/GenericArgument.cpp
+    ast/GenericArgumentDef.cpp
     ast/Parameters.cpp
     ast/Parameter.cpp
     ast/TypeDeclaration.cpp

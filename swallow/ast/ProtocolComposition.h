@@ -16,6 +16,9 @@ public:
     void addProtocol(TypeIdentifierPtr protocol);
     TypeIdentifierPtr getProtocol(int i);
     int numProtocols();
+
+    std::vector<TypeIdentifierPtr>::iterator begin();
+    std::vector<TypeIdentifierPtr>::iterator end();
 private:
     std::vector<TypeIdentifierPtr> protocols;
 };

@@ -66,13 +66,13 @@ TEST(TestGeneric, testVar)
     ValueBindingPtr var;
     FunctionCallPtr call;
     IdentifierPtr id;
-    GenericArgumentPtr arg;
+    GenericArgumentDefPtr arg;
     ASSERT_NOT_NULL(vars = std::dynamic_pointer_cast<ValueBindings>(root));
     ASSERT_EQ(1, vars->numBindings());
     ASSERT_NOT_NULL(var = std::dynamic_pointer_cast<ValueBinding>(vars->get(0)));
     ASSERT_NOT_NULL(call = std::dynamic_pointer_cast<FunctionCall>(var->getInitializer()));
     ASSERT_NOT_NULL(id = std::dynamic_pointer_cast<Identifier>(call->getFunction()));
-    ASSERT_NOT_NULL(arg = id->getGenericArgument());
+    ASSERT_NOT_NULL(arg = id->getGenericArgumentDef());
 }
 
 TEST(TestGeneric, testTypeConstraint)
@@ -94,19 +94,17 @@ TEST(TestGeneric, testTypeConstraint)
     ASSERT_EQ(L"U", type->getName());
 
     ASSERT_NOT_NULL(constraint = params->getConstraint(0));
-    ASSERT_EQ(1, constraint->numExpectedTypes());
     ASSERT_EQ(GenericConstraintDef::DerivedFrom, constraint->getConstraintType());
     ASSERT_NOT_NULL(type = constraint->getIdentifier());
     ASSERT_EQ(L"T", type->getName());
-    ASSERT_NOT_NULL(type = constraint->getExpectedType(0));
+    ASSERT_NOT_NULL(type = constraint->getExpectedType());
     ASSERT_EQ(L"SomeClass", type->getName());
 
     ASSERT_NOT_NULL(constraint = params->getConstraint(1));
-    ASSERT_EQ(1, constraint->numExpectedTypes());
     ASSERT_EQ(GenericConstraintDef::DerivedFrom, constraint->getConstraintType());
     ASSERT_NOT_NULL(type = constraint->getIdentifier());
     ASSERT_EQ(L"U", type->getName());
-    ASSERT_NOT_NULL(type = constraint->getExpectedType(0));
+    ASSERT_NOT_NULL(type = constraint->getExpectedType());
     ASSERT_EQ(L"SomeProtocol", type->getName());
 
 }
@@ -137,11 +135,10 @@ TEST(TestGeneric, testTypeConstraint2)
 
 
     ASSERT_NOT_NULL(constraint = params->getConstraint(0));
-    ASSERT_EQ(1, constraint->numExpectedTypes());
     ASSERT_EQ(GenericConstraintDef::DerivedFrom, constraint->getConstraintType());
     ASSERT_NOT_NULL(type = constraint->getIdentifier());
     ASSERT_EQ(L"T", type->getName());
-    ASSERT_NOT_NULL(type = constraint->getExpectedType(0));
+    ASSERT_NOT_NULL(type = constraint->getExpectedType());
     ASSERT_EQ(L"Equatable", type->getName());
 }
 
@@ -175,41 +172,37 @@ TEST(TestGeneric, testWhereClause)
     ASSERT_EQ(L"C2", type->getName());
 
     ASSERT_NOT_NULL(constraint = params->getConstraint(0));
-    ASSERT_EQ(1, constraint->numExpectedTypes());
     ASSERT_EQ(GenericConstraintDef::DerivedFrom, constraint->getConstraintType());
     ASSERT_NOT_NULL(type = constraint->getIdentifier());
     ASSERT_EQ(L"C1", type->getName());
-    ASSERT_NOT_NULL(type = constraint->getExpectedType(0));
+    ASSERT_NOT_NULL(type = constraint->getExpectedType());
     ASSERT_EQ(L"Container", type->getName());
 
     ASSERT_NOT_NULL(constraint = params->getConstraint(1));
-    ASSERT_EQ(1, constraint->numExpectedTypes());
     ASSERT_EQ(GenericConstraintDef::DerivedFrom, constraint->getConstraintType());
     ASSERT_NOT_NULL(type = constraint->getIdentifier());
     ASSERT_EQ(L"C2", type->getName());
-    ASSERT_NOT_NULL(type = constraint->getExpectedType(0));
+    ASSERT_NOT_NULL(type = constraint->getExpectedType());
     ASSERT_EQ(L"Container", type->getName());
 
     ASSERT_NOT_NULL(constraint = params->getConstraint(2));
-    ASSERT_EQ(1, constraint->numExpectedTypes());
     ASSERT_EQ(GenericConstraintDef::EqualsTo, constraint->getConstraintType());
     ASSERT_NOT_NULL(type = constraint->getIdentifier());
     ASSERT_EQ(L"C1", type->getName());
     ASSERT_NOT_NULL(type = type->getNestedType());
     ASSERT_EQ(L"ItemType", type->getName());
-    ASSERT_NOT_NULL(type = constraint->getExpectedType(0));
+    ASSERT_NOT_NULL(type = constraint->getExpectedType());
     ASSERT_EQ(L"C2", type->getName());
     ASSERT_NOT_NULL(type = type->getNestedType());
     ASSERT_EQ(L"ItemType", type->getName());
 
     ASSERT_NOT_NULL(constraint = params->getConstraint(3));
-    ASSERT_EQ(1, constraint->numExpectedTypes());
     ASSERT_EQ(GenericConstraintDef::DerivedFrom, constraint->getConstraintType());
     ASSERT_NOT_NULL(type = constraint->getIdentifier());
     ASSERT_EQ(L"C1", type->getName());
     ASSERT_NOT_NULL(type = type->getNestedType());
     ASSERT_EQ(L"ItemType", type->getName());
-    ASSERT_NOT_NULL(type = constraint->getExpectedType(0));
+    ASSERT_NOT_NULL(type = constraint->getExpectedType());
     ASSERT_EQ(L"Equatable", type->getName());
 
 }

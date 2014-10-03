@@ -11,6 +11,7 @@ public:
 private:
     void initPrimitiveTypes();
     void initOperators();
+    void initProtocols();
     /**
     * Register the implementation of binary operator
     */
@@ -26,6 +27,7 @@ public:
     std::vector<TypePtr> t_Numbers;
     std::vector<TypePtr> t_Ints;
 
+    TypePtr t_Equatable;
 
 };
 

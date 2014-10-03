@@ -115,7 +115,7 @@ private://expression
     IdentifierPtr parseIdentifier();
     ClosurePtr parseClosureExpression();
     bool isGenericArgument();
-    GenericArgumentPtr parseGenericArgument();
+    GenericArgumentDefPtr parseGenericArgumentDef();
     
     
     std::pair<ExpressionPtr, ExpressionPtr> parseDictionaryLiteralItem();

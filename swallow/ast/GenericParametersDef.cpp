@@ -37,3 +37,7 @@ GenericConstraintDefPtr GenericParametersDef::getConstraint(int i)
 {
     return constraints[i];
 }
+const std::vector<GenericConstraintDefPtr> GenericParametersDef::getConstraints() const
+{
+    return constraints;
+}

@@ -26,3 +26,11 @@ const std::vector<AttributePtr>& TypeNode::getAttributes()
 {
     return attributes;
 }
+TypePtr TypeNode::getType()const
+{
+    return type;
+}
+void TypeNode::setType(const TypePtr& type)
+{
+    this->type = type;
+}

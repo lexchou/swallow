@@ -49,7 +49,7 @@ struct NodeType
         FunctionCall,
         Function,
         FunctionType,
-        GenericArgument,
+        GenericArgumentDef,
         GenericConstraintDef,
         GenericParameterDef,
         Identifier,

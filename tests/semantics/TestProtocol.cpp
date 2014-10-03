@@ -40,7 +40,7 @@ TEST(TestProtocol, MethodRequirement_Decl)
     ASSERT_EQ(0, compilerResults.numResults());
     TypePtr RandomNumberGenerator;
     ASSERT_NOT_NULL(RandomNumberGenerator = std::dynamic_pointer_cast<Type>(scope->lookup(L"RandomNumberGenerator")));
-    SymbolPtr sym = RandomNumberGenerator->getSymbols()[L"random"];
+    SymbolPtr sym = RandomNumberGenerator->getDeclaredMember(L"random");
     FunctionSymbolPtr random;
 
     ASSERT_NOT_NULL(random = std::dynamic_pointer_cast<FunctionSymbol>(sym));
@@ -147,7 +147,7 @@ TEST(TestProtocol, ReadOnlyComputedProperty)
 
     TypePtr RandomNumberGenerator;
     ASSERT_NOT_NULL(RandomNumberGenerator = std::dynamic_pointer_cast<Type>(scope->lookup(L"MyProtocol")));
-    SymbolPtr sym = RandomNumberGenerator->getSymbols()[L"a"];
+    SymbolPtr sym = RandomNumberGenerator->getDeclaredMember(L"a");
     SymbolPlaceHolderPtr a;
 
     ASSERT_NOT_NULL(a = std::dynamic_pointer_cast<SymbolPlaceHolder>(sym));

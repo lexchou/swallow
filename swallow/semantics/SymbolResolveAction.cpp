@@ -161,7 +161,7 @@ void SymbolResolveAction::registerSymbol(const SymbolPlaceHolderPtr& symbol)
         case NodeType::Extension:
         case NodeType::Enum:
             assert(currentType != nullptr);
-            currentType->getSymbols()[symbol->getName()] = symbol;
+            currentType->addMember(symbol->getName(), symbol);
             break;
         default:
             break;
@@ -282,10 +282,7 @@ TypePtr SymbolResolveAction::defineType(const std::shared_ptr<TypeDeclaration>& 
     if(genericParams)
     {
         generic = prepareGenericTypes(genericParams);
-        for(auto entry : generic->getTypeMap())
-        {
-            currentScope->addSymbol(entry.first, entry.second);
-        }
+        generic->registerTo(currentScope);
     }
 
     //check inheritance clause
@@ -335,7 +332,7 @@ TypePtr SymbolResolveAction::defineType(const std::shared_ptr<TypeDeclaration>& 
     currentScope->addSymbol(type);
 
     if(currentType)
-        currentType->getSymbols()[type->getName()] = type;
+        currentType->addMember(type->getName(), type);
     return type;
 }
 
@@ -364,7 +361,9 @@ void SymbolResolveAction::visitTypeAlias(const TypeAliasPtr& node)
     }
     currentScope->addSymbol(node->getName(), type);
     if(currentType)
-        currentType->getSymbols()[node->getName()] = type;
+    {
+        currentType->addMember(node->getName(), type);
+    }
 }
 
 void SymbolResolveAction::visitClass(const ClassDefPtr& node)
@@ -398,11 +397,12 @@ void SymbolResolveAction::visitStruct(const StructDefPtr& node)
     {
         //check all fields if they all have initializer
         bool hasDefaultValues = true;
-        for(auto syms : type->getSymbols())
+        for(auto sym : type->getDeclaredStoredProperties())
         {
-            if(ValueBindingPtr binding = std::dynamic_pointer_cast<ValueBinding>(syms.second))
+            if(ValueBindingPtr binding = std::dynamic_pointer_cast<ValueBinding>(sym))
             {
                 //TODO: skip computed property
+                //TODO: Type only records SymbolPtr
                 if(!binding->getInitializer())
                 {
                     hasDefaultValues = false;
@@ -502,12 +502,12 @@ void SymbolResolveAction::visitParameters(const ParametersPtr& node)
 
 
 
-TypePtr SymbolResolveAction::createFunctionType(const std::vector<ParametersPtr>::const_iterator& begin, const std::vector<ParametersPtr>::const_iterator& end, const TypePtr& retType)
+TypePtr SymbolResolveAction::createFunctionType(const std::vector<ParametersPtr>::const_iterator& begin, const std::vector<ParametersPtr>::const_iterator& end, const TypePtr& retType, const GenericDefinitionPtr& generic)
 {
     if(begin == end)
         return retType;
 
-    TypePtr returnType = createFunctionType(begin + 1, end, retType);
+    TypePtr returnType = createFunctionType(begin + 1, end, retType, generic);
 
     std::vector<Type::Parameter> parameterTypes;
     ParametersPtr params = *begin;
@@ -527,16 +527,16 @@ TypePtr SymbolResolveAction::createFunctionType(const std::vector<ParametersPtr>
         }
     }
 
-    return Type::newFunction(parameterTypes, returnType, params->isVariadicParameters());
+    return Type::newFunction(parameterTypes, returnType, params->isVariadicParameters(), generic);
 }
-FunctionSymbolPtr SymbolResolveAction::createFunctionSymbol(const FunctionDefPtr& func)
+FunctionSymbolPtr SymbolResolveAction::createFunctionSymbol(const FunctionDefPtr& func, const GenericDefinitionPtr& generic)
 {
     std::map<std::wstring, TypePtr> genericTypes;
 
 
 
     TypePtr retType = lookupType(func->getReturnType());
-    TypePtr funcType = createFunctionType(func->getParametersList().begin(), func->getParametersList().end(), retType);
+    TypePtr funcType = createFunctionType(func->getParametersList().begin(), func->getParametersList().end(), retType, generic);
     FunctionSymbolPtr ret(new FunctionSymbol(func->getName(), funcType, func));
     return ret;
 }
@@ -558,10 +558,77 @@ GenericDefinitionPtr SymbolResolveAction::prepareGenericTypes(const GenericParam
             continue;
         }
         std::vector<TypePtr> protocols;
-        TypePtr type = Type::newType(name, Type::Placeholder, nullptr, nullptr, protocols);
+        TypePtr type = Type::newType(name, Type::GenericParameter, nullptr, nullptr, protocols);
         ret->add(name, type);
     }
-    //TODO: add constraint
+    //add constraint
+    for(const GenericConstraintDefPtr& constraint : params->getConstraints())
+    {
+        //constraint->getConstraintType()
+        list<wstring> types;
+        TypeIdentifierPtr typeId = constraint->getIdentifier();
+        TypePtr type = ret->get(typeId->getName());
+        TypePtr expectedType = lookupType(constraint->getExpectedType());
+
+        if(type == nullptr)
+        {
+            error(typeId, Errors::E_USE_OF_UNDECLARED_TYPE, typeId->getName());
+            continue;
+        }
+        if(constraint->getConstraintType() == GenericConstraintDef::EqualsTo)
+        {
+            //Same-type requirement makes generic parameter 'T' non-generic
+            if(typeId->getNestedType() == nullptr)
+            {
+                error(typeId, Errors::E_SAME_TYPE_REQUIREMENTS_MAKES_GENERIC_PARAMETER_NON_GENERIC_1, typeId->getName());
+                continue;
+            }
+            //check if the reference type is a protocol that contains Self or associated type
+            if(expectedType->getCategory() == Type::Protocol)
+            {
+                if(expectedType->containsSelfType() || expectedType->containsAssociatedType())
+                {
+                    error(typeId, Errors::E_PROTOCOL_CAN_ONLY_BE_USED_AS_GENERIC_CONSTRAINT_1, expectedType->getName());
+                    continue;
+                }
+            }
+        }
+        types.push_back(typeId->getName());
+        typeId = typeId->getNestedType();
+        while(typeId != nullptr)
+        {
+            wstring name = typeId->getName();
+            types.push_back(name);
+            TypePtr childType = type->getAssociatedType(name);
+            if(!childType)
+            {
+                //childType = Type::newType(name, Type::Placeholder, nullptr);
+                //type->getSymbols()[name] = childType;
+                error(typeId, Errors::E_IS_NOT_A_MEMBER_OF_2, name, type->getName());
+                return ret;
+            }
+            type = childType;
+            typeId = typeId->getNestedType();
+        }
+        if(expectedType->getCategory() == Type::Protocol)
+        {
+            type->addProtocol(expectedType);
+        }
+        else
+        {
+            //it's a base type
+            if(type->getParentType() != nullptr)
+            {
+                error(constraint->getIdentifier(), Errors::E_MULTIPLE_INHERITANCE_FROM_CLASS_2, type->getParentType()->getName(), expectedType->getName());
+                continue;
+            }
+            type->setParentType(expectedType);
+        }
+
+        //ret->addConstraint(types);
+        GenericDefinition::ConstraintType ct = constraint->getConstraintType() == GenericConstraintDef::DerivedFrom ? GenericDefinition::DerivedFrom : GenericDefinition::EqualsTo;
+        ret->addConstraint(types, ct, expectedType);
+    }
 
     return ret;
 }
@@ -581,6 +648,38 @@ void SymbolResolveAction::visitClosure(const ClosurePtr& node)
 
 
 }
+
+void SymbolResolveAction::visitAccessor(const CodeBlockPtr& accessor, const ParametersPtr& params, const SymbolPtr& setter)
+{
+    if(!accessor)
+        return;
+    ScopedCodeBlockPtr codeBlock = std::static_pointer_cast<ScopedCodeBlock>(accessor);
+    SymbolScope *scope = codeBlock->getScope();
+    ScopeGuard scopeGuard(codeBlock.get(), this);
+    (void) scopeGuard;
+
+    SymbolPlaceHolderPtr self(new SymbolPlaceHolder(L"self", currentType, SymbolPlaceHolder::R_PARAMETER, SymbolPlaceHolder::F_READABLE | SymbolPlaceHolder::F_INITIALIZED));
+    scope->addSymbol(self);
+    if(setter)
+        scope->addSymbol(setter);
+
+    params->accept(this);
+    prepareParameters(scope, params);
+    accessor->accept(this);
+}
+void SymbolResolveAction::visitSubscript(const SubscriptDefPtr &node)
+{
+    //process getter
+    ParametersPtr params = node->getParameters();
+    visitAccessor(node->getGetter(), params, nullptr);
+    wstring setterName = L"newValue";
+    if(!node->getSetterName().empty())
+        setterName = node->getSetterName();
+    SymbolPlaceHolderPtr setter(new SymbolPlaceHolder(setterName, currentType, SymbolPlaceHolder::R_PARAMETER, SymbolPlaceHolder::F_READABLE | SymbolPlaceHolder::F_INITIALIZED));
+    visitAccessor(node->getSetter(), params, setter);
+    //process setter
+
+}
 void SymbolResolveAction::visitFunction(const FunctionDefPtr& node)
 {
     GenericDefinitionPtr generic;
@@ -596,12 +695,13 @@ void SymbolResolveAction::visitFunction(const FunctionDefPtr& node)
         (void) scopeGuard;
 
         if(generic)
+            generic->registerTo(scope);
+        if(currentType && (node->getSpecifiers() & (TypeSpecifier::Class | TypeSpecifier::Static)) == 0)
         {
-            for (auto entry : generic->getTypeMap())
-            {
-                scope->addSymbol(entry.first, entry.second);
-            }
+            SymbolPlaceHolderPtr self(new SymbolPlaceHolder(L"self", currentType, SymbolPlaceHolder::R_PARAMETER, SymbolPlaceHolder::F_READABLE | SymbolPlaceHolder::F_INITIALIZED));
+            scope->addSymbol(self);
         }
+
 
         for (const ParametersPtr &params : node->getParametersList())
         {
@@ -609,10 +709,11 @@ void SymbolResolveAction::visitFunction(const FunctionDefPtr& node)
             prepareParameters(scope, params);
         }
         node->getBody()->accept(this);
+        lookupType(node->getReturnType());
     }
 
 
-    FunctionSymbolPtr func = createFunctionSymbol(node);
+    FunctionSymbolPtr func = createFunctionSymbol(node, generic);
     node->setType(func->getType());
     node->getBody()->setType(func->getType());
     //check if the same symbol has been defined in this scope
@@ -652,7 +753,7 @@ void SymbolResolveAction::visitFunction(const FunctionDefPtr& node)
     {
         if(declaration->getType())
         {
-            declaration->getType()->getSymbols()[sym->getName()] = sym;
+            declaration->getType()->addMember(sym->getName(), sym);
         }
     }
 
@@ -682,6 +783,8 @@ void SymbolResolveAction::prepareParameters(SymbolScope* scope, const Parameters
         sym = SymbolPtr(new SymbolPlaceHolder(param->getLocalName(), param->getType(), SymbolPlaceHolder::R_PARAMETER, SymbolPlaceHolder::F_INITIALIZED));
         scope->addSymbol(sym);
     }
+    //prepare for implicit parameter self
+
 }
 void SymbolResolveAction::visitInit(const InitializerDefPtr& node)
 {
@@ -693,6 +796,10 @@ void SymbolResolveAction::visitInit(const InitializerDefPtr& node)
     node->getParameters()->accept(this);
     ScopedCodeBlockPtr body = std::static_pointer_cast<ScopedCodeBlock>(node->getBody());
     prepareParameters(body->getScope(), node->getParameters());
+    //prepare implicit self
+    SymbolPlaceHolderPtr self(new SymbolPlaceHolder(L"self", currentType, SymbolPlaceHolder::R_PARAMETER, SymbolPlaceHolder::F_READABLE | SymbolPlaceHolder::F_INITIALIZED));
+    body->getScope()->addSymbol(self);
+
     std::vector<Type::Parameter> params;
     for(const ParameterPtr& param : *node->getParameters())
     {

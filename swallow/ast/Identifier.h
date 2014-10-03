@@ -21,12 +21,12 @@ public:
 //    void setDeclaredType(const TypeNodePtr& type);
 //    TypeNodePtr getDeclaredType();
     
-    GenericArgumentPtr getGenericArgument();
-    void setGenericArgument(const GenericArgumentPtr& val);
+    GenericArgumentDefPtr getGenericArgumentDef() const;
+    void setGenericArgumentDef(const GenericArgumentDefPtr& val);
 protected:
     std::wstring identifier;
     TypeNodePtr declaredType;
-    GenericArgumentPtr genericArgument;
+    GenericArgumentDefPtr genericArgumentDef;
 };
 
 SWIFT_NS_END

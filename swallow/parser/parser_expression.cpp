@@ -349,11 +349,11 @@ bool Parser::isGenericArgument()
  ‌ generic-argument-list → generic-argument | generic-argument,generic-argument-list
  ‌ generic-argument → type
 */
-GenericArgumentPtr Parser::parseGenericArgument()
+GenericArgumentDefPtr Parser::parseGenericArgumentDef()
 {
     Token token;
     expect(L"<", token);
-    GenericArgumentPtr ret = nodeFactory->createGenericArgument(token.state);
+    GenericArgumentDefPtr ret = nodeFactory->createGenericArgumentDef(token.state);
     do
     {
         TypeNodePtr argument = parseType();
@@ -499,8 +499,8 @@ IdentifierPtr Parser::parseIdentifier()
     
     if(isGenericArgument())
     {
-        GenericArgumentPtr arg = parseGenericArgument();
-        ret->setGenericArgument(arg);
+        GenericArgumentDefPtr arg = parseGenericArgumentDef();
+        ret->setGenericArgumentDef(arg);
     }
     return ret;
 }
@@ -562,7 +562,6 @@ ExpressionPtr Parser::parseLiteralExpression()
             }
             expect(L"]");
             return array;
-            
         }
         else if(token.type == TokenType::Colon)//dictionary
         {

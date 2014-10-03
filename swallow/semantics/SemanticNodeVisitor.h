@@ -22,7 +22,9 @@ protected:
     /**
      * Outputs an compiler error
      */
-    void error(const NodePtr& node, int code, const std::wstring& item = std::wstring());
+    void error(const NodePtr& node, int code);
+    void error(const NodePtr& node, int code, const std::wstring& item);
+    void error(const NodePtr& node, int code, const std::wstring& item1, const std::wstring& item2);
 
 
     /**
@@ -36,6 +38,8 @@ protected:
      */
     TypePtr lookupType(const TypeNodePtr& type);
     std::wstring toString(const NodePtr& node);
+private:
+    TypePtr lookupTypeImpl(const TypeNodePtr& type);
 protected:
     SymbolRegistry* symbolRegistry;
     CompilerResults* compilerResults;

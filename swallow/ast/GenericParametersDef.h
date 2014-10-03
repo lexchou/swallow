@@ -23,6 +23,8 @@ public:
     int numConstraints()const;
     GenericConstraintDefPtr getConstraint(int i);
 
+    const std::vector<GenericConstraintDefPtr> getConstraints() const;
+
     std::vector<TypeIdentifierPtr>::iterator begin() { return genericTypes.begin();}
     std::vector<TypeIdentifierPtr>::iterator end() { return genericTypes.end();}
 

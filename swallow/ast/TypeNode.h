@@ -6,6 +6,7 @@
 
 SWIFT_NS_BEGIN
 class Attribute;
+typedef std::shared_ptr<class Type> TypePtr;
 class TypeNode : public Statement
 {
 public:
@@ -15,8 +16,12 @@ public:
     void addAttribute(AttributePtr attr);
     void setAttributes(const std::vector<AttributePtr> attrs);
     const std::vector<AttributePtr>& getAttributes();
+
+    TypePtr getType()const;
+    void setType(const TypePtr& type);
 private:
     std::vector<AttributePtr> attributes;
+    TypePtr type;
 };
 
 

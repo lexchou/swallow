@@ -31,15 +31,12 @@ GenericConstraintDef::ConstraintType GenericConstraintDef::getConstraintType()co
     return type;
 }
 
-void GenericConstraintDef::addExpectedType(const TypeIdentifierPtr& expectedIdentifier)
+void GenericConstraintDef::setExpectedType(const TypeIdentifierPtr& expectedIdentifier)
 {
-    expectedTypes.push_back(expectedIdentifier);
+    this->expectedType = expectedIdentifier;
 }
-int GenericConstraintDef::numExpectedTypes()const
+
+TypeIdentifierPtr GenericConstraintDef::getExpectedType()const
 {
-    return expectedTypes.size();
-}
-TypeIdentifierPtr GenericConstraintDef::getExpectedType(int i)
-{
-    return expectedTypes[i];
+    return expectedType;
 }

@@ -74,7 +74,7 @@ void TypeVerificationAction::verifyProtocolConform(const TypePtr& type)
 }
 void TypeVerificationAction::verifyProtocolConform(const TypePtr& type, const TypePtr& protocol)
 {
-    for(auto entry : protocol->getSymbols())
+    for(auto entry : protocol->getDeclaredMembers())
     {
         SymbolPtr requirement = entry.second;
         if(FunctionOverloadedSymbolPtr funcs = std::dynamic_pointer_cast<FunctionOverloadedSymbol>(requirement))
@@ -93,7 +93,7 @@ void TypeVerificationAction::verifyProtocolConform(const TypePtr& type, const Ty
         else if(requirement == Type::getPlaceHolder())
         {
             //verify inner type
-            SymbolPtr sym = type->getSymbols()[entry.first];
+            SymbolPtr sym = type->getAssociatedType(entry.first);
             if(!(std::dynamic_pointer_cast<Type>(sym)))
             {
                 error(type->getReference(), Errors::E_TYPE_DOES_NOT_CONFORM_TO_PROTOCOL_UNIMPLEMENTED_TYPE, entry.first);
@@ -107,7 +107,7 @@ void TypeVerificationAction::verifyProtocolConform(const TypePtr& type, const Ty
         {
             //verify computed properties
             assert(prop->flags & SymbolPlaceHolder::F_MEMBER && prop->getRole() == SymbolPlaceHolder::R_PROPERTY);
-            SymbolPtr sym = type->getSymbols()[entry.first];
+            SymbolPtr sym = type->getMember(entry.first);
             SymbolPlaceHolderPtr sp = std::dynamic_pointer_cast<SymbolPlaceHolder>(sym);
             if(!sp)
             {
@@ -124,7 +124,7 @@ void TypeVerificationAction::verifyProtocolConform(const TypePtr& type, const Ty
 }
 void TypeVerificationAction::verifyProtocolFunction(const TypePtr& type, const TypePtr& protocol, const FunctionSymbolPtr& expected)
 {
-    SymbolPtr sym = type->getSymbols()[expected->getName()];
+    SymbolPtr sym = type->getMember(expected->getName());
     TypePtr expectedType = expected->getType();
     assert(expectedType != nullptr);
     if(!sym)

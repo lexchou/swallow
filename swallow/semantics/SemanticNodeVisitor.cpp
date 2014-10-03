@@ -15,6 +15,7 @@
 #include "GlobalScope.h"
 #include "ast/OptionalType.h"
 #include "GenericDefinition.h"
+#include "GenericArgument.h"
 
 USE_SWIFT_NS
 
@@ -35,6 +36,14 @@ void SemanticNodeVisitor::error(const NodePtr& node, int code, const std::wstrin
     compilerResults->add(ErrorLevel::Error, *node->getSourceInfo(), code, item);
     abort();
 }
+void SemanticNodeVisitor::error(const NodePtr& node, int code, const std::wstring& item1, const std::wstring& item2)
+{
+    error(node, code, item1);
+}
+void SemanticNodeVisitor::error(const NodePtr& node, int code)
+{
+    error(node, code, L"");
+}
 void SemanticNodeVisitor::warning(const NodePtr& node, int code, const std::wstring& item)
 {
     compilerResults->add(ErrorLevel::Warning, *node->getSourceInfo(), code, item);
@@ -51,6 +60,16 @@ TypePtr SemanticNodeVisitor::lookupType(const TypeNodePtr& type)
 {
     if(!type)
         return nullptr;
+    TypePtr ret = type->getType();
+    if(!ret)
+    {
+        ret = lookupTypeImpl(type);
+        type->setType(ret);
+    }
+    return ret;
+}
+TypePtr SemanticNodeVisitor::lookupTypeImpl(const TypeNodePtr &type)
+{
     if(TypeIdentifierPtr id = std::dynamic_pointer_cast<TypeIdentifier>(type))
     {
         //TODO: make a generic type if possible
@@ -89,15 +108,15 @@ TypePtr SemanticNodeVisitor::lookupType(const TypeNodePtr& type)
             return nullptr;
         }
         //check type
-        std::vector<TypePtr> typeArguments;
+        GenericArgumentPtr genericArgument(new GenericArgument());
         for(auto arg : *id)
         {
             TypePtr argType = lookupType(arg);
             if(!argType)
                 return nullptr;
-            typeArguments.push_back(argType);
+            genericArgument->add(argType);
         }
-        ret = Type::newSpecializedType(ret, typeArguments);
+        ret = Type::newSpecializedType(ret, genericArgument);
         return ret;
     }
     if(TupleTypePtr tuple = std::dynamic_pointer_cast<TupleType>(type))
@@ -117,8 +136,7 @@ TypePtr SemanticNodeVisitor::lookupType(const TypeNodePtr& type)
         TypePtr innerType = lookupType(array->getInnerType());
         assert(innerType != nullptr);
         assert(Array != nullptr);
-        std::vector<TypePtr> typeArguments = {innerType};
-        TypePtr ret = Type::newSpecializedType(Array, typeArguments);
+        TypePtr ret = Type::newSpecializedType(Array, innerType);
         return ret;
     }
     if(OptionalTypePtr opt = std::dynamic_pointer_cast<OptionalType>(type))
@@ -128,8 +146,7 @@ TypePtr SemanticNodeVisitor::lookupType(const TypeNodePtr& type)
         TypePtr innerType = lookupType(opt->getInnerType());
         assert(innerType != nullptr);
         assert(Optional != nullptr);
-        std::vector<TypePtr> typeArguments = {innerType};
-        TypePtr ret = Type::newSpecializedType(Optional, typeArguments);
+        TypePtr ret = Type::newSpecializedType(Optional, innerType);
         return ret;
     }
     if(FunctionTypePtr func = std::dynamic_pointer_cast<FunctionType>(type))

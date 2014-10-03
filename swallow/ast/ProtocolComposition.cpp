@@ -25,3 +25,11 @@ int ProtocolComposition::numProtocols()
 {
     return protocols.size();
 }
+std::vector<TypeIdentifierPtr>::iterator ProtocolComposition::begin()
+{
+    return protocols.begin();
+}
+std::vector<TypeIdentifierPtr>::iterator ProtocolComposition::end()
+{
+    return protocols.end();
+}

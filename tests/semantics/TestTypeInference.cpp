@@ -5,6 +5,7 @@
 #include "semantics/Type.h"
 #include "swift_errors.h"
 #include "semantics/GlobalScope.h"
+#include "semantics/GenericArgument.h"
 
 using namespace Swift;
 
@@ -69,7 +70,7 @@ TEST(TestTypeInference, testArrayLiteral)
     ASSERT_NOT_NULL(type);
     ASSERT_EQ(symbolRegistry.getGlobalScope()->t_Array, type->getInnerType());
 
-    ASSERT_NOT_NULL(innerType = type->getGenericArguments()[0]);
+    ASSERT_NOT_NULL(innerType = type->getGenericArguments()->get(0));
     ASSERT_EQ(t_Int, innerType);
 
 
@@ -86,7 +87,7 @@ TEST(TestTypeInference, testArrayLiteral2)
     ASSERT_NOT_NULL(type);
     ASSERT_EQ(symbolRegistry.getGlobalScope()->t_Array, type->getInnerType());
 
-    ASSERT_NOT_NULL(innerType = type->getGenericArguments()[0]);
+    ASSERT_NOT_NULL(innerType = type->getGenericArguments()->get(0));
     ASSERT_EQ(t_Double, innerType);
 
 
@@ -104,7 +105,7 @@ TEST(TestTypeInference, testArrayLiteral3)
     ASSERT_EQ(Type::Specialized, type->getCategory());
     ASSERT_EQ(symbolRegistry.getGlobalScope()->t_Array, type->getInnerType());
 
-    TypePtr innerType = type->getGenericArguments()[0];
+    TypePtr innerType = type->getGenericArguments()->get(0);
     ASSERT_EQ(Int8, innerType);
 }
 

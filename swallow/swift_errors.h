@@ -73,7 +73,11 @@ struct Errors
         E_GENERIC_TYPE_SPECIALIZED_WITH_TOO_MANY_TYPE_PARAMETERS, //Generic type '%' specialized with too many type parameters(got 2, but expected 1)
         E_GENERIC_TYPE_SPECIALIZED_WITH_INSUFFICIENT_TYPE_PARAMETERS, //Generic type '%' specialized with insufficient type parameters(got 1, but expected 2);
         E_CANNOT_SPECIALIZE_NON_GENERIC_TYPE, //Cannot specialize non-generic type '%'
-
+        E_MULTIPLE_INHERITANCE_FROM_CLASS_2, //Multiple inheritance from class '%' and '%'
+        E_TYPE_DOES_NOT_CONFORM_TO_PROTOCOL_2, //Type % does not conform to protocol %
+        E_IS_NOT_A_MEMBER_OF_2, // % is not a member of %
+        E_SAME_TYPE_REQUIREMENTS_MAKES_GENERIC_PARAMETER_NON_GENERIC_1,//Same-type requirement makes generic parameter 'T' non-generic
+        E_PROTOCOL_CAN_ONLY_BE_USED_AS_GENERIC_CONSTRAINT_1,//Protocol '%' can only be used as a generic constraint because it has Self or associated type requirements
 
         W_PARAM_CAN_BE_EXPRESSED_MORE_SUCCINCTLY, // '% %' can be expressed more succinctly as '#%'
         W_EXTRANEOUS_SHARTP_IN_PARAMETER, //Extraneous '#' in parameter: '%' is already the keyword argument name

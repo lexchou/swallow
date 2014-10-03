@@ -11,6 +11,7 @@ GlobalScope::GlobalScope()
 {
     initPrimitiveTypes();
     initOperators();
+    initProtocols();
 }
 void GlobalScope::initPrimitiveTypes()
 {
@@ -33,14 +34,20 @@ void GlobalScope::initPrimitiveTypes()
     addSymbol(s_True = SymbolPtr(new SymbolPlaceHolder(L"true", t_Bool, SymbolPlaceHolder::R_LOCAL_VARIABLE, SymbolPlaceHolder::F_INITIALIZED)));
     addSymbol(s_False = SymbolPtr(new SymbolPlaceHolder(L"false", t_Bool, SymbolPlaceHolder::R_LOCAL_VARIABLE, SymbolPlaceHolder::F_INITIALIZED)));
     {
-        TypePtr T = Type::newType(L"T", Type::Placeholder);
+        TypePtr T = Type::newType(L"T", Type::GenericParameter);
         GenericDefinitionPtr generic(new GenericDefinition());
         generic->add(L"T", T);
         t_Array = Type::newType(L"Array", Type::Struct, nullptr, nullptr, std::vector<TypePtr>(), generic);
+
+        std::vector<Type::Parameter> params = {Type::Parameter(L"item", false, T)};
+        TypePtr t_append = Type::newFunction(params, nullptr, false, nullptr);
+
+        FunctionSymbolPtr append(new FunctionSymbol(L"append", t_append, nullptr));
+        t_Array->addMember(append);
         addSymbol(t_Array);
     }
     {
-        TypePtr T = Type::newType(L"T", Type::Placeholder);
+        TypePtr T = Type::newType(L"T", Type::GenericParameter);
         GenericDefinitionPtr generic(new GenericDefinition());
         generic->add(L"T", T);
         t_Optional = Type::newType(L"Optional", Type::Struct, nullptr, nullptr, std::vector<TypePtr>(), generic);
@@ -81,6 +88,12 @@ void GlobalScope::initOperators()
             registerOperatorFunction(op, type, type, type);
         }
     }
+}
+
+void GlobalScope::initProtocols()
+{
+    t_Equatable = Type::newType(L"Equatable", Type::Protocol, nullptr);
+    addSymbol(t_Equatable);
 }
 
 bool GlobalScope::registerOperatorFunction(const std::wstring& name, const TypePtr& returnType, const TypePtr& lhs, const TypePtr& rhs)

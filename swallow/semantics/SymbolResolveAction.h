@@ -26,6 +26,7 @@ public:
     virtual void visitProtocol(const ProtocolDefPtr& node) override;
     virtual void visitExtension(const ExtensionDefPtr& node) override;
     virtual void visitFunction(const FunctionDefPtr& node) override;
+    virtual void visitSubscript(const SubscriptDefPtr& node);
     virtual void visitClosure(const ClosurePtr& node) override;
     virtual void visitIdentifier(const IdentifierPtr& id) override;
     virtual void visitEnumCasePattern(const EnumCasePatternPtr& node) override;
@@ -35,6 +36,7 @@ public:
     virtual void visitParameters(const ParametersPtr& node) override;
 
 private:
+    void visitAccessor(const CodeBlockPtr& accessor, const ParametersPtr& params, const SymbolPtr& setter);
     TypePtr defineType(const std::shared_ptr<TypeDeclaration>& node, Type::Category category);
     //Register all symbols in the pattern
     void registerPattern(const PatternPtr& pattern);
@@ -43,8 +45,8 @@ private:
 
     //set or reset flag in all identifiers in given pattern
     void setFlag(const PatternPtr& pattern, bool add, int flag);
-    FunctionSymbolPtr createFunctionSymbol(const FunctionDefPtr& func);
-    TypePtr createFunctionType(const std::vector<ParametersPtr>::const_iterator& begin, const std::vector<ParametersPtr>::const_iterator& end, const TypePtr& retType);
+    FunctionSymbolPtr createFunctionSymbol(const FunctionDefPtr& func, const GenericDefinitionPtr& generic);
+    TypePtr createFunctionType(const std::vector<ParametersPtr>::const_iterator& begin, const std::vector<ParametersPtr>::const_iterator& end, const TypePtr& retType, const GenericDefinitionPtr& generic);
 
     /**
      * Prepare parameters as symbols in given code block

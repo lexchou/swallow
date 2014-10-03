@@ -9,8 +9,19 @@
 #include "semantics/ScopedNodes.h"
 #include "semantics/FunctionSymbol.h"
 #include "semantics/FunctionOverloadedSymbol.h"
+#include <sstream>
+#include <fstream>
+#include <codecvt>
 
 
+std::wstring readFile(const char* fileName)
+{
+    std::wifstream wif(fileName);
+    wif.imbue(std::locale(std::locale(), new std::codecvt_utf8<wchar_t>));
+    std::wstringstream wss;
+    wss << wif.rdbuf();
+    return wss.str();
+}
 
 void dumpCompilerResults(Swift::CompilerResults& compilerResults)
 {
