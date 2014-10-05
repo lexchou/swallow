@@ -140,12 +140,13 @@ TEST(TestPostfixExpression, testSubscript)
     ASSERT_NOT_NULL(eq->getLHS());
     SubscriptAccessPtr sub = std::dynamic_pointer_cast<SubscriptAccess>(eq->getLHS());
     ASSERT_NOT_NULL(eq);
-    ASSERT_EQ(2, sub->numIndices());
+    ParenthesizedExpressionPtr index = sub->getIndex();
+    ASSERT_EQ(2, index->numExpressions());
     IntegerLiteralPtr i;
 
-    ASSERT_NOT_NULL(i = std::dynamic_pointer_cast<IntegerLiteral>(sub->getIndex(0)));
+    ASSERT_NOT_NULL(i = std::dynamic_pointer_cast<IntegerLiteral>(index->get(0)));
     ASSERT_EQ(L"0", i->valueAsString);
-    ASSERT_NOT_NULL(i = std::dynamic_pointer_cast<IntegerLiteral>(sub->getIndex(1)));
+    ASSERT_NOT_NULL(i = std::dynamic_pointer_cast<IntegerLiteral>(index->get(1)));
     ASSERT_EQ(L"1", i->valueAsString);
 }
 TEST(TestPostfixExpression, testSubscript2)
@@ -157,10 +158,12 @@ TEST(TestPostfixExpression, testSubscript2)
     ASSERT_NOT_NULL(eq->getLHS());
     SubscriptAccessPtr sub = std::dynamic_pointer_cast<SubscriptAccess>(eq->getLHS());
     ASSERT_NOT_NULL(eq);
-    ASSERT_EQ(1, sub->numIndices());
+
+    ParenthesizedExpressionPtr index = sub->getIndex();
+    ASSERT_EQ(1, index->numExpressions());
     IntegerLiteralPtr i;
 
-    ASSERT_NOT_NULL(i = std::dynamic_pointer_cast<IntegerLiteral>(sub->getIndex(0)));
+    ASSERT_NOT_NULL(i = std::dynamic_pointer_cast<IntegerLiteral>(index->get(0)));
     ASSERT_EQ(L"0", i->valueAsString);
 
 }
@@ -173,10 +176,11 @@ TEST(TestPostfixExpression, testSubscript3)
     ASSERT_NOT_NULL(eq->getLHS());
     SubscriptAccessPtr sub = std::dynamic_pointer_cast<SubscriptAccess>(eq->getLHS());
     ASSERT_NOT_NULL(eq);
-    ASSERT_EQ(1, sub->numIndices());
+    ParenthesizedExpressionPtr index = sub->getIndex();
+    ASSERT_EQ(1, index->numExpressions());
     IntegerLiteralPtr i;
 
-    ASSERT_NOT_NULL(i = std::dynamic_pointer_cast<IntegerLiteral>(sub->getIndex(0)));
+    ASSERT_NOT_NULL(i = std::dynamic_pointer_cast<IntegerLiteral>(index->get(0)));
     ASSERT_EQ(L"0", i->valueAsString);
 
 

@@ -5,7 +5,7 @@
 USE_SWIFT_NS
 
 
-FunctionSymbol::FunctionSymbol(const std::wstring& name, const TypePtr& functionType, const FunctionDefPtr& definition)
+FunctionSymbol::FunctionSymbol(const std::wstring& name, const TypePtr& functionType, const CodeBlockPtr& definition)
 :name(name), type(functionType), definition(definition)
 {
     assert(functionType);
@@ -24,7 +24,7 @@ TypePtr FunctionSymbol::getReturnType()const
 {
     return type->getReturnType();
 }
-FunctionDefPtr FunctionSymbol::getDefinition()
+CodeBlockPtr FunctionSymbol::getDefinition()
 {
     return definition.lock();
 }

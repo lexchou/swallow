@@ -291,10 +291,7 @@ void NodeVisitor::visitCompileConstant(const CompileConstantPtr& node)
 void NodeVisitor::visitSubscriptAccess(const SubscriptAccessPtr& node)
 {
     ACCEPT(node->getSelf());
-    for(ExpressionPtr index : *node)
-    {
-        ACCEPT(index);
-    }
+    ACCEPT(node->getIndex());
 }
 
 void NodeVisitor::visitMemberAccess(const MemberAccessPtr& node)

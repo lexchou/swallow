@@ -17,7 +17,7 @@
 
 USE_SWIFT_NS
 
-
+using namespace std;
 
 
 
@@ -65,7 +65,7 @@ void TypeInferenceAction::checkTupleDefinition(const TuplePtr& tuple, const Expr
         std::wstringstream out;
         NodeSerializerW serializer(out);
         declaredType->accept(&serializer);
-        error(tuple, Errors::E_USE_OF_UNDECLARED_TYPE, out.str());
+        error(tuple, Errors::E_USE_OF_UNDECLARED_TYPE_1, out.str());
         return;
     }
     if(!(type->getCategory() == Type::Tuple))
@@ -74,7 +74,7 @@ void TypeInferenceAction::checkTupleDefinition(const TuplePtr& tuple, const Expr
         std::wstringstream out;
         NodeSerializerW serializer(out);
         declaredType->accept(&serializer);
-        error(tuple, Errors::E_TUPLE_PATTERN_MUST_MATCH_TUPLE_TYPE, out.str());
+        error(tuple, Errors::E_TUPLE_PATTERN_MUST_MATCH_TUPLE_TYPE_1, out.str());
         return;
     }
     if(tuple->numElements() != type->numElementTypes())
@@ -83,7 +83,7 @@ void TypeInferenceAction::checkTupleDefinition(const TuplePtr& tuple, const Expr
         std::wstringstream out;
         NodeSerializerW serializer(out);
         declaredType->accept(&serializer);
-        error(tuple, Errors::E_TUPLE_PATTERN_MUST_MATCH_TUPLE_TYPE, out.str());
+        error(tuple, Errors::E_TUPLE_PATTERN_MUST_MATCH_TUPLE_TYPE_1, out.str());
         return;
     }
     //check if initializer has the same type with the declared type
@@ -96,7 +96,11 @@ void TypeInferenceAction::checkTupleDefinition(const TuplePtr& tuple, const Expr
             std::wstringstream out;
             NodeSerializerW serializer(out);
             declaredType->accept(&serializer);
-            error(initializer, Errors::E_TUPLE_TYPES_HAVE_A_DIFFERENT_NUMBER_OF_ELEMENT, out.str());
+            //tuple types '%0' and '%1' have a different number of elements (%2 vs. %3)
+            wstring expectedType = type->toString();
+            wstring got = toString(valueType->numElementTypes());
+            wstring expected = toString(type->numElementTypes());
+            error(initializer, Errors::E_TUPLE_TYPES_HAVE_A_DIFFERENT_NUMBER_OF_ELEMENT_4, out.str(), expectedType, got, expected);
             return;
         }
     }
@@ -142,7 +146,9 @@ TypePtr TypeInferenceAction::getExpressionType(const ExpressionPtr& expr, const 
         if(isFloat(hint))
             return hint;
     }
-    return expr->getType();
+    TypePtr ret = expr->getType();
+    assert(ret != nullptr);
+    return ret;
 }
 /**
  *
@@ -164,7 +170,7 @@ bool TypeInferenceAction::checkArgument(const TypePtr& funcType, const Type::Par
         //variadic parameter must have no name
         if(!name.empty())
         {
-            error(argument.second, Errors::E_EXTRANEOUS_ARGUMENT_LABEL_IN_CALL, name);
+            error(argument.second, Errors::E_EXTRANEOUS_ARGUMENT_LABEL_IN_CALL_1, name);
             abort();
         }
     }
@@ -176,18 +182,20 @@ bool TypeInferenceAction::checkArgument(const TypePtr& funcType, const Type::Par
             {
                 if (name.empty() && !parameter.name.empty())
                 {
-                    error(argument.second, Errors::E_MISSING_ARGUMENT_LABEL_IN_CALL, parameter.name);
+                    error(argument.second, Errors::E_MISSING_ARGUMENT_LABEL_IN_CALL_1, parameter.name);
                 }
                 else
                 {
-                    error(argument.second, Errors::E_EXTRANEOUS_ARGUMENT_LABEL_IN_CALL, name);
+                    error(argument.second, Errors::E_EXTRANEOUS_ARGUMENT_LABEL_IN_CALL_1, name);
                 }
                 abort();
             }
             return false;
         }
     }
-    if(parameter.type->getCategory() == Type::GenericParameter)
+    //only consider it's a generic parameter when and only when the generic definition is provided by the function
+    //otherwise the generic parameter may be provided by the type definition
+    if((parameter.type->getCategory() == Type::GenericParameter) && (funcType->getGenericDefinition() != nullptr))
     {
         //check for type constraint
         GenericDefinitionPtr generic = funcType->getGenericDefinition();
@@ -198,7 +206,7 @@ bool TypeInferenceAction::checkArgument(const TypePtr& funcType, const Type::Par
         {
             if(supressErrors)
                 return false;
-            error(argument.second, Errors::E_TYPE_DOES_NOT_CONFORM_TO_PROTOCOL_2, argType->getName(), expectedType->getName());
+            error(argument.second, Errors::E_TYPE_DOES_NOT_CONFORM_TO_PROTOCOL_2_, argType->getName(), expectedType->getName());
             abort();
         }
     }
@@ -206,7 +214,7 @@ bool TypeInferenceAction::checkArgument(const TypePtr& funcType, const Type::Par
     {
         if (!supressErrors)
         {
-            error(argument.second, Errors::E_UNMATCHED_PARAMETER);
+            error(argument.second, Errors::E_UNMATCHED_PARAMETERS);
             abort();
         }
         return false;//parameter is not matched
@@ -288,6 +296,36 @@ void TypeInferenceAction::visitFunctionCall(const IdentifierPtr& name, const Fun
 {
     //visitFunctionCall(sym, node);
 }
+FunctionSymbolPtr TypeInferenceAction::getOverloadedFunction(const NodePtr& node, const FunctionOverloadedSymbolPtr& funcs, const ParenthesizedExpressionPtr& arguments)
+{
+    typedef std::pair<float, FunctionSymbolPtr> ScoredFunction;
+    std::vector<ScoredFunction> candidates;
+    for(FunctionSymbolPtr func : *funcs)
+    {
+        float score = calculateFitScore(func->getType(), arguments, true);
+        if(score > 0)
+            candidates.push_back(std::make_pair(score, func));
+    }
+    if(candidates.empty())
+    {
+        error(node, Errors::E_NO_MATCHED_OVERLOAD);
+        abort();
+    }
+    //sort by fit score
+    if(candidates.size() > 1)
+    {
+        sort(candidates.begin(), candidates.end(), [](const ScoredFunction& lhs, const ScoredFunction& rhs ){
+            return rhs.first < lhs.first;
+        });
+        if(candidates[0].first == candidates[1].first)
+        {
+            error(node, Errors::E_AMBIGUOUS_USE_1, funcs->getName());
+            abort();
+        }
+    }
+    FunctionSymbolPtr matched = candidates.front().second;
+    return matched;
+}
 void TypeInferenceAction::visitFunctionCall(const SymbolPtr& sym, const FunctionCallPtr& node)
 {
     //Prepare the arguments
@@ -299,37 +337,13 @@ void TypeInferenceAction::visitFunctionCall(const SymbolPtr& sym, const Function
     if(FunctionSymbolPtr func = std::dynamic_pointer_cast<FunctionSymbol>(sym))
     {
         //verify argument
+        std::wstring name = func->getName();
         calculateFitScore(func->getType(), node->getArguments(), false);
         node->setType(func->getReturnType());
     }
     else if(FunctionOverloadedSymbolPtr funcs = std::dynamic_pointer_cast<FunctionOverloadedSymbol>(sym))
     {
-        typedef std::pair<float, FunctionSymbolPtr> ScoredFunction;
-        std::vector<ScoredFunction> candidates;
-        for(FunctionSymbolPtr func : *funcs)
-        {
-            float score = calculateFitScore(func->getType(), node->getArguments(), true);
-            if(score > 0)
-                candidates.push_back(std::make_pair(score, func));
-        }
-        if(candidates.empty())
-        {
-            error(node, Errors::E_NO_MATCHED_OVERLOAD);
-            abort();
-        }
-        //sort by fit score
-        if(candidates.size() > 1)
-        {
-            sort(candidates.begin(), candidates.end(), [](const ScoredFunction& lhs, const ScoredFunction& rhs ){
-                return rhs.first < lhs.first;
-            });
-            if(candidates[0].first == candidates[1].first)
-            {
-                error(node, Errors::E_AMBIGUOUS_USE, sym->getName());
-                abort();
-            }
-        }
-        FunctionSymbolPtr matched = candidates.front().second;
+        FunctionSymbolPtr matched = getOverloadedFunction(node, funcs, node->getArguments());
         node->setType(matched->getReturnType());
     }
     else
@@ -363,11 +377,11 @@ void TypeInferenceAction::visitReturn(const ReturnStatementPtr& node)
 
     }
     float score = 0;
-    TypePtr retType = this->getExpressionType(node->getExpression(), funcType->getType(), score);
+    TypePtr retType = this->getExpressionType(node->getExpression(), funcType->getReturnType(), score);
     TypePtr expectedType = funcType->getReturnType();
-    if(*retType != *expectedType)
+    if(!Type::equals(retType, expectedType))
     {
-        error(node->getExpression(), Errors::E_CANNOT_CONVERT_EXPRESSION_TYPE);
+        error(node->getExpression(), Errors::E_CANNOT_CONVERT_EXPRESSION_TYPE_2, retType->toString(), expectedType->toString());
     }
 }
 void TypeInferenceAction::visitFunctionCall(const FunctionCallPtr& node)
@@ -385,7 +399,7 @@ void TypeInferenceAction::visitFunctionCall(const FunctionCallPtr& node)
             SymbolPtr sym = symbolRegistry->lookupSymbol(symbolName);
             if (!sym)
             {
-                error(id, Errors::E_USE_OF_UNRESOLVED_IDENTIFIER, symbolName);
+                error(id, Errors::E_USE_OF_UNRESOLVED_IDENTIFIER_1, symbolName);
                 return;
             }
             //if symbol points to a type, then redirect it to a initializer
@@ -424,7 +438,9 @@ void TypeInferenceAction::visitFunctionCall(const FunctionCallPtr& node)
             ArrayLiteralPtr array = std::static_pointer_cast<ArrayLiteral>(func);
             if(array->numElements() != 1 || (*array->begin())->getNodeType() != NodeType::Identifier)
             {
-                error(func, Errors::E_INVALID_CALL_OF_NON_FUNCTION_TYPE);
+                wstring call = toString(func);
+                wstring type = func->getType()->toString();
+                error(func, Errors::E_INVALID_CALL_OF_NON_FUNCTION_TYPE_2, call, type);
                 break;
             }
             IdentifierPtr typeName = std::static_pointer_cast<Identifier>(*array->begin());
@@ -432,7 +448,7 @@ void TypeInferenceAction::visitFunctionCall(const FunctionCallPtr& node)
             TypePtr type = std::dynamic_pointer_cast<Type>(sym);
             if(!type)
             {
-                error(func, Errors::E_INVALID_CALL_OF_NON_FUNCTION_TYPE);
+                error(func, Errors::E_INVALID_CALL_OF_NON_FUNCTION_TYPE_2, toString(func), func->getType()->toString());
                 break;
             }
             TypePtr Array = symbolRegistry->getGlobalScope()->t_Array;
@@ -446,7 +462,7 @@ void TypeInferenceAction::visitFunctionCall(const FunctionCallPtr& node)
         }
         default:
         {
-            error(func, Errors::E_INVALID_CALL_OF_NON_FUNCTION_TYPE);
+            error(func, Errors::E_INVALID_CALL_OF_NON_FUNCTION_TYPE_2, toString(func), func->getType()->toString());
             break;
         }
     }
@@ -462,7 +478,7 @@ void TypeInferenceAction::visitMemberAccess(const MemberAccessPtr& node)
     SymbolPtr member = selfType->getMember(node->getField()->getIdentifier());
     if(member == nullptr)
     {
-        error(node->getField(), Errors::E_DOES_NOT_HAVE_A_MEMBER, node->getField()->getIdentifier());
+        error(node->getField(), Errors::E_DOES_NOT_HAVE_A_MEMBER_2, selfType->toString(), node->getField()->getIdentifier());
         return;
     }
     node->setType(member->getType());
@@ -510,7 +526,7 @@ void TypeInferenceAction::visitArrayLiteral(const ArrayLiteralPtr& node)
             bool conformToArrayLiteralConvertible = false;
             if(!conformToArrayLiteralConvertible)
             {
-                error(node, Errors::E_TYPE_DOES_NOT_CONFORM_TO_ARRAY_PROTOCOL, t_hint->getName());
+                error(node, Errors::E_TYPE_DOES_NOT_CONFORM_TO_PROTOCOL_2_, t_hint->getName(), L"ArrayLiteralConvertible");
                 return;
             }
         }
@@ -535,7 +551,7 @@ void TypeInferenceAction::visitArrayLiteral(const ArrayLiteralPtr& node)
             //check if element can be converted into given type
             if(!canConvertTo(el, type))
             {
-                error(el, Errors::E_CANNOT_CONVERT_EXPRESSION_TYPE, type->getName());
+                error(el, Errors::E_CANNOT_CONVERT_EXPRESSION_TYPE_2, toString(el), type->getName());
             }
         }
         else
@@ -636,14 +652,14 @@ void TypeInferenceAction::visitBinaryOperator(const BinaryOperatorPtr& node)
     SymbolPtr sym = symbolRegistry->lookupSymbol(node->getOperator());
     if(!op || !sym)
     {
-        error(node, Errors::E_USE_OF_UNRESOLVED_IDENTIFIER, node->getOperator());
-        error(node, Errors::E_UNKNOWN_BINARY_OPERATOR, node->getOperator());
+        error(node, Errors::E_USE_OF_UNRESOLVED_IDENTIFIER_1, node->getOperator());
+        error(node, Errors::E_UNKNOWN_BINARY_OPERATOR_1, node->getOperator());
         abort();
     }
     if((op->type & OperatorType::InfixBinary) == 0)
     {
-        error(node, Errors::E_IS_NOT_BINARY_OPERATOR, node->getOperator());
-        error(node, Errors::E_UNKNOWN_BINARY_OPERATOR, node->getOperator());
+        error(node, Errors::E_IS_NOT_BINARY_OPERATOR_1, node->getOperator());
+        error(node, Errors::E_UNKNOWN_BINARY_OPERATOR_1, node->getOperator());
         abort();
     }
     //find for overload
@@ -662,7 +678,7 @@ void TypeInferenceAction::visitBinaryOperator(const BinaryOperatorPtr& node)
     }
     if(!func)
     {
-        error(node, Errors::E_NO_OVERLOAD_ACCEPTS_ARGUMENTS, node->getOperator());
+        error(node, Errors::E_NO_OVERLOAD_ACCEPTS_ARGUMENTS_1, node->getOperator());
         abort();
     }
     node->setType(func->getReturnType());
@@ -677,7 +693,7 @@ void TypeInferenceAction::visitIdentifier(const IdentifierPtr& node)
     SymbolPtr s = symbolRegistry->lookupSymbol(node->getIdentifier());
     if(!s)
     {
-        error(node, Errors::E_USE_OF_UNRESOLVED_IDENTIFIER, node->getIdentifier());
+        error(node, Errors::E_USE_OF_UNRESOLVED_IDENTIFIER_1, node->getIdentifier());
         abort();
     }
     TypePtr type = std::dynamic_pointer_cast<Type>(s);
@@ -748,7 +764,7 @@ void TypeInferenceAction::visitValueBinding(const ValueBindingPtr& node)
             assert(actualType != nullptr);
             if(declaredType && !canConvertTo(node->initializer, declaredType))
             {
-                error(node, Errors::E_CANNOT_CONVERT_EXPRESSION_TYPE);
+                error(node, Errors::E_CANNOT_CONVERT_EXPRESSION_TYPE_2, toString(node->initializer), declaredType->toString());
                 return;
             }
 
@@ -766,6 +782,53 @@ void TypeInferenceAction::visitValueBinding(const ValueBindingPtr& node)
         }
     }
 }
+void TypeInferenceAction::visitComputedProperty(const ComputedPropertyPtr &node)
+{
+    TypePtr type = lookupType(node->getDeclaredType());
+    assert(type != nullptr);
+    std::vector<Type::Parameter> params;
+    if(node->getGetter())
+    {
+        TypePtr funcType = Type::newFunction(params, type, false, nullptr);
+        node->getGetter()->setType(funcType);
+    }
+    if(node->getSetter())
+    {
+        params.push_back(Type::Parameter(L"", false, type));
+        TypePtr funcType = Type::newFunction(params, nullptr, false, nullptr);
+        node->getSetter()->setType(funcType);
+    }
+
+
+    SemanticNodeVisitor::visitComputedProperty(node);
+}
+void TypeInferenceAction::visitSubscript(const SubscriptDefPtr &node)
+{
+    TypePtr type = lookupType(node->getReturnType());
+    assert(type != nullptr);
+    std::vector<Type::Parameter> params;
+    for(const ParameterPtr& param : *node->getParameters())
+    {
+        wstring name = param->isShorthandExternalName() ? param->getLocalName() : param->getExternalName();
+        TypePtr paramType = lookupType(param->getDeclaredType());
+        params.push_back(Type::Parameter(name, param->isInout(), paramType));
+    }
+
+    if(node->getGetter())
+    {
+        TypePtr funcType = Type::newFunction(params, type, false, nullptr);
+        node->getGetter()->setType(funcType);
+    }
+    if(node->getSetter())
+    {
+        params.push_back(Type::Parameter(L"", false, type));
+        TypePtr funcType = Type::newFunction(params, nullptr, false, nullptr);
+        node->getSetter()->setType(funcType);
+    }
+
+    SemanticNodeVisitor::visitSubscript(node);
+}
+
 TypePtr TypeInferenceAction::evaluateType(const ExpressionPtr& expr)
 {
     switch(expr->getNodeType())
@@ -780,7 +843,23 @@ TypePtr TypeInferenceAction::evaluateType(const ExpressionPtr& expr)
             return nullptr;
     }
 }
-
+void TypeInferenceAction::visitSubscriptAccess(const SubscriptAccessPtr& node)
+{
+    node->getSelf()->accept(this);
+    TypePtr selfType = node->getSelf()->getType();
+    assert(selfType != nullptr);
+    FunctionOverloadedSymbolPtr funcs = selfType->getSubscript();
+    if(funcs == nullptr)
+    {
+        //undefined subscript access
+        wstring s = this->toString(node);
+        error(node, Errors::E_UNDEFINED_SUBSCRIPT_ACCESS_FOR_1, s);
+        abort();
+    }
+    //Now inference the type returned by this subscript access
+    FunctionSymbolPtr func = getOverloadedFunction(node, funcs, node->getIndex());
+    node->setType(func->getReturnType());
+}
 void TypeInferenceAction::visitClosure(const ClosurePtr& node)
 {
     //create a function type for this

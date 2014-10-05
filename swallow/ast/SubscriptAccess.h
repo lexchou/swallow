@@ -11,27 +11,17 @@ public:
     SubscriptAccess();
     ~SubscriptAccess();
 public:
-    void setSelf(ExpressionPtr self);
-    ExpressionPtr getSelf();
+    void setSelf(const ExpressionPtr& self);
+    const ExpressionPtr& getSelf();
     
-    void setIndex(ExpressionPtr index);
-    ExpressionPtr getIndex();
-
-    void setIndex(int idx, const ExpressionPtr& index);
-    ExpressionPtr getIndex(int idx);
-    
-    void addIndex(ExpressionPtr index);
-    int numIndices();
-
-    std::vector<ExpressionPtr>::iterator begin(){return indices.begin();}
-    std::vector<ExpressionPtr>::iterator end(){return indices.end();}
+    void setIndex(const ParenthesizedExpressionPtr& index);
+    const ParenthesizedExpressionPtr& getIndex();
 
 public:
     virtual void accept(NodeVisitor* visitor);
 public:
     ExpressionPtr self;
-    std::vector<ExpressionPtr> indices;
-    
+    ParenthesizedExpressionPtr indices;
 };
 
 SWIFT_NS_END

@@ -13,43 +13,24 @@ SubscriptAccess::~SubscriptAccess()
 {
 }
 
-void SubscriptAccess::setSelf(ExpressionPtr self)
+void SubscriptAccess::setSelf(const ExpressionPtr& self)
 {
     this->self = self;
 }
-ExpressionPtr SubscriptAccess::getSelf()
+const ExpressionPtr& SubscriptAccess::getSelf()
 {
     return self;
 }
 
-void SubscriptAccess::setIndex(ExpressionPtr index)
+void SubscriptAccess::setIndex(const ParenthesizedExpressionPtr& index)
 {
-    indices.clear();
-    addIndex(index);
+    this->indices = index;
 }
-ExpressionPtr SubscriptAccess::getIndex()
+const ParenthesizedExpressionPtr& SubscriptAccess::getIndex()
 {
-    if(indices.empty())
-        return NULL;
-    return indices.front();
-}
-void SubscriptAccess::setIndex(int idx, const ExpressionPtr& index)
-{
-    indices[idx] = index;
-}
-ExpressionPtr SubscriptAccess::getIndex(int idx)
-{
-    return indices[idx];
+    return indices;
 }
 
-void SubscriptAccess::addIndex(ExpressionPtr index)
-{
-    indices.push_back(index);
-}
-int SubscriptAccess::numIndices()
-{
-    return indices.size();
-}
 
 void SubscriptAccess::accept(NodeVisitor* visitor)
 {

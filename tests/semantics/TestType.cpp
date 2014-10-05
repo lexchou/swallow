@@ -53,8 +53,8 @@ TEST(TtestType, testTypealias_UndeclaredType)
     ASSERT_EQ(1, compilerResults.numResults());
     auto result = compilerResults.getResult(0);
 
-    ASSERT_EQ(Errors::E_USE_OF_UNDECLARED_TYPE, result.code);
-    ASSERT_EQ(L"Intff", result.item);
+    ASSERT_EQ(Errors::E_USE_OF_UNDECLARED_TYPE_1, result.code);
+    ASSERT_EQ(L"Intff", result.items[0]);
 }
 
 TEST(TtestType, testTypealias_Redefinition)
@@ -65,6 +65,6 @@ TEST(TtestType, testTypealias_Redefinition)
     ASSERT_EQ(1, compilerResults.numResults());
     auto result = compilerResults.getResult(0);
 
-    ASSERT_EQ(Errors::E_INVALID_REDECLARATION, result.code);
-    ASSERT_EQ(L"IntegerLiteralType", result.item);
+    ASSERT_EQ(Errors::E_INVALID_REDECLARATION_1, result.code);
+    ASSERT_EQ(L"IntegerLiteralType", result.items[0]);
 }

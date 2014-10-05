@@ -96,7 +96,7 @@ ExpressionPtr Parser::parsePostfixExpression()
             {
                 expect_next(token);//skip .
                 expect_next(token);//read identifier
-                tassert(token, token.type == TokenType::Identifier, Errors::E_EXPECT_INIT_SELF_DYNAMICTYPE_IDENTIFIER, token.token);
+                tassert(token, token.type == TokenType::Identifier, Errors::E_EXPECT_INIT_SELF_DYNAMICTYPE_IDENTIFIER_1, token.token);
                 
                 // postfix-expression → initializer-expression
                 if(token == L"init")
@@ -122,7 +122,7 @@ ExpressionPtr Parser::parsePostfixExpression()
                     ret = r;
                     continue;
                 }
-                tassert(token, token.identifier.keyword == Keyword::_, Errors::E_EXPECT_IDENTIFIER, token.token);
+                tassert(token, token.identifier.keyword == Keyword::_, Errors::E_EXPECT_IDENTIFIER_1, token.token);
                 // postfix-expression → explicit-member-expression
                 IdentifierPtr field = nodeFactory->createIdentifier(token.state);
                 field->setIdentifier(token.token);
@@ -181,18 +181,15 @@ ExpressionPtr Parser::parsePostfixExpression()
         {
             // subscript-expression → postfix-expression[expression-list]
             match(L"[", token);
-            ExpressionPtr expr = parseExpression();
             SubscriptAccessPtr subscript = nodeFactory->createSubscriptAccess(token.state);
             subscript->setSelf(ret);
-            subscript->addIndex(expr);
-            while(match(L","))
+            ParenthesizedExpressionPtr index = nodeFactory->createParenthesizedExpression(token.state);
+            do
             {
-                if(predicate(L"]"))
-                    break;
-                expr = parseExpression();
-                subscript->addIndex(expr);
-            }
-            match(L"]");
+                parseExpressionItem(index);
+            } while(match(L","));
+            subscript->setIndex(index);
+            expect(L"]");
             ret = subscript;
             continue;
         }
@@ -405,7 +402,8 @@ void Parser::parseExpressionItem(const ParenthesizedExpressionPtr& parent)
     //rollback and parse exception
     restore(token);
     ExpressionPtr expr = parseExpression();
-    parent->append(expr);
+    if(expr)
+        parent->append(expr);
 }
 
 /*
@@ -426,7 +424,7 @@ ExpressionPtr Parser::parseSelfExpression()
     if(token == L".")
     {
         expect_next(token);
-        tassert(token, token.type == TokenType::Identifier, Errors::E_EXPECT_IDENTIFIER, token.token);
+        tassert(token, token.type == TokenType::Identifier, Errors::E_EXPECT_IDENTIFIER_1, token.token);
         if(token.identifier.keyword != Keyword::_ && token.identifier.keyword != Keyword::Init)
             unexpected(token);
         IdentifierPtr field = nodeFactory->createIdentifier(token.state);
@@ -441,7 +439,13 @@ ExpressionPtr Parser::parseSelfExpression()
         ExpressionPtr expr = this->parseExpression();
         SubscriptAccessPtr sub = nodeFactory->createSubscriptAccess(token.state);
         sub->setSelf(self);
-        sub->addIndex(expr);
+        ParenthesizedExpressionPtr index = nodeFactory->createParenthesizedExpression(token.state);
+        do
+        {
+            parseExpressionItem(index);
+        } while(match(L","));
+        expect(L"]");
+        sub->setIndex(index);
         return sub;
     }
     else
@@ -482,8 +486,14 @@ ExpressionPtr Parser::parseSuperExpression()
         ExpressionPtr expr = this->parseExpression();
         expect(L"]", token);
         SubscriptAccessPtr sub = nodeFactory->createSubscriptAccess(token.state);
+        ParenthesizedExpressionPtr index = nodeFactory->createParenthesizedExpression(token.state);
         sub->setSelf(super);
-        sub->addIndex(expr);
+        do
+        {
+            parseExpressionItem(index);
+        } while(match(L","));
+        expect(L"]");
+        sub->setIndex(index);
         return sub;
     }
     unexpected(token);
@@ -547,7 +557,7 @@ ExpressionPtr Parser::parseLiteralExpression()
         //check if there's a colon after an expression
         
         ExpressionPtr tmp = parseExpression();
-        tassert(token, tmp != NULL, Errors::E_EXPECT_EXPRESSION, token.token);
+        tassert(token, tmp != NULL, Errors::E_EXPECT_EXPRESSION_1, token.token);
         peek(token);
         if(token.type == TokenType::Comma || token.type == TokenType::CloseBracket)//array
         {
@@ -569,7 +579,7 @@ ExpressionPtr Parser::parseLiteralExpression()
             DictionaryLiteralPtr dict = nodeFactory->createDictionaryLiteral(token.state);
             ExpressionPtr key = tmp;
             ExpressionPtr value = parseExpression();
-            tassert(token, value != NULL, Errors::E_EXPECT_EXPRESSION, token.token);
+            tassert(token, value != NULL, Errors::E_EXPECT_EXPRESSION_1, token.token);
             dict->insert(key, value);
             while(match(L","))
             {

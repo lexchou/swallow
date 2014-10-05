@@ -23,8 +23,11 @@ protected:
      * Outputs an compiler error
      */
     void error(const NodePtr& node, int code);
+    void error(const NodePtr& node, int code, const std::vector<std::wstring>& items);
     void error(const NodePtr& node, int code, const std::wstring& item);
     void error(const NodePtr& node, int code, const std::wstring& item1, const std::wstring& item2);
+    void error(const NodePtr& node, int code, const std::wstring& item1, const std::wstring& item2, const std::wstring& item3);
+    void error(const NodePtr& node, int code, const std::wstring& item1, const std::wstring& item2, const std::wstring& item3, const std::wstring& item4);
 
 
     /**
@@ -38,6 +41,7 @@ protected:
      */
     TypePtr lookupType(const TypeNodePtr& type);
     std::wstring toString(const NodePtr& node);
+    std::wstring toString(int i);
 private:
     TypePtr lookupTypeImpl(const TypeNodePtr& type);
 protected:

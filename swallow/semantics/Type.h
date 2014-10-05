@@ -172,6 +172,11 @@ public://properties
     FunctionOverloadedSymbolPtr getInitializer();
 
     /**
+     * Returns the subscript getters defined by this type
+     */
+    FunctionOverloadedSymbolPtr getSubscript();
+
+    /**
      * Check if this is a generic type
      */
     bool isGenericType()const;
@@ -208,6 +213,10 @@ public://properties
      */
     bool containsGenericParameters() const;
 
+    /**
+     * convert this type to string representation
+     */
+    std::wstring toString() const;
 public://member access
     void addMember(const std::wstring& name, const SymbolPtr& member);
     void addMember(const SymbolPtr& symbol);

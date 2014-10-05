@@ -79,8 +79,8 @@ TEST(TestFunctionOverloads, testVariadicParametersOverload)
 
     ASSERT_EQ(1, compilerResults.numResults());
     const CompilerResult& r = compilerResults.getResult(0);
-    ASSERT_EQ((int)Errors::E_AMBIGUOUS_USE, r.code);
-    ASSERT_EQ(L"test", r.item);
+    ASSERT_EQ((int)Errors::E_AMBIGUOUS_USE_1, r.code);
+    ASSERT_EQ(L"test", r.items[0]);
 }
 TEST(TestFunctionOverloads, testVariadicParametersOverload2)
 {
@@ -173,8 +173,8 @@ TEST(TestFunctionOverloads, testCovarianceOverload3)
     ASSERT_EQ(1, compilerResults.numResults());
 
     const CompilerResult& r = compilerResults.getResult(0);
-    ASSERT_EQ((int)Errors::E_AMBIGUOUS_USE, r.code);
-    ASSERT_EQ(L"bar", r.item);
+    ASSERT_EQ((int)Errors::E_AMBIGUOUS_USE_1, r.code);
+    ASSERT_EQ(L"bar", r.items[0]);
 }
 
 TEST(TestFunctionOverloads, testCovarianceOverload4)
@@ -188,8 +188,8 @@ TEST(TestFunctionOverloads, testCovarianceOverload4)
     ASSERT_EQ(1, compilerResults.numResults());
 
     const CompilerResult& r = compilerResults.getResult(0);
-    ASSERT_EQ((int)Errors::E_AMBIGUOUS_USE, r.code);
-    ASSERT_EQ(L"bar", r.item);
+    ASSERT_EQ((int)Errors::E_AMBIGUOUS_USE_1, r.code);
+    ASSERT_EQ(L"bar", r.items[0]);
 }
 TEST(TestFunctionOverloads, testMixedVariableOverload)
 {

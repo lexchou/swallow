@@ -33,7 +33,9 @@ public:
     virtual void visitParenthesizedExpression(const ParenthesizedExpressionPtr& node) override;
     virtual void visitArrayLiteral(const ArrayLiteralPtr& node) override;
     virtual void visitDictionaryLiteral(const DictionaryLiteralPtr& node) override;
-
+    virtual void visitComputedProperty(const ComputedPropertyPtr& node) override;
+    virtual void visitSubscript(const SubscriptDefPtr& node) override;
+    virtual void visitSubscriptAccess(const SubscriptAccessPtr& node) override;
 private:
     void visitFunctionCall(const IdentifierPtr& name, const FunctionCallPtr& node);
     void visitFunctionCall(const SymbolPtr& func, const FunctionCallPtr& node);
@@ -49,6 +51,11 @@ private:
     bool checkArgument(const TypePtr& funcType, const Type::Parameter& parameter, const ParenthesizedExpression::Term& argument, bool variadic, float& score, bool supressErrors);
     TypePtr getExpressionType(const ExpressionPtr& expr, const TypePtr& hint, float& score);
 
+    /**
+     * Return a function that matches the given argument
+     * This will always returns a matched function, if no functions matched it will throw exception and abort the process
+     */
+    FunctionSymbolPtr getOverloadedFunction(const NodePtr& node, const FunctionOverloadedSymbolPtr& funcs, const ParenthesizedExpressionPtr& arguments);
     /**
      * Check if the given expression can be converted to given type
      */

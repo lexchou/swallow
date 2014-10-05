@@ -81,7 +81,7 @@ TEST(TestProtocol, MethodRequirements_NotImpl)
             "}");
     ASSERT_EQ(1, compilerResults.numResults());
     auto res = compilerResults.getResult(0);
-    ASSERT_EQ(Errors::E_TYPE_DOES_NOT_CONFORM_TO_PROTOCOL_UNIMPLEMENTED_FUNCTION, res.code);
+    ASSERT_EQ(Errors::E_TYPE_DOES_NOT_CONFORM_TO_PROTOCOL_UNIMPLEMENTED_FUNCTION_3, res.code);
 }
 
 TEST(TestProtocol, TypeRequirements)
@@ -106,7 +106,7 @@ TEST(TestProtocol, TypeRequirements_Impl)
             "}\n");
     ASSERT_EQ(1, compilerResults.numResults());
     auto res = compilerResults.getResult(0);
-    ASSERT_EQ(Errors::E_TYPE_DOES_NOT_CONFORM_TO_PROTOCOL_UNIMPLEMENTED_TYPE, res.code);
+    ASSERT_EQ(Errors::E_TYPE_DOES_NOT_CONFORM_TO_PROTOCOL_UNIMPLEMENTED_TYPE_3, res.code);
 }
 
 TEST(TestProtocol, TypeInheritance)
@@ -125,7 +125,7 @@ TEST(TestProtocol, Let)
             "}");
     ASSERT_EQ(1, compilerResults.numResults());
     auto res = compilerResults.getResult(0);
-    ASSERT_EQ(Errors::E_PROTOCOL_CANNOT_DEFINE_LET_CONSTANT, res.code);
+    ASSERT_EQ(Errors::E_PROTOCOL_CANNOT_DEFINE_LET_CONSTANT_1, res.code);
 }
 
 TEST(TestProtocol, Var)
@@ -135,7 +135,7 @@ TEST(TestProtocol, Var)
             "}");
     ASSERT_EQ(1, compilerResults.numResults());
     auto res = compilerResults.getResult(0);
-    ASSERT_EQ(Errors::E_PROTOCOL_VAR_MUST_BE_COMPUTED_PROPERTY, res.code);
+    ASSERT_EQ(Errors::E_PROTOCOL_VAR_MUST_BE_COMPUTED_PROPERTY_1, res.code);
 }
 
 TEST(TestProtocol, ReadOnlyComputedProperty)
@@ -166,7 +166,7 @@ TEST(TestProtocol, PropertyRequirement)
             "}");
     ASSERT_EQ(1, compilerResults.numResults());
     auto res = compilerResults.getResult(0);
-    ASSERT_EQ(Errors::E_TYPE_DOES_NOT_CONFORM_TO_PROTOCOL_UNWRITABLE_PROPERTY, res.code);
+    ASSERT_EQ(Errors::E_TYPE_DOES_NOT_CONFORM_TO_PROTOCOL_UNWRITABLE_PROPERTY_3, res.code);
 
 
 }
@@ -181,7 +181,7 @@ TEST(TestProtocol, PropertyRequirement2)
             "}");
     ASSERT_EQ(1, compilerResults.numResults());
     auto res = compilerResults.getResult(0);
-    ASSERT_EQ(Errors::E_TYPE_DOES_NOT_CONFORM_TO_PROTOCOL_UNIMPLEMENTED_PROPERTY, res.code);
+    ASSERT_EQ(Errors::E_TYPE_DOES_NOT_CONFORM_TO_PROTOCOL_UNIMPLEMENTED_PROPERTY_3, res.code);
 
 
 }
@@ -220,7 +220,7 @@ TEST(TestProtocol, PropertyRequirement5)
             "}");
     ASSERT_EQ(1, compilerResults.numResults());
     auto res = compilerResults.getResult(0);
-    ASSERT_EQ(Errors::E_TYPE_DOES_NOT_CONFORM_TO_PROTOCOL_UNWRITABLE_PROPERTY, res.code);
+    ASSERT_EQ(Errors::E_TYPE_DOES_NOT_CONFORM_TO_PROTOCOL_UNWRITABLE_PROPERTY_3, res.code);
 
 
 }

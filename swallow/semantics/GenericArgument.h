@@ -4,6 +4,7 @@
 #include "swift_conf.h"
 #include <map>
 #include <vector>
+#include <string>
 SWIFT_NS_BEGIN
 
 typedef std::shared_ptr<class Type> TypePtr;
@@ -23,11 +24,11 @@ public:
 
     TypePtr get(size_t index) const;
     TypePtr get(const std::wstring& name) const;
+
+    GenericDefinitionPtr getDefinition() const;
 private:
     GenericDefinitionPtr definition;
     std::vector<TypePtr> types;
-    std::vector<std::wstring, TypePtr> typeByName;
-
 };
 
 

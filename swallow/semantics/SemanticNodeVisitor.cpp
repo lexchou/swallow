@@ -16,6 +16,7 @@
 #include "ast/OptionalType.h"
 #include "GenericDefinition.h"
 #include "GenericArgument.h"
+#include <sstream>
 
 USE_SWIFT_NS
 
@@ -27,19 +28,35 @@ void SemanticNodeVisitor::abort()
 {
     throw Abort();
 }
-
+void SemanticNodeVisitor::error(const NodePtr& node, int code, const std::vector<std::wstring>& items)
+{
+    compilerResults->add(ErrorLevel::Error, *node->getSourceInfo(), code, items);
+    abort();
+}
 /**
  * Outputs an compiler error
  */
 void SemanticNodeVisitor::error(const NodePtr& node, int code, const std::wstring& item)
 {
-    compilerResults->add(ErrorLevel::Error, *node->getSourceInfo(), code, item);
-    abort();
+    ResultItems items = {item};
+    error(node, code, items);
 }
 void SemanticNodeVisitor::error(const NodePtr& node, int code, const std::wstring& item1, const std::wstring& item2)
 {
-    error(node, code, item1);
+    ResultItems items = {item1, item2};
+    error(node, code, items);
 }
+void SemanticNodeVisitor::error(const NodePtr& node, int code, const std::wstring& item1, const std::wstring& item2, const std::wstring& item3)
+{
+    ResultItems items = {item1, item2, item3};
+    error(node, code, items);
+}
+void SemanticNodeVisitor::error(const NodePtr& node, int code, const std::wstring& item1, const std::wstring& item2, const std::wstring& item3, const std::wstring& item4)
+{
+    ResultItems items = {item1, item2, item3, item4};
+    error(node, code, items);
+}
+
 void SemanticNodeVisitor::error(const NodePtr& node, int code)
 {
     error(node, code, L"");
@@ -55,6 +72,12 @@ std::wstring SemanticNodeVisitor::toString(const NodePtr& node)
     NodeSerializerW serializer(out);
     node->accept(&serializer);
     return out.str();
+}
+std::wstring SemanticNodeVisitor::toString(int i)
+{
+    std::wstringstream s;
+    s<<i;
+    return s.str();
 }
 TypePtr SemanticNodeVisitor::lookupType(const TypeNodePtr& type)
 {
@@ -77,7 +100,7 @@ TypePtr SemanticNodeVisitor::lookupTypeImpl(const TypeNodePtr &type)
         if(!ret)
         {
             std::wstring str = toString(type);
-            error(type, Errors::E_USE_OF_UNDECLARED_TYPE, str);
+            error(type, Errors::E_USE_OF_UNDECLARED_TYPE_1, str);
             abort();
         }
         GenericDefinitionPtr generic = ret->getGenericDefinition();
@@ -86,7 +109,7 @@ TypePtr SemanticNodeVisitor::lookupTypeImpl(const TypeNodePtr &type)
         if(generic == nullptr && id->numGenericArguments() > 0)
         {
             std::wstring str = toString(type);
-            error(id, Errors::E_CANNOT_SPECIALIZE_NON_GENERIC_TYPE, str);
+            error(id, Errors::E_CANNOT_SPECIALIZE_NON_GENERIC_TYPE_1, str);
             return nullptr;
         }
         if(generic != nullptr && id->numGenericArguments() == 0)
@@ -98,17 +121,21 @@ TypePtr SemanticNodeVisitor::lookupTypeImpl(const TypeNodePtr &type)
         if(id->numGenericArguments() > generic->numParameters())
         {
             std::wstring str = toString(type);
-            error(id, Errors::E_GENERIC_TYPE_SPECIALIZED_WITH_TOO_MANY_TYPE_PARAMETERS, str);
+            std::wstring got = toString(id->numGenericArguments());
+            std::wstring expected = toString(generic->numParameters());
+            error(id, Errors::E_GENERIC_TYPE_SPECIALIZED_WITH_TOO_MANY_TYPE_PARAMETERS_3, str, got, expected);
             return nullptr;
         }
         if(id->numGenericArguments() < generic->numParameters())
         {
             std::wstring str = toString(type);
-            error(id, Errors::E_GENERIC_TYPE_SPECIALIZED_WITH_INSUFFICIENT_TYPE_PARAMETERS, str);
+            std::wstring got = toString(id->numGenericArguments());
+            std::wstring expected = toString(generic->numParameters());
+            error(id, Errors::E_GENERIC_TYPE_SPECIALIZED_WITH_INSUFFICIENT_TYPE_PARAMETERS_3, str, got, expected);
             return nullptr;
         }
         //check type
-        GenericArgumentPtr genericArgument(new GenericArgument());
+        GenericArgumentPtr genericArgument(new GenericArgument(generic));
         for(auto arg : *id)
         {
             TypePtr argType = lookupType(arg);

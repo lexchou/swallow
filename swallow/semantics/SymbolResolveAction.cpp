@@ -42,7 +42,7 @@ void SymbolResolveAction::verifyTuplePattern(const PatternPtr& pattern)
         SymbolPtr sym = symbolRegistry->lookupSymbol(id->getIdentifier());
         if(!sym)
         {
-            error(id, Errors::E_USE_OF_UNRESOLVED_IDENTIFIER, id->getIdentifier());
+            error(id, Errors::E_USE_OF_UNRESOLVED_IDENTIFIER_1, id->getIdentifier());
         }
     }
     else if(pattern->getNodeType() == NodeType::Tuple)
@@ -200,7 +200,7 @@ void SymbolResolveAction::visitIdentifier(const IdentifierPtr& id)
     symbolRegistry->lookupSymbol(id->getIdentifier(), &scope, &sym);
     if(!sym)
     {
-        compilerResults->add(ErrorLevel::Error, *id->getSourceInfo(), Errors::E_USE_OF_UNRESOLVED_IDENTIFIER, id->getIdentifier());
+        compilerResults->add(ErrorLevel::Error, *id->getSourceInfo(), Errors::E_USE_OF_UNRESOLVED_IDENTIFIER_1, id->getIdentifier());
         return;
     }
     if(SymbolPlaceHolderPtr placeholder = std::dynamic_pointer_cast<SymbolPlaceHolder>(sym))
@@ -211,7 +211,7 @@ void SymbolResolveAction::visitIdentifier(const IdentifierPtr& id)
         }
         else if((placeholder->flags & SymbolPlaceHolder::F_INITIALIZED) == 0)
         {
-            error(id, Errors::E_USE_OF_UNINITIALIZED_VARIABLE, placeholder->getName());
+            error(id, Errors::E_USE_OF_UNINITIALIZED_VARIABLE_1, placeholder->getName());
         }
         //check if this identifier is accessed inside a class/protocol/extension/struct/enum but defined not in program
         if(dynamic_cast<TypeDeclaration*>(symbolRegistry->getCurrentScope()->getOwner()))
@@ -269,7 +269,7 @@ TypePtr SymbolResolveAction::defineType(const std::shared_ptr<TypeDeclaration>& 
     if(type && scope == currentScope)
     {
         //invalid redeclaration of type T
-        error(node, Errors::E_INVALID_REDECLARATION, id->getName());
+        error(node, Errors::E_INVALID_REDECLARATION_1, id->getName());
         return nullptr;
     }
     //prepare for generic types
@@ -302,7 +302,7 @@ TypePtr SymbolResolveAction::defineType(const std::shared_ptr<TypeDeclaration>& 
                 std::wstringstream out;
                 NodeSerializerW serializer(out);
                 parentType->accept(&serializer);
-                error(parentType, Errors::E_SUPERCLASS_MUST_APPEAR_FIRST_IN_INHERITANCE_CLAUSE, out.str());
+                error(parentType, Errors::E_SUPERCLASS_MUST_APPEAR_FIRST_IN_INHERITANCE_CLAUSE_1, out.str());
                 return nullptr;
             }
             first = false;
@@ -318,9 +318,9 @@ TypePtr SymbolResolveAction::defineType(const std::shared_ptr<TypeDeclaration>& 
             NodeSerializerW serializer(out);
             parentType->accept(&serializer);
             if(category == Type::Class)
-                error(parentType, Errors::E_INHERITANCE_FROM_NONE_PROTOCOL_NON_CLASS_TYPE, out.str());
+                error(parentType, Errors::E_INHERITANCE_FROM_NONE_PROTOCOL_NON_CLASS_TYPE_1, out.str());
             else
-                error(parentType, Errors::E_INHERITANCE_FROM_NONE_PROTOCOL_TYPE, out.str());
+                error(parentType, Errors::E_INHERITANCE_FROM_NONE_PROTOCOL_TYPE_1, out.str());
             return nullptr;
         }
     }
@@ -347,7 +347,7 @@ void SymbolResolveAction::visitTypeAlias(const TypeAliasPtr& node)
     if(type && scope == currentScope)
     {
         //invalid redeclaration of type T
-        error(node, Errors::E_INVALID_REDECLARATION, node->getName());
+        error(node, Errors::E_INVALID_REDECLARATION_1, node->getName());
         return;
     }
     if(currentType && currentType->getCategory() == Type::Protocol && !node->getType())
@@ -456,7 +456,7 @@ void SymbolResolveAction::visitParameter(const ParameterPtr& node)
     }
     if(node->getLocalName() == node->getExternalName())
     {
-        warning(node, Errors::W_PARAM_CAN_BE_EXPRESSED_MORE_SUCCINCTLY);
+        warning(node, Errors::W_PARAM_CAN_BE_EXPRESSED_MORE_SUCCINCTLY_1, node->getExternalName());
     }
     //TODO: In-out parameters cannot have default values, and variadic parameters cannot be marked as inout. If you mark a parameter as inout, it cannot also be marked as var or let.
 
@@ -494,7 +494,7 @@ void SymbolResolveAction::visitParameters(const ParametersPtr& node)
         {
             if(externalNames.find(param->getLocalName()) != externalNames.end())
             {
-                warning(param, Errors::W_EXTRANEOUS_SHARTP_IN_PARAMETER, param->getLocalName());
+                warning(param, Errors::W_EXTRANEOUS_SHARTP_IN_PARAMETER_1, param->getLocalName());
             }
         }
     }
@@ -537,7 +537,7 @@ FunctionSymbolPtr SymbolResolveAction::createFunctionSymbol(const FunctionDefPtr
 
     TypePtr retType = lookupType(func->getReturnType());
     TypePtr funcType = createFunctionType(func->getParametersList().begin(), func->getParametersList().end(), retType, generic);
-    FunctionSymbolPtr ret(new FunctionSymbol(func->getName(), funcType, func));
+    FunctionSymbolPtr ret(new FunctionSymbol(func->getName(), funcType, func->getBody()));
     return ret;
 }
 GenericDefinitionPtr SymbolResolveAction::prepareGenericTypes(const GenericParametersDefPtr& params)
@@ -572,7 +572,7 @@ GenericDefinitionPtr SymbolResolveAction::prepareGenericTypes(const GenericParam
 
         if(type == nullptr)
         {
-            error(typeId, Errors::E_USE_OF_UNDECLARED_TYPE, typeId->getName());
+            error(typeId, Errors::E_USE_OF_UNDECLARED_TYPE_1, typeId->getName());
             continue;
         }
         if(constraint->getConstraintType() == GenericConstraintDef::EqualsTo)
@@ -619,7 +619,7 @@ GenericDefinitionPtr SymbolResolveAction::prepareGenericTypes(const GenericParam
             //it's a base type
             if(type->getParentType() != nullptr)
             {
-                error(constraint->getIdentifier(), Errors::E_MULTIPLE_INHERITANCE_FROM_CLASS_2, type->getParentType()->getName(), expectedType->getName());
+                error(constraint->getIdentifier(), Errors::E_MULTIPLE_INHERITANCE_FROM_CLASS_2_, type->getParentType()->getName(), expectedType->getName());
                 continue;
             }
             type->setParentType(expectedType);
@@ -669,6 +669,7 @@ void SymbolResolveAction::visitAccessor(const CodeBlockPtr& accessor, const Para
 }
 void SymbolResolveAction::visitSubscript(const SubscriptDefPtr &node)
 {
+    assert(currentType != nullptr);
     //process getter
     ParametersPtr params = node->getParameters();
     visitAccessor(node->getGetter(), params, nullptr);
@@ -678,6 +679,34 @@ void SymbolResolveAction::visitSubscript(const SubscriptDefPtr &node)
     SymbolPlaceHolderPtr setter(new SymbolPlaceHolder(setterName, currentType, SymbolPlaceHolder::R_PARAMETER, SymbolPlaceHolder::F_READABLE | SymbolPlaceHolder::F_INITIALIZED));
     visitAccessor(node->getSetter(), params, setter);
     //process setter
+
+
+    // Register subscript as functions to type
+    std::vector<ParametersPtr> paramsList = {params};
+    TypePtr retType = lookupType(node->getReturnType());
+    if(!node->getGetter() && !node->getSetter())
+        return;
+    FunctionOverloadedSymbolPtr funcs = currentType->getSubscript();
+    if(!funcs)
+    {
+        funcs = FunctionOverloadedSymbolPtr(new FunctionOverloadedSymbol(L"subscript"));
+        currentType->addMember(funcs);
+    }
+
+    if(node->getGetter())
+    {
+        TypePtr funcType = this->createFunctionType(paramsList.begin(), paramsList.end(), retType, nullptr);
+        FunctionSymbolPtr func(new FunctionSymbol(L"subscript", funcType, node->getGetter()));
+        funcs->add(func);
+    }
+    if(node->getSetter())
+    {
+        //TODO: replace nullptr to void
+        TypePtr funcType = this->createFunctionType(paramsList.begin(), paramsList.end(), nullptr, nullptr);
+        funcType->parameters.push_back(Type::Parameter(L"", false, retType));
+        FunctionSymbolPtr func(new FunctionSymbol(L"subscript", funcType, node->getSetter()));
+        funcs->add(func);
+    }
 
 }
 void SymbolResolveAction::visitFunction(const FunctionDefPtr& node)
@@ -736,7 +765,7 @@ void SymbolResolveAction::visitFunction(const FunctionDefPtr& node)
             else
             {
                 //error, symbol with same name exists
-                error(node, Errors::E_INVALID_REDECLARATION, node->getName());
+                error(node, Errors::E_INVALID_REDECLARATION_1, node->getName());
                 abort();
             }
         }

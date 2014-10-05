@@ -2,6 +2,8 @@
 #include <cassert>
 #include "GenericDefinition.h"
 #include "GenericArgument.h"
+#include "FunctionOverloadedSymbol.h"
+#include <sstream>
 
 USE_SWIFT_NS
 
@@ -76,27 +78,6 @@ TypePtr Type::newFunction(const std::vector<Parameter>& parameters, const TypePt
     ret->genericDefinition = generic;
     return TypePtr(ret);
 }
-TypePtr Type::newSpecializedType(const TypePtr& innerType, const GenericArgumentPtr& arguments)
-{
-    Type* ret = new Type(Specialized);
-    ret->innerType = innerType;
-    ret->genericArguments = arguments;
-    //copy members from innerType and update types with given argument
-    //replace parents and protocols to apply with the generic arguments
-    return TypePtr(ret);
-}
-TypePtr Type::newSpecializedType(const TypePtr& innerType, const TypePtr& argument)
-{
-    GenericArgumentPtr arguments(new GenericArgument());
-    arguments->add(argument);
-
-    Type* ret = new Type(Specialized);
-    ret->innerType = innerType;
-    ret->genericArguments = arguments;
-    return TypePtr(ret);
-}
-
-
 /**
  * Gets the common parent class between current class and rhs with the minimum inheritance distance.
  */
@@ -257,6 +238,14 @@ FunctionOverloadedSymbolPtr Type::getInitializer()
     return initializer;
 }
 
+FunctionOverloadedSymbolPtr Type::getSubscript()
+{
+    SymbolPtr s = getMember(L"subscript");
+    FunctionOverloadedSymbolPtr ret = dynamic_pointer_cast<FunctionOverloadedSymbol>(s);
+    return ret;
+}
+
+
 bool Type::isKindOf(const TypePtr &protocolOrBase) const
 {
     assert(protocolOrBase != nullptr);
@@ -387,9 +376,9 @@ bool Type::containsSelfTypeImpl() const
             return true;
         if(genericDefinition)
         {
-            for(const TypePtr& param : genericDefinition->getParameters())
+            for(const GenericDefinition::Parameter& param : genericDefinition->getParameters())
             {
-                if(param->containsSelfType())
+                if(param.type->containsSelfType())
                     return true;
             }
         }
@@ -443,6 +432,14 @@ bool Type::containsAssociatedType() const
 */
 bool Type::containsGenericParameters() const
 {
+    //TODO: this can be optimized
+    if(category == GenericParameter)
+        return true;
+    for(const Parameter& param : parameters)
+    {
+        if(param.type->containsGenericParameters())
+            return true;
+    }
     if(genericArguments == nullptr)
         return false;
     for(const TypePtr& type : *this->genericArguments)
@@ -561,6 +558,8 @@ bool Type::operator ==(const Type& rhs)const
         }
         case GenericParameter:
             return true;
+        case Self:
+            return true;
     }
 
     return true;
@@ -569,4 +568,80 @@ bool Type::operator ==(const Type& rhs)const
 bool Type::operator !=(const Type& rhs)const
 {
     return !this->operator==(rhs);
+}
+
+
+/**
+* convert this type to string representation
+*/
+std::wstring Type::toString() const
+{
+    using namespace std;
+    switch(category)
+    {
+
+        case Aggregate:
+        case GenericParameter://Placeholder for generic type
+        case Class:
+        case Struct:
+        case Enum:
+        case Protocol:
+        case Extension:
+        case MetaType:
+            return name;
+        case Tuple:
+        {
+            wstringstream s;
+            s<<L"(";
+            bool first = true;
+            for(const TypePtr& t : elementTypes)
+            {
+                if(!first)
+                    s<<L", ";
+                first = false;
+                s<<t->toString();
+            }
+            s<<L")";
+            return s.str();
+        }
+
+        case Specialized:
+        {
+            wstringstream s;
+            s<<name<<L"<";
+            bool first = true;
+            for(const TypePtr& t : *genericArguments)
+            {
+                if(!first)
+                    s<<L", ";
+                first = false;
+                s<<t->toString();
+            }
+            s<<L">";
+            return s.str();
+        }
+        case Function:
+        case Closure:
+        {
+            wstringstream s;
+            s<<L"(";
+            bool first = true;
+            for(const Parameter& t : parameters)
+            {
+                if(!first)
+                    s<<L", ";
+                first = false;
+                if(t.inout)
+                    s<<L"inout ";
+                if(!t.name.empty())
+                    s<<t.name<<L" ";
+                s<<t.type->toString();
+            }
+            s<<L") -> ";
+            s<<returnType->toString();
+            return s.str();
+        }
+        case Self:// A fake place holder, protocol use this type to present the final type that conform to the protocol
+            return L"Self";
+    }
 }

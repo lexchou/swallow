@@ -39,11 +39,33 @@ void GlobalScope::initPrimitiveTypes()
         generic->add(L"T", T);
         t_Array = Type::newType(L"Array", Type::Struct, nullptr, nullptr, std::vector<TypePtr>(), generic);
 
-        std::vector<Type::Parameter> params = {Type::Parameter(L"item", false, T)};
-        TypePtr t_append = Type::newFunction(params, nullptr, false, nullptr);
+        {
+            std::vector<Type::Parameter> params = {Type::Parameter(T)};
+            TypePtr t_append = Type::newFunction(params, nullptr, false, nullptr);
 
-        FunctionSymbolPtr append(new FunctionSymbol(L"append", t_append, nullptr));
-        t_Array->addMember(append);
+            FunctionSymbolPtr append(new FunctionSymbol(L"append", t_append, nullptr));
+            t_Array->addMember(append);
+        }
+        {
+            std::vector<Type::Parameter> params = {};
+            TypePtr t_append = Type::newFunction(params, T, false, nullptr);
+
+            FunctionSymbolPtr append(new FunctionSymbol(L"removeLast", t_append, nullptr));
+            t_Array->addMember(append);
+        }
+        {
+            SymbolPlaceHolderPtr count(new SymbolPlaceHolder(L"count", t_Int, SymbolPlaceHolder::R_PROPERTY, SymbolPlaceHolder::F_INITIALIZED | SymbolPlaceHolder::F_READABLE | SymbolPlaceHolder::F_MEMBER));
+            t_Array->addMember(count);
+        }
+        {
+            std::vector<Type::Parameter> params = {Type::Parameter(t_Int)};
+            TypePtr t_append = Type::newFunction(params, T, false, nullptr);
+
+            FunctionSymbolPtr subscript(new FunctionSymbol(L"subscript", t_append, nullptr));
+            FunctionOverloadedSymbolPtr subscripts(new FunctionOverloadedSymbol(L"subscript"));
+            subscripts->add(subscript);
+            t_Array->addMember(subscripts);
+        }
         addSymbol(t_Array);
     }
     {

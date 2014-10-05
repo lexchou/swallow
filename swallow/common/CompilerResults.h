@@ -17,15 +17,16 @@ struct ErrorLevel
         Note
     };
 };
+typedef std::vector<std::wstring> ResultItems;
 struct CompilerResult : SourceInfo
 {
     ErrorLevel::T level;
     int code;
-    std::wstring item;
+    ResultItems items;
 
     
-    CompilerResult(ErrorLevel::T level, const SourceInfo& sourceInfo, int code, const std::wstring& item)
-    :level(level), code(code), item(item)
+    CompilerResult(ErrorLevel::T level, const SourceInfo& sourceInfo, int code, const ResultItems& items)
+    :level(level), code(code), items(items)
     {
         this->fileHash = sourceInfo.fileHash;
         this->line = sourceInfo.line;
@@ -39,8 +40,8 @@ public:
     void clear();
     int numResults();
     const CompilerResult& getResult(int i);
+    void add(ErrorLevel::T level, const SourceInfo&, int code, const ResultItems& items);
     void add(ErrorLevel::T level, const SourceInfo&, int code, const std::wstring& item = std::wstring());
-
     std::wstring format(const CompilerResult& result);
 private:
     std::wstring getErrorTemplate(int errorCode);

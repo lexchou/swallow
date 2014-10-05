@@ -79,7 +79,7 @@ TEST(TestGeneric, GenericConstraint2)
 //    dumpCompilerResults(compilerResults);
     ASSERT_EQ(1, compilerResults.numResults());
     auto res = compilerResults.getResult(0);
-    ASSERT_EQ(Errors::E_TYPE_DOES_NOT_CONFORM_TO_PROTOCOL_2, res.code);
+    ASSERT_EQ(Errors::E_TYPE_DOES_NOT_CONFORM_TO_PROTOCOL_2_, res.code);
 }
 
 

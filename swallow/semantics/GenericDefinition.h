@@ -14,6 +14,7 @@ typedef std::shared_ptr<class GenericDefinition> GenericDefinitionPtr;
 class SymbolScope;
 class GenericDefinition
 {
+    friend class GenericArgument;
 public:
     struct NodeDef;
     typedef std::shared_ptr<NodeDef> NodeDefPtr;
@@ -35,8 +36,18 @@ public:
     struct NodeDef
     {
         TypePtr type;
+        int index;
         TypeConstraintMap children;
         Constraints constraints;
+    };
+    struct Parameter
+    {
+        int index;
+        std::wstring name;
+        TypePtr type;
+        Parameter(int index, const std::wstring& name, const TypePtr& type)
+            :index(index), name(name), type(type)
+        {}
     };
 public:
     void add(const std::wstring& alias, const TypePtr& type);
@@ -47,11 +58,11 @@ public:
     bool equals(const GenericDefinitionPtr& rhs) const;
     int validate(const std::wstring& typeName, const TypePtr& typeToTest, TypePtr& expectedType) const;
 
-    const std::vector<TypePtr> getParameters()const;
+    const std::vector<Parameter> getParameters()const;
 private:
     int validate(const NodeDefPtr& node, const TypePtr& typeToTest, TypePtr& expectedType) const;
 private:
-    std::vector<TypePtr> typeParameters;
+    std::vector<Parameter> typeParameters;
     TypeConstraintMap constraints;
 };
 

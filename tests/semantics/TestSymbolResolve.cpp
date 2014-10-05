@@ -14,8 +14,8 @@ TEST(TestSymbolResolve, testUndeclaredVars)
     //dumpCompilerResults(compilerResults);
     ASSERT_EQ(1, compilerResults.numResults());
     const CompilerResult& r = compilerResults.getResult(0);
-    ASSERT_EQ((int)Errors::E_USE_OF_UNRESOLVED_IDENTIFIER, r.code);
-    ASSERT_EQ(L"a", r.item);
+    ASSERT_EQ((int)Errors::E_USE_OF_UNRESOLVED_IDENTIFIER_1, r.code);
+    ASSERT_EQ(L"a", r.items[0]);
 }
 
 TEST(TestSymbolResolve, testUseConstantBeforeDeclaration)
@@ -24,8 +24,8 @@ TEST(TestSymbolResolve, testUseConstantBeforeDeclaration)
     ASSERT_EQ(1, compilerResults.numResults());
 
     const CompilerResult& r = compilerResults.getResult(0);
-    ASSERT_EQ((int)Errors::E_USE_OF_UNINITIALIZED_VARIABLE, r.code);
-    ASSERT_EQ(L"b", r.item);
+    ASSERT_EQ((int)Errors::E_USE_OF_UNINITIALIZED_VARIABLE_1, r.code);
+    ASSERT_EQ(L"b", r.items[0]);
 
 }
 
@@ -43,7 +43,7 @@ TEST(TestSymbolResolve, testVariableUsedWithinItsOwnInitialization)
     ASSERT_EQ(1, compilerResults.numResults());
     const CompilerResult& r = compilerResults.getResult(0);
     ASSERT_EQ((int)Errors::E_USE_OF_INITIALIZING_VARIABLE, r.code);
-    ASSERT_EQ(L"a", r.item);
+    ASSERT_EQ(L"a", r.items[0]);
 
 }
 
@@ -54,17 +54,17 @@ TEST(TestSymbolResolve, testDuplicatedVars)
     ASSERT_EQ(1, compilerResults.numResults());
     const CompilerResult& r = compilerResults.getResult(0);
     ASSERT_EQ((int)Errors::E_DEFINITION_CONFLICT, r.code);
-    ASSERT_EQ(L"fa", r.item);
+    ASSERT_EQ(L"fa", r.items[0]);
 }
 
 TEST(TestSymbolResolve, testLocalGlobal)
 {
     SEMANTIC_ANALYZE(L"let global = 0; func test(){let local = 1;}");
-    FunctionDefPtr test = NULL;
+    CodeBlockPtr test = NULL;
     FunctionSymbolPtr symbol;
     ASSERT_NOT_NULL(symbol = std::dynamic_pointer_cast<FunctionSymbol>(scope->lookup(L"test")));
     ASSERT_NOT_NULL(test = symbol->getDefinition());
-    ScopedCodeBlockPtr cb = std::static_pointer_cast<ScopedCodeBlock>(test->getBody());
+    ScopedCodeBlockPtr cb = std::static_pointer_cast<ScopedCodeBlock>(test);
     SymbolPtr local = cb->getScope()->lookup(L"local");
     SymbolPtr global = root->getScope()->lookup(L"global");
     ASSERT_TRUE(local != NULL);
@@ -87,7 +87,7 @@ TEST(TestSymbolResolve, testLocalTypeUsesUpperLocalSymbol)
     ASSERT_EQ(1, compilerResults.numResults());
     const CompilerResult& r = compilerResults.getResult(0);
     ASSERT_EQ((int)Errors::E_USE_OF_FUNCTION_LOCAL_INSIDE_TYPE, r.code);
-    ASSERT_EQ(L"b", r.item);
+    ASSERT_EQ(L"b", r.items[0]);
 }
 TEST(TestSymbolResolve, testClassVariable1)
 {
@@ -161,6 +161,6 @@ TEST(TestSymbolResolve, testStructureInit)
     ASSERT_EQ(1, compilerResults.numResults());
     const CompilerResult& r = compilerResults.getResult(0);
     ASSERT_EQ((int)Errors::E_DEFINITION_CONFLICT, r.code);
-    ASSERT_EQ(L"a", r.item);
+    ASSERT_EQ(L"a", r.items[0]);
 }
 

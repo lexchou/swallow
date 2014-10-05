@@ -54,6 +54,7 @@ SET(SWALLOW_SRC
     semantics/GlobalScope.cpp
     semantics/GenericDefinition.cpp
     semantics/GenericArgument.cpp
+    semantics/TypeSpecialization.cpp
 
     ast/Node.cpp
     ast/Program.cpp

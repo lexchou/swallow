@@ -54,9 +54,11 @@ void GenericDefinition::add(const std::wstring& alias, const TypePtr& type)
     assert(type != nullptr);
     TypePtr old = get(alias);
     assert(old == nullptr);
-    typeParameters.push_back(type);
+    int index = (int)typeParameters.size();
+    typeParameters.push_back(Parameter(index, alias, type));
     NodeDefPtr node(new NodeDef());
     node->type = type;
+    node->index = index;
     constraints.insert(make_pair(alias, node));
 }
 void GenericDefinition::addConstraint(const std::list<std::wstring>& type, ConstraintType constraint, const TypePtr& referenceType)
@@ -98,7 +100,7 @@ size_t GenericDefinition::numParameters() const
 {
     return typeParameters.size();
 }
-const std::vector<TypePtr> GenericDefinition::getParameters()const
+const std::vector<GenericDefinition::Parameter> GenericDefinition::getParameters()const
 {
     return typeParameters;
 }
@@ -115,7 +117,7 @@ bool GenericDefinition::equals(const GenericDefinitionPtr& rhs) const
     auto iter2 = rhs->typeParameters.begin();
     for(; iter1 != typeParameters.end(); iter1++, iter2++)
     {
-        if(!Type::equals(*iter1, *iter2))
+        if(!Type::equals(iter1->type, iter2->type))
             return false;
     }
     //check constraint
