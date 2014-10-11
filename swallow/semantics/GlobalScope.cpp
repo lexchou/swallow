@@ -3,9 +3,10 @@
 #include "FunctionSymbol.h"
 #include "FunctionOverloadedSymbol.h"
 #include "GenericDefinition.h"
+#include "TypeBuilder.h"
 
 USE_SWIFT_NS
-
+using namespace std;
 
 GlobalScope::GlobalScope()
 {
@@ -29,7 +30,7 @@ void GlobalScope::initPrimitiveTypes()
     addSymbol(t_Float = Type::newType(L"Float", Type::Aggregate));
     addSymbol(t_Double = Type::newType(L"Double", Type::Aggregate));
     addSymbol(t_String = Type::newType(L"String", Type::Aggregate));
-    addSymbol(t_Void = Type::newType(L"Void", Type::Aggregate));
+    addSymbol(t_Void = Type::newTuple(std::vector<TypePtr>()));
 //Register built-in variables
     addSymbol(s_True = SymbolPtr(new SymbolPlaceHolder(L"true", t_Bool, SymbolPlaceHolder::R_LOCAL_VARIABLE, SymbolPlaceHolder::F_INITIALIZED)));
     addSymbol(s_False = SymbolPtr(new SymbolPlaceHolder(L"false", t_Bool, SymbolPlaceHolder::R_LOCAL_VARIABLE, SymbolPlaceHolder::F_INITIALIZED)));
@@ -38,24 +39,24 @@ void GlobalScope::initPrimitiveTypes()
         GenericDefinitionPtr generic(new GenericDefinition());
         generic->add(L"T", T);
         t_Array = Type::newType(L"Array", Type::Struct, nullptr, nullptr, std::vector<TypePtr>(), generic);
-
+        TypeBuilderPtr builder = static_pointer_cast<TypeBuilder>(t_Array);
         {
             std::vector<Type::Parameter> params = {Type::Parameter(T)};
             TypePtr t_append = Type::newFunction(params, nullptr, false, nullptr);
 
             FunctionSymbolPtr append(new FunctionSymbol(L"append", t_append, nullptr));
-            t_Array->addMember(append);
+            builder->addMember(append);
         }
         {
             std::vector<Type::Parameter> params = {};
             TypePtr t_append = Type::newFunction(params, T, false, nullptr);
 
             FunctionSymbolPtr append(new FunctionSymbol(L"removeLast", t_append, nullptr));
-            t_Array->addMember(append);
+            builder->addMember(append);
         }
         {
             SymbolPlaceHolderPtr count(new SymbolPlaceHolder(L"count", t_Int, SymbolPlaceHolder::R_PROPERTY, SymbolPlaceHolder::F_INITIALIZED | SymbolPlaceHolder::F_READABLE | SymbolPlaceHolder::F_MEMBER));
-            t_Array->addMember(count);
+            builder->addMember(count);
         }
         {
             std::vector<Type::Parameter> params = {Type::Parameter(t_Int)};
@@ -64,7 +65,7 @@ void GlobalScope::initPrimitiveTypes()
             FunctionSymbolPtr subscript(new FunctionSymbol(L"subscript", t_append, nullptr));
             FunctionOverloadedSymbolPtr subscripts(new FunctionOverloadedSymbol(L"subscript"));
             subscripts->add(subscript);
-            t_Array->addMember(subscripts);
+            builder->addMember(subscripts);
         }
         addSymbol(t_Array);
     }

@@ -14,6 +14,8 @@
 #include "ast/NodeSerializer.h"
 #include "GlobalScope.h"
 #include "GenericDefinition.h"
+#include "FunctionIterator.h"
+#include "TypeBuilder.h"
 
 USE_SWIFT_NS
 
@@ -874,4 +876,57 @@ void TypeInferenceAction::visitClosure(const ClosurePtr& node)
     }
     TypePtr type = Type::newFunction(params, returnedType, node->getParameters()->isVariadicParameters());
     node->setType(type);
+}
+
+void TypeInferenceAction::visitStruct(const StructDefPtr &node)
+{
+    SemanticNodeVisitor::visitStruct(node);
+    TypeBuilderPtr type = static_pointer_cast<TypeBuilder>(node->getType());
+    assert(type != nullptr);
+    for(auto entry : type->getAllParents())
+    {
+        TypePtr parent = entry.first;
+        if(parent->getCategory() != Type::Protocol || !(parent->containsAssociatedType() || parent->containsSelfType()))
+            continue;
+        //this parent is a protocol that contains associated type, now validate protocol's methods and infer the types out
+        std::map<std::wstring, TypePtr> types = parent->getAssociatedTypes();
+        if(parent->containsSelfType())
+            types.insert(make_pair(L"Self", type));
+
+        for(const FunctionOverloadedSymbolPtr& funcs : parent->getDeclaredFunctions())
+        {
+            for(const FunctionSymbolPtr& expectedFunc : *funcs)
+            {
+                TypePtr expectedType = expectedFunc->getType();
+                assert(expectedType != nullptr);
+                bool matched = false;
+
+                for(auto func : FunctionIterator(type, expectedFunc->getName()))
+                {
+                    TypePtr actualType = func->getType();
+                    assert(actualType != nullptr);
+                    if(expectedType->canSpecializeTo(actualType, types))
+                    {
+                        matched = true;
+                        break;
+                    }
+                }
+                if(!matched)
+                {
+                    //no matched function
+                    error(node, Errors::E_TYPE_DOES_NOT_CONFORM_TO_PROTOCOL_UNIMPLEMENTED_FUNCTION_3, type->getName(), parent->getName(), expectedFunc->getName());
+                    return;
+                }
+            }
+        }
+        //now make types infered above visible
+
+        for(auto entry : types)
+        {
+            if(entry.first == L"Self")
+                continue;
+            type->addMember(entry.first, entry.second);
+        }
+    }
+
 }

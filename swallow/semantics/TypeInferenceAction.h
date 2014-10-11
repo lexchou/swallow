@@ -36,6 +36,7 @@ public:
     virtual void visitComputedProperty(const ComputedPropertyPtr& node) override;
     virtual void visitSubscript(const SubscriptDefPtr& node) override;
     virtual void visitSubscriptAccess(const SubscriptAccessPtr& node) override;
+    virtual void visitStruct(const StructDefPtr& node) override;
 private:
     void visitFunctionCall(const IdentifierPtr& name, const FunctionCallPtr& node);
     void visitFunctionCall(const SymbolPtr& func, const FunctionCallPtr& node);

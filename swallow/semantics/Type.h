@@ -15,10 +15,10 @@ typedef std::shared_ptr<class TypeDeclaration> TypeDeclarationPtr;
 typedef std::weak_ptr<class TypeDeclaration> TypeDeclarationWeakPtr;
 typedef std::shared_ptr<class GenericDefinition> GenericDefinitionPtr;
 typedef std::shared_ptr<class GenericArgument> GenericArgumentPtr;
+typedef std::shared_ptr<class FunctionOverloadedSymbol> FunctionOverloadedSymbolPtr;
 class Type : public Symbol, public  std::enable_shared_from_this<Symbol>
 {
-    friend class SymbolRegistry;
-    friend class SymbolResolveAction;
+    friend class TypeBuilder;
 public:
     typedef std::map<std::wstring, SymbolPtr> SymbolMap;
     struct Parameter
@@ -98,16 +98,11 @@ public://properties
      * Gets the parent type that defined this type
      */
     TypePtr getParentType()const;
-    void setParentType(const TypePtr& type);
     /**
      * Gets the protocols that this type conform to
      */
     const std::vector<TypePtr>& getProtocols() const;
 
-    /**
-     * Adds a protocol that this type conform to
-     */
-    void addProtocol(const TypePtr& protocol);
 
     /**
      * Gets the module name where defined this type
@@ -131,22 +126,12 @@ public://properties
     int numElementTypes()const;
 
     /**
-     * Gets the key type of the dictionary type
-     */
-    TypePtr getKeyType() const;
-
-    /**
-     * Gets the value type of the dictionary type
-     */
-    TypePtr getValueType() const;
-
-    /**
      * Gets which declaration this type referenced to
      */
     TypeDeclarationPtr getReference()const;
 
     /**
-     * Gets the inner type for Reference category.
+     * Gets the inner type for Specialized type
      */
     TypePtr getInnerType() const;
 
@@ -218,28 +203,35 @@ public://properties
      */
     std::wstring toString() const;
 public://member access
-    void addMember(const std::wstring& name, const SymbolPtr& member);
-    void addMember(const SymbolPtr& symbol);
     SymbolPtr getMember(const std::wstring& name) const;
     SymbolPtr getDeclaredMember(const std::wstring& name) const;
     const SymbolMap& getDeclaredMembers() const;
 
     TypePtr getAssociatedType(const std::wstring& name) const;
     TypePtr getDeclaredAssociatedType(const std::wstring& name) const;
-
+    const std::map<std::wstring, TypePtr> getAssociatedTypes() const;
     const std::vector<SymbolPtr>& getDeclaredStoredProperties() const;
+    const std::vector<FunctionOverloadedSymbolPtr>& getDeclaredFunctions() const;
+
+    /**
+     * Check if current type can be specialized to given type
+     */
+    bool canSpecializeTo(const TypePtr& type, std::map<std::wstring, TypePtr>& typeMap)const;
+
+    const std::map<TypePtr, int>& getAllParents() const;
+
+    const std::vector<FunctionOverloadedSymbolPtr>& getFunctions() const;
+
 public:
     bool operator ==(const Type& rhs)const;
     bool operator !=(const Type& rhs)const;
 private:
-    void addParentTypesFrom(const TypePtr& type);
-    void addParentType(const TypePtr& type, int distance);
 
     /**
     * Check if the definition of this type contains a Self type
     */
     bool containsSelfTypeImpl() const;
-private:
+protected:
     std::wstring name;
     std::wstring fullName;
     std::wstring moduleName;
@@ -247,27 +239,38 @@ private:
     TypeDeclarationWeakPtr reference;
 
     Category category;
-    TypePtr parentType;//The direct inherited parent type
-    std::vector<TypePtr> protocols; //Protocols that this type directly conform to
-    std::map<TypePtr, int> parents;//All parent types and protocols in inheritance tree
+
+    //for function and custom type
     GenericDefinitionPtr genericDefinition;
-    GenericArgumentPtr genericArguments;
+
+    //for specialized type
     TypePtr innerType;
+    GenericArgumentPtr genericArguments;
+
+
+    //for function type
     TypePtr returnType;
     std::vector<Parameter> parameters;
-    FunctionOverloadedSymbolPtr initializer;
     bool variadicParameters;
+
+    //for tuple type
     std::vector<TypePtr> elementTypes;
 
     //for custom type
-    SymbolMap symbols;
+    TypePtr parentType;//The direct inherited parent type
+    std::vector<TypePtr> protocols; //Protocols that this type directly conform to
+    std::map<TypePtr, int> parents;//All parent types and protocols in inheritance tree
+    SymbolMap members;
+    FunctionOverloadedSymbolPtr initializer;
     std::vector<SymbolPtr> storedProperties;
+    std::vector<SymbolPlaceHolderPtr> computedProperties;
+    std::map<std::wstring, TypePtr> associatedTypes;
+    std::vector<FunctionOverloadedSymbolPtr> functions;
+    int inheritantDepth;
 
     //for protocol
     mutable short _containsSelfType;
-    mutable short _containsAssociatedType;
 
-    int inheritantDepth;
 };
 
 

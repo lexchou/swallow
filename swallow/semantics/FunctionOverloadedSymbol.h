@@ -7,6 +7,7 @@
 SWIFT_NS_BEGIN
 typedef std::shared_ptr<Symbol> SymbolPtr;
 typedef std::shared_ptr<class FunctionSymbol> FunctionSymbolPtr;
+typedef std::shared_ptr<class FunctionOverloadedSymbol> FunctionOverloadedSymbolPtr;
 class FunctionOverloadedSymbol : public Symbol
 {
 public:
@@ -16,6 +17,7 @@ public:
     virtual const std::wstring& getName() const;
     FunctionSymbolPtr lookupOverload(int argc, TypePtr argv[]);
     void add(const FunctionSymbolPtr& func);
+    void add(const FunctionOverloadedSymbolPtr& funcs);
 
     int numOverloads()const;
 

@@ -11,6 +11,8 @@
 #include "GenericDefinition.h"
 #include <cassert>
 #include <set>
+#include "TypeBuilder.h"
+#include "GlobalScope.h"
 
 USE_SWIFT_NS
 using namespace std;
@@ -161,7 +163,7 @@ void SymbolResolveAction::registerSymbol(const SymbolPlaceHolderPtr& symbol)
         case NodeType::Extension:
         case NodeType::Enum:
             assert(currentType != nullptr);
-            currentType->addMember(symbol->getName(), symbol);
+            static_pointer_cast<TypeBuilder>(currentType)->addMember(symbol->getName(), symbol);
             break;
         default:
             break;
@@ -332,7 +334,7 @@ TypePtr SymbolResolveAction::defineType(const std::shared_ptr<TypeDeclaration>& 
     currentScope->addSymbol(type);
 
     if(currentType)
-        currentType->addMember(type->getName(), type);
+        static_pointer_cast<TypeBuilder>(currentType)->addMember(type->getName(), type);
     return type;
 }
 
@@ -362,7 +364,7 @@ void SymbolResolveAction::visitTypeAlias(const TypeAliasPtr& node)
     currentScope->addSymbol(node->getName(), type);
     if(currentType)
     {
-        currentType->addMember(node->getName(), type);
+        static_pointer_cast<TypeBuilder>(currentType)->addMember(node->getName(), type);
     }
 }
 
@@ -377,8 +379,8 @@ void SymbolResolveAction::visitClass(const ClassDefPtr& node)
 }
 void SymbolResolveAction::visitStruct(const StructDefPtr& node)
 {
-    TypePtr type = defineType(node, Type::Struct);
-    type->initializer = FunctionOverloadedSymbolPtr(new FunctionOverloadedSymbol());
+    TypeBuilderPtr type = static_pointer_cast<TypeBuilder>(defineType(node, Type::Struct));
+    type->setInitializer(FunctionOverloadedSymbolPtr(new FunctionOverloadedSymbol()));
 
     StackedValueGuard<TypePtr> currentType(this->currentType);
     currentType.set(type);
@@ -535,7 +537,9 @@ FunctionSymbolPtr SymbolResolveAction::createFunctionSymbol(const FunctionDefPtr
 
 
 
-    TypePtr retType = lookupType(func->getReturnType());
+    TypePtr retType = symbolRegistry->getGlobalScope()->t_Void;
+    if(func->getReturnType())
+        retType = lookupType(func->getReturnType());
     TypePtr funcType = createFunctionType(func->getParametersList().begin(), func->getParametersList().end(), retType, generic);
     FunctionSymbolPtr ret(new FunctionSymbol(func->getName(), funcType, func->getBody()));
     return ret;
@@ -567,7 +571,7 @@ GenericDefinitionPtr SymbolResolveAction::prepareGenericTypes(const GenericParam
         //constraint->getConstraintType()
         list<wstring> types;
         TypeIdentifierPtr typeId = constraint->getIdentifier();
-        TypePtr type = ret->get(typeId->getName());
+        TypeBuilderPtr type = static_pointer_cast<TypeBuilder>(ret->get(typeId->getName()));
         TypePtr expectedType = lookupType(constraint->getExpectedType());
 
         if(type == nullptr)
@@ -607,7 +611,7 @@ GenericDefinitionPtr SymbolResolveAction::prepareGenericTypes(const GenericParam
                 error(typeId, Errors::E_IS_NOT_A_MEMBER_OF_2, name, type->getName());
                 return ret;
             }
-            type = childType;
+            type = static_pointer_cast<TypeBuilder>(childType);
             typeId = typeId->getNestedType();
         }
         if(expectedType->getCategory() == Type::Protocol)
@@ -690,7 +694,7 @@ void SymbolResolveAction::visitSubscript(const SubscriptDefPtr &node)
     if(!funcs)
     {
         funcs = FunctionOverloadedSymbolPtr(new FunctionOverloadedSymbol(L"subscript"));
-        currentType->addMember(funcs);
+        static_pointer_cast<TypeBuilder>(currentType)->addMember(funcs);
     }
 
     if(node->getGetter())
@@ -703,7 +707,7 @@ void SymbolResolveAction::visitSubscript(const SubscriptDefPtr &node)
     {
         //TODO: replace nullptr to void
         TypePtr funcType = this->createFunctionType(paramsList.begin(), paramsList.end(), nullptr, nullptr);
-        funcType->parameters.push_back(Type::Parameter(L"", false, retType));
+        static_pointer_cast<TypeBuilder>(funcType)->addParameter(Type::Parameter(retType));
         FunctionSymbolPtr func(new FunctionSymbol(L"subscript", funcType, node->getSetter()));
         funcs->add(func);
     }
@@ -782,7 +786,8 @@ void SymbolResolveAction::visitFunction(const FunctionDefPtr& node)
     {
         if(declaration->getType())
         {
-            declaration->getType()->addMember(sym->getName(), sym);
+            TypeBuilderPtr type = static_pointer_cast<TypeBuilder>(declaration->getType());
+            type->addMember(sym->getName(), sym);
         }
     }
 

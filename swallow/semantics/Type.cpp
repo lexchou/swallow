@@ -3,6 +3,7 @@
 #include "GenericDefinition.h"
 #include "GenericArgument.h"
 #include "FunctionOverloadedSymbol.h"
+#include "TypeBuilder.h"
 #include <sstream>
 
 USE_SWIFT_NS
@@ -12,7 +13,6 @@ using namespace std;
 Type::Type(Category category)
 :category(category)
 {
-    _containsAssociatedType = -1;
     _containsSelfType = -1;
     variadicParameters = false;
     inheritantDepth = 0;
@@ -31,13 +31,13 @@ bool Type::equals(const TypePtr& lhs, const TypePtr& rhs)
 */
 const TypePtr& Type::getPlaceHolder()
 {
-    static TypePtr placeholder(new Type(Type::GenericParameter));
+    static TypePtr placeholder(new TypeBuilder(Type::GenericParameter));
     return placeholder;
 }
 
 TypePtr Type::newType(const std::wstring& name, Category category, const TypeDeclarationPtr& reference, const TypePtr& parentType, const std::vector<TypePtr>& protocols, const GenericDefinitionPtr& generic)
 {
-    TypePtr ret = TypePtr(new Type(category));
+    TypeBuilder* ret = new TypeBuilder(category);
     ret->name = name;
     ret->reference = reference;
     ret->parentType = parentType;
@@ -51,12 +51,12 @@ TypePtr Type::newType(const std::wstring& name, Category category, const TypeDec
     }
     if(parentType)
         ret->inheritantDepth = parentType->inheritantDepth + 1;
-    return ret;
+    return TypePtr(ret);
 }
 
 TypePtr Type::newTypeReference(const TypePtr& innerType)
 {
-    TypePtr ret(new Type(MetaType));
+    TypePtr ret(new TypeBuilder(MetaType));
     ret->innerType = innerType;
     return ret;
 }
@@ -64,14 +64,14 @@ TypePtr Type::newTypeReference(const TypePtr& innerType)
 
 TypePtr Type::newTuple(const std::vector<TypePtr>& types)
 {
-    Type* ret = new Type(Tuple);
+    Type* ret = new TypeBuilder(Tuple);
     ret->elementTypes = types;
     return TypePtr(ret);
 }
 
 TypePtr Type::newFunction(const std::vector<Parameter>& parameters, const TypePtr& returnType, bool hasVariadicParameters, const GenericDefinitionPtr& generic)
 {
-    Type* ret = new Type(Function);
+    Type* ret = new TypeBuilder(Function);
     ret->parameters = parameters;
     ret->returnType = returnType;
     ret->variadicParameters = hasVariadicParameters;
@@ -152,23 +152,10 @@ TypePtr Type::getParentType()const
 {
     return parentType;
 }
-void Type::setParentType(const TypePtr &type)
-{
-    this->parentType = type;
-}
 
 const std::vector<TypePtr>& Type::getProtocols() const
 {
     return protocols;
-}
-void Type::addProtocol(const TypePtr &protocol)
-{
-    protocols.push_back(protocol);
-    auto iter = parents.find(protocol);
-    if(iter == parents.end())
-        parents.insert(make_pair(protocol, 1));
-    else
-        iter->second = 1;
 }
 
 const std::wstring& Type::getModuleName() const
@@ -255,27 +242,6 @@ bool Type::isKindOf(const TypePtr &protocolOrBase) const
     return iter != parents.end();
 }
 
-void Type::addParentTypesFrom(const TypePtr& type)
-{
-    for(auto parent : type->parents)
-    {
-        addParentType(parent.first, parent.second + 1);
-    }
-    addParentType(type, 1);
-}
-void Type::addParentType(const TypePtr& type, int distance)
-{
-    auto iter = parents.find(type);
-    if(iter == parents.end())
-    {
-        parents.insert(std::make_pair(type, distance));
-    }
-    else if(iter->second > distance)
-    {
-        iter->second = distance;
-    }
-}
-
 static bool isGenericDefinitionEquals(const GenericDefinitionPtr& a, const GenericDefinitionPtr& b)
 {
     if(a == b)
@@ -291,19 +257,7 @@ TypePtr Type::getType()
 {
     return nullptr;
 }
-void Type::addMember(const SymbolPtr& symbol)
-{
-    addMember(symbol->getName(), symbol);
-}
 
-void Type::addMember(const std::wstring& name, const SymbolPtr& member)
-{
-    symbols.insert(std::make_pair(name, member));
-    if(SymbolPlaceHolderPtr s = dynamic_pointer_cast<SymbolPlaceHolder>(member))
-    {
-        storedProperties.push_back(s);
-    }
-}
 
 SymbolPtr Type::getMember(const std::wstring& name) const
 {
@@ -337,14 +291,14 @@ SymbolPtr Type::getMember(const std::wstring& name) const
 }
 SymbolPtr Type::getDeclaredMember(const std::wstring& name) const
 {
-    auto iter = symbols.find(name);
-    if(iter == symbols.end())
+    auto iter = members.find(name);
+    if(iter == members.end())
         return nullptr;
     return iter->second;
 }
 const Type::SymbolMap& Type::getDeclaredMembers() const
 {
-    return symbols;
+    return members;
 }
 
 bool Type::containsSelfType() const
@@ -395,7 +349,7 @@ bool Type::containsSelfTypeImpl() const
     else
     {
         //check all symbols
-        for(auto member : symbols)
+        for(auto member : members)
         {
             if(TypePtr type = dynamic_pointer_cast<Type>(member.second))
             {
@@ -414,18 +368,7 @@ bool Type::containsSelfTypeImpl() const
 
 bool Type::containsAssociatedType() const
 {
-    if(_containsAssociatedType != -1)
-        return _containsAssociatedType == 1;
-    _containsAssociatedType = 0;
-    for(auto entry : symbols)
-    {
-        if(dynamic_pointer_cast<Type>(entry.second))
-        {
-            _containsAssociatedType = 1;
-            return true;
-        }
-    }
-    return false;
+    return !associatedTypes.empty();
 }
 /**
 * Check if this type's generic arguments contains generic parameters
@@ -467,9 +410,21 @@ TypePtr Type::getDeclaredAssociatedType(const std::wstring& name) const
     TypePtr ret = dynamic_pointer_cast<Type>(symbol);
     return ret;
 }
+const std::map<std::wstring, TypePtr> Type::getAssociatedTypes() const
+{
+    return associatedTypes;
+}
 const std::vector<SymbolPtr>& Type::getDeclaredStoredProperties() const
 {
     return storedProperties;
+}
+const std::vector<FunctionOverloadedSymbolPtr>& Type::getDeclaredFunctions() const
+{
+    return functions;
+}
+const std::map<TypePtr, int>& Type::getAllParents() const
+{
+    return parents;
 }
 
 bool Type::operator ==(const Type& rhs)const

@@ -49,3 +49,8 @@ void FunctionOverloadedSymbol::add(const FunctionSymbolPtr& func)
 {
     functions.push_back(func);
 }
+void FunctionOverloadedSymbol::add(const FunctionOverloadedSymbolPtr& funcs)
+{
+    for(const FunctionSymbolPtr& func : funcs->functions)
+        functions.push_back(func);
+}

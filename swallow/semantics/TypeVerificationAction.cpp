@@ -69,6 +69,8 @@ void TypeVerificationAction::verifyProtocolConform(const TypePtr& type)
 {
     for(const TypePtr& protocol : type->getProtocols())
     {
+        if(protocol->containsAssociatedType())
+            continue;//it's already done in SymbolResolveAction.cpp
         verifyProtocolConform(type, protocol);
     }
 }
@@ -90,6 +92,7 @@ void TypeVerificationAction::verifyProtocolConform(const TypePtr& type, const Ty
             //verify function
             verifyProtocolFunction(type, protocol, func);
         }
+        /*
         else if(requirement == Type::getPlaceHolder())
         {
             //verify inner type
@@ -99,7 +102,7 @@ void TypeVerificationAction::verifyProtocolConform(const TypePtr& type, const Ty
                 //Type %0 does not conform to protocol %1, unimplemented type %2
                 error(type->getReference(), Errors::E_TYPE_DOES_NOT_CONFORM_TO_PROTOCOL_UNIMPLEMENTED_TYPE_3, type->getName(), protocol->getName(), entry.first);
             }
-        }
+        }*/
         else if(TypePtr t = std::dynamic_pointer_cast<Type>(requirement))
         {
             //type can be ignored
