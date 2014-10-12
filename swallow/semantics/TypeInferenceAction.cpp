@@ -345,8 +345,19 @@ void TypeInferenceAction::visitFunctionCall(const SymbolPtr& sym, const Function
     }
     else if(FunctionOverloadedSymbolPtr funcs = std::dynamic_pointer_cast<FunctionOverloadedSymbol>(sym))
     {
-        FunctionSymbolPtr matched = getOverloadedFunction(node, funcs, node->getArguments());
-        node->setType(matched->getReturnType());
+        if(funcs->numOverloads() == 1)
+        {
+            FunctionSymbolPtr func = *funcs->begin();
+            //verify argument
+            std::wstring name = func->getName();
+            calculateFitScore(func->getType(), node->getArguments(), false);
+            node->setType(func->getReturnType());
+        }
+        else
+        {
+            FunctionSymbolPtr matched = getOverloadedFunction(node, funcs, node->getArguments());
+            node->setType(matched->getReturnType());
+        }
     }
     else
     {

@@ -787,7 +787,7 @@ void SymbolResolveAction::visitFunction(const FunctionDefPtr& node)
         if(declaration->getType())
         {
             TypeBuilderPtr type = static_pointer_cast<TypeBuilder>(declaration->getType());
-            type->addMember(sym->getName(), sym);
+            type->addMember(sym->getName(), func);
         }
     }
 
