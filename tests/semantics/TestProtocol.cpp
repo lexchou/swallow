@@ -4,6 +4,7 @@
 #include "semantics/Symbol.h"
 #include "semantics/ScopedNodes.h"
 #include "semantics/FunctionSymbol.h"
+#include "semantics/FunctionOverloadedSymbol.h"
 #include "swift_errors.h"
 
 
@@ -27,6 +28,8 @@ TEST(TestProtocol, ProtocolHasNoVariable)
             "var a : Int = 3\n"
             "}");
     ASSERT_EQ(1, compilerResults.numResults());
+    auto res = compilerResults.getResult(0);
+    ASSERT_EQ(Errors::E_PROTOCOL_VAR_MUST_BE_COMPUTED_PROPERTY_1, res.code);
 }
 
 
@@ -41,9 +44,10 @@ TEST(TestProtocol, MethodRequirement_Decl)
     TypePtr RandomNumberGenerator;
     ASSERT_NOT_NULL(RandomNumberGenerator = std::dynamic_pointer_cast<Type>(scope->lookup(L"RandomNumberGenerator")));
     SymbolPtr sym = RandomNumberGenerator->getDeclaredMember(L"random");
-    FunctionSymbolPtr random;
+    FunctionOverloadedSymbolPtr random;
 
-    ASSERT_NOT_NULL(random = std::dynamic_pointer_cast<FunctionSymbol>(sym));
+    ASSERT_NOT_NULL(random = std::dynamic_pointer_cast<FunctionOverloadedSymbol>(sym));
+    ASSERT_EQ(1, random->numOverloads());
 
 }
 
@@ -68,6 +72,7 @@ TEST(TestProtocol, MethodRequirements_Impl)
             "class Test : MyProtocol { \n"
             "func test(){}\n"
             "}");
+    dumpCompilerResults(compilerResults);
     ASSERT_EQ(0, compilerResults.numResults());
 }
 
@@ -95,7 +100,8 @@ TEST(TestProtocol, TypeRequirements)
             "}\n");
     ASSERT_EQ(0, compilerResults.numResults());
 }
-
+/*
+NOTE: TypeRequirement is optional, if the type is being used in methods, it should be infered by compiler
 TEST(TestProtocol, TypeRequirements_Impl)
 {
     SEMANTIC_ANALYZE(L"protocol MyProtocol {\n"
@@ -108,6 +114,7 @@ TEST(TestProtocol, TypeRequirements_Impl)
     auto res = compilerResults.getResult(0);
     ASSERT_EQ(Errors::E_TYPE_DOES_NOT_CONFORM_TO_PROTOCOL_UNIMPLEMENTED_TYPE_3, res.code);
 }
+*/
 
 TEST(TestProtocol, TypeInheritance)
 {

@@ -127,7 +127,7 @@ OperatorInfo* SymbolRegistry::getOperator(const std::wstring& name)
 OperatorInfo* SymbolRegistry::getOperator(SymbolScope* scope, const std::wstring& name)
 {
     SymbolScope::OperatorMap::iterator iter = scope->operators.find(name);
-    if(iter == currentScope->operators.end())
+    if(iter == scope->operators.end())
         return NULL;
     return &iter->second;
 }

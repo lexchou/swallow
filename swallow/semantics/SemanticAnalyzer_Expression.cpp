@@ -1,37 +1,21 @@
-#include <semantics/SymbolRegistry.h>
-#include <common/CompilerResults.h>
-#include <swift_errors.h>
-#include "TypeInferenceAction.h"
-#include "ast/ast.h"
-#include "ScopedNodes.h"
-#include "ast/TypeNode.h"
-#include "Type.h"
-#include "semantic-types.h"
-#include "FunctionSymbol.h"
-#include "FunctionOverloadedSymbol.h"
-#include <cassert>
-#include <algorithm>
-#include "ast/NodeSerializer.h"
+#include "SemanticAnalyzer.h"
 #include "GlobalScope.h"
+#include "SymbolRegistry.h"
+#include "ast/ast.h"
+#include "swift_errors.h"
+#include "FunctionOverloadedSymbol.h"
+#include "FunctionSymbol.h"
+#include "ast/NodeSerializer.h"
 #include "GenericDefinition.h"
-#include "FunctionIterator.h"
+#include "GenericArgument.h"
 #include "TypeBuilder.h"
+#include "FunctionIterator.h"
+#include <cassert>
+
 
 USE_SWIFT_NS
-
 using namespace std;
-
-
-
-TypeInferenceAction::TypeInferenceAction(SymbolRegistry* symbolRegistry, CompilerResults* compilerResults)
-    :SemanticNodeVisitor(symbolRegistry, compilerResults)
-{
-
-
-}
-
-
-bool TypeInferenceAction::isInteger(const TypePtr& type)
+bool SemanticAnalyzer::isInteger(const TypePtr& type)
 {
     GlobalScope* scope = symbolRegistry->getGlobalScope();
     for(const TypePtr& t : scope->t_Ints)
@@ -41,7 +25,7 @@ bool TypeInferenceAction::isInteger(const TypePtr& type)
     }
     return false;
 }
-bool TypeInferenceAction::isNumber(const TypePtr& type)
+bool SemanticAnalyzer::isNumber(const TypePtr& type)
 {
     if(isFloat(type))
         return true;
@@ -49,7 +33,7 @@ bool TypeInferenceAction::isNumber(const TypePtr& type)
         return true;
     return false;
 }
-bool TypeInferenceAction::isFloat(const TypePtr& type)
+bool SemanticAnalyzer::isFloat(const TypePtr& type)
 {
     GlobalScope* scope = symbolRegistry->getGlobalScope();
     if(type == scope->t_Float || type == scope->t_Double)
@@ -57,7 +41,7 @@ bool TypeInferenceAction::isFloat(const TypePtr& type)
     return false;
 }
 
-void TypeInferenceAction::checkTupleDefinition(const TuplePtr& tuple, const ExpressionPtr& initializer)
+void SemanticAnalyzer::checkTupleDefinition(const TuplePtr& tuple, const ExpressionPtr& initializer)
 {
     //this is a tuple definition, the corresponding declared type must be a tuple type
     TypeNodePtr declaredType = tuple->getDeclaredType();
@@ -120,7 +104,7 @@ void TypeInferenceAction::checkTupleDefinition(const TuplePtr& tuple, const Expr
 }
 
 
-TypePtr TypeInferenceAction::getExpressionType(const ExpressionPtr& expr, const TypePtr& hint, float& score)
+TypePtr SemanticAnalyzer::getExpressionType(const ExpressionPtr& expr, const TypePtr& hint, float& score)
 {
     if(expr->getType() == nullptr)
         expr->accept(this);
@@ -153,14 +137,14 @@ TypePtr TypeInferenceAction::getExpressionType(const ExpressionPtr& expr, const 
     return ret;
 }
 /**
- *
- * @param parameter
- * @param argument
- * @param variadic  Variadic parameter must have no name
- * @param score
- * @param supressErrors
- */
-bool TypeInferenceAction::checkArgument(const TypePtr& funcType, const Type::Parameter& parameter, const ParenthesizedExpression::Term& argument, bool variadic, float& score, bool supressErrors)
+*
+* @param parameter
+* @param argument
+* @param variadic  Variadic parameter must have no name
+* @param score
+* @param supressErrors
+*/
+bool SemanticAnalyzer::checkArgument(const TypePtr& funcType, const Type::Parameter& parameter, const ParenthesizedExpression::Term& argument, bool variadic, float& score, bool supressErrors)
 {
 
     const std::wstring name = argument.first;
@@ -225,7 +209,7 @@ bool TypeInferenceAction::checkArgument(const TypePtr& funcType, const Type::Par
     return true;
 }
 
-float TypeInferenceAction::calculateFitScore(const TypePtr& func, const ParenthesizedExpressionPtr& arguments, bool supressErrors)
+float SemanticAnalyzer::calculateFitScore(const TypePtr& func, const ParenthesizedExpressionPtr& arguments, bool supressErrors)
 {
     float score = 0;
     const std::vector<Type::Parameter>& parameters = func->getParameters();
@@ -294,11 +278,11 @@ float TypeInferenceAction::calculateFitScore(const TypePtr& func, const Parenthe
     return score / arguments->numExpressions();
 }
 
-void TypeInferenceAction::visitFunctionCall(const IdentifierPtr& name, const FunctionCallPtr& node)
+void SemanticAnalyzer::visitFunctionCall(const IdentifierPtr& name, const FunctionCallPtr& node)
 {
     //visitFunctionCall(sym, node);
 }
-FunctionSymbolPtr TypeInferenceAction::getOverloadedFunction(const NodePtr& node, const FunctionOverloadedSymbolPtr& funcs, const ParenthesizedExpressionPtr& arguments)
+FunctionSymbolPtr SemanticAnalyzer::getOverloadedFunction(const NodePtr& node, const FunctionOverloadedSymbolPtr& funcs, const ParenthesizedExpressionPtr& arguments)
 {
     typedef std::pair<float, FunctionSymbolPtr> ScoredFunction;
     std::vector<ScoredFunction> candidates;
@@ -328,7 +312,7 @@ FunctionSymbolPtr TypeInferenceAction::getOverloadedFunction(const NodePtr& node
     FunctionSymbolPtr matched = candidates.front().second;
     return matched;
 }
-void TypeInferenceAction::visitFunctionCall(const SymbolPtr& sym, const FunctionCallPtr& node)
+void SemanticAnalyzer::visitFunctionCall(const SymbolPtr& sym, const FunctionCallPtr& node)
 {
     //Prepare the arguments
     for(const ParenthesizedExpression::Term& term : *node->getArguments())
@@ -366,7 +350,7 @@ void TypeInferenceAction::visitFunctionCall(const SymbolPtr& sym, const Function
 
 }
 
-void TypeInferenceAction::visitReturn(const ReturnStatementPtr& node)
+void SemanticAnalyzer::visitReturn(const ReturnStatementPtr& node)
 {
     SemanticNodeVisitor::visitReturn(node);
     Node* owner = symbolRegistry->getCurrentScope()->getOwner();
@@ -397,7 +381,7 @@ void TypeInferenceAction::visitReturn(const ReturnStatementPtr& node)
         error(node->getExpression(), Errors::E_CANNOT_CONVERT_EXPRESSION_TYPE_2, retType->toString(), expectedType->toString());
     }
 }
-void TypeInferenceAction::visitFunctionCall(const FunctionCallPtr& node)
+void SemanticAnalyzer::visitFunctionCall(const FunctionCallPtr& node)
 {
     NodeType::T nodeType = node->getFunction()->getNodeType();
     ExpressionPtr func = node->getFunction();
@@ -481,7 +465,7 @@ void TypeInferenceAction::visitFunctionCall(const FunctionCallPtr& node)
     }
 
 }
-void TypeInferenceAction::visitMemberAccess(const MemberAccessPtr& node)
+void SemanticAnalyzer::visitMemberAccess(const MemberAccessPtr& node)
 {
     node->getSelf()->accept(this);
     TypePtr selfType = node->getSelf()->getType();
@@ -497,23 +481,23 @@ void TypeInferenceAction::visitMemberAccess(const MemberAccessPtr& node)
     node->setType(member->getType());
 }
 
-void TypeInferenceAction::visitString(const StringLiteralPtr& node)
+void SemanticAnalyzer::visitString(const StringLiteralPtr& node)
 {
     GlobalScope* scope = symbolRegistry->getGlobalScope();
     node->setType(scope->t_String);
 }
-void TypeInferenceAction::visitInteger(const IntegerLiteralPtr& node)
+void SemanticAnalyzer::visitInteger(const IntegerLiteralPtr& node)
 {
     GlobalScope* scope = symbolRegistry->getGlobalScope();
     node->setType(scope->t_Int);
 }
-void TypeInferenceAction::visitFloat(const FloatLiteralPtr& node)
+void SemanticAnalyzer::visitFloat(const FloatLiteralPtr& node)
 {
     GlobalScope* scope = symbolRegistry->getGlobalScope();
     node->setType(scope->t_Double);
 }
 
-bool TypeInferenceAction::canConvertTo(const ExpressionPtr& expr, const TypePtr& type)
+bool SemanticAnalyzer::canConvertTo(const ExpressionPtr& expr, const TypePtr& type)
 {
     switch(expr->getNodeType())
     {
@@ -527,7 +511,7 @@ bool TypeInferenceAction::canConvertTo(const ExpressionPtr& expr, const TypePtr&
     return false;
 }
 
-void TypeInferenceAction::visitArrayLiteral(const ArrayLiteralPtr& node)
+void SemanticAnalyzer::visitArrayLiteral(const ArrayLiteralPtr& node)
 {
     int num = node->numElements();
     GlobalScope* scope = symbolRegistry->getGlobalScope();
@@ -602,11 +586,11 @@ void TypeInferenceAction::visitArrayLiteral(const ArrayLiteralPtr& node)
     TypePtr arrayType = Type::newSpecializedType(scope->t_Array, type);
     node->setType(arrayType);
 }
-void TypeInferenceAction::visitDictionaryLiteral(const DictionaryLiteralPtr& node)
+void SemanticAnalyzer::visitDictionaryLiteral(const DictionaryLiteralPtr& node)
 {
 
 }
-void TypeInferenceAction::visitParenthesizedExpression(const ParenthesizedExpressionPtr& node)
+void SemanticAnalyzer::visitParenthesizedExpression(const ParenthesizedExpressionPtr& node)
 {
     SemanticNodeVisitor::visitParenthesizedExpression(node);
     std::vector<TypePtr> types;
@@ -619,7 +603,7 @@ void TypeInferenceAction::visitParenthesizedExpression(const ParenthesizedExpres
     TypePtr type = Type::newTuple(types);
     node->setType(type);
 }
-void TypeInferenceAction::visitTuple(const TuplePtr& node)
+void SemanticAnalyzer::visitTuple(const TuplePtr& node)
 {
     SemanticNodeVisitor::visitTuple(node);
     std::vector<TypePtr> types;
@@ -633,7 +617,7 @@ void TypeInferenceAction::visitTuple(const TuplePtr& node)
     node->setType(type);
 }
 
-void TypeInferenceAction::visitOperator(const OperatorDefPtr& node)
+void SemanticAnalyzer::visitOperator(const OperatorDefPtr& node)
 {
     //register operator
     if(node->getType() == OperatorType::InfixBinary)
@@ -653,11 +637,11 @@ void TypeInferenceAction::visitOperator(const OperatorDefPtr& node)
         abort();
     }
 }
-void TypeInferenceAction::visitConditionalOperator(const ConditionalOperatorPtr& node)
+void SemanticAnalyzer::visitConditionalOperator(const ConditionalOperatorPtr& node)
 {
 
 }
-void TypeInferenceAction::visitBinaryOperator(const BinaryOperatorPtr& node)
+void SemanticAnalyzer::visitBinaryOperator(const BinaryOperatorPtr& node)
 {
     SemanticNodeVisitor::visitBinaryOperator(node);
     //look for binary function that matches
@@ -696,31 +680,13 @@ void TypeInferenceAction::visitBinaryOperator(const BinaryOperatorPtr& node)
     }
     node->setType(func->getReturnType());
 }
-void TypeInferenceAction::visitUnaryOperator(const UnaryOperatorPtr& node)
+void SemanticAnalyzer::visitUnaryOperator(const UnaryOperatorPtr& node)
 {
 
 }
 
-void TypeInferenceAction::visitIdentifier(const IdentifierPtr& node)
-{
-    SymbolPtr s = symbolRegistry->lookupSymbol(node->getIdentifier());
-    if(!s)
-    {
-        error(node, Errors::E_USE_OF_UNRESOLVED_IDENTIFIER_1, node->getIdentifier());
-        abort();
-    }
-    TypePtr type = std::dynamic_pointer_cast<Type>(s);
-    if(type)
-    {
-        TypePtr ref = Type::newTypeReference(type);
-        node->setType(ref);
-    }
-    else
-    {
-        node->setType(s->getType());
-    }
-}
-void TypeInferenceAction::visitCompileConstant(const CompileConstantPtr& node)
+
+void SemanticAnalyzer::visitCompileConstant(const CompileConstantPtr& node)
 {
     const std::wstring& name = node->getName();
     GlobalScope* scope = symbolRegistry->getGlobalScope();
@@ -741,108 +707,8 @@ void TypeInferenceAction::visitCompileConstant(const CompileConstantPtr& node)
 
 
 
-void TypeInferenceAction::visitValueBinding(const ValueBindingPtr& node)
-{
-    /*if(!node->getInitializer())
-    {
-        error(node->getInitializer(), Errors::E_LET_REQUIRES_INITIALIZER);
-        return;
-    }
-    */
 
-
-    //TypePtr type = evaluateType(node->initializer);
-    if(IdentifierPtr id = std::dynamic_pointer_cast<Identifier>(node->name))
-    {
-        TypePtr declaredType = lookupType(node->getDeclaredType());//node->getDeclaredType() == nullptr ? id->getDeclaredType() : node->getDeclaredType());
-        StackedValueGuard<TypePtr> guard(t_hint);
-        guard.set(declaredType);
-        if(!declaredType && !node->initializer)
-        {
-            error(node, Errors::E_TYPE_ANNOTATION_MISSING_IN_PATTERN);
-            return;
-        }
-        SymbolPtr sym = symbolRegistry->getCurrentScope()->lookup(id->getIdentifier());
-        assert(sym != nullptr);
-        SymbolPlaceHolderPtr placeholder = std::dynamic_pointer_cast<SymbolPlaceHolder>(sym);
-        assert(placeholder != nullptr);
-        if(declaredType)
-        {
-            placeholder->setType(declaredType);
-        }
-        if(node->initializer)
-        {
-            node->initializer->accept(this);
-            TypePtr actualType = node->initializer->getType();
-            assert(actualType != nullptr);
-            if(declaredType && !canConvertTo(node->initializer, declaredType))
-            {
-                error(node, Errors::E_CANNOT_CONVERT_EXPRESSION_TYPE_2, toString(node->initializer), declaredType->toString());
-                return;
-            }
-
-            if(!declaredType)
-                placeholder->setType(actualType);
-        }
-        assert(placeholder->getType() != nullptr);
-    }
-    else if(TuplePtr id = std::dynamic_pointer_cast<Tuple>(node->name))
-    {
-        TypeNodePtr declaredType = id->getDeclaredType();
-        if(declaredType)
-        {
-            checkTupleDefinition(id, node->initializer);
-        }
-    }
-}
-void TypeInferenceAction::visitComputedProperty(const ComputedPropertyPtr &node)
-{
-    TypePtr type = lookupType(node->getDeclaredType());
-    assert(type != nullptr);
-    std::vector<Type::Parameter> params;
-    if(node->getGetter())
-    {
-        TypePtr funcType = Type::newFunction(params, type, false, nullptr);
-        node->getGetter()->setType(funcType);
-    }
-    if(node->getSetter())
-    {
-        params.push_back(Type::Parameter(L"", false, type));
-        TypePtr funcType = Type::newFunction(params, nullptr, false, nullptr);
-        node->getSetter()->setType(funcType);
-    }
-
-
-    SemanticNodeVisitor::visitComputedProperty(node);
-}
-void TypeInferenceAction::visitSubscript(const SubscriptDefPtr &node)
-{
-    TypePtr type = lookupType(node->getReturnType());
-    assert(type != nullptr);
-    std::vector<Type::Parameter> params;
-    for(const ParameterPtr& param : *node->getParameters())
-    {
-        wstring name = param->isShorthandExternalName() ? param->getLocalName() : param->getExternalName();
-        TypePtr paramType = lookupType(param->getDeclaredType());
-        params.push_back(Type::Parameter(name, param->isInout(), paramType));
-    }
-
-    if(node->getGetter())
-    {
-        TypePtr funcType = Type::newFunction(params, type, false, nullptr);
-        node->getGetter()->setType(funcType);
-    }
-    if(node->getSetter())
-    {
-        params.push_back(Type::Parameter(L"", false, type));
-        TypePtr funcType = Type::newFunction(params, nullptr, false, nullptr);
-        node->getSetter()->setType(funcType);
-    }
-
-    SemanticNodeVisitor::visitSubscript(node);
-}
-
-TypePtr TypeInferenceAction::evaluateType(const ExpressionPtr& expr)
+TypePtr SemanticAnalyzer::evaluateType(const ExpressionPtr& expr)
 {
     switch(expr->getNodeType())
     {
@@ -856,7 +722,7 @@ TypePtr TypeInferenceAction::evaluateType(const ExpressionPtr& expr)
             return nullptr;
     }
 }
-void TypeInferenceAction::visitSubscriptAccess(const SubscriptAccessPtr& node)
+void SemanticAnalyzer::visitSubscriptAccess(const SubscriptAccessPtr& node)
 {
     node->getSelf()->accept(this);
     TypePtr selfType = node->getSelf()->getType();
@@ -872,72 +738,4 @@ void TypeInferenceAction::visitSubscriptAccess(const SubscriptAccessPtr& node)
     //Now inference the type returned by this subscript access
     FunctionSymbolPtr func = getOverloadedFunction(node, funcs, node->getIndex());
     node->setType(func->getReturnType());
-}
-void TypeInferenceAction::visitClosure(const ClosurePtr& node)
-{
-    //create a function type for this
-    TypePtr returnedType = this->lookupType(node->getReturnType());
-    std::vector<Type::Parameter> params;
-    for(const ParameterPtr& param : *node->getParameters())
-    {
-        TypePtr type = lookupType(param->getDeclaredType());
-        assert(type != nullptr);
-        const std::wstring& name = param->isShorthandExternalName() ? param->getLocalName() : param->getExternalName();
-        params.push_back(Type::Parameter(name, param->isInout(), type));
-    }
-    TypePtr type = Type::newFunction(params, returnedType, node->getParameters()->isVariadicParameters());
-    node->setType(type);
-}
-
-void TypeInferenceAction::visitStruct(const StructDefPtr &node)
-{
-    SemanticNodeVisitor::visitStruct(node);
-    TypeBuilderPtr type = static_pointer_cast<TypeBuilder>(node->getType());
-    assert(type != nullptr);
-    for(auto entry : type->getAllParents())
-    {
-        TypePtr parent = entry.first;
-        if(parent->getCategory() != Type::Protocol || !(parent->containsAssociatedType() || parent->containsSelfType()))
-            continue;
-        //this parent is a protocol that contains associated type, now validate protocol's methods and infer the types out
-        std::map<std::wstring, TypePtr> types = parent->getAssociatedTypes();
-        if(parent->containsSelfType())
-            types.insert(make_pair(L"Self", type));
-
-        for(const FunctionOverloadedSymbolPtr& funcs : parent->getDeclaredFunctions())
-        {
-            for(const FunctionSymbolPtr& expectedFunc : *funcs)
-            {
-                TypePtr expectedType = expectedFunc->getType();
-                assert(expectedType != nullptr);
-                bool matched = false;
-
-                for(auto func : FunctionIterator(type, expectedFunc->getName()))
-                {
-                    TypePtr actualType = func->getType();
-                    assert(actualType != nullptr);
-                    if(expectedType->canSpecializeTo(actualType, types))
-                    {
-                        matched = true;
-                        break;
-                    }
-                }
-                if(!matched)
-                {
-                    //no matched function
-                    error(node, Errors::E_TYPE_DOES_NOT_CONFORM_TO_PROTOCOL_UNIMPLEMENTED_FUNCTION_3, type->getName(), parent->getName(), expectedFunc->getName());
-                    return;
-                }
-            }
-        }
-        //now make types infered above visible
-
-        for(auto entry : types)
-        {
-            if(entry.first == L"Self")
-                continue;
-            type->addMember(entry.first, entry.second);
-        }
-    }
-
 }

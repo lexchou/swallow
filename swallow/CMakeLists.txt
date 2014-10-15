@@ -45,9 +45,6 @@ SET(SWALLOW_SRC
     semantics/ScopedNodeFactory.cpp
     semantics/SemanticNodeVisitor.cpp
     semantics/Type.cpp
-    semantics/TypeInferenceAction.cpp
-    semantics/SymbolResolveAction.cpp
-    semantics/TypeVerificationAction.cpp
     semantics/FunctionSymbol.cpp
     semantics/FunctionOverloadedSymbol.cpp
     semantics/ScopeGuard.cpp
@@ -57,6 +54,11 @@ SET(SWALLOW_SRC
     semantics/TypeSpecialization.cpp
     semantics/TypeBuilder.cpp
     semantics/FunctionIterator.cpp
+    semantics/SemanticAnalyzer.cpp
+    semantics/SemanticAnalyzer_TypeCreation.cpp
+    semantics/SemanticAnalyzer_Function.cpp
+    semantics/SemanticAnalyzer_Variables.cpp
+    semantics/SemanticAnalyzer_Expression.cpp
 
     ast/Node.cpp
     ast/Program.cpp

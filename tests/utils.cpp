@@ -3,9 +3,7 @@
 #include "semantics/SymbolRegistry.h"
 #include "semantics/Symbol.h"
 #include "semantics/ScopedNodeFactory.h"
-#include "semantics/SymbolResolveAction.h"
-#include "semantics/TypeInferenceAction.h"
-#include "semantics/TypeVerificationAction.h"
+#include "semantics/SemanticAnalyzer.h"
 #include "semantics/ScopedNodes.h"
 #include "semantics/FunctionSymbol.h"
 #include "semantics/FunctionOverloadedSymbol.h"
@@ -100,16 +98,8 @@ Swift::ScopedProgramPtr analyzeStatement(Swift::SymbolRegistry& registry, Swift:
         return ret;
     try
     {
-        SymbolResolveAction symbolResolve(&registry, &compilerResults);
-        TypeInferenceAction typeInference(&registry, &compilerResults);
-        TypeVerificationAction typeVerification(&registry, &compilerResults);
-        NodeVisitor* visitors[] = {&symbolResolve, &typeInference, &typeVerification};
-        for(NodeVisitor* visitor : visitors)
-        {
-            ret->accept(visitor);
-            if(compilerResults.numResults() > 0)
-                break;
-        }
+        SemanticAnalyzer analyzer(&registry, &compilerResults);
+        ret->accept(&analyzer);
     }
     catch(const Abort&)
     {

@@ -1,0 +1,370 @@
+#include "SemanticAnalyzer.h"
+#include "ast/ast.h"
+#include "SymbolRegistry.h"
+#include "FunctionIterator.h"
+#include "FunctionOverloadedSymbol.h"
+#include "FunctionSymbol.h"
+#include "GenericDefinition.h"
+#include "GenericArgument.h"
+#include "swift_errors.h"
+#include "ast/NodeSerializer.h"
+#include "TypeBuilder.h"
+#include <cassert>
+
+USE_SWIFT_NS
+using namespace std;
+
+TypePtr SemanticAnalyzer::defineType(const std::shared_ptr<TypeDeclaration>& node, Type::Category category)
+{
+    TypeIdentifierPtr id = node->getIdentifier();
+    SymbolScope* scope = NULL;
+    TypePtr type;
+    //it's inside the type's scope, so need to access parent scope;
+    SymbolScope* currentScope = symbolRegistry->getCurrentScope()->getParentScope();
+
+    //check if this type is already defined
+    symbolRegistry->lookupType(id->getName(), &scope, &type);
+    if(type && scope == currentScope)
+    {
+        //invalid redeclaration of type T
+        error(node, Errors::E_INVALID_REDECLARATION_1, id->getName());
+        return nullptr;
+    }
+    //prepare for generic types
+    GenericDefinitionPtr generic;
+    GenericParametersDefPtr genericParams;
+    if(node->getNodeType() == NodeType::Class)
+        genericParams = std::static_pointer_cast<ClassDef>(node)->getGenericParametersDef();
+    else if(node->getNodeType() == NodeType::Struct)
+        genericParams = std::static_pointer_cast<StructDef>(node)->getGenericParametersDef();
+    if(genericParams)
+    {
+        generic = prepareGenericTypes(genericParams);
+        generic->registerTo(currentScope);
+    }
+
+    //check inheritance clause
+    TypePtr parent = nullptr;
+    std::vector<TypePtr> protocols;
+    bool first = true;
+
+    for(const TypeIdentifierPtr& parentType : node->getParents())
+    {
+        parentType->accept(this);
+        TypePtr ptr = this->lookupType(parentType);
+        if(ptr->getCategory() == Type::Class && category == Type::Class)
+        {
+            if(!first)
+            {
+                //only the first type can be class type
+                std::wstringstream out;
+                NodeSerializerW serializer(out);
+                parentType->accept(&serializer);
+                error(parentType, Errors::E_SUPERCLASS_MUST_APPEAR_FIRST_IN_INHERITANCE_CLAUSE_1, out.str());
+                return nullptr;
+            }
+            first = false;
+            parent = ptr;
+        }
+        else if(ptr->getCategory() == Type::Protocol)
+        {
+            protocols.push_back(ptr);
+        }
+        else
+        {
+            std::wstringstream out;
+            NodeSerializerW serializer(out);
+            parentType->accept(&serializer);
+            if(category == Type::Class)
+                error(parentType, Errors::E_INHERITANCE_FROM_NONE_PROTOCOL_NON_CLASS_TYPE_1, out.str());
+            else
+                error(parentType, Errors::E_INHERITANCE_FROM_NONE_PROTOCOL_TYPE_1, out.str());
+            return nullptr;
+        }
+    }
+
+
+    //register this type
+    type = Type::newType(node->getIdentifier()->getName(), category, node, parent, protocols, generic);
+    node->setType(type);
+    currentScope->addSymbol(type);
+
+    if(currentType)
+        static_pointer_cast<TypeBuilder>(currentType)->addMember(type->getName(), type);
+    return type;
+}
+
+void SemanticAnalyzer::visitTypeAlias(const TypeAliasPtr& node)
+{
+    SymbolScope* scope = nullptr;
+    TypePtr type;
+    SymbolScope* currentScope = symbolRegistry->getCurrentScope();
+
+    //check if this type is already defined
+    symbolRegistry->lookupType(node->getName(), &scope, &type);
+    if(type && scope == currentScope)
+    {
+        //invalid redeclaration of type T
+        error(node, Errors::E_INVALID_REDECLARATION_1, node->getName());
+        return;
+    }
+    if(currentType && currentType->getCategory() == Type::Protocol && !node->getType())
+    {
+        //register a type place holder for protocol
+        type = Type::getPlaceHolder();
+    }
+    else
+    {
+        type = lookupType(node->getType());
+    }
+    currentScope->addSymbol(node->getName(), type);
+    if(currentType)
+    {
+        static_pointer_cast<TypeBuilder>(currentType)->addMember(node->getName(), type);
+    }
+}
+
+
+void SemanticAnalyzer::visitClass(const ClassDefPtr& node)
+{
+    TypePtr type = defineType(node, Type::Class);
+    StackedValueGuard<TypePtr> currentType(this->currentType);
+    currentType.set(type);
+
+
+    NodeVisitor::visitClass(node);
+    verifyProtocolConform(type);
+
+}
+void SemanticAnalyzer::visitStruct(const StructDefPtr& node)
+{
+    TypeBuilderPtr type = static_pointer_cast<TypeBuilder>(defineType(node, Type::Struct));
+    type->setInitializer(FunctionOverloadedSymbolPtr(new FunctionOverloadedSymbol()));
+
+    StackedValueGuard<TypePtr> currentType(this->currentType);
+    currentType.set(type);
+
+    NodeVisitor::visitStruct(node);
+    //Type verification and typealias inference
+
+    for(auto entry : type->getAllParents())
+    {
+        TypePtr parent = entry.first;
+        if(parent->getCategory() != Type::Protocol || !(parent->containsAssociatedType() || parent->containsSelfType()))
+            continue;
+        //this parent is a protocol that contains associated type, now validate protocol's methods and infer the types out
+        std::map<std::wstring, TypePtr> types = parent->getAssociatedTypes();
+        if(parent->containsSelfType())
+            types.insert(make_pair(L"Self", type));
+
+        for(const FunctionOverloadedSymbolPtr& funcs : parent->getDeclaredFunctions())
+        {
+            for(const FunctionSymbolPtr& expectedFunc : *funcs)
+            {
+                TypePtr expectedType = expectedFunc->getType();
+                assert(expectedType != nullptr);
+                bool matched = false;
+
+                for(auto func : FunctionIterator(type, expectedFunc->getName()))
+                {
+                    TypePtr actualType = func->getType();
+                    assert(actualType != nullptr);
+                    if(expectedType->canSpecializeTo(actualType, types))
+                    {
+                        matched = true;
+                        break;
+                    }
+                }
+                if(!matched)
+                {
+                    //no matched function
+                    error(node, Errors::E_TYPE_DOES_NOT_CONFORM_TO_PROTOCOL_UNIMPLEMENTED_FUNCTION_3, type->getName(), parent->getName(), expectedFunc->getName());
+                    return;
+                }
+            }
+        }
+        //now make types infered above visible
+
+        for(auto entry : types)
+        {
+            if(entry.first == L"Self")
+                continue;
+            type->addMember(entry.first, entry.second);
+        }
+    }
+
+    verifyProtocolConform(type);
+
+
+
+
+
+    /*
+    Rule of initializers for structure:
+    1) If no custom initializers, compiler will prepare one or two initializers:
+        1.1) A default initializer with no arguments if all let/var fields are defined with a default value
+        1.2) A default initializer with all let/var fields as initializer's parameters with the same external name,
+            the order of the parameters are the exactly the same as them defined in structure
+    2) Compiler will not generate initializers if there's custom initializers
+     */
+    //TypePtr type = node->getType();
+    if(type->getInitializer()->numOverloads() == 0)
+    {
+        //check all fields if they all have initializer
+        bool hasDefaultValues = true;
+        for(auto sym : type->getDeclaredStoredProperties())
+        {
+            if(ValueBindingPtr binding = std::dynamic_pointer_cast<ValueBinding>(sym))
+            {
+                //TODO: skip computed property
+                //TODO: Type only records SymbolPtr
+                if(!binding->getInitializer())
+                {
+                    hasDefaultValues = false;
+                    break;
+                }
+            }
+        }
+        if(hasDefaultValues)
+        {
+            //apply rule 1
+            std::vector<Type::Parameter> params;
+            TypePtr initType = Type::newFunction(params, type, false);
+            FunctionSymbolPtr initializer(new FunctionSymbol(node->getIdentifier()->getName(), initType, nullptr));
+            type->getInitializer()->add(initializer);
+        }
+
+    }
+
+
+}
+void SemanticAnalyzer::visitEnum(const EnumDefPtr& node)
+{
+    defineType(node, Type::Enum);
+    NodeVisitor::visitEnum(node);
+}
+void SemanticAnalyzer::visitProtocol(const ProtocolDefPtr& node)
+{
+    TypePtr type = defineType(node, Type::Protocol);
+
+    StackedValueGuard<TypePtr> currentType(this->currentType);
+    currentType.set(type);
+
+    NodeVisitor::visitProtocol(node);
+}
+void SemanticAnalyzer::visitExtension(const ExtensionDefPtr& node)
+{
+    NodeVisitor::visitExtension(node);
+
+}
+
+
+
+/**
+* Verify if the specified type conform to the given protocol
+*/
+void SemanticAnalyzer::verifyProtocolConform(const TypePtr& type)
+{
+    for(const TypePtr& protocol : type->getProtocols())
+    {
+        if(protocol->containsAssociatedType())
+            continue;//it's already done in SymbolResolveAction.cpp
+        verifyProtocolConform(type, protocol);
+    }
+}
+void SemanticAnalyzer::verifyProtocolConform(const TypePtr& type, const TypePtr& protocol)
+{
+    for(auto entry : protocol->getDeclaredMembers())
+    {
+        SymbolPtr requirement = entry.second;
+        if(FunctionOverloadedSymbolPtr funcs = std::dynamic_pointer_cast<FunctionOverloadedSymbol>(requirement))
+        {
+            //verify function
+            for(auto func : *funcs)
+            {
+                verifyProtocolFunction(type, protocol, func);
+            }
+        }
+        else if(FunctionSymbolPtr func = std::dynamic_pointer_cast<FunctionSymbol>(requirement))
+        {
+            //verify function
+            verifyProtocolFunction(type, protocol, func);
+        }
+            /*
+            else if(requirement == Type::getPlaceHolder())
+            {
+                //verify inner type
+                SymbolPtr sym = type->getAssociatedType(entry.first);
+                if(!(std::dynamic_pointer_cast<Type>(sym)))
+                {
+                    //Type %0 does not conform to protocol %1, unimplemented type %2
+                    error(type->getReference(), Errors::E_TYPE_DOES_NOT_CONFORM_TO_PROTOCOL_UNIMPLEMENTED_TYPE_3, type->getName(), protocol->getName(), entry.first);
+                }
+            }*/
+        else if(TypePtr t = std::dynamic_pointer_cast<Type>(requirement))
+        {
+            //type can be ignored
+        }
+        else if(SymbolPlaceHolderPtr prop = std::dynamic_pointer_cast<SymbolPlaceHolder>(requirement))
+        {
+            //verify computed properties
+            assert(prop->flags & SymbolPlaceHolder::F_MEMBER && prop->getRole() == SymbolPlaceHolder::R_PROPERTY);
+            SymbolPtr sym = type->getMember(entry.first);
+            SymbolPlaceHolderPtr sp = std::dynamic_pointer_cast<SymbolPlaceHolder>(sym);
+            if(!sp)
+            {
+                error(type->getReference(), Errors::E_TYPE_DOES_NOT_CONFORM_TO_PROTOCOL_UNIMPLEMENTED_PROPERTY_3, type->getName(), protocol->getName(), entry.first);
+            }
+            bool expectedSetter = prop->flags & SymbolPlaceHolder::F_WRITABLE;
+            bool actualSetter = sp->flags & SymbolPlaceHolder::F_WRITABLE;
+            if(expectedSetter && !actualSetter)
+            {
+                error(type->getReference(), Errors::E_TYPE_DOES_NOT_CONFORM_TO_PROTOCOL_UNWRITABLE_PROPERTY_3, type->getName(), protocol->getName(), entry.first);
+            }
+        }
+    }
+}
+void SemanticAnalyzer::verifyProtocolFunction(const TypePtr& type, const TypePtr& protocol, const FunctionSymbolPtr& expected)
+{
+    SymbolPtr sym = type->getMember(expected->getName());
+    TypePtr expectedType = expected->getType();
+    assert(expectedType != nullptr);
+    if(!sym)
+    {
+        error(type->getReference(), Errors::E_TYPE_DOES_NOT_CONFORM_TO_PROTOCOL_UNIMPLEMENTED_FUNCTION_3, type->getName(), protocol->getName(), expected->getName());
+        return;
+    }
+    else if(const FunctionSymbolPtr& func = std::dynamic_pointer_cast<FunctionSymbol>(sym))
+    {
+        //verify if they're the same type
+        TypePtr funcType = func->getType();
+        assert(funcType != nullptr);
+        if(*funcType != *expectedType)
+        {
+            error(type->getReference(),  Errors::E_TYPE_DOES_NOT_CONFORM_TO_PROTOCOL_UNIMPLEMENTED_FUNCTION_3, type->getName(), protocol->getName(), expected->getName());
+        }
+        return;
+    }
+    else if(FunctionOverloadedSymbolPtr funcs = std::dynamic_pointer_cast<FunctionOverloadedSymbol>(sym))
+    {
+        //verify if they're the same type
+        bool found = false;
+        for(const FunctionSymbolPtr& func : *funcs)
+        {
+            if(*func->getType() == *expectedType)
+            {
+                found = true;
+                break;
+            }
+        }
+        if(!found)
+            error(type->getReference(), Errors::E_TYPE_DOES_NOT_CONFORM_TO_PROTOCOL_UNIMPLEMENTED_FUNCTION_3, type->getName(), protocol->getName(), expected->getName());
+        return;
+    }
+    else if(SymbolPlaceHolderPtr prop = std::dynamic_pointer_cast<SymbolPlaceHolder>(sym))
+    {
+
+
+    }
+    error(type->getReference(), Errors::E_TYPE_DOES_NOT_CONFORM_TO_PROTOCOL_UNIMPLEMENTED_FUNCTION_3, type->getName(), protocol->getName(), expected->getName());
+}
