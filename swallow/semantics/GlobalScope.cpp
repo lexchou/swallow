@@ -1,5 +1,5 @@
 #include "GlobalScope.h"
-#include "type.h"
+#include "Type.h"
 #include "FunctionSymbol.h"
 #include "FunctionOverloadedSymbol.h"
 #include "GenericDefinition.h"

@@ -11,6 +11,7 @@
 #include "TypeBuilder.h"
 #include "FunctionIterator.h"
 #include <cassert>
+#include <algorithm>
 
 
 USE_SWIFT_NS

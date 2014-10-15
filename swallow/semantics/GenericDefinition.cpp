@@ -1,6 +1,6 @@
 #include "GenericDefinition.h"
 #include <cassert>
-#include <semantics/type.h>
+#include "Type.h"
 #include "SymbolScope.h"
 
 USE_SWIFT_NS

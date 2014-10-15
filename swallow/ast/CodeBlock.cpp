@@ -1,4 +1,3 @@
-#include <semantics/type.h>
 #include "CodeBlock.h"
 #include "NodeVisitor.h"
 #include <cassert>
@@ -49,5 +48,5 @@ const TypePtr& CodeBlock::getType()const
 void CodeBlock::setType(const TypePtr& type)
 {
     this->type = type;
-    assert(type && type->getCategory() == Type::Function);
+//    assert(type && type->getCategory() == Type::Function);
 }

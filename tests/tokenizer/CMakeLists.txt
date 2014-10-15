@@ -17,7 +17,7 @@ INCLUDE_DIRECTORIES(
 SET( CMAKE_BUILD_TYPE Debug )
 SET(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/../bin)
 cmake_policy(SET CMP0015 OLD)
-SET(CMAKE_CXX_FLAGS "$ENV{CXXFLAGS} -O0 -Wall -g -ggdb -std=c++0x -Qunused-arguments")
+SET(CMAKE_CXX_FLAGS "$ENV{CXXFLAGS} -O0 -Wall -g -ggdb -std=c++0x")
 
 add_definitions(-DTRACE_NODE)
 
