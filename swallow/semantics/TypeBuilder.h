@@ -14,6 +14,8 @@ public:
 
     void setParentType(const TypePtr& type);
 
+    void setInnerType(const TypePtr& type);
+
     /**
     * Adds a protocol that this type conform to
     */

@@ -108,6 +108,12 @@ std::wstring CompilerResults::getErrorTemplate(int errorCode)
         case Errors::E_SAME_TYPE_REQUIREMENTS_MAKES_GENERIC_PARAMETER_NON_GENERIC_1: return L"Same-type requirement makes generic parameter '%' non-generic";
         case Errors::E_PROTOCOL_CAN_ONLY_BE_USED_AS_GENERIC_CONSTRAINT_1: return L"Protocol '%0' can only be used as a generic constraint because it has Self or associated type requirements";
         case Errors::E_UNDEFINED_SUBSCRIPT_ACCESS_FOR_1: return L"Undefined subscript access for '%0'";
+        case Errors::E_A_IS_NOT_A_MEMBER_TYPE_OF_B_2: return L"'%0' is not a member type of '%2'";
+        case Errors::E_TYPE_A_NESTED_IN_GENERIC_TYPE_B_IS_NOT_ALLOWED_2: return L"type '%0' nested in generic type '%1' is not allowed";
+        case Errors::E_GENERIC_TYPE_A_NESTED_IN_TYPE_B_IS_NOT_ALLOWED_2: return L"generic type '%0' nested in type '%1' is not allowed";
+
+
+
         case Errors::W_PARAM_CAN_BE_EXPRESSED_MORE_SUCCINCTLY_1: return L"'%0 %0' can be expressed more succinctly as '#%0'";
         case Errors::W_EXTRANEOUS_SHARTP_IN_PARAMETER_1: return L"Extraneous '#' in parameter: '%0' is already the keyword argument name";
     }

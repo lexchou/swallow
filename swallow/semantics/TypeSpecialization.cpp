@@ -17,7 +17,8 @@ static TypePtr specialize(const TypePtr& type, const GenericArgumentPtr& argumen
         return nullptr;
     if(!type->containsGenericParameters())
         return type;
-    switch(type->getCategory())
+    Type::Category category = type->getCategory();
+    switch(category)
     {
         case Type::GenericParameter:
         {
@@ -75,7 +76,9 @@ TypePtr Type::newSpecializedType(const TypePtr& innerType, const GenericArgument
         SymbolPtr sym = entry.second;
         if(TypePtr type = dynamic_pointer_cast<Type>(sym))
         {
+
             sym = specialize(type, arguments);
+            assert(sym != nullptr);
         }
         else if(FunctionSymbolPtr func = dynamic_pointer_cast<FunctionSymbol>(sym))
         {
@@ -117,10 +120,15 @@ TypePtr Type::newSpecializedType(const TypePtr& innerType, const TypePtr& argume
 
 bool Type::canSpecializeTo(const TypePtr& type, std::map<std::wstring, TypePtr>& typeMap)const
 {
-    if(category == GenericParameter)
+    TypePtr self = static_pointer_cast<Type>(const_cast<Type*>(this)->shared_from_this())->unwrap();
+
+    if(self->category == Alias)
     {
+        //it's a alias, type inferece only for undefined alias
+        assert(self->innerType == nullptr);
+
         auto iter = typeMap.find(name);
-        if(iter == typeMap.end())
+        if (iter == typeMap.end())
         {
             //this matches any type
             typeMap.insert(make_pair(name, type));
@@ -129,7 +137,7 @@ bool Type::canSpecializeTo(const TypePtr& type, std::map<std::wstring, TypePtr>&
         else
         {
             //only match the defined/inference type
-            if(Type::equals(iter->second, type))
+            if (Type::equals(iter->second, type))
                 return true;
             return false;
         }
@@ -145,16 +153,20 @@ bool Type::canSpecializeTo(const TypePtr& type, std::map<std::wstring, TypePtr>&
         case Enum:
         case Protocol:
         {
-            TypePtr self = static_pointer_cast<Type>(const_cast<Type*>(this)->shared_from_this());
             return equals(self, type);
+        }
+        case Alias:
+        {
+            assert(0);
+            return true;
         }
         case Tuple:
         {
-            if(elementTypes.size() != type->elementTypes.size())
+            if(self->elementTypes.size() != type->elementTypes.size())
                 return false;
-            auto iter1 = elementTypes.begin();
+            auto iter1 = self->elementTypes.begin();
             auto iter2 = type->elementTypes.begin();
-            for(; iter1 != elementTypes.end(); iter1++, iter2++)
+            for(; iter1 != self->elementTypes.end(); iter1++, iter2++)
             {
                 if(!(*iter1)->canSpecializeTo(*iter2, typeMap))
                     return false;
@@ -166,10 +178,10 @@ bool Type::canSpecializeTo(const TypePtr& type, std::map<std::wstring, TypePtr>&
             if (!equals(innerType, type->innerType))
                 return false;
             //check generic argument, every argument must be able to specialized to the corresponding argument in given type
-            assert(genericArguments != nullptr && type->genericArguments != nullptr);
-            auto iter1 = genericArguments->begin();
+            assert(self->genericArguments != nullptr && type->genericArguments != nullptr);
+            auto iter1 = self->genericArguments->begin();
             auto iter2 = type->genericArguments->begin();
-            for (; iter1 != genericArguments->end(); iter1++, iter2++)
+            for (; iter1 != self->genericArguments->end(); iter1++, iter2++)
             {
                 if (!(*iter1)->canSpecializeTo(*iter2, typeMap))
                     return false;
@@ -181,16 +193,16 @@ bool Type::canSpecializeTo(const TypePtr& type, std::map<std::wstring, TypePtr>&
         case Function:
         case Closure:
         {
-            if(parameters.size() != type->parameters.size())
+            if(self->parameters.size() != type->parameters.size())
                 return false;
-            if(!returnType->canSpecializeTo(type->returnType, typeMap))
+            if(!self->returnType->canSpecializeTo(type->returnType, typeMap))
                 return false;
             //the type to test should not be a generic function
             if(type->genericDefinition)
                 return false;
-            auto iter1 = parameters.begin();
+            auto iter1 = self->parameters.begin();
             auto iter2 = type->parameters.begin();
-            for(; iter1 != parameters.end(); iter1++, iter2++)
+            for(; iter1 != self->parameters.end(); iter1++, iter2++)
             {
                 if((iter1->name != iter2->name) || (iter1->inout != iter2->inout))
                     return false;
@@ -200,6 +212,7 @@ bool Type::canSpecializeTo(const TypePtr& type, std::map<std::wstring, TypePtr>&
             return true;
         }
         case GenericParameter://Placeholder for generic type
+            assert(0);
             return false;
         case Self:
             auto iter = typeMap.find(L"Self");

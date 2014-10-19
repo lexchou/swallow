@@ -30,7 +30,8 @@ void GlobalScope::initPrimitiveTypes()
     addSymbol(t_Float = Type::newType(L"Float", Type::Aggregate));
     addSymbol(t_Double = Type::newType(L"Double", Type::Aggregate));
     addSymbol(t_String = Type::newType(L"String", Type::Aggregate));
-    addSymbol(t_Void = Type::newTuple(std::vector<TypePtr>()));
+    addSymbol(L"Void", t_Void = Type::newTuple(std::vector<TypePtr>()));
+
 //Register built-in variables
     addSymbol(s_True = SymbolPtr(new SymbolPlaceHolder(L"true", t_Bool, SymbolPlaceHolder::R_LOCAL_VARIABLE, SymbolPlaceHolder::F_INITIALIZED)));
     addSymbol(s_False = SymbolPtr(new SymbolPlaceHolder(L"false", t_Bool, SymbolPlaceHolder::R_LOCAL_VARIABLE, SymbolPlaceHolder::F_INITIALIZED)));
@@ -42,7 +43,7 @@ void GlobalScope::initPrimitiveTypes()
         TypeBuilderPtr builder = static_pointer_cast<TypeBuilder>(t_Array);
         {
             std::vector<Type::Parameter> params = {Type::Parameter(T)};
-            TypePtr t_append = Type::newFunction(params, nullptr, false, nullptr);
+            TypePtr t_append = Type::newFunction(params, t_Void, false, nullptr);
 
             FunctionSymbolPtr append(new FunctionSymbol(L"append", t_append, nullptr));
             builder->addMember(append);

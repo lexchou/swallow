@@ -20,7 +20,7 @@ INCLUDE_DIRECTORIES(
 SET( CMAKE_BUILD_TYPE Debug )
 SET(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/../bin)
 cmake_policy(SET CMP0015 OLD)
-SET(CMAKE_CXX_FLAGS "$ENV{CXXFLAGS} -O0 -Wall -g -ggdb -std=c++0x")
+SET(CMAKE_CXX_FLAGS "$ENV{CXXFLAGS} -O0 -Wall -g -ggdb -std=c++11")
 
 
 
@@ -43,7 +43,6 @@ SET(SWALLOW_SRC
     semantics/ScopeOwner.cpp
     semantics/ScopedNodes.cpp
     semantics/ScopedNodeFactory.cpp
-    semantics/SemanticNodeVisitor.cpp
     semantics/Type.cpp
     semantics/FunctionSymbol.cpp
     semantics/FunctionOverloadedSymbol.cpp

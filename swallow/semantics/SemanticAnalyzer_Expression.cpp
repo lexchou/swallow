@@ -353,7 +353,7 @@ void SemanticAnalyzer::visitFunctionCall(const SymbolPtr& sym, const FunctionCal
 
 void SemanticAnalyzer::visitReturn(const ReturnStatementPtr& node)
 {
-    SemanticNodeVisitor::visitReturn(node);
+    NodeVisitor::visitReturn(node);
     Node* owner = symbolRegistry->getCurrentScope()->getOwner();
     assert(owner != nullptr);
     TypePtr funcType;
@@ -593,7 +593,7 @@ void SemanticAnalyzer::visitDictionaryLiteral(const DictionaryLiteralPtr& node)
 }
 void SemanticAnalyzer::visitParenthesizedExpression(const ParenthesizedExpressionPtr& node)
 {
-    SemanticNodeVisitor::visitParenthesizedExpression(node);
+    NodeVisitor::visitParenthesizedExpression(node);
     std::vector<TypePtr> types;
     for(const ParenthesizedExpression::Term& element : *node)
     {
@@ -606,7 +606,7 @@ void SemanticAnalyzer::visitParenthesizedExpression(const ParenthesizedExpressio
 }
 void SemanticAnalyzer::visitTuple(const TuplePtr& node)
 {
-    SemanticNodeVisitor::visitTuple(node);
+    NodeVisitor::visitTuple(node);
     std::vector<TypePtr> types;
     for(const Tuple::Element& element : *node)
     {
@@ -644,7 +644,7 @@ void SemanticAnalyzer::visitConditionalOperator(const ConditionalOperatorPtr& no
 }
 void SemanticAnalyzer::visitBinaryOperator(const BinaryOperatorPtr& node)
 {
-    SemanticNodeVisitor::visitBinaryOperator(node);
+    NodeVisitor::visitBinaryOperator(node);
     //look for binary function that matches
     OperatorInfo* op = symbolRegistry->getOperator(node->getOperator());
     SymbolPtr sym = symbolRegistry->lookupSymbol(node->getOperator());

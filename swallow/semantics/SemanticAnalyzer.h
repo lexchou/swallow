@@ -1,6 +1,6 @@
 #ifndef SEMANTIC_ANALYZER_H
 #define SEMANTIC_ANALYZER_H
-#include "SemanticNodeVisitor.h"
+#include "ast/NodeVisitor.h"
 #include "Type.h"
 
 SWIFT_NS_BEGIN
@@ -10,7 +10,7 @@ class CompilerResults;
 class TypeDeclaration;
 class Expression;
 class Pattern;
-class SemanticAnalyzer : public SemanticNodeVisitor
+class SemanticAnalyzer : public NodeVisitor
 {
 public:
     SemanticAnalyzer(SymbolRegistry* symbolRegistry, CompilerResults* compilerResults);
@@ -67,6 +67,7 @@ public:
     virtual void visitExtension(const ExtensionDefPtr& node) override;
     virtual void visitProtocol(const ProtocolDefPtr& node) override;
     */
+    SymbolRegistry* getSymbolRegistry() { return symbolRegistry;}
 private:
     void visitAccessor(const CodeBlockPtr& accessor, const ParametersPtr& params, const SymbolPtr& setter);
     TypePtr defineType(const std::shared_ptr<TypeDeclaration>& node, Type::Category category);
@@ -123,6 +124,42 @@ private:
     void verifyProtocolConform(const TypePtr& type);
     void verifyProtocolConform(const TypePtr& type, const TypePtr& protocol);
     void verifyProtocolFunction(const TypePtr& type, const TypePtr& protocol, const FunctionSymbolPtr& expected);
+
+
+protected:
+    /**
+    * Abort the visitor
+    */
+    void abort();
+
+    /**
+    * Outputs an compiler error
+    */
+    void error(const NodePtr& node, int code);
+    void error(const NodePtr& node, int code, const std::vector<std::wstring>& items);
+    void error(const NodePtr& node, int code, const std::wstring& item);
+    void error(const NodePtr& node, int code, const std::wstring& item1, const std::wstring& item2);
+    void error(const NodePtr& node, int code, const std::wstring& item1, const std::wstring& item2, const std::wstring& item3);
+    void error(const NodePtr& node, int code, const std::wstring& item1, const std::wstring& item2, const std::wstring& item3, const std::wstring& item4);
+
+
+    /**
+    * Outputs an compiler error
+    */
+    void warning(const NodePtr& node, int code, const std::wstring& item = std::wstring());
+
+
+    /**
+    * Convert a AST TypeNode into symboled Type
+    */
+    TypePtr lookupType(const TypeNodePtr& type);
+    std::wstring toString(const NodePtr& node);
+    std::wstring toString(int i);
+private:
+    TypePtr lookupTypeImpl(const TypeNodePtr& type);
+protected:
+    SymbolRegistry* symbolRegistry;
+    CompilerResults* compilerResults;
 private:
     //hint for parsing Array/tuple/dictionary literal
     TypePtr t_hint;
@@ -132,6 +169,28 @@ private:
 
 
 
+template<class T>
+struct StackedValueGuard
+{
+    StackedValueGuard(T & value)
+            :ref(value), value(value)
+    {
+
+    }
+    void set(const T& val)
+    {
+        ref = val;
+    }
+
+    ~StackedValueGuard()
+    {
+        ref = value;
+    }
+
+    T& ref;
+    T value;
+
+};
 
 SWIFT_NS_END
 

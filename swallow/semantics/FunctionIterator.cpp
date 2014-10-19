@@ -31,6 +31,11 @@ const FunctionIterator::iterator& FunctionIterator::iterator::operator++()
 }
 void FunctionIterator::iterator::moveNext()
 {
+    if(begin == end)
+    {
+        value = nullptr;
+        type = type->getParentType();
+    }
     //move to the parent type
     for(;type; type = type->getParentType())
     {

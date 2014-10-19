@@ -316,7 +316,7 @@ void SemanticAnalyzer::visitFunction(const FunctionDefPtr& node)
 
 void SemanticAnalyzer::visitDeinit(const DeinitializerDefPtr& node)
 {
-    SemanticNodeVisitor::visitDeinit(node);
+    NodeVisitor::visitDeinit(node);
 }
 
 void SemanticAnalyzer::visitInit(const InitializerDefPtr& node)

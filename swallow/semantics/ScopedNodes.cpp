@@ -1,11 +1,11 @@
 #include "ScopedNodes.h"
-#include "SemanticNodeVisitor.h"
 #include "SymbolScope.h"
 #include "SymbolRegistry.h"
 #include "ast/TypeIdentifier.h"
 #include <cassert>
 #include "ast/Identifier.h"
 #include "ScopeGuard.h"
+#include "ast/NodeVisitor.h"
 
 USE_SWIFT_NS
 

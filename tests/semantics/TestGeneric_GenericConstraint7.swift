@@ -26,6 +26,6 @@ struct Stack<T>: Container {
     }
 }
 
-
+var a : Stack<Int>.ItemType = 3
 
 

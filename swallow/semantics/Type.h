@@ -47,6 +47,7 @@ public:
         Closure,
         MetaType,
         GenericParameter,//Placeholder for generic type
+        Alias,// Alias for another type
         Self// A fake place holder, protocol use this type to present the final type that conform to the protocol
     };
 private:
@@ -202,6 +203,11 @@ public://properties
      * convert this type to string representation
      */
     std::wstring toString() const;
+
+    /**
+     * Unwrap the alias chain, return the last node of the alias chain
+     */
+    TypePtr unwrap() const;
 public://member access
     SymbolPtr getMember(const std::wstring& name) const;
     SymbolPtr getDeclaredMember(const std::wstring& name) const;

@@ -1,5 +1,6 @@
 #include "GenericArgument.h"
 #include "GenericDefinition.h"
+#include <cassert>
 
 USE_SWIFT_NS
 
@@ -20,6 +21,7 @@ TypePtr GenericArgument::get(size_t index) const
 }
 TypePtr GenericArgument::get(const std::wstring& name) const
 {
+    assert(!name.empty());
     auto iter = definition->constraints.find(name);
     if(iter == definition->constraints.end())
         return nullptr;

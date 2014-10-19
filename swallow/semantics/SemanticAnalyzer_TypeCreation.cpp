@@ -37,6 +37,22 @@ TypePtr SemanticAnalyzer::defineType(const std::shared_ptr<TypeDeclaration>& nod
         genericParams = std::static_pointer_cast<ClassDef>(node)->getGenericParametersDef();
     else if(node->getNodeType() == NodeType::Struct)
         genericParams = std::static_pointer_cast<StructDef>(node)->getGenericParametersDef();
+
+    //check if it's defined as a nested type
+    if(currentType)
+    {
+        if(genericParams)
+        {
+            error(node, Errors::E_GENERIC_TYPE_A_NESTED_IN_TYPE_B_IS_NOT_ALLOWED_2, id->getName(), currentType->getName());
+            return nullptr;
+        }
+        if(currentType->isGenericType())
+        {
+            error(node, Errors::E_TYPE_A_NESTED_IN_GENERIC_TYPE_B_IS_NOT_ALLOWED_2, id->getName(), currentType->getName());
+            return nullptr;
+        }
+    }
+
     if(genericParams)
     {
         generic = prepareGenericTypes(genericParams);
@@ -108,14 +124,15 @@ void SemanticAnalyzer::visitTypeAlias(const TypeAliasPtr& node)
         error(node, Errors::E_INVALID_REDECLARATION_1, node->getName());
         return;
     }
+    type = Type::newType(node->getName(), Type::Alias);
     if(currentType && currentType->getCategory() == Type::Protocol && !node->getType())
     {
         //register a type place holder for protocol
-        type = Type::getPlaceHolder();
     }
     else
     {
-        type = lookupType(node->getType());
+        TypePtr innerType = lookupType(node->getType());
+        static_pointer_cast<TypeBuilder>(type)->setInnerType(innerType);
     }
     currentScope->addSymbol(node->getName(), type);
     if(currentType)
@@ -153,9 +170,16 @@ void SemanticAnalyzer::visitStruct(const StructDefPtr& node)
         if(parent->getCategory() != Type::Protocol || !(parent->containsAssociatedType() || parent->containsSelfType()))
             continue;
         //this parent is a protocol that contains associated type, now validate protocol's methods and infer the types out
-        std::map<std::wstring, TypePtr> types = parent->getAssociatedTypes();
+        std::map<std::wstring, TypePtr> associatedTypes;
+        //collect all defined associated types
+        for(auto entry : parent->getAssociatedTypes())
+        {
+            TypePtr type = entry.second->unwrap();
+            if(type->getCategory() != Type::Alias)
+                associatedTypes.insert(make_pair(entry.first, type));
+        }
         if(parent->containsSelfType())
-            types.insert(make_pair(L"Self", type));
+            associatedTypes.insert(make_pair(L"Self", type));
 
         for(const FunctionOverloadedSymbolPtr& funcs : parent->getDeclaredFunctions())
         {
@@ -169,7 +193,7 @@ void SemanticAnalyzer::visitStruct(const StructDefPtr& node)
                 {
                     TypePtr actualType = func->getType();
                     assert(actualType != nullptr);
-                    if(expectedType->canSpecializeTo(actualType, types))
+                    if(expectedType->canSpecializeTo(actualType, associatedTypes))
                     {
                         matched = true;
                         break;
@@ -185,7 +209,7 @@ void SemanticAnalyzer::visitStruct(const StructDefPtr& node)
         }
         //now make types infered above visible
 
-        for(auto entry : types)
+        for(auto entry : associatedTypes)
         {
             if(entry.first == L"Self")
                 continue;

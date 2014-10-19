@@ -81,8 +81,9 @@ Swift::ScopedProgramPtr analyzeStatement(Swift::SymbolRegistry& registry, Swift:
     FunctionOverloadedSymbolPtr println(new FunctionOverloadedSymbol());
     {
         TypePtr t_int = registry.lookupType(L"Int");
+        TypePtr t_Void = registry.lookupType(L"Void");
         std::vector<Type::Parameter> parameters = {Type::Parameter(t_int)};
-        TypePtr type = Type::newFunction(parameters, nullptr, false);
+        TypePtr type = Type::newFunction(parameters, t_Void, false);
         FunctionSymbolPtr println_int(new FunctionSymbol(L"println", type, nullptr));
         println->add(println_int);
     }

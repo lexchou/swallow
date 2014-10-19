@@ -26,6 +26,10 @@ void TypeBuilder::setParentType(const TypePtr &type)
 {
     this->parentType = type;
 }
+void TypeBuilder::setInnerType(const TypePtr &type)
+{
+    innerType = type;
+}
 void TypeBuilder::addProtocol(const TypePtr &protocol)
 {
     protocols.push_back(protocol);
@@ -111,7 +115,10 @@ void TypeBuilder::addMember(const std::wstring& name, const SymbolPtr& member)
             functions.push_back(funcs);
         }
         else
+        {
+            member->getName();
             assert(0 && "Unknown member type");
+        }
     }
 }
 

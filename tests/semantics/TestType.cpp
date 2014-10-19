@@ -35,18 +35,19 @@ TEST(TestType, testInheritance)
 
 }
 
-TEST(TtestType, testTypealias)
+TEST(TestType, testTypealias)
 {
     SEMANTIC_ANALYZE(L"typealias IntegerLiteralType = Int");
     TypePtr IntegerLiteralType, Int;
 
     Int = symbolRegistry.lookupType(L"Int");
     ASSERT_NOT_NULL(IntegerLiteralType = std::dynamic_pointer_cast<Type>(scope->lookup(L"IntegerLiteralType")));
-    ASSERT_EQ(Int, IntegerLiteralType);
+    ASSERT_EQ(Type::Alias, IntegerLiteralType->getCategory());
+    ASSERT_EQ(Int, IntegerLiteralType->unwrap());
 }
 
 
-TEST(TtestType, testTypealias_UndeclaredType)
+TEST(TestType, testTypealias_UndeclaredType)
 {
     SEMANTIC_ANALYZE(L"typealias IntegerLiteralType = Intff");
 
@@ -57,7 +58,7 @@ TEST(TtestType, testTypealias_UndeclaredType)
     ASSERT_EQ(L"Intff", result.items[0]);
 }
 
-TEST(TtestType, testTypealias_Redefinition)
+TEST(TestType, testTypealias_Redefinition)
 {
     SEMANTIC_ANALYZE(L"typealias IntegerLiteralType = Int\n"
             "typealias IntegerLiteralType = Intff");
@@ -67,4 +68,36 @@ TEST(TtestType, testTypealias_Redefinition)
 
     ASSERT_EQ(Errors::E_INVALID_REDECLARATION_1, result.code);
     ASSERT_EQ(L"IntegerLiteralType", result.items[0]);
+}
+TEST(TestType, NestedGenericType)
+{
+    SEMANTIC_ANALYZE(L"class Base"
+            "{"
+            "    class Child<T>"
+            "    {"
+            "    }"
+            "}");
+    //generic type 'Child' nested in type 'Base' is not allowed
+    ASSERT_EQ(1, compilerResults.numResults());
+    auto result = compilerResults.getResult(0);
+    ASSERT_EQ(Errors::E_GENERIC_TYPE_A_NESTED_IN_TYPE_B_IS_NOT_ALLOWED_2, result.code);
+    ASSERT_EQ(L"Child", result.items[0]);
+    ASSERT_EQ(L"Base", result.items[1]);
+}
+
+TEST(TestType, TypeNestedInGenericType)
+{
+    SEMANTIC_ANALYZE(L"class Base<T>"
+            "{"
+            "    class Child"
+            "    {"
+            "    }"
+            "}");
+    //type 'Child' nested in generic type 'Base' is not allowed
+    ASSERT_EQ(1, compilerResults.numResults());
+    auto result = compilerResults.getResult(0);
+
+    ASSERT_EQ(Errors::E_TYPE_A_NESTED_IN_GENERIC_TYPE_B_IS_NOT_ALLOWED_2, result.code);
+    ASSERT_EQ(L"Child", result.items[0]);
+    ASSERT_EQ(L"Base", result.items[1]);
 }

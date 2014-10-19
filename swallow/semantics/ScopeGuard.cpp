@@ -1,6 +1,6 @@
 #include "ScopeGuard.h"
 #include "ScopeOwner.h"
-#include "SemanticNodeVisitor.h"
+#include "SemanticAnalyzer.h"
 #include "SymbolRegistry.h"
 USE_SWIFT_NS
 
@@ -8,10 +8,10 @@ USE_SWIFT_NS
 ScopeGuard::ScopeGuard(ScopeOwner* owner, NodeVisitor* visitor)
     :symbolRegistry(nullptr)
 {
-    SemanticNodeVisitor* semanticNodeVisitor = dynamic_cast<SemanticNodeVisitor*>(visitor);
+    SemanticAnalyzer* semanticNodeVisitor = dynamic_cast<SemanticAnalyzer*>(visitor);
     if(semanticNodeVisitor)
     {
-        symbolRegistry = dynamic_cast<SemanticNodeVisitor *>(visitor)->getSymbolRegistry();
+        symbolRegistry = semanticNodeVisitor->getSymbolRegistry();
         SymbolScope *scope = owner->getScope();
         if(symbolRegistry->getCurrentScope() == scope)
         {

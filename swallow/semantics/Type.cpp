@@ -37,6 +37,7 @@ const TypePtr& Type::getPlaceHolder()
 
 TypePtr Type::newType(const std::wstring& name, Category category, const TypeDeclarationPtr& reference, const TypePtr& parentType, const std::vector<TypePtr>& protocols, const GenericDefinitionPtr& generic)
 {
+    assert(!name.empty());
     TypeBuilder* ret = new TypeBuilder(category);
     ret->name = name;
     ret->reference = reference;
@@ -71,6 +72,7 @@ TypePtr Type::newTuple(const std::vector<TypePtr>& types)
 
 TypePtr Type::newFunction(const std::vector<Parameter>& parameters, const TypePtr& returnType, bool hasVariadicParameters, const GenericDefinitionPtr& generic)
 {
+    assert(returnType != nullptr);
     Type* ret = new TypeBuilder(Function);
     ret->parameters = parameters;
     ret->returnType = returnType;
@@ -394,6 +396,15 @@ bool Type::containsGenericParameters() const
     }
     return false;
 }
+TypePtr Type::unwrap() const
+{
+    TypePtr node = static_pointer_cast<Type>(const_cast<Type*>(this)->shared_from_this());
+    while(node->category == Alias && node->innerType)
+    {
+        node = node->innerType;
+    }
+    return node;
+}
 TypePtr Type::getAssociatedType(const std::wstring& name) const
 {
     SymbolPtr symbol = getMember(name);
@@ -433,7 +444,6 @@ bool Type::operator ==(const Type& rhs)const
         return false;
     if(moduleName != rhs.moduleName)
         return false;
-
     switch(category)
     {
         case Aggregate:
@@ -452,6 +462,16 @@ bool Type::operator ==(const Type& rhs)const
             if(!isGenericDefinitionEquals(genericDefinition, rhs.genericDefinition))
                 return false;
             break;
+        case Alias:
+        {
+            TypePtr a = this->unwrap();
+            TypePtr b = rhs.unwrap();
+            if(a->category == Alias)
+                a = a->innerType;
+            if(b->category == Alias)
+                b = b->innerType;
+            return equals(a, b);
+        }
         case Tuple:
         {
             if (!elementTypes.empty() && !rhs.elementTypes.empty())
@@ -543,6 +563,7 @@ std::wstring Type::toString() const
         case Protocol:
         case Extension:
         case MetaType:
+        case Alias:
             return name;
         case Tuple:
         {

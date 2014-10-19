@@ -78,7 +78,9 @@ struct Errors
         E_SAME_TYPE_REQUIREMENTS_MAKES_GENERIC_PARAMETER_NON_GENERIC_1,//Same-type requirement makes generic parameter '%' non-generic
         E_PROTOCOL_CAN_ONLY_BE_USED_AS_GENERIC_CONSTRAINT_1,//Protocol '%0' can only be used as a generic constraint because it has Self or associated type requirements
         E_UNDEFINED_SUBSCRIPT_ACCESS_FOR_1,// Undefined subscript access for '%0'
-
+        E_A_IS_NOT_A_MEMBER_TYPE_OF_B_2, // '%0' is not a member type of '%2'
+        E_TYPE_A_NESTED_IN_GENERIC_TYPE_B_IS_NOT_ALLOWED_2, //type '%0' nested in generic type '%1' is not allowed
+        E_GENERIC_TYPE_A_NESTED_IN_TYPE_B_IS_NOT_ALLOWED_2, //generic type '%0' nested in type '%1' is not allowed
 
         W_PARAM_CAN_BE_EXPRESSED_MORE_SUCCINCTLY_1, // '%0 %0' can be expressed more succinctly as '#%0'
         W_EXTRANEOUS_SHARTP_IN_PARAMETER_1, //Extraneous '#' in parameter: '%0' is already the keyword argument name

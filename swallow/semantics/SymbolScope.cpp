@@ -19,6 +19,7 @@ Node* SymbolScope::getOwner()
 
 void SymbolScope::addSymbol(const std::wstring& name, const SymbolPtr& symbol)
 {
+    assert(!name.empty());
     SymbolMap::iterator iter = symbols.find(name);
     assert(iter == symbols.end() && "The symbol already exists with the same name.");
     this->symbols.insert(std::make_pair(name, symbol));
