@@ -1,6 +1,7 @@
 #include "Parser.h"
 #include "ast/NodeFactory.h"
 #include "ast/ast.h"
+#include <cassert>
 using namespace Swift;
 
 
@@ -261,7 +262,6 @@ GenericParametersDefPtr Parser::parseGenericParametersDef()
             {
                 // conformance-requirement → type-identifier:type-identifier
                 // conformance-requirement → type-identifier:protocol-composition-type
-                //predicate(<#(const wchar_t*)token#>)
 
                 if (predicate(L"protocol"))
                 {
@@ -271,8 +271,10 @@ GenericParametersDefPtr Parser::parseGenericParametersDef()
                     {
                         GenericConstraintDefPtr c = nodeFactory->createGenericConstraintDef(*type->getSourceInfo());
                         c->setIdentifier(type);
-                        TypeIdentifierPtr expectedType = parseTypeIdentifier();
-                        c->setExpectedType(expectedType);
+                        //TypeIdentifierPtr expectedType = parseTypeIdentifier();
+                        //TODO:
+                        assert(0);
+                        //c->setExpectedType(protocol);
                         c->setConstraintType(GenericConstraintDef::DerivedFrom);
                         ret->addConstraint(c);
                     }

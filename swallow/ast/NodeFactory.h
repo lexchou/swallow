@@ -8,7 +8,6 @@
 SWIFT_NS_BEGIN
 
 struct SourceInfo;
-class AutoReleasePool;
 
 class NodeFactory
 {
@@ -97,9 +96,6 @@ public:
     virtual GenericConstraintDefPtr createGenericConstraintDef(const SourceInfo& state);
     virtual GenericParametersDefPtr createGenericParametersDef(const SourceInfo& state);
 
-
-public:
-    void setAutoReleasePool(AutoReleasePool* autoReleasePool);
 protected:
 
     void bindNode(const SourceInfo&s, Node* n);
@@ -112,8 +108,6 @@ protected:
         return ret;
     }
 
-protected:
-    AutoReleasePool* autoReleasePool;
 };
 
 

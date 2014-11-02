@@ -4,7 +4,7 @@ USE_SWIFT_NS
 
 
 MemberAccess::MemberAccess()
-    :Expression(NodeType::MemberAccess)
+    :Expression(NodeType::MemberAccess), index(-1)
 {
 }
 MemberAccess::~MemberAccess()
@@ -27,6 +27,15 @@ ExpressionPtr MemberAccess::getSelf()
 IdentifierPtr MemberAccess::getField()
 {
     return field;
+}
+
+int MemberAccess::getIndex() const
+{
+    return index;
+}
+void MemberAccess::setIndex(int index)
+{
+    this->index = index;
 }
 
 void MemberAccess::accept(NodeVisitor* visitor)

@@ -145,7 +145,7 @@ TEST(TestDeclaration, testLet_Tuple)
     ASSERT_TRUE(c->isReadOnly());
     ASSERT_NOT_NULL(tuple = std::dynamic_pointer_cast<Tuple>(c->get(0)->name));
     ASSERT_EQ(2, tuple->numElements());
-    ASSERT_NOT_NULL(type = std::dynamic_pointer_cast<TypeIdentifier>(tuple->getDeclaredType()));
+    ASSERT_NOT_NULL(type = std::dynamic_pointer_cast<TypeIdentifier>(c->get(0)->getDeclaredType()));
     ASSERT_NOT_NULL(p = std::dynamic_pointer_cast<ParenthesizedExpression>(c->get(0)->initializer));
     ASSERT_EQ(2, p->numExpressions());
 

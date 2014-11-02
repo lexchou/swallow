@@ -27,19 +27,20 @@ PatternPtr Parser::parsePattern()
             // pattern → identifier-pattern type-annotationopt
             case Keyword::_:
             {
-                TypedPatternPtr ret = nodeFactory->createTypedPattern(token.state);
                 IdentifierPtr id = nodeFactory->createIdentifier(token.state);
                 id->setIdentifier(token.token);
-                ret->setPattern(id);
                 if((flags & UNDER_CASE) == 0)//type annotation is not parsed when it's inside a let/var
                 {
                     if(match(L":"))
                     {
+                        TypedPatternPtr ret = nodeFactory->createTypedPattern(*id->getSourceInfo());
                         TypeNodePtr type = parseTypeAnnotation();
                         ret->setDeclaredType(type);
+                        ret->setPattern(id);
+                        return ret;
                     }
                 }
-                return ret;
+                return id;
             }
             // pattern → value-binding-pattern
             case Keyword::Var:
@@ -76,7 +77,10 @@ PatternPtr Parser::parsePattern()
             if(match(L":"))
             {
                 TypeNodePtr type = parseTypeAnnotation();
-                ret->setDeclaredType(type);
+                TypedPatternPtr pattern = nodeFactory->createTypedPattern(*ret->getSourceInfo());
+                pattern->setDeclaredType(type);
+                pattern->setPattern(ret);
+                return pattern;
             }
         }
         return ret;

@@ -12,7 +12,6 @@
 
 SWIFT_NS_BEGIN
 
-class AutoReleasePool;
 class NodeVisitor;
 struct NodeType
 {
@@ -93,17 +92,18 @@ struct NodeType
     };
 };
 
+class NodeFactory;
 class Node : public std::enable_shared_from_this<Node>
 {
+    friend class NodeFactory;
 protected:
     Node(NodeType::T nodeType);
 public:
     virtual ~Node();
 public:
     SourceInfo* getSourceInfo();
-    void setAutoReleasePool(AutoReleasePool* autoReleasePool);
-    AutoReleasePool* getAutoReleasePool();
     NodeType::T getNodeType();
+    NodeFactory* getNodeFactory();
 public:
     virtual void accept(NodeVisitor* visitor){}
 
@@ -124,9 +124,8 @@ protected:
 
 protected:
     SourceInfo sourceInfo;
-    AutoReleasePool* autoReleasePool;
     NodeType::T nodeType;
-
+    NodeFactory* nodeFactory;
 #ifdef TRACE_NODE
 public:
     static std::list<Node*> UnreleasedNodes;

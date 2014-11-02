@@ -9,7 +9,7 @@
 
 using namespace Swift;
 
-TEST(TestTypeInference, testIntLiteral)
+TEST(TestTypeInference, IntLiteral)
 {
     SEMANTIC_ANALYZE(L"let a = 34");
     SymbolPtr a = NULL;
@@ -20,7 +20,7 @@ TEST(TestTypeInference, testIntLiteral)
     ASSERT_TRUE(type == Int);
 
 }
-TEST(TestTypeInference, testStringLiteral)
+TEST(TestTypeInference, StringLiteral)
 {
     SEMANTIC_ANALYZE(L"let a = \"345\"");
     SymbolPtr a = NULL;
@@ -32,7 +32,7 @@ TEST(TestTypeInference, testStringLiteral)
     ASSERT_TRUE(type == String);
 }
 
-TEST(TestTypeInference, testTupleLiteral)
+TEST(TestTypeInference, TupleLiteral)
 {
     SEMANTIC_ANALYZE(L"let a = (3, true, \"str\")");
     SymbolPtr a = NULL;
@@ -52,14 +52,14 @@ TEST(TestTypeInference, testTupleLiteral)
 }
 
 
-TEST(TestTypeInference, testNamedTupleLiteral)
+TEST(TestTypeInference, NamedTupleLiteral)
 {
     //TODO: parse  let a = (a : 3, b : 4, c : 5)
 }
 
 
 
-TEST(TestTypeInference, testArrayLiteral)
+TEST(TestTypeInference, ArrayLiteral)
 {
     SEMANTIC_ANALYZE(L"let a = [1, 2]");
     SymbolPtr a = NULL;
@@ -76,7 +76,7 @@ TEST(TestTypeInference, testArrayLiteral)
 
 }
 
-TEST(TestTypeInference, testArrayLiteral2)
+TEST(TestTypeInference, ArrayLiteral2)
 {
     SEMANTIC_ANALYZE(L"let a = [1, 3.4]");
     SymbolPtr a = NULL;
@@ -93,7 +93,7 @@ TEST(TestTypeInference, testArrayLiteral2)
 
 }
 
-TEST(TestTypeInference, testArrayLiteral3)
+TEST(TestTypeInference, ArrayLiteral3)
 {
     SEMANTIC_ANALYZE(L"let a : Int8[] = [1, 3]");
     SymbolPtr a = NULL;
@@ -109,7 +109,7 @@ TEST(TestTypeInference, testArrayLiteral3)
     ASSERT_EQ(Int8, innerType);
 }
 
-TEST(TestTypeInference, testArrayLiteral4)
+TEST(TestTypeInference, ArrayLiteral4)
 {
 /*
     SEMANTIC_ANALYZE(L"class Base {}  "
@@ -135,25 +135,76 @@ TEST(TestTypeInference, testArrayLiteral4)
 
 
 
-TEST(TestTypeInference, testDictionaryLiteral)
+TEST(TestTypeInference, DictionaryLiteral)
 {
 
 }
 
 
-TEST(TestTypeInference, testTupleAssignment)
+TEST(TestTypeInference, TupleAssignment1)
 {
-    /*
-    SEMANTIC_ANALYZE(L"let (a, b) : Int = (1, 0.3)");
-    IdentifierPtr a = NULL;
-    ASSERT_TRUE(a = std::dynamic_pointer_cast<Identifier>(scope->lookup(L"a")));
+    SEMANTIC_ANALYZE(L"let a = (1, 0.3).1");
+    dumpCompilerResults(compilerResults);
+    ASSERT_EQ(0, compilerResults.numResults());
+    SymbolPlaceHolderPtr a = NULL;
+    ASSERT_NOT_NULL(a = std::dynamic_pointer_cast<SymbolPlaceHolder>(scope->lookup(L"a")));
     TypePtr type = a->getType();
-    ASSERT_TRUE(type);
-    TypePtr String = symbolRegistry.lookupType(L"Int");
-    ASSERT_TRUE(type == String);
-    */
+    ASSERT_NOT_NULL(type);
+    TypePtr Double = symbolRegistry.lookupType(L"Double");
+    ASSERT_EQ(Double, type);
 }
-TEST(TestTypeInference, testExpression)
+
+//The 'a' already has a different type, should emit a compiler error
+TEST(TestTypeInference, TupleAssignment2)
+{
+    SEMANTIC_ANALYZE(L"let (a : String, b) : (Int, Double) = (1, 0.3)");
+    dumpCompilerResults(compilerResults);
+    ASSERT_EQ(1, compilerResults.numResults());
+    auto res = compilerResults.getResult(0);
+    ASSERT_EQ(Errors::E_TYPE_ANNOTATION_DOES_NOT_MATCH_CONTEXTUAL_TYPE_A_1, res.code);
+}
+//The 'a' already has a type but equals to the contextual type, should not emit a compiler error
+TEST(TestTypeInference, TupleAssignment3)
+{
+    SEMANTIC_ANALYZE(L"let (a : Int, b) : (Int, Double) = (1, 0)");
+    dumpCompilerResults(compilerResults);
+    ASSERT_EQ(0, compilerResults.numResults());
+}
+
+TEST(TestTypeInference, TupleAssignment4)
+{
+    SEMANTIC_ANALYZE(L"let (a, b) : (Int, Int) = (1, 0.3)");
+    ASSERT_EQ(1, compilerResults.numResults());
+    auto res = compilerResults.getResult(0);
+    ASSERT_EQ(Errors::E_CANNOT_CONVERT_EXPRESSION_TYPE_2, res.code);
+}
+
+TEST(TestTypeInference, TupleAssignment5)
+{
+    SEMANTIC_ANALYZE(L"let (a, b) : (Int, Double) = (1, 0.3)");
+    dumpCompilerResults(compilerResults);
+    SymbolPlaceHolderPtr a = NULL;
+    ASSERT_NOT_NULL(a = std::dynamic_pointer_cast<SymbolPlaceHolder>(scope->lookup(L"a")));
+    TypePtr type = a->getType();
+    ASSERT_NOT_NULL(type);
+    TypePtr Int = symbolRegistry.lookupType(L"Int");
+    ASSERT_TRUE(type == Int);
+}
+
+TEST(TestTypeInference, TupleAssignment6)
+{
+    SEMANTIC_ANALYZE(L"let a : (Int, Double) = (1, 0.3)\n"
+            "let (c,d) = a");
+    dumpCompilerResults(compilerResults);
+    SymbolPlaceHolderPtr a = NULL;
+    ASSERT_NOT_NULL(a = std::dynamic_pointer_cast<SymbolPlaceHolder>(scope->lookup(L"d")));
+    TypePtr type = a->getType();
+    ASSERT_NOT_NULL(type);
+    TypePtr Double = symbolRegistry.lookupType(L"Double");
+    ASSERT_TRUE(type == Double);
+}
+
+TEST(TestTypeInference, Expression)
 {
     SEMANTIC_ANALYZE(L"let a = 3 * 4 + 3");
     dumpCompilerResults(compilerResults);
@@ -168,7 +219,7 @@ TEST(TestTypeInference, testExpression)
     ASSERT_TRUE(type == t_int);
 }
 
-TEST(TestTypeInference, testStructInstance)
+TEST(TestTypeInference, StructInstance)
 {
 
     SEMANTIC_ANALYZE(L"struct Test {let a = 4}\n"

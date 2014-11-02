@@ -26,7 +26,6 @@ SET(CMAKE_CXX_FLAGS "$ENV{CXXFLAGS} -O0 -Wall -g -ggdb -std=c++11")
 
 SET(SWALLOW_SRC
     common/CompilerResults.cpp
-    common/AutoReleasePool.cpp
 
     tokenizer/Tokenizer.cpp
 

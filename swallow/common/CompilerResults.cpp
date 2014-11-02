@@ -111,8 +111,11 @@ std::wstring CompilerResults::getErrorTemplate(int errorCode)
         case Errors::E_A_IS_NOT_A_MEMBER_TYPE_OF_B_2: return L"'%0' is not a member type of '%2'";
         case Errors::E_TYPE_A_NESTED_IN_GENERIC_TYPE_B_IS_NOT_ALLOWED_2: return L"type '%0' nested in generic type '%1' is not allowed";
         case Errors::E_GENERIC_TYPE_A_NESTED_IN_TYPE_B_IS_NOT_ALLOWED_2: return L"generic type '%0' nested in type '%1' is not allowed";
-
-
+        case Errors::E_TUPLE_ACCESS_ONLY_WORKS_FOR_TUPLE_TYPE: return L"Tuple access only works for tuple type";
+        case Errors::E_TUPLE_ACCESS_A_OUT_OF_RANGE_IN_B_2: return L"Tuple access '%0' out of range in '%1'";
+        case Errors::E_VARLET_CANNOT_APPEAR_INSIDE_ANOTHER_VAR_OR_LET_PATTERN_1: return L"%0 cannot appear inside another var or let pattern";
+        case Errors::E_EXPECT_TUPLE_OR_IDENTIFIER: return L"Expect tuple or identifier";
+        case Errors::E_TYPE_ANNOTATION_DOES_NOT_MATCH_CONTEXTUAL_TYPE_A_1: return L"Type annotation does not match contextual type '%0'";
 
         case Errors::W_PARAM_CAN_BE_EXPRESSED_MORE_SUCCINCTLY_1: return L"'%0 %0' can be expressed more succinctly as '#%0'";
         case Errors::W_EXTRANEOUS_SHARTP_IN_PARAMETER_1: return L"Extraneous '#' in parameter: '%0' is already the keyword argument name";

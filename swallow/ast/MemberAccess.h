@@ -16,12 +16,15 @@ public:
     
     ExpressionPtr getSelf();
     IdentifierPtr getField();
+
+    int getIndex() const;
+    void setIndex(int index);
 public:
     virtual void accept(NodeVisitor* visitor);
 public:
     ExpressionPtr self;
     IdentifierPtr field;
-    
+    int index;
 };
 
 SWIFT_NS_END

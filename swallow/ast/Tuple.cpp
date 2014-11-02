@@ -29,14 +29,14 @@ void Tuple::setDeclaredType(const TypeNodePtr& type)
 
 void Tuple::add(const PatternPtr& st)
 {
-    if(const TypedPatternPtr& p = std::dynamic_pointer_cast<TypedPattern>(st))
-    {
-        elements.push_back(Element(p->getPattern(), p->getDeclaredType()));
-    }
-    else
-    {
+    //if(const TypedPatternPtr& p = std::dynamic_pointer_cast<TypedPattern>(st))
+    //{
+    //    elements.push_back(Element(p->getPattern(), p->getDeclaredType()));
+    //}
+    //else
+    //{
         elements.push_back(Element(st, nullptr));
-    }
+    //}
 }
 int Tuple::numElements()
 {

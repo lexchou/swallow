@@ -53,11 +53,22 @@ void NodeSerializerA::append(const std::wstring& str)
 
 void NodeSerializer::visitValueBindings(const ValueBindingsPtr &node)
 {
-
+    append(node->isReadOnly() ? L"let " : L"var ");
+    NodeVisitor::visitValueBindings(node);
 }
 void NodeSerializer::visitValueBinding(const ValueBindingPtr &node)
 {
-
+    node->getName()->accept(this);
+    if(node->getDeclaredType())
+    {
+        append(L" : ");
+        node->getDeclaredType()->accept(this);
+    }
+    if(node->getInitializer())
+    {
+        append(L" = ");
+        node->getInitializer()->accept(this);
+    }
 }
 void NodeSerializer::visitComputedProperty(const ComputedPropertyPtr &node)
 {
@@ -238,7 +249,17 @@ void NodeSerializer::visitUnaryOperator(const UnaryOperatorPtr& node)
 }
 void NodeSerializer::visitTuple(const TuplePtr& node)
 {
-
+    append(L"(");
+    bool first = true;
+    for(auto element : *node)
+    {
+        if(!first)
+            append(L", ");
+        first = false;
+        //element.vaccept(this);
+        element.element->accept(this);
+    }
+    append(L")");
 }
 void NodeSerializer::visitIdentifier(const IdentifierPtr& node)
 {
@@ -290,19 +311,36 @@ void NodeSerializer::visitOptionalChaining(const OptionalChainingPtr& node)
 }
 void NodeSerializer::visitParenthesizedExpression(const ParenthesizedExpressionPtr& node)
 {
-
+    append(L"(");
+    bool first = true;
+    for(auto element : *node)
+    {
+        if(!first)
+            append(L", ");
+        first = false;
+        if(!element.first.empty())
+        {
+            append(element.first);
+            append(L" : ");
+        }
+        element.second->accept(this);
+    }
+    append(L")");
 }
 void NodeSerializer::visitString(const StringLiteralPtr& node)
 {
-
+    append(L"\"");
+    append(node->value);
+    append(L"\"");
 }
 void NodeSerializer::visitInteger(const IntegerLiteralPtr& node)
 {
+    append(node->valueAsString);
 
 }
 void NodeSerializer::visitFloat(const FloatLiteralPtr& node)
 {
-
+    append(node->valueAsString);
 }
 
 void NodeSerializer::visitArrayType(const ArrayTypePtr& node)

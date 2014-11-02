@@ -224,6 +224,11 @@ public://member access
      */
     bool canSpecializeTo(const TypePtr& type, std::map<std::wstring, TypePtr>& typeMap)const;
 
+    /**
+     * Check if an instance of current type can be assigned to a variable with given type
+     */
+    bool canAssignTo(const TypePtr& type)const;
+
     const std::map<TypePtr, int>& getAllParents() const;
 
     const std::vector<FunctionOverloadedSymbolPtr>& getFunctions() const;

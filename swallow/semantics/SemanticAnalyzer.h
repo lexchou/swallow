@@ -2,6 +2,7 @@
 #define SEMANTIC_ANALYZER_H
 #include "ast/NodeVisitor.h"
 #include "Type.h"
+#include <list>
 
 SWIFT_NS_BEGIN
 
@@ -10,6 +11,7 @@ class CompilerResults;
 class TypeDeclaration;
 class Expression;
 class Pattern;
+class NodeFactory;
 class SemanticAnalyzer : public NodeVisitor
 {
 public:
@@ -125,6 +127,14 @@ private:
     void verifyProtocolConform(const TypePtr& type, const TypePtr& protocol);
     void verifyProtocolFunction(const TypePtr& type, const TypePtr& protocol, const FunctionSymbolPtr& expected);
 
+
+    /**
+     * Need to explode a tuple variable definition into a sequence of single variable definitions
+     */
+    void explodeValueBindings(const ValueBindingsPtr& node);
+    void explodeValueBinding(const ValueBindingsPtr& valueBindings, const std::list<ValueBindingPtr>::iterator& iter);
+    MemberAccessPtr makeAccess(SourceInfo* info, NodeFactory* nodeFactory, const std::wstring& tempName, const std::vector<int>& indices);
+    void expandTuple(std::vector<std::tuple<std::wstring, TypePtr, ExpressionPtr> >& results, std::vector<int>& indices, const PatternPtr& name, const std::wstring& tempName, const TypePtr& type, bool isReadonly);
 
 protected:
     /**

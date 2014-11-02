@@ -9,6 +9,7 @@
 #include "common/CompilerResults.h"
 #include <cassert>
 #include "GlobalScope.h"
+#include "ast/NodeFactory.h"
 
 USE_SWIFT_NS
 using namespace std;
@@ -197,10 +198,13 @@ void SemanticAnalyzer::visitValueBinding(const ValueBindingPtr& node)
             node->initializer->accept(this);
             TypePtr actualType = node->initializer->getType();
             assert(actualType != nullptr);
-            if(declaredType && !canConvertTo(node->initializer, declaredType))
+            if(declaredType)
             {
-                error(node, Errors::E_CANNOT_CONVERT_EXPRESSION_TYPE_2, toString(node->initializer), declaredType->toString());
-                return;
+                if(!Type::equals(actualType, declaredType) && !canConvertTo(node->initializer, declaredType))
+                {
+                    error(node, Errors::E_CANNOT_CONVERT_EXPRESSION_TYPE_2, toString(node->initializer), declaredType->toString());
+                    return;
+                }
             }
 
             if(!declaredType)
@@ -223,8 +227,152 @@ void SemanticAnalyzer::visitValueBinding(const ValueBindingPtr& node)
 }
 
 
+/**
+* Need to explode a tuple variable definition into a sequence of single variable definitions
+*/
+void SemanticAnalyzer::explodeValueBindings(const ValueBindingsPtr& node)
+{
+    auto iter = node->begin();
+    for(; iter != node->end(); iter++)
+    {
+        ValueBindingPtr var = *iter;
+        TuplePtr tuple = dynamic_pointer_cast<Tuple>(var->getName());
+        if(!tuple)
+            continue;
+        explodeValueBinding(node, iter);
+    }
+}
+void SemanticAnalyzer::explodeValueBinding(const ValueBindingsPtr& valueBindings, const ValueBindings::Iterator& iter)
+{
+    ValueBindingPtr var = *iter;
+    TuplePtr name = dynamic_pointer_cast<Tuple>(var->getName());
+    TypePtr declaredType = var->getDeclaredType() ? lookupType(var->getDeclaredType()) : nullptr;
+    TypePtr initializerType;
+    if(var->getInitializer())
+    {
+        StackedValueGuard<TypePtr> guard(t_hint);
+        guard.set(declaredType);
+        var->getInitializer()->accept(this);
+        initializerType = var->getInitializer()->getType();
+        assert(initializerType != nullptr);
+    }
+
+    if(declaredType && initializerType)
+    {
+        //it has both type definition and initializer, then we need to check if the initializer expression matches the type annotation
+        if(!initializerType->canAssignTo(declaredType))
+        {
+            error(var, Errors::E_CANNOT_CONVERT_EXPRESSION_TYPE_2, initializerType->toString(), declaredType->toString());
+            return;
+        }
+    }
+    //expand it into tuple assignment
+    //need a temporay variable to hold the initializer
+    std::wstring tempName = L"#0";
+    ValueBindingPtr tempVar = valueBindings->getNodeFactory()->createValueBinding(*var->getSourceInfo());
+    IdentifierPtr tempVarId = valueBindings->getNodeFactory()->createIdentifier(*var->getSourceInfo());
+    tempVarId->setIdentifier(tempName);
+    tempVar->setName(tempVarId);
+    tempVar->setInitializer(var->getInitializer());
+    tempVar->setType(declaredType ? declaredType : initializerType);
+    valueBindings->insertAfter(tempVar, iter);
+    //now expand tuples
+    vector<tuple<wstring, TypePtr, ExpressionPtr> > result;
+    vector<int> indices;
+    expandTuple(result, indices, name, tempName, tempVar->getType(), valueBindings->isReadOnly());
+}
+
+MemberAccessPtr SemanticAnalyzer::makeAccess(SourceInfo* info, NodeFactory* nodeFactory, const std::wstring& tempName, const std::vector<int>& indices)
+{
+    assert(!indices.empty());
+    IdentifierPtr self = nodeFactory->createIdentifier(*info);
+    self->setIdentifier(tempName);
+    ExpressionPtr ret = self;
+    for(int i : indices)
+    {
+        MemberAccessPtr next = nodeFactory->createMemberAccess(*info);
+        next->setSelf(ret);
+        next->setIndex(i);
+        ret = next;
+    }
+    return static_pointer_cast<MemberAccess>(ret);
+}
+void SemanticAnalyzer::expandTuple(vector<tuple<wstring, TypePtr, ExpressionPtr> >& results, vector<int>& indices, const PatternPtr& name, const std::wstring& tempName, const TypePtr& type, bool isReadonly)
+{
+    TypeNodePtr declaredType;
+    switch (name->getNodeType())
+    {
+        case NodeType::Identifier:
+        {
+            IdentifierPtr id = static_pointer_cast<Identifier>(name);
+            name->setType(type);
+            results.push_back(make_tuple(id->getIdentifier(), type, makeAccess(id->getSourceInfo(), id->getNodeFactory(), tempName, indices)));
+            //check if the identifier already has a type definition
+            break;
+        }
+        case NodeType::TypedPattern:
+        {
+            TypedPatternPtr pat = static_pointer_cast<TypedPattern>(name);
+            assert(pat->getDeclaredType());
+            TypePtr declaredType = lookupType(pat->getDeclaredType());
+            pat->setType(declaredType);
+            if(!Type::equals(declaredType, type))
+            {
+                error(name, Errors::E_TYPE_ANNOTATION_DOES_NOT_MATCH_CONTEXTUAL_TYPE_A_1, type->toString());
+                abort();
+                return;
+            }
+            expandTuple(results, indices, pat->getPattern(), tempName, declaredType, isReadonly);
+            break;
+        }
+        case NodeType::Tuple:
+        {
+            if(type->getCategory() != Type::Tuple)
+            {
+                error(name, Errors::E_TUPLE_PATTERN_CANNOT_MATCH_VALUES_OF_THE_NON_TUPLE_TYPE_A_1, type->toString());
+                return;
+            }
+            TuplePtr tuple = static_pointer_cast<Tuple>(name);
+            declaredType = tuple->getDeclaredType();
+            if((type->getCategory() != Type::Tuple) || (tuple->numElements() != type->numElementTypes()))
+            {
+                error(name, Errors::E_TYPE_ANNOTATION_DOES_NOT_MATCH_CONTEXTUAL_TYPE_A_1, type->toString());
+                abort();
+                return;
+            }
+            //check each elements
+            int elements = tuple->numElements();
+            for(int i = 0; i < elements; i++)
+            {
+                PatternPtr element = tuple->getElement(i);
+                TypePtr elementType = type->getElementType(i);
+                indices.push_back(i);
+                //validateTupleType(isReadonly, element, elementType);
+                expandTuple(results, indices, element, tempName, elementType, isReadonly);
+                indices.pop_back();
+            }
+            break;
+        }
+        case NodeType::ValueBindingPattern:
+        {
+            error(name, Errors::E_VARLET_CANNOT_APPEAR_INSIDE_ANOTHER_VAR_OR_LET_PATTERN_1, isReadonly ? L"let" : L"var");
+            abort();
+            break;
+        }
+        case NodeType::EnumCasePattern:
+        case NodeType::TypeCase:
+        case NodeType::TypeCheck:
+        default:
+            error(name, Errors::E_EXPECT_TUPLE_OR_IDENTIFIER);
+            break;
+    }
+}
+
+
 void SemanticAnalyzer::visitValueBindings(const ValueBindingsPtr& node)
 {
+    explodeValueBindings(node);
+
 
     if(node->isReadOnly() && currentType && currentType->getCategory() == Type::Protocol)
     {

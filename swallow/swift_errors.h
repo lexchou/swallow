@@ -82,6 +82,13 @@ struct Errors
         E_TYPE_A_NESTED_IN_GENERIC_TYPE_B_IS_NOT_ALLOWED_2, //type '%0' nested in generic type '%1' is not allowed
         E_GENERIC_TYPE_A_NESTED_IN_TYPE_B_IS_NOT_ALLOWED_2, //generic type '%0' nested in type '%1' is not allowed
 
+        E_TUPLE_ACCESS_ONLY_WORKS_FOR_TUPLE_TYPE, //Tuple access only works for tuple type
+        E_TUPLE_ACCESS_A_OUT_OF_RANGE_IN_B_2, //Tuple access '%0' out of range in '%1'
+        E_VARLET_CANNOT_APPEAR_INSIDE_ANOTHER_VAR_OR_LET_PATTERN_1, //%0 cannot appear inside another var or let pattern
+        E_EXPECT_TUPLE_OR_IDENTIFIER, //Expect tuple or identifier
+        E_TYPE_ANNOTATION_DOES_NOT_MATCH_CONTEXTUAL_TYPE_A_1, //Type annotation does not match contextual type '%0'
+        E_TUPLE_PATTERN_CANNOT_MATCH_VALUES_OF_THE_NON_TUPLE_TYPE_A_1, //Tuple pattern cannot match values of the non-tuple type '%0'
+
         W_PARAM_CAN_BE_EXPRESSED_MORE_SUCCINCTLY_1, // '%0 %0' can be expressed more succinctly as '#%0'
         W_EXTRANEOUS_SHARTP_IN_PARAMETER_1, //Extraneous '#' in parameter: '%0' is already the keyword argument name
         //linking errors

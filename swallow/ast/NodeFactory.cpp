@@ -4,18 +4,13 @@ USE_SWIFT_NS;
 
 
 NodeFactory::NodeFactory()
-    :autoReleasePool(NULL)
 {
-}
-void NodeFactory::setAutoReleasePool(AutoReleasePool* autoReleasePool)
-{
-    this->autoReleasePool = autoReleasePool;
 }
 
 void NodeFactory::bindNode(const SourceInfo&s, Node* n)
 {
     *n->getSourceInfo() = s;
-    n->setAutoReleasePool(autoReleasePool);
+    n->nodeFactory = this;
 }
 
 

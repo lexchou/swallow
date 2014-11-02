@@ -96,39 +96,50 @@ ExpressionPtr Parser::parsePostfixExpression()
             {
                 expect_next(token);//skip .
                 expect_next(token);//read identifier
-                tassert(token, token.type == TokenType::Identifier, Errors::E_EXPECT_INIT_SELF_DYNAMICTYPE_IDENTIFIER_1, token.token);
+                tassert(token, token.type == TokenType::Identifier || token.type == TokenType::Integer, Errors::E_EXPECT_INIT_SELF_DYNAMICTYPE_IDENTIFIER_1, token.token);
                 
                 // postfix-expression → initializer-expression
-                if(token == L"init")
+                if(token.type == TokenType::Identifier)
                 {
-                    InitializerReferencePtr r = nodeFactory->createInitializerReference(token.state);
-                    r->setExpression(ret);
-                    ret = r;
-                    continue;
+                    if (token == L"init")
+                    {
+                        InitializerReferencePtr r = nodeFactory->createInitializerReference(token.state);
+                        r->setExpression(ret);
+                        ret = r;
+                        continue;
+                    }
+                    // postfix-expression → postfix-self-expression
+                    if (token.identifier.keyword == Keyword::Self)
+                    {
+                        SelfExpressionPtr r = nodeFactory->createSelfExpression(token.state);
+                        r->setExpression(ret);
+                        ret = r;
+                        continue;
+                    }
+                    // postfix-expression → dynamic-type-expression
+                    if (token.identifier.keyword == Keyword::DynamicType)
+                    {
+                        DynamicTypePtr r = nodeFactory->createDynamicType(token.state);
+                        r->setExpression(ret);
+                        ret = r;
+                        continue;
+                    }
+                    tassert(token, token.identifier.keyword == Keyword::_, Errors::E_EXPECT_IDENTIFIER_1, token.token);
                 }
-                // postfix-expression → postfix-self-expression
-                if(token.identifier.keyword == Keyword::Self)
-                {
-                    SelfExpressionPtr r = nodeFactory->createSelfExpression(token.state);
-                    r->setExpression(ret);
-                    ret = r;
-                    continue;
-                }
-                // postfix-expression → dynamic-type-expression
-                if(token.identifier.keyword == Keyword::DynamicType)
-                {
-                    DynamicTypePtr r = nodeFactory->createDynamicType(token.state);
-                    r->setExpression(ret);
-                    ret = r;
-                    continue;
-                }
-                tassert(token, token.identifier.keyword == Keyword::_, Errors::E_EXPECT_IDENTIFIER_1, token.token);
+
                 // postfix-expression → explicit-member-expression
-                IdentifierPtr field = nodeFactory->createIdentifier(token.state);
-                field->setIdentifier(token.token);
                 MemberAccessPtr access = nodeFactory->createMemberAccess(token.state);
                 access->setSelf(ret);
-                access->setField(field);
+                if(token.type == TokenType::Integer)
+                {
+                    access->setIndex((int)token.number.value);
+                }
+                else
+                {
+                    IdentifierPtr field = nodeFactory->createIdentifier(token.state);
+                    field->setIdentifier(token.token);
+                    access->setField(field);
+                }
                 ret = access;
                 continue;
             }

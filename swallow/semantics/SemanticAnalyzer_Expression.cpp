@@ -287,7 +287,7 @@ FunctionSymbolPtr SemanticAnalyzer::getOverloadedFunction(const NodePtr& node, c
 {
     typedef std::pair<float, FunctionSymbolPtr> ScoredFunction;
     std::vector<ScoredFunction> candidates;
-    for(FunctionSymbolPtr func : *funcs)
+    for(const FunctionSymbolPtr& func : *funcs)
     {
         float score = calculateFitScore(func->getType(), arguments, true);
         if(score > 0)
@@ -473,13 +473,32 @@ void SemanticAnalyzer::visitMemberAccess(const MemberAccessPtr& node)
     assert(selfType != nullptr);
 
 
-    SymbolPtr member = selfType->getMember(node->getField()->getIdentifier());
-    if(member == nullptr)
+    if(node->getField())
     {
-        error(node->getField(), Errors::E_DOES_NOT_HAVE_A_MEMBER_2, selfType->toString(), node->getField()->getIdentifier());
-        return;
+        SymbolPtr member = selfType->getMember(node->getField()->getIdentifier());
+        if (member == nullptr)
+        {
+            error(node->getField(), Errors::E_DOES_NOT_HAVE_A_MEMBER_2, selfType->toString(), node->getField()->getIdentifier());
+            return;
+        }
+        node->setType(member->getType());
     }
-    node->setType(member->getType());
+    else
+    {
+        //so it must be a tuple type
+        if(selfType->getCategory() != Type::Tuple)
+        {
+            error(node, Errors::E_TUPLE_ACCESS_ONLY_WORKS_FOR_TUPLE_TYPE);
+            return;
+        }
+        int index = node->getIndex();
+        if(index < 0 || index >= selfType->numElementTypes())
+        {
+            error(node, Errors::E_TUPLE_ACCESS_A_OUT_OF_RANGE_IN_B_2, toString(index), toString(node->getSelf()));
+            return;
+        }
+        node->setType(selfType->getElementType(index));
+    }
 }
 
 void SemanticAnalyzer::visitString(const StringLiteralPtr& node)
@@ -490,7 +509,11 @@ void SemanticAnalyzer::visitString(const StringLiteralPtr& node)
 void SemanticAnalyzer::visitInteger(const IntegerLiteralPtr& node)
 {
     GlobalScope* scope = symbolRegistry->getGlobalScope();
-    node->setType(scope->t_Int);
+    //TODO: it will changed to use standard library's overloaded type constructor to infer type when the facility is mature enough.
+    if(t_hint && canConvertTo(node, t_hint))
+        node->setType(t_hint);
+    else
+        node->setType(scope->t_Int);
 }
 void SemanticAnalyzer::visitFloat(const FloatLiteralPtr& node)
 {
@@ -498,6 +521,7 @@ void SemanticAnalyzer::visitFloat(const FloatLiteralPtr& node)
     node->setType(scope->t_Double);
 }
 
+//Will be replaced by stdlib's type constructor
 bool SemanticAnalyzer::canConvertTo(const ExpressionPtr& expr, const TypePtr& type)
 {
     switch(expr->getNodeType())
@@ -593,10 +617,20 @@ void SemanticAnalyzer::visitDictionaryLiteral(const DictionaryLiteralPtr& node)
 }
 void SemanticAnalyzer::visitParenthesizedExpression(const ParenthesizedExpressionPtr& node)
 {
-    NodeVisitor::visitParenthesizedExpression(node);
+    //NodeVisitor::visitParenthesizedExpression(node);
+    TypePtr hint = t_hint;
     std::vector<TypePtr> types;
+    int index = 0;
     for(const ParenthesizedExpression::Term& element : *node)
     {
+        TypePtr elementHint = nullptr;
+        if(t_hint && t_hint->getCategory() == Type::Tuple && index < t_hint->numElementTypes())
+        {
+            elementHint = t_hint->getElementType(index++);
+        }
+        StackedValueGuard<TypePtr> hintGuard(t_hint);
+        hintGuard.set(elementHint);
+        element.second->accept(this);
         TypePtr elementType = element.second->getType();
         assert(elementType != nullptr);
         types.push_back(elementType);

@@ -2,6 +2,7 @@
 #define VALUE_BINDINGS_H
 #include "Declaration.h"
 #include <string>
+#include <list>
 
 SWIFT_NS_BEGIN
 
@@ -9,6 +10,8 @@ SWIFT_NS_BEGIN
 
     class ValueBindings : public Declaration
     {
+    public:
+        typedef std::list<ValueBindingPtr>::iterator Iterator;
     public:
         ValueBindings();
         ~ValueBindings();
@@ -25,12 +28,14 @@ SWIFT_NS_BEGIN
         bool isReadOnly()const { return readOnly;}
         void setReadOnly(bool readOnly) { this->readOnly = readOnly;}
 
-        std::vector<ValueBindingPtr>::iterator begin() {return valueBindings.begin();}
-        std::vector<ValueBindingPtr>::iterator end() {return valueBindings.end();}
+        Iterator begin() {return valueBindings.begin();}
+        Iterator end() {return valueBindings.end();}
+
+        void insertAfter(const ValueBindingPtr& binding, const Iterator& iter);
     public://Node
         virtual void accept(NodeVisitor* visitor);
     public:
-        std::vector<ValueBindingPtr> valueBindings;
+        std::list<ValueBindingPtr> valueBindings;
         bool readOnly;
     };
 

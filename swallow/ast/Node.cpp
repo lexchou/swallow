@@ -1,5 +1,4 @@
 #include "Node.h"
-#include "common/AutoReleasePool.h"
 #include <cstdlib>
 #include <cassert>
 #include <set>
@@ -102,7 +101,7 @@ const char* Node::nodeTypeToName(NodeType::T nodeType)
 
 
 Node::Node(NodeType::T nodeType)
-:autoReleasePool(NULL), nodeType(nodeType)
+:nodeType(nodeType), nodeFactory(nullptr)
 {
 #ifdef TRACE_NODE
     NodeCount++;
@@ -117,29 +116,11 @@ Node::~Node()
     if(iter != UnreleasedNodes.end())
         UnreleasedNodes.erase(iter);
 #endif
-    this->setAutoReleasePool(NULL);
 }
 
-void Node::setAutoReleasePool(AutoReleasePool* autoReleasePool)
+NodeFactory* Node::getNodeFactory()
 {
-    if(this->autoReleasePool == autoReleasePool)
-        return;
-    if(this->autoReleasePool)
-    {
-        AutoReleasePool* old = this->autoReleasePool;
-        this->autoReleasePool = NULL;
-        old->remove(this);
-
-    }
-    this->autoReleasePool = autoReleasePool;
-    if(autoReleasePool)
-    {
-        autoReleasePool->add(this);
-    }
-}
-AutoReleasePool* Node::getAutoReleasePool()
-{
-    return autoReleasePool;
+    return nodeFactory;
 }
 
 SourceInfo* Node::getSourceInfo()

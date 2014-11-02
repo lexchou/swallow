@@ -3,7 +3,6 @@
 #include "ast/NodeFactory.h"
 #include "ast/ast.h"
 #include "common/CompilerResults.h"
-#include "common/AutoReleasePool.h"
 #include "swift_errors.h"
 //#include <cstdlib>
 //#include <stack>
@@ -186,19 +185,15 @@ void Parser::tassert(Token& token, bool cond, int errorCode, const std::wstring&
 NodePtr Parser::parseStatement(const wchar_t* code)
 {
     tokenizer->set(code);
-    AutoReleasePool pool;
-    nodeFactory->setAutoReleasePool(&pool);
     NodePtr ret = NULL;
     try
     {
         ret = parseStatement();
-        pool.removeAll();
     }
     catch(...)
     {
         //clean up all nodes created during the parsing
         ret = NULL;
-        nodeFactory->setAutoReleasePool(NULL);
     }
     return ret;
 }
@@ -206,8 +201,6 @@ NodePtr Parser::parseStatement(const wchar_t* code)
 ProgramPtr Parser::parse(const wchar_t* code)
 {
     tokenizer->set(code);
-    AutoReleasePool pool;
-    nodeFactory->setAutoReleasePool(&pool);
     ProgramPtr ret = nodeFactory->createProgram();
     try
     {
@@ -220,13 +213,11 @@ ProgramPtr Parser::parse(const wchar_t* code)
             ret->addStatement(statement);
             match(L";");
         }
-        pool.removeAll();
     }
     catch(...)
     {
         //clean up all nodes created during the parsing
         ret = NULL;
-        nodeFactory->setAutoReleasePool(NULL);
     }
     return ret;
 }

@@ -438,6 +438,40 @@ const std::map<TypePtr, int>& Type::getAllParents() const
     return parents;
 }
 
+bool Type::canAssignTo(const TypePtr &type) const
+{
+    if(type == nullptr)
+        return false;
+    if(type->getCategory() == Protocol || type->getCategory() == Class)
+    {
+        if(this->parents.find(type) != parents.end())
+        {
+            return true;
+        }
+        return false;
+    }
+    /*
+    if(type->getCategory() != category)
+        return false;
+    if(category == Tuple)
+    {
+        //In tuple type, each element type must can be assigned to corresponding element type in given argument
+        if(elementTypes.size() != type->elementTypes.size())
+            return false;
+        auto iter1 = elementTypes.begin();
+        auto iter2 = type->elementTypes.begin();
+        for(; iter1 != elementTypes.end(); iter1++, iter2++)
+        {
+            if(!(*iter1)->canAssignTo(*iter2))
+            {
+                return false;
+            }
+        }
+    }
+    */
+    return *this == *type;
+}
+
 bool Type::operator ==(const Type& rhs)const
 {
     if(category != rhs.category)
@@ -474,12 +508,12 @@ bool Type::operator ==(const Type& rhs)const
         }
         case Tuple:
         {
-            if (!elementTypes.empty() && !rhs.elementTypes.empty())
+            if (elementTypes.size() != rhs.elementTypes.size())
                 return false;
             auto iter = elementTypes.begin(), iter2 = rhs.elementTypes.begin();
             for (; iter != elementTypes.end(); iter++, iter2++)
             {
-                if (*iter != *iter2)
+                if (!Type::equals(*iter, *iter2))
                     return false;
             }
             break;
