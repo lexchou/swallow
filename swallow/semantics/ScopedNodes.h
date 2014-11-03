@@ -29,7 +29,7 @@
  */
 #ifndef SCOPED_NODES_H
 #define SCOPED_NODES_H
-#include "swift_conf.h"
+#include "swallow_conf.h"
 #include "ast/Program.h"
 #include "ast/ClassDef.h"
 #include "ast/ProtocolDef.h"
@@ -42,7 +42,7 @@
 #include "ast/FunctionDef.h"
 #include "Symbol.h"
 
-SWIFT_NS_BEGIN
+SWALLOW_NS_BEGIN
 
 class ScopedProgram : public Program, public ScopeOwner
 {
@@ -106,7 +106,7 @@ public:
 
 
 
-SWIFT_NS_END
+SWALLOW_NS_END
 
 
 #endif//SCOPED_NODES_H

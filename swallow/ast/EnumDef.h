@@ -32,7 +32,7 @@
 #include "TypeDeclaration.h"
 #include <string>
 
-SWIFT_NS_BEGIN
+SWALLOW_NS_BEGIN
 class Expression;
 class TupleType;
 class EnumDef : public TypeDeclaration
@@ -75,6 +75,6 @@ private:
     std::vector<Constant> constants;
 };
 
-SWIFT_NS_END
+SWALLOW_NS_END
 
 #endif//ENUM_DEF_H

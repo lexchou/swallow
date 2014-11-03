@@ -32,7 +32,7 @@
 #include "Node.h"
 #include <string>
 
-SWIFT_NS_BEGIN
+SWALLOW_NS_BEGIN
 
 class TypeNode;
 class GenericArgumentDef : public Node
@@ -48,6 +48,6 @@ private:
     std::vector<TypeNodePtr> arguments;
 };
 
-SWIFT_NS_END
+SWALLOW_NS_END
 
 #endif//GENERIC_ARGUMENT_DEF_H

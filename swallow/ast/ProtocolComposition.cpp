@@ -29,7 +29,7 @@
  */
 #include "ProtocolComposition.h"
 #include "TypeIdentifier.h"
-USE_SWIFT_NS
+USE_SWALLOW_NS
 
 
 ProtocolComposition::ProtocolComposition()

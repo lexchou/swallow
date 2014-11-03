@@ -30,7 +30,7 @@
 #include "FunctionOverloadedSymbol.h"
 #include "FunctionSymbol.h"
 #include "Type.h"
-USE_SWIFT_NS
+USE_SWALLOW_NS
 
 FunctionOverloadedSymbol::FunctionOverloadedSymbol(const std::wstring& name)
 :name(name)

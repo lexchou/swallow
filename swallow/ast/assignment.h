@@ -31,7 +31,7 @@
 #define ASSIGNMENT_H
 #include "BinaryOperator.h"
 
-SWIFT_NS_BEGIN
+SWALLOW_NS_BEGIN
 
 class Assignment : public BinaryOperator
 {
@@ -40,6 +40,6 @@ public:
 public:
     virtual void accept(NodeVisitor* visitor);
 };
-SWIFT_NS_END
+SWALLOW_NS_END
 
 #endif//ASSIGNMENT_H

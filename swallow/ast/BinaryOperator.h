@@ -31,7 +31,7 @@
 #define BINARY_OPERATOR_H
 #include "Operator.h"
 #include <string>
-SWIFT_NS_BEGIN
+SWALLOW_NS_BEGIN
 
 class BinaryOperator : public Operator
 {
@@ -60,6 +60,6 @@ protected:
     PatternPtr rhs;
 };
 
-SWIFT_NS_END
+SWALLOW_NS_END
 
 #endif//BINARY_OPERATOR_H

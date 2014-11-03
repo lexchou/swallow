@@ -35,7 +35,7 @@
 #include "TypeBuilder.h"
 #include <sstream>
 
-USE_SWIFT_NS
+USE_SWALLOW_NS
 
 using namespace std;
 

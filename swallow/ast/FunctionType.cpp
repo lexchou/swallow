@@ -29,7 +29,7 @@
  */
 #include "FunctionType.h"
 #include "TupleType.h"
-USE_SWIFT_NS
+USE_SWALLOW_NS
 
 
 FunctionType::FunctionType()

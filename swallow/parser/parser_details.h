@@ -29,9 +29,9 @@
  */
 #ifndef PARSER_DETAILS_H
 #define PARSER_DETAILS_H
-#include "swift_conf.h"
+#include "swallow_conf.h"
 
-SWIFT_NS_BEGIN
+SWALLOW_NS_BEGIN
 
 enum
 {
@@ -92,5 +92,5 @@ struct Flags
 };
 
 
-SWIFT_NS_END
+SWALLOW_NS_END
 #endif//PARSER_DETAILS_H

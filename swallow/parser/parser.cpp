@@ -33,7 +33,7 @@
 #include "ast/ast.h"
 #include "common/CompilerResults.h"
 #include "common/Errors.h"
-using namespace Swift;
+using namespace Swallow;
 
 
 Parser::Parser(NodeFactory* nodeFactory, CompilerResults* compilerResults)

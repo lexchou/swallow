@@ -28,7 +28,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "Comment.h"
-USE_SWIFT_NS
+USE_SWALLOW_NS
 
 CommentNode::CommentNode()
     :Node(NodeType::Comment)

@@ -32,7 +32,7 @@
 #include "Node.h"
 #include <string>
 
-SWIFT_NS_BEGIN
+SWALLOW_NS_BEGIN
 
 class Statement : public Node
 {
@@ -42,6 +42,6 @@ private:
 };
 typedef std::shared_ptr<Statement> StatementPtr;
 
-SWIFT_NS_END
+SWALLOW_NS_END
 
 #endif//STATEMENT_H

@@ -31,7 +31,7 @@
 #define ARRAY_LITERAL_H
 #include "Expression.h"
 
-SWIFT_NS_BEGIN
+SWALLOW_NS_BEGIN
 
 class ArrayLiteral : public Expression
 {
@@ -52,6 +52,6 @@ public:
     std::vector<ExpressionPtr> elements;
 };
 
-SWIFT_NS_END
+SWALLOW_NS_END
 
 #endif//ARRAY_LITERAL_H

@@ -32,7 +32,7 @@
 #include "TypeNode.h"
 #include <string>
 #include "ast-decl.h"
-SWIFT_NS_BEGIN
+SWALLOW_NS_BEGIN
 
 class TypeIdentifier : public TypeNode
 {
@@ -60,6 +60,6 @@ private:
     TypeIdentifierPtr nestedType;
 };
 
-SWIFT_NS_END
+SWALLOW_NS_END
 
 #endif//TYPE_IDENTIFIER_H

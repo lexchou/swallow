@@ -40,7 +40,7 @@
 #include "TypeBuilder.h"
 #include <cassert>
 
-USE_SWIFT_NS
+USE_SWALLOW_NS
 using namespace std;
 
 TypePtr SemanticAnalyzer::defineType(const std::shared_ptr<TypeDeclaration>& node, Type::Category category)

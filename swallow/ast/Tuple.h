@@ -33,21 +33,11 @@
 #include <string>
 #include "ast-decl.h"
 
-SWIFT_NS_BEGIN
+SWALLOW_NS_BEGIN
 
 class TypeNode;
 class Tuple : public Expression
 {
-public:
-    struct Element
-    {
-        PatternPtr element;
-        TypeNodePtr declaredType;
-        Element(){}
-        Element(const PatternPtr& element, const TypeNodePtr& declaredType)
-                :element(element), declaredType(declaredType)
-        {}
-    };
 public:
     Tuple();
     ~Tuple();
@@ -61,14 +51,14 @@ public:
     TypeNodePtr getDeclaredType();
     void setDeclaredType(const TypeNodePtr& type);
 
-    std::vector<Element>::iterator begin(){return elements.begin();}
-    std::vector<Element>::iterator end(){return elements.end();}
+    std::vector<PatternPtr>::iterator begin(){return elements.begin();}
+    std::vector<PatternPtr>::iterator end(){return elements.end();}
 
-public:
+private:
     TypeNodePtr declaredType;
-    std::vector<Element> elements;
+    std::vector<PatternPtr> elements;
 };
 
-SWIFT_NS_END
+SWALLOW_NS_END
 
 #endif//TUPLE_H

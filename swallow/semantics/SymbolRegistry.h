@@ -29,14 +29,14 @@
  */
 #ifndef SYMBOL_REGISTRY_H
 #define SYMBOL_REGISTRY_H
-#include "swift_conf.h"
-#include "swift_types.h"
+#include "swallow_conf.h"
+#include "swallow_types.h"
 #include <string>
 #include <map>
 #include <stack>
 #include "SymbolScope.h"
 #include "semantic-types.h"
-SWIFT_NS_BEGIN
+SWALLOW_NS_BEGIN
 
 struct OperatorInfo;
 class TypeNode;
@@ -84,6 +84,6 @@ private:
     SymbolScope* fileScope;
 };
 
-SWIFT_NS_END
+SWALLOW_NS_END
 
 #endif//SYMBOL_REGISTRY_H

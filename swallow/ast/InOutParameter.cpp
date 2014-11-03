@@ -29,7 +29,7 @@
  */
 #include "InOutParameter.h"
 #include "Identifier.h"
-USE_SWIFT_NS;
+USE_SWALLOW_NS;
 
 InOutParameter::InOutParameter()
 {

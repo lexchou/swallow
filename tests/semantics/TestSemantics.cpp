@@ -28,7 +28,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "../utils.h"
-using namespace Swift;
+using namespace Swallow;
 
 
 int main(int argc, char** argv)

@@ -37,7 +37,7 @@
 #include "common/Errors.h"
 
 
-using namespace Swift;
+using namespace Swallow;
 
 TEST(TestGeneric, Func_GenericParameter)
 {
@@ -181,7 +181,7 @@ TEST(TestGeneric, GenericConstraint7)
 
 TEST(TestGeneric, GenericConstraint7)
 {
-    SEMANTIC_ANALYZE_F("TestGeneric_GenericConstraint7.swift");
+    SEMANTIC_ANALYZE_F("TestGeneric_GenericConstraint7.swallow");
     dumpCompilerResults(compilerResults);
     ASSERT_EQ(0, compilerResults.numResults());
 }

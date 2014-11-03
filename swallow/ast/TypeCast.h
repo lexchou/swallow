@@ -32,7 +32,7 @@
 #include "BinaryOperator.h"
 #include <string>
 
-SWIFT_NS_BEGIN
+SWALLOW_NS_BEGIN
 class TypeNode;
 class TypeCast : public BinaryOperator
 {
@@ -54,7 +54,7 @@ private:
     bool optional;
 };
 
-SWIFT_NS_END
+SWALLOW_NS_END
 
 
 

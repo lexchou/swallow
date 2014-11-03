@@ -31,7 +31,7 @@
 #define FUNCTION_CALL_H
 #include "Expression.h"
 
-SWIFT_NS_BEGIN
+SWALLOW_NS_BEGIN
 
 class ParenthesizedExpression;
 class Closure;
@@ -58,6 +58,6 @@ private:
     ClosurePtr trailingClosure;
 };
 
-SWIFT_NS_END
+SWALLOW_NS_END
 
 #endif//FUNCTION_CALL_H

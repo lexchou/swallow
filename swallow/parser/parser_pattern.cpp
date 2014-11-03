@@ -31,7 +31,7 @@
 #include "parser_details.h"
 #include "ast/NodeFactory.h"
 #include "ast/ast.h"
-using namespace Swift;
+using namespace Swallow;
 
 /*
   GRAMMAR OF A PATTERN

@@ -29,7 +29,7 @@
  */
 #include "TupleType.h"
 #include "Attribute.h"
-USE_SWIFT_NS
+USE_SWALLOW_NS
 
 
 TupleType::TupleType()

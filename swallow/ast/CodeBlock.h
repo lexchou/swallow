@@ -33,7 +33,7 @@
 #include "Attribute.h"
 #include <string>
 
-SWIFT_NS_BEGIN
+SWALLOW_NS_BEGIN
 typedef std::shared_ptr<class Type> TypePtr;
 
 class CodeBlock : public Statement
@@ -62,6 +62,6 @@ private:
     TypePtr type;
 };
 
-SWIFT_NS_END
+SWALLOW_NS_END
 
 #endif//CODE_BLOCK_H

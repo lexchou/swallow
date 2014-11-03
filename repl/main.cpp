@@ -38,7 +38,7 @@
 #include "common/Errors.h"
 
 using namespace std;
-using namespace Swift;
+using namespace Swallow;
 typedef std::shared_ptr<ConsoleWriter> ConsoleWriterPtr;
 class Repl
 {

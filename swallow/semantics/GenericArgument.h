@@ -30,11 +30,11 @@
 #ifndef GENERIC_ARGUMENT_H
 #define GENERIC_ARGUMENT_H
 
-#include "swift_conf.h"
+#include "swallow_conf.h"
 #include <map>
 #include <vector>
 #include <string>
-SWIFT_NS_BEGIN
+SWALLOW_NS_BEGIN
 
 typedef std::shared_ptr<class Type> TypePtr;
 typedef std::shared_ptr<class GenericDefinition> GenericDefinitionPtr;
@@ -63,7 +63,7 @@ private:
 
 
 
-SWIFT_NS_END
+SWALLOW_NS_END
 
 
 #endif//GENERIC_ARGUMENT_H

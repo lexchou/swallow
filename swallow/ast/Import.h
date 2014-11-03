@@ -32,7 +32,7 @@
 #include "Declaration.h"
 #include <string>
 
-SWIFT_NS_BEGIN
+SWALLOW_NS_BEGIN
 
 class Import : public Declaration
 {
@@ -63,6 +63,6 @@ private:
     Kind kind;
 };
 
-SWIFT_NS_END
+SWALLOW_NS_END
 
 #endif//IMPORT_H

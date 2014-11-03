@@ -32,7 +32,7 @@
 #include "Statement.h"
 #include <string>
 
-SWIFT_NS_BEGIN
+SWALLOW_NS_BEGIN
 
 class Expression;
 class Pattern;
@@ -69,6 +69,6 @@ private:
     std::vector<StatementPtr> statements;
 };
 
-SWIFT_NS_END
+SWALLOW_NS_END
 
 #endif//CASE_STATEMENT_H

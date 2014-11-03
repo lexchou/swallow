@@ -34,7 +34,7 @@
 #include "GenericDefinition.h"
 #include "TypeBuilder.h"
 
-USE_SWIFT_NS
+USE_SWALLOW_NS
 using namespace std;
 
 GlobalScope::GlobalScope()

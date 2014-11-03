@@ -32,7 +32,7 @@
 #include "TypeNode.h"
 #include <string>
 
-SWIFT_NS_BEGIN
+SWALLOW_NS_BEGIN
 
 class FunctionType : public TypeNode
 {
@@ -53,6 +53,6 @@ private:
     TypeNodePtr returnType;
 };
 
-SWIFT_NS_END
+SWALLOW_NS_END
 
 #endif//FUNCTION_TYPE_H

@@ -34,7 +34,7 @@
 #include "parser_details.h"
 #include "common/Errors.h"
 
-using namespace Swift;
+using namespace Swallow;
 
 
 /*

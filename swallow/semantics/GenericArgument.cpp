@@ -31,7 +31,7 @@
 #include "GenericDefinition.h"
 #include <cassert>
 
-USE_SWIFT_NS
+USE_SWALLOW_NS
 
 GenericArgument::GenericArgument(const GenericDefinitionPtr& definition)
 :definition(definition)

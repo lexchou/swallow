@@ -32,7 +32,7 @@
 #include "NodeVisitor.h"
 #include <ostream>
 
-SWIFT_NS_BEGIN
+SWALLOW_NS_BEGIN
 
 
 
@@ -135,7 +135,7 @@ private:
 };
 
 
-SWIFT_NS_END
+SWALLOW_NS_END
 
 
 #endif//NODE_SERIALIZER_H

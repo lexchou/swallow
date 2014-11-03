@@ -36,7 +36,7 @@
 #include "ScopeGuard.h"
 #include "ast/NodeVisitor.h"
 
-USE_SWIFT_NS
+USE_SWALLOW_NS
 
 
 

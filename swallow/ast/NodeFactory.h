@@ -29,12 +29,12 @@
  */
 #ifndef NODE_FACTORY_H
 #define NODE_FACTORY_H
-#include "swift_types.h"
+#include "swallow_types.h"
 #include <string>
 #include <vector>
 #include "ast-decl.h"
 
-SWIFT_NS_BEGIN
+SWALLOW_NS_BEGIN
 
 struct SourceInfo;
 
@@ -140,7 +140,7 @@ protected:
 };
 
 
-SWIFT_NS_END
+SWALLOW_NS_END
 
 
 #endif//NODE_FACTORY_H

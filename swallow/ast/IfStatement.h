@@ -34,7 +34,7 @@
 #include "ast-decl.h"
 
 
-SWIFT_NS_BEGIN
+SWALLOW_NS_BEGIN
 
 class Expression;
 class CodeBlock;
@@ -61,6 +61,6 @@ private:
     StatementPtr elsePart;
 };
 
-SWIFT_NS_END
+SWALLOW_NS_END
 
 #endif//IF_STATEMENT_H

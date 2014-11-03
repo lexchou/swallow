@@ -30,7 +30,7 @@
 #ifndef EXPRESSION_H
 #define EXPRESSION_H
 #include "Pattern.h"
-SWIFT_NS_BEGIN
+SWALLOW_NS_BEGIN
 
 
 class Expression : public Pattern
@@ -39,5 +39,5 @@ protected:
 	Expression(NodeType::T nodeType);
 };
 typedef std::shared_ptr<Expression> ExpressionPtr;
-SWIFT_NS_END
+SWALLOW_NS_END
 #endif//EXPRESSION_H

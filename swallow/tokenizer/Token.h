@@ -29,13 +29,13 @@
  */
 #ifndef TOKEN_H
 #define TOKEN_H
-#include "swift_types.h"
+#include "swallow_types.h"
 #include <vector>
 #include <cstring>
 #include <string>
 #include <wchar.h>
 
-SWIFT_NS_BEGIN
+SWALLOW_NS_BEGIN
 
 struct TokenizerState : SourceInfo
 {
@@ -107,5 +107,5 @@ struct Token
     }
 };
 
-SWIFT_NS_END
+SWALLOW_NS_END
 #endif//TOKEN_H

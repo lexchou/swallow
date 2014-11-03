@@ -29,11 +29,11 @@
  */
 #ifndef FUNCTION_OVERLOADED_SYMBOL_H
 #define FUNCTION_OVERLOADED_SYMBOL_H
-#include "swift_conf.h"
+#include "swallow_conf.h"
 #include "Symbol.h"
 #include <vector>
 
-SWIFT_NS_BEGIN
+SWALLOW_NS_BEGIN
 typedef std::shared_ptr<Symbol> SymbolPtr;
 typedef std::shared_ptr<class FunctionSymbol> FunctionSymbolPtr;
 typedef std::shared_ptr<class FunctionOverloadedSymbol> FunctionOverloadedSymbolPtr;
@@ -58,6 +58,6 @@ private:
 };
 
 
-SWIFT_NS_END
+SWALLOW_NS_END
 
 #endif//FUNCTION_OVERLOADED_SYMBOL_H

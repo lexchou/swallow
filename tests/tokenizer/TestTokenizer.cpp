@@ -30,7 +30,7 @@
 #include "tokenizer/Token.h"
 #include "tokenizer/Tokenizer.h"
 #include "../utils.h"
-using namespace Swift;
+using namespace Swallow;
 
 
 

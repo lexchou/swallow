@@ -29,7 +29,7 @@
  */
 #include "FloatLiteral.h"
 #include "NodeVisitor.h"
-USE_SWIFT_NS
+USE_SWALLOW_NS
 
 FloatLiteral::FloatLiteral()
     :Expression(NodeType::FloatLiteral), valueAsString(L"0.0"), value(0)

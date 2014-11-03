@@ -34,7 +34,7 @@
 #include "Attribute.h"
 #include "ast-decl.h"
 
-SWIFT_NS_BEGIN
+SWALLOW_NS_BEGIN
 
 class TypeNode;
 class Expression;
@@ -95,6 +95,6 @@ private:
     ExpressionPtr defaultValue;
 };
 
-SWIFT_NS_END
+SWALLOW_NS_END
 
 #endif//PARAMETER_H

@@ -32,7 +32,7 @@
 #include "TypeNode.h"
 #include <string>
 
-SWIFT_NS_BEGIN
+SWALLOW_NS_BEGIN
 
 class OptionalType : public TypeNode
 {
@@ -48,6 +48,6 @@ private:
     TypeNodePtr innerType;
 };
 
-SWIFT_NS_END
+SWALLOW_NS_END
 
 #endif//OPTIONAL_TYPE_H

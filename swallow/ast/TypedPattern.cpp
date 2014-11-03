@@ -29,7 +29,7 @@
  */
 #include "TypedPattern.h"
 #include "NodeVisitor.h"
-USE_SWIFT_NS
+USE_SWALLOW_NS
 
 TypedPattern::TypedPattern()
     :Expression(NodeType::TypedPattern)

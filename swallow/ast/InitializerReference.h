@@ -31,7 +31,7 @@
 #define INITIALIZER_REFERENCE_H
 #include "Expression.h"
 
-SWIFT_NS_BEGIN
+SWALLOW_NS_BEGIN
 
 class InitializerReference : public Expression
 {
@@ -47,6 +47,6 @@ private:
     ExpressionPtr expression;
 };
 
-SWIFT_NS_END
+SWALLOW_NS_END
 
 #endif//INITIALIZER_REFERENCE_H

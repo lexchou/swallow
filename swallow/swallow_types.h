@@ -1,4 +1,4 @@
-/* swift_types.h --
+/* swallow_types.h --
  *
  * Copyright (c) 2014, Lex Chou <lex at chou dot com>
  * All rights reserved.
@@ -27,11 +27,11 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef SWIFT_TYPES_H
-#define SWIFT_TYPES_H
-#include "swift_conf.h"
+#ifndef SWALLOW_TYPES_H
+#define SWALLOW_TYPES_H
+#include "swallow_conf.h"
 
-SWIFT_NS_BEGIN
+SWALLOW_NS_BEGIN
 
 struct TokenType
 {
@@ -210,6 +210,6 @@ struct Abort
 };
 
 
-SWIFT_NS_END
+SWALLOW_NS_END
 
-#endif//SWIFT_TYPES_H
+#endif//SWALLOW_TYPES_H

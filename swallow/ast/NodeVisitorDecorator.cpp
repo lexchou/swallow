@@ -28,7 +28,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "NodeVisitorDecorator.h"
-USE_SWIFT_NS
+USE_SWALLOW_NS
 
 
 #define VISIT(fn) visitor->fn(node);

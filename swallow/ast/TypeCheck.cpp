@@ -29,7 +29,7 @@
  */
 #include "TypeCheck.h"
 #include "TypeNode.h"
-USE_SWIFT_NS
+USE_SWALLOW_NS
 
 TypeCheck::TypeCheck()
 {

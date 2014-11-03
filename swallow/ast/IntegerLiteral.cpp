@@ -29,7 +29,7 @@
  */
 #include "IntegerLiteral.h"
 #include "NodeVisitor.h"
-USE_SWIFT_NS
+USE_SWALLOW_NS
 
 IntegerLiteral::IntegerLiteral()
     :Expression(NodeType::IntegerLiteral), valueAsString(L"0"), value(0)

@@ -31,7 +31,7 @@
 #define DICTIONARY_LITERAL_H
 #include "Expression.h"
 
-SWIFT_NS_BEGIN
+SWALLOW_NS_BEGIN
 
 class DictionaryLiteral : public Expression
 {
@@ -51,6 +51,6 @@ private:
     Map items;
 };
 
-SWIFT_NS_END
+SWALLOW_NS_END
 
 #endif//DICTIONARY_LITERAL_H

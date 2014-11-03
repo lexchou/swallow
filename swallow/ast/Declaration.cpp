@@ -30,7 +30,7 @@
 #include "Declaration.h"
 #include "Attribute.h"
 #include <algorithm>
-USE_SWIFT_NS
+USE_SWALLOW_NS
 
 
 Declaration::Declaration(NodeType::T nodeType)

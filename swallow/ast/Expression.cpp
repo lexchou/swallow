@@ -28,7 +28,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "Expression.h"
-USE_SWIFT_NS
+USE_SWALLOW_NS
 
 Expression::Expression(NodeType::T nodeType)
     :Pattern(nodeType)

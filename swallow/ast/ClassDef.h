@@ -32,7 +32,7 @@
 #include "TypeDeclaration.h"
 #include <string>
 
-SWIFT_NS_BEGIN
+SWALLOW_NS_BEGIN
 
 class ClassDef : public TypeDeclaration
 {
@@ -47,6 +47,6 @@ private:
     std::wstring name;
 };
 
-SWIFT_NS_END
+SWALLOW_NS_END
 
 #endif//CLASS_DEF_H

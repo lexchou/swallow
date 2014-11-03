@@ -31,7 +31,7 @@
 #define OPTIONAL_CHAINING_H
 #include "Expression.h"
 
-SWIFT_NS_BEGIN
+SWALLOW_NS_BEGIN
 
 class OptionalChaining : public Expression
 {
@@ -47,6 +47,6 @@ private:
     ExpressionPtr expression;
 };
 
-SWIFT_NS_END
+SWALLOW_NS_END
 
 #endif//OPTIONAL_CHAINING_H

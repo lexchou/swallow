@@ -32,7 +32,7 @@
 #include "Statement.h"
 #include <string>
 
-SWIFT_NS_BEGIN
+SWALLOW_NS_BEGIN
 
 class BreakStatement : public Statement
 {
@@ -47,6 +47,6 @@ private:
     std::wstring loop;
 };
 
-SWIFT_NS_END
+SWALLOW_NS_END
 
 #endif//BREAK_STATEMENT_H

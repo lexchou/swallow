@@ -29,7 +29,7 @@
  */
 #include "NodeFactory.h"
 #include "ast.h"
-USE_SWIFT_NS;
+USE_SWALLOW_NS;
 
 
 NodeFactory::NodeFactory()

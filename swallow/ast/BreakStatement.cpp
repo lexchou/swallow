@@ -30,7 +30,7 @@
 
 #include "BreakStatement.h"
 #include "NodeVisitor.h"
-USE_SWIFT_NS
+USE_SWALLOW_NS
 
 
 BreakStatement::BreakStatement()

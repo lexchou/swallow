@@ -32,7 +32,7 @@
 #include "Declaration.h"
 #include <string>
 
-SWIFT_NS_BEGIN
+SWALLOW_NS_BEGIN
 
 class Pattern;
 class Expression;
@@ -74,6 +74,6 @@ private:
     std::weak_ptr<class ValueBindings> owner;
 };
 
-SWIFT_NS_END
+SWALLOW_NS_END
 
 #endif//VALUE_BINDING_H

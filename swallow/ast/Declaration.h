@@ -34,7 +34,7 @@
 #include <vector>
 #include "ast-decl.h"
 
-SWIFT_NS_BEGIN
+SWALLOW_NS_BEGIN
 
 class Attribute;
 class GenericParametersDef;
@@ -60,6 +60,6 @@ protected:
     GenericParametersDefPtr genericParameters;
 };
 
-SWIFT_NS_END
+SWALLOW_NS_END
 
 #endif//DECLARATION_H

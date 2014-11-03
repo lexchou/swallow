@@ -30,7 +30,7 @@
 #include "CodeBlock.h"
 #include "NodeVisitor.h"
 #include <cassert>
-USE_SWIFT_NS
+USE_SWALLOW_NS
 
 
 CodeBlock::CodeBlock()

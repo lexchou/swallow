@@ -31,7 +31,7 @@
 #include "ast/NodeFactory.h"
 #include "ast/ast.h"
 
-using namespace Swift;
+using namespace Swallow;
 
 void Parser::parseAttributes(std::vector<AttributePtr>& attributes)
 {

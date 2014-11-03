@@ -33,7 +33,7 @@
 #include <string>
 #include "Attribute.h"
 
-SWIFT_NS_BEGIN
+SWALLOW_NS_BEGIN
 class CodeBlock;
 class Parameters;
 class TypeNode;
@@ -72,6 +72,6 @@ private:
     CodeBlockPtr setter;
 };
 
-SWIFT_NS_END
+SWALLOW_NS_END
 
 #endif//SUBSCRIPT_DEF_H

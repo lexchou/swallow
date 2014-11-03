@@ -31,7 +31,7 @@
 #define UNARY_OPERATOR_H
 #include "Operator.h"
 #include <string>
-SWIFT_NS_BEGIN
+SWALLOW_NS_BEGIN
 
 class UnaryOperator : public Operator
 {
@@ -55,6 +55,6 @@ private:
     ExpressionPtr operand;
 };
 
-SWIFT_NS_END
+SWALLOW_NS_END
 
 #endif//UNARY_OPERATOR_H

@@ -50,9 +50,9 @@ std::wstring readFile(const char* fileName)
     return wss.str();
 }
 
-void dumpCompilerResults(Swift::CompilerResults& compilerResults)
+void dumpCompilerResults(Swallow::CompilerResults& compilerResults)
 {
-    using namespace Swift;
+    using namespace Swallow;
     if(compilerResults.numResults() > 0)
     {
         for(int i = 0; i < compilerResults.numResults(); i++)
@@ -82,9 +82,9 @@ void dumpCompilerResults(Swift::CompilerResults& compilerResults)
 }
 
 
-Swift::NodePtr parseStatement(Swift::CompilerResults& compilerResults, const char* func, const wchar_t* str)
+Swallow::NodePtr parseStatement(Swallow::CompilerResults& compilerResults, const char* func, const wchar_t* str)
 {
-    using namespace Swift;
+    using namespace Swallow;
     NodeFactory nodeFactory;
     Parser parser(&nodeFactory, &compilerResults);
     parser.setFileName(L"<file>");
@@ -93,9 +93,9 @@ Swift::NodePtr parseStatement(Swift::CompilerResults& compilerResults, const cha
     return ret;
 }
 
-Swift::ProgramPtr parseStatements(Swift::CompilerResults& compilerResults, const char* func, const wchar_t* str)
+Swallow::ProgramPtr parseStatements(Swallow::CompilerResults& compilerResults, const char* func, const wchar_t* str)
 {
-    using namespace Swift;
+    using namespace Swallow;
     NodeFactory nodeFactory;
     Parser parser(&nodeFactory, &compilerResults);
     parser.setFileName(L"<file>");
@@ -103,9 +103,9 @@ Swift::ProgramPtr parseStatements(Swift::CompilerResults& compilerResults, const
     dumpCompilerResults(compilerResults);
     return ret;
 }
-Swift::ScopedProgramPtr analyzeStatement(Swift::SymbolRegistry& registry, Swift::CompilerResults& compilerResults, const char* func, const wchar_t* str)
+Swallow::ScopedProgramPtr analyzeStatement(Swallow::SymbolRegistry& registry, Swallow::CompilerResults& compilerResults, const char* func, const wchar_t* str)
 {
-    using namespace Swift;
+    using namespace Swallow;
 
     FunctionOverloadedSymbolPtr println(new FunctionOverloadedSymbol());
     {
@@ -146,7 +146,7 @@ Tracer::Tracer(const char* file, int line, const char* func)
     strcpy(this->func, func);
     this->line = line;
 #ifdef TRACE_NODE
-    using namespace Swift;
+    using namespace Swallow;
     Node::UnreleasedNodes.clear();
     Node::NodeCount = 0;
 #endif
@@ -154,7 +154,7 @@ Tracer::Tracer(const char* file, int line, const char* func)
 Tracer::~Tracer()
 {
 #ifdef TRACE_NODE
-    using namespace Swift;
+    using namespace Swallow;
     using namespace std;
     list<Node*>& nodes = Node::UnreleasedNodes;
     int unreleasedNodes = nodes.size();

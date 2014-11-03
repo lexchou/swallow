@@ -29,10 +29,10 @@
  */
 #ifndef NODE_VISITOR_H
 #define NODE_VISITOR_H
-#include "swift_conf.h"
+#include "swallow_conf.h"
 #include "ast-decl.h"
 
-SWIFT_NS_BEGIN
+SWALLOW_NS_BEGIN
 
 class Statement;
 class NodeVisitor
@@ -110,5 +110,5 @@ public:
 };
 
 
-SWIFT_NS_END
+SWALLOW_NS_END
 #endif//NODE_VISITOR_H

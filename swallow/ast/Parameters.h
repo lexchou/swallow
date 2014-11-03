@@ -33,7 +33,7 @@
 #include <string>
 #include "ast-decl.h"
 
-SWIFT_NS_BEGIN
+SWALLOW_NS_BEGIN
 
 class Parameter;
 class Parameters : public Node
@@ -59,6 +59,6 @@ private:
     std::vector<ParameterPtr> parameters;
 };
 
-SWIFT_NS_END
+SWALLOW_NS_END
 
 #endif//PARAMETERS_H

@@ -32,7 +32,7 @@
 #include "Statement.h"
 #include <string>
 
-SWIFT_NS_BEGIN
+SWALLOW_NS_BEGIN
 
 class Expression;
 class ReturnStatement : public Statement
@@ -49,6 +49,6 @@ private:
     ExpressionPtr expression;
 };
 
-SWIFT_NS_END
+SWALLOW_NS_END
 
 #endif//RETURN_STATEMENT_H

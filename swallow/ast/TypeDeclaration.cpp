@@ -29,7 +29,7 @@
  */
 #include "TypeDeclaration.h"
 #include "TypeIdentifier.h"
-USE_SWIFT_NS
+USE_SWALLOW_NS
 
 
 TypeDeclaration::TypeDeclaration(NodeType::T nodeType)

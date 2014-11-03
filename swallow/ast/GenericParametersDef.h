@@ -32,7 +32,7 @@
 #include "Node.h"
 #include <string>
 
-SWIFT_NS_BEGIN
+SWALLOW_NS_BEGIN
 class GenericConstraintDef;
 class TypeIdentifier;
 
@@ -63,6 +63,6 @@ private:
 
 };
 
-SWIFT_NS_END
+SWALLOW_NS_END
 
 #endif//GENERIC_PARAMETERS_H

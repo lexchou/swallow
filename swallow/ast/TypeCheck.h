@@ -32,7 +32,7 @@
 #include "BinaryOperator.h"
 #include <string>
 
-SWIFT_NS_BEGIN
+SWALLOW_NS_BEGIN
 class TypeNode;
 class TypeCheck : public BinaryOperator
 {
@@ -50,7 +50,7 @@ private:
     TypeNodePtr declaredType;
 };
 
-SWIFT_NS_END
+SWALLOW_NS_END
 
 
 

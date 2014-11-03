@@ -32,7 +32,7 @@
 #include "Expression.h"
 #include <string>
 
-SWIFT_NS_BEGIN
+SWALLOW_NS_BEGIN
 class Identifier;
 class SubscriptAccess : public Expression
 {
@@ -53,7 +53,7 @@ public:
     ParenthesizedExpressionPtr indices;
 };
 
-SWIFT_NS_END
+SWALLOW_NS_END
 
 
 

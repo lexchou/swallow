@@ -41,7 +41,7 @@
 #include "ast/NodeSerializer.h"
 #include "GlobalScope.h"
 
-USE_SWIFT_NS
+USE_SWALLOW_NS
 using namespace std;
 
 

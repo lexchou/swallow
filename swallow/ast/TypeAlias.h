@@ -32,7 +32,7 @@
 #include "Declaration.h"
 #include <string>
 
-SWIFT_NS_BEGIN
+SWALLOW_NS_BEGIN
 
 class TypeNode;
 class TypeAlias : public Declaration
@@ -54,6 +54,6 @@ private:
     TypeNodePtr type;
 };
 
-SWIFT_NS_END
+SWALLOW_NS_END
 
 #endif//TYPE_ALIAS_H

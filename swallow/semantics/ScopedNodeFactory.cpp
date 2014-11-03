@@ -29,7 +29,7 @@
  */
 #include "ScopedNodeFactory.h"
 #include "ScopedNodes.h"
-USE_SWIFT_NS
+USE_SWALLOW_NS
 
 
 IdentifierPtr ScopedNodeFactory::createIdentifier(const SourceInfo& state)

@@ -29,7 +29,7 @@
  */
 #include "UnaryOperator.h"
 #include "NodeVisitor.h"
-USE_SWIFT_NS;
+USE_SWALLOW_NS;
 
 UnaryOperator::UnaryOperator()
     :Operator(NodeType::UnaryOperator)

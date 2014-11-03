@@ -31,7 +31,7 @@
 #define SELF_EXPRESSION_H
 #include "Expression.h"
 
-SWIFT_NS_BEGIN
+SWALLOW_NS_BEGIN
 
 class SelfExpression : public Expression
 {
@@ -47,6 +47,6 @@ private:
     ExpressionPtr expression;
 };
 
-SWIFT_NS_END
+SWALLOW_NS_END
 
 #endif//SELF_EXPRESSION_H

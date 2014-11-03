@@ -33,7 +33,7 @@
 #include <string>
 #include <vector>
 
-SWIFT_NS_BEGIN
+SWALLOW_NS_BEGIN
 class Attribute;
 typedef std::shared_ptr<class Type> TypePtr;
 class TypeNode : public Statement
@@ -54,6 +54,6 @@ private:
 };
 
 
-SWIFT_NS_END
+SWALLOW_NS_END
 
 #endif//TYPE_NODE_H

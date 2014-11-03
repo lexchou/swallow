@@ -35,7 +35,7 @@
 #include "common/Errors.h"
 #include "semantics/FunctionSymbol.h"
 
-using namespace Swift;
+using namespace Swallow;
 
 TEST(TestSymbolResolve, testUndeclaredVars)
 {

@@ -31,7 +31,7 @@
 #define FORCED_VALUE_H
 #include "Expression.h"
 
-SWIFT_NS_BEGIN
+SWALLOW_NS_BEGIN
 
 class ForcedValue : public Expression
 {
@@ -47,6 +47,6 @@ private:
     ExpressionPtr expression;
 };
 
-SWIFT_NS_END
+SWALLOW_NS_END
 
 #endif//FORCED_VALUE_H

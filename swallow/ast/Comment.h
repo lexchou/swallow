@@ -31,7 +31,7 @@
 #define COMMENT_NODE_H
 #include "Node.h"
 #include <string>
-SWIFT_NS_BEGIN
+SWALLOW_NS_BEGIN
 
 class CommentNode : public Node
 {
@@ -42,6 +42,6 @@ public:
 public:
 };
 
-SWIFT_NS_END
+SWALLOW_NS_END
 
 #endif//COMMENT_NODE_H

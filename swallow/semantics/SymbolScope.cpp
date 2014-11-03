@@ -32,7 +32,7 @@
 #include "Type.h"
 #include <cassert>
 
-USE_SWIFT_NS
+USE_SWALLOW_NS
 
 SymbolScope::SymbolScope()
     :owner(NULL), parent(NULL)

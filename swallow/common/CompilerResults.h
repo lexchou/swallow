@@ -29,12 +29,12 @@
  */
 #ifndef ERROR_LIST_H
 #define ERROR_LIST_H
-#include "swift_conf.h"
-#include "swift_types.h"
+#include "swallow_conf.h"
+#include "swallow_types.h"
 #include <string>
 #include <vector>
 
-SWIFT_NS_BEGIN
+SWALLOW_NS_BEGIN
 
 struct ErrorLevel
 {
@@ -78,6 +78,6 @@ private:
     std::vector<CompilerResult> results;
 };
 
-SWIFT_NS_END
+SWALLOW_NS_END
 
 #endif//ERROR_LIST_H

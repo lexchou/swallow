@@ -32,7 +32,7 @@
 #include <cassert>
 #include <set>
 #include <algorithm>
-USE_SWIFT_NS
+USE_SWALLOW_NS
 
 #ifdef TRACE_NODE
 int Node::NodeCount = 0;

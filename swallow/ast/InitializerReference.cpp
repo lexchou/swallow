@@ -29,7 +29,7 @@
  */
 #include "InitializerReference.h"
 #include "NodeVisitor.h"
-USE_SWIFT_NS
+USE_SWALLOW_NS
 
 
 InitializerReference::InitializerReference()

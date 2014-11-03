@@ -37,7 +37,7 @@
 #include "common/Errors.h"
 
 
-using namespace Swift;
+using namespace Swallow;
 
 TEST(TestProtocol, ProtocolInheritance)
 {

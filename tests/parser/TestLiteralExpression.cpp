@@ -32,7 +32,7 @@
 #include "semantics/SymbolRegistry.h"
 #include "ast/ast.h"
 
-using namespace Swift;
+using namespace Swallow;
 
 TEST(TestLiteralExpression, testLiteral)
 {

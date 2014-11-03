@@ -29,7 +29,7 @@
  */
 #include "ConditionalOperator.h"
 #include "NodeVisitor.h"
-USE_SWIFT_NS
+USE_SWALLOW_NS
 
 ConditionalOperator::ConditionalOperator()
     :Operator(NodeType::ConditionalOperator)

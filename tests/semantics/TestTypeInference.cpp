@@ -36,7 +36,7 @@
 #include "semantics/GlobalScope.h"
 #include "semantics/GenericArgument.h"
 
-using namespace Swift;
+using namespace Swallow;
 
 TEST(TestTypeInference, IntLiteral)
 {

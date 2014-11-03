@@ -32,7 +32,7 @@
 #include "Type.h"
 
 
-SWIFT_NS_BEGIN
+SWALLOW_NS_BEGIN
 
 class TypeBuilder : public Type
 {
@@ -64,7 +64,7 @@ public:
 typedef std::shared_ptr<TypeBuilder> TypeBuilderPtr;
 
 
-SWIFT_NS_END
+SWALLOW_NS_END
 
 
 #endif//TYPE_BUILDER_H

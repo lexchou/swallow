@@ -32,7 +32,7 @@
 #include "Expression.h"
 #include <string>
 
-SWIFT_NS_BEGIN
+SWALLOW_NS_BEGIN
 
 class IntegerLiteral : public Expression
 {
@@ -48,7 +48,7 @@ public:
 };
 typedef std::shared_ptr<IntegerLiteral> IntegerLiteralPtr;
 
-SWIFT_NS_END
+SWALLOW_NS_END
 
 
 

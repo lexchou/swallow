@@ -31,7 +31,7 @@
 #include "NodeVisitor.h"
 #include "ValueBinding.h"
 #include <algorithm>
-USE_SWIFT_NS
+USE_SWALLOW_NS
 
 
 ValueBindings::ValueBindings()

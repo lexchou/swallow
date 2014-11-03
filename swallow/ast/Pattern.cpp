@@ -28,7 +28,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "Pattern.h"
-USE_SWIFT_NS
+USE_SWALLOW_NS
 
 
 Pattern::Pattern(NodeType::T nodeType)

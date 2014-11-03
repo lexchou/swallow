@@ -31,7 +31,7 @@
 #include "ScopeOwner.h"
 #include "SemanticAnalyzer.h"
 #include "SymbolRegistry.h"
-USE_SWIFT_NS
+USE_SWALLOW_NS
 
 
 ScopeGuard::ScopeGuard(ScopeOwner* owner, NodeVisitor* visitor)

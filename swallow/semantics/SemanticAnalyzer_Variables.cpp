@@ -42,7 +42,7 @@
 #include "GlobalScope.h"
 #include "ast/NodeFactory.h"
 
-USE_SWIFT_NS
+USE_SWALLOW_NS
 using namespace std;
 
 void SemanticAnalyzer::visitAssignment(const AssignmentPtr& node)
@@ -73,9 +73,9 @@ void SemanticAnalyzer::verifyTuplePattern(const PatternPtr& pattern)
     else if(pattern->getNodeType() == NodeType::Tuple)
     {
         TuplePtr tuple = std::static_pointer_cast<Tuple>(pattern);
-        for(const Tuple::Element& element : tuple->elements)
+        for(const PatternPtr& element : *tuple)
         {
-            verifyTuplePattern(element.element);
+            verifyTuplePattern(element);
         }
     }
     else
@@ -106,9 +106,9 @@ void SemanticAnalyzer::registerPattern(const PatternPtr& pattern)
     else if(pattern->getNodeType() == NodeType::Tuple)
     {
         TuplePtr tuple = std::static_pointer_cast<Tuple>(pattern);
-        for(const Tuple::Element& element : tuple->elements)
+        for(const PatternPtr& element : *tuple)
         {
-            registerPattern(element.element);
+            registerPattern(element);
         }
     }
 }
@@ -502,9 +502,9 @@ void SemanticAnalyzer::setFlag(const PatternPtr& pattern, bool add, int flag)
     else if(t == NodeType::Tuple)
     {
         TuplePtr tuple = std::static_pointer_cast<Tuple>(pattern);
-        for(const Tuple::Element& element : tuple->elements)
+        for(const PatternPtr& element : *tuple)
         {
-            setFlag(element.element, add, flag);
+            setFlag(element, add, flag);
         }
     }
 

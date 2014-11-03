@@ -44,11 +44,11 @@
 #define ASSERT_NOT_NULL(condition) GTEST_TEST_BOOLEAN_((condition) != NULL, #condition, false, true, GTEST_FATAL_FAILURE_)
 #define ASSERT_NULL(condition) GTEST_TEST_BOOLEAN_((condition) == NULL, #condition, false, true, GTEST_FATAL_FAILURE_)
 
-void dumpCompilerResults(Swift::CompilerResults& compilerResults);
-Swift::NodePtr parseStatement(Swift::CompilerResults& compilerResults, const char* func, const wchar_t* str);
-Swift::ProgramPtr parseStatements(Swift::CompilerResults& compilerResults, const char* func, const wchar_t* str);
+void dumpCompilerResults(Swallow::CompilerResults& compilerResults);
+Swallow::NodePtr parseStatement(Swallow::CompilerResults& compilerResults, const char* func, const wchar_t* str);
+Swallow::ProgramPtr parseStatements(Swallow::CompilerResults& compilerResults, const char* func, const wchar_t* str);
 
-Swift::ScopedProgramPtr analyzeStatement(Swift::SymbolRegistry& registry, Swift::CompilerResults& compilerResults, const char* func, const wchar_t* str);
+Swallow::ScopedProgramPtr analyzeStatement(Swallow::SymbolRegistry& registry, Swallow::CompilerResults& compilerResults, const char* func, const wchar_t* str);
 std::wstring readFile(const char* fileName);
 
 
@@ -65,17 +65,17 @@ struct Tracer
     
 };
 #define PARSE_STATEMENT(s) Tracer tracer(__FILE__, __LINE__, __FUNCTION__); \
-    Swift::CompilerResults compilerResults; \
+    Swallow::CompilerResults compilerResults; \
     NodePtr root = parseStatement(compilerResults, __FUNCTION__, (s));
 
 
 
 
 #define SEMANTIC_ANALYZE(s) Tracer tracer(__FILE__, __LINE__, __FUNCTION__); \
-    Swift::SymbolRegistry symbolRegistry; \
-    Swift::CompilerResults compilerResults; \
+    Swallow::SymbolRegistry symbolRegistry; \
+    Swallow::CompilerResults compilerResults; \
     ScopedProgramPtr root = analyzeStatement(symbolRegistry, compilerResults, __FUNCTION__, (s)); \
-    Swift::SymbolScope* scope = root ? root->getScope() : nullptr; \
+    Swallow::SymbolScope* scope = root ? root->getScope() : nullptr; \
     (void)scope;
 #define SEMANTIC_ANALYZE_F(fileName) std::wstring content = readFile(fileName); \
     SEMANTIC_ANALYZE(content.c_str());

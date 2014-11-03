@@ -30,10 +30,10 @@
 #ifndef OPERATOR_DEF_H
 #define OPERATOR_DEF_H
 #include "Declaration.h"
-#include "swift_types.h"
+#include "swallow_types.h"
 #include <string>
 
-SWIFT_NS_BEGIN
+SWALLOW_NS_BEGIN
 
 class OperatorDef : public Declaration
 {
@@ -61,6 +61,6 @@ private:
     Associativity::T associativity;
 };
 
-SWIFT_NS_END
+SWALLOW_NS_END
 
 #endif//OPERATOR_DEF_H

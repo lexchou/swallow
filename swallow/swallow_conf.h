@@ -1,4 +1,4 @@
-/* swift_conf.h --
+/* swallow_conf.h --
  *
  * Copyright (c) 2014, Lex Chou <lex at chou dot com>
  * All rights reserved.
@@ -27,37 +27,13 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef SWIFT_CONF_H
-#define SWIFT_CONF_H
+#ifndef SWALLOW_CONF_H
+#define SWALLOW_CONF_H
 #include <memory>
 
-#define SWIFT_NS_BEGIN namespace Swift{
-#define SWIFT_NS_END }
-#define USE_SWIFT_NS using namespace Swift;
+#define SWALLOW_NS_BEGIN namespace Swallow {
+#define SWALLOW_NS_END }
+#define USE_SWALLOW_NS using namespace Swallow;
 
 
-SWIFT_NS_BEGIN
-/*
-template<class T>
-inline void SafeDelete(T*& val)
-{
-    T* v = val;
-    val = (T*)0;
-    if(v)
-        delete v;
-}
-
-template<typename ContainerT>
-inline void SafeDeleteAll(ContainerT& container)
-{
-    for(typename ContainerT::iterator iter = container.begin(); iter != container.end(); iter++)
-    {
-        delete *iter;
-    }
-    container.clear();
-}
-*/
-
-SWIFT_NS_END
-
-#endif//SWIFT_CONF_H
+#endif//SWALLOW_CONF_H

@@ -32,7 +32,7 @@
 #include "Statement.h"
 #include <string>
 
-SWIFT_NS_BEGIN
+SWALLOW_NS_BEGIN
 class Type;
 typedef std::shared_ptr<Type> TypePtr;
 
@@ -49,6 +49,6 @@ private:
 };
 typedef std::shared_ptr<Pattern> PatternPtr;
 
-SWIFT_NS_END
+SWALLOW_NS_END
 
 #endif//PATTERN_H

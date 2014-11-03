@@ -32,7 +32,7 @@
 #include "Expression.h"
 #include <string>
 
-SWIFT_NS_BEGIN
+SWALLOW_NS_BEGIN
 
 class Parameters;
 class TypeNode;
@@ -81,6 +81,6 @@ public:
     
 };
 
-SWIFT_NS_END
+SWALLOW_NS_END
 
 #endif//CLOSURE_H

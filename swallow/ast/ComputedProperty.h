@@ -33,7 +33,7 @@
 #include "Attribute.h"
 #include <string>
 
-SWIFT_NS_BEGIN
+SWALLOW_NS_BEGIN
 class CodeBlock;
 class Expression;
 class Pattern;
@@ -101,6 +101,6 @@ private:
 
 };
 
-SWIFT_NS_END
+SWALLOW_NS_END
 
 #endif//COMPUTED_PROPERTY_H

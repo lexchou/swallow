@@ -28,7 +28,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "Attribute.h"
-USE_SWIFT_NS
+USE_SWALLOW_NS
 
 
 Attribute::Attribute()

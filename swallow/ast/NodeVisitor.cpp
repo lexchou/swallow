@@ -29,7 +29,7 @@
  */
 #include "NodeVisitor.h"
 #include "ast.h"
-USE_SWIFT_NS
+USE_SWALLOW_NS
 
 
 #define ACCEPT(node) do { \
@@ -299,9 +299,9 @@ void NodeVisitor::visitUnaryOperator(const UnaryOperatorPtr& node)
 
 void NodeVisitor::visitTuple(const TuplePtr& node)
 {
-    for(const Tuple::Element& p : *node)
+    for(const PatternPtr & p : *node)
     {
-        ACCEPT(p.element);
+        ACCEPT(p);
     }
 }
 

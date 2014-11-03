@@ -29,7 +29,7 @@
  */
 #include "TypeNode.h"
 #include <algorithm>
-USE_SWIFT_NS
+USE_SWALLOW_NS
 
 
 TypeNode::TypeNode(NodeType::T nodeType)

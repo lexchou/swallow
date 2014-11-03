@@ -32,7 +32,7 @@
 #include "Pattern.h"
 #include <string>
 
-SWIFT_NS_BEGIN
+SWALLOW_NS_BEGIN
 
 class Tuple;
 class EnumCasePattern : public Pattern
@@ -53,6 +53,6 @@ private:
     TuplePtr associatedBinding;
 };
 
-SWIFT_NS_END
+SWALLOW_NS_END
 
 #endif//ENUM_CASE_PATTERN_H

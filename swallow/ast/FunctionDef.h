@@ -33,7 +33,7 @@
 #include "Attribute.h"
 #include <string>
 
-SWIFT_NS_BEGIN
+SWALLOW_NS_BEGIN
 
 class Parameters;
 class CodeBlock;
@@ -87,6 +87,6 @@ protected:
     TypePtr type;
 };
 
-SWIFT_NS_END
+SWALLOW_NS_END
 
 #endif//FUNCTION_DEF_H

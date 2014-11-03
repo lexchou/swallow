@@ -32,7 +32,7 @@
 #include "Statement.h"
 #include <string>
 
-SWIFT_NS_BEGIN
+SWALLOW_NS_BEGIN
 
 class Expression;
 class CaseStatement;
@@ -62,6 +62,6 @@ private:
     CaseStatementPtr defaultCase;
 };
 
-SWIFT_NS_END
+SWALLOW_NS_END
 
 #endif//SWITCH_CASE_H

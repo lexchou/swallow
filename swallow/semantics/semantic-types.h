@@ -29,10 +29,10 @@
  */
 #ifndef SEMANTIC_TYPES_H
 #define SEMANTIC_TYPES_H
-#include "swift_conf.h"
+#include "swallow_conf.h"
 #include <memory>
 
-SWIFT_NS_BEGIN
+SWALLOW_NS_BEGIN
 
 class SymbolScope;
 //typedef std::shared_ptr<SymbolScope> SymbolScopePtr;
@@ -66,6 +66,6 @@ typedef std::shared_ptr<class SymboledVariable> SymboledVariablePtr;
 typedef std::shared_ptr<class SymboledConstant> SymboledConstantPtr;
 
 
-SWIFT_NS_END
+SWALLOW_NS_END
 
 #endif//SEMANTIC_TYPES_H

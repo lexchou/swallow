@@ -33,7 +33,7 @@
 #include <cstring>
 #include <wchar.h>
 #include <ctype.h>
-using namespace Swift;
+using namespace Swallow;
 
 Tokenizer::Tokenizer(const wchar_t* data)
 {

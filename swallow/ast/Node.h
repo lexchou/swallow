@@ -29,8 +29,8 @@
  */
 #ifndef NODE_H
 #define NODE_H
-#include "swift_conf.h"
-#include "swift_types.h"
+#include "swallow_conf.h"
+#include "swallow_types.h"
 #include "ast-decl.h"
 #include <vector>
 #include <sstream>
@@ -39,7 +39,7 @@
 #include <list>
 #endif//TRACE_NODE
 
-SWIFT_NS_BEGIN
+SWALLOW_NS_BEGIN
 
 class NodeVisitor;
 struct NodeType
@@ -163,7 +163,7 @@ public:
 };
 typedef std::shared_ptr<Node> NodePtr;
 
-SWIFT_NS_END
+SWALLOW_NS_END
 
 
 #endif//NODE_H

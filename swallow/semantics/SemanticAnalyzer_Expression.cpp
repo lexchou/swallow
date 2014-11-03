@@ -43,7 +43,7 @@
 #include <algorithm>
 
 
-USE_SWIFT_NS
+USE_SWALLOW_NS
 using namespace std;
 bool SemanticAnalyzer::isInteger(const TypePtr& type)
 {
@@ -122,9 +122,9 @@ void SemanticAnalyzer::checkTupleDefinition(const TuplePtr& tuple, const Express
     }
 
 
-    for(const Tuple::Element& p : *tuple)
+    for(const PatternPtr& p : *tuple)
     {
-        NodeType::T nodeType = p.element->getNodeType();
+        NodeType::T nodeType = p->getNodeType();
         if(nodeType != NodeType::Identifier)
         {
 
@@ -671,9 +671,9 @@ void SemanticAnalyzer::visitTuple(const TuplePtr& node)
 {
     NodeVisitor::visitTuple(node);
     std::vector<TypePtr> types;
-    for(const Tuple::Element& element : *node)
+    for(const PatternPtr & element : *node)
     {
-        TypePtr elementType = element.element->getType();
+        TypePtr elementType = element->getType();
         assert(elementType != nullptr);
         types.push_back(elementType);
     }

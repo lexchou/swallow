@@ -32,7 +32,7 @@
 #include "Expression.h"
 #include <string>
 
-SWIFT_NS_BEGIN
+SWALLOW_NS_BEGIN
 class Identifier;
 class MemberAccess : public Expression
 {
@@ -56,7 +56,7 @@ public:
     int index;
 };
 
-SWIFT_NS_END
+SWALLOW_NS_END
 
 
 

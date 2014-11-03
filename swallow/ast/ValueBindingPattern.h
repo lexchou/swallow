@@ -32,7 +32,7 @@
 #include "Pattern.h"
 #include <string>
 
-SWIFT_NS_BEGIN
+SWALLOW_NS_BEGIN
 
 class ValueBindingPattern : public Pattern
 {
@@ -58,6 +58,6 @@ protected:
 
 
 
-SWIFT_NS_END
+SWALLOW_NS_END
 
 #endif//VALUE_BINDING_PATTERN_H

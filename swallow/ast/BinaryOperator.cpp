@@ -29,7 +29,7 @@
  */
 #include "BinaryOperator.h"
 #include "NodeVisitor.h"
-USE_SWIFT_NS;
+USE_SWALLOW_NS;
 
 BinaryOperator::BinaryOperator()
     :Operator(NodeType::BinaryOperator)

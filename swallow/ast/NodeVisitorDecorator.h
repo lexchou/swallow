@@ -31,7 +31,7 @@
 #define NODE_VISITOR_DECORATOR_H
 #include "NodeVisitor.h"
 
-SWIFT_NS_BEGIN
+SWALLOW_NS_BEGIN
 
 class Statement;
 class NodeVisitorDecorator : public NodeVisitor
@@ -107,5 +107,5 @@ private:
 };
 
 
-SWIFT_NS_END
+SWALLOW_NS_END
 #endif//NODE_VISITOR_DECORATOR_H

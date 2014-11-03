@@ -30,13 +30,13 @@
 #ifndef GENERIC_DEFINITION_H
 #define GENERIC_DEFINITION_H
 
-#include "swift_conf.h"
+#include "swallow_conf.h"
 #include <vector>
 #include <map>
 #include <string>
 #include <list>
 
-SWIFT_NS_BEGIN
+SWALLOW_NS_BEGIN
 
 typedef std::shared_ptr<class Type> TypePtr;
 typedef std::shared_ptr<class GenericDefinition> GenericDefinitionPtr;
@@ -95,7 +95,7 @@ private:
     TypeConstraintMap constraints;
 };
 
-SWIFT_NS_END
+SWALLOW_NS_END
 
 
 #endif//GENERIC_DEFINITION_H

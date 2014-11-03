@@ -32,7 +32,7 @@
 #include "Expression.h"
 #include <string>
 
-SWIFT_NS_BEGIN
+SWALLOW_NS_BEGIN
 
 class CompileConstant : public Expression
 {
@@ -50,7 +50,7 @@ private:
     std::wstring value;
 };
 
-SWIFT_NS_END
+SWALLOW_NS_END
 
 
 

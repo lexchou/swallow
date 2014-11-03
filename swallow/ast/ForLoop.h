@@ -33,7 +33,7 @@
 #include <string>
 #include "ast-decl.h"
 
-SWIFT_NS_BEGIN
+SWALLOW_NS_BEGIN
 
 class Expression;
 class CodeBlock;
@@ -65,6 +65,6 @@ public:
     CodeBlockPtr codeBlock;
 };
 
-SWIFT_NS_END
+SWALLOW_NS_END
 
 #endif//FOR_LOOP_H

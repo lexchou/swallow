@@ -32,7 +32,7 @@
 #include "TypeDeclaration.h"
 #include <string>
 
-SWIFT_NS_BEGIN
+SWALLOW_NS_BEGIN
 class TypeIdentifier;
 class ExtensionDef : public TypeDeclaration
 {
@@ -43,6 +43,6 @@ public:
 public:
 };
 
-SWIFT_NS_END
+SWALLOW_NS_END
 
 #endif//EXTENSION_DEF_H

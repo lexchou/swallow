@@ -32,7 +32,7 @@
 #include "Node.h"
 #include <string>
 
-SWIFT_NS_BEGIN
+SWALLOW_NS_BEGIN
 
 class Attribute : public Node
 {
@@ -49,6 +49,6 @@ public:
 };
 
 
-SWIFT_NS_END
+SWALLOW_NS_END
 
 #endif//ATTRIBUTE_H

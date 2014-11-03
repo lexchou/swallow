@@ -28,7 +28,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "Statement.h"
-USE_SWIFT_NS
+USE_SWALLOW_NS
 
 
 Statement::Statement(NodeType::T nodeType)

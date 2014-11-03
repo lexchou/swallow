@@ -27,13 +27,13 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef SWIFT_ERRORS_H
-#define SWIFT_ERRORS_H
-#include "swift_conf.h"
+#ifndef SWALLOW_ERRORS_H
+#define SWALLOW_ERRORS_H
+#include "swallow_conf.h"
 #include <string>
 #include <vector>
 
-SWIFT_NS_BEGIN
+SWALLOW_NS_BEGIN
 
 struct Errors
 {
@@ -128,6 +128,6 @@ struct Errors
 };
 
 
-SWIFT_NS_END
+SWALLOW_NS_END
 
-#endif//SWIFT_ERRORS_H
+#endif//SWALLOW_ERRORS_H

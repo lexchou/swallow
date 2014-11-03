@@ -32,7 +32,7 @@
 #include "Statement.h"
 #include <string>
 
-SWIFT_NS_BEGIN
+SWALLOW_NS_BEGIN
 
 class LabeledStatement : public Statement
 {
@@ -52,6 +52,6 @@ private:
     StatementPtr statement;
 };
 
-SWIFT_NS_END
+SWALLOW_NS_END
 
 #endif//LABELED_STATEMENT_H

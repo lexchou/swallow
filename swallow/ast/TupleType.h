@@ -33,7 +33,7 @@
 #include <string>
 #include <vector>
 
-SWIFT_NS_BEGIN
+SWALLOW_NS_BEGIN
 class Attribute;
 class TupleType : public TypeNode
 {
@@ -66,6 +66,6 @@ private:
     std::vector<TupleElement> elements;
 };
 
-SWIFT_NS_END
+SWALLOW_NS_END
 
 #endif//TUPLE_TYPE_H

@@ -32,7 +32,7 @@
 #include "FunctionOverloadedSymbol.h"
 #include "FunctionSymbol.h"
 
-USE_SWIFT_NS
+USE_SWALLOW_NS
 
 using namespace std;
 

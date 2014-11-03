@@ -29,7 +29,7 @@
  */
 #include "CompileConstant.h"
 #include "ast/NodeVisitor.h"
-USE_SWIFT_NS
+USE_SWALLOW_NS
 
 CompileConstant::CompileConstant()
     :Expression(NodeType::CompileConstant)

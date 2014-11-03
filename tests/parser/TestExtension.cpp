@@ -29,7 +29,7 @@
  */
 #include "../utils.h"
 
-using namespace Swift;
+using namespace Swallow;
 
 TEST(TestExtension, testEmptyExtension)
 {

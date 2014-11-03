@@ -33,7 +33,7 @@
 #include "Type.h"
 #include <list>
 
-SWIFT_NS_BEGIN
+SWALLOW_NS_BEGIN
 
 class SymbolRegistry;
 class CompilerResults;
@@ -231,7 +231,7 @@ struct StackedValueGuard
 
 };
 
-SWIFT_NS_END
+SWALLOW_NS_END
 
 
 

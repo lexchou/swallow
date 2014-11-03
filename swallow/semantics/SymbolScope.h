@@ -29,14 +29,14 @@
  */
 #ifndef SYMBOL_SCOPE_H
 #define SYMBOL_SCOPE_H
-#include "swift_conf.h"
+#include "swallow_conf.h"
 #include <map>
 #include <memory>
 #include "semantic-types.h"
-#include "swift_types.h"
+#include "swallow_types.h"
 #include <string>
 
-SWIFT_NS_BEGIN
+SWALLOW_NS_BEGIN
 
 class Node;
 
@@ -86,6 +86,6 @@ private:
 };
 
 
-SWIFT_NS_END
+SWALLOW_NS_END
 
 #endif//SYMBOL_SCOPE_H

@@ -31,7 +31,7 @@
 #define OPERATOR_H
 #include "Expression.h"
 #include "tokenizer/Token.h"
-SWIFT_NS_BEGIN
+SWALLOW_NS_BEGIN
 
 class Operator : public Expression
 {
@@ -57,7 +57,7 @@ protected:
     
 };
 
-SWIFT_NS_END
+SWALLOW_NS_END
 
 
 #endif//OPERATOR_H

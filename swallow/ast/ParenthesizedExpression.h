@@ -32,7 +32,7 @@
 #include "Expression.h"
 #include <string>
 
-SWIFT_NS_BEGIN
+SWALLOW_NS_BEGIN
 class ExpressionNode;
 class ParenthesizedExpression : public Expression
 {
@@ -56,7 +56,7 @@ public:
     std::vector<Term> expressions;
 };
 
-SWIFT_NS_END
+SWALLOW_NS_END
 
 
 

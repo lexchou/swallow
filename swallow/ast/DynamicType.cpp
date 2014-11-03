@@ -30,7 +30,7 @@
 #include "DynamicType.h"
 #include "NodeVisitor.h"
 
-USE_SWIFT_NS
+USE_SWALLOW_NS
 
 DynamicType::DynamicType()
     :Expression(NodeType::DynamicType)

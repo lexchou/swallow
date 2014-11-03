@@ -32,7 +32,7 @@
 #include "Operator.h"
 #include <string>
 
-SWIFT_NS_BEGIN
+SWALLOW_NS_BEGIN
 class ConditionalOperator : public Operator
 {
 public:
@@ -60,7 +60,7 @@ private:
     ExpressionPtr falseExpression;
 };
 
-SWIFT_NS_END
+SWALLOW_NS_END
 
 
 

@@ -33,7 +33,7 @@
 #include <string>
 #include "ast-decl.h"
 
-SWIFT_NS_BEGIN
+SWALLOW_NS_BEGIN
 
 class TypeIdentifier;
 class ProtocolComposition : public TypeNode
@@ -52,6 +52,6 @@ private:
     std::vector<TypeIdentifierPtr> protocols;
 };
 
-SWIFT_NS_END
+SWALLOW_NS_END
 
 #endif//PROTOCOL_COMPOSITION_H

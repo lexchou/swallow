@@ -29,16 +29,16 @@
  */
 #ifndef TYPE_H
 #define TYPE_H
-#include "swift_conf.h"
+#include "swallow_conf.h"
 #include <memory>
 #include <string>
 #include "Symbol.h"
-#include "swift_types.h"
+#include "swallow_types.h"
 #include "semantic-types.h"
 #include <vector>
 #include <map>
 
-SWIFT_NS_BEGIN
+SWALLOW_NS_BEGIN
 
 typedef std::shared_ptr<class TypeDeclaration> TypeDeclarationPtr;
 typedef std::weak_ptr<class TypeDeclaration> TypeDeclarationWeakPtr;
@@ -314,7 +314,7 @@ protected:
 };
 
 
-SWIFT_NS_END
+SWALLOW_NS_END
 
 
 #endif//TYPE_H

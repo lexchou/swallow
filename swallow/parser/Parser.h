@@ -29,12 +29,12 @@
  */
 #ifndef PARSER_H
 #define PARSER_H
-#include "swift_conf.h"
+#include "swallow_conf.h"
 #include "tokenizer/Token.h"
 #include <string>
 #include "ast/ast-decl.h"
 
-SWIFT_NS_BEGIN
+SWALLOW_NS_BEGIN
 
 class Tokenizer;
 class NodeFactory;
@@ -217,6 +217,6 @@ private:
 
 
 
-SWIFT_NS_END
+SWALLOW_NS_END
 
 #endif//PARSER_H

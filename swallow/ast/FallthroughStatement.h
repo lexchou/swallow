@@ -32,7 +32,7 @@
 #include "Statement.h"
 #include <string>
 
-SWIFT_NS_BEGIN
+SWALLOW_NS_BEGIN
 
 class FallthroughStatement : public Statement
 {
@@ -43,6 +43,6 @@ public:
 private:
 };
 
-SWIFT_NS_END
+SWALLOW_NS_END
 
 #endif//FALLTHROUGH_STATEMENT_H

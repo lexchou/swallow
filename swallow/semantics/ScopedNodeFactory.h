@@ -31,7 +31,7 @@
 #define SCOPED_NODE_FACTORY_H
 #include "ast/NodeFactory.h"
 
-SWIFT_NS_BEGIN
+SWALLOW_NS_BEGIN
 
 class ScopedNodeFactory : public NodeFactory
 {
@@ -51,6 +51,6 @@ public:
 
 };
 
-SWIFT_NS_END
+SWALLOW_NS_END
 
 #endif//SCOPED_NODE_FACTORY_H

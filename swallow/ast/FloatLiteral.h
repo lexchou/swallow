@@ -32,7 +32,7 @@
 #include "Expression.h"
 #include <string>
 
-SWIFT_NS_BEGIN
+SWALLOW_NS_BEGIN
 
 class FloatLiteral : public Expression
 {
@@ -45,7 +45,7 @@ public:
     double value;
 };
 
-SWIFT_NS_END
+SWALLOW_NS_END
 
 
 

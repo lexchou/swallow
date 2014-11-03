@@ -30,7 +30,7 @@
 #include "Tuple.h"
 #include "NodeVisitor.h"
 #include "TypedPattern.h"
-USE_SWIFT_NS
+USE_SWALLOW_NS
 
 
 Tuple::Tuple()
@@ -56,16 +56,9 @@ void Tuple::setDeclaredType(const TypeNodePtr& type)
     this->declaredType = type;
 }
 
-void Tuple::add(const PatternPtr& st)
+void Tuple::add(const PatternPtr& pattern)
 {
-    //if(const TypedPatternPtr& p = std::dynamic_pointer_cast<TypedPattern>(st))
-    //{
-    //    elements.push_back(Element(p->getPattern(), p->getDeclaredType()));
-    //}
-    //else
-    //{
-        elements.push_back(Element(st, nullptr));
-    //}
+    elements.push_back(pattern);
 }
 int Tuple::numElements()
 {
@@ -73,5 +66,5 @@ int Tuple::numElements()
 }
 PatternPtr Tuple::getElement(int i)
 {
-    return elements[i].element;
+    return elements[i];
 }

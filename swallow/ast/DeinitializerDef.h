@@ -32,7 +32,7 @@
 #include "Declaration.h"
 #include <string>
 
-SWIFT_NS_BEGIN
+SWALLOW_NS_BEGIN
 
 class CodeBlock;
 class DeinitializerDef : public Declaration
@@ -49,6 +49,6 @@ private:
     CodeBlockPtr body;
 };
 
-SWIFT_NS_END
+SWALLOW_NS_END
 
 #endif//DEINITIALIZER_H

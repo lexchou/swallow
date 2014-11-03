@@ -31,7 +31,7 @@
 #include "ast.h"
 //#include <codecvt>
 
-USE_SWIFT_NS
+USE_SWALLOW_NS
 
 
 NodeSerializerW::NodeSerializerW(std::wostream& out)
@@ -286,7 +286,7 @@ void NodeSerializer::visitTuple(const TuplePtr& node)
             append(L", ");
         first = false;
         //element.vaccept(this);
-        element.element->accept(this);
+        element->accept(this);
     }
     append(L")");
 }

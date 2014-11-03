@@ -33,7 +33,7 @@
 #include <string>
 #include <list>
 
-SWIFT_NS_BEGIN
+SWALLOW_NS_BEGIN
 
     typedef std::shared_ptr<class ValueBinding> ValueBindingPtr;
 
@@ -68,6 +68,6 @@ SWIFT_NS_BEGIN
         bool readOnly;
     };
 
-SWIFT_NS_END
+SWALLOW_NS_END
 
 #endif//VALUE_BINDINGS_H

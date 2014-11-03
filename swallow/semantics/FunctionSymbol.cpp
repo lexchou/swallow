@@ -31,7 +31,7 @@
 #include "Type.h"
 #include <cassert>
 
-USE_SWIFT_NS
+USE_SWALLOW_NS
 
 
 FunctionSymbol::FunctionSymbol(const std::wstring& name, const TypePtr& functionType, const CodeBlockPtr& definition)

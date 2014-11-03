@@ -31,7 +31,7 @@
 #include "SymbolScope.h"
 #include "ast/Node.h"
 
-USE_SWIFT_NS
+USE_SWALLOW_NS
 
 
 ScopeOwner::ScopeOwner()

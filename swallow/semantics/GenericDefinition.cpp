@@ -32,7 +32,7 @@
 #include "Type.h"
 #include "SymbolScope.h"
 
-USE_SWIFT_NS
+USE_SWALLOW_NS
 using namespace std;
 
 

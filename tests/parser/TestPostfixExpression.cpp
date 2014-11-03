@@ -30,7 +30,7 @@
 #include "../utils.h"
 
 
-using namespace Swift;
+using namespace Swallow;
 
     
 TEST(TestPostfixExpression, testPostfixOperator)

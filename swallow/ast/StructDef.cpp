@@ -29,7 +29,7 @@
  */
 #include "StructDef.h"
 #include "NodeVisitor.h"
-USE_SWIFT_NS
+USE_SWALLOW_NS
 
 
 StructDef::StructDef()

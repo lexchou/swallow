@@ -33,7 +33,7 @@
 #include <cassert>
 
 
-USE_SWIFT_NS
+USE_SWALLOW_NS
 
 using namespace std;
 

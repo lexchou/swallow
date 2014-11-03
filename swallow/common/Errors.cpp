@@ -29,7 +29,7 @@
  */
 #include "Errors.h"
 
-USE_SWIFT_NS
+USE_SWALLOW_NS
 
 static std::wstring getErrorTemplate(int errorCode);
 

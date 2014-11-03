@@ -34,7 +34,7 @@
 #include <string>
 #include <map>
 
-SWIFT_NS_BEGIN
+SWALLOW_NS_BEGIN
 
 struct TokenizerError
 {
@@ -108,5 +108,5 @@ private:
 };
 
 
-SWIFT_NS_END
+SWALLOW_NS_END
 #endif//TOKENIZER_H

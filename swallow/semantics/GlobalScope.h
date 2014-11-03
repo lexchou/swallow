@@ -31,7 +31,7 @@
 #define GLOBAL_SCOPE_H
 #include "SymbolScope.h"
 #include <vector>
-SWIFT_NS_BEGIN
+SWALLOW_NS_BEGIN
 
 class GlobalScope : public SymbolScope
 {
@@ -60,5 +60,5 @@ public:
 
 };
 
-SWIFT_NS_END
+SWALLOW_NS_END
 #endif//GLOBAL_SCOPE_H

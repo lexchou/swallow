@@ -32,7 +32,7 @@
 #include "TypeDeclaration.h"
 #include <string>
 
-SWIFT_NS_BEGIN
+SWALLOW_NS_BEGIN
 
 class StructDef : public TypeDeclaration
 {
@@ -45,6 +45,6 @@ public:
     virtual void accept(NodeVisitor* visitor);
 };
 
-SWIFT_NS_END
+SWALLOW_NS_END
 
 #endif//STRUCT_DEF_H

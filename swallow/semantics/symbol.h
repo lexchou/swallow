@@ -29,10 +29,10 @@
  */
 #ifndef SYMBOL_H
 #define SYMBOL_H
-#include "swift_conf.h"
+#include "swallow_conf.h"
 #include <string>
 
-SWIFT_NS_BEGIN
+SWALLOW_NS_BEGIN
 typedef std::shared_ptr<class Type> TypePtr;
 class Symbol
 {
@@ -80,7 +80,7 @@ public:
 
 };
 
-SWIFT_NS_END
+SWALLOW_NS_END
 
 
 #endif//SYMBOL_H

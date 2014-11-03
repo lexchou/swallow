@@ -31,7 +31,7 @@
 #include "ast/NodeFactory.h"
 #include "ast/ast.h"
 #include <cassert>
-using namespace Swift;
+using namespace Swallow;
 
 
 TypeNodePtr Parser::parseTypeAnnotation()

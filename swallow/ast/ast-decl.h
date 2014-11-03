@@ -29,11 +29,11 @@
  */
 #ifndef AST_DECL_H
 #define AST_DECL_H
-#include "swift_conf.h"
+#include "swallow_conf.h"
 #include <memory>
 #include <vector>
 
-SWIFT_NS_BEGIN
+SWALLOW_NS_BEGIN
 
 class Node;
 class Expression;
@@ -194,6 +194,6 @@ typedef std::shared_ptr<EnumCasePattern> EnumCasePatternPtr;
 typedef std::vector<AttributePtr> Attributes;
 
 
-SWIFT_NS_END
+SWALLOW_NS_END
 
 #endif//

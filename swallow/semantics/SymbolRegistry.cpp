@@ -34,7 +34,7 @@
 #include "FunctionSymbol.h"
 #include "GlobalScope.h"
 
-using namespace Swift;
+using namespace Swallow;
 
 SymbolRegistry::SymbolRegistry()
 :currentScope(nullptr), fileScope(nullptr)
