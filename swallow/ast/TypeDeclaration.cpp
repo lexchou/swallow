@@ -54,7 +54,7 @@ int TypeDeclaration::numParents()const
 }
 TypeIdentifierPtr TypeDeclaration::getParent(int i)
 {
-    if(i < 0 || i >= parents.size())
+    if(i < 0 || i >= (int)parents.size())
         return nullptr;
     return parents[i];
 }

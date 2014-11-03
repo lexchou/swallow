@@ -54,7 +54,7 @@ void TypeIdentifier::addGenericArgument(TypeNodePtr argument)
 {
     genericArguments.push_back(argument);
 }
-int TypeIdentifier::numGenericArguments()
+size_t TypeIdentifier::numGenericArguments()
 {
     return genericArguments.size();
 }

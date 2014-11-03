@@ -199,7 +199,7 @@ TypePtr Type::getElementType() const
 }
 TypePtr Type::getElementType(int index) const
 {
-    if(index >= elementTypes.size() || index < 0)
+    if(index >= (int)elementTypes.size() || index < 0)
         return nullptr;
     return elementTypes[index];
 }

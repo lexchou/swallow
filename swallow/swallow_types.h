@@ -56,7 +56,7 @@ struct TokenType
         OpenBracket, // [
         CloseBracket, // ]
         OpenBrace, // {
-        CloseBrace, // }
+        CloseBrace // }
     };
 };
 struct IntegerPrefix

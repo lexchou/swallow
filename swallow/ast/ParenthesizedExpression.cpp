@@ -50,7 +50,7 @@ void ParenthesizedExpression::append(const ExpressionPtr& expr)
 {
     append(L"", expr);
 }
-int ParenthesizedExpression::numExpressions()const
+size_t ParenthesizedExpression::numExpressions()const
 {
     return expressions.size();
 }
@@ -62,13 +62,13 @@ void ParenthesizedExpression::accept(NodeVisitor* visitor)
 
 std::wstring ParenthesizedExpression::getName(int idx)
 {
-    if(idx <0 || idx >= expressions.size())
+    if(idx <0 || idx >= (int)expressions.size())
         return L"";
     return expressions[idx].first;
 }
 ExpressionPtr ParenthesizedExpression::get(int idx)
 {
-    if(idx <0 || idx >= expressions.size())
+    if(idx <0 || idx >= (int)expressions.size())
         return NULL;
     return expressions[idx].second;
 }

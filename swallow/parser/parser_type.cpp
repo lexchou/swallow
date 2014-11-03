@@ -296,8 +296,9 @@ GenericParametersDefPtr Parser::parseGenericParametersDef()
                 {
                     ProtocolCompositionPtr protocols = this->parseProtocolComposition();
 
-                    for(const TypeNodePtr& protocol : *protocols)
+                    for(const TypeNodePtr& protocol: *protocols)
                     {
+                        (void)protocol;
                         GenericConstraintDefPtr c = nodeFactory->createGenericConstraintDef(*type->getSourceInfo());
                         c->setIdentifier(type);
                         //TypeIdentifierPtr expectedType = parseTypeIdentifier();

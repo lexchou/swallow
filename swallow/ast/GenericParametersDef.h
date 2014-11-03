@@ -49,7 +49,7 @@ public:
     
     
     void addConstraint(const GenericConstraintDefPtr& constraint);
-    int numConstraints()const;
+    size_t numConstraints()const;
     GenericConstraintDefPtr getConstraint(int i);
 
     const std::vector<GenericConstraintDefPtr> getConstraints() const;

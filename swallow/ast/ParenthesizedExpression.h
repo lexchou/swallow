@@ -45,7 +45,7 @@ public:
 public:
     void append(const std::wstring& name, const ExpressionPtr& expr);
     void append(const ExpressionPtr& expr);
-    int numExpressions()const;
+    size_t numExpressions()const;
     std::wstring getName(int idx);
     ExpressionPtr get(int idx);
 public:

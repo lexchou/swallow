@@ -44,7 +44,7 @@ public:
     const std::wstring& getName() const;
     
     void addGenericArgument(TypeNodePtr argument);
-    int numGenericArguments();
+    size_t numGenericArguments();
     TypeNodePtr getGenericArgument(int idx);
     
     void setNestedType(TypeIdentifierPtr type);

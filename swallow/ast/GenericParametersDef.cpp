@@ -58,7 +58,7 @@ void GenericParametersDef::addConstraint(const GenericConstraintDefPtr& constrai
 {
     constraints.push_back(constraint);
 }
-int GenericParametersDef::numConstraints()const
+size_t GenericParametersDef::numConstraints()const
 {
     return constraints.size();
 }

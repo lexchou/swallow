@@ -121,7 +121,7 @@ struct Errors
         E_TUPLE_PATTERN_CANNOT_MATCH_VALUES_OF_THE_NON_TUPLE_TYPE_A_1, //Tuple pattern cannot match values of the non-tuple type '%0'
 
         W_PARAM_CAN_BE_EXPRESSED_MORE_SUCCINCTLY_1, // '%0 %0' can be expressed more succinctly as '#%0'
-        W_EXTRANEOUS_SHARTP_IN_PARAMETER_1, //Extraneous '#' in parameter: '%0' is already the keyword argument name
+        W_EXTRANEOUS_SHARTP_IN_PARAMETER_1 //Extraneous '#' in parameter: '%0' is already the keyword argument name
         //linking errors
     };
     static std::wstring format(int code, const std::vector<std::wstring>& items);

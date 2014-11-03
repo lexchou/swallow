@@ -29,7 +29,7 @@
  */
 #include "CompilerResults.h"
 #include "Errors.h"
-USE_SWALLOW_NS;
+USE_SWALLOW_NS
 
 
 void CompilerResults::clear()

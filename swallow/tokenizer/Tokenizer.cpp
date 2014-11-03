@@ -275,7 +275,7 @@ bool Tokenizer::readOperator(Token& token, int max)
     bool whiteLeft = hasWhiteLeft(cursor);
     const wchar_t* begin = cursor;
     
-    while(get(ch) && (!max || token.token.size() < max))
+    while(get(ch) && (!max || token.token.size() < (size_t)max))
     {
         if(!isOperator(ch))
         {

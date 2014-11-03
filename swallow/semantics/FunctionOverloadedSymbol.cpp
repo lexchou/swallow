@@ -56,7 +56,7 @@ FunctionSymbolPtr FunctionOverloadedSymbol::lookupOverload(int argc, TypePtr arg
         TypePtr signature = func->getType();
         const std::vector<Type::Parameter>& parameterTypes = signature->getParameters();
 
-        if(parameterTypes.size() != argc)
+        if(parameterTypes.size() != (size_t)argc)
             continue;
         //check each parameter's type
         bool matched = true;

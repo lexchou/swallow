@@ -591,7 +591,7 @@ void SemanticAnalyzer::visitArrayLiteral(const ArrayLiteralPtr& node)
             error(node, Errors::E_CANNOT_DEFINE_EMPTY_ARRAY_WITHOUT_TYPE);
         return;
     }
-    bool hasHint = t_hint != nullptr;
+    //bool hasHint = t_hint != nullptr;
     TypePtr type = t_hint != nullptr ? t_hint->getInnerType() : nullptr;
     TypePtr hint;
     for(const ExpressionPtr& el : *node)
