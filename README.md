@@ -35,6 +35,53 @@ Swallow 是一个开源的swift编译器实现，不过目前还没完工，只�
 需要注意的是目前的版本为了方便用单元测试，内建类型（比如Builtin.Word）在语法分析里做了简单的hack来处理，这个错误的做法将在整个编译器能完整的支持标准库的时候再进行修正。
 
 
+# Build instructions
+Clone this repository to your drive:
+```
+$ git clone https://github.com/lexchou/swallow/
+```
+Build google-test:
+```
+$ cd swallow/gtest-1.7.0/
+$ ./configure
+$ cmake -G 'Unix Makefiles' .
+$ make
+```
+Build the swallow/repl/test cases:
+```
+$ cd ..
+$ cmake .
+$ make
+```
+Start repl:
+```
+$ repl/repl
+```
+
+
+# 构建过程
+先将项目克隆到本地：
+```
+$ git clone https://github.com/lexchou/swallow/
+```
+然后编译： google-test:
+```
+$ cd swallow/gtest-1.7.0/
+$ ./configure
+$ cmake -G 'Unix Makefiles' .
+$ make
+```
+然后编译 swallow/repl/test cases:
+```
+$ cd ..
+$ cmake .
+$ make
+```
+执行 repl:
+```
+$ repl/repl
+```
+
 # License
 
 ```
