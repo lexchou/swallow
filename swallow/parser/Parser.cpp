@@ -200,8 +200,16 @@ NodePtr Parser::parseStatement(const wchar_t* code)
 
 ProgramPtr Parser::parse(const wchar_t* code)
 {
-    tokenizer->set(code);
     ProgramPtr ret = nodeFactory->createProgram();
+    if(parse(code, ret))
+    {
+        return ret;
+    }
+    return nullptr;
+}
+bool Parser::parse(const wchar_t* code, const ProgramPtr& program)
+{
+    tokenizer->set(code);
     try
     {
         Token token;
@@ -210,14 +218,13 @@ ProgramPtr Parser::parse(const wchar_t* code)
             StatementPtr statement = parseStatement();
             if(!statement)
                 break;
-            ret->addStatement(statement);
+            program->addStatement(statement);
             match(L";");
         }
     }
     catch(...)
     {
-        //clean up all nodes created during the parsing
-        ret = NULL;
+        return false;
     }
-    return ret;
+    return true;
 }

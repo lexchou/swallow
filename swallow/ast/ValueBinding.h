@@ -10,6 +10,7 @@ class Expression;
 typedef std::shared_ptr<class Type> TypePtr;
 class ValueBinding : public Declaration
 {
+    friend class ValueBindings;
 public:
     ValueBinding();
 public:
@@ -31,14 +32,17 @@ public:
 
     void setInitializer(const ExpressionPtr& initializer);
     const ExpressionPtr& getInitializer()const;
+
+    std::shared_ptr<class ValueBindings> getOwner() const;
 public:
     virtual void accept(NodeVisitor* visitor) override;
-public:
+private:
     PatternPtr name;
     ExpressionPtr initializer;
     TypePtr type;
     TypeNodePtr declaredType;
     Attributes typeAttributes;
+    std::weak_ptr<class ValueBindings> owner;
 };
 
 SWIFT_NS_END

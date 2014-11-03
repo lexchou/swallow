@@ -143,6 +143,7 @@ void SemanticAnalyzer::abort()
 }
 void SemanticAnalyzer::error(const NodePtr& node, int code, const std::vector<std::wstring>& items)
 {
+    assert(node != nullptr);
     compilerResults->add(ErrorLevel::Error, *node->getSourceInfo(), code, items);
     abort();
 }

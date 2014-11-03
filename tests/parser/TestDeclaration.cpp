@@ -96,13 +96,13 @@ TEST(TestDeclaration, testLet)
     ASSERT_TRUE(c->isReadOnly());
     ASSERT_EQ(1, c->numBindings());
     ASSERT_NOT_NULL(a = c->get(0));
-    ASSERT_NOT_NULL(id = std::dynamic_pointer_cast<Identifier>(a->name));
+    ASSERT_NOT_NULL(id = std::dynamic_pointer_cast<Identifier>(a->getName()));
     ASSERT_EQ(L"a", id->getIdentifier());
     ASSERT_NOT_NULL(type = std::dynamic_pointer_cast<ArrayType>(a->getDeclaredType()));
     ASSERT_NOT_NULL(Int = std::dynamic_pointer_cast<TypeIdentifier>(type->getInnerType()));
     ASSERT_EQ(L"Int", Int->getName());
 
-    ASSERT_NOT_NULL(value = std::dynamic_pointer_cast<ArrayLiteral>(c->get(0)->initializer));
+    ASSERT_NOT_NULL(value = std::dynamic_pointer_cast<ArrayLiteral>(c->get(0)->getInitializer()));
     ASSERT_EQ(3, value->numElements());
     ASSERT_EQ(L"1", std::dynamic_pointer_cast<IntegerLiteral>(value->getElement(0))->valueAsString);
     ASSERT_EQ(L"2", std::dynamic_pointer_cast<IntegerLiteral>(value->getElement(1))->valueAsString);
@@ -121,13 +121,13 @@ TEST(TestDeclaration, testLet_Multiple)
     ASSERT_NOT_NULL(c = std::dynamic_pointer_cast<ValueBindings>(root));
     ASSERT_TRUE(c->isReadOnly());
     ASSERT_EQ(2, c->numBindings());
-    ASSERT_NOT_NULL(id = std::dynamic_pointer_cast<Identifier>(c->get(0)->name));
+    ASSERT_NOT_NULL(id = std::dynamic_pointer_cast<Identifier>(c->get(0)->getName()));
     ASSERT_EQ(L"a", id->getIdentifier());
-    ASSERT_NOT_NULL(dict = std::dynamic_pointer_cast<DictionaryLiteral>(c->get(0)->initializer));
+    ASSERT_NOT_NULL(dict = std::dynamic_pointer_cast<DictionaryLiteral>(c->get(0)->getInitializer()));
     ASSERT_EQ(2, dict->numElements());
 
     ASSERT_NOT_NULL(b = c->get(1));
-    ASSERT_NOT_NULL(id = std::dynamic_pointer_cast<Identifier>(b->name));
+    ASSERT_NOT_NULL(id = std::dynamic_pointer_cast<Identifier>(b->getName()));
     ASSERT_EQ(L"b", id->getIdentifier());
     ASSERT_NOT_NULL(Int = std::dynamic_pointer_cast<TypeIdentifier>(b->getDeclaredType()));
     ASSERT_EQ(L"Int", Int->getName());
@@ -143,10 +143,10 @@ TEST(TestDeclaration, testLet_Tuple)
     ParenthesizedExpressionPtr p;
     ASSERT_NOT_NULL(c = std::dynamic_pointer_cast<ValueBindings>(root));
     ASSERT_TRUE(c->isReadOnly());
-    ASSERT_NOT_NULL(tuple = std::dynamic_pointer_cast<Tuple>(c->get(0)->name));
+    ASSERT_NOT_NULL(tuple = std::dynamic_pointer_cast<Tuple>(c->get(0)->getName()));
     ASSERT_EQ(2, tuple->numElements());
     ASSERT_NOT_NULL(type = std::dynamic_pointer_cast<TypeIdentifier>(c->get(0)->getDeclaredType()));
-    ASSERT_NOT_NULL(p = std::dynamic_pointer_cast<ParenthesizedExpression>(c->get(0)->initializer));
+    ASSERT_NOT_NULL(p = std::dynamic_pointer_cast<ParenthesizedExpression>(c->get(0)->getInitializer()));
     ASSERT_EQ(2, p->numExpressions());
 
 }

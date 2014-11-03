@@ -242,7 +242,7 @@ DeclarationPtr Parser::parseLet(const std::vector<AttributePtr>& attrs, int spec
         ValueBindingPtr constant = nodeFactory->createValueBinding(*pattern->getSourceInfo());
         constant->setAttributes(attrs);
         constant->setSpecifiers(specifiers);
-        constant->name = pattern;
+        constant->setName(pattern);
         TypedPatternPtr typedPattern = std::dynamic_pointer_cast<TypedPattern>(pattern);
         if(typedPattern)
         {
@@ -250,7 +250,7 @@ DeclarationPtr Parser::parseLet(const std::vector<AttributePtr>& attrs, int spec
             constant->setDeclaredType(typedPattern->getDeclaredType());
             constant->setName(typedPattern->getPattern());
         }
-        constant->initializer = initializer;
+        constant->setInitializer(initializer);
         ret->add(constant);
     }while(match(L","));
     return ret;

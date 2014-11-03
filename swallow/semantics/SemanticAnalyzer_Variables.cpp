@@ -8,6 +8,8 @@
 #include "TypeBuilder.h"
 #include "common/CompilerResults.h"
 #include <cassert>
+#include "semantics/FunctionSymbol.h"
+#include "semantics/FunctionOverloadedSymbol.h"
 #include "GlobalScope.h"
 #include "ast/NodeFactory.h"
 
@@ -166,21 +168,20 @@ void SemanticAnalyzer::registerSymbol(const SymbolPlaceHolderPtr& symbol)
 
 void SemanticAnalyzer::visitValueBinding(const ValueBindingPtr& node)
 {
-    /*if(!node->getInitializer())
+    if(node->getOwner()->isReadOnly() && !node->getInitializer())
     {
-        error(node->getInitializer(), Errors::E_LET_REQUIRES_INITIALIZER);
+        error(node, Errors::E_LET_REQUIRES_INITIALIZER);
         return;
     }
-    */
 
 
     //TypePtr type = evaluateType(node->initializer);
-    if(IdentifierPtr id = std::dynamic_pointer_cast<Identifier>(node->name))
+    if(IdentifierPtr id = std::dynamic_pointer_cast<Identifier>(node->getName()))
     {
         TypePtr declaredType = lookupType(node->getDeclaredType());//node->getDeclaredType() == nullptr ? id->getDeclaredType() : node->getDeclaredType());
         StackedValueGuard<TypePtr> guard(t_hint);
         guard.set(declaredType);
-        if(!declaredType && !node->initializer)
+        if(!declaredType && !node->getInitializer())
         {
             error(node, Errors::E_TYPE_ANNOTATION_MISSING_IN_PATTERN);
             return;
@@ -193,16 +194,16 @@ void SemanticAnalyzer::visitValueBinding(const ValueBindingPtr& node)
         {
             placeholder->setType(declaredType);
         }
-        if(node->initializer)
+        if(node->getInitializer())
         {
-            node->initializer->accept(this);
-            TypePtr actualType = node->initializer->getType();
+            node->getInitializer()->accept(this);
+            TypePtr actualType = node->getInitializer()->getType();
             assert(actualType != nullptr);
             if(declaredType)
             {
-                if(!Type::equals(actualType, declaredType) && !canConvertTo(node->initializer, declaredType))
+                if(!Type::equals(actualType, declaredType) && !canConvertTo(node->getInitializer(), declaredType))
                 {
-                    error(node, Errors::E_CANNOT_CONVERT_EXPRESSION_TYPE_2, toString(node->initializer), declaredType->toString());
+                    error(node->getInitializer(), Errors::E_CANNOT_CONVERT_EXPRESSION_TYPE_2, actualType->toString(), declaredType->toString());
                     return;
                 }
             }
@@ -212,12 +213,12 @@ void SemanticAnalyzer::visitValueBinding(const ValueBindingPtr& node)
         }
         assert(placeholder->getType() != nullptr);
     }
-    else if(TuplePtr id = std::dynamic_pointer_cast<Tuple>(node->name))
+    else if(TuplePtr id = std::dynamic_pointer_cast<Tuple>(node->getName()))
     {
         TypeNodePtr declaredType = id->getDeclaredType();
         if(declaredType)
         {
-            checkTupleDefinition(id, node->initializer);
+            checkTupleDefinition(id, node->getInitializer());
         }
     }
     if(currentType && currentType->getCategory() == Type::Protocol)
@@ -438,6 +439,15 @@ void SemanticAnalyzer::visitIdentifier(const IdentifierPtr& id)
     {
         TypePtr ref = Type::newTypeReference(type);
         id->setType(ref);
+    }
+    else if(FunctionSymbolPtr func = dynamic_pointer_cast<FunctionSymbol>(sym))
+    {
+        id->setType(func->getType());
+    }
+    else if(FunctionOverloadedSymbolPtr func = dynamic_pointer_cast<FunctionOverloadedSymbol>(sym))
+    {
+        //TODO: check contextual type hint
+        error(id, Errors::E_AMBIGUOUS_USE_1, id->getIdentifier());
     }
 }
 void SemanticAnalyzer::visitEnumCasePattern(const EnumCasePatternPtr& node)

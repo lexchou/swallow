@@ -1,5 +1,6 @@
 #include "ValueBindings.h"
 #include "NodeVisitor.h"
+#include "ValueBinding.h"
 #include <algorithm>
 USE_SWIFT_NS
 
@@ -21,6 +22,7 @@ void ValueBindings::accept(NodeVisitor* visitor)
 void ValueBindings::add(const ValueBindingPtr& var)
 {
     valueBindings.push_back(var);
+    var->owner = std::static_pointer_cast<ValueBindings>(shared_from_this());
 }
 void ValueBindings::insertAfter(const ValueBindingPtr& binding, const Iterator& iter)
 {
@@ -34,6 +36,7 @@ void ValueBindings::insertAfter(const ValueBindingPtr& binding, const Iterator& 
         it++;
         valueBindings.insert(it, binding);
     }
+    binding->owner = std::static_pointer_cast<ValueBindings>(shared_from_this());
 }
 ValueBindingPtr ValueBindings::get(int i)
 {

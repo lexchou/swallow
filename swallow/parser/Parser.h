@@ -20,6 +20,7 @@ public:
 public:
     NodePtr parseStatement(const wchar_t* code);
     ProgramPtr parse(const wchar_t* code);
+    bool parse(const wchar_t* code, const ProgramPtr& program);
     void setFileName(const wchar_t* fileName);
     void setFunctionName(const wchar_t* function);
 private:

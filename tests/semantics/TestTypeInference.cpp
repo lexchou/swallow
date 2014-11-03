@@ -253,4 +253,15 @@ TEST(TestTypeInference, StructInstance)
 
 }
 
+TEST(TestTypeInference, FuncToVar)
+{
+    SEMANTIC_ANALYZE(L"func a () -> Int { return 3}\n"
+            "let b = a");
+    dumpCompilerResults(compilerResults);
+    ASSERT_EQ(0, compilerResults.numResults());
+    SymbolPtr b;
+    ASSERT_NOT_NULL(b = scope->lookup(L"b"));
+
+
+}
 

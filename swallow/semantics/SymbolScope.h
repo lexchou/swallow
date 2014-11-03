@@ -34,7 +34,9 @@ class SymbolScope
 {
     friend class SymbolRegistry;
     friend class ScopeOwner;
+public:
     typedef std::map<std::wstring, OperatorInfo> OperatorMap;
+    typedef std::map<std::wstring, SymbolPtr> SymbolMap;
 public:
     SymbolScope();
     ~SymbolScope();
@@ -46,9 +48,9 @@ public:
     SymbolPtr lookup(const std::wstring& name);
     Node* getOwner();
     SymbolScope* getParentScope() {return parent;}
+    const SymbolMap& getSymbols() {return symbols;}
 private:
     OperatorMap operators;
-    typedef std::map<std::wstring, SymbolPtr> SymbolMap;
     Node* owner;
     SymbolScope* parent;
     SymbolMap symbols;

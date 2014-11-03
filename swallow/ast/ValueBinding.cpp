@@ -56,3 +56,8 @@ const ExpressionPtr& ValueBinding::getInitializer()const
 {
     return initializer;
 }
+
+std::shared_ptr<class ValueBindings> ValueBinding::getOwner() const
+{
+    return owner.lock();
+}

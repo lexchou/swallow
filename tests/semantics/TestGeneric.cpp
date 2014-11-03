@@ -39,7 +39,7 @@ TEST(TestGeneric, Struct_GenericParameter)
 TEST(TestGeneric, Use_GenericType)
 {
     SEMANTIC_ANALYZE(L"struct Stack<T> {}\n"
-            "let stackOfInts : Stack<Int>");
+            "var stackOfInts : Stack<Int>");
     ASSERT_EQ(0, compilerResults.numResults());
     SymbolPlaceHolderPtr stackOfInts;
     TypePtr type, Stack, Int;
