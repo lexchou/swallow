@@ -33,6 +33,7 @@
 #include <stdarg.h>
 #include <string.h>
 #include <unistd.h>
+#include <stdio.h>
 
 
 void ConsoleWriter::printf(const wchar_t* fmt, ...)
