@@ -26,6 +26,7 @@ SET(CMAKE_CXX_FLAGS "$ENV{CXXFLAGS} -O0 -Wall -g -ggdb -std=c++11")
 
 SET(SWALLOW_SRC
     common/CompilerResults.cpp
+    common/Errors.cpp
 
     tokenizer/Tokenizer.cpp
 
@@ -151,7 +152,6 @@ SET(SWALLOW_SRC
 add_definitions(-DTRACE_NODE)
 
 add_library(swallow SHARED ${SWALLOW_SRC})
-add_executable(swallow_main main.cpp)
 
 
 #enable_testing()

@@ -3,7 +3,7 @@
 #include "Symbol.h"
 #include "SymbolScope.h"
 #include "SymbolRegistry.h"
-#include "swift_errors.h"
+#include "common/Errors.h"
 #include "ScopedNodes.h"
 #include "TypeBuilder.h"
 #include "common/CompilerResults.h"
@@ -447,7 +447,7 @@ void SemanticAnalyzer::visitIdentifier(const IdentifierPtr& id)
     else if(FunctionOverloadedSymbolPtr func = dynamic_pointer_cast<FunctionOverloadedSymbol>(sym))
     {
         //TODO: check contextual type hint
-        error(id, Errors::E_AMBIGUOUS_USE_1, id->getIdentifier());
+        //error(id, Errors::E_AMBIGUOUS_USE_1, id->getIdentifier());
     }
 }
 void SemanticAnalyzer::visitEnumCasePattern(const EnumCasePatternPtr& node)

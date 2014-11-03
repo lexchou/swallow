@@ -2,7 +2,7 @@
 #include "GlobalScope.h"
 #include "SymbolRegistry.h"
 #include "ast/ast.h"
-#include "swift_errors.h"
+#include "common/Errors.h"
 #include "FunctionOverloadedSymbol.h"
 #include "FunctionSymbol.h"
 #include "ast/NodeSerializer.h"

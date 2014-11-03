@@ -3,7 +3,7 @@
 #include "semantics/Symbol.h"
 #include "semantics/ScopedNodes.h"
 #include "semantics/Type.h"
-#include "swift_errors.h"
+#include "common/Errors.h"
 #include "semantics/GlobalScope.h"
 #include "semantics/GenericArgument.h"
 
@@ -158,7 +158,6 @@ TEST(TestTypeInference, TupleAssignment1)
 TEST(TestTypeInference, TupleAssignment2)
 {
     SEMANTIC_ANALYZE(L"let (a : String, b) : (Int, Double) = (1, 0.3)");
-    dumpCompilerResults(compilerResults);
     ASSERT_EQ(1, compilerResults.numResults());
     auto res = compilerResults.getResult(0);
     ASSERT_EQ(Errors::E_TYPE_ANNOTATION_DOES_NOT_MATCH_CONTEXTUAL_TYPE_A_1, res.code);

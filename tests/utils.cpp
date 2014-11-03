@@ -9,6 +9,7 @@
 #include "semantics/FunctionOverloadedSymbol.h"
 #include <sstream>
 #include <fstream>
+#include "common/Errors.h"
 //#include <codecvt>
 
 
@@ -45,7 +46,7 @@ void dumpCompilerResults(Swift::CompilerResults& compilerResults)
                     break;
             }
             std::wcout<<L"("<<res.line<<L", "<<res.column<<") ";
-            std::wstring msg = compilerResults.format(res);
+            std::wstring msg = Errors::format(res.code, res.items);
             std::wcout<<msg<<std::endl;
         }
 

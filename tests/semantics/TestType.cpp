@@ -3,7 +3,7 @@
 #include "semantics/SymbolRegistry.h"
 #include "semantics/Symbol.h"
 #include "semantics/ScopedNodes.h"
-#include "swift_errors.h"
+#include "common/Errors.h"
 
 
 using namespace Swift;

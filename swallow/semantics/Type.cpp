@@ -618,7 +618,7 @@ std::wstring Type::toString() const
         case Specialized:
         {
             wstringstream s;
-            s<<name<<L"<";
+            s<<innerType->getName()<<L"<";
             bool first = true;
             for(const TypePtr& t : *genericArguments)
             {

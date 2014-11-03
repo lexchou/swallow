@@ -2,7 +2,7 @@
 #include <cassert>
 #include "SymbolScope.h"
 #include "ast/ast.h"
-#include "swift_errors.h"
+#include "common/Errors.h"
 #include "GenericDefinition.h"
 #include "GenericArgument.h"
 #include <string>

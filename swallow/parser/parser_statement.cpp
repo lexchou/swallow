@@ -2,7 +2,7 @@
 #include "parser_details.h"
 #include "ast/NodeFactory.h"
 #include "ast/ast.h"
-#include "swift_errors.h"
+#include "common/Errors.h"
 using namespace Swift;
 
 

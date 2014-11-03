@@ -6,6 +6,7 @@
 #include <semantics/ScopedNodes.h>
 #include <iostream>
 #include "ConsoleWriter.h"
+#include "common/Errors.h"
 
 using namespace std;
 using namespace Swift;
@@ -85,7 +86,7 @@ public:
             }
             out->setForegroundColor(White, Bright);
             out->printf(L": ");
-            wstring msg = compilerResults.format(res);
+            wstring msg = Errors::format(res.code, res.items);
             out->printf(L"%ls\n", msg.c_str());
             out->reset();
             out->printf(L"%ls\n", code.c_str());

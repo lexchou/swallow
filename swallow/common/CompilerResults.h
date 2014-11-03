@@ -42,12 +42,9 @@ public:
     const CompilerResult& getResult(int i);
     void add(ErrorLevel::T level, const SourceInfo&, int code, const ResultItems& items);
     void add(ErrorLevel::T level, const SourceInfo&, int code, const std::wstring& item = std::wstring());
-    std::wstring format(const CompilerResult& result);
 
     std::vector<CompilerResult>::iterator begin() { return results.begin();}
     std::vector<CompilerResult>::iterator end() { return results.end();}
-private:
-    std::wstring getErrorTemplate(int errorCode);
 private:
     std::vector<CompilerResult> results;
 };

@@ -6,7 +6,7 @@
 #include "FunctionSymbol.h"
 #include "GenericDefinition.h"
 #include "GenericArgument.h"
-#include "swift_errors.h"
+#include "common/Errors.h"
 #include "ast/NodeSerializer.h"
 #include "TypeBuilder.h"
 #include <cassert>

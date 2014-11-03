@@ -5,7 +5,7 @@
 #include "FunctionSymbol.h"
 #include "FunctionOverloadedSymbol.h"
 #include "ast/ast.h"
-#include "swift_errors.h"
+#include "common/Errors.h"
 #include "SymbolScope.h"
 #include "SymbolRegistry.h"
 #include "GlobalScope.h"

@@ -5,7 +5,7 @@
 #include "semantics/ScopedNodes.h"
 #include "semantics/FunctionSymbol.h"
 #include "semantics/FunctionOverloadedSymbol.h"
-#include "swift_errors.h"
+#include "common/Errors.h"
 
 
 using namespace Swift;

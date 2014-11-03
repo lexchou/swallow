@@ -4,8 +4,8 @@
 #include "semantics/Symbol.h"
 #include "semantics/ScopedNodes.h"
 #include "semantics/FunctionSymbol.h"
-#include "swift_errors.h"
 #include "semantics/GenericArgument.h"
+#include "common/Errors.h"
 
 
 using namespace Swift;

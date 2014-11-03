@@ -3,11 +3,7 @@
 #include "ast/NodeFactory.h"
 #include "ast/ast.h"
 #include "common/CompilerResults.h"
-#include "swift_errors.h"
-//#include <cstdlib>
-//#include <stack>
-//#include <sstream>
-//#include <iostream>
+#include "common/Errors.h"
 using namespace Swift;
 
 
