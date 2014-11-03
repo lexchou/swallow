@@ -1,6 +1,6 @@
 /* Operator.cpp --
  *
- * Copyright (c) 2006-2012, Salvatore Sanfilippo <antirez at gmail dot com>
+ * Copyright (c) 2014, Lex Chou <lex at chou dot com>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
