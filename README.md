@@ -82,6 +82,17 @@ $ make
 $ repl/repl
 ```
 
+
+# Snapshots
+Comparison between official REPL and swallow
+
+![Comparison between official REPL and swallow](docs/images/repl-comparison.jpg)
+
+Type inference
+
+![Type inference example](docs/images/type-inference.png)
+
+
 # License
 
 ```
