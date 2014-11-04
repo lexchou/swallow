@@ -34,6 +34,7 @@
 #include <semantics/SemanticAnalyzer.h>
 #include <semantics/ScopedNodes.h>
 #include <iostream>
+#include <fstream>
 #include "ConsoleWriter.h"
 #include "common/Errors.h"
 
@@ -143,11 +144,21 @@ int main(int argc, char** argv)
     bool canQuit = false;
     wstring line;
     Repl repl(out);
+    wifstream file;
+    if(argv[1]) 
+    {
+        file.open(argv[1]);
+        if(!file.good()) 
+        {
+            out->printf(L"%s does not exist!\n", argv[1]);
+            return 0;
+        }
+    }
     out->printf(L"Welcome to Swallow! Type :help for assistance.\n");
-    while(!canQuit && !wcin.eof())
+    while(!canQuit && argv[1] ? !file.eof() : !wcin.eof())
     {
         out->printf(L"%3d> ", id++);
-        getline(wcin, line);
+        getline(argv[1] ? file : wcin, line);
         if(line.empty())
             continue;
         if(line.compare(L"exit") == 0) 
