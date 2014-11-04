@@ -96,7 +96,7 @@ Type inference
 # License
 
 ```
- Copyright (c) 2014, Lex Chou <lex at chou dot com> 
+ Copyright (c) 2014, Lex Chou <lex at chou dot it> 
  All rights reserved.
  Redistribution and use in source and binary forms, with or without
  modification, are permitted provided that the following conditions are met:
@@ -124,7 +124,7 @@ Type inference
 
 # 授权许可
 ```
- Copyright (c) 2014, Lex Chou <lex at chou dot com> 
+ Copyright (c) 2014, Lex Chou <lex at chou dot it> 
  
  这份授权条款，在使用者符合以下三条件的情形下，授予使用者使用及再散播本
  软件包装原始码及二进位可执行形式的权利，无论此包装是否经改作皆然：
