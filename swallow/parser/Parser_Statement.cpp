@@ -28,7 +28,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "Parser.h"
-#include "parser_details.h"
+#include "Parser_Details.h"
 #include "ast/NodeFactory.h"
 #include "ast/ast.h"
 #include "common/Errors.h"

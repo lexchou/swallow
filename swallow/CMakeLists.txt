@@ -40,12 +40,12 @@ SET(SWALLOW_SRC
     tokenizer/Tokenizer.cpp
 
     parser/Parser.cpp
-    parser/parser_expression.cpp
-    parser/parser_statement.cpp
-    parser/parser_declaration.cpp
-    parser/parser_pattern.cpp
-    parser/parser_type.cpp
-    parser/parser_attribute.cpp
+    parser/Parser_Expression.cpp
+    parser/Parser_Statement.cpp
+    parser/Parser_Declaration.cpp
+    parser/Parser_Pattern.cpp
+    parser/Parser_Type.cpp
+    parser/Parser_Attribute.cpp
 
     semantics/SymbolRegistry.cpp
     semantics/SymbolScope.cpp

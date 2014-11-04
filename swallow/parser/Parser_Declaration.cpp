@@ -1,4 +1,4 @@
-/* parser_declaration.cpp --
+/* Parser_Declaration.cpp --
  *
  * Copyright (c) 2014, Lex Chou <lex at chou dot it>
  * All rights reserved.
@@ -31,7 +31,7 @@
 #include "tokenizer/Tokenizer.h"
 #include "ast/NodeFactory.h"
 #include "ast/ast.h"
-#include "parser_details.h"
+#include "Parser_Details.h"
 #include "common/Errors.h"
 
 using namespace Swallow;

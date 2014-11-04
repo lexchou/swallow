@@ -1,4 +1,4 @@
-/* parser_details.h --
+/* Parser_Details.h --
  *
  * Copyright (c) 2014, Lex Chou <lex at chou dot it>
  * All rights reserved.

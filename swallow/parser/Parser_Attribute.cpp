@@ -1,4 +1,4 @@
-/* parser_attribute.cpp --
+/* Parser_Attribute.cpp --
  *
  * Copyright (c) 2014, Lex Chou <lex at chou dot it>
  * All rights reserved.
