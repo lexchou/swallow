@@ -34,8 +34,9 @@
 #include <string.h>
 #if !defined(_WIN32) && !defined(WIN32)
 #include <unistd.h>
-#endif
+#else
 #include <io.h>
+#endif
 #include <stdio.h>
 
 
@@ -49,6 +50,7 @@ void ConsoleWriter::printf(const wchar_t* fmt, ...)
 
 ConsoleWriter* ConsoleWriter::create()
 {
+#if !defined(_WIN32) && !defined(WIN32)
     if(isatty(fileno(stdout)))
     {
         return new AnsiConsoleWriter();
@@ -57,6 +59,9 @@ ConsoleWriter* ConsoleWriter::create()
     {
         return new PlainConsoleWriter();
     }
+#else
+    return new PlainConsoleWriter();
+#endif
 
 }
 
