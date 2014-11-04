@@ -150,6 +150,8 @@ int main(int argc, char** argv)
         getline(wcin, line);
         if(line.empty())
             continue;
+        if(line.compare(L"exit") == 0) 
+            break;
         CompilerResults compilerResults;
         repl.eval(compilerResults, line);
         repl.dumpCompilerResults(compilerResults, line);
