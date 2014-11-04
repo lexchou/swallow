@@ -63,7 +63,7 @@ struct CompilerResult : SourceInfo
     }
 };
 
-class CompilerResults
+class SWALLOW_EXPORT CompilerResults
 {
 public:
     void clear();

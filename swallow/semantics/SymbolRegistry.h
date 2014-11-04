@@ -42,7 +42,7 @@ struct OperatorInfo;
 class TypeNode;
 typedef std::shared_ptr<TypeNode> TypeNodePtr;
 class GlobalScope;
-class SymbolRegistry
+class SWALLOW_EXPORT SymbolRegistry
 {
     friend class SymbolScope;
 public:

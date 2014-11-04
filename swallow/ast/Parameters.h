@@ -36,7 +36,7 @@
 SWALLOW_NS_BEGIN
 
 class Parameter;
-class Parameters : public Node
+class SWALLOW_EXPORT Parameters : public Node
 {
 public:
     Parameters();

@@ -37,7 +37,7 @@ SWALLOW_NS_BEGIN
 class TypeIdentifier;
 typedef std::shared_ptr<class Type> TypePtr;
 
-class TypeDeclaration : public Declaration
+class SWALLOW_EXPORT TypeDeclaration : public Declaration
 {
 public:
     TypeDeclaration(NodeType::T nodeType);

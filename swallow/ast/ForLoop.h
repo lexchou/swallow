@@ -37,7 +37,7 @@ SWALLOW_NS_BEGIN
 
 class Expression;
 class CodeBlock;
-class ForLoop : public Statement
+class SWALLOW_EXPORT ForLoop : public Statement
 {
 public:
     ForLoop();

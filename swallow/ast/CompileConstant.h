@@ -34,7 +34,7 @@
 
 SWALLOW_NS_BEGIN
 
-class CompileConstant : public Expression
+class SWALLOW_EXPORT CompileConstant : public Expression
 {
 public:
     CompileConstant();

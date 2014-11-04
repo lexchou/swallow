@@ -35,7 +35,7 @@
 SWALLOW_NS_BEGIN
 
 class Statement;
-class NodeVisitor
+class SWALLOW_EXPORT NodeVisitor
 {
 public:
     virtual ~NodeVisitor(){}

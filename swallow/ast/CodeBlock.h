@@ -36,7 +36,7 @@
 SWALLOW_NS_BEGIN
 typedef std::shared_ptr<class Type> TypePtr;
 
-class CodeBlock : public Statement
+class SWALLOW_EXPORT CodeBlock : public Statement
 {
 public:
     CodeBlock();

@@ -38,7 +38,7 @@ SWALLOW_NS_BEGIN
 
 typedef std::shared_ptr<class Type> TypePtr;
 typedef std::shared_ptr<class GenericDefinition> GenericDefinitionPtr;
-class GenericArgument
+class SWALLOW_EXPORT GenericArgument
 {
 public:
     GenericArgument(const GenericDefinitionPtr& definition);

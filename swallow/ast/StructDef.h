@@ -34,7 +34,7 @@
 
 SWALLOW_NS_BEGIN
 
-class StructDef : public TypeDeclaration
+class SWALLOW_EXPORT StructDef : public TypeDeclaration
 {
 public:
     StructDef();

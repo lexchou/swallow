@@ -36,7 +36,7 @@ SWALLOW_NS_BEGIN
 
 class Parameters;
 class CodeBlock;
-class InitializerDef : public Declaration
+class SWALLOW_EXPORT InitializerDef : public Declaration
 {
 public:
     InitializerDef();

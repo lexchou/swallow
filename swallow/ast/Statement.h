@@ -34,7 +34,7 @@
 
 SWALLOW_NS_BEGIN
 
-class Statement : public Node
+class SWALLOW_EXPORT Statement : public Node
 {
 public:
     Statement(NodeType::T nodeType);

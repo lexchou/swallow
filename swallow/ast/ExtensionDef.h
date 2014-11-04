@@ -34,7 +34,7 @@
 
 SWALLOW_NS_BEGIN
 class TypeIdentifier;
-class ExtensionDef : public TypeDeclaration
+class SWALLOW_EXPORT ExtensionDef : public TypeDeclaration
 {
 public:
     ExtensionDef();

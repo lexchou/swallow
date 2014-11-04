@@ -35,7 +35,7 @@ SWALLOW_NS_BEGIN
 
 class ParenthesizedExpression;
 class Closure;
-class FunctionCall : public Expression
+class SWALLOW_EXPORT FunctionCall : public Expression
 {
 public:
     FunctionCall();

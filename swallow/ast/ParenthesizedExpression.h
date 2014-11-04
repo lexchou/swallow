@@ -34,7 +34,7 @@
 
 SWALLOW_NS_BEGIN
 class ExpressionNode;
-class ParenthesizedExpression : public Expression
+class SWALLOW_EXPORT ParenthesizedExpression : public Expression
 {
 public:
 

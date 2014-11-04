@@ -34,7 +34,7 @@
 SWALLOW_NS_BEGIN
 
 class SymbolScope;
-class ScopeOwner
+class SWALLOW_EXPORT ScopeOwner
 {
 protected:
     ScopeOwner();

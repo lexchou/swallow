@@ -34,7 +34,7 @@
 
 SWALLOW_NS_BEGIN
 
-class BreakStatement : public Statement
+class SWALLOW_EXPORT BreakStatement : public Statement
 {
 public:
     BreakStatement();

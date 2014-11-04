@@ -33,7 +33,7 @@
 #include "ast-decl.h"
 SWALLOW_NS_BEGIN
 
-class InOutParameter : public UnaryOperator
+class SWALLOW_EXPORT InOutParameter : public UnaryOperator
 {
 public:
     InOutParameter();

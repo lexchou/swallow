@@ -36,7 +36,7 @@ SWALLOW_NS_BEGIN
 
 class Expression;
 class CaseStatement;
-class SwitchCase : public Statement
+class SWALLOW_EXPORT SwitchCase : public Statement
 {
 public:
     SwitchCase();

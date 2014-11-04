@@ -34,7 +34,7 @@
 #include "ast-decl.h"
 SWALLOW_NS_BEGIN
 
-class TypeIdentifier : public TypeNode
+class SWALLOW_EXPORT TypeIdentifier : public TypeNode
 {
 public:
     TypeIdentifier();

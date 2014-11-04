@@ -34,7 +34,7 @@
 
 SWALLOW_NS_BEGIN
 class TypeNode;
-class TypeCast : public BinaryOperator
+class SWALLOW_EXPORT TypeCast : public BinaryOperator
 {
 public:
     TypeCast();

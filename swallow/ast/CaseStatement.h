@@ -36,7 +36,7 @@ SWALLOW_NS_BEGIN
 
 class Expression;
 class Pattern;
-class CaseStatement : public Statement
+class SWALLOW_EXPORT CaseStatement : public Statement
 {
 public:
     struct Condition

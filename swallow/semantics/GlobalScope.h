@@ -33,7 +33,7 @@
 #include <vector>
 SWALLOW_NS_BEGIN
 
-class GlobalScope : public SymbolScope
+class SWALLOW_EXPORT GlobalScope : public SymbolScope
 {
 public:
     GlobalScope();

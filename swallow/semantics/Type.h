@@ -45,7 +45,7 @@ typedef std::weak_ptr<class TypeDeclaration> TypeDeclarationWeakPtr;
 typedef std::shared_ptr<class GenericDefinition> GenericDefinitionPtr;
 typedef std::shared_ptr<class GenericArgument> GenericArgumentPtr;
 typedef std::shared_ptr<class FunctionOverloadedSymbol> FunctionOverloadedSymbolPtr;
-class Type : public Symbol, public  std::enable_shared_from_this<Symbol>
+class SWALLOW_EXPORT Type : public Symbol, public  std::enable_shared_from_this<Symbol>
 {
     friend class TypeBuilder;
 public:

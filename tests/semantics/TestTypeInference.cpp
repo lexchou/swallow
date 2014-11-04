@@ -236,7 +236,7 @@ TEST(TestTypeInference, Placeholder)
 TEST(TestTypeInference, TupleAssignment6)
 {
     SEMANTIC_ANALYZE(L"let a : (Int, Double) = (1, 0.3)\n"
-            "let (c,d) = a");
+        L"let (c,d) = a");
     dumpCompilerResults(compilerResults);
     SymbolPlaceHolderPtr a = NULL;
     ASSERT_NOT_NULL(a = std::dynamic_pointer_cast<SymbolPlaceHolder>(scope->lookup(L"d")));
@@ -298,7 +298,7 @@ TEST(TestTypeInference, StructInstance)
 TEST(TestTypeInference, FuncToVar)
 {
     SEMANTIC_ANALYZE(L"func a () -> Int { return 3}\n"
-            "let b = a");
+        L"let b = a");
     dumpCompilerResults(compilerResults);
     ASSERT_EQ(0, compilerResults.numResults());
     SymbolPtr b;

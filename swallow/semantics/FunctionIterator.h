@@ -41,7 +41,7 @@ typedef std::shared_ptr<class FunctionSymbol> FunctionSymbolPtr;
 /**
  * This iterator will iterate the function by name through out the inheritance hierarchy
  */
-class FunctionIterator
+class SWALLOW_EXPORT FunctionIterator
 {
 public:
     class iterator

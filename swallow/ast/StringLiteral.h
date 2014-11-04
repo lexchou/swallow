@@ -34,7 +34,7 @@
 
 SWALLOW_NS_BEGIN
 
-class StringLiteral : public Expression
+class SWALLOW_EXPORT StringLiteral : public Expression
 {
 public:
     StringLiteral();

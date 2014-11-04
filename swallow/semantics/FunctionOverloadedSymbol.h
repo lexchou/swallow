@@ -37,7 +37,7 @@ SWALLOW_NS_BEGIN
 typedef std::shared_ptr<Symbol> SymbolPtr;
 typedef std::shared_ptr<class FunctionSymbol> FunctionSymbolPtr;
 typedef std::shared_ptr<class FunctionOverloadedSymbol> FunctionOverloadedSymbolPtr;
-class FunctionOverloadedSymbol : public Symbol
+class SWALLOW_EXPORT FunctionOverloadedSymbol : public Symbol
 {
 public:
     FunctionOverloadedSymbol(const std::wstring& name);

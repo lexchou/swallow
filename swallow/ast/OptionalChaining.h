@@ -33,7 +33,7 @@
 
 SWALLOW_NS_BEGIN
 
-class OptionalChaining : public Expression
+class SWALLOW_EXPORT OptionalChaining : public Expression
 {
 public:
     OptionalChaining();

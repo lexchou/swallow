@@ -32,7 +32,10 @@
 #include <wchar.h>
 #include <stdarg.h>
 #include <string.h>
+#if !defined(_WIN32) && !defined(WIN32)
 #include <unistd.h>
+#endif
+#include <io.h>
 #include <stdio.h>
 
 

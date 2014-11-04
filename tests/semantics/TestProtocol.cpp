@@ -42,7 +42,7 @@ using namespace Swallow;
 TEST(TestProtocol, ProtocolInheritance)
 {
     SEMANTIC_ANALYZE(L"protocol Base{}\n"
-            "protocol Child : Base{}")
+        L"protocol Child : Base{}")
     dumpCompilerResults(compilerResults);
     ASSERT_EQ(0, compilerResults.numResults());
     TypePtr Base, Child;
@@ -54,8 +54,8 @@ TEST(TestProtocol, ProtocolInheritance)
 TEST(TestProtocol, ProtocolHasNoVariable)
 {
     SEMANTIC_ANALYZE(L"protocol Test {\n"
-            "var a : Int = 3\n"
-            "}");
+        L"var a : Int = 3\n"
+        L"}");
     ASSERT_EQ(1, compilerResults.numResults());
     auto res = compilerResults.getResult(0);
     ASSERT_EQ(Errors::E_PROTOCOL_VAR_MUST_BE_COMPUTED_PROPERTY_1, res.code);
@@ -96,11 +96,11 @@ TEST(TestProtocol, MethodRequirements_DefaultParameterInitializer)
 TEST(TestProtocol, MethodRequirements_Impl)
 {
     SEMANTIC_ANALYZE(L"protocol MyProtocol {"
-            "func test()\n"
-            "}\n"
-            "class Test : MyProtocol { \n"
-            "func test(){}\n"
-            "}");
+        L"func test()\n"
+        L"}\n"
+        L"class Test : MyProtocol { \n"
+        L"func test(){}\n"
+        L"}");
     dumpCompilerResults(compilerResults);
     ASSERT_EQ(0, compilerResults.numResults());
 }
@@ -109,10 +109,10 @@ TEST(TestProtocol, MethodRequirements_Impl)
 TEST(TestProtocol, MethodRequirements_NotImpl)
 {
     SEMANTIC_ANALYZE(L"protocol MyProtocol {"
-            "func test()\n"
-            "}\n"
-            "class Test : MyProtocol { \n"
-            "}");
+        L"func test()\n"
+        L"}\n"
+        L"class Test : MyProtocol { \n"
+        L"}");
     ASSERT_EQ(1, compilerResults.numResults());
     auto res = compilerResults.getResult(0);
     ASSERT_EQ(Errors::E_TYPE_DOES_NOT_CONFORM_TO_PROTOCOL_UNIMPLEMENTED_FUNCTION_3, res.code);
@@ -121,12 +121,12 @@ TEST(TestProtocol, MethodRequirements_NotImpl)
 TEST(TestProtocol, TypeRequirements)
 {
     SEMANTIC_ANALYZE(L"protocol MyProtocol {\n"
-            "typealias Element\n"
-            "}\n"
-            "class Test : MyProtocol\n"
-            "{\n"
-            "  class Element {}\n"
-            "}\n");
+        L"typealias Element\n"
+        L"}\n"
+        L"class Test : MyProtocol\n"
+        L"{\n"
+        L"  class Element {}\n"
+        L"}\n");
     ASSERT_EQ(0, compilerResults.numResults());
 }
 /*
@@ -148,7 +148,7 @@ TEST(TestProtocol, TypeRequirements_Impl)
 TEST(TestProtocol, TypeInheritance)
 {
     SEMANTIC_ANALYZE(L"protocol MyProtocol { typealias Element = Int }\n"
-            "class Test : MyProtocol {}");
+        L"class Test : MyProtocol {}");
     //TODO: type inference for let a : Test.Element
     ASSERT_EQ(0, compilerResults.numResults());
 
@@ -157,8 +157,8 @@ TEST(TestProtocol, TypeInheritance)
 TEST(TestProtocol, Let)
 {
     SEMANTIC_ANALYZE(L"protocol MyProtocol {\n"
-            "let a : Int = 3\n"
-            "}");
+        L"let a : Int = 3\n"
+        L"}");
     ASSERT_EQ(1, compilerResults.numResults());
     auto res = compilerResults.getResult(0);
     ASSERT_EQ(Errors::E_PROTOCOL_CANNOT_DEFINE_LET_CONSTANT_1, res.code);
@@ -167,8 +167,8 @@ TEST(TestProtocol, Let)
 TEST(TestProtocol, Var)
 {
     SEMANTIC_ANALYZE(L"protocol MyProtocol {\n"
-            "var a : Int = 3\n"
-            "}");
+        L"var a : Int = 3\n"
+        L"}");
     ASSERT_EQ(1, compilerResults.numResults());
     auto res = compilerResults.getResult(0);
     ASSERT_EQ(Errors::E_PROTOCOL_VAR_MUST_BE_COMPUTED_PROPERTY_1, res.code);
@@ -177,8 +177,8 @@ TEST(TestProtocol, Var)
 TEST(TestProtocol, ReadOnlyComputedProperty)
 {
     SEMANTIC_ANALYZE(L"protocol MyProtocol {\n"
-            "var a : Int {get}\n"
-            "}");
+        L"var a : Int {get}\n"
+        L"}");
     ASSERT_EQ(0, compilerResults.numResults());
 
     TypePtr RandomNumberGenerator;
@@ -195,11 +195,11 @@ TEST(TestProtocol, ReadOnlyComputedProperty)
 TEST(TestProtocol, PropertyRequirement)
 {
     SEMANTIC_ANALYZE(L"protocol MyProtocol { \n"
-            "var a : Int {get set} \n"
-            "}\n"
-            "class MyClass : MyProtocol {\n"
-            "var a : Int {get { return 3}}\n"
-            "}");
+        L"var a : Int {get set} \n"
+        L"}\n"
+        L"class MyClass : MyProtocol {\n"
+        L"var a : Int {get { return 3}}\n"
+        L"}");
     ASSERT_EQ(1, compilerResults.numResults());
     auto res = compilerResults.getResult(0);
     ASSERT_EQ(Errors::E_TYPE_DOES_NOT_CONFORM_TO_PROTOCOL_UNWRITABLE_PROPERTY_3, res.code);
@@ -210,11 +210,11 @@ TEST(TestProtocol, PropertyRequirement)
 TEST(TestProtocol, PropertyRequirement2)
 {
     SEMANTIC_ANALYZE(L"protocol MyProtocol { \n"
-            "var a : Int {get set} \n"
-            "}\n"
-            "class MyClass : MyProtocol {\n"
-            "var af : Int {get { return 3}}\n"
-            "}");
+        L"var a : Int {get set} \n"
+        L"}\n"
+        L"class MyClass : MyProtocol {\n"
+        L"var af : Int {get { return 3}}\n"
+        L"}");
     ASSERT_EQ(1, compilerResults.numResults());
     auto res = compilerResults.getResult(0);
     ASSERT_EQ(Errors::E_TYPE_DOES_NOT_CONFORM_TO_PROTOCOL_UNIMPLEMENTED_PROPERTY_3, res.code);
@@ -225,11 +225,11 @@ TEST(TestProtocol, PropertyRequirement2)
 TEST(TestProtocol, PropertyRequirement3)
 {
     SEMANTIC_ANALYZE(L"protocol MyProtocol { \n"
-            "var a : Int {get set} \n"
-            "}\n"
-            "class MyClass : MyProtocol {"
-            "var a : Int {get { return 0 } set {}}\n"
-            "}");
+        L"var a : Int {get set} \n"
+        L"}\n"
+        L"class MyClass : MyProtocol {"
+        L"var a : Int {get { return 0 } set {}}\n"
+        L"}");
     ASSERT_EQ(0, compilerResults.numResults());
 
 }
@@ -237,11 +237,11 @@ TEST(TestProtocol, PropertyRequirement3)
 TEST(TestProtocol, PropertyRequirement4)
 {
     SEMANTIC_ANALYZE(L"protocol MyProtocol { \n"
-            "var a : Int {get set} \n"
-            "}\n"
-            "class MyClass : MyProtocol {\n"
-            "var a : Int\n"
-            "}");
+        L"var a : Int {get set} \n"
+        L"}\n"
+        L"class MyClass : MyProtocol {\n"
+        L"var a : Int\n"
+        L"}");
     ASSERT_EQ(0, compilerResults.numResults());
 
 }
@@ -249,11 +249,11 @@ TEST(TestProtocol, PropertyRequirement4)
 TEST(TestProtocol, PropertyRequirement5)
 {
     SEMANTIC_ANALYZE(L"protocol MyProtocol { \n"
-            "var a : Int {get set} \n"
-            "}\n"
-            "class MyClass : MyProtocol {\n"
-            "let a : Int = 3\n"
-            "}");
+        L"var a : Int {get set} \n"
+        L"}\n"
+        L"class MyClass : MyProtocol {\n"
+        L"let a : Int = 3\n"
+        L"}");
     ASSERT_EQ(1, compilerResults.numResults());
     auto res = compilerResults.getResult(0);
     ASSERT_EQ(Errors::E_TYPE_DOES_NOT_CONFORM_TO_PROTOCOL_UNWRITABLE_PROPERTY_3, res.code);

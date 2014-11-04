@@ -34,7 +34,7 @@
 
 SWALLOW_NS_BEGIN
 class TypeNode;
-class TypeCheck : public BinaryOperator
+class SWALLOW_EXPORT TypeCheck : public BinaryOperator
 {
 public:
     TypeCheck();
