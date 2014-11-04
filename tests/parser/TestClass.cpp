@@ -28,6 +28,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "../utils.h"
+#include "common/Errors.h"
 
 using namespace Swallow;
 
@@ -41,6 +42,13 @@ TEST(TestClass, testStruct)
     ASSERT_NOT_NULL(s = std::dynamic_pointer_cast<StructDef>(root));
     ASSERT_EQ(L"Resolution", std::static_pointer_cast<TypeIdentifier>(s->getIdentifier())->getName());
     ASSERT_EQ(2, s->numDeclarations());
+}
+TEST(TestClass, StructWithEof)
+{
+    PARSE_STATEMENT(L"struct Resolution ");
+    ASSERT_EQ(1, compilerResults.numResults());
+    auto res = compilerResults.getResult(0);
+    ASSERT_EQ(Errors::E_EXPECT_1, res.code);
 }
 TEST(TestClass, testClass)
 {

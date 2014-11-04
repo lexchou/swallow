@@ -709,7 +709,11 @@ bool Tokenizer::nextImpl(Token& token)
 {
     wchar_t ch;
     if(!peek(ch))
+    {
+        token.type = TokenType::EndOfFile;
+        token.state = state;
         return false;
+    }
     
     token.state = state;
 

@@ -92,6 +92,8 @@ bool Parser::next(Token& token)
             continue;
         return true;
     }
+    //eof reached, fill token with end-of-file for compiler error
+    token.token = L"end-of-file";
     return false;
 }
 /**
@@ -163,8 +165,12 @@ void Parser::expect(const wchar_t* str)
 }
 void Parser::expect(const wchar_t* str, Token& token)
 {
-    expect_next(token);
-    tassert(token, token == str, Errors::E_EXPECT_1, str);
+    if(next(token))
+    {
+        if(token == str)
+            return;
+    }
+    tassert(token, false, Errors::E_EXPECT_1, str);
 }
 
 void Parser::expect(Keyword::T keyword)
@@ -175,17 +181,16 @@ void Parser::expect(Keyword::T keyword)
 
 void Parser::expect(Keyword::T keyword, Token& token)
 {
-    //TODO: check EOF and give a more prominent error
-    expect_next(token);
+    const std::wstring& str = tokenizer->getKeyword(keyword);
+    tassert(token, next(token), Errors::E_EXPECT_KEYWORD_1, str);
     if(keyword == token.getKeyword())
         return;
-
-    const std::wstring& str = tokenizer->getKeyword(keyword);
     tassert(token, false, Errors::E_EXPECT_KEYWORD_1, str);
 }
 void Parser::expect_identifier(Token& token)
 {
-    expect_next(token);
+    static std::wstring eof = L"end-of-file";
+    tassert(token, next(token), Errors::E_EXPECT_IDENTIFIER_1, eof);
     tassert(token, token.type == TokenType::Identifier, Errors::E_EXPECT_IDENTIFIER_1, token.token);
     tassert(token, token.identifier.keyword == Keyword::_, Errors::E_EXPECT_IDENTIFIER_1, token.token);
 }

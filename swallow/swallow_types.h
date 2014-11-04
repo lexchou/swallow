@@ -38,6 +38,7 @@ struct TokenType
     enum T
     {
         _,
+        EndOfFile,
         Identifier,
         String,
         Integer,
