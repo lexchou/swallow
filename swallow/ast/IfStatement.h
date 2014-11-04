@@ -38,7 +38,7 @@ SWALLOW_NS_BEGIN
 
 class Expression;
 class CodeBlock;
-class SWALLOW_DLL IfStatement : public Statement
+class SWALLOW_EXPORT IfStatement : public Statement
 {
 public:
     IfStatement();

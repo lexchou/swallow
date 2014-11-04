@@ -34,7 +34,7 @@
 
 SWALLOW_NS_BEGIN
 
-class SWALLOW_DLL ContinueStatement : public Statement
+class SWALLOW_EXPORT ContinueStatement : public Statement
 {
 public:
     ContinueStatement();

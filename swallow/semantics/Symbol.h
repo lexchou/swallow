@@ -34,7 +34,7 @@
 
 SWALLOW_NS_BEGIN
 typedef std::shared_ptr<class Type> TypePtr;
-class SWALLOW_DLL Symbol
+class SWALLOW_EXPORT Symbol
 {
 public:
     Symbol(){}

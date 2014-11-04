@@ -41,7 +41,7 @@ class TypeDeclaration;
 class Expression;
 class Pattern;
 class NodeFactory;
-class SWALLOW_DLL SemanticAnalyzer : public NodeVisitor
+class SWALLOW_EXPORT SemanticAnalyzer : public NodeVisitor
 {
 public:
     SemanticAnalyzer(SymbolRegistry* symbolRegistry, CompilerResults* compilerResults);

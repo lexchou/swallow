@@ -36,7 +36,7 @@ SWALLOW_NS_BEGIN
 class Type;
 typedef std::shared_ptr<Type> TypePtr;
 
-class SWALLOW_DLL Pattern : public Statement
+class SWALLOW_EXPORT Pattern : public Statement
 {
 public:
     Pattern(NodeType::T nodeType);

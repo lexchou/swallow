@@ -59,7 +59,7 @@ struct OperatorInfo
         this->precedence.postfix = -1;
     }
 };
-class SWALLOW_DLL SymbolScope
+class SWALLOW_EXPORT SymbolScope
 {
     friend class SymbolRegistry;
     friend class ScopeOwner;

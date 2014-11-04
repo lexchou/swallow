@@ -47,7 +47,7 @@ struct KeywordInfo
     Keyword::T keyword;
     KeywordType::T type;
 };
-class SWALLOW_DLL Tokenizer
+class SWALLOW_EXPORT Tokenizer
 {
 public:
     Tokenizer(const wchar_t* data);

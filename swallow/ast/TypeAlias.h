@@ -35,7 +35,7 @@
 SWALLOW_NS_BEGIN
 
 class TypeNode;
-class SWALLOW_DLL TypeAlias : public Declaration
+class SWALLOW_EXPORT TypeAlias : public Declaration
 {
 public:
     TypeAlias();

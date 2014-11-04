@@ -34,7 +34,7 @@
 
 SWALLOW_NS_BEGIN
 
-class SWALLOW_DLL TypeBuilder : public Type
+class SWALLOW_EXPORT TypeBuilder : public Type
 {
 public://Constructors
     TypeBuilder(Category category);

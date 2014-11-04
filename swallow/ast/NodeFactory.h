@@ -38,7 +38,7 @@ SWALLOW_NS_BEGIN
 
 struct SourceInfo;
 
-class SWALLOW_DLL NodeFactory
+class SWALLOW_EXPORT NodeFactory
 {
 public:
     NodeFactory();

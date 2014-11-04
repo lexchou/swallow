@@ -35,7 +35,7 @@
 
 SWALLOW_NS_BEGIN
 class Attribute;
-class SWALLOW_DLL TupleType : public TypeNode
+class SWALLOW_EXPORT TupleType : public TypeNode
 {
 public:
     struct TupleElement

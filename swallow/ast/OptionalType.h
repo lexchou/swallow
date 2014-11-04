@@ -34,7 +34,7 @@
 
 SWALLOW_NS_BEGIN
 
-class SWALLOW_DLL OptionalType : public TypeNode
+class SWALLOW_EXPORT OptionalType : public TypeNode
 {
 public:
     OptionalType();

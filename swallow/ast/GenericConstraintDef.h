@@ -35,7 +35,7 @@
 SWALLOW_NS_BEGIN
 class TypeIdentifier;
 
-class SWALLOW_DLL GenericConstraintDef : public Node
+class SWALLOW_EXPORT GenericConstraintDef : public Node
 {
 public:
     enum ConstraintType

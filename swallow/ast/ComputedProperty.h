@@ -39,7 +39,7 @@ class Expression;
 class Pattern;
 class TypeNode;
 typedef std::shared_ptr<class Type> TypePtr;
-class SWALLOW_DLL ComputedProperty : public Declaration
+class SWALLOW_EXPORT ComputedProperty : public Declaration
 {
 public:
     ComputedProperty();

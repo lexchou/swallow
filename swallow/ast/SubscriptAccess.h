@@ -34,7 +34,7 @@
 
 SWALLOW_NS_BEGIN
 class Identifier;
-class SWALLOW_DLL SubscriptAccess : public Expression
+class SWALLOW_EXPORT SubscriptAccess : public Expression
 {
 public:
     SubscriptAccess();

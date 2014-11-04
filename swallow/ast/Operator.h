@@ -33,7 +33,7 @@
 #include "tokenizer/Token.h"
 SWALLOW_NS_BEGIN
 
-class SWALLOW_DLL Operator : public Expression
+class SWALLOW_EXPORT Operator : public Expression
 {
 protected:
     Operator(NodeType::T);

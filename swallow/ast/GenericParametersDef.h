@@ -36,7 +36,7 @@ SWALLOW_NS_BEGIN
 class GenericConstraintDef;
 class TypeIdentifier;
 
-class SWALLOW_DLL GenericParametersDef : public Node
+class SWALLOW_EXPORT GenericParametersDef : public Node
 {
 public:
     GenericParametersDef();

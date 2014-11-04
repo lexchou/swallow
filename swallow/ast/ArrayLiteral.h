@@ -33,7 +33,7 @@
 
 SWALLOW_NS_BEGIN
 
-class SWALLOW_DLL ArrayLiteral : public Expression
+class SWALLOW_EXPORT ArrayLiteral : public Expression
 {
 public:
 	ArrayLiteral();

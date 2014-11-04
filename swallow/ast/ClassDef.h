@@ -34,7 +34,7 @@
 
 SWALLOW_NS_BEGIN
 
-class SWALLOW_DLL ClassDef : public TypeDeclaration
+class SWALLOW_EXPORT ClassDef : public TypeDeclaration
 {
 public:
     ClassDef();

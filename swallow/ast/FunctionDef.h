@@ -39,7 +39,7 @@ class Parameters;
 class CodeBlock;
 class TypeNode;
 typedef std::shared_ptr<class Type> TypePtr;
-class SWALLOW_DLL FunctionDef : public Declaration
+class SWALLOW_EXPORT FunctionDef : public Declaration
 {
 public:
     FunctionDef();

@@ -34,7 +34,7 @@
 SWALLOW_NS_BEGIN
 
 class SymbolScope;
-class SWALLOW_DLL ScopeOwner
+class SWALLOW_EXPORT ScopeOwner
 {
 protected:
     ScopeOwner();

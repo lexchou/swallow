@@ -34,7 +34,7 @@
 
 SWALLOW_NS_BEGIN
 
-class SWALLOW_DLL ValueBindingPattern : public Pattern
+class SWALLOW_EXPORT ValueBindingPattern : public Pattern
 {
 public:
     ValueBindingPattern();

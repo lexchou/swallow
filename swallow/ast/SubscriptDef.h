@@ -37,7 +37,7 @@ SWALLOW_NS_BEGIN
 class CodeBlock;
 class Parameters;
 class TypeNode;
-class SWALLOW_DLL SubscriptDef : public Declaration
+class SWALLOW_EXPORT SubscriptDef : public Declaration
 {
 public:
     SubscriptDef();

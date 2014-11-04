@@ -33,7 +33,7 @@
 
 SWALLOW_NS_BEGIN
 
-class SWALLOW_DLL ScopedNodeFactory : public NodeFactory
+class SWALLOW_EXPORT ScopedNodeFactory : public NodeFactory
 {
 public:
     virtual IdentifierPtr createIdentifier(const SourceInfo& state) override;

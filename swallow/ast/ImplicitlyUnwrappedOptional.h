@@ -34,7 +34,7 @@
 
 SWALLOW_NS_BEGIN
 
-class SWALLOW_DLL ImplicitlyUnwrappedOptional : public TypeNode
+class SWALLOW_EXPORT ImplicitlyUnwrappedOptional : public TypeNode
 {
 public:
     ImplicitlyUnwrappedOptional();

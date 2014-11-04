@@ -36,7 +36,7 @@ SWALLOW_NS_BEGIN
 class TypeNode;
 class GenericArgument;
 class Type;
-class SWALLOW_DLL Identifier : public Expression
+class SWALLOW_EXPORT Identifier : public Expression
 {
 public:
     Identifier();

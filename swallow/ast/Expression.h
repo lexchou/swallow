@@ -33,7 +33,7 @@
 SWALLOW_NS_BEGIN
 
 
-class SWALLOW_DLL Expression : public Pattern
+class SWALLOW_EXPORT Expression : public Pattern
 {
 protected:
 	Expression(NodeType::T nodeType);

@@ -38,7 +38,7 @@ SWALLOW_NS_BEGIN
 
 class Attribute;
 class GenericParametersDef;
-class SWALLOW_DLL Declaration : public Statement
+class SWALLOW_EXPORT Declaration : public Statement
 {
 public:
     Declaration(NodeType::T nodeType);

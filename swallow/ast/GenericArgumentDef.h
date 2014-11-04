@@ -35,7 +35,7 @@
 SWALLOW_NS_BEGIN
 
 class TypeNode;
-class SWALLOW_DLL GenericArgumentDef : public Node
+class SWALLOW_EXPORT GenericArgumentDef : public Node
 {
 public:
     GenericArgumentDef();

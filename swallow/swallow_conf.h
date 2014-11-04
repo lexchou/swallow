@@ -31,10 +31,14 @@
 #define SWALLOW_CONF_H
 #include <memory>
 
-#if defined(swallow_EXPORTS)
-#define SWALLOW_DLL     __declspec(dllexport)
-#else         /* use a DLL library */
-#define SWALLOW_DLL     __declspec(dllimport)
+#if !defined(_WIN32) && !defined(WIN32)
+#define SWALLOW_EXPORT 
+#else
+    #if defined(swallow_EXPORTS)
+    #define SWALLOW_EXPORT __declspec(dllexport)
+    #else         /* use a DLL library */
+    #define SWALLOW_EXPORT __declspec(dllimport)
+    #endif
 #endif
 
 

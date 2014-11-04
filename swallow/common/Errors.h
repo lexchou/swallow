@@ -35,7 +35,7 @@
 
 SWALLOW_NS_BEGIN
 
-struct SWALLOW_DLL Errors
+struct SWALLOW_EXPORT Errors
 {
     enum
     {

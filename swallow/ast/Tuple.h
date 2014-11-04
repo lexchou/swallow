@@ -36,7 +36,7 @@
 SWALLOW_NS_BEGIN
 
 class TypeNode;
-class SWALLOW_DLL Tuple : public Expression
+class SWALLOW_EXPORT Tuple : public Expression
 {
 public:
     Tuple();

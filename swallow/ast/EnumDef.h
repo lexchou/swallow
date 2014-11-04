@@ -35,7 +35,7 @@
 SWALLOW_NS_BEGIN
 class Expression;
 class TupleType;
-class SWALLOW_DLL EnumDef : public TypeDeclaration
+class SWALLOW_EXPORT EnumDef : public TypeDeclaration
 {
 public:
     enum Type

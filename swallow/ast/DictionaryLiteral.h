@@ -33,7 +33,7 @@
 
 SWALLOW_NS_BEGIN
 
-class SWALLOW_DLL DictionaryLiteral : public Expression
+class SWALLOW_EXPORT DictionaryLiteral : public Expression
 {
     typedef std::vector<std::pair<ExpressionPtr, ExpressionPtr> > Map;
 public:

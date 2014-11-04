@@ -34,7 +34,7 @@
 
 SWALLOW_NS_BEGIN
 
-class SWALLOW_DLL ArrayType : public TypeNode
+class SWALLOW_EXPORT ArrayType : public TypeNode
 {
 public:
     ArrayType();

@@ -37,7 +37,7 @@ SWALLOW_NS_BEGIN
 
     typedef std::shared_ptr<class ValueBinding> ValueBindingPtr;
 
-class SWALLOW_DLL ValueBindings : public Declaration
+class SWALLOW_EXPORT ValueBindings : public Declaration
     {
     public:
         typedef std::list<ValueBindingPtr>::iterator Iterator;

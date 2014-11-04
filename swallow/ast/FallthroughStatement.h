@@ -34,7 +34,7 @@
 
 SWALLOW_NS_BEGIN
 
-class SWALLOW_DLL FallthroughStatement : public Statement
+class SWALLOW_EXPORT FallthroughStatement : public Statement
 {
 public:
     FallthroughStatement();

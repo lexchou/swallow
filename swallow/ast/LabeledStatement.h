@@ -34,7 +34,7 @@
 
 SWALLOW_NS_BEGIN
 
-class SWALLOW_DLL LabeledStatement : public Statement
+class SWALLOW_EXPORT LabeledStatement : public Statement
 {
 public:
     LabeledStatement();

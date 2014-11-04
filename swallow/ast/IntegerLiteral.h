@@ -34,7 +34,7 @@
 
 SWALLOW_NS_BEGIN
 
-class SWALLOW_DLL IntegerLiteral : public Expression
+class SWALLOW_EXPORT IntegerLiteral : public Expression
 {
 public:
     IntegerLiteral();

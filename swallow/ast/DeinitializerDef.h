@@ -35,7 +35,7 @@
 SWALLOW_NS_BEGIN
 
 class CodeBlock;
-class SWALLOW_DLL DeinitializerDef : public Declaration
+class SWALLOW_EXPORT DeinitializerDef : public Declaration
 {
 public:
     DeinitializerDef();

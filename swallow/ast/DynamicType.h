@@ -33,7 +33,7 @@
 
 SWALLOW_NS_BEGIN
 
-class SWALLOW_DLL DynamicType : public Expression
+class SWALLOW_EXPORT DynamicType : public Expression
 {
 public:
     DynamicType();

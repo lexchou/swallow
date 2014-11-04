@@ -37,7 +37,7 @@ SWALLOW_NS_BEGIN
 class Pattern;
 class Expression;
 typedef std::shared_ptr<class Type> TypePtr;
-class SWALLOW_DLL ValueBinding : public Declaration
+class SWALLOW_EXPORT ValueBinding : public Declaration
 {
     friend class ValueBindings;
 public:
