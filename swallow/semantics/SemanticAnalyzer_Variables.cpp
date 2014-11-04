@@ -86,33 +86,6 @@ void SemanticAnalyzer::verifyTuplePattern(const PatternPtr& pattern)
 
 }
 
-void SemanticAnalyzer::registerPattern(const PatternPtr& pattern)
-{
-    if(pattern->getNodeType() == NodeType::Identifier)
-    {
-        IdentifierPtr id = std::static_pointer_cast<Identifier>(pattern);
-        SymbolPtr s = symbolRegistry->lookupSymbol(id->getIdentifier());
-        if(s)
-        {
-            //already defined
-            error(id, Errors::E_DEFINITION_CONFLICT, id->getIdentifier());
-        }
-        else
-        {
-            SymbolPlaceHolderPtr pattern(new SymbolPlaceHolder(id->getIdentifier(), id->getType(), SymbolPlaceHolder::R_LOCAL_VARIABLE, 0));
-            registerSymbol(pattern);
-        }
-    }
-    else if(pattern->getNodeType() == NodeType::Tuple)
-    {
-        TuplePtr tuple = std::static_pointer_cast<Tuple>(pattern);
-        for(const PatternPtr& element : *tuple)
-        {
-            registerPattern(element);
-        }
-    }
-}
-
 void SemanticAnalyzer::visitComputedProperty(const ComputedPropertyPtr& node)
 {
 
@@ -297,19 +270,31 @@ void SemanticAnalyzer::explodeValueBinding(const ValueBindingsPtr& valueBindings
         }
     }
     //expand it into tuple assignment
+    NodeFactory* nodeFactory = valueBindings->getNodeFactory();
     //need a temporay variable to hold the initializer
     std::wstring tempName = L"#0";
-    ValueBindingPtr tempVar = valueBindings->getNodeFactory()->createValueBinding(*var->getSourceInfo());
-    IdentifierPtr tempVarId = valueBindings->getNodeFactory()->createIdentifier(*var->getSourceInfo());
+    ValueBindingPtr tempVar = nodeFactory->createValueBinding(*var->getSourceInfo());
+    IdentifierPtr tempVarId = nodeFactory->createIdentifier(*var->getSourceInfo());
     tempVarId->setIdentifier(tempName);
     tempVar->setName(tempVarId);
     tempVar->setInitializer(var->getInitializer());
     tempVar->setType(declaredType ? declaredType : initializerType);
     valueBindings->insertAfter(tempVar, iter);
     //now expand tuples
-    vector<tuple<wstring, TypePtr, ExpressionPtr> > result;
+    vector<tuple<IdentifierPtr, TypePtr, ExpressionPtr> > result;
     vector<int> indices;
     expandTuple(result, indices, name, tempName, tempVar->getType(), valueBindings->isReadOnly());
+    for(auto v : result)
+    {
+        IdentifierPtr id = get<0>(v);
+        if(id->getIdentifier() == L"_")
+            continue;//ignore the placeholder
+        ValueBindingPtr var = nodeFactory->createValueBinding(*id->getSourceInfo());
+        var->setName(id);
+        var->setType(get<1>(v));
+        var->setInitializer(get<2>(v));
+        valueBindings->add(var);
+    }
 }
 
 MemberAccessPtr SemanticAnalyzer::makeAccess(SourceInfo* info, NodeFactory* nodeFactory, const std::wstring& tempName, const std::vector<int>& indices)
@@ -327,7 +312,7 @@ MemberAccessPtr SemanticAnalyzer::makeAccess(SourceInfo* info, NodeFactory* node
     }
     return static_pointer_cast<MemberAccess>(ret);
 }
-void SemanticAnalyzer::expandTuple(vector<tuple<wstring, TypePtr, ExpressionPtr> >& results, vector<int>& indices, const PatternPtr& name, const std::wstring& tempName, const TypePtr& type, bool isReadonly)
+void SemanticAnalyzer::expandTuple(vector<tuple<IdentifierPtr, TypePtr, ExpressionPtr> >& results, vector<int>& indices, const PatternPtr& name, const std::wstring& tempName, const TypePtr& type, bool isReadonly)
 {
     TypeNodePtr declaredType;
     switch (name->getNodeType())
@@ -336,7 +321,7 @@ void SemanticAnalyzer::expandTuple(vector<tuple<wstring, TypePtr, ExpressionPtr>
         {
             IdentifierPtr id = static_pointer_cast<Identifier>(name);
             name->setType(type);
-            results.push_back(make_tuple(id->getIdentifier(), type, makeAccess(id->getSourceInfo(), id->getNodeFactory(), tempName, indices)));
+            results.push_back(make_tuple(id, type, makeAccess(id->getSourceInfo(), id->getNodeFactory(), tempName, indices)));
             //check if the identifier already has a type definition
             break;
         }
@@ -413,7 +398,20 @@ void SemanticAnalyzer::visitValueBindings(const ValueBindingsPtr& node)
     for(const ValueBindingPtr& var : *node)
     {
         PatternPtr name = var->getName();
-        registerPattern(name);
+        if(name->getNodeType() != NodeType::Identifier)
+            continue;//The tuple has been exploded into a sequence of single variable bindings, no need to handle tuple again
+        IdentifierPtr id = std::static_pointer_cast<Identifier>(name);
+        SymbolPtr s = symbolRegistry->lookupSymbol(id->getIdentifier());
+        if(s)
+        {
+            //already defined
+            error(id, Errors::E_DEFINITION_CONFLICT, id->getIdentifier());
+        }
+        else
+        {
+            SymbolPlaceHolderPtr pattern(new SymbolPlaceHolder(id->getIdentifier(), id->getType(), SymbolPlaceHolder::R_LOCAL_VARIABLE, 0));
+            registerSymbol(pattern);
+        }
     }
     int flags = SymbolPlaceHolder::F_INITIALIZING | SymbolPlaceHolder::F_READABLE;
     if(dynamic_cast<TypeDeclaration*>(symbolRegistry->getCurrentScope()->getOwner()))
@@ -423,15 +421,22 @@ void SemanticAnalyzer::visitValueBindings(const ValueBindingsPtr& node)
     for(const ValueBindingPtr& v : *node)
     {
         PatternPtr name = v->getName();
+        if(name->getNodeType() != NodeType::Identifier)
+            continue;
+        //skip placeholder
+        IdentifierPtr id = std::static_pointer_cast<Identifier>(name);
+        if(id->getIdentifier() == L"_")
+            continue;
+        SymbolPtr s = symbolRegistry->lookupSymbol(id->getIdentifier());
+        assert(s != nullptr);
         ExpressionPtr initializer = v->getInitializer();
-        setFlag(name, true, flags);
+        SymbolPlaceHolderPtr placeholder = std::dynamic_pointer_cast<SymbolPlaceHolder>(s);
+        assert(placeholder != nullptr);
+        placeholder->flags |= flags;
         v->accept(this);
-        setFlag(name, true, SymbolPlaceHolder::F_INITIALIZED);
-        setFlag(name, false, SymbolPlaceHolder::F_INITIALIZING);
+        placeholder->flags |= SymbolPlaceHolder::F_INITIALIZED;
+        placeholder->flags &= ~SymbolPlaceHolder::F_INITIALIZING;
     }
-
-
-    //SemanticNodeVisitor::visitValueBindings(node);
 }
 
 void SemanticAnalyzer::visitIdentifier(const IdentifierPtr& id)
@@ -484,28 +489,3 @@ void SemanticAnalyzer::visitEnumCasePattern(const EnumCasePatternPtr& node)
     //TODO: check if the enum case is defined
 }
 
-void SemanticAnalyzer::setFlag(const PatternPtr& pattern, bool add, int flag)
-{
-    NodeType::T t = pattern->getNodeType();
-    if(t == NodeType::Identifier)
-    {
-        IdentifierPtr id = std::static_pointer_cast<Identifier>(pattern);
-        SymbolPtr sym = symbolRegistry->getCurrentScope()->lookup(id->getIdentifier());
-        assert(sym != nullptr);
-        SymbolPlaceHolderPtr placeholder = std::dynamic_pointer_cast<SymbolPlaceHolder>(sym);
-        assert(placeholder != nullptr);
-        if(add)
-            placeholder->flags |= flag;
-        else
-            placeholder->flags &= ~flag;
-    }
-    else if(t == NodeType::Tuple)
-    {
-        TuplePtr tuple = std::static_pointer_cast<Tuple>(pattern);
-        for(const PatternPtr& element : *tuple)
-        {
-            setFlag(element, add, flag);
-        }
-    }
-
-}

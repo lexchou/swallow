@@ -219,6 +219,20 @@ TEST(TestTypeInference, TupleAssignment5)
     ASSERT_TRUE(type == Int);
 }
 
+
+TEST(TestTypeInference, Placeholder)
+{
+    SEMANTIC_ANALYZE(L"let (a, _, _) = (1,2,3)");
+    ASSERT_EQ(0, compilerResults.numResults());
+    SymbolPlaceHolderPtr a;
+    ASSERT_NOT_NULL(a = std::dynamic_pointer_cast<SymbolPlaceHolder>(scope->lookup(L"a")));
+    TypePtr type = a->getType();
+    ASSERT_NOT_NULL(type);
+    TypePtr Int = symbolRegistry.lookupType(L"Int");
+    ASSERT_TRUE(type == Int);
+}
+
+
 TEST(TestTypeInference, TupleAssignment6)
 {
     SEMANTIC_ANALYZE(L"let a : (Int, Double) = (1, 0.3)\n"
