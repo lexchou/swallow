@@ -54,7 +54,7 @@ TEST(TestType, testCovariance)
 TEST(TestType, testInheritance)
 {
     SEMANTIC_ANALYZE(L"class SomeSuperclass{}"
-            "class SomeClass : SomeSuperclass{}");
+        L"class SomeClass : SomeSuperclass{}");
     TypePtr SomeSuperclass, SomeClass;
 
     ASSERT_NOT_NULL(SomeSuperclass = std::dynamic_pointer_cast<Type>(scope->lookup(L"SomeSuperclass")));
@@ -90,7 +90,7 @@ TEST(TestType, testTypealias_UndeclaredType)
 TEST(TestType, testTypealias_Redefinition)
 {
     SEMANTIC_ANALYZE(L"typealias IntegerLiteralType = Int\n"
-            "typealias IntegerLiteralType = Intff");
+        L"typealias IntegerLiteralType = Intff");
 
     ASSERT_EQ(1, compilerResults.numResults());
     auto result = compilerResults.getResult(0);
@@ -101,11 +101,11 @@ TEST(TestType, testTypealias_Redefinition)
 TEST(TestType, NestedGenericType)
 {
     SEMANTIC_ANALYZE(L"class Base"
-            "{"
-            "    class Child<T>"
-            "    {"
-            "    }"
-            "}");
+        L"{"
+        L"    class Child<T>"
+        L"    {"
+        L"    }"
+        L"}");
     //generic type 'Child' nested in type 'Base' is not allowed
     ASSERT_EQ(1, compilerResults.numResults());
     auto result = compilerResults.getResult(0);
@@ -117,11 +117,11 @@ TEST(TestType, NestedGenericType)
 TEST(TestType, TypeNestedInGenericType)
 {
     SEMANTIC_ANALYZE(L"class Base<T>"
-            "{"
-            "    class Child"
-            "    {"
-            "    }"
-            "}");
+        L"{"
+        L"    class Child"
+        L"    {"
+        L"    }"
+        L"}");
     //type 'Child' nested in generic type 'Base' is not allowed
     ASSERT_EQ(1, compilerResults.numResults());
     auto result = compilerResults.getResult(0);

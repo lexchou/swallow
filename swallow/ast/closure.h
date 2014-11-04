@@ -37,7 +37,7 @@ SWALLOW_NS_BEGIN
 class Parameters;
 class TypeNode;
 class Statement;
-class Closure : public Expression
+class SWALLOW_DLL Closure : public Expression
 {
 public:
     enum CaptureSpecifier

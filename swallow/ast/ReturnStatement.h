@@ -35,7 +35,7 @@
 SWALLOW_NS_BEGIN
 
 class Expression;
-class ReturnStatement : public Statement
+class SWALLOW_DLL ReturnStatement : public Statement
 {
 public:
     ReturnStatement();

@@ -34,7 +34,7 @@
 
 SWALLOW_NS_BEGIN
 
-class Import : public Declaration
+class SWALLOW_DLL Import : public Declaration
 {
 public:
     enum Kind

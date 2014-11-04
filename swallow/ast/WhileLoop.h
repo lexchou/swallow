@@ -36,7 +36,7 @@ SWALLOW_NS_BEGIN
 
 class Expression;
 class CodeBlock;
-class WhileLoop : public Statement
+class SWALLOW_DLL WhileLoop : public Statement
 {
 public:
     WhileLoop();

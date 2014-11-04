@@ -33,7 +33,7 @@
 
 SWALLOW_NS_BEGIN
 
-class SelfExpression : public Expression
+class SWALLOW_DLL SelfExpression : public Expression
 {
 public:
     SelfExpression();

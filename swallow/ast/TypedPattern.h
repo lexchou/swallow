@@ -36,7 +36,7 @@ SWALLOW_NS_BEGIN
 class TypeNode;
 class GenericArgument;
 class Type;
-class TypedPattern : public Expression
+class SWALLOW_DLL TypedPattern : public Expression
 {
 public:
     TypedPattern();

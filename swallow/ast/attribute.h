@@ -34,7 +34,7 @@
 
 SWALLOW_NS_BEGIN
 
-class Attribute : public Node
+class SWALLOW_DLL Attribute : public Node
 {
 public:
     Attribute();

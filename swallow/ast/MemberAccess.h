@@ -34,7 +34,7 @@
 
 SWALLOW_NS_BEGIN
 class Identifier;
-class MemberAccess : public Expression
+class SWALLOW_DLL MemberAccess : public Expression
 {
 public:
     MemberAccess();

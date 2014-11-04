@@ -33,7 +33,7 @@
 #include <string>
 SWALLOW_NS_BEGIN
 
-class CommentNode : public Node
+class SWALLOW_DLL CommentNode : public Node
 {
 public:
 	CommentNode();

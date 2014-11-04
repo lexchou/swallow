@@ -36,7 +36,7 @@
 SWALLOW_NS_BEGIN
 
 class Statement;
-class Program : public Node
+class SWALLOW_DLL Program : public Node
 {
 public:
     Program();

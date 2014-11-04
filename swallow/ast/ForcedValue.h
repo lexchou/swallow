@@ -33,7 +33,7 @@
 
 SWALLOW_NS_BEGIN
 
-class ForcedValue : public Expression
+class SWALLOW_DLL ForcedValue : public Expression
 {
 public:
     ForcedValue();

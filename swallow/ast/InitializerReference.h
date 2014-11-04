@@ -33,7 +33,7 @@
 
 SWALLOW_NS_BEGIN
 
-class InitializerReference : public Expression
+class SWALLOW_DLL InitializerReference : public Expression
 {
 public:
     InitializerReference();

@@ -35,7 +35,7 @@
 SWALLOW_NS_BEGIN
 
 class Tuple;
-class EnumCasePattern : public Pattern
+class SWALLOW_DLL EnumCasePattern : public Pattern
 {
 public:
     EnumCasePattern();

@@ -34,7 +34,7 @@
 SWALLOW_NS_BEGIN
 
 class Statement;
-class NodeVisitorDecorator : public NodeVisitor
+class SWALLOW_DLL NodeVisitorDecorator : public NodeVisitor
 {
 public:
     NodeVisitorDecorator(NodeVisitor* visitor);

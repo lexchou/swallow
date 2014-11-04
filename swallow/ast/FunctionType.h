@@ -34,7 +34,7 @@
 
 SWALLOW_NS_BEGIN
 
-class FunctionType : public TypeNode
+class SWALLOW_DLL FunctionType : public TypeNode
 {
 public:
     FunctionType();

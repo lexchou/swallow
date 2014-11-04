@@ -33,7 +33,7 @@
 
 SWALLOW_NS_BEGIN
 
-class Assignment : public BinaryOperator
+class SWALLOW_DLL Assignment : public BinaryOperator
 {
 public:
 	Assignment();

@@ -40,7 +40,7 @@ class Tokenizer;
 class NodeFactory;
 class CompilerResults;
 
-class Parser
+class SWALLOW_DLL Parser
 {
     friend struct Flags;
 public:

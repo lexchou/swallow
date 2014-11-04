@@ -36,7 +36,7 @@
 SWALLOW_NS_BEGIN
 
 class TypeIdentifier;
-class ProtocolComposition : public TypeNode
+class SWALLOW_DLL ProtocolComposition : public TypeNode
 {
 public:
     ProtocolComposition();

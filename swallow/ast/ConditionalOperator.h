@@ -33,7 +33,7 @@
 #include <string>
 
 SWALLOW_NS_BEGIN
-class ConditionalOperator : public Operator
+class SWALLOW_DLL ConditionalOperator : public Operator
 {
 public:
     ConditionalOperator();

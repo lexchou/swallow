@@ -39,7 +39,7 @@ typedef std::shared_ptr<class FunctionDef> FunctionDefPtr;
 typedef std::weak_ptr<class FunctionDef> FunctionDefWeakPtr;
 typedef std::shared_ptr<class CodeBlock> CodeBlockPtr;
 typedef std::weak_ptr<class CodeBlock> CodeBlockWeakPtr;
-class FunctionSymbol : public Symbol
+class SWALLOW_DLL FunctionSymbol : public Symbol
 {
     friend class FunctionOverloadedSymbol;
     friend class SymbolRegistry;

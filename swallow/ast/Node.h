@@ -122,7 +122,7 @@ struct NodeType
 };
 
 class NodeFactory;
-class Node : public std::enable_shared_from_this<Node>
+class SWALLOW_DLL Node : public std::enable_shared_from_this<Node>
 {
     friend class NodeFactory;
 protected:

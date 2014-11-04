@@ -36,7 +36,7 @@ SWALLOW_NS_BEGIN
 
 
 
-class NodeSerializer : public NodeVisitor
+class SWALLOW_DLL NodeSerializer : public NodeVisitor
 {
 public:
     virtual void visitValueBindings(const ValueBindingsPtr& node);
@@ -112,7 +112,7 @@ protected:
 };
 
 
-class NodeSerializerW : public NodeSerializer
+class SWALLOW_DLL NodeSerializerW : public NodeSerializer
 {
 public:
     NodeSerializerW(std::wostream& out);
@@ -122,7 +122,7 @@ protected:
 private:
     std::wostream& out;
 };
-class NodeSerializerA: public NodeSerializer
+class SWALLOW_DLL NodeSerializerA : public NodeSerializer
 {
 public:
     NodeSerializerA(std::ostream& out);

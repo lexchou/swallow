@@ -40,7 +40,7 @@ class TypeNode;
 class Expression;
 class Type;
 typedef std::shared_ptr<Type> TypePtr;
-class Parameter : public Node
+class SWALLOW_DLL Parameter : public Node
 {
 public:
     enum Accessibility

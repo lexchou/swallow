@@ -37,7 +37,7 @@ SWALLOW_NS_BEGIN
 
 class Expression;
 class CodeBlock;
-class DoLoop : public Statement
+class SWALLOW_DLL DoLoop : public Statement
 {
 public:
     DoLoop();

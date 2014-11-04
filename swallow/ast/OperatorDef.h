@@ -35,7 +35,7 @@
 
 SWALLOW_NS_BEGIN
 
-class OperatorDef : public Declaration
+class SWALLOW_DLL OperatorDef : public Declaration
 {
 public:
     OperatorDef();

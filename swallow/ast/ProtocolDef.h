@@ -34,7 +34,7 @@
 
 SWALLOW_NS_BEGIN
 
-class ProtocolDef : public TypeDeclaration
+class SWALLOW_DLL ProtocolDef : public TypeDeclaration
 {
 public:
     ProtocolDef();

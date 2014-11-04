@@ -33,7 +33,7 @@
 #include <string>
 SWALLOW_NS_BEGIN
 
-class UnaryOperator : public Operator
+class SWALLOW_DLL UnaryOperator : public Operator
 {
 public:
     UnaryOperator();

@@ -31,6 +31,13 @@
 #define SWALLOW_CONF_H
 #include <memory>
 
+#if defined(swallow_EXPORTS)
+#define SWALLOW_DLL     __declspec(dllexport)
+#else         /* use a DLL library */
+#define SWALLOW_DLL     __declspec(dllimport)
+#endif
+
+
 #define SWALLOW_NS_BEGIN namespace Swallow {
 #define SWALLOW_NS_END }
 #define USE_SWALLOW_NS using namespace Swallow;
