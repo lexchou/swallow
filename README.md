@@ -92,6 +92,10 @@ Type inference
 
 ![Type inference example](docs/images/type-inference.png)
 
+Function overloads
+
+![Function overloads](docs/images/function-overloads.png)
+
 
 # License
 
