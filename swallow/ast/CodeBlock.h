@@ -1,6 +1,6 @@
 /* CodeBlock.h --
  *
- * Copyright (c) 2014, Lex Chou <lex at chou dot com>
+ * Copyright (c) 2014, Lex Chou <lex at chou dot it>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,7 +36,7 @@
 SWALLOW_NS_BEGIN
 typedef std::shared_ptr<class Type> TypePtr;
 
-class CodeBlock : public Statement
+class SWALLOW_EXPORT CodeBlock : public Statement
 {
 public:
     CodeBlock();

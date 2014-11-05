@@ -1,6 +1,6 @@
 /* Parser.h --
  *
- * Copyright (c) 2014, Lex Chou <lex at chou dot com>
+ * Copyright (c) 2014, Lex Chou <lex at chou dot it>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,7 +40,7 @@ class Tokenizer;
 class NodeFactory;
 class CompilerResults;
 
-class Parser
+class SWALLOW_EXPORT Parser
 {
     friend struct Flags;
 public:

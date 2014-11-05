@@ -1,6 +1,6 @@
 /* ScopeGuard.h --
  *
- * Copyright (c) 2014, Lex Chou <lex at chou dot com>
+ * Copyright (c) 2014, Lex Chou <lex at chou dot it>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,7 +35,7 @@ SWALLOW_NS_BEGIN
 class SymbolRegistry;
 class NodeVisitor;
 class ScopeOwner;
-struct ScopeGuard
+struct SWALLOW_EXPORT ScopeGuard
 {
     ScopeGuard(ScopeOwner* owner, NodeVisitor* visitor);
     ~ScopeGuard();

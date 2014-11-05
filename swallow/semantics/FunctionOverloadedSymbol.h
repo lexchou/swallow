@@ -1,6 +1,6 @@
 /* FunctionOverloadedSymbol.h --
  *
- * Copyright (c) 2014, Lex Chou <lex at chou dot com>
+ * Copyright (c) 2014, Lex Chou <lex at chou dot it>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,7 +37,7 @@ SWALLOW_NS_BEGIN
 typedef std::shared_ptr<Symbol> SymbolPtr;
 typedef std::shared_ptr<class FunctionSymbol> FunctionSymbolPtr;
 typedef std::shared_ptr<class FunctionOverloadedSymbol> FunctionOverloadedSymbolPtr;
-class FunctionOverloadedSymbol : public Symbol
+class SWALLOW_EXPORT FunctionOverloadedSymbol : public Symbol
 {
 public:
     FunctionOverloadedSymbol(const std::wstring& name);

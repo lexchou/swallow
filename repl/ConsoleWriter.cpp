@@ -1,6 +1,6 @@
 /* ConsoleWriter.cpp --
  *
- * Copyright (c) 2014, Lex Chou <lex at chou dot com>
+ * Copyright (c) 2014, Lex Chou <lex at chou dot it>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,7 +32,11 @@
 #include <wchar.h>
 #include <stdarg.h>
 #include <string.h>
+#if !defined(_WIN32) && !defined(WIN32)
 #include <unistd.h>
+#else
+#include <io.h>
+#endif
 #include <stdio.h>
 
 
@@ -46,6 +50,7 @@ void ConsoleWriter::printf(const wchar_t* fmt, ...)
 
 ConsoleWriter* ConsoleWriter::create()
 {
+#if !defined(_WIN32) && !defined(WIN32)
     if(isatty(fileno(stdout)))
     {
         return new AnsiConsoleWriter();
@@ -54,6 +59,9 @@ ConsoleWriter* ConsoleWriter::create()
     {
         return new PlainConsoleWriter();
     }
+#else
+    return new PlainConsoleWriter();
+#endif
 
 }
 

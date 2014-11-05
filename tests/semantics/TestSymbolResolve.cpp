@@ -1,6 +1,6 @@
 /* TestSymbolResolve.cpp --
  *
- * Copyright (c) 2014, Lex Chou <lex at chou dot com>
+ * Copyright (c) 2014, Lex Chou <lex at chou dot it>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -180,12 +180,12 @@ TEST(TestSymbolResolve, testStructureInit)
 {
     const wchar_t* code =
             L"struct Test\n"
-                    "{\n"
-                    "    init(a : Int, a : Int)\n"
-                    "    {\n"
-                    "        \n"
-                    "    }\n"
-                    "}";
+            L"{\n"
+            L"    init(a : Int, a : Int)\n"
+            L"    {\n"
+            L"        \n"
+            L"    }\n"
+            L"}";
     SEMANTIC_ANALYZE(code);
     ASSERT_EQ(1, compilerResults.numResults());
     const CompilerResult& r = compilerResults.getResult(0);

@@ -1,6 +1,6 @@
 /* Parameter.h --
  *
- * Copyright (c) 2014, Lex Chou <lex at chou dot com>
+ * Copyright (c) 2014, Lex Chou <lex at chou dot it>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,7 +40,7 @@ class TypeNode;
 class Expression;
 class Type;
 typedef std::shared_ptr<Type> TypePtr;
-class Parameter : public Node
+class SWALLOW_EXPORT Parameter : public Node
 {
 public:
     enum Accessibility

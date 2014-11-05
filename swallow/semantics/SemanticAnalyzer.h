@@ -1,6 +1,6 @@
 /* SemanticAnalyzer.h --
  *
- * Copyright (c) 2014, Lex Chou <lex at chou dot com>
+ * Copyright (c) 2014, Lex Chou <lex at chou dot it>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,7 +41,7 @@ class TypeDeclaration;
 class Expression;
 class Pattern;
 class NodeFactory;
-class SemanticAnalyzer : public NodeVisitor
+class SWALLOW_EXPORT SemanticAnalyzer : public NodeVisitor
 {
 public:
     SemanticAnalyzer(SymbolRegistry* symbolRegistry, CompilerResults* compilerResults);
@@ -102,13 +102,9 @@ public:
 private:
     void visitAccessor(const CodeBlockPtr& accessor, const ParametersPtr& params, const SymbolPtr& setter);
     TypePtr defineType(const std::shared_ptr<TypeDeclaration>& node, Type::Category category);
-    //Register all symbols in the pattern
-    void registerPattern(const PatternPtr& pattern);
     //Verify each symbol in the tuple is initialized
     void verifyTuplePattern(const PatternPtr& pattern);
 
-    //set or reset flag in all identifiers in given pattern
-    void setFlag(const PatternPtr& pattern, bool add, int flag);
     FunctionSymbolPtr createFunctionSymbol(const FunctionDefPtr& func, const GenericDefinitionPtr& generic);
     TypePtr createFunctionType(const std::vector<ParametersPtr>::const_iterator& begin, const std::vector<ParametersPtr>::const_iterator& end, const TypePtr& retType, const GenericDefinitionPtr& generic);
 
@@ -163,7 +159,7 @@ private:
     void explodeValueBindings(const ValueBindingsPtr& node);
     void explodeValueBinding(const ValueBindingsPtr& valueBindings, const std::list<ValueBindingPtr>::iterator& iter);
     MemberAccessPtr makeAccess(SourceInfo* info, NodeFactory* nodeFactory, const std::wstring& tempName, const std::vector<int>& indices);
-    void expandTuple(std::vector<std::tuple<std::wstring, TypePtr, ExpressionPtr> >& results, std::vector<int>& indices, const PatternPtr& name, const std::wstring& tempName, const TypePtr& type, bool isReadonly);
+    void expandTuple(std::vector<std::tuple<IdentifierPtr, TypePtr, ExpressionPtr> >& results, std::vector<int>& indices, const PatternPtr& name, const std::wstring& tempName, const TypePtr& type, bool isReadonly);
 
 protected:
     /**

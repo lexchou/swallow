@@ -1,6 +1,6 @@
 /* SymbolRegistry.h --
  *
- * Copyright (c) 2014, Lex Chou <lex at chou dot com>
+ * Copyright (c) 2014, Lex Chou <lex at chou dot it>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,7 +42,7 @@ struct OperatorInfo;
 class TypeNode;
 typedef std::shared_ptr<TypeNode> TypeNodePtr;
 class GlobalScope;
-class SymbolRegistry
+class SWALLOW_EXPORT SymbolRegistry
 {
     friend class SymbolScope;
 public:

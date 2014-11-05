@@ -1,6 +1,6 @@
 /* InitializerDef.h --
  *
- * Copyright (c) 2014, Lex Chou <lex at chou dot com>
+ * Copyright (c) 2014, Lex Chou <lex at chou dot it>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,7 +36,7 @@ SWALLOW_NS_BEGIN
 
 class Parameters;
 class CodeBlock;
-class InitializerDef : public Declaration
+class SWALLOW_EXPORT InitializerDef : public Declaration
 {
 public:
     InitializerDef();

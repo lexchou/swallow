@@ -1,6 +1,6 @@
 /* Closure.h --
  *
- * Copyright (c) 2014, Lex Chou <lex at chou dot com>
+ * Copyright (c) 2014, Lex Chou <lex at chou dot it>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,7 +37,7 @@ SWALLOW_NS_BEGIN
 class Parameters;
 class TypeNode;
 class Statement;
-class Closure : public Expression
+class SWALLOW_EXPORT Closure : public Expression
 {
 public:
     enum CaptureSpecifier

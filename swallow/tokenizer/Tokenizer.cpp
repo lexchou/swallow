@@ -1,6 +1,6 @@
 /* Tokenizer.cpp --
  *
- * Copyright (c) 2014, Lex Chou <lex at chou dot com>
+ * Copyright (c) 2014, Lex Chou <lex at chou dot it>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -709,7 +709,11 @@ bool Tokenizer::nextImpl(Token& token)
 {
     wchar_t ch;
     if(!peek(ch))
+    {
+        token.type = TokenType::EndOfFile;
+        token.state = state;
         return false;
+    }
     
     token.state = state;
 

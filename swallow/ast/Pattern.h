@@ -1,6 +1,6 @@
 /* Pattern.h --
  *
- * Copyright (c) 2014, Lex Chou <lex at chou dot com>
+ * Copyright (c) 2014, Lex Chou <lex at chou dot it>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,7 +36,7 @@ SWALLOW_NS_BEGIN
 class Type;
 typedef std::shared_ptr<Type> TypePtr;
 
-class Pattern : public Statement
+class SWALLOW_EXPORT Pattern : public Statement
 {
 public:
     Pattern(NodeType::T nodeType);

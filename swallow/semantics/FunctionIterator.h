@@ -1,6 +1,6 @@
 /* FunctionIterator.h --
  *
- * Copyright (c) 2014, Lex Chou <lex at chou dot com>
+ * Copyright (c) 2014, Lex Chou <lex at chou dot it>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,7 +41,7 @@ typedef std::shared_ptr<class FunctionSymbol> FunctionSymbolPtr;
 /**
  * This iterator will iterate the function by name through out the inheritance hierarchy
  */
-class FunctionIterator
+class SWALLOW_EXPORT FunctionIterator
 {
 public:
     class iterator

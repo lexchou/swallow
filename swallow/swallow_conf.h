@@ -1,6 +1,6 @@
 /* swallow_conf.h --
  *
- * Copyright (c) 2014, Lex Chou <lex at chou dot com>
+ * Copyright (c) 2014, Lex Chou <lex at chou dot it>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,6 +30,17 @@
 #ifndef SWALLOW_CONF_H
 #define SWALLOW_CONF_H
 #include <memory>
+
+#if !defined(_WIN32) && !defined(WIN32)
+#define SWALLOW_EXPORT 
+#else
+    #if defined(swallow_EXPORTS)
+    #define SWALLOW_EXPORT __declspec(dllexport)
+    #else         /* use a DLL library */
+    #define SWALLOW_EXPORT __declspec(dllimport)
+    #endif
+#endif
+
 
 #define SWALLOW_NS_BEGIN namespace Swallow {
 #define SWALLOW_NS_END }

@@ -1,6 +1,6 @@
 /* TupleType.h --
  *
- * Copyright (c) 2014, Lex Chou <lex at chou dot com>
+ * Copyright (c) 2014, Lex Chou <lex at chou dot it>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,7 +35,7 @@
 
 SWALLOW_NS_BEGIN
 class Attribute;
-class TupleType : public TypeNode
+class SWALLOW_EXPORT TupleType : public TypeNode
 {
 public:
     struct TupleElement

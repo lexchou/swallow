@@ -1,6 +1,6 @@
 /* Symbol.h --
  *
- * Copyright (c) 2014, Lex Chou <lex at chou dot com>
+ * Copyright (c) 2014, Lex Chou <lex at chou dot it>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,7 +34,7 @@
 
 SWALLOW_NS_BEGIN
 typedef std::shared_ptr<class Type> TypePtr;
-class Symbol
+class SWALLOW_EXPORT Symbol
 {
 public:
     Symbol(){}

@@ -1,6 +1,6 @@
 /* TestGeneric.cpp --
  *
- * Copyright (c) 2014, Lex Chou <lex at chou dot com>
+ * Copyright (c) 2014, Lex Chou <lex at chou dot it>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,10 +42,10 @@ using namespace Swallow;
 TEST(TestGeneric, Func_GenericParameter)
 {
     SEMANTIC_ANALYZE(L"func swapTwoValues<T>(inout a: T, inout b: T) {\n"
-            "    let temporaryA = a\n"
-            "    a = b\n"
-            "    b = temporaryA\n"
-            "}\n");
+        L"    let temporaryA = a\n"
+        L"    a = b\n"
+        L"    b = temporaryA\n"
+        L"}\n");
     dumpCompilerResults(compilerResults);
     ASSERT_EQ(0, compilerResults.numResults());
 
@@ -54,21 +54,21 @@ TEST(TestGeneric, Func_GenericParameter)
 TEST(TestGeneric, Struct_GenericParameter)
 {
     SEMANTIC_ANALYZE(L"struct Stack<T> {\n"
-            "    var items : T\n"
-            "    mutating func push(item: T) {\n"
-            "        //items.append(item)\n"
-            "    }\n"
-            "    mutating func pop() -> T {\n"
-            "        //return items.removeLast()\n"
-            "    }\n"
-            "}");
+        L"    var items : T\n"
+        L"    mutating func push(item: T) {\n"
+        L"        //items.append(item)\n"
+        L"    }\n"
+        L"    mutating func pop() -> T {\n"
+        L"        //return items.removeLast()\n"
+        L"    }\n"
+        L"}");
     dumpCompilerResults(compilerResults);
     ASSERT_EQ(0, compilerResults.numResults());
 }
 TEST(TestGeneric, Use_GenericType)
 {
     SEMANTIC_ANALYZE(L"struct Stack<T> {}\n"
-            "var stackOfInts : Stack<Int>");
+        L"var stackOfInts : Stack<Int>");
     ASSERT_EQ(0, compilerResults.numResults());
     SymbolPlaceHolderPtr stackOfInts;
     TypePtr type, Stack, Int;
@@ -93,18 +93,18 @@ TEST(TestGeneric, GenericConstraint)
             //"        }\n"
             //"    }\n"
             //"    return nil\n"
-            "}\n");
+            L"}\n");
     dumpCompilerResults(compilerResults);
     ASSERT_EQ(0, compilerResults.numResults());
 }
 TEST(TestGeneric, GenericConstraint2)
 {
     SEMANTIC_ANALYZE(L"class Base {}\n"
-            "func test<T : Base>(a : T)\n"
-            "{\n"
-            "}\n"
-            "var a : Int = 3\n"
-            "test(\"\");");
+        L"func test<T : Base>(a : T)\n"
+        L"{\n"
+        L"}\n"
+        L"var a : Int = 3\n"
+        L"test(\"\");");
 //    dumpCompilerResults(compilerResults);
     ASSERT_EQ(1, compilerResults.numResults());
     auto res = compilerResults.getResult(0);
@@ -115,9 +115,9 @@ TEST(TestGeneric, GenericConstraint2)
 TEST(TestGeneric, GenericConstraint3)
 {
     SEMANTIC_ANALYZE(L"func a<T where T.B : Int>(a : T)\n"
-        "{\n"
-        "    \n"
-        "}");
+        L"{\n"
+        L"    \n"
+        L"}");
 //    dumpCompilerResults(compilerResults);
     ASSERT_EQ(1, compilerResults.numResults());
     auto res = compilerResults.getResult(0);
@@ -126,23 +126,23 @@ TEST(TestGeneric, GenericConstraint3)
 TEST(TestGeneric, GenericConstraint4)
 {
     SEMANTIC_ANALYZE(L"protocol DD\n"
-        "{\n"
-        "    typealias B\n"
-        "}\n"
-        "\n"
-        "func a<T : DD where T.B == Int>(a : T)\n"
-        "{\n"
-        "    \n"
-        "}");
+        L"{\n"
+        L"    typealias B\n"
+        L"}\n"
+        L"\n"
+        L"func a<T : DD where T.B == Int>(a : T)\n"
+        L"{\n"
+        L"    \n"
+        L"}");
     dumpCompilerResults(compilerResults);
     ASSERT_EQ(0, compilerResults.numResults());
 }
 TEST(TestGeneric, GenericConstraint5)
 {
     SEMANTIC_ANALYZE(L"func a<T where T == Int>(a : T)\n"
-        "{\n"
-        "\n"
-        "}");
+        L"{\n"
+        L"\n"
+        L"}");
     ASSERT_EQ(1, compilerResults.numResults());
     auto res = compilerResults.getResult(0);
     ASSERT_EQ(Errors::E_SAME_TYPE_REQUIREMENTS_MAKES_GENERIC_PARAMETER_NON_GENERIC_1, res.code);
@@ -152,14 +152,14 @@ TEST(TestGeneric, GenericConstraint5)
 TEST(TestGeneric, GenericConstraint6)
 {
     SEMANTIC_ANALYZE(L"protocol DD\n"
-        "{\n"
-        "    typealias F\n"
-        "}\n"
-        "\n"
-        "func a<T : DD where T.F == DD>(a : T)\n"
-        "{\n"
-        "    \n"
-        "}");
+        L"{\n"
+        L"    typealias F\n"
+        L"}\n"
+        L"\n"
+        L"func a<T : DD where T.F == DD>(a : T)\n"
+        L"{\n"
+        L"    \n"
+        L"}");
     ASSERT_EQ(1, compilerResults.numResults());
     auto res = compilerResults.getResult(0);
     ASSERT_EQ(Errors::E_PROTOCOL_CAN_ONLY_BE_USED_AS_GENERIC_CONSTRAINT_1, res.code);
@@ -189,9 +189,9 @@ TEST(TestGeneric, GenericConstraint7)
 TEST(TestGeneric, GenericConstraint8)
 {
     SEMANTIC_ANALYZE(L"func test<T>(a : Array<Foo<T>>) -> T\n"
-        "{\n"
-        "    return T();\n"
-        "}");
+        L"{\n"
+        L"    return T();\n"
+        L"}");
 }
 
 /*

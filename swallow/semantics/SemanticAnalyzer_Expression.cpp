@@ -1,6 +1,6 @@
 /* SemanticAnalyzer_Expression.cpp --
  *
- * Copyright (c) 2014, Lex Chou <lex at chou dot com>
+ * Copyright (c) 2014, Lex Chou <lex at chou dot it>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -177,7 +177,7 @@ TypePtr SemanticAnalyzer::getExpressionType(const ExpressionPtr& expr, const Typ
 bool SemanticAnalyzer::checkArgument(const TypePtr& funcType, const Type::Parameter& parameter, const ParenthesizedExpression::Term& argument, bool variadic, float& score, bool supressErrors)
 {
 
-    const std::wstring name = argument.first;
+    const std::wstring& name = argument.first;
     float s = 1;
     TypePtr argType = getExpressionType(argument.second, parameter.type, s);
 

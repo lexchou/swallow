@@ -1,6 +1,6 @@
 /* Errors.cpp --
  *
- * Copyright (c) 2014, Lex Chou <lex at chou dot com>
+ * Copyright (c) 2014, Lex Chou <lex at chou dot it>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,6 +51,7 @@ std::wstring getErrorTemplate(int errorCode)
 {
     switch(errorCode)
     {
+        case Errors::E_UNEXPECTED_EOF: return L"Unexpected end-of-file";
         case Errors::E_EXPECT_1: return L"%0 is expected";
         case Errors::E_UNEXPECTED_1: return L"Unexpected %0";
         case Errors::E_EXPECT_IDENTIFIER_1: return L"Identifier expected, but %0 found.";
@@ -123,6 +124,7 @@ std::wstring getErrorTemplate(int errorCode)
         case Errors::E_VARLET_CANNOT_APPEAR_INSIDE_ANOTHER_VAR_OR_LET_PATTERN_1: return L"%0 cannot appear inside another var or let pattern";
         case Errors::E_EXPECT_TUPLE_OR_IDENTIFIER: return L"Expect tuple or identifier";
         case Errors::E_TYPE_ANNOTATION_DOES_NOT_MATCH_CONTEXTUAL_TYPE_A_1: return L"Type annotation does not match contextual type '%0'";
+        case Errors::E_TUPLE_PATTERN_CANNOT_MATCH_VALUES_OF_THE_NON_TUPLE_TYPE_A_1: return L"Tuple pattern cannot match values of the non-tuple type '%0'";
 
         case Errors::W_PARAM_CAN_BE_EXPRESSED_MORE_SUCCINCTLY_1: return L"'%0 %0' can be expressed more succinctly as '#%0'";
         case Errors::W_EXTRANEOUS_SHARTP_IN_PARAMETER_1: return L"Extraneous '#' in parameter: '%0' is already the keyword argument name";

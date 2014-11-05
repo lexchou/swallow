@@ -1,6 +1,6 @@
 /* FunctionSymbol.h --
  *
- * Copyright (c) 2014, Lex Chou <lex at chou dot com>
+ * Copyright (c) 2014, Lex Chou <lex at chou dot it>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,7 +39,7 @@ typedef std::shared_ptr<class FunctionDef> FunctionDefPtr;
 typedef std::weak_ptr<class FunctionDef> FunctionDefWeakPtr;
 typedef std::shared_ptr<class CodeBlock> CodeBlockPtr;
 typedef std::weak_ptr<class CodeBlock> CodeBlockWeakPtr;
-class FunctionSymbol : public Symbol
+class SWALLOW_EXPORT FunctionSymbol : public Symbol
 {
     friend class FunctionOverloadedSymbol;
     friend class SymbolRegistry;

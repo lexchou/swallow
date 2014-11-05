@@ -1,6 +1,6 @@
 /* GlobalScope.h --
  *
- * Copyright (c) 2014, Lex Chou <lex at chou dot com>
+ * Copyright (c) 2014, Lex Chou <lex at chou dot it>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,7 +33,7 @@
 #include <vector>
 SWALLOW_NS_BEGIN
 
-class GlobalScope : public SymbolScope
+class SWALLOW_EXPORT GlobalScope : public SymbolScope
 {
 public:
     GlobalScope();

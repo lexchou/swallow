@@ -1,6 +1,6 @@
 /* parser_statement.cpp --
  *
- * Copyright (c) 2014, Lex Chou <lex at chou dot com>
+ * Copyright (c) 2014, Lex Chou <lex at chou dot it>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,7 +28,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "Parser.h"
-#include "parser_details.h"
+#include "Parser_Details.h"
 #include "ast/NodeFactory.h"
 #include "ast/ast.h"
 #include "common/Errors.h"

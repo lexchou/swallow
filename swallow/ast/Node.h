@@ -1,6 +1,6 @@
 /* Node.h --
  *
- * Copyright (c) 2014, Lex Chou <lex at chou dot com>
+ * Copyright (c) 2014, Lex Chou <lex at chou dot it>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -122,7 +122,7 @@ struct NodeType
 };
 
 class NodeFactory;
-class Node : public std::enable_shared_from_this<Node>
+class SWALLOW_EXPORT Node : public std::enable_shared_from_this<Node>
 {
     friend class NodeFactory;
 protected:

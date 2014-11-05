@@ -1,6 +1,6 @@
 /* InitializerReference.h --
  *
- * Copyright (c) 2014, Lex Chou <lex at chou dot com>
+ * Copyright (c) 2014, Lex Chou <lex at chou dot it>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,7 +33,7 @@
 
 SWALLOW_NS_BEGIN
 
-class InitializerReference : public Expression
+class SWALLOW_EXPORT InitializerReference : public Expression
 {
 public:
     InitializerReference();

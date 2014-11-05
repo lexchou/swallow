@@ -1,6 +1,6 @@
 /* Operator.h --
  *
- * Copyright (c) 2014, Lex Chou <lex at chou dot com>
+ * Copyright (c) 2014, Lex Chou <lex at chou dot it>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,7 +33,7 @@
 #include "tokenizer/Token.h"
 SWALLOW_NS_BEGIN
 
-class Operator : public Expression
+class SWALLOW_EXPORT Operator : public Expression
 {
 protected:
     Operator(NodeType::T);

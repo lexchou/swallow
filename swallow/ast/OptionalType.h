@@ -1,6 +1,6 @@
 /* OptionalType.h --
  *
- * Copyright (c) 2014, Lex Chou <lex at chou dot com>
+ * Copyright (c) 2014, Lex Chou <lex at chou dot it>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,7 +34,7 @@
 
 SWALLOW_NS_BEGIN
 
-class OptionalType : public TypeNode
+class SWALLOW_EXPORT OptionalType : public TypeNode
 {
 public:
     OptionalType();

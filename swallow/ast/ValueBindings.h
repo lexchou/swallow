@@ -1,6 +1,6 @@
 /* ValueBindings.h --
  *
- * Copyright (c) 2014, Lex Chou <lex at chou dot com>
+ * Copyright (c) 2014, Lex Chou <lex at chou dot it>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,7 +37,7 @@ SWALLOW_NS_BEGIN
 
     typedef std::shared_ptr<class ValueBinding> ValueBindingPtr;
 
-    class ValueBindings : public Declaration
+class SWALLOW_EXPORT ValueBindings : public Declaration
     {
     public:
         typedef std::list<ValueBindingPtr>::iterator Iterator;

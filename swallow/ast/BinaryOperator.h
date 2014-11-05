@@ -1,6 +1,6 @@
 /* BinaryOperator.h --
  *
- * Copyright (c) 2014, Lex Chou <lex at chou dot com>
+ * Copyright (c) 2014, Lex Chou <lex at chou dot it>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,7 +33,7 @@
 #include <string>
 SWALLOW_NS_BEGIN
 
-class BinaryOperator : public Operator
+class SWALLOW_EXPORT BinaryOperator : public Operator
 {
 public:
     BinaryOperator();
