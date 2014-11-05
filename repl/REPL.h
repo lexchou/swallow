@@ -1,4 +1,4 @@
-/* Program.h --
+/* REPL.h --
  *
  * Copyright (c) 2014, Lex Chou <lex at chou dot it>
  * All rights reserved.
@@ -27,36 +27,46 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef PROGRAM_H
-#define PROGRAM_H
-#include "Node.h"
+#ifndef REPL_H
+#define REPL_H
 #include <string>
-#include "ast-decl.h"
+#include <map>
+#include <memory>
+#include "common/CompilerResults.h"
+#include <semantics/SymbolRegistry.h>
+#include <semantics/ScopedNodeFactory.h>
+#include <ast/ast-decl.h>
+using std::wstring;
+class REPL;
+typedef std::shared_ptr<class ConsoleWriter> ConsoleWriterPtr;
+typedef void (REPL::*CommandMethod)(const wstring& args);
 
-SWALLOW_NS_BEGIN
-
-class Statement;
-class SWALLOW_EXPORT Program : public Node
+class REPL
 {
 public:
-    Program();
-    ~Program();
+    REPL(const ConsoleWriterPtr& out);
 public:
-    virtual void accept(NodeVisitor* visitor);
-
-
-    void addStatement(const StatementPtr& statement);
-    int numStatements()const;
-    StatementPtr getStatement(int n);
-
-    std::vector<StatementPtr>::iterator begin() { return statements.begin();}
-    std::vector<StatementPtr>::iterator end() { return statements.end();}
-
-    void clearStatements();
+    void repl();
 private:
-    std::vector<StatementPtr> statements;
+    void evalCommand(const wstring& command);
+    void eval(Swallow::CompilerResults& compilerResults, const wstring& line);
+    void dumpCompilerResults(Swallow::CompilerResults& compilerResults, const std::wstring& code);
+    void dumpProgram();
+    void dumpSymbol(const Swallow::SymbolPtr& sym);
+
+private://commands
+    void initCommands();
+    void commandHelp(const wstring& args);
+    void commandQuit(const wstring& args);
+private:
+    Swallow::SymbolRegistry registry;
+    Swallow::ScopedNodeFactory nodeFactory;
+    Swallow::ProgramPtr program;
+    std::map<std::wstring, CommandMethod> methods;
+    ConsoleWriterPtr out;
+    int resultId;
+    bool canQuit;
+
 };
 
-SWALLOW_NS_END
-
-#endif//PROGRAM_H
+#endif//REPL_H

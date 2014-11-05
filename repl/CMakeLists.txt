@@ -15,7 +15,7 @@ SET(CMAKE_CXX_FLAGS "$ENV{CXXFLAGS} -O0 -Wall -g -ggdb -std=c++0x")
 
 add_definitions(-DTRACE_NODE)
 
-SET(REPL_SRC main.cpp ConsoleWriter.cpp)
+SET(REPL_SRC main.cpp ConsoleWriter.cpp REPL.cpp)
 
 ADD_EXECUTABLE(repl main.cpp ${REPL_SRC})
 target_link_libraries(repl swallow)

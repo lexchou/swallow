@@ -49,6 +49,10 @@ void Program::addStatement(const StatementPtr& statement)
 {
     statements.push_back(statement);
 }
+void Program::clearStatements()
+{
+    statements.clear();
+}
 int Program::numStatements()const
 {
     return statements.size();
