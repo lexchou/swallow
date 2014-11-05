@@ -286,3 +286,29 @@ TEST(TestFunctionOverloads, testClosureLiteral)
 
 
 }
+
+TEST(TestFunctionOverloads, CallVariable)
+{
+    SEMANTIC_ANALYZE(L"var a = {(a : Int) -> Bool in return true}\n"
+            L"var b = a(3)");
+    dumpCompilerResults(compilerResults);
+    ASSERT_EQ(0, compilerResults.numResults());
+
+
+    SymbolPtr b;
+    ASSERT_NOT_NULL(b = scope->lookup(L"b"));
+    TypePtr type = b->getType();
+    ASSERT_NOT_NULL(type);
+    TypePtr t_Bool = symbolRegistry.lookupType(L"Bool");
+    ASSERT_TRUE(type == t_Bool);
+}
+
+TEST(TestFunctionOverloads, UnmatchedArgumentType)
+{
+
+    SEMANTIC_ANALYZE(L"var a = {(a : Int) -> Bool in return true}\n"
+            L"var b = a(true)");
+    ASSERT_EQ(1, compilerResults.numResults());
+    auto res = compilerResults.getResult(0);
+    ASSERT_EQ(Errors::E_CANNOT_CONVERT_EXPRESSION_TYPE_2, res.code);
+}
