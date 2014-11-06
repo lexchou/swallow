@@ -13,8 +13,8 @@ using namespace std;
 using namespace Swallow;
 
 
-REPL::REPL(const ConsoleWriterPtr& out)
-:out(out), canQuit(false)
+REPL::REPL(const ConsoleWriterPtr& out, const char* path)
+:out(out), canQuit(false), file(path)
 {
     initCommands();
     resultId = 0;
@@ -25,12 +25,17 @@ void REPL::repl()
 {
     wstring line;
     int id = 1;
+    if(!file.good()) 
+    {
+        out->printf(L"file does not exist!\n");
+        return;
+    }
     out->printf(L"Welcome to Swallow! Type :help for assistance.\n");
     program = nodeFactory.createProgram();
-    while(!canQuit && !wcin.eof())
+    while(!canQuit && file.good() ? !file.eof() : !wcin.eof())
     {
         out->printf(L"%3d> ", id);
-        getline(wcin, line);
+        file.good() ? getline(file, line) : getline(wcin, line);
         if(line.empty())
             continue;
         if(line[0] == ':')

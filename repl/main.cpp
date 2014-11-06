@@ -28,7 +28,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include <iostream>
-#include <fstream>
 #include "ConsoleWriter.h"
 #include "common/Errors.h"
 #include "REPL.h"
@@ -41,7 +40,7 @@ using namespace Swallow;
 int main(int argc, char** argv)
 {
     ConsoleWriterPtr out(ConsoleWriter::create());
-    REPL repl(out);
+    REPL repl(out, argv[1] ? argv[1] : NULL);
     repl.repl();
     return 0;
 }
