@@ -25,11 +25,6 @@ void REPL::repl()
 {
     wstring line;
     int id = 1;
-    if(!file.good()) 
-    {
-        out->printf(L"file does not exist!\n");
-        return;
-    }
     out->printf(L"Welcome to Swallow! Type :help for assistance.\n");
     program = nodeFactory.createProgram();
     while(!canQuit && file.good() ? !file.eof() : !wcin.eof())

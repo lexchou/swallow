@@ -25,29 +25,33 @@ s : String
 vim ./repl/main.cpp
 ```
 
-先定位到main入口函数，看到while循环，getline(wcin, line)从终端逐行获取wstring
-交给Repl来打印CompilerResults输出结果。
+先定位到main入口函数，给REPL构造函数添加一个参数const char* path，默认为NULL
 
 ## 开始HACKING
 
 代码风格和@lexchou保持一致
 
 ```
-#include <fstream>
-
-wifstream file;                                                                
-if(argv[1])                                                                    
-{                                                                              
-    file.open(argv[1]);                                                        
-    if(!file.good())                                                           
-    {                                                                          
-        out->printf(L"%s does not exist!\n", argv[1]);                         
-        return 0;                                                              
-    }                                                                          
-}
+REPL repl(out, argv[1] ? argv[1] : NULL);
 ```
 
-getline(argv[1] ? file : wcin, line)就可以从文件中逐行获取wstring
+./repl/REPL.h
+
+```
+#include <fstream>
+
+// 构造函数添加一个默认参数
+REPL(const ConsoleWriterPtr& out, const char* path = NULL);
+
+std::wifstream file; // 私有成员
+```
+
+./repl/REPL.cpp
+
+```
+file(path) // 调用std::wifstream的构造函数
+file.good() ? getline(file, line) : getline(wcin, line); // 逐行读文件
+```
 
 ## 准备一个hello.swift文件 
 
@@ -61,9 +65,5 @@ func test(a : String) -> Bool { return true; }
 let a = (test(56), test(""))
 ```
 
-运行hello.swift，会segfault报错The symbol already exists with the same name 
-https://github.com/lexchou/swallow/issues/3 
-PS: 将在下一篇HACKING教程里讲如何简单的monkey patch（将getCurrentScope替换成getGlobalScope）
-不过@lexchou已经在TODO准备用正确的姿势fix这个bug了 
-https://github.com/lexchou/swallow/blob/master/TODO.org#codes-that-can-crash-swallow01
+看看效果 ;)
 
