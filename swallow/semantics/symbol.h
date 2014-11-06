@@ -59,7 +59,9 @@ public:
         F_INITIALIZED = 2,
         F_MEMBER= 4,
         F_WRITABLE = 8,
-        F_READABLE = 0x10
+        F_READABLE = 0x10,
+        F_TEMPORARY = 0x20,
+        F_HAS_INITIALIZER = 0x40
 
 
     };

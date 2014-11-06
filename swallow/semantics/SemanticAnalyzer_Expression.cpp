@@ -226,11 +226,11 @@ bool SemanticAnalyzer::checkArgument(const TypePtr& funcType, const Type::Parame
             abort();
         }
     }
-    else if(*argType != *parameter.type)
+    else if(!argType->canAssignTo(parameter.type))
     {
         if (!supressErrors)
         {
-            error(argument.second, Errors::E_UNMATCHED_PARAMETERS);
+            error(argument.second, Errors::E_CANNOT_CONVERT_EXPRESSION_TYPE_2, argType->toString(), parameter.type->toString());
             abort();
         }
         return false;//parameter is not matched
@@ -373,6 +373,20 @@ void SemanticAnalyzer::visitFunctionCall(const SymbolPtr& sym, const FunctionCal
             node->setType(matched->getReturnType());
         }
     }
+    else if(SymbolPlaceHolderPtr symbol = std::dynamic_pointer_cast<SymbolPlaceHolder>(sym))
+    {
+        //it must be a function type to call
+        TypePtr type = symbol->getType();
+        assert(type != nullptr);
+        if(type->getCategory() != Type::Function && type->getCategory() != Type::Closure)
+        {
+            error(node, Errors::E_INVALID_USE_OF_A_TO_CALL_A_VALUE_OF_NON_FUNCTION_TYPE_B_2, toString(node), type->toString());
+            abort();
+            return;
+        }
+        calculateFitScore(type, node->getArguments(), false);
+        node->setType(type->getReturnType());
+    }
     else
     {
         assert(0 && "Unsupported function to call");
@@ -467,7 +481,7 @@ void SemanticAnalyzer::visitFunctionCall(const FunctionCallPtr& node)
             {
                 wstring call = toString(func);
                 wstring type = func->getType()->toString();
-                error(func, Errors::E_INVALID_CALL_OF_NON_FUNCTION_TYPE_2, call, type);
+                error(func, Errors::E_INVALID_USE_OF_A_TO_CALL_A_VALUE_OF_NON_FUNCTION_TYPE_B_2, call, type);
                 break;
             }
             IdentifierPtr typeName = std::static_pointer_cast<Identifier>(*array->begin());
@@ -475,7 +489,7 @@ void SemanticAnalyzer::visitFunctionCall(const FunctionCallPtr& node)
             TypePtr type = std::dynamic_pointer_cast<Type>(sym);
             if(!type)
             {
-                error(func, Errors::E_INVALID_CALL_OF_NON_FUNCTION_TYPE_2, toString(func), func->getType()->toString());
+                error(func, Errors::E_INVALID_USE_OF_A_TO_CALL_A_VALUE_OF_NON_FUNCTION_TYPE_B_2, toString(func), func->getType()->toString());
                 break;
             }
             TypePtr Array = symbolRegistry->getGlobalScope()->t_Array;
@@ -489,7 +503,7 @@ void SemanticAnalyzer::visitFunctionCall(const FunctionCallPtr& node)
         }
         default:
         {
-            error(func, Errors::E_INVALID_CALL_OF_NON_FUNCTION_TYPE_2, toString(func), func->getType()->toString());
+            error(func, Errors::E_INVALID_USE_OF_A_TO_CALL_A_VALUE_OF_NON_FUNCTION_TYPE_B_2, toString(func), func->getType()->toString());
             break;
         }
     }

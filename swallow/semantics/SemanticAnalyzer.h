@@ -102,6 +102,7 @@ public:
 private:
     void visitAccessor(const CodeBlockPtr& accessor, const ParametersPtr& params, const SymbolPtr& setter);
     TypePtr defineType(const std::shared_ptr<TypeDeclaration>& node, Type::Category category);
+    void prepareDefaultInitializers(const TypePtr& type);
     //Verify each symbol in the tuple is initialized
     void verifyTuplePattern(const PatternPtr& pattern);
 

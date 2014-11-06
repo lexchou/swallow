@@ -72,7 +72,7 @@ struct SWALLOW_EXPORT Errors
         E_UNKNOWN_BINARY_OPERATOR_1, //operator '%0' is not a known binary operator
         E_IS_NOT_BINARY_OPERATOR_1, //'%0' is not a binary operator
         E_NO_OVERLOAD_ACCEPTS_ARGUMENTS_1,//could not find an overload for '%0' that accepts the supplied arguments
-        E_INVALID_CALL_OF_NON_FUNCTION_TYPE_2,//invalid use of '%0' to call a value of non-function type '%1'
+        E_INVALID_USE_OF_A_TO_CALL_A_VALUE_OF_NON_FUNCTION_TYPE_B_2,//invalid use of '%0' to call a value of non-function type '%1'
         E_UNMATCHED_PARAMETERS, // Unmatched number of supplied parameters
         E_UNMATCHED_PARAMETER_1, // Unmatched type of parameter %0
         E_NO_MATCHED_OVERLOAD, // No matched overload found

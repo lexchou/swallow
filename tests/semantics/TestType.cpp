@@ -130,3 +130,29 @@ TEST(TestType, TypeNestedInGenericType)
     ASSERT_EQ(L"Child", result.items[0]);
     ASSERT_EQ(L"Base", result.items[1]);
 }
+
+TEST(TestType, InitializeClass)
+{
+    SEMANTIC_ANALYZE(L"class cobject{var fd = -1}\n"
+            L"let b = cobject()");
+    ASSERT_EQ(0, compilerResults.numResults());
+
+}
+
+TEST(TestType, InitsWithStoredProperties)
+{
+    SEMANTIC_ANALYZE(L"struct foo\n"
+            L"{\n"
+            L"    var (_a, _b) : (Int, Int)\n"
+            L"    var a : Int\n"
+            L"    {\n"
+            L"        get {return _a}\n"
+            L"        set {_a = newValue}\n"
+            L"    }\n"
+            L"}\n"
+            L"\n"
+            L"var a = foo(_a : 3, _b : 4)\n"
+            L"\n");
+    dumpCompilerResults(compilerResults);
+    ASSERT_EQ(0, compilerResults.numResults());
+}

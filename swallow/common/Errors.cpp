@@ -80,7 +80,7 @@ std::wstring getErrorTemplate(int errorCode)
         case Errors::E_UNKNOWN_BINARY_OPERATOR_1: return L"operator '%0' is not a known binary operator";
         case Errors::E_IS_NOT_BINARY_OPERATOR_1: return L"'%0' is not a binary operator";
         case Errors::E_NO_OVERLOAD_ACCEPTS_ARGUMENTS_1: return L"could not find an overload for '%0' that accepts the supplied arguments";
-        case Errors::E_INVALID_CALL_OF_NON_FUNCTION_TYPE_2: return L"invalid use of '%0' to call a value of non-function type '%1'";
+        case Errors::E_INVALID_USE_OF_A_TO_CALL_A_VALUE_OF_NON_FUNCTION_TYPE_B_2: return L"invalid use of '%0' to call a value of non-function type '%1'";
         case Errors::E_UNMATCHED_PARAMETERS: return L"Unmatched number of supplied parameters";
         case Errors::E_UNMATCHED_PARAMETER_1: return L"Unmatched type of parameter %0";
         case Errors::E_NO_MATCHED_OVERLOAD: return L"No matched overload found";
