@@ -22,12 +22,16 @@
 
 * Test case complements
 
-** Codes that can crash swallow:[0/1]
-- [ ] Following codes run one by one in REPL would crash the swallow
+** Codes that can crash swallow:[2/2]
+- [X] Following codes run one by one in REPL would crash the swallow
 #+BEGIN_SRC
 func test(a : Int) -> String { return ""; }
 func test(a : String) -> Bool { return true; }
 let a = (test(56), test(""))
+#+END_SRC
+- [X] Following code will make compiler in dead loop
+#+BEGIN_SRC
+for(
 #+END_SRC
 
 ** Codes that doesn't work as expected: [0/2]
@@ -42,5 +46,9 @@ let b = cobject()
 #+BEGIN_SRC
 let (c, d : Double) = (1, 2)
 #+END_SRC
-  
+
+- [ ] Expression inside a string
+#+BEGIN_SRC
+  "\(a"
+#+END_SRC
 

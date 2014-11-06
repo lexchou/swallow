@@ -145,7 +145,7 @@ StatementPtr Parser::parseForLoop()
     bool forIn = false;
     for(;;)
     {
-        next(t);
+        expect_next(t);
         if(t.getKeyword() == Keyword::In)
         {
             forIn = true;

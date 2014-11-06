@@ -82,6 +82,12 @@ TEST(TestStatement, testFor2)
 
 
 }
+
+TEST(TestStatement, BrokenFor)
+{
+    PARSE_STATEMENT(L"for(");
+
+}
 TEST(TestStatement, testForIn)
 {
     PARSE_STATEMENT(L"for index in 1...5 {\n"
