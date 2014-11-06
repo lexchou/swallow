@@ -128,7 +128,6 @@ TypePtr SemanticAnalyzer::defineType(const std::shared_ptr<TypeDeclaration>& nod
         }
     }
 
-
     //register this type
     type = Type::newType(node->getIdentifier()->getName(), category, node, parent, protocols, generic);
     node->setType(type);
@@ -137,6 +136,59 @@ TypePtr SemanticAnalyzer::defineType(const std::shared_ptr<TypeDeclaration>& nod
     if(currentType)
         static_pointer_cast<TypeBuilder>(currentType)->addMember(type->getName(), type);
     return type;
+}
+
+void SemanticAnalyzer::prepareDefaultInitializers(const TypePtr& type)
+{
+
+    /*
+    Rule of initializers for class/structure:
+    1) If no custom initializers, compiler will prepare one or two initializers:
+        1.1) A default initializer with no arguments if all let/var fields are defined with a default value
+        1.2) Skip this rule if it's a class. A default initializer with all let/var fields as initializer's parameters with the same external name,
+            the order of the parameters are the exactly the same as them defined in structure
+    2) Compiler will not generate initializers if there's custom initializers
+     */
+
+    if(type->getInitializer() && type->getInitializer()->numOverloads() > 0)
+        return;
+    if(!type->getInitializer())
+        static_pointer_cast<TypeBuilder>(type)->setInitializer(FunctionOverloadedSymbolPtr(new FunctionOverloadedSymbol()));
+
+
+    bool createDefaultInit = true;
+    vector<Type::Parameter> initParams;
+    if(type->getCategory() == Type::Struct)
+    {
+        //check all fields if they all have initializer
+        for (auto sym : type->getDeclaredStoredProperties())
+        {
+            SymbolPlaceHolderPtr s = dynamic_pointer_cast<SymbolPlaceHolder>(sym);
+            if(!s || (s->flags & SymbolPlaceHolder::F_TEMPORARY) != 0)
+                continue;
+            initParams.push_back(Type::Parameter(sym->getName(), false, sym->getType()));
+            //do not create default init if there's a variable has no initializer
+            if ((s->flags & SymbolPlaceHolder::F_HAS_INITIALIZER) == 0)
+            {
+                createDefaultInit = false;
+                break;
+            }
+        }
+    }
+    if(createDefaultInit)
+    {
+        //apply rule 1
+        std::vector<Type::Parameter> params;
+        TypePtr initType = Type::newFunction(params, type, false);
+        FunctionSymbolPtr initializer(new FunctionSymbol(type->getName(), initType, nullptr));
+        type->getInitializer()->add(initializer);
+    }
+    if(type->getCategory() == Type::Struct && !initParams.empty())
+    {
+        TypePtr initType = Type::newFunction(initParams, type, false);
+        FunctionSymbolPtr initializer(new FunctionSymbol(type->getName(), initType, nullptr));
+        type->getInitializer()->add(initializer);
+    }
 }
 
 void SemanticAnalyzer::visitTypeAlias(const TypeAliasPtr& node)
@@ -180,17 +232,19 @@ void SemanticAnalyzer::visitClass(const ClassDefPtr& node)
 
     NodeVisitor::visitClass(node);
     verifyProtocolConform(type);
-
+    prepareDefaultInitializers(type);
 }
+
 void SemanticAnalyzer::visitStruct(const StructDefPtr& node)
 {
     TypeBuilderPtr type = static_pointer_cast<TypeBuilder>(defineType(node, Type::Struct));
-    type->setInitializer(FunctionOverloadedSymbolPtr(new FunctionOverloadedSymbol()));
 
     StackedValueGuard<TypePtr> currentType(this->currentType);
     currentType.set(type);
 
     NodeVisitor::visitStruct(node);
+    //prepare default initializers
+    this->prepareDefaultInitializers(type);
     //Type verification and typealias inference
 
     for(auto entry : type->getAllParents())
@@ -251,43 +305,6 @@ void SemanticAnalyzer::visitStruct(const StructDefPtr& node)
 
 
 
-
-    /*
-    Rule of initializers for structure:
-    1) If no custom initializers, compiler will prepare one or two initializers:
-        1.1) A default initializer with no arguments if all let/var fields are defined with a default value
-        1.2) A default initializer with all let/var fields as initializer's parameters with the same external name,
-            the order of the parameters are the exactly the same as them defined in structure
-    2) Compiler will not generate initializers if there's custom initializers
-     */
-    //TypePtr type = node->getType();
-    if(type->getInitializer()->numOverloads() == 0)
-    {
-        //check all fields if they all have initializer
-        bool hasDefaultValues = true;
-        for(auto sym : type->getDeclaredStoredProperties())
-        {
-            if(ValueBindingPtr binding = std::dynamic_pointer_cast<ValueBinding>(sym))
-            {
-                //TODO: skip computed property
-                //TODO: Type only records SymbolPtr
-                if(!binding->getInitializer())
-                {
-                    hasDefaultValues = false;
-                    break;
-                }
-            }
-        }
-        if(hasDefaultValues)
-        {
-            //apply rule 1
-            std::vector<Type::Parameter> params;
-            TypePtr initType = Type::newFunction(params, type, false);
-            FunctionSymbolPtr initializer(new FunctionSymbol(node->getIdentifier()->getName(), initType, nullptr));
-            type->getInitializer()->add(initializer);
-        }
-
-    }
 
 
 }

@@ -298,6 +298,11 @@ ValueBindingPtr Parser::parseVariableDeclaration()
     {
         type = parseTypeAnnotation();
     }
+    else if(TypedPatternPtr typedKey = std::dynamic_pointer_cast<TypedPattern>(key))
+    {
+        type = typedKey->getDeclaredType();
+        key = typedKey->getPattern();
+    }
     if(match(L"="))
     {
         Flags flags(this, SUPPRESS_TRAILING_CLOSURE);

@@ -180,7 +180,7 @@ void SemanticAnalyzer::visitValueBinding(const ValueBindingPtr& node)
     //TypePtr type = evaluateType(node->initializer);
     if(IdentifierPtr id = std::dynamic_pointer_cast<Identifier>(node->getName()))
     {
-        TypePtr declaredType = lookupType(node->getDeclaredType());//node->getDeclaredType() == nullptr ? id->getDeclaredType() : node->getDeclaredType());
+        TypePtr declaredType = node->getType() ? node->getType() : lookupType(node->getDeclaredType());//node->getDeclaredType() == nullptr ? id->getDeclaredType() : node->getDeclaredType());
         StackedValueGuard<TypePtr> guard(t_hint);
         guard.set(declaredType);
         if(!declaredType && !node->getInitializer())
@@ -279,6 +279,7 @@ void SemanticAnalyzer::explodeValueBinding(const ValueBindingsPtr& valueBindings
     tempVar->setName(tempVarId);
     tempVar->setInitializer(var->getInitializer());
     tempVar->setType(declaredType ? declaredType : initializerType);
+    tempVar->setTemporary(true);
     valueBindings->insertAfter(tempVar, iter);
     //now expand tuples
     vector<tuple<IdentifierPtr, TypePtr, ExpressionPtr> > result;
@@ -425,15 +426,18 @@ void SemanticAnalyzer::visitValueBindings(const ValueBindingsPtr& node)
             continue;
         //skip placeholder
         IdentifierPtr id = std::static_pointer_cast<Identifier>(name);
-        if(id->getIdentifier() == L"_")
-            continue;
         SymbolPtr s = symbolRegistry->lookupSymbol(id->getIdentifier());
         assert(s != nullptr);
         ExpressionPtr initializer = v->getInitializer();
         SymbolPlaceHolderPtr placeholder = std::dynamic_pointer_cast<SymbolPlaceHolder>(s);
         assert(placeholder != nullptr);
         placeholder->flags |= flags;
+        if(initializer)
+            placeholder->flags |= SymbolPlaceHolder::F_HAS_INITIALIZER;
+        if(v->isTemporary())
+            placeholder->flags |= SymbolPlaceHolder::F_TEMPORARY;
         v->accept(this);
+
         placeholder->flags |= SymbolPlaceHolder::F_INITIALIZED;
         placeholder->flags &= ~SymbolPlaceHolder::F_INITIALIZING;
     }
@@ -460,7 +464,7 @@ void SemanticAnalyzer::visitIdentifier(const IdentifierPtr& id)
             error(id, Errors::E_USE_OF_UNINITIALIZED_VARIABLE_1, placeholder->getName());
         }
         //check if this identifier is accessed inside a class/protocol/extension/struct/enum but defined not in program
-        if(dynamic_cast<TypeDeclaration*>(symbolRegistry->getCurrentScope()->getOwner()))
+        if(dynamic_cast<TypeDeclaration*>(symbolRegistry->getCurrentScope()->getOwner()) && symbolRegistry->getCurrentScope() != scope)
         {
             if(scope->getOwner()->getNodeType() != NodeType::Program)
             {

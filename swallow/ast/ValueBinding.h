@@ -62,6 +62,9 @@ public:
     void setInitializer(const ExpressionPtr& initializer);
     const ExpressionPtr& getInitializer()const;
 
+    bool isTemporary()const;
+    void setTemporary(bool val);
+
     std::shared_ptr<class ValueBindings> getOwner() const;
 public:
     virtual void accept(NodeVisitor* visitor) override;
@@ -72,6 +75,7 @@ private:
     TypeNodePtr declaredType;
     Attributes typeAttributes;
     std::weak_ptr<class ValueBindings> owner;
+    bool temporary;
 };
 
 SWALLOW_NS_END

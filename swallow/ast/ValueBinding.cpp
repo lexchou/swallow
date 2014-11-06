@@ -32,7 +32,7 @@
 USE_SWALLOW_NS
 
 ValueBinding::ValueBinding()
-    :Declaration(NodeType::ValueBinding)
+    :Declaration(NodeType::ValueBinding), temporary(false)
 {
 }
 
@@ -89,4 +89,12 @@ const ExpressionPtr& ValueBinding::getInitializer()const
 std::shared_ptr<class ValueBindings> ValueBinding::getOwner() const
 {
     return owner.lock();
+}
+bool ValueBinding::isTemporary()const
+{
+    return temporary;
+}
+void ValueBinding::setTemporary(bool val)
+{
+    temporary = val;
 }
