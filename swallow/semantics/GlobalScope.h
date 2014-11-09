@@ -53,10 +53,12 @@ public:
     TypePtr t_Int, t_UInt, t_Int8, t_UInt8, t_Int16, t_UInt16, t_Int32, t_UInt32, t_Int64, t_UInt64;
     TypePtr t_Float, t_Double;
     TypePtr t_Array, t_Dictionary, t_Optional;
+    //Common used protocols
+    TypePtr p_BooleanType;
+    TypePtr p_Equatable;
+
     std::vector<TypePtr> t_Numbers;
     std::vector<TypePtr> t_Ints;
-
-    TypePtr t_Equatable;
 
 };
 

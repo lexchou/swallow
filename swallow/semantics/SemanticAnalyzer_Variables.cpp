@@ -501,8 +501,3 @@ void SemanticAnalyzer::visitIdentifier(const IdentifierPtr& id)
         //error(id, Errors::E_AMBIGUOUS_USE_1, id->getIdentifier());
     }
 }
-void SemanticAnalyzer::visitEnumCasePattern(const EnumCasePatternPtr& node)
-{
-    //TODO: check if the enum case is defined
-}
-

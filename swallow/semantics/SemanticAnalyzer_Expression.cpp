@@ -530,7 +530,7 @@ void SemanticAnalyzer::visitMemberAccess(const MemberAccessPtr& node)
         selfType = t_hint;
         if(!t_hint)
         {
-            //invalid contexture type
+            //invalid contextual type
             wstring member = node->getField() ? node->getField()->getIdentifier() : toString(node->getIndex());
             error(node, Errors::E_NO_CONTEXTUAL_TYPE_TO_ACCESS_MEMBER_A_1, member);
         }

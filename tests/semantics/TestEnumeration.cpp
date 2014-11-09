@@ -93,3 +93,35 @@ TEST(TestEnumeration, CaseAccess_ShorterSyntax)
     ASSERT_EQ(CompassPoint, a->getType());
 
 }
+
+TEST(TestEnumeration, CaseAccess_SwitchCase)
+{
+    SEMANTIC_ANALYZE(L"enum CompassPoint { \n"
+            L"case North\n"
+            L"case South\n"
+            L"case East\n"
+            L"case West\n"
+            L"}\n"
+            L"var directionToHead : CompassPoint = .North;\n"
+            L"directionToHead = .North\n"
+            L"switch directionToHead {\n"
+            L"case .North:\n"
+            L"        break\n"
+            L"case .South:\n"
+            L"        break\n"
+            L"case .East:\n"
+            L"        break\n"
+            L"case .West:\n"
+            L"        break\n"
+            L"}");
+    dumpCompilerResults(compilerResults);
+    ASSERT_EQ(0, compilerResults.numResults());
+    SymbolPtr directionToHead;
+    TypePtr CompassPoint;
+    ASSERT_NOT_NULL(directionToHead = scope->lookup(L"directionToHead"));
+    ASSERT_NOT_NULL(CompassPoint = dynamic_pointer_cast<Type>(scope->lookup(L"CompassPoint")));
+    ASSERT_EQ(CompassPoint, directionToHead->getType());
+
+}
+
+

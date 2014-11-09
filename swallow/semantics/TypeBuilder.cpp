@@ -78,6 +78,7 @@ void TypeBuilder::addParentTypesFrom(const TypePtr& type)
 }
 void TypeBuilder::addParentType(const TypePtr& type, int distance)
 {
+    assert(distance > 0);
     auto iter = parents.find(type);
     if(iter == parents.end())
     {

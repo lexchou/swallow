@@ -45,6 +45,11 @@ GlobalScope::GlobalScope()
 }
 void GlobalScope::initPrimitiveTypes()
 {
+    //Protocols
+    addSymbol(p_BooleanType = Type::newType(L"BooleanType", Type::Protocol));
+
+
+    //Types
     addSymbol(t_Int8 = Type::newType(L"Int8", Type::Aggregate));
     addSymbol(t_UInt8 = Type::newType(L"UInt8", Type::Aggregate));
     addSymbol(t_Int16 = Type::newType(L"Int16", Type::Aggregate));
@@ -56,6 +61,7 @@ void GlobalScope::initPrimitiveTypes()
     addSymbol(t_Int = Type::newType(L"Int", Type::Aggregate));
     addSymbol(t_UInt = Type::newType(L"UInt", Type::Aggregate));
     addSymbol(t_Bool = Type::newType(L"Bool", Type::Aggregate));
+    static_pointer_cast<TypeBuilder>(t_Bool)->addParentType(p_BooleanType);
     addSymbol(t_Float = Type::newType(L"Float", Type::Aggregate));
     addSymbol(t_Double = Type::newType(L"Double", Type::Aggregate));
     addSymbol(t_String = Type::newType(L"String", Type::Aggregate));
@@ -145,8 +151,8 @@ void GlobalScope::initOperators()
 
 void GlobalScope::initProtocols()
 {
-    t_Equatable = Type::newType(L"Equatable", Type::Protocol, nullptr);
-    addSymbol(t_Equatable);
+    p_Equatable = Type::newType(L"Equatable", Type::Protocol, nullptr);
+    addSymbol(p_Equatable);
 }
 
 bool GlobalScope::registerOperatorFunction(const std::wstring& name, const TypePtr& returnType, const TypePtr& lhs, const TypePtr& rhs)

@@ -58,7 +58,7 @@ public:
     void addMember(const std::wstring& name, const SymbolPtr& member);
     void addMember(const SymbolPtr& symbol);
     void addParentTypesFrom(const TypePtr& type);
-    void addParentType(const TypePtr& type, int distance);
+    void addParentType(const TypePtr& type, int distance = 1);
 
 };
 typedef std::shared_ptr<TypeBuilder> TypeBuilderPtr;

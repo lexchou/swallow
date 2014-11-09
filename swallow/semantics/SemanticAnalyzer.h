@@ -88,7 +88,10 @@ public:
     //virtual void visitSubscript(const SubscriptDefPtr& node) override;
     virtual void visitSubscriptAccess(const SubscriptAccessPtr& node) override;
     //virtual void visitStruct(const StructDefPtr& node) override;
-public:
+public:// Condition control flow
+    virtual void visitIf(const IfStatementPtr& node);
+    virtual void visitSwitchCase(const SwitchCasePtr& node);
+    virtual void visitCase(const CaseStatementPtr& node);
     /*
     virtual void visitValueBindings(const ValueBindingsPtr& node) override;
     virtual void visitValueBinding(const ValueBindingPtr& node) override;

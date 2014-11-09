@@ -127,6 +127,7 @@ std::wstring getErrorTemplate(int errorCode)
         case Errors::E_TUPLE_PATTERN_CANNOT_MATCH_VALUES_OF_THE_NON_TUPLE_TYPE_A_1: return L"Tuple pattern cannot match values of the non-tuple type '%0'";
         case Errors::E_A_IS_NOT_CONVERTIBLE_TO_B_2: return L"'%0' is not convertible to '%1'";
         case Errors::E_NO_CONTEXTUAL_TYPE_TO_ACCESS_MEMBER_A_1: return L"No contextual type to access member '%0'";
+        case Errors::E_CASE_IN_SWITCH_SHOULD_HAVE_AT_LEAST_ONE_STATEMENT_0: return L"'case' label in a 'switch' should have at least one executable statement'";
 
 
         case Errors::W_PARAM_CAN_BE_EXPRESSED_MORE_SUCCINCTLY_1: return L"'%0 %0' can be expressed more succinctly as '#%0'";
