@@ -46,6 +46,7 @@ struct TokenType
         Comment,
         
         Optional, // ?
+        Dot, // .
         Attribute, // @
         Sharp, // #
         Colon, // :

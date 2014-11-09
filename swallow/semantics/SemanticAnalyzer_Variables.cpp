@@ -463,7 +463,7 @@ void SemanticAnalyzer::visitIdentifier(const IdentifierPtr& id)
     symbolRegistry->lookupSymbol(id->getIdentifier(), &scope, &sym);
     if(!sym)
     {
-        compilerResults->add(ErrorLevel::Error, *id->getSourceInfo(), Errors::E_USE_OF_UNRESOLVED_IDENTIFIER_1, id->getIdentifier());
+        error(id, Errors::E_USE_OF_UNRESOLVED_IDENTIFIER_1, id->getIdentifier());
         return;
     }
     if(SymbolPlaceHolderPtr placeholder = std::dynamic_pointer_cast<SymbolPlaceHolder>(sym))

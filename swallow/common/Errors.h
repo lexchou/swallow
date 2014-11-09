@@ -120,6 +120,7 @@ struct SWALLOW_EXPORT Errors
         E_TYPE_ANNOTATION_DOES_NOT_MATCH_CONTEXTUAL_TYPE_A_1, //Type annotation does not match contextual type '%0'
         E_TUPLE_PATTERN_CANNOT_MATCH_VALUES_OF_THE_NON_TUPLE_TYPE_A_1, //Tuple pattern cannot match values of the non-tuple type '%0'
         E_A_IS_NOT_CONVERTIBLE_TO_B_2, //'%0' is not convertible to '%1'
+        E_NO_CONTEXTUAL_TYPE_TO_ACCESS_MEMBER_A_1, // No contextual type to access member '%0"
 
         W_PARAM_CAN_BE_EXPRESSED_MORE_SUCCINCTLY_1, // '%0 %0' can be expressed more succinctly as '#%0'
         W_EXTRANEOUS_SHARTP_IN_PARAMETER_1 //Extraneous '#' in parameter: '%0' is already the keyword argument name

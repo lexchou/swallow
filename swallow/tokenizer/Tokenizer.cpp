@@ -266,7 +266,7 @@ bool Tokenizer::hasWhiteRight(const wchar_t* cursor)
     return true;//EOF means has white after
 }
 
-bool Tokenizer::readOperator(Token& token, int max)
+bool Tokenizer::readOperator(Token& token, bool dotOperator, int max)
 {
     wchar_t ch;
     token.type = TokenType::Operator;
@@ -277,7 +277,8 @@ bool Tokenizer::readOperator(Token& token, int max)
     
     while(get(ch) && (!max || token.token.size() < (size_t)max))
     {
-        if(!isOperator(ch))
+        bool ret = dotOperator ? isDotOperatorCharacter(ch) : isOperatorCharacter(ch);
+        if(!ret)
         {
             unget();
             break;
@@ -724,14 +725,24 @@ bool Tokenizer::nextImpl(Token& token)
             if(!peek(ch))
             {
                 unget();
-                return readOperator(token, 1);
+                return readOperator(token, false, 1);
             }
             unget();
             if(ch == '/')
                 return readComment(token);
             if(ch == '*')
                 return readMultilineComment(token);
-            return readOperator(token);
+            return readOperator(token, false, 0);
+        case '.':// could be just dot or operator
+            get(ch);
+            if(peek(ch) && ch == '.')
+            {
+                //it's an dot operator
+                unget();
+                return readOperator(token, true, 0);
+            }
+            unget();
+            return readSymbol(token, TokenType::Dot);
         case ':':
             return readSymbol(token, TokenType::Colon);
         case '[':
@@ -777,9 +788,9 @@ bool Tokenizer::nextImpl(Token& token)
         unget();
         ch = data[state.cursor];
     }
-    
-    if(isOperator(ch))
-        return readOperator(token);
+
+    if(isOperatorHead(ch))
+        return readOperator(token, false, 0);
     if(ch == '"')
         return readString(token);
     if(isIdentifierHead(ch) || ch == '$' || ch == '`')

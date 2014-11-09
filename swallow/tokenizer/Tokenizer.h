@@ -89,7 +89,7 @@ private:
     OperatorType::T calculateOperatorType(const wchar_t* begin, const wchar_t* end);
     
     bool readSymbol(Token& token, TokenType::T type);
-    bool readOperator(Token& token, int max = 0);
+    bool readOperator(Token& token, bool dotOperator, int max);
     bool readComment(Token& token);
     bool readMultilineComment(Token& token);
     bool readString(Token& token);

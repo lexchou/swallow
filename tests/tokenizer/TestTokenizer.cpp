@@ -270,8 +270,8 @@ TEST(TestTokenizer, testCustomizedOperators)
 
 
     ASSERT_TRUE(tokenizer.next(token));
-    ASSERT_EQ(TokenType::Operator, token.type);
-    ASSERT_EQ(OperatorType::InfixBinary, token.operators.type);
+    ASSERT_EQ(TokenType::Dot, token.type);
+//    ASSERT_EQ(OperatorType::InfixBinary, token.operators.type);
     ASSERT_EQ(L".", token.token);
 
     ASSERT_TRUE(tokenizer.next(token));
@@ -434,7 +434,7 @@ TEST(TestNumberToken, testNumberSelf)
 
 
     ASSERT_TRUE(tokenizer.next(token));
-    ASSERT_EQ(TokenType::Operator, token.type);
+    ASSERT_EQ(TokenType::Dot, token.type);
     ASSERT_EQ(L".", token.token);
 
 

@@ -511,19 +511,37 @@ void SemanticAnalyzer::visitFunctionCall(const FunctionCallPtr& node)
 }
 void SemanticAnalyzer::visitMemberAccess(const MemberAccessPtr& node)
 {
-    node->getSelf()->accept(this);
-    TypePtr selfType = node->getSelf()->getType();
-    assert(selfType != nullptr);
+    TypePtr selfType = t_hint;
+    bool staticAccess = false;
+    if(node->getSelf())
+    {
+        node->getSelf()->accept(this);
+        selfType = node->getSelf()->getType();
+        assert(selfType != nullptr);
 
+        if (selfType->getCategory() == Type::MetaType)
+        {
+            selfType = selfType->getInnerType();
+            staticAccess = true;
+        }
+    }
+    else //Type is implicitly retrieved from contextual type
+    {
+        selfType = t_hint;
+        if(!t_hint)
+        {
+            //invalid contexture type
+            wstring member = node->getField() ? node->getField()->getIdentifier() : toString(node->getIndex());
+            error(node, Errors::E_NO_CONTEXTUAL_TYPE_TO_ACCESS_MEMBER_A_1, member);
+        }
+        staticAccess = true;
+    }
 
     if(node->getField())
     {
         SymbolPtr member;
-        if (selfType->getCategory() == Type::MetaType)
-        {
-            selfType = selfType->getInnerType();
+        if (staticAccess)
             member = selfType->getDeclaredStaticMember(node->getField()->getIdentifier());
-        }
         else
             member = selfType->getMember(node->getField()->getIdentifier());
         if (member == nullptr)

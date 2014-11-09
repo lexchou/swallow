@@ -29,6 +29,7 @@
  */
 #ifndef TOKEN_CHAR_TYPES_H
 #define TOKEN_CHAR_TYPES_H
+#define CHECK(A, B) if(ch >= A && ch <= B)return true;
 
 static inline bool iswhite(wchar_t ch)
 {
@@ -47,7 +48,39 @@ static inline bool iswhite(wchar_t ch)
     }
 }
 
-inline static bool isOperator(wchar_t ch)
+/*
+
+ operator-head → /  =  -  +  !  *  %  <  >  &  |  ^  ~
+‌ operator-head → U+00A1–U+00A7
+‌ operator-head → U+00A9 or U+00AB
+‌ operator-head → U+00AC or U+00AE
+‌ operator-head → U+00B0–U+00B1, U+00B6, U+00BB, U+00BF, U+00D7, or U+00F7
+‌ operator-head → U+2016–U+2017 or U+2020–U+2027
+‌ operator-head → U+2030–U+203E
+‌ operator-head → U+2041–U+2053
+‌ operator-head → U+2055–U+205E
+‌ operator-head → U+2190–U+23FF
+‌ operator-head → U+2500–U+2775
+‌ operator-head → U+2794–U+2BFF
+‌ operator-head → U+2E00–U+2E7F
+‌ operator-head → U+3001–U+3003
+‌ operator-head → U+3008–U+3030
+‌ operator-character → operator-head
+‌ operator-character → U+0300–U+036F
+‌ operator-character → U+1DC0–U+1DFF
+‌ operator-character → U+20D0–U+20FF
+‌ operator-character → U+FE00–U+FE0F
+‌ operator-character → U+FE20–U+FE2F
+‌ operator-character → U+E0100–U+E01EF
+‌ operator-characters → operator-character operator-characters opt
+‌ dot-operator-head → ..
+‌ dot-operator-character → .  operator-character
+‌ dot-operator-characters → dot-operator-character dot-operator-characters opt
+
+
+
+ */
+inline static bool isOperatorHead(wchar_t ch)
 {
     switch(ch)
     {
@@ -64,12 +97,51 @@ inline static bool isOperator(wchar_t ch)
         case '|':
         case '^':
         case '~':
-        case '.':
+        case 0x00A9:
+        case 0x00AB:
+        case 0x00AC:
+        case 0x00AE:
+        case 0x00B6:
+        case 0x00BB:
+        case 0x00BF:
+        case 0x00D7:
+        case 0x00F7:
             return true;
         default:
+            CHECK(0x00A1, 0x00A7);
+            CHECK(0x00B0, 0x00B1);
+            CHECK(0x2016, 0x2017);
+            CHECK(0x2020, 0x2027);
+            CHECK(0x2030, 0x203E);
+            CHECK(0x2041, 0x2053);
+            CHECK(0x2055, 0x205E);
+            CHECK(0x2190, 0x23FF);
+            CHECK(0x2500, 0x2775);
+            CHECK(0x2794, 0x2BFF);
+            CHECK(0x2E00, 0x2E7F);
+            CHECK(0x3001, 0x3003);
+            CHECK(0x3008, 0x3030);
             return false;
-            
     }
+}
+static bool isOperatorCharacter(wchar_t ch)
+{
+    if(isOperatorHead(ch))
+        return true;
+    CHECK(0x0300, 0x036F);
+    CHECK(0x1DC0, 0x1DFF);
+    CHECK(0x20D0, 0x20FF);
+    CHECK(0xFE00, 0xFE0F);
+    CHECK(0xFE20, 0xFE2F);
+    CHECK(0xE0100, 0xE01EF);
+    return false;
+}
+
+static bool isDotOperatorCharacter(wchar_t ch)
+{
+    if(ch == '.')
+        return true;
+    return isOperatorCharacter(ch);
 }
 
 
@@ -99,7 +171,6 @@ inline static int to_digit(wchar_t ch)
 
 
 
-#define CHECK(A, B) if(ch >= A && ch <= B)return true;
 
 inline static bool isIdentifierHead(wchar_t ch)
 {
