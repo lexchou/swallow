@@ -60,8 +60,12 @@ public:
         F_MEMBER= 4,
         F_WRITABLE = 8,
         F_READABLE = 0x10,
+        //A temporary variable used for some intermediate works.
         F_TEMPORARY = 0x20,
-        F_HAS_INITIALIZER = 0x40
+        //
+        F_HAS_INITIALIZER = 0x40,
+        //Static members can be accessed directly from type
+        F_STATIC = 0x80
 
 
     };

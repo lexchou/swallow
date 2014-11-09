@@ -518,7 +518,14 @@ void SemanticAnalyzer::visitMemberAccess(const MemberAccessPtr& node)
 
     if(node->getField())
     {
-        SymbolPtr member = selfType->getMember(node->getField()->getIdentifier());
+        SymbolPtr member;
+        if (selfType->getCategory() == Type::MetaType)
+        {
+            selfType = selfType->getInnerType();
+            member = selfType->getDeclaredStaticMember(node->getField()->getIdentifier());
+        }
+        else
+            member = selfType->getMember(node->getField()->getIdentifier());
         if (member == nullptr)
         {
             error(node->getField(), Errors::E_DOES_NOT_HAVE_A_MEMBER_2, selfType->toString(), node->getField()->getIdentifier());
@@ -760,7 +767,7 @@ void SemanticAnalyzer::visitBinaryOperator(const BinaryOperatorPtr& node)
 }
 void SemanticAnalyzer::visitUnaryOperator(const UnaryOperatorPtr& node)
 {
-
+    error(node, Errors::E_NO_OVERLOAD_ACCEPTS_ARGUMENTS_1, node->getOperator());
 }
 
 

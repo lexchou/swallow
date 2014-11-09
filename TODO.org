@@ -1,6 +1,10 @@
 #+TITLE: Swallow compiler TODO list
 #+AUTHOR: Lex Chou
 
+* Type declaration
+** Enumeration
+*** Raw Values Enumeration
+*** Associated Values Enumeration
 
 * Control Flow
 ** Conditional statements
@@ -34,9 +38,9 @@ let a = (test(56), test(""))
 for(
 #+END_SRC
 
-** Codes that doesn't work as expected: [0/2]
+** Codes that doesn't work as expected: [2/3]
 
-- [ ] Class declaration 
+- [X] Class declaration 
 #+BEGIN_SRC
 class cobject { var fd = -1 }
 let b = cobject()
@@ -47,7 +51,7 @@ let b = cobject()
 let (c, d : Double) = (1, 2)
 #+END_SRC
 
-- [ ] Expression inside a string
+- [X] Expression inside a string
 #+BEGIN_SRC
   "\(a"
 #+END_SRC

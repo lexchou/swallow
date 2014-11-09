@@ -238,6 +238,7 @@ public://properties
      */
     TypePtr unwrap() const;
 public://member access
+    SymbolPtr getDeclaredStaticMember(const std::wstring& name)const;
     SymbolPtr getMember(const std::wstring& name) const;
     SymbolPtr getDeclaredMember(const std::wstring& name) const;
     const SymbolMap& getDeclaredMembers() const;
@@ -301,6 +302,7 @@ protected:
     std::vector<TypePtr> protocols; //Protocols that this type directly conform to
     std::map<TypePtr, int> parents;//All parent types and protocols in inheritance tree
     SymbolMap members;
+    SymbolMap staticMembers;
     FunctionOverloadedSymbolPtr initializer;
     std::vector<SymbolPtr> storedProperties;
     std::vector<SymbolPlaceHolderPtr> computedProperties;

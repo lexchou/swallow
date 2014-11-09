@@ -310,8 +310,35 @@ void SemanticAnalyzer::visitStruct(const StructDefPtr& node)
 }
 void SemanticAnalyzer::visitEnum(const EnumDefPtr& node)
 {
-    defineType(node, Type::Enum);
+    TypeBuilderPtr type = static_pointer_cast<TypeBuilder>(defineType(node, Type::Enum));
     NodeVisitor::visitEnum(node);
+    if(node->numConstants())
+    {
+        for(int i = 0; i < node->numConstants(); i++)
+        {
+            auto c = node->getConstant(i);
+            int flags = SymbolPlaceHolder::F_READABLE | SymbolPlaceHolder::F_HAS_INITIALIZER | SymbolPlaceHolder::F_MEMBER | SymbolPlaceHolder::F_STATIC;
+            SymbolPlaceHolderPtr symb(new SymbolPlaceHolder(c.name, type, SymbolPlaceHolder::R_PROPERTY, flags));
+            type->addMember(symb);
+        }
+    }
+    else if(node->numAssociatedTypes())
+    {
+        for(int i = 0; i < node->numAssociatedTypes(); i++)
+        {
+            auto c = node->getAssociatedType(i);
+            if(c.value)
+            {
+                //TODO: generate a function for associated type
+            }
+            else
+            {
+                int flags = SymbolPlaceHolder::F_READABLE | SymbolPlaceHolder::F_HAS_INITIALIZER | SymbolPlaceHolder::F_MEMBER | SymbolPlaceHolder::F_STATIC;
+                SymbolPlaceHolderPtr symb(new SymbolPlaceHolder(c.name, type, SymbolPlaceHolder::R_PROPERTY, flags));
+                type->addMember(symb);
+            }
+        }
+    }
 }
 void SemanticAnalyzer::visitProtocol(const ProtocolDefPtr& node)
 {

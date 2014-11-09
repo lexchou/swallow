@@ -320,6 +320,13 @@ SymbolPtr Type::getMember(const std::wstring& name) const
         return nullptr;
     }
 }
+SymbolPtr Type::getDeclaredStaticMember(const std::wstring& name)const
+{
+    auto iter = staticMembers.find(name);
+    if(iter == staticMembers.end())
+        return nullptr;
+    return iter->second;
+}
 SymbolPtr Type::getDeclaredMember(const std::wstring& name) const
 {
     auto iter = members.find(name);

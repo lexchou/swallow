@@ -49,7 +49,20 @@ void SemanticAnalyzer::visitAssignment(const AssignmentPtr& node)
 {
     //check node's LHS, it must be a tuple or identifier
     PatternPtr pattern = node->getLHS();
+    pattern->accept(this);
+    TypePtr destinationType = pattern->getType();
+    assert(destinationType != nullptr);
+    StackedValueGuard<TypePtr> contextualType(this->t_hint);
+    contextualType.set(destinationType);
     verifyTuplePattern(pattern);
+    node->getRHS()->accept(this);
+    TypePtr sourceType = node->getRHS()->getType();
+    assert(sourceType != nullptr);
+    if(!sourceType->canAssignTo(destinationType))
+    {
+        error(node, Errors::E_A_IS_NOT_CONVERTIBLE_TO_B_2, sourceType->toString(), destinationType->toString());
+        return;
+    }
 }
 void SemanticAnalyzer::verifyTuplePattern(const PatternPtr& pattern)
 {
