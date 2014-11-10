@@ -32,6 +32,7 @@ ADD_EXECUTABLE(TestSemantics
     TestProtocol.cpp
     TestGeneric.cpp
     TestEnumeration.cpp
+    TestCondition.cpp
     ../utils.cpp
     )
 target_link_libraries(TestSemantics swallow ${GTEST_LIBS})

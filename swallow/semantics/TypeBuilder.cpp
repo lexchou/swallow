@@ -169,4 +169,7 @@ void TypeBuilder::addMember(const std::wstring& name, const SymbolPtr& member)
     }
 }
 
-
+void TypeBuilder::setNumEnumCases(int num)
+{
+    enumCases = num;
+}

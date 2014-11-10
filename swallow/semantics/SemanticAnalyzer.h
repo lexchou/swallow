@@ -165,7 +165,7 @@ private:
     MemberAccessPtr makeAccess(SourceInfo* info, NodeFactory* nodeFactory, const std::wstring& tempName, const std::vector<int>& indices);
     void expandTuple(std::vector<std::tuple<IdentifierPtr, TypePtr, ExpressionPtr> >& results, std::vector<int>& indices, const PatternPtr& name, const std::wstring& tempName, const TypePtr& type, bool isReadonly);
 
-protected:
+public:
     /**
     * Abort the visitor
     */

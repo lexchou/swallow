@@ -321,6 +321,7 @@ void SemanticAnalyzer::visitEnum(const EnumDefPtr& node)
             SymbolPlaceHolderPtr symb(new SymbolPlaceHolder(c.name, type, SymbolPlaceHolder::R_PROPERTY, flags));
             type->addMember(symb);
         }
+        type->setNumEnumCases(node->numConstants());
     }
     else if(node->numAssociatedTypes())
     {
@@ -338,6 +339,7 @@ void SemanticAnalyzer::visitEnum(const EnumDefPtr& node)
                 type->addMember(symb);
             }
         }
+        type->setNumEnumCases(node->numAssociatedTypes());
     }
 }
 void SemanticAnalyzer::visitProtocol(const ProtocolDefPtr& node)

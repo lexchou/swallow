@@ -60,6 +60,10 @@ public:
     void addParentTypesFrom(const TypePtr& type);
     void addParentType(const TypePtr& type, int distance = 1);
 
+    /**
+     * Sets the number of total enum cases
+     */
+    void setNumEnumCases(int num);
 };
 typedef std::shared_ptr<TypeBuilder> TypeBuilderPtr;
 

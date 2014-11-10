@@ -50,6 +50,33 @@ void SemanticAnalyzer::visitIf(const IfStatementPtr& node)
 {
 
 }
+
+static void checkExhausiveSwitch(SemanticAnalyzer* sa, const SwitchCasePtr& node)
+{
+    TypePtr conditionType = node->getControlExpression()->getType();
+    //only check for enum and bool type
+    TypePtr t_Bool = sa->getSymbolRegistry()->getGlobalScope()->t_Bool;
+    if(conditionType->getCategory() != Type::Enum && conditionType != t_Bool)
+        return;
+    //do not check if it already has a default case
+    if(node->getDefaultCase())
+        return;
+    if(conditionType->getCategory() == Type::Enum)
+    {
+        if(node->numCases() != conditionType->numEnumCases())
+        {
+            sa->error(node, Errors::E_SWITCH_MUST_BE_EXHAUSIVE_CONSIDER_ADDING_A_DEFAULT_CLAUSE);
+        }
+    }
+    else if(conditionType == t_Bool)
+    {
+        if(node->numCases() != 2)
+        {
+            sa->error(node, Errors::E_SWITCH_MUST_BE_EXHAUSIVE_CONSIDER_ADDING_A_DEFAULT_CLAUSE);
+        }
+    }
+}
+
 void SemanticAnalyzer::visitSwitchCase(const SwitchCasePtr& node)
 {
     node->getControlExpression()->accept(this);
@@ -57,12 +84,28 @@ void SemanticAnalyzer::visitSwitchCase(const SwitchCasePtr& node)
     assert(conditionType != nullptr);
     StackedValueGuard<TypePtr> contextualType(this->t_hint);
     contextualType.set(conditionType);
+
+    checkExhausiveSwitch(this, node);
+
     for(const CaseStatementPtr& c : *node)
     {
+        if(c->numStatements() == 0)
+        {
+            error(node, Errors::E_A_LABEL_IN_SWITCH_SHOULD_HAVE_AT_LEAST_ONE_STATEMENT_0, L"case");
+            return;
+        }
         c->accept(this);
     }
     if(node->getDefaultCase())
+    {
+
+        if(node->getDefaultCase()->numStatements() == 0)
+        {
+            error(node, Errors::E_A_LABEL_IN_SWITCH_SHOULD_HAVE_AT_LEAST_ONE_STATEMENT_0, L"default");
+            return;
+        }
         node->getDefaultCase()->accept(this);
+    }
 }
 
 void SemanticAnalyzer::visitEnumCasePattern(const EnumCasePatternPtr& node)
@@ -112,11 +155,6 @@ void SemanticAnalyzer::visitCase(const CaseStatementPtr& node)
                 break;
             }
         }
-    }
-    if(node->numStatements() == 0)
-    {
-        error(node, Errors::E_CASE_IN_SWITCH_SHOULD_HAVE_AT_LEAST_ONE_STATEMENT_0);
-        return;
     }
     for(const StatementPtr& st : *node)
     {

@@ -156,6 +156,11 @@ public://properties
     int numElementTypes()const;
 
     /**
+     * Gets the number of total enum cases
+     */
+    int numEnumCases()const;
+
+    /**
      * Gets which declaration this type referenced to
      */
     TypeDeclarationPtr getReference()const;
@@ -287,6 +292,9 @@ protected:
     //for specialized type
     TypePtr innerType;
     GenericArgumentPtr genericArguments;
+
+    //for enum type
+    int enumCases;
 
 
     //for function type

@@ -208,6 +208,11 @@ int Type::numElementTypes()const
     return elementTypes.size();
 }
 
+int Type::numEnumCases()const
+{
+    return enumCases;
+}
+
 TypeDeclarationPtr Type::getReference()const
 {
     if(reference.expired())
