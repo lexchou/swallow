@@ -654,9 +654,3 @@ TEST(TestNumberToken, testHexadecimalFloat)
     ASSERT_TRUE(!tokenizer.next(token));
 }
 
-
-int main(int argc, char** argv)
-{
-    testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
-}
