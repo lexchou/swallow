@@ -32,6 +32,7 @@
 #include <string>
 #include <map>
 #include <memory>
+#include <fstream>
 #include "common/CompilerResults.h"
 #include <semantics/SymbolRegistry.h>
 #include <semantics/ScopedNodeFactory.h>
@@ -44,7 +45,7 @@ typedef void (REPL::*CommandMethod)(const wstring& args);
 class REPL
 {
 public:
-    REPL(const ConsoleWriterPtr& out);
+    REPL(const ConsoleWriterPtr& out, const char* path = NULL);
 public:
     void repl();
 private:
@@ -66,7 +67,7 @@ private:
     ConsoleWriterPtr out;
     int resultId;
     bool canQuit;
-
+    std::wifstream file;
 };
 
 #endif//REPL_H

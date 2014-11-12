@@ -297,7 +297,7 @@ void SemanticAnalyzer::visitFunction(const FunctionDefPtr& node)
 
 
     //check if the same symbol has been defined in this scope
-    SymbolScope* scope = symbolRegistry->getCurrentScope();
+    SymbolScope* scope = symbolRegistry->getGlobalScope();
     SymbolPtr oldSym = scope->lookup(func->getName());
     SymbolPtr sym;
     if(oldSym)
