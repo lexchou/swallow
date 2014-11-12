@@ -63,7 +63,7 @@ void SemanticAnalyzer::prepareParameters(SymbolScope* scope, const ParametersPtr
             error(param, Errors::E_DEFINITION_CONFLICT, param->getLocalName());
             return;
         }
-        sym = SymbolPtr(new SymbolPlaceHolder(param->getLocalName(), param->getType(), SymbolPlaceHolder::R_PARAMETER, SymbolPlaceHolder::F_INITIALIZED));
+        sym = SymbolPtr(new SymbolPlaceHolder(param->getLocalName(), param->getType(), SymbolPlaceHolder::R_PARAMETER, SymbolFlagInitialized));
         scope->addSymbol(sym);
     }
     //prepare for implicit parameter self

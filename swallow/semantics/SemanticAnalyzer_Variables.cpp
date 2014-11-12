@@ -126,7 +126,7 @@ void SemanticAnalyzer::visitComputedProperty(const ComputedPropertyPtr& node)
         //TODO: replace the symbol to internal value
         ScopedCodeBlockPtr cb = std::static_pointer_cast<ScopedCodeBlock>(setter);
         cb->setType(setterType);
-        cb->getScope()->addSymbol(SymbolPtr(new SymbolPlaceHolder(name, type, SymbolPlaceHolder::R_PARAMETER, SymbolPlaceHolder::F_INITIALIZED)));
+        cb->getScope()->addSymbol(SymbolPtr(new SymbolPlaceHolder(name, type, SymbolPlaceHolder::R_PARAMETER, SymbolFlagInitialized)));
         cb->accept(this);
     }
     if(willSet)
@@ -135,7 +135,7 @@ void SemanticAnalyzer::visitComputedProperty(const ComputedPropertyPtr& node)
         //TODO: replace the symbol to internal value
         ScopedCodeBlockPtr cb = std::static_pointer_cast<ScopedCodeBlock>(willSet);
         cb->setType(setterType);
-        cb->getScope()->addSymbol(SymbolPtr(new SymbolPlaceHolder(setter, type, SymbolPlaceHolder::R_PARAMETER, SymbolPlaceHolder::F_INITIALIZED)));
+        cb->getScope()->addSymbol(SymbolPtr(new SymbolPlaceHolder(setter, type, SymbolPlaceHolder::R_PARAMETER, SymbolFlagInitialized)));
         cb->accept(this);
     }
     if(didSet)
@@ -144,17 +144,17 @@ void SemanticAnalyzer::visitComputedProperty(const ComputedPropertyPtr& node)
         //TODO: replace the symbol to internal value
         ScopedCodeBlockPtr cb = std::static_pointer_cast<ScopedCodeBlock>(didSet);
         cb->setType(setterType);
-        cb->getScope()->addSymbol(SymbolPtr(new SymbolPlaceHolder(setter, type, SymbolPlaceHolder::R_PARAMETER, SymbolPlaceHolder::F_INITIALIZED)));
+        cb->getScope()->addSymbol(SymbolPtr(new SymbolPlaceHolder(setter, type, SymbolPlaceHolder::R_PARAMETER, SymbolFlagInitialized)));
         cb->accept(this);
     }
     //register symbol
-    int flags = SymbolPlaceHolder::F_INITIALIZED;
+    int flags = SymbolFlagInitialized;
     if(didSet || willSet)
-        flags |= SymbolPlaceHolder::F_READABLE | SymbolPlaceHolder::F_WRITABLE;
+        flags |= SymbolFlagReadable | SymbolFlagWritable;
     if(setter)
-        flags |= SymbolPlaceHolder::F_WRITABLE;
+        flags |= SymbolFlagWritable;
     if(getter)
-        flags |= SymbolPlaceHolder::F_READABLE;
+        flags |= SymbolFlagReadable;
     SymbolPlaceHolderPtr symbol(new SymbolPlaceHolder(node->getName(), type, SymbolPlaceHolder::R_PROPERTY, flags));
     registerSymbol(symbol);
 
@@ -164,7 +164,7 @@ void SemanticAnalyzer::registerSymbol(const SymbolPlaceHolderPtr& symbol)
     SymbolScope* scope = symbolRegistry->getCurrentScope();
     NodeType::T nodeType = scope->getOwner()->getNodeType();
     if(nodeType != NodeType::Program)
-        symbol->flags |= SymbolPlaceHolder::F_MEMBER;
+        symbol->setFlags(SymbolFlagMember, true);
     scope->addSymbol(symbol);
     switch(nodeType)
     {
@@ -427,11 +427,11 @@ void SemanticAnalyzer::visitValueBindings(const ValueBindingsPtr& node)
             registerSymbol(pattern);
         }
     }
-    int flags = SymbolPlaceHolder::F_INITIALIZING | SymbolPlaceHolder::F_READABLE;
+    int flags = SymbolFlagInitializing | SymbolFlagReadable;
     if(dynamic_cast<TypeDeclaration*>(symbolRegistry->getCurrentScope()->getOwner()))
-        flags |= SymbolPlaceHolder::F_MEMBER;
+        flags |= SymbolFlagMember;
     if(!node->isReadOnly())
-        flags |= SymbolPlaceHolder::F_WRITABLE;
+        flags |= SymbolFlagWritable;
     for(const ValueBindingPtr& v : *node)
     {
         PatternPtr name = v->getName();
@@ -444,15 +444,15 @@ void SemanticAnalyzer::visitValueBindings(const ValueBindingsPtr& node)
         ExpressionPtr initializer = v->getInitializer();
         SymbolPlaceHolderPtr placeholder = std::dynamic_pointer_cast<SymbolPlaceHolder>(s);
         assert(placeholder != nullptr);
-        placeholder->flags |= flags;
+        placeholder->setFlags((SymbolFlags)flags, true);
         if(initializer)
-            placeholder->flags |= SymbolPlaceHolder::F_HAS_INITIALIZER;
+            placeholder->setFlags(SymbolFlagHasInitializer, true);
         if(v->isTemporary())
-            placeholder->flags |= SymbolPlaceHolder::F_TEMPORARY;
+            placeholder->setFlags(SymbolFlagTemporary, true);
         v->accept(this);
 
-        placeholder->flags |= SymbolPlaceHolder::F_INITIALIZED;
-        placeholder->flags &= ~SymbolPlaceHolder::F_INITIALIZING;
+        placeholder->setFlags(SymbolFlagInitialized, true);
+        placeholder->setFlags(SymbolFlagInitializing, false);
     }
 }
 
@@ -468,11 +468,11 @@ void SemanticAnalyzer::visitIdentifier(const IdentifierPtr& id)
     }
     if(SymbolPlaceHolderPtr placeholder = std::dynamic_pointer_cast<SymbolPlaceHolder>(sym))
     {
-        if((placeholder->flags & SymbolPlaceHolder::F_INITIALIZING))
+        if(placeholder->hasFlags(SymbolFlagInitializing))
         {
             error(id, Errors::E_USE_OF_INITIALIZING_VARIABLE, placeholder->getName());
         }
-        else if((placeholder->flags & SymbolPlaceHolder::F_INITIALIZED) == 0)
+        else if(!placeholder->hasFlags(SymbolFlagInitialized))
         {
             error(id, Errors::E_USE_OF_UNINITIALIZED_VARIABLE_1, placeholder->getName());
         }

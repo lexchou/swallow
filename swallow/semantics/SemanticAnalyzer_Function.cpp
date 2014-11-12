@@ -189,7 +189,7 @@ void SemanticAnalyzer::visitAccessor(const CodeBlockPtr& accessor, const Paramet
     ScopeGuard scopeGuard(codeBlock.get(), this);
     (void) scopeGuard;
 
-    SymbolPlaceHolderPtr self(new SymbolPlaceHolder(L"self", currentType, SymbolPlaceHolder::R_PARAMETER, SymbolPlaceHolder::F_READABLE | SymbolPlaceHolder::F_INITIALIZED));
+    SymbolPlaceHolderPtr self(new SymbolPlaceHolder(L"self", currentType, SymbolPlaceHolder::R_PARAMETER, SymbolFlagReadable | SymbolFlagInitialized));
     scope->addSymbol(self);
     if(setter)
         scope->addSymbol(setter);
@@ -251,7 +251,7 @@ void SemanticAnalyzer::visitSubscript(const SubscriptDefPtr &node)
     wstring setterName = L"newValue";
     if(!node->getSetterName().empty())
         setterName = node->getSetterName();
-    SymbolPlaceHolderPtr setter(new SymbolPlaceHolder(setterName, currentType, SymbolPlaceHolder::R_PARAMETER, SymbolPlaceHolder::F_READABLE | SymbolPlaceHolder::F_INITIALIZED));
+    SymbolPlaceHolderPtr setter(new SymbolPlaceHolder(setterName, currentType, SymbolPlaceHolder::R_PARAMETER, SymbolFlagReadable | SymbolFlagInitialized));
     visitAccessor(node->getSetter(), parameters, setter);
     //process setter
 }
@@ -274,7 +274,7 @@ void SemanticAnalyzer::visitFunction(const FunctionDefPtr& node)
             generic->registerTo(scope);
         if(currentType && (node->getSpecifiers() & (TypeSpecifier::Class | TypeSpecifier::Static)) == 0)
         {
-            SymbolPlaceHolderPtr self(new SymbolPlaceHolder(L"self", currentType, SymbolPlaceHolder::R_PARAMETER, SymbolPlaceHolder::F_READABLE | SymbolPlaceHolder::F_INITIALIZED));
+            SymbolPlaceHolderPtr self(new SymbolPlaceHolder(L"self", currentType, SymbolPlaceHolder::R_PARAMETER, SymbolFlagReadable | SymbolFlagInitialized));
             scope->addSymbol(self);
         }
 
@@ -359,7 +359,7 @@ void SemanticAnalyzer::visitInit(const InitializerDefPtr& node)
     ScopedCodeBlockPtr body = std::static_pointer_cast<ScopedCodeBlock>(node->getBody());
     prepareParameters(body->getScope(), node->getParameters());
     //prepare implicit self
-    SymbolPlaceHolderPtr self(new SymbolPlaceHolder(L"self", currentType, SymbolPlaceHolder::R_PARAMETER, SymbolPlaceHolder::F_READABLE | SymbolPlaceHolder::F_INITIALIZED));
+    SymbolPlaceHolderPtr self(new SymbolPlaceHolder(L"self", currentType, SymbolPlaceHolder::R_PARAMETER, SymbolFlagReadable | SymbolFlagInitialized));
     body->getScope()->addSymbol(self);
 
     std::vector<Type::Parameter> params;

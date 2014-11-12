@@ -164,11 +164,11 @@ void SemanticAnalyzer::prepareDefaultInitializers(const TypePtr& type)
         for (auto sym : type->getDeclaredStoredProperties())
         {
             SymbolPlaceHolderPtr s = dynamic_pointer_cast<SymbolPlaceHolder>(sym);
-            if(!s || (s->flags & SymbolPlaceHolder::F_TEMPORARY) != 0)
+            if(!s || sym->hasFlags(SymbolFlagTemporary))
                 continue;
             initParams.push_back(Type::Parameter(sym->getName(), false, sym->getType()));
             //do not create default init if there's a variable has no initializer
-            if ((s->flags & SymbolPlaceHolder::F_HAS_INITIALIZER) == 0)
+            if (!s->hasFlags(SymbolFlagHasInitializer))
             {
                 createDefaultInit = false;
                 break;
@@ -317,7 +317,7 @@ void SemanticAnalyzer::visitEnum(const EnumDefPtr& node)
         for(int i = 0; i < node->numConstants(); i++)
         {
             auto c = node->getConstant(i);
-            int flags = SymbolPlaceHolder::F_READABLE | SymbolPlaceHolder::F_HAS_INITIALIZER | SymbolPlaceHolder::F_MEMBER | SymbolPlaceHolder::F_STATIC;
+            int flags = SymbolFlagReadable | SymbolFlagHasInitializer | SymbolFlagMember | SymbolFlagStatic;
             SymbolPlaceHolderPtr symb(new SymbolPlaceHolder(c.name, type, SymbolPlaceHolder::R_PROPERTY, flags));
             type->addMember(symb);
         }
@@ -330,11 +330,22 @@ void SemanticAnalyzer::visitEnum(const EnumDefPtr& node)
             auto c = node->getAssociatedType(i);
             if(c.value)
             {
-                //TODO: generate a function for associated type
+                TypePtr associatedType = lookupType(c.value);
+                assert(associatedType != nullptr && associatedType->getCategory() == Type::Tuple);
+                vector<Type::Parameter> params;
+                for(int i = 0; i < associatedType->numElementTypes(); i++)
+                {
+                    TypePtr t = associatedType->getElementType(i);
+                    params.push_back(Type::Parameter(t));
+                }
+                TypePtr initializerType = Type::newFunction(params, type, false, nullptr);
+                FunctionSymbolPtr func(new FunctionSymbol(c.name, initializerType, nullptr));
+                func->setFlags(SymbolFlagStatic, true);
+                type->addMember(func);
             }
             else
             {
-                int flags = SymbolPlaceHolder::F_READABLE | SymbolPlaceHolder::F_HAS_INITIALIZER | SymbolPlaceHolder::F_MEMBER | SymbolPlaceHolder::F_STATIC;
+                int flags = SymbolFlagReadable | SymbolFlagHasInitializer | SymbolFlagMember | SymbolFlagStatic;
                 SymbolPlaceHolderPtr symb(new SymbolPlaceHolder(c.name, type, SymbolPlaceHolder::R_PROPERTY, flags));
                 type->addMember(symb);
             }
@@ -407,15 +418,15 @@ void SemanticAnalyzer::verifyProtocolConform(const TypePtr& type, const TypePtr&
         else if(SymbolPlaceHolderPtr prop = std::dynamic_pointer_cast<SymbolPlaceHolder>(requirement))
         {
             //verify computed properties
-            assert(prop->flags & SymbolPlaceHolder::F_MEMBER && prop->getRole() == SymbolPlaceHolder::R_PROPERTY);
+            assert(prop->hasFlags(SymbolFlagMember) && prop->getRole() == SymbolPlaceHolder::R_PROPERTY);
             SymbolPtr sym = type->getMember(entry.first);
             SymbolPlaceHolderPtr sp = std::dynamic_pointer_cast<SymbolPlaceHolder>(sym);
             if(!sp)
             {
                 error(type->getReference(), Errors::E_TYPE_DOES_NOT_CONFORM_TO_PROTOCOL_UNIMPLEMENTED_PROPERTY_3, type->getName(), protocol->getName(), entry.first);
             }
-            bool expectedSetter = prop->flags & SymbolPlaceHolder::F_WRITABLE;
-            bool actualSetter = sp->flags & SymbolPlaceHolder::F_WRITABLE;
+            bool expectedSetter = prop->hasFlags(SymbolFlagWritable);
+            bool actualSetter = sp->hasFlags(SymbolFlagWritable);
             if(expectedSetter && !actualSetter)
             {
                 error(type->getReference(), Errors::E_TYPE_DOES_NOT_CONFORM_TO_PROTOCOL_UNWRITABLE_PROPERTY_3, type->getName(), protocol->getName(), entry.first);

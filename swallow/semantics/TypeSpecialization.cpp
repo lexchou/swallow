@@ -127,7 +127,7 @@ TypePtr Type::newSpecializedType(const TypePtr& innerType, const GenericArgument
         else if(SymbolPlaceHolderPtr s = dynamic_pointer_cast<SymbolPlaceHolder>(sym))
         {
             TypePtr t = specialize(s->getType(), arguments);
-            SymbolPlaceHolderPtr newSym(new SymbolPlaceHolder(s->getName(), t, s->getRole(), s->flags));
+            SymbolPlaceHolderPtr newSym(new SymbolPlaceHolder(s->getName(), t, s->getRole(), s->getFlags()));
             sym = newSym;
         }
         ret->addMember(entry.first, sym);

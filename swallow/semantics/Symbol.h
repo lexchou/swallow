@@ -34,14 +34,44 @@
 
 SWALLOW_NS_BEGIN
 typedef std::shared_ptr<class Type> TypePtr;
+
+enum SymbolFlags
+{
+    //The symbol is still being initialized, used to detect uninitialized symbol used by another symbol's initialization
+    SymbolFlagInitializing = 1,
+    //The symbol is already initialized
+    SymbolFlagInitialized = 2,
+    //The symbol is a member symbol, which belongs to a type or an instance
+    SymbolFlagMember = 4,
+    //The symbol is writable, e.g. computed property declared with a setter, or variable declared by *var*
+    SymbolFlagWritable = 8,
+    //The symbol is readable
+    SymbolFlagReadable = 0x10,
+    //A temporary variable used for some intermediate works.
+    SymbolFlagTemporary = 0x20,
+    //The symbol is declared with a initializer
+    SymbolFlagHasInitializer = 0x40,
+    //Static members can be accessed directly from type
+    SymbolFlagStatic = 0x80,
+    //The symbol is a type's init, init function cannot be hold by a value binding
+    SymbolFlagInit = 0x100
+};
+
 class SWALLOW_EXPORT Symbol
 {
 public:
-    Symbol(){}
+    Symbol();
     virtual ~Symbol(){}
 public:
     virtual const std::wstring& getName() const = 0;
     virtual TypePtr getType() {return nullptr;}
+    void setFlags(int flags);
+    int getFlags()const;
+    bool hasFlags(SymbolFlags flags)const;
+    void setFlags(SymbolFlags flags, bool set);
+
+protected:
+    int flags;
 };
 class SymbolPlaceHolder : public Symbol
 {
@@ -53,25 +83,8 @@ public:
         R_UPVALUE,
         R_PROPERTY
     };
-    enum Flags
-    {
-        F_INITIALIZING = 1,
-        F_INITIALIZED = 2,
-        F_MEMBER= 4,
-        F_WRITABLE = 8,
-        F_READABLE = 0x10,
-        //A temporary variable used for some intermediate works.
-        F_TEMPORARY = 0x20,
-        //
-        F_HAS_INITIALIZER = 0x40,
-        //Static members can be accessed directly from type
-        F_STATIC = 0x80
-
-
-    };
 public:
-    SymbolPlaceHolder(const std::wstring& name, const TypePtr& type, Role role, int flags)
-    :name(name), type(type), role(role), flags(flags){}
+    SymbolPlaceHolder(const std::wstring& name, const TypePtr& type, Role role, int flags);
 public:
     virtual const std::wstring& getName() const override {return name;}
     virtual TypePtr getType() override {return type;}
@@ -81,9 +94,6 @@ private:
     std::wstring name;
     TypePtr type;
     Role role;
-public:
-    int flags;
-
 };
 
 SWALLOW_NS_END

@@ -459,7 +459,17 @@ void SemanticAnalyzer::visitFunctionCall(const FunctionCallPtr& node)
             MemberAccessPtr ma = std::static_pointer_cast<MemberAccess>(func);
             TypePtr selfType = ma->getSelf()->getType();
             assert(selfType != nullptr);
-            SymbolPtr sym = selfType->getMember(ma->getField()->getIdentifier());
+            const wstring& identifier = ma->getField()->getIdentifier();
+            SymbolPtr sym;
+            if(selfType->getCategory() == Type::MetaType)
+            {
+                selfType = selfType->getInnerType();
+                sym = selfType->getDeclaredStaticMember(identifier);
+            }
+            else
+            {
+                sym = selfType->getMember(identifier);
+            }
             assert(sym != nullptr);//
             visitFunctionCall(sym, node);
             break;

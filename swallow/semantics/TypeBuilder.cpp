@@ -95,21 +95,9 @@ void TypeBuilder::addMember(const SymbolPtr& symbol)
     addMember(symbol->getName(), symbol);
 }
 
-static bool isStaticMember(const SymbolPtr& member)
-{
-    if(SymbolPlaceHolderPtr sym = dynamic_pointer_cast<SymbolPlaceHolder>(member))
-    {
-        if(sym->flags & SymbolPlaceHolder::F_STATIC)
-        {
-            return true;
-        }
-    }
-    return false;
-}
-
 void TypeBuilder::addMember(const std::wstring& name, const SymbolPtr& member)
 {
-    if(isStaticMember(member))
+    if(member->hasFlags(SymbolFlagStatic))
     {
         staticMembers.insert(make_pair(name, member));
         return;

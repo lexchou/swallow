@@ -124,4 +124,20 @@ TEST(TestEnumeration, CaseAccess_SwitchCase)
 
 }
 
+TEST(TestEnumeration, AssociatedValues)
+{
+    SEMANTIC_ANALYZE(L"enum Barcode {\n"
+            L"    case UPCA(Int, Int, Int, Int)\n"
+            L"    case QRCode(String)\n"
+            L"}\n"
+            L"var a = Barcode.UPCA(3, 4, 5, 6)\n");
+    ASSERT_EQ(0, compilerResults.numResults());
+    SymbolPlaceHolderPtr a;
+    TypePtr Barcode;
+
+    ASSERT_NOT_NULL(Barcode = dynamic_pointer_cast<Type>(scope->lookup(L"Barcode")));
+    ASSERT_NOT_NULL(a = dynamic_pointer_cast<SymbolPlaceHolder>(scope->lookup(L"a")));
+
+}
+//TODO partial application of enum constructor is not allowed
 

@@ -68,8 +68,8 @@ void GlobalScope::initPrimitiveTypes()
     addSymbol(L"Void", t_Void = Type::newTuple(std::vector<TypePtr>()));
 
 //Register built-in variables
-    addSymbol(s_True = SymbolPtr(new SymbolPlaceHolder(L"true", t_Bool, SymbolPlaceHolder::R_LOCAL_VARIABLE, SymbolPlaceHolder::F_INITIALIZED)));
-    addSymbol(s_False = SymbolPtr(new SymbolPlaceHolder(L"false", t_Bool, SymbolPlaceHolder::R_LOCAL_VARIABLE, SymbolPlaceHolder::F_INITIALIZED)));
+    addSymbol(s_True = SymbolPtr(new SymbolPlaceHolder(L"true", t_Bool, SymbolPlaceHolder::R_LOCAL_VARIABLE, SymbolFlagInitialized)));
+    addSymbol(s_False = SymbolPtr(new SymbolPlaceHolder(L"false", t_Bool, SymbolPlaceHolder::R_LOCAL_VARIABLE, SymbolFlagInitialized)));
     {
         TypePtr T = Type::newType(L"T", Type::GenericParameter);
         GenericDefinitionPtr generic(new GenericDefinition());
@@ -91,7 +91,7 @@ void GlobalScope::initPrimitiveTypes()
             builder->addMember(append);
         }
         {
-            SymbolPlaceHolderPtr count(new SymbolPlaceHolder(L"count", t_Int, SymbolPlaceHolder::R_PROPERTY, SymbolPlaceHolder::F_INITIALIZED | SymbolPlaceHolder::F_READABLE | SymbolPlaceHolder::F_MEMBER));
+            SymbolPlaceHolderPtr count(new SymbolPlaceHolder(L"count", t_Int, SymbolPlaceHolder::R_PROPERTY, SymbolFlagInitialized | SymbolFlagReadable | SymbolFlagMember));
             builder->addMember(count);
         }
         {

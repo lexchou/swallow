@@ -49,6 +49,7 @@ SET(SWALLOW_SRC
 
     semantics/SymbolRegistry.cpp
     semantics/SymbolScope.cpp
+    semantics/Symbol.cpp
     semantics/ScopeOwner.cpp
     semantics/ScopedNodes.cpp
     semantics/ScopedNodeFactory.cpp

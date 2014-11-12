@@ -187,9 +187,9 @@ TEST(TestProtocol, ReadOnlyComputedProperty)
     SymbolPlaceHolderPtr a;
 
     ASSERT_NOT_NULL(a = std::dynamic_pointer_cast<SymbolPlaceHolder>(sym));
-    ASSERT_TRUE((a->flags & SymbolPlaceHolder::F_MEMBER) != 0);
-    ASSERT_TRUE((a->flags & SymbolPlaceHolder::F_READABLE) != 0);
-    ASSERT_TRUE((a->flags & SymbolPlaceHolder::F_WRITABLE) == 0);
+    ASSERT_TRUE(a->hasFlags(SymbolFlagMember));
+    ASSERT_TRUE(a->hasFlags(SymbolFlagReadable));
+    ASSERT_TRUE(!a->hasFlags(SymbolFlagWritable));
 
 }
 TEST(TestProtocol, PropertyRequirement)
