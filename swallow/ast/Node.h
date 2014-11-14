@@ -101,6 +101,7 @@ struct NodeType
         Protocol,
         Return,
         Self,
+        StringInterpolation,
         StringLiteral,
         Struct,
         SubscriptAccess,

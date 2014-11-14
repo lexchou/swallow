@@ -65,6 +65,8 @@ std::wstring getErrorTemplate(int errorCode)
         case Errors::E_EXPECT_CAPTURE_SPECIFIER: return L"The capture specifier is not specified.";
         case Errors::E_EXPECT_CASE: return L"case/default is expected in switch/case statement";
         case Errors::E_GETTER_SETTER_CAN_ONLY_BE_DEFINED_FOR_A_SINGLE_VARIABLE: return L"Getter/setter can only be defined for a single variable";
+        case Errors::E_UNTERMINATED_STRING_LITERAL: return L"Unterminated string literal";
+
         case Errors::E_INVALID_REDECLARATION_1: return L"Invalid redeclaration of type %0";
         case Errors::E_USE_OF_UNDECLARED_TYPE_1: return L"Use of undeclared type %0";
         case Errors::E_CANNOT_ASSIGN: return L"cannot assign to the result of this expression";

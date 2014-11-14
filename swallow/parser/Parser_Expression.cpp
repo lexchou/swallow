@@ -56,13 +56,36 @@ ExpressionPtr Parser::parseInteger()
     ret->isFloat = token.type == TokenType::Float;
     return ret;
 }
+static void appendString(NodeFactory* nodeFactory, const StringInterpolationPtr& si, const Token& token)
+{
+    if(token.token.empty())
+        return;
+    StringLiteralPtr str = nodeFactory->createString(token.state);
+    str->value = token.token;
+    si->addExpression(str);
+}
 ExpressionPtr Parser::parseString()
 {
     Token token;
     expect_next(token);
-    StringLiteralPtr ret = nodeFactory->createString(token.state);
-    ret->value = token.token;
-    return ret;
+    if(!token.string.expressionFollowed)
+    {
+        StringLiteralPtr ret = nodeFactory->createString(token.state);
+        ret->value = token.token;
+        return ret;
+    }
+    StringInterpolationPtr si = nodeFactory->createStringInterpolation(token.state);
+    appendString(nodeFactory, si, token);
+    do
+    {
+        ExpressionPtr expr = parseExpression();
+        si->addExpression(expr);
+        expect_next(token);
+        tassert(token, token.type == TokenType::String, Errors::E_UNTERMINATED_STRING_LITERAL);
+        appendString(nodeFactory, si, token);
+    }while(token.string.expressionFollowed);
+
+    return si;
 }
 /*
  GRAMMAR OF A PREFIX EXPRESSION
@@ -696,9 +719,8 @@ ExpressionPtr Parser::parseLiteral()
         }
         case TokenType::String:
         {
-            StringLiteralPtr s = nodeFactory->createString(token.state);
-            s->value = token.token;
-            return s;
+            restore(token);
+            return parseString();
         }
         case TokenType::Float:
         {

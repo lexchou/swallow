@@ -124,7 +124,7 @@ public:
     virtual OperatorDefPtr createOperator(const SourceInfo& state);
     virtual GenericConstraintDefPtr createGenericConstraintDef(const SourceInfo& state);
     virtual GenericParametersDefPtr createGenericParametersDef(const SourceInfo& state);
-
+    virtual StringInterpolationPtr createStringInterpolation(const SourceInfo& state);
 protected:
 
     void bindNode(const SourceInfo&s, Node* n);

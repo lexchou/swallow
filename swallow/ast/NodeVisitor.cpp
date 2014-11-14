@@ -383,6 +383,13 @@ void NodeVisitor::visitParenthesizedExpression(const ParenthesizedExpressionPtr&
     }
 }
 
+void NodeVisitor::visitStringInterpolation(const StringInterpolationPtr &node)
+{
+    for(auto expr : * node)
+    {
+        ACCEPT(expr);
+    }
+}
 void NodeVisitor::visitString(const StringLiteralPtr& node)
 {
 

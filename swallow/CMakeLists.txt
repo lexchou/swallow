@@ -100,6 +100,7 @@ SET(SWALLOW_SRC
     ast/OptionalChaining.cpp
     ast/IntegerLiteral.cpp
     ast/FloatLiteral.cpp
+    ast/StringInterpolation.cpp
     ast/StringLiteral.cpp
     ast/CompileConstant.cpp
 

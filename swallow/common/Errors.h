@@ -54,6 +54,7 @@ struct SWALLOW_EXPORT Errors
         E_EXPECT_CAPTURE_SPECIFIER, // The capture specifier is not specified.
         E_EXPECT_CASE, // case/default is expected in switch/case statement
         E_GETTER_SETTER_CAN_ONLY_BE_DEFINED_FOR_A_SINGLE_VARIABLE, // Getter/setter can only be defined for a single variable
+        E_UNTERMINATED_STRING_LITERAL, //Unterminated string literal
 
         //semantic errors
         E_INVALID_REDECLARATION_1, // Invalid redeclaration of type %0

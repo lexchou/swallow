@@ -146,7 +146,7 @@ void Tokenizer::set(const wchar_t* data)
     end = 0;
     state.cursor = 0;
     state.hasSpace = false;
-    state.inStringExpression = false;
+    state.inStringExpression = 0;
     state.line = 1;
     state.column = 1;
     //copy string
@@ -387,7 +387,6 @@ bool Tokenizer::readString(Token& token)
 {
     wchar_t ch;
     int len = 0;
-    state.inStringExpression = false;
     token.type = TokenType::String;
     token.string.expressionFollowed = false;
     
@@ -405,7 +404,7 @@ bool Tokenizer::readString(Token& token)
         if(ch == '(')//“quoted-text-item → \(expression)”
         {
             token.string.expressionFollowed = true;
-            state.inStringExpression = true;
+            state.inStringExpression = 1;
             break;
         }
         
@@ -750,10 +749,17 @@ bool Tokenizer::nextImpl(Token& token)
         case ']':
             return readSymbol(token, TokenType::CloseBracket);
         case '(':
+            if(state.inStringExpression > 0)
+                state.inStringExpression++;
             return readSymbol(token, TokenType::OpenParen);
         case ')':
-            if(state.inStringExpression)
+            if(state.inStringExpression == 1)
+            {
+                state.inStringExpression = 0;
                 return readString(token);
+            }
+            if(state.inStringExpression > 0)
+                state.inStringExpression --;
             return readSymbol(token, TokenType::CloseParen);
         case '{':
             return readSymbol(token, TokenType::OpenBrace);

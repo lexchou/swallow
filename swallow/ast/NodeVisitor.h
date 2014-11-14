@@ -97,6 +97,7 @@ public:
     virtual void visitParenthesizedExpression(const ParenthesizedExpressionPtr& node);
 
     virtual void visitString(const StringLiteralPtr& node);
+    virtual void visitStringInterpolation(const StringInterpolationPtr& node);
     virtual void visitInteger(const IntegerLiteralPtr& node);
     virtual void visitFloat(const FloatLiteralPtr& node);
 public:

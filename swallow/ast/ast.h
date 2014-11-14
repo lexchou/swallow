@@ -113,5 +113,6 @@
 #include "OperatorDef.h"
 #include "GenericParametersDef.h"
 #include "GenericConstraintDef.h"
+#include "StringInterpolation.h"
 
 #endif//AST_H

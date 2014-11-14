@@ -190,7 +190,7 @@ class Pattern;
 typedef std::shared_ptr<Pattern> PatternPtr;
 class EnumCasePattern;
 typedef std::shared_ptr<EnumCasePattern> EnumCasePatternPtr;
-
+typedef std::shared_ptr<class StringInterpolation> StringInterpolationPtr;
 typedef std::vector<AttributePtr> Attributes;
 
 

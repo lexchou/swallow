@@ -175,3 +175,19 @@ TEST(TestLiteralExpression, testCompileConstants4)
     ASSERT_EQ(L"<top>", c->getValue());
 
 }
+
+TEST(TestLiteralExpression, StringInterpolation)
+{
+    PARSE_STATEMENT(L"\"\\(multiplier) times 2.5 is \\(Double(multiplier) * 2.5)\"");
+    dumpCompilerResults(compilerResults);
+    StringInterpolationPtr c = std::dynamic_pointer_cast<StringInterpolation>(root);
+    ASSERT_NOT_NULL(c);
+    //1th Expr: multipler
+    //2nd Expr: " times 2.5 is "
+    //3rd Expr: Double(multiplier) * 2.5
+    ASSERT_EQ(3, c->numExpressions());
+    ASSERT_NOT_NULL(std::dynamic_pointer_cast<Identifier>(c->getExpression(0)));
+    ASSERT_NOT_NULL(std::dynamic_pointer_cast<StringLiteral>(c->getExpression(0)));
+    ASSERT_NOT_NULL(std::dynamic_pointer_cast<BinaryOperator>(c->getExpression(0)));
+
+}

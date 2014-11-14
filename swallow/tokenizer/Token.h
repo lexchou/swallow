@@ -42,7 +42,7 @@ struct TokenizerState : SourceInfo
 
     int cursor;
     bool hasSpace;
-    bool inStringExpression;
+    int inStringExpression;
 };
 
 struct Token
