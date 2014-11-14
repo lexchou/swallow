@@ -187,7 +187,7 @@ TEST(TestLiteralExpression, StringInterpolation)
     //3rd Expr: Double(multiplier) * 2.5
     ASSERT_EQ(3, c->numExpressions());
     ASSERT_NOT_NULL(std::dynamic_pointer_cast<Identifier>(c->getExpression(0)));
-    ASSERT_NOT_NULL(std::dynamic_pointer_cast<StringLiteral>(c->getExpression(0)));
-    ASSERT_NOT_NULL(std::dynamic_pointer_cast<BinaryOperator>(c->getExpression(0)));
+    ASSERT_NOT_NULL(std::dynamic_pointer_cast<StringLiteral>(c->getExpression(1)));
+    ASSERT_NOT_NULL(std::dynamic_pointer_cast<BinaryOperator>(c->getExpression(2)));
 
 }
