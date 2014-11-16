@@ -126,6 +126,7 @@ const char* Node::nodeTypeToName(NodeType::T nodeType)
         CASE_TYPE(While)
     }
 #undef CASE_TYPE
+    return "<invalid-node-type>";
 }
 
 

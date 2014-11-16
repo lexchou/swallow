@@ -703,4 +703,5 @@ std::wstring Type::toString() const
         case Self:// A fake place holder, protocol use this type to present the final type that conform to the protocol
             return L"Self";
     }
+    return L"<invalid-type>";
 }

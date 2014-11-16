@@ -716,7 +716,7 @@ ParametersPtr Parser::parseParameterClause()
             shorthandExternalName = true;
             expect_next(token);
         }
-        tassert(token, token.type = TokenType::Identifier, Errors::E_EXPECT_IDENTIFIER_1, token.token);
+        tassert(token, token.type == TokenType::Identifier, Errors::E_EXPECT_IDENTIFIER_1, token.token);
         std::wstring name = token.token;
         std::wstring localName;
         if(match_identifier(token))
@@ -1196,6 +1196,7 @@ DeclarationPtr Parser::parseOperator(const std::vector<AttributePtr>& attrs)
     expect_next(token);
     tassert(token, token.type == TokenType::Operator, Errors::E_EXPECT_OPERATOR_1, token.token);
     op->setName(token.token);
+    op->setType(type);
     expect(L"{");
     while(!match(L"}"))
     {

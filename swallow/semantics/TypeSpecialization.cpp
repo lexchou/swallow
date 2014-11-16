@@ -249,4 +249,5 @@ bool Type::canSpecializeTo(const TypePtr& type, std::map<std::wstring, TypePtr>&
                 return false;
             return Type::equals(iter->second, type);
     }
+    return false;
 }
