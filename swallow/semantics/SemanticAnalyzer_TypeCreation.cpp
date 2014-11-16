@@ -38,6 +38,7 @@
 #include "common/Errors.h"
 #include "ast/NodeSerializer.h"
 #include "TypeBuilder.h"
+#include "GlobalScope.h"
 #include <cassert>
 
 USE_SWALLOW_NS
@@ -320,8 +321,8 @@ void SemanticAnalyzer::visitEnum(const EnumDefPtr& node)
             int flags = SymbolFlagReadable | SymbolFlagHasInitializer | SymbolFlagMember | SymbolFlagStatic;
             SymbolPlaceHolderPtr symb(new SymbolPlaceHolder(c.name, type, SymbolPlaceHolder::R_PROPERTY, flags));
             type->addMember(symb);
+            type->addEnumCase(c.name, symbolRegistry->getGlobalScope()->t_Void, nullptr);
         }
-        type->setNumEnumCases(node->numConstants());
     }
     else if(node->numAssociatedTypes())
     {
@@ -341,16 +342,16 @@ void SemanticAnalyzer::visitEnum(const EnumDefPtr& node)
                 TypePtr initializerType = Type::newFunction(params, type, false, nullptr);
                 FunctionSymbolPtr func(new FunctionSymbol(c.name, initializerType, nullptr));
                 func->setFlags(SymbolFlagStatic, true);
-                type->addMember(func);
+                type->addEnumCase(c.name, associatedType, func);
             }
             else
             {
                 int flags = SymbolFlagReadable | SymbolFlagHasInitializer | SymbolFlagMember | SymbolFlagStatic;
                 SymbolPlaceHolderPtr symb(new SymbolPlaceHolder(c.name, type, SymbolPlaceHolder::R_PROPERTY, flags));
                 type->addMember(symb);
+                type->addEnumCase(c.name, symbolRegistry->getGlobalScope()->t_Void, nullptr);
             }
         }
-        type->setNumEnumCases(node->numAssociatedTypes());
     }
 }
 void SemanticAnalyzer::visitProtocol(const ProtocolDefPtr& node)

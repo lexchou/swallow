@@ -210,7 +210,15 @@ int Type::numElementTypes()const
 
 int Type::numEnumCases()const
 {
-    return enumCases;
+    return enumCases.size();
+}
+
+const EnumCase* Type::getEnumCase(const std::wstring &name) const
+{
+    auto iter = enumCases.find(name);
+    if(iter == enumCases.end())
+        return nullptr;
+    return &iter->second;
 }
 
 TypeDeclarationPtr Type::getReference()const

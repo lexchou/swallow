@@ -61,9 +61,9 @@ public:
     void addParentType(const TypePtr& type, int distance = 1);
 
     /**
-     * Sets the number of total enum cases
+     * add a new enum case
      */
-    void setNumEnumCases(int num);
+    void addEnumCase(const std::wstring& name, const TypePtr& associatedType, const FunctionSymbolPtr& constructor);
 };
 typedef std::shared_ptr<TypeBuilder> TypeBuilderPtr;
 

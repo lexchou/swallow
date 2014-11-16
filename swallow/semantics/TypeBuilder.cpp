@@ -157,7 +157,9 @@ void TypeBuilder::addMember(const std::wstring& name, const SymbolPtr& member)
     }
 }
 
-void TypeBuilder::setNumEnumCases(int num)
+void TypeBuilder::addEnumCase(const std::wstring &name, const TypePtr &associatedType, const FunctionSymbolPtr& constructor)
 {
-    enumCases = num;
+    assert(associatedType != nullptr);
+    EnumCase c = {name, associatedType, constructor};
+    enumCases.insert(make_pair(name, c));
 }

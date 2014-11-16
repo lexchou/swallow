@@ -33,6 +33,8 @@
 #include "FunctionOverloadedSymbol.h"
 #include "GenericDefinition.h"
 #include "TypeBuilder.h"
+#include <cstdarg>
+#include <cassert>
 
 USE_SWALLOW_NS
 using namespace std;
@@ -112,6 +114,70 @@ void GlobalScope::initPrimitiveTypes()
         t_Optional = Type::newType(L"Optional", Type::Struct, nullptr, nullptr, std::vector<TypePtr>(), generic);
         addSymbol(t_Optional);
     }
+}
+
+
+void GlobalScope::declareFunction(const std::wstring&name, int flags, const wchar_t* returnType, ...)
+{
+    va_list va;
+    va_start(va, returnType);
+    FunctionSymbolPtr fn = vcreateFunction(name, flags, returnType, va);
+    va_end(va);
+
+    auto iter = symbols.find(name);
+    if(iter == symbols.end())
+    {
+        addSymbol(fn);
+        return;
+    }
+    if(FunctionOverloadedSymbolPtr overloads = dynamic_pointer_cast<FunctionOverloadedSymbol>(iter->second))
+    {
+        overloads->add(fn);
+    }
+    else if(FunctionSymbolPtr old = dynamic_pointer_cast<FunctionSymbol>(iter->second))
+    {
+        FunctionOverloadedSymbolPtr overloads(new FunctionOverloadedSymbol(name));
+        overloads->add(old);
+        overloads->add(fn);
+        iter->second = overloads;
+    }
+    else
+    {
+        assert(0 && "Symbol already defined with other types.");
+    }
+}
+
+/**
+* A short-hand way to create a function symbol
+*/
+FunctionSymbolPtr GlobalScope::createFunction(const std::wstring&name, int flags, const wchar_t* returnType, ...)
+{
+    va_list va;
+    va_start(va, returnType);
+    FunctionSymbolPtr ret = vcreateFunction(name, flags, returnType, va);
+    va_end(va);
+    return ret;
+}
+
+FunctionSymbolPtr GlobalScope::vcreateFunction(const std::wstring&name, int flags, const wchar_t* returnType, va_list va)
+{
+    std::vector<Type::Parameter> params;
+    TypePtr retType = dynamic_pointer_cast<Type>(lookup(returnType));
+    bool variadicParams = false;
+    assert(retType != nullptr);
+    while(true)
+    {
+        const wchar_t* typeName = va_arg(va, const wchar_t*);
+        if(!typeName)
+            break;
+        TypePtr paramType = dynamic_pointer_cast<Type>(lookup(typeName));
+        assert(paramType != nullptr);
+        params.push_back(Type::Parameter(paramType));
+    }
+    TypePtr funcType = Type::newFunction(params, retType, variadicParams, nullptr);
+    FunctionSymbolPtr ret(new FunctionSymbol(name, funcType, nullptr));
+    ret->setFlags(flags);
+    return ret;
 }
 
 void GlobalScope::initOperators()

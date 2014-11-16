@@ -41,6 +41,26 @@ class TypeDeclaration;
 class Expression;
 class Pattern;
 class NodeFactory;
+typedef std::shared_ptr<class Identifier> IdentifierPtr;
+struct TupleExtractionResult
+{
+    IdentifierPtr name;
+    TypePtr type;
+    ExpressionPtr initializer;
+    bool readonly;
+
+    TupleExtractionResult(const IdentifierPtr& name, const TypePtr& type, const ExpressionPtr& initializer, bool readonly)
+         :name(name), type(type), initializer(initializer), readonly(readonly)
+    {
+
+    }
+};
+enum PatternAccessibility
+{
+    AccessibilityUndefined,
+    AccessibilityConstant,
+    AccessibilityVariable
+};
 class SWALLOW_EXPORT SemanticAnalyzer : public NodeVisitor
 {
 public:
@@ -70,6 +90,7 @@ public:
     virtual void visitOperator(const OperatorDefPtr& node) override;
     virtual void visitValueBinding(const ValueBindingPtr& node) override;
     virtual void visitString(const StringLiteralPtr& node) override;
+    virtual void visitStringInterpolation(const StringInterpolationPtr& node);
     virtual void visitInteger(const IntegerLiteralPtr& node) override;
     virtual void visitFloat(const FloatLiteralPtr& node) override;
     virtual void visitConditionalOperator(const ConditionalOperatorPtr& node) override;
@@ -163,7 +184,7 @@ private:
     void explodeValueBindings(const ValueBindingsPtr& node);
     void explodeValueBinding(const ValueBindingsPtr& valueBindings, const std::list<ValueBindingPtr>::iterator& iter);
     MemberAccessPtr makeAccess(SourceInfo* info, NodeFactory* nodeFactory, const std::wstring& tempName, const std::vector<int>& indices);
-    void expandTuple(std::vector<std::tuple<IdentifierPtr, TypePtr, ExpressionPtr> >& results, std::vector<int>& indices, const PatternPtr& name, const std::wstring& tempName, const TypePtr& type, bool isReadonly);
+    void expandTuple(std::vector<TupleExtractionResult>& results, std::vector<int>& indices, const PatternPtr& name, const std::wstring& tempName, const TypePtr& type, PatternAccessibility accessibility);
 
 public:
     /**

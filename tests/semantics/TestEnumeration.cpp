@@ -138,6 +138,42 @@ TEST(TestEnumeration, AssociatedValues)
     ASSERT_NOT_NULL(Barcode = dynamic_pointer_cast<Type>(scope->lookup(L"Barcode")));
     ASSERT_NOT_NULL(a = dynamic_pointer_cast<SymbolPlaceHolder>(scope->lookup(L"a")));
 
+    ASSERT_EQ(Barcode, a->getType());
 }
-//TODO partial application of enum constructor is not allowed
 
+TEST(TestEnumeration, PartialApplication)
+{
+    SEMANTIC_ANALYZE(L"enum Barcode {\n"
+            L"    case UPCA(Int, Int, Int, Int)\n"
+            L"    case QRCode(String)\n"
+            L"}\n"
+            L"var productBarcode = Barcode.UPCA\n");
+    dumpCompilerResults(compilerResults);
+    ASSERT_EQ(1, compilerResults.numResults());
+    auto res = compilerResults.getResult(0);
+    ASSERT_EQ(Errors::E_PARTIAL_APPLICATION_OF_ENUM_CONSTRUCTOR_IS_NOT_ALLOWED, res.code);
+}
+
+TEST(TestEnumeration, AssociatedValues_SwitchCase)
+{
+    SEMANTIC_ANALYZE(L"enum Barcode {\n"
+            L"    case UPCA(Int, Int, Int, Int)\n"
+            L"    case QRCode(String)\n"
+            L"}\n"
+            L"var productBarcode = Barcode.UPCA(3, 4, 5, 6)\n"
+            L"switch productBarcode {\n"
+            L"case .UPCA(let numberSystem, let manufacturer, let product, let check):\n"
+            L"    println(\"UPC-A: \\(numberSystem), \\(manufacturer), \\(product), \\(check).\")\n"
+            L"case .QRCode(let productCode):\n"
+            L"    println(\"QR code: \\(productCode).\")\n"
+            L"}\n"
+            L"\n");
+    dumpCompilerResults(compilerResults);
+    ASSERT_EQ(0, compilerResults.numResults());
+    SymbolPlaceHolderPtr a;
+    TypePtr Barcode;
+
+    ASSERT_NOT_NULL(Barcode = dynamic_pointer_cast<Type>(scope->lookup(L"Barcode")));
+    ASSERT_NOT_NULL(a = dynamic_pointer_cast<SymbolPlaceHolder>(scope->lookup(L"productBarcode")));
+
+}

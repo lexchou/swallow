@@ -429,12 +429,12 @@ void SemanticAnalyzer::visitFunctionCall(const FunctionCallPtr& node)
 {
     NodeType::T nodeType = node->getFunction()->getNodeType();
     ExpressionPtr func = node->getFunction();
-    func->accept(this);
 
     switch(nodeType)
     {
         case NodeType::Identifier:
         {
+            func->accept(this);
             IdentifierPtr id = std::static_pointer_cast<Identifier>(func);
             const std::wstring &symbolName = id->getIdentifier();
             SymbolPtr sym = symbolRegistry->lookupSymbol(symbolName);
@@ -457,18 +457,34 @@ void SemanticAnalyzer::visitFunctionCall(const FunctionCallPtr& node)
         case NodeType::MemberAccess:
         {
             MemberAccessPtr ma = std::static_pointer_cast<MemberAccess>(func);
+            ma->getSelf()->accept(this);
             TypePtr selfType = ma->getSelf()->getType();
             assert(selfType != nullptr);
             const wstring& identifier = ma->getField()->getIdentifier();
             SymbolPtr sym;
+            const EnumCase*c = nullptr;
             if(selfType->getCategory() == Type::MetaType)
             {
                 selfType = selfType->getInnerType();
-                sym = selfType->getDeclaredStaticMember(identifier);
+                if(selfType->getCategory() == Type::Enum && (c = selfType->getEnumCase(identifier)) && c->constructor)
+                {
+                    //constructing an enum
+                    sym = c->constructor;
+                }
+                else
+                {
+                    sym = selfType->getDeclaredStaticMember(identifier);
+                }
             }
             else
             {
                 sym = selfType->getMember(identifier);
+            }
+            if(!sym)
+            {
+                error(ma, Errors::E_DOES_NOT_HAVE_A_MEMBER_2, toString(ma->getSelf()), identifier);
+                abort();
+                return;
             }
             assert(sym != nullptr);//
             visitFunctionCall(sym, node);
@@ -476,6 +492,7 @@ void SemanticAnalyzer::visitFunctionCall(const FunctionCallPtr& node)
         }
         case NodeType::Closure:
         {
+            func->accept(this);
             ClosurePtr closure = std::static_pointer_cast<Closure>(func);
             TypePtr type = closure->getType();
             assert(type != nullptr && type->getCategory() == Type::Function);
@@ -485,6 +502,7 @@ void SemanticAnalyzer::visitFunctionCall(const FunctionCallPtr& node)
         }
         case NodeType::ArrayLiteral:
         {
+            func->accept(this);
             //check if it's an array expression
             ArrayLiteralPtr array = std::static_pointer_cast<ArrayLiteral>(func);
             if(array->numElements() != 1 || (*array->begin())->getNodeType() != NodeType::Identifier)
@@ -522,6 +540,7 @@ void SemanticAnalyzer::visitFunctionCall(const FunctionCallPtr& node)
 void SemanticAnalyzer::visitMemberAccess(const MemberAccessPtr& node)
 {
     TypePtr selfType = t_hint;
+    wstring fieldName = node->getField() ? node->getField()->getIdentifier() : toString(node->getIndex());
     bool staticAccess = false;
     if(node->getSelf())
     {
@@ -541,8 +560,8 @@ void SemanticAnalyzer::visitMemberAccess(const MemberAccessPtr& node)
         if(!t_hint)
         {
             //invalid contextual type
-            wstring member = node->getField() ? node->getField()->getIdentifier() : toString(node->getIndex());
-            error(node, Errors::E_NO_CONTEXTUAL_TYPE_TO_ACCESS_MEMBER_A_1, member);
+            error(node, Errors::E_NO_CONTEXTUAL_TYPE_TO_ACCESS_MEMBER_A_1, fieldName);
+            return;
         }
         staticAccess = true;
     }
@@ -551,12 +570,19 @@ void SemanticAnalyzer::visitMemberAccess(const MemberAccessPtr& node)
     {
         SymbolPtr member;
         if (staticAccess)
-            member = selfType->getDeclaredStaticMember(node->getField()->getIdentifier());
+            member = selfType->getDeclaredStaticMember(fieldName);
         else
-            member = selfType->getMember(node->getField()->getIdentifier());
+            member = selfType->getMember(fieldName);
         if (member == nullptr)
         {
-            error(node->getField(), Errors::E_DOES_NOT_HAVE_A_MEMBER_2, selfType->toString(), node->getField()->getIdentifier());
+            //diagnose why it's not found
+            if(staticAccess && selfType->getCategory() == Type::Enum && selfType->getEnumCase(fieldName))
+            {
+                //it's a enum's case access, it's not allowed to be accessed directly
+                error(node, Errors::E_PARTIAL_APPLICATION_OF_ENUM_CONSTRUCTOR_IS_NOT_ALLOWED);
+                abort();
+            }
+            error(node->getField(), Errors::E_DOES_NOT_HAVE_A_MEMBER_2, selfType->toString(), fieldName);
             return;
         }
         node->setType(member->getType());
@@ -581,6 +607,12 @@ void SemanticAnalyzer::visitMemberAccess(const MemberAccessPtr& node)
 
 void SemanticAnalyzer::visitString(const StringLiteralPtr& node)
 {
+    GlobalScope* scope = symbolRegistry->getGlobalScope();
+    node->setType(scope->t_String);
+}
+void SemanticAnalyzer::visitStringInterpolation(const StringInterpolationPtr &node)
+{
+    //TODO: check all expressions inside can be converted to string
     GlobalScope* scope = symbolRegistry->getGlobalScope();
     node->setType(scope->t_String);
 }

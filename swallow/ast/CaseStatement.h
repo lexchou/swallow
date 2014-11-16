@@ -56,17 +56,16 @@ public:
     const Condition& getCondition(int i);
     const std::vector<Condition>& getConditions(){return conditions;}
 
-    std::vector<StatementPtr>::iterator begin(){return statements.begin();}
-    std::vector<StatementPtr>::iterator end(){return statements.end();}
-    
-    void addStatement(const StatementPtr& statement);
-    StatementPtr getStatement(int idx);
-    int numStatements();
+    void setCodeBlock(const CodeBlockPtr& codeBlock);
+    const CodeBlockPtr& getCodeBlock()const;
+
+    StatementPtr getStatement(int idx) const;
+    int numStatements() const;
 public:
     virtual void accept(NodeVisitor* visitor);
 private:
     std::vector<Condition> conditions;
-    std::vector<StatementPtr> statements;
+    CodeBlockPtr codeBlock;
 };
 
 SWALLOW_NS_END

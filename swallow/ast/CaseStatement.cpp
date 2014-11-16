@@ -27,6 +27,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+#include <ast/CodeBlock.h>
 #include "CaseStatement.h"
 #include "NodeVisitor.h"
 USE_SWALLOW_NS
@@ -60,17 +61,25 @@ const CaseStatement::Condition& CaseStatement::getCondition(int i)
     return conditions[i];
 }
 
-void CaseStatement::addStatement(const StatementPtr& statement)
+void CaseStatement::setCodeBlock(const CodeBlockPtr& codeBlock)
 {
-    statements.push_back(statement);
+    this->codeBlock = codeBlock;
 }
-StatementPtr CaseStatement::getStatement(int idx)
+const CodeBlockPtr& CaseStatement::getCodeBlock()const
 {
-    return statements[idx];
-}
-int CaseStatement::numStatements()
-{
-    return statements.size();
+    return codeBlock;
 }
 
+StatementPtr CaseStatement::getStatement(int idx) const
+{
+    if(codeBlock)
+        return codeBlock->getStatement(idx);
+    return nullptr;
+}
+int CaseStatement::numStatements() const
+{
+    if(codeBlock)
+        return codeBlock->numStatements();
+    return 0;
+}
 

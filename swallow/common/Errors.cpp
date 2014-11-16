@@ -131,6 +131,7 @@ std::wstring getErrorTemplate(int errorCode)
         case Errors::E_NO_CONTEXTUAL_TYPE_TO_ACCESS_MEMBER_A_1: return L"No contextual type to access member '%0'";
         case Errors::E_A_LABEL_IN_SWITCH_SHOULD_HAVE_AT_LEAST_ONE_STATEMENT_0: return L"'%0' label in a 'switch' should have at least one executable statement'";
         case Errors::E_SWITCH_MUST_BE_EXHAUSIVE_CONSIDER_ADDING_A_DEFAULT_CLAUSE: return L"Switch must be exhausive, consider adding a default clause";
+        case Errors::E_PARTIAL_APPLICATION_OF_ENUM_CONSTRUCTOR_IS_NOT_ALLOWED: return L"partial application of enum constructor is not allowed";
 
 
 

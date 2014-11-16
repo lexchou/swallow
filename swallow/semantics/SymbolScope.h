@@ -78,7 +78,7 @@ public:
     Node* getOwner();
     SymbolScope* getParentScope() {return parent;}
     const SymbolMap& getSymbols() {return symbols;}
-private:
+protected:
     OperatorMap operators;
     Node* owner;
     SymbolScope* parent;

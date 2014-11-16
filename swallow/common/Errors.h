@@ -124,6 +124,7 @@ struct SWALLOW_EXPORT Errors
         E_NO_CONTEXTUAL_TYPE_TO_ACCESS_MEMBER_A_1, // No contextual type to access member '%0"
         E_A_LABEL_IN_SWITCH_SHOULD_HAVE_AT_LEAST_ONE_STATEMENT_0, //'%0' label in a 'switch' should have at least one executable statement'
         E_SWITCH_MUST_BE_EXHAUSIVE_CONSIDER_ADDING_A_DEFAULT_CLAUSE, //Switch must be exhausive, consider adding a default clause
+        E_PARTIAL_APPLICATION_OF_ENUM_CONSTRUCTOR_IS_NOT_ALLOWED, //partial application of enum constructor is not allowed
 
         W_PARAM_CAN_BE_EXPRESSED_MORE_SUCCINCTLY_1, // '%0 %0' can be expressed more succinctly as '#%0'
         W_EXTRANEOUS_SHARTP_IN_PARAMETER_1 //Extraneous '#' in parameter: '%0' is already the keyword argument name

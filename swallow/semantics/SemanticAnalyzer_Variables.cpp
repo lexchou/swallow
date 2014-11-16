@@ -295,18 +295,17 @@ void SemanticAnalyzer::explodeValueBinding(const ValueBindingsPtr& valueBindings
     tempVar->setTemporary(true);
     valueBindings->insertAfter(tempVar, iter);
     //now expand tuples
-    vector<tuple<IdentifierPtr, TypePtr, ExpressionPtr> > result;
+    vector<TupleExtractionResult> result;
     vector<int> indices;
-    expandTuple(result, indices, name, tempName, tempVar->getType(), valueBindings->isReadOnly());
+    expandTuple(result, indices, name, tempName, tempVar->getType(), valueBindings->isReadOnly() ? AccessibilityConstant : AccessibilityVariable);
     for(auto v : result)
     {
-        IdentifierPtr id = get<0>(v);
-        if(id->getIdentifier() == L"_")
+        if(v.name->getIdentifier() == L"_")
             continue;//ignore the placeholder
-        ValueBindingPtr var = nodeFactory->createValueBinding(*id->getSourceInfo());
-        var->setName(id);
-        var->setType(get<1>(v));
-        var->setInitializer(get<2>(v));
+        ValueBindingPtr var = nodeFactory->createValueBinding(*v.name->getSourceInfo());
+        var->setName(v.name);
+        var->setType(v.type);
+        var->setInitializer(v.initializer);
         valueBindings->add(var);
     }
 }
@@ -326,7 +325,7 @@ MemberAccessPtr SemanticAnalyzer::makeAccess(SourceInfo* info, NodeFactory* node
     }
     return static_pointer_cast<MemberAccess>(ret);
 }
-void SemanticAnalyzer::expandTuple(vector<tuple<IdentifierPtr, TypePtr, ExpressionPtr> >& results, vector<int>& indices, const PatternPtr& name, const std::wstring& tempName, const TypePtr& type, bool isReadonly)
+void SemanticAnalyzer::expandTuple(vector<TupleExtractionResult>& results, vector<int>& indices, const PatternPtr& name, const std::wstring& tempName, const TypePtr& type, PatternAccessibility accessibility)
 {
     TypeNodePtr declaredType;
     switch (name->getNodeType())
@@ -334,8 +333,16 @@ void SemanticAnalyzer::expandTuple(vector<tuple<IdentifierPtr, TypePtr, Expressi
         case NodeType::Identifier:
         {
             IdentifierPtr id = static_pointer_cast<Identifier>(name);
+            if(accessibility == AccessibilityUndefined)
+            {
+                //undefined variable
+                error(name, Errors::E_USE_OF_UNRESOLVED_IDENTIFIER_1, id->getIdentifier());
+                abort();
+                return;
+            }
             name->setType(type);
-            results.push_back(make_tuple(id, type, makeAccess(id->getSourceInfo(), id->getNodeFactory(), tempName, indices)));
+            bool readonly = accessibility == AccessibilityConstant;
+            results.push_back(TupleExtractionResult(id, type, makeAccess(id->getSourceInfo(), id->getNodeFactory(), tempName, indices), readonly));
             //check if the identifier already has a type definition
             break;
         }
@@ -351,7 +358,7 @@ void SemanticAnalyzer::expandTuple(vector<tuple<IdentifierPtr, TypePtr, Expressi
                 abort();
                 return;
             }
-            expandTuple(results, indices, pat->getPattern(), tempName, declaredType, isReadonly);
+            expandTuple(results, indices, pat->getPattern(), tempName, declaredType, accessibility);
             break;
         }
         case NodeType::Tuple:
@@ -377,18 +384,34 @@ void SemanticAnalyzer::expandTuple(vector<tuple<IdentifierPtr, TypePtr, Expressi
                 TypePtr elementType = type->getElementType(i);
                 indices.push_back(i);
                 //validateTupleType(isReadonly, element, elementType);
-                expandTuple(results, indices, element, tempName, elementType, isReadonly);
+                expandTuple(results, indices, element, tempName, elementType, accessibility);
                 indices.pop_back();
             }
             break;
         }
         case NodeType::ValueBindingPattern:
         {
-            error(name, Errors::E_VARLET_CANNOT_APPEAR_INSIDE_ANOTHER_VAR_OR_LET_PATTERN_1, isReadonly ? L"let" : L"var");
-            abort();
+            if(accessibility != AccessibilityUndefined)
+            {
+                error(name, Errors::E_VARLET_CANNOT_APPEAR_INSIDE_ANOTHER_VAR_OR_LET_PATTERN_1, accessibility == AccessibilityConstant ? L"let" : L"var");
+                abort();
+            }
+            else
+            {
+                ValueBindingPatternPtr p = static_pointer_cast<ValueBindingPattern>(name);
+                expandTuple(results, indices, p->getBinding(), tempName, type, p->isReadOnly() ? AccessibilityConstant : AccessibilityVariable);
+            }
             break;
         }
         case NodeType::EnumCasePattern:
+        {
+            EnumCasePatternPtr p(static_pointer_cast<EnumCasePattern>(name));
+            if(p->getAssociatedBinding())
+            {
+                expandTuple(results, indices, p->getAssociatedBinding(), tempName, type, accessibility);
+            }
+            break;
+        }
         case NodeType::TypeCase:
         case NodeType::TypeCheck:
         default:

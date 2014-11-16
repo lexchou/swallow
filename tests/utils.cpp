@@ -39,6 +39,7 @@
 #include <sstream>
 #include <fstream>
 #include "common/Errors.h"
+#include <semantics/GlobalScope.h>
 //#include <codecvt>
 
 std::wstring readFile(const char* fileName)
@@ -106,17 +107,9 @@ Swallow::ProgramPtr parseStatements(Swallow::CompilerResults& compilerResults, c
 Swallow::ScopedProgramPtr analyzeStatement(Swallow::SymbolRegistry& registry, Swallow::CompilerResults& compilerResults, const char* func, const wchar_t* str)
 {
     using namespace Swallow;
+    registry.getGlobalScope()->declareFunction(L"println", 0, L"Void", L"Int", NULL);
+    registry.getGlobalScope()->declareFunction(L"println", 0, L"Void", L"String", NULL);
 
-    FunctionOverloadedSymbolPtr println(new FunctionOverloadedSymbol());
-    {
-        TypePtr t_int = registry.lookupType(L"Int");
-        TypePtr t_Void = registry.lookupType(L"Void");
-        std::vector<Type::Parameter> parameters = {Type::Parameter(t_int)};
-        TypePtr type = Type::newFunction(parameters, t_Void, false);
-        FunctionSymbolPtr println_int(new FunctionSymbol(L"println", type, nullptr));
-        println->add(println_int);
-    }
-    registry.getCurrentScope()->addSymbol(L"println", SymbolPtr(println));
     ScopedNodeFactory nodeFactory;
     Parser parser(&nodeFactory, &compilerResults);
     parser.setFileName(L"<file>");

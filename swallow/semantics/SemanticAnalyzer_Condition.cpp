@@ -38,6 +38,7 @@
 #include "GenericDefinition.h"
 #include "GenericArgument.h"
 #include "TypeBuilder.h"
+#include "ScopedNodes.h"
 #include "FunctionIterator.h"
 #include <cassert>
 #include <algorithm>
@@ -89,7 +90,8 @@ void SemanticAnalyzer::visitSwitchCase(const SwitchCasePtr& node)
 
     for(const CaseStatementPtr& c : *node)
     {
-        if(c->numStatements() == 0)
+        CodeBlockPtr statements = c->getCodeBlock();
+        if(statements->numStatements() == 0)
         {
             error(node, Errors::E_A_LABEL_IN_SWITCH_SHOULD_HAVE_AT_LEAST_ONE_STATEMENT_0, L"case");
             return;
@@ -99,7 +101,7 @@ void SemanticAnalyzer::visitSwitchCase(const SwitchCasePtr& node)
     if(node->getDefaultCase())
     {
 
-        if(node->getDefaultCase()->numStatements() == 0)
+        if(node->getDefaultCase()->getCodeBlock()->numStatements() == 0)
         {
             error(node, Errors::E_A_LABEL_IN_SWITCH_SHOULD_HAVE_AT_LEAST_ONE_STATEMENT_0, L"default");
             return;
@@ -117,8 +119,8 @@ void SemanticAnalyzer::visitEnumCasePattern(const EnumCasePatternPtr& node)
         error(node, Errors::E_NO_CONTEXTUAL_TYPE_TO_ACCESS_MEMBER_A_1, node->getName());
         return;
     }
-    SymbolPtr member = t_hint->getDeclaredStaticMember(node->getName());
-    if (member == nullptr)
+    const EnumCase* ec = t_hint->getEnumCase(node->getName());
+    if (ec == nullptr)
     {
         error(node, Errors::E_DOES_NOT_HAVE_A_MEMBER_2, t_hint->toString(), node->getName());
         return;
@@ -132,6 +134,7 @@ void SemanticAnalyzer::visitEnumCasePattern(const EnumCasePatternPtr& node)
 void SemanticAnalyzer::visitCase(const CaseStatementPtr& node)
 {
     assert(t_hint != nullptr);
+    ScopedCodeBlockPtr codeBlock = static_pointer_cast<ScopedCodeBlock>(node->getCodeBlock());
     for(const CaseStatement::Condition& cond : node->getConditions())
     {
         //the pattern should be evaluated to the contextual type where the condition must evaluate to BooleanLiteralConvertible
@@ -155,10 +158,36 @@ void SemanticAnalyzer::visitCase(const CaseStatementPtr& node)
                 break;
             }
         }
+        //create symbols that used for unpacking associated values
+        if(t_hint->getCategory() == Type::Enum)
+        {
+            PatternAccessibility accessibility = AccessibilityUndefined;
+            TuplePtr tuple = nullptr;
+            EnumCasePatternPtr enumCase = dynamic_pointer_cast<EnumCasePattern>(cond.condition);
+            if(!enumCase)
+            {
+                if (ValueBindingPatternPtr binding = dynamic_pointer_cast<ValueBindingPattern>(cond.condition))
+                {
+                    enumCase = dynamic_pointer_cast<EnumCasePattern>(binding->getBinding());
+                    accessibility = binding->isReadOnly() ? AccessibilityConstant : AccessibilityVariable;
+                }
+            }
+            assert(enumCase != nullptr);
+            const EnumCase* ec = t_hint->getEnumCase(enumCase->getName());
+            if(ec && ec->type != symbolRegistry->getGlobalScope()->t_Void)
+            {
+                vector<TupleExtractionResult> results;
+                vector<int> indices;
+                this->expandTuple(results, indices, cond.condition, L"#0", ec->type, accessibility);
+                for (auto var : results)
+                {
+                    //register symbol
+                    const wstring &name = var.name->getIdentifier();
+                    SymbolPlaceHolderPtr sym(new SymbolPlaceHolder(name, var.type, SymbolPlaceHolder::R_LOCAL_VARIABLE, SymbolFlagInitialized | SymbolFlagReadable));
+                    codeBlock->getScope()->addSymbol(sym);
+                }
+            }
+        }
     }
-    for(const StatementPtr& st : *node)
-    {
-        st->accept(this);
-    }
-
+    node->getCodeBlock()->accept(this);
 }

@@ -156,10 +156,7 @@ void NodeVisitor::visitCase(const CaseStatementPtr& node)
         ACCEPT(condition.condition);
         ACCEPT(condition.guard);
     }
-    for(auto st : *node)
-    {
-        ACCEPT(st);
-    }
+    ACCEPT(node->getCodeBlock());
 }
 
 void NodeVisitor::visitCodeBlock(const CodeBlockPtr& node)

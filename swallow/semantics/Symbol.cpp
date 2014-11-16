@@ -1,4 +1,4 @@
-#include "symbol.h"
+#include "Symbol.h"
 
 USE_SWALLOW_NS
 using namespace std;

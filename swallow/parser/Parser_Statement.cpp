@@ -360,6 +360,8 @@ StatementPtr Parser::parseSwitch()
             
             //“case-item-list → pattern guard-clause opt | pattern guard-clause opt , case-item-list”
             CaseStatementPtr caseCond = nodeFactory->createCase(token.state);
+            CodeBlockPtr codeBlock = nodeFactory->createCodeBlock(token.state);
+            caseCond->setCodeBlock(codeBlock);
             do
             {
                 PatternPtr pattern = parsePattern();
@@ -378,6 +380,8 @@ StatementPtr Parser::parseSwitch()
         {
             expect(L":");
             CaseStatementPtr caseCond = nodeFactory->createCase(token.state);
+            CodeBlockPtr codeBlock = nodeFactory->createCodeBlock(token.state);
+            caseCond->setCodeBlock(codeBlock);
             parseSwitchStatements(caseCond);
             ret->setDefaultCase(caseCond);
         }
@@ -396,6 +400,7 @@ void Parser::parseSwitchStatements(const CaseStatementPtr& case_)
     Token token;
     Flags flags(this);
     flags -= SUPPRESS_TRAILING_CLOSURE;
+    CodeBlockPtr codeBlock = case_->getCodeBlock();
     while(true)
     {
         expect_next(token);
@@ -406,7 +411,7 @@ void Parser::parseSwitchStatements(const CaseStatementPtr& case_)
             break;
         }
         StatementPtr st = parseStatement();
-        case_->addStatement(st);
+        codeBlock->addStatement(st);
     }
         
 }

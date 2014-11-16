@@ -45,11 +45,18 @@ typedef std::weak_ptr<class TypeDeclaration> TypeDeclarationWeakPtr;
 typedef std::shared_ptr<class GenericDefinition> GenericDefinitionPtr;
 typedef std::shared_ptr<class GenericArgument> GenericArgumentPtr;
 typedef std::shared_ptr<class FunctionOverloadedSymbol> FunctionOverloadedSymbolPtr;
+struct SWALLOW_EXPORT EnumCase
+{
+    std::wstring name;
+    TypePtr type;
+    FunctionSymbolPtr constructor;
+};
 class SWALLOW_EXPORT Type : public Symbol, public  std::enable_shared_from_this<Symbol>
 {
     friend class TypeBuilder;
 public:
     typedef std::map<std::wstring, SymbolPtr> SymbolMap;
+    typedef std::map<std::wstring, EnumCase> EnumCaseMap;
     struct Parameter
     {
         std::wstring name;
@@ -159,6 +166,11 @@ public://properties
      * Gets the number of total enum cases
      */
     int numEnumCases()const;
+
+    /**
+     * Gets the enum cases' associated value type
+     */
+    const EnumCase* getEnumCase(const std::wstring& name)const;
 
     /**
      * Gets which declaration this type referenced to
@@ -294,7 +306,7 @@ protected:
     GenericArgumentPtr genericArguments;
 
     //for enum type
-    int enumCases;
+    EnumCaseMap enumCases;
 
 
     //for function type
