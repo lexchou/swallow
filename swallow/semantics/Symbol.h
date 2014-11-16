@@ -73,7 +73,7 @@ public:
 protected:
     int flags;
 };
-class SymbolPlaceHolder : public Symbol
+class SWALLOW_EXPORT SymbolPlaceHolder : public Symbol
 {
 public:
     enum Role
