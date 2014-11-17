@@ -178,7 +178,7 @@ void REPL::evalCommand(const wstring &command)
     if(pos != wstring::npos)
     {
         cmd = command.substr(0, pos);
-        args = cmd.substr(pos + 1, command.size() - pos);
+        args = command.substr(pos + 1, command.size() - pos - 1);
     }
     auto iter = methods.find(cmd);
     if(iter == methods.end())
@@ -268,7 +268,11 @@ static void dumpSymbols(SymbolScope* scope, const ConsoleWriterPtr& out)
 }
 void REPL::commandSymbols(const wstring& args)
 {
+    SymbolScope* scope = nullptr;
     ScopedProgramPtr p = static_pointer_cast<ScopedProgram>(program);
-    SymbolScope* scope = p->getScope();
+    if(args == L"global")
+        scope = this->registry.getGlobalScope();
+    else
+        scope = p->getScope();
     dumpSymbols(scope, out);
 }
