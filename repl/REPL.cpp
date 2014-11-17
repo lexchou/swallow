@@ -8,6 +8,8 @@
 #include <cassert>
 #include <ast/ast.h>
 #include <semantics/GlobalScope.h>
+#include <semantics/FunctionOverloadedSymbol.h>
+#include <semantics/FunctionSymbol.h>
 
 using namespace std;
 using namespace Swallow;
@@ -192,19 +194,81 @@ void REPL::initCommands()
     methods.insert(make_pair(L"help", &REPL::commandHelp));
     methods.insert(make_pair(L"quit", &REPL::commandQuit));
     methods.insert(make_pair(L"exit", &REPL::commandQuit));
+    methods.insert(make_pair(L"symbols", &REPL::commandSymbols));
 }
 void REPL::commandHelp(const wstring& args)
 {
-
     out->printf(L"The Swallow REPL (Read-Eval-Print-Loop) acts like an interpreter.  Valid statements, expressions, and declarations.\n");
     out->printf(L"Compiler and execution is not finished yet.");
     out->printf(L"\n");
     out->printf(L"The complete set of commands are also available as described below.  Commands must be prefixed with a colon at the REPL prompt (:quit for example.) \n\n\n");
     out->printf(L"REPL commands:\n");
     out->printf(L"  help              -- Show a list of all swallow commands, or give details about specific commands.\n");
+    out->printf(L"  symbols           -- Dump symbols\n");
     out->printf(L"  quit              -- Quit out of the Swallow REPL.\n\n");
 }
 void REPL::commandQuit(const wstring& args)
 {
     canQuit = true;
+}
+
+static void dumpSymbol(const wstring& name, const SymbolPtr& sym, const ConsoleWriterPtr& out)
+{
+    const wchar_t* kind = L"?????";
+
+    if(dynamic_pointer_cast<Type>(sym))
+        kind = L"Type";
+    else if(dynamic_pointer_cast<SymbolPlaceHolder>(sym))
+        kind = L"Placeholder";
+    else if(dynamic_pointer_cast<FunctionSymbol>(sym))
+        kind = L"Function";
+
+    out->setForegroundColor(White , Bright);
+    out->printf(L"%10ls\t", name.c_str());
+    out->setForegroundColor(Magenta , Bright);
+    out->printf(L"%7ls\t", kind);
+
+    if(sym->getType())
+    {
+        wstring type = sym->getType()->toString();
+        out->setForegroundColor(Yellow, Bright);
+        out->printf(L"%ls\t", type.c_str());
+    }
+
+
+    out->setForegroundColor(Cyan, Bright);
+    static const SymbolFlags flags[] = {SymbolFlagInitializing, SymbolFlagInitialized, SymbolFlagMember, SymbolFlagWritable, SymbolFlagReadable, SymbolFlagTemporary,
+            SymbolFlagHasInitializer, SymbolFlagStatic, SymbolFlagInit};
+    static const wchar_t* flagNames[] = {L"initializing", L"initialized", L"member", L"writable", L"readable", L"temporary", L"has_initializer", L"static", L"init"};
+    for(int i = 0; i < sizeof(flags) / sizeof(flags[0]); i++)
+    {
+        if(sym->hasFlags(flags[i]))
+            out->printf(L"%ls,", flagNames[i]);
+    }
+
+    out->printf(L"\n");
+    out->reset();
+}
+static void dumpSymbols(SymbolScope* scope, const ConsoleWriterPtr& out)
+{
+    for(auto entry : scope->getSymbols())
+    {
+        if(FunctionOverloadedSymbolPtr funcs = dynamic_pointer_cast<FunctionOverloadedSymbol>(entry.second))
+        {
+            for(const FunctionSymbolPtr& func : *funcs)
+            {
+                dumpSymbol(entry.first, func, out);
+            }
+        }
+        else
+        {
+            dumpSymbol(entry.first, entry.second, out);
+        }
+    }
+}
+void REPL::commandSymbols(const wstring& args)
+{
+    ScopedProgramPtr p = static_pointer_cast<ScopedProgram>(program);
+    SymbolScope* scope = p->getScope();
+    dumpSymbols(scope, out);
 }

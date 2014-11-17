@@ -58,6 +58,7 @@ private://commands
     void initCommands();
     void commandHelp(const wstring& args);
     void commandQuit(const wstring& args);
+    void commandSymbols(const wstring& args);
 private:
     Swallow::SymbolRegistry registry;
     Swallow::ScopedNodeFactory nodeFactory;
