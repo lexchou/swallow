@@ -66,7 +66,7 @@ bool SemanticAnalyzer::isNumber(const TypePtr& type)
 bool SemanticAnalyzer::isFloat(const TypePtr& type)
 {
     GlobalScope* scope = symbolRegistry->getGlobalScope();
-    if(type == scope->t_Float || type == scope->t_Double)
+    if(type == scope->Float || type == scope->Double)
         return true;
     return false;
 }
@@ -520,7 +520,7 @@ void SemanticAnalyzer::visitFunctionCall(const FunctionCallPtr& node)
                 error(func, Errors::E_INVALID_USE_OF_A_TO_CALL_A_VALUE_OF_NON_FUNCTION_TYPE_B_2, toString(func), func->getType()->toString());
                 break;
             }
-            TypePtr Array = symbolRegistry->getGlobalScope()->t_Array;
+            TypePtr Array = symbolRegistry->getGlobalScope()->Array;
             TypePtr arrayType = Type::newSpecializedType(Array, type);
             node->setType(arrayType);
             break;
@@ -608,13 +608,13 @@ void SemanticAnalyzer::visitMemberAccess(const MemberAccessPtr& node)
 void SemanticAnalyzer::visitString(const StringLiteralPtr& node)
 {
     GlobalScope* scope = symbolRegistry->getGlobalScope();
-    node->setType(scope->t_String);
+    node->setType(scope->String);
 }
 void SemanticAnalyzer::visitStringInterpolation(const StringInterpolationPtr &node)
 {
     //TODO: check all expressions inside can be converted to string
     GlobalScope* scope = symbolRegistry->getGlobalScope();
-    node->setType(scope->t_String);
+    node->setType(scope->String);
 }
 void SemanticAnalyzer::visitInteger(const IntegerLiteralPtr& node)
 {
@@ -623,12 +623,12 @@ void SemanticAnalyzer::visitInteger(const IntegerLiteralPtr& node)
     if(t_hint && canConvertTo(node, t_hint))
         node->setType(t_hint);
     else
-        node->setType(scope->t_Int);
+        node->setType(scope->Int);
 }
 void SemanticAnalyzer::visitFloat(const FloatLiteralPtr& node)
 {
     GlobalScope* scope = symbolRegistry->getGlobalScope();
-    node->setType(scope->t_Double);
+    node->setType(scope->Double);
 }
 
 //Will be replaced by stdlib's type constructor
@@ -653,7 +653,7 @@ void SemanticAnalyzer::visitArrayLiteral(const ArrayLiteralPtr& node)
     if(t_hint)
     {
         //TODO if hint specified, it must be Array type nor conform to ArrayLiteralConvertible protocol
-        if(t_hint->getInnerType() != scope->t_Array)
+        if(t_hint->getInnerType() != scope->Array)
         {
             bool conformToArrayLiteralConvertible = false;
             if(!conformToArrayLiteralConvertible)
@@ -691,17 +691,17 @@ void SemanticAnalyzer::visitArrayLiteral(const ArrayLiteralPtr& node)
             switch(el->getNodeType())
             {
                 case NodeType::IntegerLiteral:
-                    hint = scope->t_Int;
+                    hint = scope->Int;
                     break;
                 case NodeType::FloatLiteral:
-                    hint = scope->t_Double;
+                    hint = scope->Double;
                     break;
                 default:
                     type = el->getType();
                     if(hint)
                     {
                         //check if the hint can be converted to type
-                        bool success = (hint == scope->t_Double && isFloat(type)) || (hint == scope->t_Int && isNumber(type));
+                        bool success = (hint == scope->Double && isFloat(type)) || (hint == scope->Int && isNumber(type));
                         if(!success)
                         {
                             error(el, Errors::E_ARRAY_CONTAINS_DIFFERENT_TYPES);
@@ -718,7 +718,7 @@ void SemanticAnalyzer::visitArrayLiteral(const ArrayLiteralPtr& node)
     if(!type && hint)
         type = hint;
 
-    TypePtr arrayType = Type::newSpecializedType(scope->t_Array, type);
+    TypePtr arrayType = Type::newSpecializedType(scope->Array, type);
     node->setType(arrayType);
 }
 void SemanticAnalyzer::visitDictionaryLiteral(const DictionaryLiteralPtr& node)
@@ -837,11 +837,11 @@ void SemanticAnalyzer::visitCompileConstant(const CompileConstantPtr& node)
     GlobalScope* scope = symbolRegistry->getGlobalScope();
     if(name == L"__LINE__" || name == L"__COLUMN__")
     {
-        node->setType(scope->t_Int);
+        node->setType(scope->Int);
     }
     else if(name == L"__FUNCTION__" || name == L"__FILE__")
     {
-        node->setType(scope->t_String);
+        node->setType(scope->String);
     }
     else
     {

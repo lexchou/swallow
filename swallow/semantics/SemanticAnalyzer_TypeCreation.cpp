@@ -321,7 +321,7 @@ void SemanticAnalyzer::visitEnum(const EnumDefPtr& node)
             int flags = SymbolFlagReadable | SymbolFlagHasInitializer | SymbolFlagMember | SymbolFlagStatic;
             SymbolPlaceHolderPtr symb(new SymbolPlaceHolder(c.name, type, SymbolPlaceHolder::R_PROPERTY, flags));
             type->addMember(symb);
-            type->addEnumCase(c.name, symbolRegistry->getGlobalScope()->t_Void, nullptr);
+            type->addEnumCase(c.name, symbolRegistry->getGlobalScope()->Void, nullptr);
         }
     }
     else if(node->numAssociatedTypes())
@@ -349,7 +349,7 @@ void SemanticAnalyzer::visitEnum(const EnumDefPtr& node)
                 int flags = SymbolFlagReadable | SymbolFlagHasInitializer | SymbolFlagMember | SymbolFlagStatic;
                 SymbolPlaceHolderPtr symb(new SymbolPlaceHolder(c.name, type, SymbolPlaceHolder::R_PROPERTY, flags));
                 type->addMember(symb);
-                type->addEnumCase(c.name, symbolRegistry->getGlobalScope()->t_Void, nullptr);
+                type->addEnumCase(c.name, symbolRegistry->getGlobalScope()->Void, nullptr);
             }
         }
     }

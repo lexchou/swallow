@@ -321,7 +321,7 @@ TypePtr SemanticAnalyzer::lookupTypeImpl(const TypeNodePtr &type)
     if(ArrayTypePtr array = std::dynamic_pointer_cast<ArrayType>(type))
     {
         GlobalScope* scope = symbolRegistry->getGlobalScope();
-        TypePtr Array = scope->t_Array;
+        TypePtr Array = scope->Array;
         TypePtr innerType = lookupType(array->getInnerType());
         assert(innerType != nullptr);
         assert(Array != nullptr);
@@ -331,7 +331,7 @@ TypePtr SemanticAnalyzer::lookupTypeImpl(const TypeNodePtr &type)
     if(OptionalTypePtr opt = std::dynamic_pointer_cast<OptionalType>(type))
     {
         GlobalScope* scope = symbolRegistry->getGlobalScope();
-        TypePtr Optional = scope->t_Optional;
+        TypePtr Optional = scope->Optional;
         TypePtr innerType = lookupType(opt->getInnerType());
         assert(innerType != nullptr);
         assert(Optional != nullptr);

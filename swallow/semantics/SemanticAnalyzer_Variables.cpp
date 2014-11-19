@@ -113,7 +113,7 @@ void SemanticAnalyzer::visitComputedProperty(const ComputedPropertyPtr& node)
     std::vector<Type::Parameter> params;
     TypePtr getterType = Type::newFunction(params, type, nullptr);
     params.push_back(Type::Parameter(type));
-    TypePtr setterType = Type::newFunction(params, symbolRegistry->getGlobalScope()->t_Void, false);
+    TypePtr setterType = Type::newFunction(params, symbolRegistry->getGlobalScope()->Void, false);
 
     if(getter)
     {

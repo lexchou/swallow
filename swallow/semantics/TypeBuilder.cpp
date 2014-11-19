@@ -48,6 +48,7 @@ void TypeBuilder::setInitializer(const FunctionOverloadedSymbolPtr& initializer)
 
 void TypeBuilder::addParameter(const Type::Parameter& param)
 {
+    assert(param.type != nullptr);
     parameters.push_back(param);
 }
 
@@ -61,6 +62,7 @@ void TypeBuilder::setInnerType(const TypePtr &type)
 }
 void TypeBuilder::addProtocol(const TypePtr &protocol)
 {
+    assert(protocol != nullptr);
     protocols.push_back(protocol);
     auto iter = parents.find(protocol);
     if(iter == parents.end())
@@ -70,6 +72,7 @@ void TypeBuilder::addProtocol(const TypePtr &protocol)
 }
 void TypeBuilder::addParentTypesFrom(const TypePtr& type)
 {
+    assert(type != nullptr);
     for(auto parent : type->parents)
     {
         addParentType(parent.first, parent.second + 1);
@@ -78,6 +81,7 @@ void TypeBuilder::addParentTypesFrom(const TypePtr& type)
 }
 void TypeBuilder::addParentType(const TypePtr& type, int distance)
 {
+    assert(type != nullptr);
     assert(distance > 0);
     auto iter = parents.find(type);
     if(iter == parents.end())
@@ -92,11 +96,14 @@ void TypeBuilder::addParentType(const TypePtr& type, int distance)
 
 void TypeBuilder::addMember(const SymbolPtr& symbol)
 {
+    assert(symbol != nullptr);
     addMember(symbol->getName(), symbol);
 }
 
 void TypeBuilder::addMember(const std::wstring& name, const SymbolPtr& member)
 {
+    assert(!name.empty());
+    assert(member != nullptr);
     if(member->hasFlags(SymbolFlagStatic))
     {
         staticMembers.insert(make_pair(name, member));
@@ -159,6 +166,7 @@ void TypeBuilder::addMember(const std::wstring& name, const SymbolPtr& member)
 
 void TypeBuilder::addEnumCase(const std::wstring &name, const TypePtr &associatedType, const FunctionSymbolPtr& constructor)
 {
+    assert(!name.empty());
     assert(associatedType != nullptr);
     EnumCase c = {name, associatedType, constructor};
     enumCases.insert(make_pair(name, c));

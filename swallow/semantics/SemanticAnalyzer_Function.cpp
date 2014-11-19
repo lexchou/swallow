@@ -141,7 +141,7 @@ FunctionSymbolPtr SemanticAnalyzer::createFunctionSymbol(const FunctionDefPtr& f
 
 
 
-    TypePtr retType = symbolRegistry->getGlobalScope()->t_Void;
+    TypePtr retType = symbolRegistry->getGlobalScope()->Void;
     if(func->getReturnType())
         retType = lookupType(func->getReturnType());
     TypePtr funcType = createFunctionType(func->getParametersList().begin(), func->getParametersList().end(), retType, generic);

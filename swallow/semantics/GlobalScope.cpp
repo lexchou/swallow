@@ -48,39 +48,119 @@ GlobalScope::GlobalScope()
 void GlobalScope::initPrimitiveTypes()
 {
     //Protocols
-    addSymbol(p_BooleanType = Type::newType(L"BooleanType", Type::Protocol));
+    TypeBuilderPtr type;
+    #define DECLARE_TYPE(T, N)  N = type = static_pointer_cast<TypeBuilder>(Type::newType(L###N, Type::T)); addSymbol(N);
+    #define IMPLEMENTS(P) type->addProtocol(P);
+
+    DECLARE_TYPE(Protocol, BooleanType);
+    DECLARE_TYPE(Protocol, IntegerLiteralConvertible);
+    DECLARE_TYPE(Protocol, BooleanLiteralConvertible);
+    DECLARE_TYPE(Protocol, StringLiteralConvertible);
+    DECLARE_TYPE(Protocol, FloatLiteralConvertible);
+    DECLARE_TYPE(Protocol, NilLiteralConvertible);
+    DECLARE_TYPE(Protocol, ArrayLiteralConvertible);
+    DECLARE_TYPE(Protocol, DictionaryLiteralConvertible);
+    DECLARE_TYPE(Protocol, UnicodeScalarLiteralConvertible);
+    DECLARE_TYPE(Protocol, ExtendedGraphemeClusterLiteralConvertible);
+    IMPLEMENTS(UnicodeScalarLiteralConvertible);
+
+    DECLARE_TYPE(Protocol, Equatable);
+    DECLARE_TYPE(Protocol, Hashable);
+    DECLARE_TYPE(Protocol, Comparable);
+
+
+    DECLARE_TYPE(Protocol, _IntegerType);
+    IMPLEMENTS(IntegerLiteralConvertible);
+
+    DECLARE_TYPE(Protocol, SignedIntegerType);
+    IMPLEMENTS(_IntegerType)
+
+    DECLARE_TYPE(Protocol, UnsignedIntegerType);
+    IMPLEMENTS(_IntegerType);
+
+    DECLARE_TYPE(Protocol, FloatingPointType);
+
+    DECLARE_TYPE(Protocol, StringInterpolationConvertible);
+
+
 
 
     //Types
-    addSymbol(t_Int8 = Type::newType(L"Int8", Type::Aggregate));
-    addSymbol(t_UInt8 = Type::newType(L"UInt8", Type::Aggregate));
-    addSymbol(t_Int16 = Type::newType(L"Int16", Type::Aggregate));
-    addSymbol(t_UInt16 = Type::newType(L"UInt16", Type::Aggregate));
-    addSymbol(t_Int32 = Type::newType(L"Int32", Type::Aggregate));
-    addSymbol(t_UInt32 = Type::newType(L"UInt32", Type::Aggregate));
-    addSymbol(t_Int64 = Type::newType(L"Int64", Type::Aggregate));
-    addSymbol(t_UInt64 = Type::newType(L"UInt64", Type::Aggregate));
-    addSymbol(t_Int = Type::newType(L"Int", Type::Aggregate));
-    addSymbol(t_UInt = Type::newType(L"UInt", Type::Aggregate));
-    addSymbol(t_Bool = Type::newType(L"Bool", Type::Aggregate));
-    static_pointer_cast<TypeBuilder>(t_Bool)->addParentType(p_BooleanType);
-    addSymbol(t_Float = Type::newType(L"Float", Type::Aggregate));
-    addSymbol(t_Double = Type::newType(L"Double", Type::Aggregate));
-    addSymbol(t_String = Type::newType(L"String", Type::Aggregate));
-    addSymbol(L"Void", t_Void = Type::newTuple(std::vector<TypePtr>()));
+    DECLARE_TYPE(Aggregate, Int8);
+    IMPLEMENTS(SignedIntegerType);
+
+    DECLARE_TYPE(Aggregate, UInt8);
+    IMPLEMENTS(UnsignedIntegerType);
+
+    DECLARE_TYPE(Aggregate, Int16);
+    IMPLEMENTS(SignedIntegerType);
+
+    DECLARE_TYPE(Aggregate, UInt16);
+    IMPLEMENTS(UnsignedIntegerType);
+
+    DECLARE_TYPE(Aggregate, Int32);
+    IMPLEMENTS(SignedIntegerType);
+
+    DECLARE_TYPE(Aggregate, UInt32);
+    IMPLEMENTS(UnsignedIntegerType);
+
+    DECLARE_TYPE(Aggregate, Int64);
+    IMPLEMENTS(SignedIntegerType);
+
+    DECLARE_TYPE(Aggregate, UInt64);
+    IMPLEMENTS(UnsignedIntegerType);
+
+    DECLARE_TYPE(Aggregate, Int);
+    IMPLEMENTS(SignedIntegerType);
+
+    DECLARE_TYPE(Aggregate, UInt);
+    IMPLEMENTS(UnsignedIntegerType);
+
+
+    DECLARE_TYPE(Aggregate, Bool);
+    IMPLEMENTS(BooleanType);
+    IMPLEMENTS(BooleanLiteralConvertible);
+    IMPLEMENTS(Equatable)
+    IMPLEMENTS(Hashable)
+
+    DECLARE_TYPE(Aggregate, Float);
+    IMPLEMENTS(FloatingPointType);
+    IMPLEMENTS(IntegerLiteralConvertible);
+    IMPLEMENTS(FloatLiteralConvertible);
+
+    DECLARE_TYPE(Aggregate, Double);
+    IMPLEMENTS(FloatingPointType);
+    IMPLEMENTS(IntegerLiteralConvertible);
+    IMPLEMENTS(FloatLiteralConvertible);
+
+    DECLARE_TYPE(Aggregate, String);
+    IMPLEMENTS(StringLiteralConvertible);
+    IMPLEMENTS(UnicodeScalarLiteralConvertible);
+    IMPLEMENTS(ExtendedGraphemeClusterLiteralConvertible);
+    IMPLEMENTS(Hashable);
+    IMPLEMENTS(Equatable);
+    IMPLEMENTS(StringInterpolationConvertible);
+
+    DECLARE_TYPE(Aggregate, Character);
+    IMPLEMENTS(ExtendedGraphemeClusterLiteralConvertible);
+    IMPLEMENTS(Equatable);
+    IMPLEMENTS(Hashable);
+    IMPLEMENTS(Comparable);
+
+    addSymbol(L"Void", Void = Type::newTuple(vector<TypePtr>()));
 
 //Register built-in variables
-    addSymbol(s_True = SymbolPtr(new SymbolPlaceHolder(L"true", t_Bool, SymbolPlaceHolder::R_LOCAL_VARIABLE, SymbolFlagInitialized)));
-    addSymbol(s_False = SymbolPtr(new SymbolPlaceHolder(L"false", t_Bool, SymbolPlaceHolder::R_LOCAL_VARIABLE, SymbolFlagInitialized)));
+    addSymbol(True = SymbolPtr(new SymbolPlaceHolder(L"true", Bool, SymbolPlaceHolder::R_LOCAL_VARIABLE, SymbolFlagInitialized)));
+    addSymbol(False = SymbolPtr(new SymbolPlaceHolder(L"false", Bool, SymbolPlaceHolder::R_LOCAL_VARIABLE, SymbolFlagInitialized)));
     {
         TypePtr T = Type::newType(L"T", Type::GenericParameter);
         GenericDefinitionPtr generic(new GenericDefinition());
         generic->add(L"T", T);
-        t_Array = Type::newType(L"Array", Type::Struct, nullptr, nullptr, std::vector<TypePtr>(), generic);
-        TypeBuilderPtr builder = static_pointer_cast<TypeBuilder>(t_Array);
+        Array = Type::newType(L"Array", Type::Struct, nullptr, nullptr, std::vector<TypePtr>(), generic);
+        TypeBuilderPtr builder = static_pointer_cast<TypeBuilder>(Array);
         {
             std::vector<Type::Parameter> params = {Type::Parameter(T)};
-            TypePtr t_append = Type::newFunction(params, t_Void, false, nullptr);
+            TypePtr t_append = Type::newFunction(params, Void, false, nullptr);
 
             FunctionSymbolPtr append(new FunctionSymbol(L"append", t_append, nullptr));
             builder->addMember(append);
@@ -93,11 +173,11 @@ void GlobalScope::initPrimitiveTypes()
             builder->addMember(append);
         }
         {
-            SymbolPlaceHolderPtr count(new SymbolPlaceHolder(L"count", t_Int, SymbolPlaceHolder::R_PROPERTY, SymbolFlagInitialized | SymbolFlagReadable | SymbolFlagMember));
+            SymbolPlaceHolderPtr count(new SymbolPlaceHolder(L"count", Int, SymbolPlaceHolder::R_PROPERTY, SymbolFlagInitialized | SymbolFlagReadable | SymbolFlagMember));
             builder->addMember(count);
         }
         {
-            std::vector<Type::Parameter> params = {Type::Parameter(t_Int)};
+            std::vector<Type::Parameter> params = {Type::Parameter(Int)};
             TypePtr t_append = Type::newFunction(params, T, false, nullptr);
 
             FunctionSymbolPtr subscript(new FunctionSymbol(L"subscript", t_append, nullptr));
@@ -105,14 +185,14 @@ void GlobalScope::initPrimitiveTypes()
             subscripts->add(subscript);
             builder->addMember(subscripts);
         }
-        addSymbol(t_Array);
+        addSymbol(Array);
     }
     {
         TypePtr T = Type::newType(L"T", Type::GenericParameter);
         GenericDefinitionPtr generic(new GenericDefinition());
         generic->add(L"T", T);
-        t_Optional = Type::newType(L"Optional", Type::Struct, nullptr, nullptr, std::vector<TypePtr>(), generic);
-        addSymbol(t_Optional);
+        Optional = Type::newType(L"Optional", Type::Struct, nullptr, nullptr, std::vector<TypePtr>(), generic);
+        addSymbol(Optional);
     }
 }
 
@@ -186,8 +266,8 @@ void GlobalScope::initOperators()
     //Register built-in operators
     const wchar_t* arithmetics[] = {L"+", L"-", L"*", L"/", L"%", L"&+", L"&-", L"&*", L"&/", L"&%"};
     const wchar_t* bitwises[] = {L"|", L"&", L"^", L"<<", L">>"};
-    TypePtr integers[] = {t_Int, t_UInt, t_Int8, t_UInt8, t_Int16, t_UInt16, t_Int32, t_UInt32, t_Int64, t_UInt64};
-    TypePtr numbers[] = {t_Int, t_UInt, t_Int8, t_UInt8, t_Int16, t_UInt16, t_Int32, t_UInt32, t_Int64, t_UInt64, t_Float, t_Double};
+    TypePtr integers[] = {Int, UInt, Int8, UInt8, Int16, UInt16, Int32, UInt32, Int64, UInt64};
+    TypePtr numbers[] = {Int, UInt, Int8, UInt8, Int16, UInt16, Int32, UInt32, Int64, UInt64, Float, Double};
 
     for(const TypePtr& type : integers)
     {
@@ -217,8 +297,6 @@ void GlobalScope::initOperators()
 
 void GlobalScope::initProtocols()
 {
-    p_Equatable = Type::newType(L"Equatable", Type::Protocol, nullptr);
-    addSymbol(p_Equatable);
 }
 
 bool GlobalScope::registerOperatorFunction(const std::wstring& name, const TypePtr& returnType, const TypePtr& lhs, const TypePtr& rhs)

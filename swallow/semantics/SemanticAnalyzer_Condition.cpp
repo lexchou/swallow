@@ -56,8 +56,8 @@ static void checkExhausiveSwitch(SemanticAnalyzer* sa, const SwitchCasePtr& node
 {
     TypePtr conditionType = node->getControlExpression()->getType();
     //only check for enum and bool type
-    TypePtr t_Bool = sa->getSymbolRegistry()->getGlobalScope()->t_Bool;
-    if(conditionType->getCategory() != Type::Enum && conditionType != t_Bool)
+    TypePtr Bool = sa->getSymbolRegistry()->getGlobalScope()->Bool;
+    if(conditionType->getCategory() != Type::Enum && conditionType != Bool)
         return;
     //do not check if it already has a default case
     if(node->getDefaultCase())
@@ -69,7 +69,7 @@ static void checkExhausiveSwitch(SemanticAnalyzer* sa, const SwitchCasePtr& node
             sa->error(node, Errors::E_SWITCH_MUST_BE_EXHAUSIVE_CONSIDER_ADDING_A_DEFAULT_CLAUSE);
         }
     }
-    else if(conditionType == t_Bool)
+    else if(conditionType == Bool)
     {
         if(node->numCases() != 2)
         {
@@ -151,7 +151,7 @@ void SemanticAnalyzer::visitCase(const CaseStatementPtr& node)
             cond.guard->accept(this);
             TypePtr whereType = cond.guard->getType();
             assert(whereType != nullptr);
-            TypePtr p_BooleanType = symbolRegistry->getGlobalScope()->p_BooleanType;
+            TypePtr p_BooleanType = symbolRegistry->getGlobalScope()->BooleanType;
             if(!whereType->canAssignTo(p_BooleanType))
             {
                 error(cond.guard, Errors::E_TYPE_DOES_NOT_CONFORM_TO_PROTOCOL_2_, whereType->toString(), p_BooleanType->toString());
@@ -174,7 +174,7 @@ void SemanticAnalyzer::visitCase(const CaseStatementPtr& node)
             }
             assert(enumCase != nullptr);
             const EnumCase* ec = t_hint->getEnumCase(enumCase->getName());
-            if(ec && ec->type != symbolRegistry->getGlobalScope()->t_Void)
+            if(ec && ec->type != symbolRegistry->getGlobalScope()->Void)
             {
                 vector<TupleExtractionResult> results;
                 vector<int> indices;

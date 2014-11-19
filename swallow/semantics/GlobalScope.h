@@ -58,15 +58,47 @@ public:
 private:
     FunctionSymbolPtr vcreateFunction(const std::wstring&name, int flags, const wchar_t* returnType, va_list va);
 public:
-    SymbolPtr s_True, s_False;
+    SymbolPtr True;
+    SymbolPtr False;
 
-    TypePtr t_Bool, t_Void, t_String;
-    TypePtr t_Int, t_UInt, t_Int8, t_UInt8, t_Int16, t_UInt16, t_Int32, t_UInt32, t_Int64, t_UInt64;
-    TypePtr t_Float, t_Double;
-    TypePtr t_Array, t_Dictionary, t_Optional;
+    TypePtr Bool;
+    TypePtr Void;
+    TypePtr String;
+    TypePtr Character;
+    TypePtr Int;
+    TypePtr UInt;
+    TypePtr Int8;
+    TypePtr UInt8;
+    TypePtr Int16;
+    TypePtr UInt16;
+    TypePtr Int32;
+    TypePtr UInt32;
+    TypePtr Int64;
+    TypePtr UInt64;
+    TypePtr Float;
+    TypePtr Double;
+    TypePtr Array;
+    TypePtr Dictionary;
+    TypePtr Optional;
     //Common used protocols
-    TypePtr p_BooleanType;
-    TypePtr p_Equatable;
+    TypePtr BooleanType;
+    TypePtr Equatable;
+    TypePtr Comparable;
+    TypePtr Hashable;
+    TypePtr _IntegerType;
+    TypePtr UnsignedIntegerType;
+    TypePtr SignedIntegerType;
+    TypePtr FloatingPointType;
+    TypePtr StringInterpolationConvertible;
+    TypePtr IntegerLiteralConvertible;
+    TypePtr BooleanLiteralConvertible;
+    TypePtr StringLiteralConvertible;
+    TypePtr FloatLiteralConvertible;
+    TypePtr NilLiteralConvertible;
+    TypePtr ArrayLiteralConvertible;
+    TypePtr DictionaryLiteralConvertible;
+    TypePtr UnicodeScalarLiteralConvertible;
+    TypePtr ExtendedGraphemeClusterLiteralConvertible;
 
     std::vector<TypePtr> t_Numbers;
     std::vector<TypePtr> t_Ints;
