@@ -103,7 +103,7 @@ void REPL::dumpProgram()
             {
                 if(PatternPtr pat = dynamic_pointer_cast<Pattern>(st))
                 {
-                    if(pat->getType() && !Type::equals(registry.getGlobalScope()->t_Void, pat->getType()))
+                    if(pat->getType() && !Type::equals(registry.getGlobalScope()->Void, pat->getType()))
                     {
                         wstringstream s;
                         s<<L"$R"<<(resultId++);
