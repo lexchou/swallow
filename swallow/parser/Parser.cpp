@@ -72,29 +72,46 @@ void Parser::expect_next(Token& token)
 bool Parser::peek(Token& token)
 {
     token.type = TokenType::_;
-    while(tokenizer->next(token))
+    try
     {
-        if(token.type == TokenType::Comment)
-            continue;
-        tokenizer->restore(token);
-        return true;
+        while (tokenizer->next(token))
+        {
+            if (token.type == TokenType::Comment)
+                continue;
+            tokenizer->restore(token);
+            return true;
+        }
+        return false;
     }
-    return false;
+    catch(const TokenizerError& e)
+    {
+        return false;
+    }
 }
 /**
  * Read next token from tokenizer, return false if EOF reached.
  */
 bool Parser::next(Token& token)
 {
-    while(tokenizer->next(token))
+    try
     {
-        if(token.type == TokenType::Comment)
-            continue;
-        return true;
+        while (tokenizer->next(token))
+        {
+            if (token.type == TokenType::Comment)
+                continue;
+            return true;
+        }
+        //eof reached, fill token with end-of-file for compiler error
+        token.token = L"end-of-file";
+        return false;
     }
-    //eof reached, fill token with end-of-file for compiler error
-    token.token = L"end-of-file";
-    return false;
+    catch(const TokenizerError& e)
+    {
+        token.state.line = e.line;
+        token.state.column = e.column;
+        tassert(token, false, e.errorCode, e.item);
+        return false;
+    }
 }
 /**
  * Restore the position of tokenizer to specified token
@@ -219,18 +236,6 @@ NodePtr Parser::parseStatement(const wchar_t* code)
     try
     {
         ret = parseStatement();
-    }
-    catch(const TokenizerError& e)
-    {
-        SourceInfo si;
-        si.column = e.column;
-        si.line = e.line;
-        si.fileHash = fileHash;
-        ResultItems items;
-        if(!e.item.empty())
-            items.push_back(e.item);
-        compilerResults->add(ErrorLevel::Fatal, si, e.errorCode, items);
-        return NULL;
     }
     catch(...)
     {
