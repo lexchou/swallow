@@ -113,8 +113,8 @@ private://declaration
     ParametersPtr parseParameterClause();
 
     DeclarationPtr parseEnum(const std::vector<AttributePtr>& attrs);
-    DeclarationPtr parseRawValueEnum(const std::vector<AttributePtr>& attrs, const std::wstring& name, const TypeIdentifierPtr& baseType);
-    DeclarationPtr parseUnionEnum(const std::vector<AttributePtr>& attrs, const std::wstring& name);
+    DeclarationPtr parseRawValueEnum(const std::vector<AttributePtr>& attrs, const TypeIdentifierPtr& name);
+    DeclarationPtr parseUnionEnum(const std::vector<AttributePtr>& attrs, const TypeIdentifierPtr& name);
 
     
     DeclarationPtr parseStruct(const std::vector<AttributePtr>& attrs);

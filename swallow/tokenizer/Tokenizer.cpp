@@ -33,6 +33,7 @@
 #include <cstring>
 #include <wchar.h>
 #include <ctype.h>
+#include "common/Errors.h"
 using namespace Swallow;
 
 Tokenizer::Tokenizer(const wchar_t* data)
@@ -443,7 +444,8 @@ bool Tokenizer::readString(Token& token)
                 for(int i = 0; i < len; i ++)
                 {
                     wchar_t ch = must_get();
-                    tassert(check_digit(16, ch));
+                    if(!check_digit(16, ch))
+                        error(Errors::E_INVALID_ESCAPE_SEQUENCE_IN_LITERAL);
                     if(ch >= '0' && ch <= '9')
                         ch -= '0';
                     else if(ch >= 'a' && ch <= 'f')
@@ -620,21 +622,23 @@ bool Tokenizer::readIdentifier(Token& token)
         //implicit-parameter-name -> $ decimal-digits
         token.append(ch);
         ch = must_get();
-        tassert(isdigit(ch));
         token.append(ch);
-        while(get(ch))
+        if(isdigit(ch))
         {
-            if(!isdigit(ch))
+            while (get(ch))
             {
-                unget();
-                break;
+                if (!isdigit(ch))
+                {
+                    unget();
+                    break;
+                }
+                token.append(ch);
             }
-            token.append(ch);
+            token.identifier.implicitParameterName = true;
+            return true;
         }
-        token.identifier.implicitParameterName = true;
-        return true;
     }
-    if(ch == '`')
+    else if(ch == '`')
         token.identifier.backtick = true;
     else
         token.append(ch);
@@ -664,26 +668,33 @@ bool Tokenizer::readIdentifier(Token& token)
     }
     return true;
 }
-void Tokenizer::tassert(bool cond)
-{
-    if(!cond)
-    {
-        throw TokenizerError();
-    }
-}
+
 wchar_t Tokenizer::must_get()
 {
     wchar_t ch;
     if(!get(ch))
     {
-        throw TokenizerError();
+        error(Errors::E_UNEXPECTED_EOF);
     }
     return ch;
+}
+void Tokenizer::error(int errorCode, const std::wstring& str)
+{
+    TokenizerError error;
+    error.column = state.column;
+    error.line = state.line;
+    error.errorCode = errorCode;
+    error.item = str;
+    throw error;
 }
 void Tokenizer::match(wchar_t expected)
 {
     wchar_t ch = must_get();
-    tassert(ch == expected);
+    if(ch != expected)
+    {
+        const wchar_t s[2] = {ch, 0};
+        error(Errors::E_UNEXPECTED_1, s);
+    }
 }
 bool Tokenizer::readSymbol(Token& token, TokenType::T type)
 {
@@ -798,7 +809,11 @@ bool Tokenizer::nextImpl(Token& token)
     if(isOperatorHead(ch))
         return readOperator(token, false, 0);
     if(ch == '"')
+    {
+        if(state.inStringExpression)
+            error(Errors::E_UNEXPECTED_CHARACTER_A_IN_STRING_INTERPOLATION, L"\"");
         return readString(token);
+    }
     if(isIdentifierHead(ch) || ch == '$' || ch == '`')
         return readIdentifier(token);
     

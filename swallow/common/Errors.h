@@ -55,6 +55,8 @@ struct SWALLOW_EXPORT Errors
         E_EXPECT_CASE, // case/default is expected in switch/case statement
         E_GETTER_SETTER_CAN_ONLY_BE_DEFINED_FOR_A_SINGLE_VARIABLE, // Getter/setter can only be defined for a single variable
         E_UNTERMINATED_STRING_LITERAL, //Unterminated string literal
+        E_UNEXPECTED_CHARACTER_A_IN_STRING_INTERPOLATION,// Unexpected '%0' character in string interpolation
+        E_INVALID_ESCAPE_SEQUENCE_IN_LITERAL,
 
         //semantic errors
         E_INVALID_REDECLARATION_1, // Invalid redeclaration of type %0
@@ -125,6 +127,12 @@ struct SWALLOW_EXPORT Errors
         E_A_LABEL_IN_SWITCH_SHOULD_HAVE_AT_LEAST_ONE_STATEMENT_0, //'%0' label in a 'switch' should have at least one executable statement'
         E_SWITCH_MUST_BE_EXHAUSIVE_CONSIDER_ADDING_A_DEFAULT_CLAUSE, //Switch must be exhausive, consider adding a default clause
         E_PARTIAL_APPLICATION_OF_ENUM_CONSTRUCTOR_IS_NOT_ALLOWED, //partial application of enum constructor is not allowed
+
+        E_MULTIPLE_ENUM_RAW_TYPES_A_AND_B_2, //Multiple enum raw types '%0' and '%1'
+        E_RAW_TYPE_A_MUST_APPEAR_FIRST_IN_THE_ENUM_INHERITANCE_CLAUSE_1, //Raw type 'Int' must appear first in the enum inheritance clause
+        E_RAW_TYPE_A_IS_NOT_CONVERTIBLE_FROM_ANY_LITERAL_1, //Raw type 'TestBase' is not convertible from any literal
+        E_RAWREPRESENTABLE_INIT_CANNOT_BE_SYNTHESIZED_BECAUSE_RAW_TYPE_A_IS_NOT_EQUATABLE_1,//RawRepresentable 'init' cannot be synthesized because raw type 'MyInt' is not Equatable
+
 
         W_PARAM_CAN_BE_EXPRESSED_MORE_SUCCINCTLY_1, // '%0 %0' can be expressed more succinctly as '#%0'
         W_EXTRANEOUS_SHARTP_IN_PARAMETER_1 //Extraneous '#' in parameter: '%0' is already the keyword argument name

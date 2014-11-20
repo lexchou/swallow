@@ -43,7 +43,23 @@
 
 USE_SWALLOW_NS
 using namespace std;
-
+static bool isLiteralTypeForEnum(GlobalScope* global, const TypePtr& type)
+{
+    if(type->canAssignTo(global->IntegerLiteralConvertible))
+        return true;
+    if(type->canAssignTo(global->StringLiteralConvertible))
+        return true;
+    if(type->canAssignTo(global->FloatLiteralConvertible))
+        return true;
+    if(type->canAssignTo(global->BooleanLiteralConvertible))
+        return true;
+    if(type->canAssignTo(global->UnicodeScalarLiteralConvertible))
+        return true;
+    if(type->canAssignTo(global->ExtendedGraphemeClusterLiteralConvertible))
+        return true;
+    //nil, array, dictionary literal is not working for enum
+    return false;
+}
 TypePtr SemanticAnalyzer::defineType(const std::shared_ptr<TypeDeclaration>& node, Type::Category category)
 {
     TypeIdentifierPtr id = node->getIdentifier();
@@ -109,7 +125,32 @@ TypePtr SemanticAnalyzer::defineType(const std::shared_ptr<TypeDeclaration>& nod
                 error(parentType, Errors::E_SUPERCLASS_MUST_APPEAR_FIRST_IN_INHERITANCE_CLAUSE_1, out.str());
                 return nullptr;
             }
-            first = false;
+            parent = ptr;
+        }
+        else if(category == Type::Enum && ptr->getCategory() != Type::Protocol)
+        {
+
+            if(parent)//already has a raw type
+            {
+                error(parentType, Errors::E_MULTIPLE_ENUM_RAW_TYPES_A_AND_B_2, parent->toString(), ptr->toString());
+                return nullptr;
+            }
+            if(!first)
+            {
+                error(parentType, Errors::E_RAW_TYPE_A_MUST_APPEAR_FIRST_IN_THE_ENUM_INHERITANCE_CLAUSE_1, ptr->toString());
+                return nullptr;
+            }
+            //check if the raw type is literal convertible
+            if(!isLiteralTypeForEnum(symbolRegistry->getGlobalScope(), ptr))
+            {
+                error(parentType, Errors::E_RAW_TYPE_A_IS_NOT_CONVERTIBLE_FROM_ANY_LITERAL_1, ptr->toString());
+                return nullptr;
+            }
+            if(!ptr->canAssignTo(symbolRegistry->getGlobalScope()->Equatable))
+            {
+                error(parentType, Errors::E_RAWREPRESENTABLE_INIT_CANNOT_BE_SYNTHESIZED_BECAUSE_RAW_TYPE_A_IS_NOT_EQUATABLE_1, ptr->toString());
+                return nullptr;
+            }
             parent = ptr;
         }
         else if(ptr->getCategory() == Type::Protocol)
@@ -127,6 +168,7 @@ TypePtr SemanticAnalyzer::defineType(const std::shared_ptr<TypeDeclaration>& nod
                 error(parentType, Errors::E_INHERITANCE_FROM_NONE_PROTOCOL_TYPE_1, out.str());
             return nullptr;
         }
+        first = false;
     }
 
     //register this type

@@ -770,15 +770,16 @@ DeclarationPtr Parser::parseEnum(const std::vector<AttributePtr>& attrs)
     Flags flag(this);
     flags += UNDER_ENUM;
     expect_identifier(token);
+    TypeIdentifierPtr typeId = nodeFactory->createTypeIdentifier(token.state);
+    typeId->setName(token.token);
     if(match(L":"))
     {
         //this is a raw-value-style-enum
-        TypeIdentifierPtr baseType = parseTypeIdentifier();
-        return parseRawValueEnum(attrs, token.token, baseType);
+        return parseRawValueEnum(attrs, typeId);
     }
     else
     {
-        return parseUnionEnum(attrs, token.token);
+        return parseUnionEnum(attrs, typeId);
     }
 }
 /*
@@ -790,16 +791,19 @@ DeclarationPtr Parser::parseEnum(const std::vector<AttributePtr>& attrs)
  ‌ raw-value-style-enum-case → enum-case-name raw-value-assignment opt
  ‌ raw-value-assignment → =literal
 */
-DeclarationPtr Parser::parseRawValueEnum(const std::vector<AttributePtr>& attrs, const std::wstring& name, const TypeIdentifierPtr& baseType)
+DeclarationPtr Parser::parseRawValueEnum(const std::vector<AttributePtr>& attrs, const TypeIdentifierPtr& name)
 {
     Token token;
-    expect(L"{", token);
     EnumDefPtr ret = nodeFactory->createEnum(token.state);
     ret->setAttributes(attrs);
-    TypeIdentifierPtr typeId = nodeFactory->createTypeIdentifier(token.state);
-    typeId->setName(name);
-    ret->setIdentifier(typeId);
-    ret->addParent(baseType);
+    ret->setIdentifier(name);
+    do
+    {
+        TypeIdentifierPtr baseType = this->parseTypeIdentifier();
+        ret->addParent(baseType);
+    } while(match(L","));
+
+    expect(L"{", token);
     while(!predicate(L"}"))
     {
         if(match(Keyword::Case))
@@ -832,15 +836,13 @@ DeclarationPtr Parser::parseRawValueEnum(const std::vector<AttributePtr>& attrs,
  ‌ union-style-enum-case-list → union-style-enum-case | union-style-enum-case,union-style-enum-case-list
  ‌ union-style-enum-case → enum-case-name tuple-type opt
 */
-DeclarationPtr Parser::parseUnionEnum(const std::vector<AttributePtr>& attrs, const std::wstring& name)
+DeclarationPtr Parser::parseUnionEnum(const std::vector<AttributePtr>& attrs, const TypeIdentifierPtr& name)
 {
     Token token;
     expect(L"{", token);
     EnumDefPtr ret = nodeFactory->createEnum(token.state);
     ret->setAttributes(attrs);
-    TypeIdentifierPtr typeId = nodeFactory->createTypeIdentifier(token.state);
-    typeId->setName(name);
-    ret->setIdentifier(typeId);
+    ret->setIdentifier(name);
 
     while(!predicate(L"}"))
     {

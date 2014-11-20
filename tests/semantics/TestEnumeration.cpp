@@ -177,3 +177,75 @@ TEST(TestEnumeration, AssociatedValues_SwitchCase)
     ASSERT_NOT_NULL(a = dynamic_pointer_cast<SymbolPlaceHolder>(scope->lookup(L"productBarcode")));
 
 }
+
+TEST(TestEnumeration, RawValues)
+{
+    SEMANTIC_ANALYZE(L"enum ASCIIControlCharacter: Character {\n"
+            L"    case Tab = \"\\t\"\n"
+            L"    case LineFeed = \"\\n\"\n"
+            L"    case CarriageReturn = \"\\r\"\n"
+            L"}");
+    dumpCompilerResults(compilerResults);
+
+    ASSERT_EQ(0, compilerResults.numResults());
+}
+
+TEST(TestEnumeration, RawValueMustAppearFirst)
+{
+    SEMANTIC_ANALYZE(L"protocol MyProtocol {}"
+            L"enum ASCIIControlCharacter: MyProtocol, Character {\n"
+            L"    case Tab = \"\\t\"\n"
+            L"    case LineFeed = \"\\n\"\n"
+            L"    case CarriageReturn = \"\\r\"\n"
+            L"}");
+    ASSERT_EQ(1, compilerResults.numResults());
+    auto res = compilerResults.getResult(0);
+    ASSERT_EQ(Errors::E_RAW_TYPE_A_MUST_APPEAR_FIRST_IN_THE_ENUM_INHERITANCE_CLAUSE_1, res.code);
+}
+
+
+TEST(TestEnumeration, MultipleEnumRawTypes)
+{
+    SEMANTIC_ANALYZE(L"enum ASCIIControlCharacter: String, Character {\n"
+            L"    case Tab = \"\\t\"\n"
+            L"    case LineFeed = \"\\n\"\n"
+            L"    case CarriageReturn = \"\\r\"\n"
+            L"}");
+    ASSERT_EQ(1, compilerResults.numResults());
+    auto res = compilerResults.getResult(0);
+    ASSERT_EQ(Errors::E_MULTIPLE_ENUM_RAW_TYPES_A_AND_B_2, res.code);
+}
+TEST(TestEnumeration, RawTypeIsNotConvertibleFromLiteral)
+{
+    SEMANTIC_ANALYZE(L"class MyClass{}\n"
+            L"enum Test : MyClass\n"
+            L"{\n"
+            L"case A = 3\n"
+            L"}");
+    ASSERT_EQ(1, compilerResults.numResults());
+    auto res = compilerResults.getResult(0);
+    ASSERT_EQ(Errors::E_RAW_TYPE_A_IS_NOT_CONVERTIBLE_FROM_ANY_LITERAL_1, res.code);
+}
+
+TEST(TestEnumeration, RawTypeIsNotConvertibleFromLiteral2)
+{
+    SEMANTIC_ANALYZE(L"class MyClass : IntegerLiteralConvertible, Equatable{}\n"
+            L"enum Test : MyClass\n"
+            L"{\n"
+            L"case A = 3\n"
+            L"}");
+    ASSERT_EQ(0, compilerResults.numResults());
+}
+
+
+TEST(TestEnumeration, CannotBeSynthesizedBecauseNotEquatable)
+{
+    SEMANTIC_ANALYZE(L"class MyClass : IntegerLiteralConvertible{}\n"
+            L"enum Test : MyClass\n"
+            L"{\n"
+            L"case A = 3\n"
+            L"}");
+    ASSERT_EQ(1, compilerResults.numResults());
+    auto res = compilerResults.getResult(0);
+    ASSERT_EQ(Errors::E_RAWREPRESENTABLE_INIT_CANNOT_BE_SYNTHESIZED_BECAUSE_RAW_TYPE_A_IS_NOT_EQUATABLE_1, res.code);
+}

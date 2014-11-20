@@ -40,13 +40,15 @@ struct TokenizerError
 {
     int line;
     int column;
-    int error_code;
+    int errorCode;
+    std::wstring item;
 };
 struct KeywordInfo
 {
     Keyword::T keyword;
     KeywordType::T type;
 };
+
 class SWALLOW_EXPORT Tokenizer
 {
 public:
@@ -79,7 +81,6 @@ private:
     void unget();
     bool peek(wchar_t &ch);
     
-    void tassert(bool cond);
     wchar_t must_get();
     void match(wchar_t ch);
     
@@ -97,6 +98,8 @@ private:
     bool readNumberLiteral(Token& token, int base, int64_t& out);
     bool readFraction(Token& token, int base, double& out);
     bool readIdentifier(Token& token);
+private:
+    void error(int errorCode, const std::wstring& str = L"");
 private:
     wchar_t* data;
     const wchar_t* end;

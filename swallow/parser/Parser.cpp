@@ -220,6 +220,18 @@ NodePtr Parser::parseStatement(const wchar_t* code)
     {
         ret = parseStatement();
     }
+    catch(const TokenizerError& e)
+    {
+        SourceInfo si;
+        si.column = e.column;
+        si.line = e.line;
+        si.fileHash = fileHash;
+        ResultItems items;
+        if(!e.item.empty())
+            items.push_back(e.item);
+        compilerResults->add(ErrorLevel::Fatal, si, e.errorCode, items);
+        return NULL;
+    }
     catch(...)
     {
         //clean up all nodes created during the parsing

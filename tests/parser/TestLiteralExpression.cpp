@@ -31,6 +31,7 @@
 #include "parser/Parser.h"
 #include "semantics/SymbolRegistry.h"
 #include "ast/ast.h"
+#include "common/Errors.h"
 
 using namespace Swallow;
 
@@ -190,4 +191,14 @@ TEST(TestLiteralExpression, StringInterpolation)
     ASSERT_NOT_NULL(std::dynamic_pointer_cast<StringLiteral>(c->getExpression(1)));
     ASSERT_NOT_NULL(std::dynamic_pointer_cast<BinaryOperator>(c->getExpression(2)));
 
+}
+
+
+TEST(TestLiteralExpression, BrokenStringInterpolation)
+{
+    PARSE_STATEMENT(L"\"\\(3\"")
+    ASSERT_EQ(1, compilerResults.numResults());
+    ASSERT_NULL(root);
+    auto res = compilerResults.getResult(0);
+    ASSERT_EQ(Errors::E_UNEXPECTED_CHARACTER_A_IN_STRING_INTERPOLATION, res.code);
 }
