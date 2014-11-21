@@ -46,13 +46,13 @@ void EnumDef::accept(NodeVisitor* visitor)
     accept2(visitor, &NodeVisitor::visitEnum);
 }
 
-EnumDef::Type EnumDef::getType()const
+EnumDef::ValueStyle EnumDef::getValueStyle()const
 {
-    if(numParents() > 0)
-    {
-        return RawValue;
-    }
-    return UnionStyle;
+    return valueStyle;
+}
+void EnumDef::setValueStyle(EnumDef::ValueStyle style)
+{
+    this->valueStyle = style;
 }
 
 void EnumDef::addAssociatedType(const std::wstring& name, const TupleTypePtr& associatedType)

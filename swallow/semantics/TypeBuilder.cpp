@@ -69,6 +69,7 @@ void TypeBuilder::addProtocol(const TypePtr &protocol)
         parents.insert(make_pair(protocol, 1));
     else
         iter->second = 1;
+    addParentTypesFrom(protocol);
 }
 void TypeBuilder::addParentTypesFrom(const TypePtr& type)
 {

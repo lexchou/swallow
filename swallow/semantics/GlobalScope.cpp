@@ -73,12 +73,18 @@ void GlobalScope::initPrimitiveTypes()
     IMPLEMENTS(IntegerLiteralConvertible);
 
     DECLARE_TYPE(Protocol, SignedIntegerType);
-    IMPLEMENTS(_IntegerType)
+    IMPLEMENTS(_IntegerType);
+    IMPLEMENTS(Comparable);
+    IMPLEMENTS(Equatable);
 
     DECLARE_TYPE(Protocol, UnsignedIntegerType);
     IMPLEMENTS(_IntegerType);
+    IMPLEMENTS(Comparable);
+    IMPLEMENTS(Equatable);
 
     DECLARE_TYPE(Protocol, FloatingPointType);
+    IMPLEMENTS(Comparable);
+    IMPLEMENTS(Equatable);
 
     DECLARE_TYPE(Protocol, StringInterpolationConvertible);
 

@@ -797,6 +797,7 @@ DeclarationPtr Parser::parseRawValueEnum(const std::vector<AttributePtr>& attrs,
     EnumDefPtr ret = nodeFactory->createEnum(token.state);
     ret->setAttributes(attrs);
     ret->setIdentifier(name);
+    ret->setValueStyle(EnumDef::RawValues);
     do
     {
         TypeIdentifierPtr baseType = this->parseTypeIdentifier();
@@ -814,7 +815,9 @@ DeclarationPtr Parser::parseRawValueEnum(const std::vector<AttributePtr>& attrs,
                 ExpressionPtr val = NULL;
                 if(match(L"="))
                 {
-                    val = parseLiteral();
+                    //the raw value must be a literal, but to offer accurate compilation error,
+                    //use expression here, and check if it's literal in semantic analyzing stage.
+                    val = parseExpression();
                 }
                 ret->addConstant(token.token, val);
             }while(match(L","));
@@ -843,7 +846,7 @@ DeclarationPtr Parser::parseUnionEnum(const std::vector<AttributePtr>& attrs, co
     EnumDefPtr ret = nodeFactory->createEnum(token.state);
     ret->setAttributes(attrs);
     ret->setIdentifier(name);
-
+    ret->setValueStyle(EnumDef::AssociatedValues);
     while(!predicate(L"}"))
     {
         if(match(Keyword::Case))

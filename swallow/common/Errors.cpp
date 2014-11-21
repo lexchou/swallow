@@ -140,6 +140,9 @@ std::wstring getErrorTemplate(int errorCode)
         case Errors::E_RAW_TYPE_A_MUST_APPEAR_FIRST_IN_THE_ENUM_INHERITANCE_CLAUSE_1: return L"Raw type '%0' must appear first in the enum inheritance clause";
         case Errors::E_RAW_TYPE_A_IS_NOT_CONVERTIBLE_FROM_ANY_LITERAL_1: return L"Raw type '%0' is not convertible from any literal";
         case Errors::E_RAWREPRESENTABLE_INIT_CANNOT_BE_SYNTHESIZED_BECAUSE_RAW_TYPE_A_IS_NOT_EQUATABLE_1: return L"RawRepresentable 'init' cannot be synthesized because raw type '%0' is not Equatable";
+        case Errors::E_ENUM_WITH_NO_CASES_CANNOT_DECLARE_A_RAW_TYPE: return L"An enum with no cases cannot declare a raw type";
+        case Errors::E_RAW_VALUE_FOR_ENUM_CASE_MUST_BE_LITERAL: return L"Raw value for enum case must be literal";
+        case Errors::E_ENUM_CASES_REQUIRE_EXPLICIT_RAW_VALUES_WHEN_THE_RAW_TYPE_IS_NOT_INTEGER_LITERAL_CONVERTIBLE: return L"Enum cases require explicit raw values when the raw type is not integer literal convertible";
 
 
         case Errors::W_PARAM_CAN_BE_EXPRESSED_MORE_SUCCINCTLY_1: return L"'%0 %0' can be expressed more succinctly as '#%0'";

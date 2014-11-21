@@ -234,6 +234,7 @@ TEST(TestEnumeration, RawTypeIsNotConvertibleFromLiteral2)
             L"{\n"
             L"case A = 3\n"
             L"}");
+    dumpCompilerResults(compilerResults);
     ASSERT_EQ(0, compilerResults.numResults());
 }
 
@@ -248,4 +249,92 @@ TEST(TestEnumeration, CannotBeSynthesizedBecauseNotEquatable)
     ASSERT_EQ(1, compilerResults.numResults());
     auto res = compilerResults.getResult(0);
     ASSERT_EQ(Errors::E_RAWREPRESENTABLE_INIT_CANNOT_BE_SYNTHESIZED_BECAUSE_RAW_TYPE_A_IS_NOT_EQUATABLE_1, res.code);
+}
+
+TEST(TestEnumeration, RawValuesWithNoCases)
+{
+    SEMANTIC_ANALYZE(L"enum Test : Int\n"
+            L"{\n"
+            L"}");
+    ASSERT_EQ(1, compilerResults.numResults());
+    auto res = compilerResults.getResult(0);
+    ASSERT_EQ(Errors::E_ENUM_WITH_NO_CASES_CANNOT_DECLARE_A_RAW_TYPE, res.code);
+}
+
+TEST(TestEnumeration, RawValueCaseMustBeLiteral_Int)
+{
+    SEMANTIC_ANALYZE(L"let one = 1;"
+            L"enum Test : Int\n"
+            L"{"
+            L"    case A = one\n"
+            L"}");
+    ASSERT_EQ(1, compilerResults.numResults());
+    auto res = compilerResults.getResult(0);
+    ASSERT_EQ(Errors::E_RAW_VALUE_FOR_ENUM_CASE_MUST_BE_LITERAL, res.code);
+}
+
+TEST(TestEnumeration, RawValueCaseMustBeLiteral_String)
+{
+    SEMANTIC_ANALYZE(L"let one = \"one\";"
+            L"enum Test : String\n"
+            L"{"
+            L"    case A = one\n"
+            L"}");
+    ASSERT_EQ(1, compilerResults.numResults());
+    auto res = compilerResults.getResult(0);
+    ASSERT_EQ(Errors::E_RAW_VALUE_FOR_ENUM_CASE_MUST_BE_LITERAL, res.code);
+}
+
+
+TEST(TestEnumeration, RawValueCaseMustBeLiteral_String2)
+{
+    SEMANTIC_ANALYZE(L"enum Test : String\n"
+            L"{"
+            L"    case A = \"one\"\n"
+            L"}");
+    dumpCompilerResults(compilerResults);
+    ASSERT_EQ(0, compilerResults.numResults());
+}
+
+
+
+TEST(TestEnumeration, RawValueCannotConvertToRawType)
+{
+    SEMANTIC_ANALYZE(L"enum Test : Int\n"
+            L"{"
+            L"    case A = \"one\"\n"
+            L"}");
+
+    ASSERT_EQ(1, compilerResults.numResults());
+    auto res = compilerResults.getResult(0);
+    ASSERT_EQ(Errors::E_A_IS_NOT_CONVERTIBLE_TO_B_2, res.code);
+}
+
+TEST(TestEnumeration, EnumCaseRequireValueWhenRawTypeIsIntegerLiteralConvertible)
+{
+    SEMANTIC_ANALYZE(L"enum Test : String\n"
+            L"{"
+            L"    case A\n"
+            L"}");
+    ASSERT_EQ(1, compilerResults.numResults());
+    auto res = compilerResults.getResult(0);
+    ASSERT_EQ(Errors::E_ENUM_CASES_REQUIRE_EXPLICIT_RAW_VALUES_WHEN_THE_RAW_TYPE_IS_NOT_INTEGER_LITERAL_CONVERTIBLE, res.code);
+}
+
+TEST(TestEnumeration, EnumCaseRequireValueWhenRawTypeIsIntegerLiteralConvertible2)
+{
+    SEMANTIC_ANALYZE(L"enum Test : Int\n"
+            L"{"
+            L"    case A\n"
+            L"}");
+    ASSERT_EQ(0, compilerResults.numResults());
+}
+
+TEST(TestEnumeration, EnumCaseRequireValueWhenRawTypeIsIntegerLiteralConvertible3)
+{
+    SEMANTIC_ANALYZE(L"enum Test : Double\n"
+            L"{"
+            L"    case A\n"
+            L"}");
+    ASSERT_EQ(0, compilerResults.numResults());
 }

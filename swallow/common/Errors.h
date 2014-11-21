@@ -132,7 +132,9 @@ struct SWALLOW_EXPORT Errors
         E_RAW_TYPE_A_MUST_APPEAR_FIRST_IN_THE_ENUM_INHERITANCE_CLAUSE_1, //Raw type 'Int' must appear first in the enum inheritance clause
         E_RAW_TYPE_A_IS_NOT_CONVERTIBLE_FROM_ANY_LITERAL_1, //Raw type 'TestBase' is not convertible from any literal
         E_RAWREPRESENTABLE_INIT_CANNOT_BE_SYNTHESIZED_BECAUSE_RAW_TYPE_A_IS_NOT_EQUATABLE_1,//RawRepresentable 'init' cannot be synthesized because raw type 'MyInt' is not Equatable
-
+        E_ENUM_WITH_NO_CASES_CANNOT_DECLARE_A_RAW_TYPE,//An enum with no cases cannot declare a raw type
+        E_RAW_VALUE_FOR_ENUM_CASE_MUST_BE_LITERAL,//Raw value for enum case must be literal
+        E_ENUM_CASES_REQUIRE_EXPLICIT_RAW_VALUES_WHEN_THE_RAW_TYPE_IS_NOT_INTEGER_LITERAL_CONVERTIBLE, //Enum cases require explicit raw values when the raw type is not integer literal convertible
 
         W_PARAM_CAN_BE_EXPRESSED_MORE_SUCCINCTLY_1, // '%0 %0' can be expressed more succinctly as '#%0'
         W_EXTRANEOUS_SHARTP_IN_PARAMETER_1 //Extraneous '#' in parameter: '%0' is already the keyword argument name

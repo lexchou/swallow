@@ -491,6 +491,9 @@ bool Type::canAssignTo(const TypePtr &type) const
 {
     if(type == nullptr)
         return false;
+    TypePtr self = static_pointer_cast<Type>(const_cast<Type*>(this)->shared_from_this());
+    if(equals(self, type))
+        return true;
     if(type->getCategory() == Protocol || type->getCategory() == Class)
     {
         if(this->parents.find(type) != parents.end())

@@ -608,19 +608,29 @@ void SemanticAnalyzer::visitMemberAccess(const MemberAccessPtr& node)
 void SemanticAnalyzer::visitString(const StringLiteralPtr& node)
 {
     GlobalScope* scope = symbolRegistry->getGlobalScope();
-    node->setType(scope->String);
+    if(t_hint && t_hint->canAssignTo(scope->StringLiteralConvertible))
+        node->setType(t_hint);
+    else if(t_hint && node->value.length() == 1 && t_hint->canAssignTo(scope->UnicodeScalarLiteralConvertible))
+        node->setType(t_hint);
+    else
+        node->setType(scope->String);
 }
 void SemanticAnalyzer::visitStringInterpolation(const StringInterpolationPtr &node)
 {
     //TODO: check all expressions inside can be converted to string
     GlobalScope* scope = symbolRegistry->getGlobalScope();
-    node->setType(scope->String);
+    if(t_hint && t_hint->canAssignTo(scope->StringInterpolationConvertible))
+        node->setType(t_hint);
+    else
+        node->setType(scope->String);
 }
 void SemanticAnalyzer::visitInteger(const IntegerLiteralPtr& node)
 {
     GlobalScope* scope = symbolRegistry->getGlobalScope();
     //TODO: it will changed to use standard library's overloaded type constructor to infer type when the facility is mature enough.
-    if(t_hint && canConvertTo(node, t_hint))
+    if(t_hint && t_hint->canAssignTo(scope->IntegerLiteralConvertible))
+        node->setType(t_hint);
+    else if(t_hint && t_hint->canAssignTo(scope->FloatLiteralConvertible))
         node->setType(t_hint);
     else
         node->setType(scope->Int);
@@ -628,7 +638,10 @@ void SemanticAnalyzer::visitInteger(const IntegerLiteralPtr& node)
 void SemanticAnalyzer::visitFloat(const FloatLiteralPtr& node)
 {
     GlobalScope* scope = symbolRegistry->getGlobalScope();
-    node->setType(scope->Double);
+    if(t_hint && t_hint->canAssignTo(scope->FloatLiteralConvertible))
+        node->setType(t_hint);
+    else
+        node->setType(scope->Double);
 }
 
 //Will be replaced by stdlib's type constructor

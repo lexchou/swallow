@@ -51,13 +51,29 @@ static bool isLiteralTypeForEnum(GlobalScope* global, const TypePtr& type)
         return true;
     if(type->canAssignTo(global->FloatLiteralConvertible))
         return true;
-    if(type->canAssignTo(global->BooleanLiteralConvertible))
-        return true;
+    //if(type->canAssignTo(global->BooleanLiteralConvertible))
+    //    return true;
     if(type->canAssignTo(global->UnicodeScalarLiteralConvertible))
         return true;
     if(type->canAssignTo(global->ExtendedGraphemeClusterLiteralConvertible))
         return true;
     //nil, array, dictionary literal is not working for enum
+    return false;
+}
+static bool isLiteralExpression(const ExpressionPtr& expr)
+{
+    if(!expr)
+        return false;
+    NodeType::T nodeType = expr->getNodeType();
+    switch(nodeType)
+    {
+        case NodeType::StringLiteral:
+        case NodeType::FloatLiteral:
+        case NodeType::IntegerLiteral:
+            return true;
+        default:
+            break;
+    }
     return false;
 }
 TypePtr SemanticAnalyzer::defineType(const std::shared_ptr<TypeDeclaration>& node, Type::Category category)
@@ -355,18 +371,50 @@ void SemanticAnalyzer::visitEnum(const EnumDefPtr& node)
 {
     TypeBuilderPtr type = static_pointer_cast<TypeBuilder>(defineType(node, Type::Enum));
     NodeVisitor::visitEnum(node);
-    if(node->numConstants())
+    if(node->getValueStyle() == EnumDef::RawValues)
     {
+        if(!node->numConstants())
+        {
+            error(node, Errors::E_ENUM_WITH_NO_CASES_CANNOT_DECLARE_A_RAW_TYPE);
+            return;
+        }
+        TypePtr rawType = type->getParentType();
+        assert(rawType != nullptr);
+        bool integerConvertible = rawType->canAssignTo(symbolRegistry->getGlobalScope()->IntegerLiteralConvertible);
         for(int i = 0; i < node->numConstants(); i++)
         {
             auto c = node->getConstant(i);
+            if(!c.value && !integerConvertible)
+            {
+                //Enum cases require explicit raw values when the raw type is not integer literal convertible
+                error(node, Errors::E_ENUM_CASES_REQUIRE_EXPLICIT_RAW_VALUES_WHEN_THE_RAW_TYPE_IS_NOT_INTEGER_LITERAL_CONVERTIBLE);
+                return;
+            }
+            if(c.value)
+            {
+                if(!isLiteralExpression(c.value))
+                {
+                    error(node, Errors::E_RAW_VALUE_FOR_ENUM_CASE_MUST_BE_LITERAL);
+                    return;
+                }
+                StackedValueGuard<TypePtr> contextualType(this->t_hint);
+                contextualType.set(rawType);
+                c.value->accept(this);
+                TypePtr caseType = c.value->getType();
+                assert(caseType != nullptr);
+                if(!caseType->canAssignTo(rawType))
+                {
+                    error(node, Errors::E_A_IS_NOT_CONVERTIBLE_TO_B_2, caseType->toString(), rawType->toString());
+                    return;
+                }
+            }
             int flags = SymbolFlagReadable | SymbolFlagHasInitializer | SymbolFlagMember | SymbolFlagStatic;
             SymbolPlaceHolderPtr symb(new SymbolPlaceHolder(c.name, type, SymbolPlaceHolder::R_PROPERTY, flags));
             type->addMember(symb);
             type->addEnumCase(c.name, symbolRegistry->getGlobalScope()->Void, nullptr);
         }
     }
-    else if(node->numAssociatedTypes())
+    else if(node->getValueStyle() == EnumDef::AssociatedValues)
     {
         for(int i = 0; i < node->numAssociatedTypes(); i++)
         {
@@ -394,6 +442,10 @@ void SemanticAnalyzer::visitEnum(const EnumDefPtr& node)
                 type->addEnumCase(c.name, symbolRegistry->getGlobalScope()->Void, nullptr);
             }
         }
+    }
+    else
+    {
+        assert(0);
     }
 }
 void SemanticAnalyzer::visitProtocol(const ProtocolDefPtr& node)

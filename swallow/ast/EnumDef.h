@@ -38,10 +38,10 @@ class TupleType;
 class SWALLOW_EXPORT EnumDef : public TypeDeclaration
 {
 public:
-    enum Type
+    enum ValueStyle
     {
-        UnionStyle,
-        RawValue
+        AssociatedValues,
+        RawValues
     };
 public:
     template<class ValueType>
@@ -58,7 +58,8 @@ public:
     EnumDef();
     ~EnumDef();
 public:
-    Type getType()const;
+    ValueStyle getValueStyle()const;
+    void setValueStyle(ValueStyle style);
     
     void addAssociatedType(const std::wstring& name, const TupleTypePtr& associatedType);
     int numAssociatedTypes()const;
@@ -73,6 +74,7 @@ public:
 private:
     std::vector<AssociatedType> associatedTypes;
     std::vector<Constant> constants;
+    ValueStyle valueStyle;
 };
 
 SWALLOW_NS_END
