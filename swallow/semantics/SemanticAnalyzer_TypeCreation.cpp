@@ -367,10 +367,25 @@ void SemanticAnalyzer::visitStruct(const StructDefPtr& node)
 
 
 }
+
+
+/**
+ *  Make the given enum type implements the protocol RawRepresentable.
+ *  TODO Only one member is added for test case, add the rest members
+ */
+static void makeRawRepresentable(const TypeBuilderPtr& type, GlobalScope* global)
+{
+    type->addProtocol(global->RawRepresentable);
+    //var rawValue: RawValue { get }
+    TypePtr RawValue = type->getParentType();
+    SymbolPlaceHolderPtr rawValue(new SymbolPlaceHolder(L"rawValue", RawValue, SymbolPlaceHolder::R_PROPERTY, SymbolFlagMember | SymbolFlagReadable));
+    type->addMember(rawValue);
+}
 void SemanticAnalyzer::visitEnum(const EnumDefPtr& node)
 {
     TypeBuilderPtr type = static_pointer_cast<TypeBuilder>(defineType(node, Type::Enum));
     NodeVisitor::visitEnum(node);
+    GlobalScope* global = symbolRegistry->getGlobalScope();
     if(node->getValueStyle() == EnumDef::RawValues)
     {
         if(!node->numConstants())
@@ -378,9 +393,15 @@ void SemanticAnalyzer::visitEnum(const EnumDefPtr& node)
             error(node, Errors::E_ENUM_WITH_NO_CASES_CANNOT_DECLARE_A_RAW_TYPE);
             return;
         }
+        //Add RawRepresentable protocol if it's not implemented
+        if(!type->canAssignTo(global->RawRepresentable))
+        {
+            makeRawRepresentable(type, global);
+        }
+
         TypePtr rawType = type->getParentType();
         assert(rawType != nullptr);
-        bool integerConvertible = rawType->canAssignTo(symbolRegistry->getGlobalScope()->IntegerLiteralConvertible);
+        bool integerConvertible = rawType->canAssignTo(global->IntegerLiteralConvertible);
         for(int i = 0; i < node->numConstants(); i++)
         {
             auto c = node->getConstant(i);
@@ -411,7 +432,7 @@ void SemanticAnalyzer::visitEnum(const EnumDefPtr& node)
             int flags = SymbolFlagReadable | SymbolFlagHasInitializer | SymbolFlagMember | SymbolFlagStatic;
             SymbolPlaceHolderPtr symb(new SymbolPlaceHolder(c.name, type, SymbolPlaceHolder::R_PROPERTY, flags));
             type->addMember(symb);
-            type->addEnumCase(c.name, symbolRegistry->getGlobalScope()->Void, nullptr);
+            type->addEnumCase(c.name, global->Void, nullptr);
         }
     }
     else if(node->getValueStyle() == EnumDef::AssociatedValues)
@@ -439,7 +460,7 @@ void SemanticAnalyzer::visitEnum(const EnumDefPtr& node)
                 int flags = SymbolFlagReadable | SymbolFlagHasInitializer | SymbolFlagMember | SymbolFlagStatic;
                 SymbolPlaceHolderPtr symb(new SymbolPlaceHolder(c.name, type, SymbolPlaceHolder::R_PROPERTY, flags));
                 type->addMember(symb);
-                type->addEnumCase(c.name, symbolRegistry->getGlobalScope()->Void, nullptr);
+                type->addEnumCase(c.name, global->Void, nullptr);
             }
         }
     }

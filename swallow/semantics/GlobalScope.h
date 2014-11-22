@@ -85,6 +85,7 @@ public:
     TypePtr Equatable;
     TypePtr Comparable;
     TypePtr Hashable;
+    TypePtr RawRepresentable;
     TypePtr _IntegerType;
     TypePtr UnsignedIntegerType;
     TypePtr SignedIntegerType;

@@ -68,6 +68,15 @@ void GlobalScope::initPrimitiveTypes()
     DECLARE_TYPE(Protocol, Hashable);
     DECLARE_TYPE(Protocol, Comparable);
 
+    DECLARE_TYPE(Protocol, RawRepresentable);
+    {
+        TypePtr RawValue = Type::newType(L"RawValue", Type::Alias);
+        type->addMember(RawValue);
+
+        SymbolPlaceHolderPtr rawValue(new SymbolPlaceHolder(L"rawValue", RawValue, SymbolPlaceHolder::R_PROPERTY, SymbolFlagMember | SymbolFlagReadable));
+        type->addMember(rawValue);
+    }
+
 
     DECLARE_TYPE(Protocol, _IntegerType);
     IMPLEMENTS(IntegerLiteralConvertible);

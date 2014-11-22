@@ -338,3 +338,28 @@ TEST(TestEnumeration, EnumCaseRequireValueWhenRawTypeIsIntegerLiteralConvertible
             L"}");
     ASSERT_EQ(0, compilerResults.numResults());
 }
+
+
+TEST(TestEnumeration, ImplicitRawRepresentable)
+{
+    SEMANTIC_ANALYZE(L"enum Planet: Int {\n"
+            L"    case Mercury = 1, Venus, Earth, Mars, Jupiter, Saturn, Uranus, Neptune\n"
+            L"}\n"
+            L"let earthsOrder = Planet.Earth.rawValue");
+    dumpCompilerResults(compilerResults);
+    ASSERT_EQ(0, compilerResults.numResults());
+    SymbolPtr earthsOrder;
+    ASSERT_NOT_NULL(earthsOrder = scope->lookup(L"earthsOrder"));
+    ASSERT_EQ(symbolRegistry.getGlobalScope()->Int, earthsOrder->getType());
+}
+
+TEST(TestEnumeration, ImplicitRawRepresentable2)
+{
+    SEMANTIC_ANALYZE(L"enum Planet {\n"
+            L"    case Mercury, Venus, Earth, Mars, Jupiter, Saturn, Uranus, Neptune\n"
+            L"}\n"
+            L"let earthsOrder = Planet.Earth.rawValue");
+    ASSERT_EQ(1, compilerResults.numResults());
+    auto res = compilerResults.getResult(0);
+    ASSERT_EQ(Errors::E_DOES_NOT_HAVE_A_MEMBER_2, res.code);
+}

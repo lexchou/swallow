@@ -482,7 +482,7 @@ void SemanticAnalyzer::visitFunctionCall(const FunctionCallPtr& node)
             }
             if(!sym)
             {
-                error(ma, Errors::E_DOES_NOT_HAVE_A_MEMBER_2, toString(ma->getSelf()), identifier);
+                error(ma, Errors::E_DOES_NOT_HAVE_A_MEMBER_2, selfType->toString(), identifier);
                 abort();
                 return;
             }
