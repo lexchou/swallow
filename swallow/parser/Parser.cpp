@@ -56,7 +56,7 @@ void Parser::setFunctionName(const wchar_t* function)
 {
     this->functionName = functionName;
 }
-/**
+/*!
  * Read next token from tokenizer, throw exception if EOF reached.
  */
 void Parser::expect_next(Token& token)
@@ -66,7 +66,7 @@ void Parser::expect_next(Token& token)
     compilerResults->add(ErrorLevel::Fatal, token.state, Errors::E_UNEXPECTED_EOF);
     throw Abort();
 }
-/**
+/*!
  * Peek next token from tokenizer, return false if EOF reached.
  */
 bool Parser::peek(Token& token)
@@ -88,7 +88,7 @@ bool Parser::peek(Token& token)
         return false;
     }
 }
-/**
+/*!
  * Read next token from tokenizer, return false if EOF reached.
  */
 bool Parser::next(Token& token)
@@ -113,14 +113,14 @@ bool Parser::next(Token& token)
         return false;
     }
 }
-/**
+/*!
  * Restore the position of tokenizer to specified token
  */
 void Parser::restore(Token& token)
 {
     tokenizer->restore(token);
 }
-/**
+/*!
  * Check if the following token is the specified one, consume the token and return true if matched or return false if not.
  */
 bool Parser::match(const wchar_t* str, Token& token)
@@ -153,7 +153,7 @@ bool Parser::match(Keyword::T keyword)
     Token t;
     return match(keyword, t);
 }
-/**
+/*!
  * Check if the following token is an identifier(keywords included), consume the token and return true if matched or rollback and return false
  */
 bool Parser::match_identifier(Token& token)
@@ -165,7 +165,7 @@ bool Parser::match_identifier(Token& token)
     restore(token);
     return false;
 }
-/**
+/*!
  * Return true if the next token is the specified one, no token will be consumed
  */
 bool Parser::predicate(const wchar_t* token)
@@ -212,7 +212,7 @@ void Parser::expect_identifier(Token& token)
     tassert(token, token.identifier.keyword == Keyword::_, Errors::E_EXPECT_IDENTIFIER_1, token.token);
 }
 
-/**
+/*!
  * Throw an exception with the unexpected token
  */
 void Parser::unexpected(const Token& token)

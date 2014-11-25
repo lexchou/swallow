@@ -370,7 +370,7 @@ void SemanticAnalyzer::visitStruct(const StructDefPtr& node)
 }
 
 
-/**
+/*!
  *  Make the given enum type implements the protocol RawRepresentable.
  *  TODO Only one member is added for test case, add the rest members
  */
@@ -466,9 +466,9 @@ void SemanticAnalyzer::visitExtension(const ExtensionDefPtr& node)
 
 
 
-/**
-* Verify if the specified type conform to the given protocol
-*/
+/*!
+ * Verify if the specified type conform to the given protocol
+ */
 void SemanticAnalyzer::verifyProtocolConform(const TypePtr& type)
 {
     for(const TypePtr& protocol : type->getProtocols())

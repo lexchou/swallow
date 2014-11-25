@@ -246,9 +246,9 @@ void SemanticAnalyzer::visitValueBinding(const ValueBindingPtr& node)
 }
 
 
-/**
-* Need to explode a tuple variable definition into a sequence of single variable definitions
-*/
+/*!
+ * Need to explode a tuple variable definition into a sequence of single variable definitions
+ */
 void SemanticAnalyzer::explodeValueBindings(const ValueBindingsPtr& node)
 {
     auto iter = node->begin();

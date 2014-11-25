@@ -95,125 +95,125 @@ public:
     static TypePtr newFunction(const std::vector<Parameter>& parameters, const TypePtr& returnType, bool hasVariadicParameters, const GenericDefinitionPtr& generic = nullptr);
     static TypePtr newSpecializedType(const TypePtr& innerType, const GenericArgumentPtr& arguments);
     static TypePtr newSpecializedType(const TypePtr& innerType, const TypePtr& argument);
-    /**
+    /*!
      * A type place holder for protocol's typealias
      */
     static const TypePtr& getPlaceHolder();
 
     static bool equals(const TypePtr& lhs, const TypePtr& rhs);
 public://methods
-    /**
+    /*!
      * Gets the common parent class between current class and rhs with the minimum inheritance distance.
      */
     TypePtr getCommonParent(const TypePtr& rhs);
 public://properties
-    /**
+    /*!
      * Does the value copies by value or by reference
      */
     bool isValueType()const;
 
-    /**
+    /*!
      * return true if the type is a class/struct/protocol/enum
      */
     bool isObjectType()const;
 
-    /**
+    /*!
      * return true if the type is a nil
      */
     bool isNil()const;
 
     Category getCategory()const;
 
-    /**
+    /*!
      * Gets the name of this type
      * e.g. SubClass
      */
     const std::wstring& getName()const;
 
-    /**
+    /*!
      * Gets the full qualified name of the type
      * e.g.  com.carbinch.demo.MyClass.SubClass
      */
     const std::wstring& getFullName() const;
 
-    /**
+    /*!
      * Gets the parent type that defined this type
      */
     TypePtr getParentType()const;
-    /**
+    /*!
      * Gets the protocols that this type conform to
      */
     const std::vector<TypePtr>& getProtocols() const;
 
 
-    /**
+    /*!
      * Gets the module name where defined this type
      * e.g.  com.carbinch.demo
      */
     const std::wstring& getModuleName() const;
 
-    /**
+    /*!
      * Gets the element type of the Array type
      */
     TypePtr getElementType() const;
 
-    /**
+    /*!
      * Gets the element type of the tuple type
      */
     TypePtr getElementType(int index) const;
 
-    /**
+    /*!
      * Gets the number of element types of the tuple type
      */
     int numElementTypes()const;
 
-    /**
+    /*!
      * Gets the number of total enum cases
      */
     int numEnumCases()const;
 
-    /**
+    /*!
      * Gets the enum cases' associated value type
      */
     const EnumCase* getEnumCase(const std::wstring& name)const;
 
-    /**
+    /*!
      * Gets which declaration this type referenced to
      */
     TypeDeclarationPtr getReference()const;
 
-    /**
+    /*!
      * Gets the inner type for Specialized type
      */
     TypePtr getInnerType() const;
 
-    /**
+    /*!
      * Gets the return type if it's a function/closure type
      */
     TypePtr getReturnType() const;
 
-    /**
+    /*!
      * Gets the parameter types if it's a function/closure type
      */
     const std::vector<Parameter>& getParameters() const;
 
-    /**
+    /*!
      * Check if the function has variadic parameters
      */
     bool hasVariadicParameters()const;
 
 
-    /**
+    /*!
      * Returns the initializer of class/structure
      */
     FunctionOverloadedSymbolPtr getInitializer();
 
-    /**
+    /*!
      * Returns the subscript getters defined by this type
      */
     FunctionOverloadedSymbolPtr getSubscript();
 
-    /**
+    /*!
      * Check if this is a generic type
      */
     bool isGenericType()const;
@@ -223,44 +223,44 @@ public://properties
      */
     const GenericArgumentPtr& getGenericArguments() const;
 
-    /**
+    /*!
      * Gets the generic definition
      */
     const GenericDefinitionPtr& getGenericDefinition() const;
 
-    /**
+    /*!
      * Check if current type is conform to the given protocol or it is a child class of given class
      */
     bool isKindOf(const TypePtr& protocolOrBase) const;
 
     TypePtr getType() override;
 
-    /**
+    /*!
      * Check if the definition of this type contains a Self type
      */
     bool containsSelfType() const;
 
-    /**
+    /*!
      * Check if the definition of this type contains an associated type
      */
     bool containsAssociatedType() const;
 
-    /**
+    /*!
      * Check if this type's generic arguments contains generic parameters
      */
     bool containsGenericParameters() const;
 
-    /**
+    /*!
      * convert this type to string representation
      */
     std::wstring toString() const;
 
-    /**
+    /*!
      * Unwrap the alias chain, return the last node of the alias chain
      */
     TypePtr unwrap() const;
 
-    /**
+    /*!
      * return current instance as TypePtr
      */
     TypePtr self() const;
@@ -276,12 +276,12 @@ public://member access
     const std::vector<SymbolPtr>& getDeclaredStoredProperties() const;
     const std::vector<FunctionOverloadedSymbolPtr>& getDeclaredFunctions() const;
 
-    /**
+    /*!
      * Check if current type can be specialized to given type
      */
     bool canSpecializeTo(const TypePtr& type, std::map<std::wstring, TypePtr>& typeMap)const;
 
-    /**
+    /*!
      * Check if an instance of current type can be assigned to a variable with given type
      */
     bool canAssignTo(const TypePtr& type)const;
@@ -295,9 +295,9 @@ public:
     bool operator !=(const Type& rhs)const;
 private:
 
-    /**
-    * Check if the definition of this type contains a Self type
-    */
+    /*!
+     * Check if the definition of this type contains a Self type
+     */
     bool containsSelfTypeImpl() const;
 protected:
     std::wstring name;

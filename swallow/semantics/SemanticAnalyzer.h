@@ -135,9 +135,9 @@ private:
     FunctionSymbolPtr createFunctionSymbol(const FunctionDefPtr& func, const GenericDefinitionPtr& generic);
     TypePtr createFunctionType(const std::vector<ParametersPtr>::const_iterator& begin, const std::vector<ParametersPtr>::const_iterator& end, const TypePtr& retType, const GenericDefinitionPtr& generic);
 
-    /**
-    * Prepare parameters as symbols in given code block
-    */
+    /*!
+     * Prepare parameters as symbols in given code block
+     */
     void prepareParameters(SymbolScope* scope, const ParametersPtr& params);
     void registerSymbol(const SymbolPlaceHolderPtr& symbol);
     GenericDefinitionPtr prepareGenericTypes(const GenericParametersDefPtr& params);
@@ -148,23 +148,23 @@ private:
     void checkTupleDefinition(const TuplePtr& tuple, const ExpressionPtr& initializer);
     TypePtr evaluateType(const ExpressionPtr& expr);
 
-    /**
-    * Calculates the fit score of arguments on given function
-    * @return -1 if the type is not matched
-    */
+    /*!
+     * Calculates the fit score of arguments on given function
+     * @return -1 if the type is not matched
+     */
     float calculateFitScore(const TypePtr& func, const ParenthesizedExpressionPtr& arguments, bool supressErrors);
 
     bool checkArgument(const TypePtr& funcType, const Type::Parameter& parameter, const std::pair<std::wstring, ExpressionPtr>& argument, bool variadic, float& score, bool supressErrors);
     TypePtr getExpressionType(const ExpressionPtr& expr, const TypePtr& hint, float& score);
 
-    /**
-    * Return a function that matches the given argument
-    * This will always returns a matched function, if no functions matched it will throw exception and abort the process
-    */
+    /*!
+     * Return a function that matches the given argument
+     * This will always returns a matched function, if no functions matched it will throw exception and abort the process
+     */
     FunctionSymbolPtr getOverloadedFunction(const NodePtr& node, const FunctionOverloadedSymbolPtr& funcs, const ParenthesizedExpressionPtr& arguments);
-    /**
-    * Check if the given expression can be converted to given type
-    */
+    /*!
+     * Check if the given expression can be converted to given type
+     */
     bool canConvertTo(const ExpressionPtr&, const TypePtr& type);
 
     bool isInteger(const TypePtr& type);
@@ -172,15 +172,15 @@ private:
     bool isFloat(const TypePtr& type);
 
 
-    /**
-    * Verify if the specified type conform to the given protocol
-    */
+    /*!
+     * Verify if the specified type conform to the given protocol
+     */
     void verifyProtocolConform(const TypePtr& type);
     void verifyProtocolConform(const TypePtr& type, const TypePtr& protocol);
     void verifyProtocolFunction(const TypePtr& type, const TypePtr& protocol, const FunctionSymbolPtr& expected);
 
 
-    /**
+    /*!
      * Need to explode a tuple variable definition into a sequence of single variable definitions
      */
     void explodeValueBindings(const ValueBindingsPtr& node);
@@ -188,31 +188,31 @@ private:
     MemberAccessPtr makeAccess(SourceInfo* info, NodeFactory* nodeFactory, const std::wstring& tempName, const std::vector<int>& indices);
     void expandTuple(std::vector<TupleExtractionResult>& results, std::vector<int>& indices, const PatternPtr& name, const std::wstring& tempName, const TypePtr& type, PatternAccessibility accessibility);
 
-    /**
+    /*!
      * Expand given expression to given Optional<T> type by adding implicit Optional<T>.Some calls
      * Return false if the given expression cannot be conform to given optional type
      */
     bool expandOptional(const TypePtr& optionalType, ExpressionPtr& expr);
 
-    /**
+    /*!
      * Returns the final actual type of Optional in a sequence of Optional type chain.
      * e.g. T?????? will return T
      */
     TypePtr finalTypeOfOptional(const TypePtr& optionalType);
 
-    /**
+    /*!
      * This will make implicit type conversion like expanding optional
      */
     ExpressionPtr transformExpression(const TypePtr& contextualType, const ExpressionPtr& expr);
 public:
-    /**
+    /*!
     * Abort the visitor
     */
     void abort();
 
-    /**
-    * Outputs an compiler error
-    */
+    /*!
+     * Outputs an compiler error
+     */
     void error(const NodePtr& node, int code);
     void error(const NodePtr& node, int code, const std::vector<std::wstring>& items);
     void error(const NodePtr& node, int code, const std::wstring& item);
@@ -221,15 +221,15 @@ public:
     void error(const NodePtr& node, int code, const std::wstring& item1, const std::wstring& item2, const std::wstring& item3, const std::wstring& item4);
 
 
-    /**
-    * Outputs an compiler error
-    */
+    /*!
+     * Outputs an compiler error
+     */
     void warning(const NodePtr& node, int code, const std::wstring& item = std::wstring());
 
 
-    /**
-    * Convert a AST TypeNode into symboled Type
-    */
+    /*!
+     * Convert a AST TypeNode into symboled Type
+     */
     TypePtr lookupType(const TypeNodePtr& type);
     std::wstring toString(const NodePtr& node);
     std::wstring toString(int i);

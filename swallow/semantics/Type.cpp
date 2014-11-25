@@ -55,9 +55,9 @@ bool Type::equals(const TypePtr& lhs, const TypePtr& rhs)
         return false;
     return *lhs == *rhs;
 }
-/**
-* A type place holder for protocol's typealias
-*/
+/*!
+ * A type place holder for protocol's typealias
+ */
 const TypePtr& Type::getPlaceHolder()
 {
     static TypePtr placeholder(new TypeBuilder(Type::GenericParameter));
@@ -109,7 +109,7 @@ TypePtr Type::newFunction(const std::vector<Parameter>& parameters, const TypePt
     ret->genericDefinition = generic;
     return TypePtr(ret);
 }
-/**
+/*!
  * Gets the common parent class between current class and rhs with the minimum inheritance distance.
  */
 TypePtr Type::getCommonParent(const TypePtr& rhs)
@@ -144,7 +144,7 @@ Type::Category Type::getCategory()const
 }
 
 
-/**
+/*!
  * return true if the type is a class/struct/protocol/enum
  */
 bool Type::isObjectType()const
@@ -426,9 +426,9 @@ bool Type::containsAssociatedType() const
 {
     return !associatedTypes.empty();
 }
-/**
-* Check if this type's generic arguments contains generic parameters
-*/
+/*!
+ * Check if this type's generic arguments contains generic parameters
+ */
 bool Type::containsGenericParameters() const
 {
     //TODO: this can be optimized
@@ -642,9 +642,9 @@ bool Type::operator !=(const Type& rhs)const
 }
 
 
-/**
-* convert this type to string representation
-*/
+/*!
+ * convert this type to string representation
+ */
 std::wstring Type::toString() const
 {
     using namespace std;

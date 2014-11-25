@@ -247,9 +247,9 @@ void GlobalScope::declareFunction(const std::wstring&name, int flags, const wcha
     }
 }
 
-/**
-* A short-hand way to create a function symbol
-*/
+/*!
+ * A short-hand way to create a function symbol
+ */
 FunctionSymbolPtr GlobalScope::createFunction(const std::wstring&name, int flags, const wchar_t* returnType, ...)
 {
     va_list va;
@@ -287,9 +287,9 @@ TypePtr GlobalScope::makeArray(const TypePtr& elementType) const
     return Type::newSpecializedType(Array, ga);
 }
 
-/**
-* A short-hand way to create an Optional type
-*/
+/*!
+ * A short-hand way to create an Optional type
+ */
 TypePtr GlobalScope::makeOptional(const TypePtr& elementType) const
 {
     GenericArgumentPtr ga(new GenericArgument(Optional->getGenericDefinition()));
@@ -297,9 +297,9 @@ TypePtr GlobalScope::makeOptional(const TypePtr& elementType) const
     return Type::newSpecializedType(Array, ga);
 }
 
-/**
-* A short-hand way to create a Dictionary type
-*/
+/*!
+ * A short-hand way to create a Dictionary type
+ */
 TypePtr GlobalScope::makeDictionary(const TypePtr& keyType, const TypePtr& valueType) const
 {
     GenericArgumentPtr ga(new GenericArgument(Dictionary->getGenericDefinition()));

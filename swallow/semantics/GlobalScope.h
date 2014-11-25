@@ -41,32 +41,32 @@ private:
     void initPrimitiveTypes();
     void initOperators();
     void initProtocols();
-    /**
+    /*!
      * Register the implementation of binary operator
      */
     bool registerOperatorFunction(const std::wstring& name, const TypePtr& returnType, const TypePtr& lhs, const TypePtr& rhs);
 public:
-    /**
+    /*!
      * A short-hand way to declare an external function.
      */
     void declareFunction(const std::wstring&name, int flags, const wchar_t* returnType, ...);
 
-    /**
+    /*!
      * A short-hand way to create a function symbol
      */
     FunctionSymbolPtr createFunction(const std::wstring&name, int flags, const wchar_t* returnType, ...);
 
-    /**
+    /*!
      * A short-hand way to create an Array type
      */
     TypePtr makeArray(const TypePtr& elementType) const;
 
-    /**
+    /*!
      * A short-hand way to create an Optional type
      */
     TypePtr makeOptional(const TypePtr& elementType) const;
 
-    /**
+    /*!
      * A short-hand way to create a Dictionary type
      */
     TypePtr makeDictionary(const TypePtr& keyType, const TypePtr& valueType) const;

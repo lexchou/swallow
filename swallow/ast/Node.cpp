@@ -43,7 +43,7 @@ std::list<Node*> Node::UnreleasedNodes;
 
 
 
-/**
+/*!
 * Used for debugging, convert node type into it's class name
 */
 const char* Node::nodeTypeToName(NodeType::T nodeType)

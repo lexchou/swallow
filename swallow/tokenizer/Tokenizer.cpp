@@ -166,21 +166,21 @@ Tokenizer::~Tokenizer()
     set(NULL);
 }
 
-/**
+/*!
  * Save current state for restoring later
  */
 const TokenizerState& Tokenizer::save()
 {
     return state;
 }
-/**
+/*!
  * Restore the specified state
  */
 void Tokenizer::restore(const TokenizerState& state)
 {
     this->state = state;
 }
-/**
+/*!
  * Restore the state that used to parse given token
  */
 void Tokenizer::restore(const Token& token)

@@ -146,7 +146,7 @@ protected:
     }
 
 public:
-    /**
+    /*!
      * Used for debugging, convert node type into it's class name
      */
     static const char* nodeTypeToName(NodeType::T nodeType);

@@ -150,55 +150,55 @@ private://expression
     
     std::pair<ExpressionPtr, ExpressionPtr> parseDictionaryLiteralItem();
 private:
-    /**
+    /*!
      * Read next token from tokenizer, throw exception if EOF reached.
      */
     void expect_next(Token& token);
-    /**
+    /*!
      * Restore the position of tokenizer to specified token
      */
     void restore(Token& token);
-    /**
+    /*!
      * Read next token from tokenizer, return false if EOF reached.
      */
     bool next(Token& token);
-    /**
+    /*!
      * Peek next token from tokenizer, return false if EOF reached.
      */
     bool peek(Token& token);
-    /**
+    /*!
      * Check if the following token is an identifier, throw exception if not matched
      */
     void expect_identifier(Token& token);
-    /**
+    /*!
      * Check if the following token is the specified one, throw exception if not matched
      */
     void expect(const wchar_t* token);
     void expect(const wchar_t* token, Token&);
-    /**
+    /*!
      * Check if the following token is the specified keyword, throw exception if not matched
      */
     void expect(Keyword::T keyword);
     void expect(Keyword::T keyword, Token&);
 
-    /**
+    /*!
      * Throw an exception with the unexpected token
      */
     void unexpected(const Token& token);
 
-    /**
+    /*!
      * Check if the following token is the specified one, consume the token and return true if matched or return false if not.
      */
     bool match(const wchar_t* token);
     bool match(Keyword::T keyword);
     bool match(const wchar_t* token, Token&);
     bool match(Keyword::T keyword, Token&);
-    /**
+    /*!
      * Check if the following token is an identifier(keywords included), consume the token and return true if matched or rollback and return false
      */
     bool match_identifier(Token& token);
     
-    /**
+    /*!
      * Return true if the next token is the specified one, no token will be consumed
      */
     bool predicate(const wchar_t* token);

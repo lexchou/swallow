@@ -761,7 +761,7 @@ static inline bool isBinaryExpr(const Token& token)
         return true;
     return false;
 }
-/**
+/*!
  * Rotate the AST tree if required
  */
 static int rotateRequired(const OperatorPtr& lhs, const OperatorPtr& rhs)
@@ -773,7 +773,7 @@ static int rotateRequired(const OperatorPtr& lhs, const OperatorPtr& rhs)
     }
     return lhs->getPrecedence() < rhs->getPrecedence();
 }
-/**
+/*!
  * Sort the AST tree by precedence, if the precedence is the same, sort by associativity
  */
 static OperatorPtr sortExpression(OperatorPtr op)

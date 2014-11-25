@@ -166,13 +166,13 @@ TypePtr SemanticAnalyzer::getExpressionType(const ExpressionPtr& expr, const Typ
     assert(ret != nullptr);
     return ret;
 }
-/**
-*
-* @param parameter
-* @param argument
-* @param variadic  Variadic parameter must have no name
-* @param score
-* @param supressErrors
+/*!
+ *
+ * \param parameter
+ * \param argument
+ * \param variadic  Variadic parameter must have no name
+ * \param score
+ * \param supressErrors
 */
 bool SemanticAnalyzer::checkArgument(const TypePtr& funcType, const Type::Parameter& parameter, const ParenthesizedExpression::Term& argument, bool variadic, float& score, bool supressErrors)
 {

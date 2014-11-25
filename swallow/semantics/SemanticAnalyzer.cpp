@@ -164,9 +164,9 @@ GenericDefinitionPtr SemanticAnalyzer::prepareGenericTypes(const GenericParamete
     return ret;
 }
 
-/**
-* Abort the visitor
-*/
+/*!
+ * Abort the visitor
+ */
 void SemanticAnalyzer::abort()
 {
     throw Abort();
@@ -177,9 +177,9 @@ void SemanticAnalyzer::error(const NodePtr& node, int code, const std::vector<st
     compilerResults->add(ErrorLevel::Error, *node->getSourceInfo(), code, items);
     abort();
 }
-/**
-* Outputs an compiler error
-*/
+/*!
+ * Outputs an compiler error
+ */
 void SemanticAnalyzer::error(const NodePtr& node, int code, const std::wstring& item)
 {
     ResultItems items = {item};
@@ -352,7 +352,7 @@ TypePtr SemanticAnalyzer::lookupTypeImpl(const TypeNodePtr &type)
 }
 
 
-/**
+/*!
  * Expand given expression to given Optional<T> type by adding implicit Optional<T>.Some calls
  * Return false if the given expression cannot be conform to given optional type
  */
@@ -390,7 +390,7 @@ bool SemanticAnalyzer::expandOptional(const TypePtr& optionalType, ExpressionPtr
         return false;
     }
 }
-/**
+/*!
  * Returns the final actual type of Optional in a sequence of Optional type chain.
  * e.g. T?????? will return T
  */
@@ -402,7 +402,7 @@ TypePtr SemanticAnalyzer::finalTypeOfOptional(const TypePtr& optionalType)
     return finalTypeOfOptional(inner);
 }
 
-/**
+/*!
  * This will make implicit type conversion like expanding optional
  */
 ExpressionPtr SemanticAnalyzer::transformExpression(const TypePtr& contextualType, const ExpressionPtr& expr)

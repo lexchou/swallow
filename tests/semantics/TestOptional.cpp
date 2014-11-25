@@ -1,4 +1,4 @@
-/* TypeBuilder.h --
+/* TestOptional.cpp --
  *
  * Copyright (c) 2014, Lex Chou <lex at chou dot it>
  * All rights reserved.
@@ -27,48 +27,22 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef TYPE_BUILDER_H
-#define TYPE_BUILDER_H
-#include "Type.h"
+#include "../utils.h"
+#include "semantics/Type.h"
+#include "semantics/SymbolRegistry.h"
+#include "semantics/Symbol.h"
+#include "semantics/ScopedNodes.h"
+#include "semantics/FunctionSymbol.h"
+#include "semantics/GenericArgument.h"
+#include "common/Errors.h"
 
 
-SWALLOW_NS_BEGIN
+using namespace Swallow;
 
-class SWALLOW_EXPORT TypeBuilder : public Type
+TEST(TestOptional, Type)
 {
-public://Constructors
-    TypeBuilder(Category category);
-public:
-    void setInitializer(const FunctionOverloadedSymbolPtr& initializer);
+    SEMANTIC_ANALYZE(L"var a : Int? = 3")
+    dumpCompilerResults(compilerResults);
+    ASSERT_EQ(0, compilerResults.numResults());
 
-    void setParentType(const TypePtr& type);
-
-    void setInnerType(const TypePtr& type);
-
-    /*!
-     * Adds a protocol that this type conform to
-     */
-    void addProtocol(const TypePtr& protocol);
-
-    /*!
-     * Add function's parameter if it's a function type
-     */
-    void addParameter(const Parameter& param);
-
-    void addMember(const std::wstring& name, const SymbolPtr& member);
-    void addMember(const SymbolPtr& symbol);
-    void addParentTypesFrom(const TypePtr& type);
-    void addParentType(const TypePtr& type, int distance = 1);
-
-    /*!
-     * add a new enum case
-     */
-    void addEnumCase(const std::wstring& name, const TypePtr& associatedType);
-};
-typedef std::shared_ptr<TypeBuilder> TypeBuilderPtr;
-
-
-SWALLOW_NS_END
-
-
-#endif//TYPE_BUILDER_H
+}

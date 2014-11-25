@@ -67,7 +67,7 @@ public:
     TypePtr lookupType(const std::wstring& name);
     bool lookupType(const std::wstring& name, SymbolScope** container, TypePtr* ret);
 
-    /**
+    /*!
      * Lookup symbol in given scope by symbol name and return it's container scope and the symbol
      */
     bool lookupSymbol(SymbolScope* scope, const std::wstring& name, SymbolScope** container, SymbolPtr* ret);

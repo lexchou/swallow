@@ -61,15 +61,15 @@ public:
 
     const std::wstring& getKeyword(Keyword::T k);
 
-    /**
+    /*!
      * Save current state for restoring later
      */
     const TokenizerState& save();
-    /**
+    /*!
      * Restore the specified state
      */
     void restore(const TokenizerState& state);
-    /**
+    /*!
      * Restore the state that used to parse given token
      */
     void restore(const Token& token);

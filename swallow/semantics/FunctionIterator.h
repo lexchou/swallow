@@ -38,7 +38,7 @@ SWALLOW_NS_BEGIN
 typedef std::shared_ptr<class Type> TypePtr;
 typedef std::shared_ptr<class FunctionSymbol> FunctionSymbolPtr;
 
-/**
+/*!
  * This iterator will iterate the function by name through out the inheritance hierarchy
  */
 class SWALLOW_EXPORT FunctionIterator
