@@ -189,6 +189,8 @@ void SemanticAnalyzer::visitValueBinding(const ValueBindingPtr& node)
         return;
     }
 
+    //add implicitly constructor for Optional
+
 
     //TypePtr type = evaluateType(node->initializer);
     if(IdentifierPtr id = std::dynamic_pointer_cast<Identifier>(node->getName()))
@@ -211,14 +213,15 @@ void SemanticAnalyzer::visitValueBinding(const ValueBindingPtr& node)
         }
         if(node->getInitializer())
         {
-            node->getInitializer()->accept(this);
-            TypePtr actualType = node->getInitializer()->getType();
+            ExpressionPtr initializer = transformExpression(declaredType, node->getInitializer());
+            node->setInitializer(initializer);
+            TypePtr actualType = initializer->getType();
             assert(actualType != nullptr);
             if(declaredType)
             {
-                if(!Type::equals(actualType, declaredType) && !canConvertTo(node->getInitializer(), declaredType))
+                if(!Type::equals(actualType, declaredType) && !canConvertTo(initializer, declaredType))
                 {
-                    error(node->getInitializer(), Errors::E_CANNOT_CONVERT_EXPRESSION_TYPE_2, actualType->toString(), declaredType->toString());
+                    error(initializer, Errors::E_CANNOT_CONVERT_EXPRESSION_TYPE_2, actualType->toString(), declaredType->toString());
                     return;
                 }
             }

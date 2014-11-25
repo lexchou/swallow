@@ -123,6 +123,8 @@ public:// Condition control flow
     virtual void visitProtocol(const ProtocolDefPtr& node) override;
     */
     SymbolRegistry* getSymbolRegistry() { return symbolRegistry;}
+public://Syntax sugar for type
+    virtual void visitOptionalType(const OptionalTypePtr& node);
 private:
     void visitAccessor(const CodeBlockPtr& accessor, const ParametersPtr& params, const SymbolPtr& setter);
     TypePtr defineType(const std::shared_ptr<TypeDeclaration>& node, Type::Category category);
@@ -186,6 +188,22 @@ private:
     MemberAccessPtr makeAccess(SourceInfo* info, NodeFactory* nodeFactory, const std::wstring& tempName, const std::vector<int>& indices);
     void expandTuple(std::vector<TupleExtractionResult>& results, std::vector<int>& indices, const PatternPtr& name, const std::wstring& tempName, const TypePtr& type, PatternAccessibility accessibility);
 
+    /**
+     * Expand given expression to given Optional<T> type by adding implicit Optional<T>.Some calls
+     * Return false if the given expression cannot be conform to given optional type
+     */
+    bool expandOptional(const TypePtr& optionalType, ExpressionPtr& expr);
+
+    /**
+     * Returns the final actual type of Optional in a sequence of Optional type chain.
+     * e.g. T?????? will return T
+     */
+    TypePtr finalTypeOfOptional(const TypePtr& optionalType);
+
+    /**
+     * This will make implicit type conversion like expanding optional
+     */
+    ExpressionPtr transformExpression(const TypePtr& contextualType, const ExpressionPtr& expr);
 public:
     /**
     * Abort the visitor

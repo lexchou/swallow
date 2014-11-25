@@ -32,6 +32,7 @@
 #include "FunctionSymbol.h"
 #include "FunctionOverloadedSymbol.h"
 #include "GenericDefinition.h"
+#include "GenericArgument.h"
 #include "TypeBuilder.h"
 #include <cstdarg>
 #include <cassert>
@@ -206,7 +207,11 @@ void GlobalScope::initPrimitiveTypes()
         TypePtr T = Type::newType(L"T", Type::GenericParameter);
         GenericDefinitionPtr generic(new GenericDefinition());
         generic->add(L"T", T);
-        Optional = Type::newType(L"Optional", Type::Struct, nullptr, nullptr, std::vector<TypePtr>(), generic);
+        Optional = Type::newType(L"Optional", Type::Enum, nullptr, nullptr, std::vector<TypePtr>(), generic);
+        type = static_pointer_cast<TypeBuilder>(Optional);
+        type->addEnumCase(L"None", Void);
+        std::vector<TypePtr> SomeArgs = {T};
+        type->addEnumCase(L"Some", Type::newTuple(SomeArgs));
         addSymbol(Optional);
     }
 }
@@ -275,6 +280,34 @@ FunctionSymbolPtr GlobalScope::vcreateFunction(const std::wstring&name, int flag
     return ret;
 }
 
+TypePtr GlobalScope::makeArray(const TypePtr& elementType) const
+{
+    GenericArgumentPtr ga(new GenericArgument(Array->getGenericDefinition()));
+    ga->add(elementType);
+    return Type::newSpecializedType(Array, ga);
+}
+
+/**
+* A short-hand way to create an Optional type
+*/
+TypePtr GlobalScope::makeOptional(const TypePtr& elementType) const
+{
+    GenericArgumentPtr ga(new GenericArgument(Optional->getGenericDefinition()));
+    ga->add(elementType);
+    return Type::newSpecializedType(Array, ga);
+}
+
+/**
+* A short-hand way to create a Dictionary type
+*/
+TypePtr GlobalScope::makeDictionary(const TypePtr& keyType, const TypePtr& valueType) const
+{
+    GenericArgumentPtr ga(new GenericArgument(Dictionary->getGenericDefinition()));
+    ga->add(keyType);
+    ga->add(valueType);
+    return Type::newSpecializedType(Array, ga);
+}
+
 void GlobalScope::initOperators()
 {
     //Register built-in functions
@@ -338,4 +371,24 @@ bool GlobalScope::registerOperatorFunction(const std::wstring& name, const TypeP
     }
     addSymbol(func);
     return true;
+}
+
+static TypePtr innerType(const TypePtr& type)
+{
+    if(type->getCategory() == Type::Specialized)
+        return type->getInnerType();
+    return nullptr;
+}
+
+bool GlobalScope::isArray(const TypePtr& type) const
+{
+    return innerType(type) == Array;
+}
+bool GlobalScope::isOptional(const TypePtr& type) const
+{
+    return innerType(type) == Optional;
+}
+bool GlobalScope::isDictionary(const TypePtr& type) const
+{
+    return innerType(type) == Dictionary;
 }

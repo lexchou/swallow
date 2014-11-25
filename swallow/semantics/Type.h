@@ -117,6 +117,11 @@ public://properties
      */
     bool isObjectType()const;
 
+    /**
+     * return true if the type is a nil
+     */
+    bool isNil()const;
+
     Category getCategory()const;
 
     /**
@@ -254,6 +259,11 @@ public://properties
      * Unwrap the alias chain, return the last node of the alias chain
      */
     TypePtr unwrap() const;
+
+    /**
+     * return current instance as TypePtr
+     */
+    TypePtr self() const;
 public://member access
     SymbolPtr getDeclaredStaticMember(const std::wstring& name)const;
     SymbolPtr getMember(const std::wstring& name) const;

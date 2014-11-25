@@ -40,6 +40,7 @@
 #include "TypeBuilder.h"
 #include "GlobalScope.h"
 #include <cassert>
+#include <ast/NodeFactory.h>
 
 USE_SWALLOW_NS
 using namespace std;
@@ -429,10 +430,7 @@ void SemanticAnalyzer::visitEnum(const EnumDefPtr& node)
                     return;
                 }
             }
-            int flags = SymbolFlagReadable | SymbolFlagHasInitializer | SymbolFlagMember | SymbolFlagStatic;
-            SymbolPlaceHolderPtr symb(new SymbolPlaceHolder(c.name, type, SymbolPlaceHolder::R_PROPERTY, flags));
-            type->addMember(symb);
-            type->addEnumCase(c.name, global->Void, nullptr);
+            type->addEnumCase(c.name, global->Void);
         }
     }
     else if(node->getValueStyle() == EnumDef::AssociatedValues)
@@ -440,28 +438,10 @@ void SemanticAnalyzer::visitEnum(const EnumDefPtr& node)
         for(int i = 0; i < node->numAssociatedTypes(); i++)
         {
             auto c = node->getAssociatedType(i);
+            TypePtr associatedType = global->Void;
             if(c.value)
-            {
-                TypePtr associatedType = lookupType(c.value);
-                assert(associatedType != nullptr && associatedType->getCategory() == Type::Tuple);
-                vector<Type::Parameter> params;
-                for(int i = 0; i < associatedType->numElementTypes(); i++)
-                {
-                    TypePtr t = associatedType->getElementType(i);
-                    params.push_back(Type::Parameter(t));
-                }
-                TypePtr initializerType = Type::newFunction(params, type, false, nullptr);
-                FunctionSymbolPtr func(new FunctionSymbol(c.name, initializerType, nullptr));
-                func->setFlags(SymbolFlagStatic, true);
-                type->addEnumCase(c.name, associatedType, func);
-            }
-            else
-            {
-                int flags = SymbolFlagReadable | SymbolFlagHasInitializer | SymbolFlagMember | SymbolFlagStatic;
-                SymbolPlaceHolderPtr symb(new SymbolPlaceHolder(c.name, type, SymbolPlaceHolder::R_PROPERTY, flags));
-                type->addMember(symb);
-                type->addEnumCase(c.name, global->Void, nullptr);
-            }
+                associatedType = lookupType(c.value);
+            type->addEnumCase(c.name, associatedType);
         }
     }
     else
@@ -593,4 +573,11 @@ void SemanticAnalyzer::verifyProtocolFunction(const TypePtr& type, const TypePtr
 
     }
     error(type->getReference(), Errors::E_TYPE_DOES_NOT_CONFORM_TO_PROTOCOL_UNIMPLEMENTED_FUNCTION_3, type->getName(), protocol->getName(), expected->getName());
+}
+
+void SemanticAnalyzer::visitOptionalType(const OptionalTypePtr& node)
+{
+    TypePtr innerType = lookupType(node->getInnerType());
+    TypePtr type = symbolRegistry->getGlobalScope()->makeOptional(innerType);
+    node->setType(type);
 }

@@ -120,7 +120,7 @@ TypePtr Type::getCommonParent(const TypePtr& rhs)
     if(parentType)
         a = parentType->getCommonParent(rhs);
 
-    TypePtr pthis = std::static_pointer_cast<Type>(shared_from_this());
+    TypePtr pthis = self();
     TypePtr b = rhs->getCommonParent(parentType);
     if(a && b)
     {
@@ -167,6 +167,11 @@ bool Type::isValueType()const
         default:
             return false;
     }
+}
+
+bool Type::isNil() const
+{
+    return category == Tuple && elementTypes.empty();
 }
 
 
@@ -447,12 +452,17 @@ bool Type::containsGenericParameters() const
 }
 TypePtr Type::unwrap() const
 {
-    TypePtr node = static_pointer_cast<Type>(const_cast<Type*>(this)->shared_from_this());
+    TypePtr node = self();
     while(node->category == Alias && node->innerType)
     {
         node = node->innerType;
     }
     return node;
+}
+TypePtr Type::self() const
+{
+    TypePtr ret = static_pointer_cast<Type>(const_cast<Type*>(this)->shared_from_this());
+    return ret;
 }
 TypePtr Type::getAssociatedType(const std::wstring& name) const
 {
@@ -491,7 +501,7 @@ bool Type::canAssignTo(const TypePtr &type) const
 {
     if(type == nullptr)
         return false;
-    TypePtr self = static_pointer_cast<Type>(const_cast<Type*>(this)->shared_from_this());
+    TypePtr self = this->self();
     if(equals(self, type))
         return true;
     if(type->getCategory() == Protocol || type->getCategory() == Class)

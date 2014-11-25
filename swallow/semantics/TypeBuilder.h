@@ -63,7 +63,7 @@ public:
     /**
      * add a new enum case
      */
-    void addEnumCase(const std::wstring& name, const TypePtr& associatedType, const FunctionSymbolPtr& constructor);
+    void addEnumCase(const std::wstring& name, const TypePtr& associatedType);
 };
 typedef std::shared_ptr<TypeBuilder> TypeBuilderPtr;
 

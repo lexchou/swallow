@@ -40,6 +40,7 @@
 #include "SymbolRegistry.h"
 #include "ast/NodeSerializer.h"
 #include "GlobalScope.h"
+#include "ast/NodeFactory.h"
 
 USE_SWALLOW_NS
 using namespace std;
@@ -348,4 +349,76 @@ TypePtr SemanticAnalyzer::lookupTypeImpl(const TypeNodePtr &type)
     }
     assert(0 && "Unsupported type");
     return nullptr;
+}
+
+
+/**
+ * Expand given expression to given Optional<T> type by adding implicit Optional<T>.Some calls
+ * Return false if the given expression cannot be conform to given optional type
+ */
+bool SemanticAnalyzer::expandOptional(const TypePtr& optionalType, ExpressionPtr& expr)
+{
+    GlobalScope* global = symbolRegistry->getGlobalScope();
+    TypePtr exprType = expr->getType();
+    assert(exprType != nullptr);
+    if(exprType->canAssignTo(optionalType))
+        return true;
+    if(optionalType->getCategory() == Type::Specialized && optionalType->getInnerType() == global->Optional)
+    {
+        TypePtr innerType = optionalType->getGenericArguments()->get(0);
+        bool ret = expandOptional(innerType, expr);
+        if(!ret)
+            return ret;
+        //wrap it with an Optional
+        NodeFactory* factory = expr->getNodeFactory();
+        MemberAccessPtr ma = factory->createMemberAccess(*expr->getSourceInfo());
+        IdentifierPtr Some = factory->createIdentifier(*expr->getSourceInfo());
+        Some->setIdentifier(L"Some");
+        ma->setType(optionalType);
+        ma->setField(Some);
+        ParenthesizedExpressionPtr args = factory->createParenthesizedExpression(*expr->getSourceInfo());
+        args->append(expr);
+        FunctionCallPtr call = factory->createFunctionCall(*expr->getSourceInfo());
+        call->setFunction(ma);
+        call->setArguments(args);
+        call->setType(optionalType);
+        expr = call;
+        return ret;
+    }
+    else
+    {
+        return false;
+    }
+}
+/**
+ * Returns the final actual type of Optional in a sequence of Optional type chain.
+ * e.g. T?????? will return T
+ */
+TypePtr SemanticAnalyzer::finalTypeOfOptional(const TypePtr& optionalType)
+{
+    if(optionalType->getCategory() == Type::Specialized && optionalType->getInnerType() != symbolRegistry->getGlobalScope()->Optional)
+        return optionalType;
+    TypePtr inner = optionalType->getGenericArguments()->get(0);
+    return finalTypeOfOptional(inner);
+}
+
+/**
+ * This will make implicit type conversion like expanding optional
+ */
+ExpressionPtr SemanticAnalyzer::transformExpression(const TypePtr& contextualType, const ExpressionPtr& expr)
+{
+    StackedValueGuard<TypePtr> hint(t_hint);
+    hint.set(contextualType);
+    expr->accept(this);
+    if(!contextualType)
+        return expr;
+    if(symbolRegistry->getGlobalScope()->isOptional(contextualType))
+    {
+        ExpressionPtr transformed = expr;
+        bool ret = expandOptional(contextualType, transformed);
+        if(ret)
+            return transformed;
+        return expr;
+    }
+    return expr;
 }

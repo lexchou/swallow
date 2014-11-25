@@ -520,8 +520,7 @@ void SemanticAnalyzer::visitFunctionCall(const FunctionCallPtr& node)
                 error(func, Errors::E_INVALID_USE_OF_A_TO_CALL_A_VALUE_OF_NON_FUNCTION_TYPE_B_2, toString(func), func->getType()->toString());
                 break;
             }
-            TypePtr Array = symbolRegistry->getGlobalScope()->Array;
-            TypePtr arrayType = Type::newSpecializedType(Array, type);
+            TypePtr arrayType = symbolRegistry->getGlobalScope()->makeArray(type);
             node->setType(arrayType);
             break;
         }
@@ -731,7 +730,7 @@ void SemanticAnalyzer::visitArrayLiteral(const ArrayLiteralPtr& node)
     if(!type && hint)
         type = hint;
 
-    TypePtr arrayType = Type::newSpecializedType(scope->Array, type);
+    TypePtr arrayType = scope->makeArray(type);
     node->setType(arrayType);
 }
 void SemanticAnalyzer::visitDictionaryLiteral(const DictionaryLiteralPtr& node)

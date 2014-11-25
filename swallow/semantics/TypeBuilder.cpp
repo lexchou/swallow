@@ -165,10 +165,33 @@ void TypeBuilder::addMember(const std::wstring& name, const SymbolPtr& member)
     }
 }
 
-void TypeBuilder::addEnumCase(const std::wstring &name, const TypePtr &associatedType, const FunctionSymbolPtr& constructor)
+
+void TypeBuilder::addEnumCase(const std::wstring &name, const TypePtr &associatedType)
 {
     assert(!name.empty());
     assert(associatedType != nullptr);
+    FunctionSymbolPtr constructor;
+    if(associatedType->isNil())
+    {
+        //create a symbol for it and save it as member
+        int flags = SymbolFlagReadable | SymbolFlagHasInitializer | SymbolFlagMember | SymbolFlagStatic;
+        SymbolPlaceHolderPtr symb(new SymbolPlaceHolder(name, self(), SymbolPlaceHolder::R_PROPERTY, flags));
+        this->addMember(symb);
+    }
+    else
+    {
+        //create a constructor for it
+        assert(associatedType != nullptr && associatedType->getCategory() == Type::Tuple);
+        vector<Type::Parameter> params;
+        for(int i = 0; i < associatedType->numElementTypes(); i++)
+        {
+            TypePtr t = associatedType->getElementType(i);
+            params.push_back(Type::Parameter(t));
+        }
+        TypePtr initializerType = Type::newFunction(params, self(), false, nullptr);
+        constructor = FunctionSymbolPtr(new FunctionSymbol(name, initializerType, nullptr));
+        constructor->setFlags(SymbolFlagStatic, true);
+    }
     EnumCase c = {name, associatedType, constructor};
     enumCases.insert(make_pair(name, c));
 }
