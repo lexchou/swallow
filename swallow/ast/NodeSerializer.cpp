@@ -347,12 +347,12 @@ void NodeSerializer::visitParenthesizedExpression(const ParenthesizedExpressionP
         if(!first)
             append(L", ");
         first = false;
-        if(!element.first.empty())
+        if(!element.name.empty())
         {
-            append(element.first);
+            append(element.name);
             append(L" : ");
         }
-        element.second->accept(this);
+        element.expression->accept(this);
     }
     append(L")");
 }

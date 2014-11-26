@@ -59,6 +59,14 @@ FloatLiteralPtr NodeFactory::createFloat(const SourceInfo&state)
 {
     return _(state, new FloatLiteral());
 }
+NilLiteralPtr NodeFactory::createNilLiteral(const SourceInfo& state)
+{
+    return _(state, new NilLiteral());
+}
+BooleanLiteralPtr NodeFactory::createBooleanLiteral(const SourceInfo& state)
+{
+    return _(state, new BooleanLiteral());
+}
 StringInterpolationPtr NodeFactory::createStringInterpolation(const SourceInfo &state)
 {
     return _(state, new StringInterpolation());

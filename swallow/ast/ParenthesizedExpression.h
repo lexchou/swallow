@@ -37,8 +37,16 @@ class ExpressionNode;
 class SWALLOW_EXPORT ParenthesizedExpression : public Expression
 {
 public:
+    struct Term
+    {
+        std::wstring name;
+        ExpressionPtr expression;
+        ExpressionPtr transformedExpression;
+        Term(const std::wstring& name, const ExpressionPtr& expr)
+                :name(name), expression(expr)
+        {}
+    };
 
-    typedef std::pair<std::wstring, ExpressionPtr> Term;
 public:
     ParenthesizedExpression();
     ~ParenthesizedExpression();

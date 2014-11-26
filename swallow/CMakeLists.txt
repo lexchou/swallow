@@ -102,6 +102,8 @@ SET(SWALLOW_SRC
     ast/FloatLiteral.cpp
     ast/StringInterpolation.cpp
     ast/StringLiteral.cpp
+    ast/NilLiteral.cpp
+    ast/BooleanLiteral.cpp
     ast/CompileConstant.cpp
 
     ast/BreakStatement.cpp

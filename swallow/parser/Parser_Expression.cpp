@@ -318,6 +318,10 @@ ExpressionPtr Parser::parsePrimaryExpression()
             case Keyword::Super:
                 // primary-expression → superclass-expression
                 return parseSuperExpression();
+            case Keyword::Nil:
+            case Keyword::True:
+            case Keyword::False:
+                return parseLiteral();
             default:
                 break;
         }
@@ -728,6 +732,28 @@ ExpressionPtr Parser::parseLiteral()
             f->valueAsString = token.token;
             f->value = token.number.dvalue;
             return f;
+        }
+        case TokenType::Identifier:
+        {
+            switch(token.getKeyword())
+            {
+                case Keyword::Nil:
+                {
+                    NilLiteralPtr nil = nodeFactory->createNilLiteral(token.state);
+                    return nil;
+                }
+                case Keyword::True:
+                case Keyword::False:
+                {
+                    BooleanLiteralPtr ret = nodeFactory->createBooleanLiteral(token.state);
+                    ret->setValue(token.getKeyword() == Keyword::True);
+                    return ret;
+                }
+                default:
+                    unexpected(token);
+                    break;
+            }
+
         }
         default:
             unexpected(token);

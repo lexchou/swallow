@@ -118,7 +118,8 @@ TypeNodePtr Parser::parseType()
         // ‌ metatype-type → type.Type  type.Protocol
         //TODO meta type is not supported
         restore(token);
-    }while(false);
+        break;
+    }while(true);
     return ret;
 }
 

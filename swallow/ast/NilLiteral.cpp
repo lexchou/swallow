@@ -1,4 +1,4 @@
-/* ParenthesizedExpression.cpp --
+/* NilLiteral.cpp --
  *
  * Copyright (c) 2014, Lex Chou <lex at chou dot it>
  * All rights reserved.
@@ -27,48 +27,16 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "ParenthesizedExpression.h"
+#include "NilLiteral.h"
 #include "NodeVisitor.h"
 USE_SWALLOW_NS
 
-
-ParenthesizedExpression::ParenthesizedExpression()
-    :Expression(NodeType::ParenthesizedExpression)
-{
-    
-}
-
-ParenthesizedExpression::~ParenthesizedExpression()
+NilLiteral::NilLiteral()
+        :Expression(NodeType::NilLiteral)
 {
 }
 
-void ParenthesizedExpression::append(const std::wstring& name, const ExpressionPtr& expr)
+void NilLiteral::accept(NodeVisitor* visitor)
 {
-    expressions.push_back(Term(name, expr));
-}
-void ParenthesizedExpression::append(const ExpressionPtr& expr)
-{
-    append(L"", expr);
-}
-size_t ParenthesizedExpression::numExpressions()const
-{
-    return expressions.size();
-}
-
-void ParenthesizedExpression::accept(NodeVisitor* visitor)
-{
-    accept2(visitor, &NodeVisitor::visitParenthesizedExpression);
-}
-
-std::wstring ParenthesizedExpression::getName(int idx)
-{
-    if(idx <0 || idx >= (int)expressions.size())
-        return L"";
-    return expressions[idx].name;
-}
-ExpressionPtr ParenthesizedExpression::get(int idx)
-{
-    if(idx <0 || idx >= (int)expressions.size())
-        return NULL;
-    return expressions[idx].expression;
+    accept2(visitor, &NodeVisitor::visitNilLiteral);
 }

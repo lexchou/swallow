@@ -39,6 +39,8 @@
 #include "FloatLiteral.h"
 #include "StringLiteral.h"
 #include "CompileConstant.h"
+#include "NilLiteral.h"
+#include "BooleanLiteral.h"
 
 #include "ArrayLiteral.h"
 #include "DictionaryLiteral.h"

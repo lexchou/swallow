@@ -143,6 +143,7 @@ std::wstring getErrorTemplate(int errorCode)
         case Errors::E_ENUM_WITH_NO_CASES_CANNOT_DECLARE_A_RAW_TYPE: return L"An enum with no cases cannot declare a raw type";
         case Errors::E_RAW_VALUE_FOR_ENUM_CASE_MUST_BE_LITERAL: return L"Raw value for enum case must be literal";
         case Errors::E_ENUM_CASES_REQUIRE_EXPLICIT_RAW_VALUES_WHEN_THE_RAW_TYPE_IS_NOT_INTEGER_LITERAL_CONVERTIBLE: return L"Enum cases require explicit raw values when the raw type is not integer literal convertible";
+        case Errors::E_EXPRESSION_DOES_NOT_CONFORM_TO_PROTOCOL_1: return L"Expression does not conform to protocol '%0'";
 
 
         case Errors::W_PARAM_CAN_BE_EXPRESSED_MORE_SUCCINCTLY_1: return L"'%0 %0' can be expressed more succinctly as '#%0'";

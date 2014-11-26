@@ -506,7 +506,9 @@ bool Type::canAssignTo(const TypePtr &type) const
         return true;
     if(type->getCategory() == Protocol || type->getCategory() == Class)
     {
-        if(this->parents.find(type) != parents.end())
+        if(this->category == Type::Specialized)
+            self = innerType;
+        if(self->parents.find(type) != parents.end())
         {
             return true;
         }

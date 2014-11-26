@@ -376,7 +376,7 @@ void NodeVisitor::visitParenthesizedExpression(const ParenthesizedExpressionPtr&
 {
     for(auto term : *node)
     {
-        ACCEPT(term.second);
+        ACCEPT(term.expression);
     }
 }
 
@@ -400,6 +400,14 @@ void NodeVisitor::visitFloat(const FloatLiteralPtr& node)
 
 }
 
+void NodeVisitor::visitNilLiteral(const NilLiteralPtr& node)
+{
+
+}
+void NodeVisitor::visitBooleanLiteral(const BooleanLiteralPtr& node)
+{
+
+}
 
 void NodeVisitor::visitArrayType(const ArrayTypePtr& node)
 {

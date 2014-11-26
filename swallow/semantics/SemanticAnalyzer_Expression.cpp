@@ -143,18 +143,14 @@ TypePtr SemanticAnalyzer::getExpressionType(const ExpressionPtr& expr, const Typ
     if(expr->getNodeType() == NodeType::IntegerLiteral && hint != nullptr)
     {
         IntegerLiteralPtr literal = std::static_pointer_cast<IntegerLiteral>(expr);
-        if(isFloat(hint))
+        if(hint->canAssignTo(scope->FloatingPointType))
         {
             score  = 0.5;
             return hint;
         }
-        if(isInteger(hint))
+        if(hint->canAssignTo(scope->_IntegerType))
             return hint;
-        for(const TypePtr& t : scope->t_Ints)
-        {
-            if(t == hint)
-                return t;
-        }
+
     }
     if(expr->getNodeType() == NodeType::FloatLiteral && hint != nullptr)
     {
@@ -174,7 +170,7 @@ TypePtr SemanticAnalyzer::getExpressionType(const ExpressionPtr& expr, const Typ
  * \param score
  * \param supressErrors
 */
-bool SemanticAnalyzer::checkArgument(const TypePtr& funcType, const Type::Parameter& parameter, const ParenthesizedExpression::Term& argument, bool variadic, float& score, bool supressErrors)
+bool SemanticAnalyzer::checkArgument(const TypePtr& funcType, const Type::Parameter& parameter, const std::pair<std::wstring, ExpressionPtr>& argument, bool variadic, float& score, bool supressErrors)
 {
 
     const std::wstring& name = argument.first;
@@ -249,13 +245,16 @@ float SemanticAnalyzer::calculateFitScore(const TypePtr& func, const Parenthesiz
 
 
     std::vector<Type::Parameter>::const_iterator paramIter = parameters.begin();
-    std::vector<ParenthesizedExpression::Term>::const_iterator argumentIter = arguments->begin();
+    std::vector<ParenthesizedExpression::Term>::iterator argumentIter = arguments->begin();
     std::vector<Type::Parameter>::const_iterator paramEnd = variadic ? parameters.end() - 1 : parameters.end();
     for(;argumentIter != arguments->end() && paramIter != paramEnd; argumentIter++, paramIter++)
     {
         const Type::Parameter& parameter = *paramIter;
-        const ParenthesizedExpression::Term& argument = *argumentIter;
-        bool ret = checkArgument(func, parameter, argument, false, score, supressErrors);
+        ParenthesizedExpression::Term& argument = *argumentIter;
+        StackedValueGuard<TypePtr> contextualType(t_hint);
+        contextualType.set(parameter.type);
+        argument.transformedExpression = this->transformExpression(parameter.type, argument.expression);
+        bool ret = checkArgument(func, parameter, make_pair(argumentIter->name, argumentIter->transformedExpression), false, score, supressErrors);
         if(!ret)
             return -1;
     }
@@ -281,7 +280,7 @@ float SemanticAnalyzer::calculateFitScore(const TypePtr& func, const Parenthesiz
         {
             if(!supressErrors)
             {
-                error(argumentIter->second, Errors::E_EXTRANEOUS_ARGUMENT);
+                error(argumentIter->expression, Errors::E_EXTRANEOUS_ARGUMENT);
                 abort();
             }
             return -1;
@@ -290,7 +289,8 @@ float SemanticAnalyzer::calculateFitScore(const TypePtr& func, const Parenthesiz
         //the first variadic argument must have a label if the parameter got a label
         if(!parameter.name.empty())
         {
-            bool ret = checkArgument(func, parameter, *argumentIter++, false, score, supressErrors);
+            bool ret = checkArgument(func, parameter, make_pair(argumentIter->name, argumentIter->transformedExpression), false, score, supressErrors);
+            argumentIter++;
             if(!ret)
                 return -1;
         }
@@ -298,7 +298,7 @@ float SemanticAnalyzer::calculateFitScore(const TypePtr& func, const Parenthesiz
         //check rest argument
         for(;argumentIter != arguments->end(); argumentIter++)
         {
-            bool ret = checkArgument(func, parameter, *argumentIter, true, score, supressErrors);
+            bool ret = checkArgument(func, parameter, make_pair(argumentIter->name, argumentIter->transformedExpression), true, score, supressErrors);
             if(!ret)
                 return -1;
         }
@@ -345,10 +345,12 @@ FunctionSymbolPtr SemanticAnalyzer::getOverloadedFunction(const NodePtr& node, c
 void SemanticAnalyzer::visitFunctionCall(const SymbolPtr& sym, const FunctionCallPtr& node)
 {
     //Prepare the arguments
+    /*
     for(const ParenthesizedExpression::Term& term : *node->getArguments())
     {
         term.second->accept(this);
     }
+    */
 
     if(FunctionSymbolPtr func = std::dynamic_pointer_cast<FunctionSymbol>(sym))
     {
@@ -603,7 +605,24 @@ void SemanticAnalyzer::visitMemberAccess(const MemberAccessPtr& node)
         node->setType(selfType->getElementType(index));
     }
 }
-
+void SemanticAnalyzer::visitNilLiteral(const NilLiteralPtr& node)
+{
+    GlobalScope* scope = symbolRegistry->getGlobalScope();
+    if(!t_hint || !t_hint->canAssignTo(scope->NilLiteralConvertible))
+    {
+        error(node, Errors::E_EXPRESSION_DOES_NOT_CONFORM_TO_PROTOCOL_1, L"NilLiteralConvertible");
+        return;
+    }
+    node->setType(t_hint);
+}
+void SemanticAnalyzer::visitBooleanLiteral(const BooleanLiteralPtr& node)
+{
+    GlobalScope* scope = symbolRegistry->getGlobalScope();
+    if(t_hint && t_hint->canAssignTo(scope->BooleanLiteralConvertible))
+        node->setType(t_hint);
+    else
+        node->setType(scope->Bool);
+}
 void SemanticAnalyzer::visitString(const StringLiteralPtr& node)
 {
     GlobalScope* scope = symbolRegistry->getGlobalScope();
@@ -743,7 +762,7 @@ void SemanticAnalyzer::visitParenthesizedExpression(const ParenthesizedExpressio
     TypePtr hint = t_hint;
     std::vector<TypePtr> types;
     int index = 0;
-    for(const ParenthesizedExpression::Term& element : *node)
+    for(ParenthesizedExpression::Term& element : *node)
     {
         TypePtr elementHint = nullptr;
         if(t_hint && t_hint->getCategory() == Type::Tuple && index < t_hint->numElementTypes())
@@ -752,8 +771,9 @@ void SemanticAnalyzer::visitParenthesizedExpression(const ParenthesizedExpressio
         }
         StackedValueGuard<TypePtr> hintGuard(t_hint);
         hintGuard.set(elementHint);
-        element.second->accept(this);
-        TypePtr elementType = element.second->getType();
+        element.expression->accept(this);
+        element.expression = transformExpression(elementHint, element.expression);
+        TypePtr elementType = element.expression->getType();
         assert(elementType != nullptr);
         types.push_back(elementType);
     }
@@ -764,8 +784,24 @@ void SemanticAnalyzer::visitTuple(const TuplePtr& node)
 {
     NodeVisitor::visitTuple(node);
     std::vector<TypePtr> types;
-    for(const PatternPtr & element : *node)
+    auto iter = node->begin();
+    int index = 0;
+    for(; iter != node->end(); iter++)
     {
+        TypePtr elementHint = nullptr;
+        if(t_hint && t_hint->getCategory() == Type::Tuple && index < t_hint->numElementTypes())
+        {
+            elementHint = t_hint->getElementType(index++);
+        }
+        StackedValueGuard<TypePtr> hintGuard(t_hint);
+        hintGuard.set(elementHint);
+        PatternPtr element = *iter;
+        element->accept(this);
+        if(ExpressionPtr expr = dynamic_pointer_cast<Expression>(element))
+        {
+            expr = transformExpression(elementHint, expr);
+            element = *iter = expr;
+        }
         TypePtr elementType = element->getType();
         assert(elementType != nullptr);
         types.push_back(elementType);

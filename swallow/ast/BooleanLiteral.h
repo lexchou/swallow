@@ -1,4 +1,4 @@
-/* ParenthesizedExpression.cpp --
+/* BooleanLiteral.h --
  *
  * Copyright (c) 2014, Lex Chou <lex at chou dot it>
  * All rights reserved.
@@ -27,48 +27,28 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "ParenthesizedExpression.h"
-#include "NodeVisitor.h"
-USE_SWALLOW_NS
+#ifndef BOOLEAN_LITERAL_H
+#define BOOLEAN_LITERAL_H
+#include "Expression.h"
+
+SWALLOW_NS_BEGIN
+
+class SWALLOW_EXPORT BooleanLiteral : public Expression
+{
+public:
+    BooleanLiteral();
+public:
+    virtual void accept(NodeVisitor* visitor);
+public:
+    void setValue(bool val);
+    bool getValue()const;
+private:
+    bool val;
+};
 
 
-ParenthesizedExpression::ParenthesizedExpression()
-    :Expression(NodeType::ParenthesizedExpression)
-{
-    
-}
+SWALLOW_NS_END
 
-ParenthesizedExpression::~ParenthesizedExpression()
-{
-}
 
-void ParenthesizedExpression::append(const std::wstring& name, const ExpressionPtr& expr)
-{
-    expressions.push_back(Term(name, expr));
-}
-void ParenthesizedExpression::append(const ExpressionPtr& expr)
-{
-    append(L"", expr);
-}
-size_t ParenthesizedExpression::numExpressions()const
-{
-    return expressions.size();
-}
 
-void ParenthesizedExpression::accept(NodeVisitor* visitor)
-{
-    accept2(visitor, &NodeVisitor::visitParenthesizedExpression);
-}
-
-std::wstring ParenthesizedExpression::getName(int idx)
-{
-    if(idx <0 || idx >= (int)expressions.size())
-        return L"";
-    return expressions[idx].name;
-}
-ExpressionPtr ParenthesizedExpression::get(int idx)
-{
-    if(idx <0 || idx >= (int)expressions.size())
-        return NULL;
-    return expressions[idx].expression;
-}
+#endif//BOOLEAN_LITERAL_H

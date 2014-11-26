@@ -93,6 +93,8 @@ public:
     virtual void visitStringInterpolation(const StringInterpolationPtr& node);
     virtual void visitInteger(const IntegerLiteralPtr& node) override;
     virtual void visitFloat(const FloatLiteralPtr& node) override;
+    virtual void visitNilLiteral(const NilLiteralPtr& node) override;
+    virtual void visitBooleanLiteral(const BooleanLiteralPtr& node) override;
     virtual void visitConditionalOperator(const ConditionalOperatorPtr& node) override;
     virtual void visitBinaryOperator(const BinaryOperatorPtr& node) override;
     virtual void visitUnaryOperator(const UnaryOperatorPtr& node) override;

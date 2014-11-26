@@ -44,5 +44,44 @@ TEST(TestOptional, Type)
     SEMANTIC_ANALYZE(L"var a : Int? = 3")
     dumpCompilerResults(compilerResults);
     ASSERT_EQ(0, compilerResults.numResults());
+    SymbolPtr a = scope->lookup(L"a");
+    ASSERT_NOT_NULL(a);
+    ASSERT_EQ(L"Optional<Int>", a->getType()->toString());
 
+}
+TEST(TestOptional, Type2)
+{
+    SEMANTIC_ANALYZE(L"var a : Int?? = 3");
+    dumpCompilerResults(compilerResults);
+    ASSERT_EQ(0, compilerResults.numResults());
+    SymbolPtr a = scope->lookup(L"a");
+    ASSERT_NOT_NULL(a);
+    ASSERT_EQ(L"Optional<Optional<Int>>", a->getType()->toString());
+}
+
+TEST(TestOptional, Type3)
+{
+    SEMANTIC_ANALYZE(L"var a : (Int??, Int??\?) = (3, 4)");
+    dumpCompilerResults(compilerResults);
+    ASSERT_EQ(0, compilerResults.numResults());
+    SymbolPtr a = scope->lookup(L"a");
+    ASSERT_NOT_NULL(a);
+    ASSERT_EQ(L"(Optional<Optional<Int>>, Optional<Optional<Optional<Int>>>)", a->getType()->toString());
+}
+
+
+TEST(TestOptional, Type4)
+{
+    SEMANTIC_ANALYZE(L"func test(a : Int??\?){}\n"
+            L"test(3)");
+    dumpCompilerResults(compilerResults);
+    ASSERT_EQ(0, compilerResults.numResults());
+}
+
+TEST(TestOptional, Type5)
+{
+    SEMANTIC_ANALYZE(L"func test(a : Int??\?){}\n"
+            L"test(nil)");
+    dumpCompilerResults(compilerResults);
+    ASSERT_EQ(0, compilerResults.numResults());
 }

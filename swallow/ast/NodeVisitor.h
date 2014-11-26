@@ -100,6 +100,8 @@ public:
     virtual void visitStringInterpolation(const StringInterpolationPtr& node);
     virtual void visitInteger(const IntegerLiteralPtr& node);
     virtual void visitFloat(const FloatLiteralPtr& node);
+    virtual void visitNilLiteral(const NilLiteralPtr& node);
+    virtual void visitBooleanLiteral(const BooleanLiteralPtr& node);
 public:
     virtual void visitArrayType(const ArrayTypePtr& node);
     virtual void visitFunctionType(const FunctionTypePtr& node);

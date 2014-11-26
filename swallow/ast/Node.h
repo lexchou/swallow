@@ -90,6 +90,7 @@ struct NodeType
         IntegerLiteral,
         LabeledStatement,
         MemberAccess,
+        NilLiteral,
         Operator,
         OptionalChaining,
         OptionalType,

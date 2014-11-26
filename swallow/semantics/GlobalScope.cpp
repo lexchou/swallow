@@ -165,9 +165,6 @@ void GlobalScope::initPrimitiveTypes()
 
     addSymbol(L"Void", Void = Type::newTuple(vector<TypePtr>()));
 
-//Register built-in variables
-    addSymbol(True = SymbolPtr(new SymbolPlaceHolder(L"true", Bool, SymbolPlaceHolder::R_LOCAL_VARIABLE, SymbolFlagInitialized)));
-    addSymbol(False = SymbolPtr(new SymbolPlaceHolder(L"false", Bool, SymbolPlaceHolder::R_LOCAL_VARIABLE, SymbolFlagInitialized)));
     {
         TypePtr T = Type::newType(L"T", Type::GenericParameter);
         GenericDefinitionPtr generic(new GenericDefinition());
@@ -209,6 +206,8 @@ void GlobalScope::initPrimitiveTypes()
         generic->add(L"T", T);
         Optional = Type::newType(L"Optional", Type::Enum, nullptr, nullptr, std::vector<TypePtr>(), generic);
         type = static_pointer_cast<TypeBuilder>(Optional);
+        type->addProtocol(NilLiteralConvertible);
+
         type->addEnumCase(L"None", Void);
         std::vector<TypePtr> SomeArgs = {T};
         type->addEnumCase(L"Some", Type::newTuple(SomeArgs));
