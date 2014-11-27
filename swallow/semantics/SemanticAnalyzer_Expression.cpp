@@ -538,6 +538,29 @@ void SemanticAnalyzer::visitFunctionCall(const FunctionCallPtr& node)
     }
 
 }
+void SemanticAnalyzer::visitForcedValue(const ForcedValuePtr& node)
+{
+    node->getExpression()->accept(this);
+    TypePtr type = node->getExpression()->getType();
+    if(!symbolRegistry->getGlobalScope()->isOptional(type))
+    {
+        error(node, Errors::E_OPERAND_OF_POSTFIX_A_SHOULD_HAVE_OPTIONAL_TYPE_TYPE_IS_B_2, L"!", type->toString());
+        return;
+    }
+    node->setType(type->getGenericArguments()->get(0));
+}
+void SemanticAnalyzer::visitOptionalChaining(const OptionalChainingPtr& node)
+{
+
+    node->getExpression()->accept(this);
+    TypePtr type = node->getExpression()->getType();
+    if(!symbolRegistry->getGlobalScope()->isOptional(type))
+    {
+        error(node, Errors::E_OPERAND_OF_POSTFIX_A_SHOULD_HAVE_OPTIONAL_TYPE_TYPE_IS_B_2, L"?", type->toString());
+        return;
+    }
+    node->setType(type->getGenericArguments()->get(0));
+}
 void SemanticAnalyzer::visitMemberAccess(const MemberAccessPtr& node)
 {
     TypePtr selfType = t_hint;

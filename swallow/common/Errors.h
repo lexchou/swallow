@@ -137,6 +137,8 @@ struct SWALLOW_EXPORT Errors
         E_ENUM_CASES_REQUIRE_EXPLICIT_RAW_VALUES_WHEN_THE_RAW_TYPE_IS_NOT_INTEGER_LITERAL_CONVERTIBLE, //Enum cases require explicit raw values when the raw type is not integer literal convertible
         E_EXPRESSION_DOES_NOT_CONFORM_TO_PROTOCOL_1, // Expression does not conform to protocol '%0'
 
+        E_OPERAND_OF_POSTFIX_A_SHOULD_HAVE_OPTIONAL_TYPE_TYPE_IS_B_2, // Operand of postfix '%0' should have optional type; type is '%1'
+
         W_PARAM_CAN_BE_EXPRESSED_MORE_SUCCINCTLY_1, // '%0 %0' can be expressed more succinctly as '#%0'
         W_EXTRANEOUS_SHARTP_IN_PARAMETER_1 //Extraneous '#' in parameter: '%0' is already the keyword argument name
         //linking errors

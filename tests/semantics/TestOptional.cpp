@@ -31,6 +31,7 @@
 #include "semantics/Type.h"
 #include "semantics/SymbolRegistry.h"
 #include "semantics/Symbol.h"
+#include "semantics/GlobalScope.h"
 #include "semantics/ScopedNodes.h"
 #include "semantics/FunctionSymbol.h"
 #include "semantics/GenericArgument.h"
@@ -84,4 +85,28 @@ TEST(TestOptional, Type5)
             L"test(nil)");
     dumpCompilerResults(compilerResults);
     ASSERT_EQ(0, compilerResults.numResults());
+}
+TEST(TestOptional, OptionalChaining)
+{
+    SEMANTIC_ANALYZE(
+            L"class Residence {\n"
+                    L"    var numberOfRooms = 1\n"
+                    L"}\n"
+            L"class Person {\n"
+            L"    var residence: Residence?\n"
+            L"}\n"
+            L"\n"
+            L"let john = Person()\n"
+            L"let roomCount = john.residence!.numberOfRooms");
+    dumpCompilerResults(compilerResults);
+    ASSERT_EQ(0, compilerResults.numResults());
+    SymbolPtr roomCount = scope->lookup(L"roomCount");
+    ASSERT_NOT_NULL(roomCount);
+    ASSERT_EQ(symbolRegistry.getGlobalScope()->Int, roomCount->getType());
+/*
+
+
+
+
+     */
 }

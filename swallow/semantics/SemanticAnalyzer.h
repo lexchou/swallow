@@ -110,6 +110,8 @@ public:
     //virtual void visitComputedProperty(const ComputedPropertyPtr& node) override;
     //virtual void visitSubscript(const SubscriptDefPtr& node) override;
     virtual void visitSubscriptAccess(const SubscriptAccessPtr& node) override;
+    virtual void visitForcedValue(const ForcedValuePtr& node) override;
+    virtual void visitOptionalChaining(const OptionalChainingPtr& node) override;
     //virtual void visitStruct(const StructDefPtr& node) override;
 public:// Condition control flow
     virtual void visitIf(const IfStatementPtr& node);
