@@ -39,6 +39,14 @@ USE_SWALLOW_NS
         } \
     } while(0);
 
+void NodeVisitor::beforeVisiting(const NodePtr& node)
+{
+
+}
+void NodeVisitor::afterVisited(const NodePtr& node)
+{
+
+}
 
 void NodeVisitor::visitDeinit(const DeinitializerDefPtr& node)
 {

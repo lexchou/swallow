@@ -35,6 +35,7 @@
 #include <vector>
 #include <sstream>
 #include <memory>
+#include "NodeVisitor.h"
 #ifdef TRACE_NODE
 #include <list>
 #endif//TRACE_NODE
@@ -143,7 +144,18 @@ protected:
     inline void accept2(NodeVisitor* visitor, void (NodeVisitor::*visit)(const std::shared_ptr<ASTNode>&))
     {
         std::shared_ptr<ASTNode> ptr = std::static_pointer_cast<ASTNode>(shared_from_this());
-        (visitor->*visit)(ptr);
+        visitor->beforeVisiting(ptr);
+        try
+        {
+            (visitor->*visit)(ptr);
+            visitor->afterVisited(ptr);
+        }
+        catch(...)
+        {
+            visitor->afterVisited(ptr);
+            throw;
+        }
+
     }
 
 public:

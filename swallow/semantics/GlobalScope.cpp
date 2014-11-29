@@ -293,7 +293,7 @@ TypePtr GlobalScope::makeOptional(const TypePtr& elementType) const
 {
     GenericArgumentPtr ga(new GenericArgument(Optional->getGenericDefinition()));
     ga->add(elementType);
-    return Type::newSpecializedType(Array, ga);
+    return Type::newSpecializedType(Optional, ga);
 }
 
 /*!
@@ -304,7 +304,7 @@ TypePtr GlobalScope::makeDictionary(const TypePtr& keyType, const TypePtr& value
     GenericArgumentPtr ga(new GenericArgument(Dictionary->getGenericDefinition()));
     ga->add(keyType);
     ga->add(valueType);
-    return Type::newSpecializedType(Array, ga);
+    return Type::newSpecializedType(Dictionary, ga);
 }
 
 void GlobalScope::initOperators()

@@ -40,6 +40,9 @@ class SWALLOW_EXPORT NodeVisitor
 public:
     virtual ~NodeVisitor(){}
 public:
+    virtual void beforeVisiting(const NodePtr& node);
+    virtual void afterVisited(const NodePtr& node);
+public:
     virtual void visitValueBindings(const ValueBindingsPtr& node);
     virtual void visitComputedProperty(const ComputedPropertyPtr& node);
     virtual void visitValueBinding(const ValueBindingPtr& node);

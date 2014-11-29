@@ -86,7 +86,7 @@ TEST(TestOptional, Type5)
     dumpCompilerResults(compilerResults);
     ASSERT_EQ(0, compilerResults.numResults());
 }
-TEST(TestOptional, OptionalChaining)
+TEST(TestOptional, ForcedValue)
 {
     SEMANTIC_ANALYZE(
             L"class Residence {\n"
@@ -103,10 +103,48 @@ TEST(TestOptional, OptionalChaining)
     SymbolPtr roomCount = scope->lookup(L"roomCount");
     ASSERT_NOT_NULL(roomCount);
     ASSERT_EQ(symbolRegistry.getGlobalScope()->Int, roomCount->getType());
-/*
+}
 
+TEST(TestOptional, ForcedValue2)
+{
+    SEMANTIC_ANALYZE(
+            L"var a : Int??? = 3\n"
+                    L"var b = a!");
 
+    dumpCompilerResults(compilerResults);
+    ASSERT_EQ(0, compilerResults.numResults());
+    SymbolPtr b = scope->lookup(L"b");
+    ASSERT_NOT_NULL(b);
+    ASSERT_EQ(L"Optional<Optional<Int>>", b->getType()->toString());
+}
+TEST(TestOptional, OptionalChaining)
+{
+    SEMANTIC_ANALYZE(
+            L"class Residence {\n"
+                    L"    var numberOfRooms = 1\n"
+                    L"}\n"
+                    L"class Person {\n"
+                    L"    var residence: Residence?\n"
+                    L"}\n"
+                    L"\n"
+                    L"let john = Person()\n"
+                    L"let roomCount = john.residence?.numberOfRooms");
+    dumpCompilerResults(compilerResults);
+    ASSERT_EQ(0, compilerResults.numResults());
+    SymbolPtr roomCount = scope->lookup(L"roomCount");
+    ASSERT_NOT_NULL(roomCount);
+    ASSERT_EQ(L"Optional<Int>", roomCount->getType()->toString());
+}
 
+TEST(TestOptional, OptionalChaining2)
+{
+    SEMANTIC_ANALYZE(
+            L"var a : Int??? = 3\n"
+                    L"var b = a?");
 
-     */
+    dumpCompilerResults(compilerResults);
+    ASSERT_EQ(0, compilerResults.numResults());
+    SymbolPtr b = scope->lookup(L"b");
+    ASSERT_NOT_NULL(b);
+    ASSERT_EQ(L"Optional<Optional<Int>>", b->getType()->toString());
 }

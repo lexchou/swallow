@@ -561,6 +561,17 @@ void SemanticAnalyzer::visitOptionalChaining(const OptionalChainingPtr& node)
     }
     node->setType(type->getGenericArguments()->get(0));
 }
+static bool hasOptionalChaining(const NodePtr& node)
+{
+    if(!node)
+        return false;
+    NodeType::T nodeType = node->getNodeType();
+    if(nodeType == NodeType::OptionalChaining)
+        return true;
+    if(nodeType == NodeType::MemberAccess)
+        return hasOptionalChaining(static_pointer_cast<MemberAccess>(node)->getSelf());
+    return false;
+}
 void SemanticAnalyzer::visitMemberAccess(const MemberAccessPtr& node)
 {
     TypePtr selfType = t_hint;
@@ -626,6 +637,16 @@ void SemanticAnalyzer::visitMemberAccess(const MemberAccessPtr& node)
             return;
         }
         node->setType(selfType->getElementType(index));
+    }
+
+    //Optional Chaining, if parent node is not a member access and there's a optional chaining expression inside Self, mark the expression optional
+    if(!parentNode || parentNode->getNodeType() != NodeType::MemberAccess)
+    {
+        if(hasOptionalChaining(node->getSelf()))
+        {
+            TypePtr type = symbolRegistry->getGlobalScope()->makeOptional(node->getType());
+            node->setType(type);
+        }
     }
 }
 void SemanticAnalyzer::visitNilLiteral(const NilLiteralPtr& node)

@@ -51,6 +51,28 @@ SemanticAnalyzer::SemanticAnalyzer(SymbolRegistry* symbolRegistry, CompilerResul
 {
 
 }
+
+void SemanticAnalyzer::beforeVisiting(const NodePtr& node)
+{
+    parentNodes.push(parentNode);
+    parentNode = currentNode;
+    currentNode = node;
+
+}
+void SemanticAnalyzer::afterVisited(const NodePtr& node)
+{
+    currentNode = parentNode;
+    if(parentNodes.empty())
+    {
+        parentNode = nullptr;
+    }
+    else
+    {
+        parentNode = parentNodes.top();
+        parentNodes.pop();
+    }
+}
+
 void SemanticAnalyzer::prepareParameters(SymbolScope* scope, const ParametersPtr& params)
 {
     //check and prepare for parameters

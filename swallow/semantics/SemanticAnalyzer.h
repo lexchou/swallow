@@ -31,6 +31,7 @@
 #define SEMANTIC_ANALYZER_H
 #include "ast/NodeVisitor.h"
 #include "Type.h"
+#include <stack>
 #include <list>
 
 SWALLOW_NS_BEGIN
@@ -65,6 +66,9 @@ class SWALLOW_EXPORT SemanticAnalyzer : public NodeVisitor
 {
 public:
     SemanticAnalyzer(SymbolRegistry* symbolRegistry, CompilerResults* compilerResults);
+public:
+    virtual void beforeVisiting(const NodePtr& node);
+    virtual void afterVisited(const NodePtr& node);
 public:
     virtual void visitAssignment(const AssignmentPtr& node) override;
     virtual void visitComputedProperty(const ComputedPropertyPtr& node) override;
@@ -245,6 +249,10 @@ protected:
 private:
     //hint for parsing Array/tuple/dictionary literal
     TypePtr t_hint;
+    NodePtr parentNode;
+    NodePtr currentNode;
+    std::stack<NodePtr> parentNodes;
+
 private:
     TypePtr currentType;
 };
