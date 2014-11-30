@@ -257,7 +257,37 @@ StatementPtr Parser::parseWhileLoop()
 //“while-condition → expression  declaration”
 ExpressionPtr Parser::parseConditionExpression()
 {
-    return parseExpression();
+    Token token;
+    expect_next(token);
+    if(token.type == TokenType::Identifier && token.identifier.keyword != Keyword::_)
+    {
+        Keyword::T keyword = token.identifier.keyword;
+        tassert(token, keyword == Keyword::Var || keyword == Keyword::Let, Errors::E_EXPECTED_EXPRESSION_VAR_OR_LET_IN_A_CONDITION_1, L"if");
+        ValueBindingPatternPtr value = nodeFactory->createValueBindingPattern(token.state);
+        value->setReadOnly(keyword == Keyword::Let);
+        PatternPtr binding = parsePattern();
+        value->setBinding(binding);
+        if(binding->getNodeType() == NodeType::TypedPattern)
+        {
+            TypedPatternPtr tpattern = std::static_pointer_cast<TypedPattern>(binding);
+            value->setBinding(tpattern->getPattern());
+            value->setDeclaredType(tpattern->getDeclaredType());
+        }
+        if (!match(L"=", token))
+        {
+            tassert(token, false, Errors::E_VARIABLE_BINDING_IN_A_CONDITION_REQUIRES_AN_INITIALIZER);
+        }
+        AssignmentPtr assignment = nodeFactory->createAssignment(token.state);
+        ExpressionPtr expr = parseExpression();
+        assignment->setLHS(value);
+        assignment->setRHS(expr);
+        return assignment;
+    }
+    else
+    {
+        restore(token);
+        return parseExpression();
+    }
 }
 /*
  GRAMMAR OF A DO-WHILE STATEMENT

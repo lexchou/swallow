@@ -63,6 +63,7 @@ void SemanticAnalyzer::visitAssignment(const AssignmentPtr& node)
         error(node, Errors::E_A_IS_NOT_CONVERTIBLE_TO_B_2, sourceType->toString(), destinationType->toString());
         return;
     }
+    node->setType(symbolRegistry->getGlobalScope()->Void);
 }
 void SemanticAnalyzer::verifyTuplePattern(const PatternPtr& pattern)
 {
@@ -288,7 +289,7 @@ void SemanticAnalyzer::explodeValueBinding(const ValueBindingsPtr& valueBindings
     //expand it into tuple assignment
     NodeFactory* nodeFactory = valueBindings->getNodeFactory();
     //need a temporay variable to hold the initializer
-    std::wstring tempName = L"#0";
+    std::wstring tempName = generateTempName();
     ValueBindingPtr tempVar = nodeFactory->createValueBinding(*var->getSourceInfo());
     IdentifierPtr tempVarId = nodeFactory->createIdentifier(*var->getSourceInfo());
     tempVarId->setIdentifier(tempName);

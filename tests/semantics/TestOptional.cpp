@@ -148,3 +148,37 @@ TEST(TestOptional, OptionalChaining2)
     ASSERT_NOT_NULL(b);
     ASSERT_EQ(L"Optional<Optional<Int>>", b->getType()->toString());
 }
+
+
+
+TEST(TestOptional, OptionalChaining3)
+{
+    SEMANTIC_ANALYZE(
+            L"class Residence {\n"
+                    L"    var numberOfRooms = 1\n"
+                    L"}\n"
+                    L"class Person {\n"
+                    L"    var residence: Residence?\n"
+                    L"}\n"
+                    L"\n"
+                    L"let john = Person()\n"
+                    L"if let roomCount = john.residence?.numberOfRooms {\n"
+                    "    println(\"John's residence has \\(roomCount) room(s).\")\n"
+                    "} else {\n"
+                    "    println(\"Unable to retrieve the number of rooms.\")\n"
+                    "}\n");
+
+
+    dumpCompilerResults(compilerResults);
+    ASSERT_EQ(0, compilerResults.numResults());
+
+    IfStatementPtr _if = std::dynamic_pointer_cast<IfStatement>(root->getStatement(3));
+    ASSERT_NOT_NULL(_if);
+    ScopedCodeBlockPtr then = std::dynamic_pointer_cast<ScopedCodeBlock>(_if->getThen());
+    ASSERT_NOT_NULL(then);
+    SymbolScope* thenScope = then->getScope();
+    ASSERT_NOT_NULL(thenScope);
+    SymbolPtr roomCount = thenScope->lookup(L"roomCount");
+    ASSERT_NOT_NULL(roomCount);
+    ASSERT_EQ(L"Int", roomCount->getType()->toString());
+}

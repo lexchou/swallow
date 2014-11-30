@@ -145,6 +145,10 @@ std::wstring getErrorTemplate(int errorCode)
         case Errors::E_ENUM_CASES_REQUIRE_EXPLICIT_RAW_VALUES_WHEN_THE_RAW_TYPE_IS_NOT_INTEGER_LITERAL_CONVERTIBLE: return L"Enum cases require explicit raw values when the raw type is not integer literal convertible";
         case Errors::E_EXPRESSION_DOES_NOT_CONFORM_TO_PROTOCOL_1: return L"Expression does not conform to protocol '%0'";
         case Errors::E_OPERAND_OF_POSTFIX_A_SHOULD_HAVE_OPTIONAL_TYPE_TYPE_IS_B_2: return L"Operand of postfix '%0' should have optional type; type is '%1'";
+        case Errors::E_BOUND_VALUE_IN_A_CONDITIONAL_BINDING_MUST_BE_OF_OPTIONAL_TYPE: return L"Bound value in a conditional binding must be of Optional type";
+        case Errors::E_EXPECTED_EXPRESSION_VAR_OR_LET_IN_A_CONDITION_1: return L"Expected expression, var, or let in '%0' condition";
+        case Errors::E_VARIABLE_BINDING_IN_A_CONDITION_REQUIRES_AN_INITIALIZER: return L"Variable binding in a condition requires an initializer";
+        case Errors::E_A_IS_NOT_IDENTICIAL_TO_B_2: return L"'%0' is not identical to '%1'";
 
         case Errors::W_PARAM_CAN_BE_EXPRESSED_MORE_SUCCINCTLY_1: return L"'%0 %0' can be expressed more succinctly as '#%0'";
         case Errors::W_EXTRANEOUS_SHARTP_IN_PARAMETER_1: return L"Extraneous '#' in parameter: '%0' is already the keyword argument name";

@@ -49,7 +49,7 @@ using namespace std;
 SemanticAnalyzer::SemanticAnalyzer(SymbolRegistry* symbolRegistry, CompilerResults* compilerResults)
 :symbolRegistry(symbolRegistry), compilerResults(compilerResults)
 {
-
+    numTemporaryNames = 0;
 }
 
 void SemanticAnalyzer::beforeVisiting(const NodePtr& node)
@@ -71,6 +71,13 @@ void SemanticAnalyzer::afterVisited(const NodePtr& node)
         parentNode = parentNodes.top();
         parentNodes.pop();
     }
+}
+
+std::wstring SemanticAnalyzer::generateTempName()
+{
+    std::wstringstream ss;
+    ss<<L"#"<<this->numTemporaryNames++;
+    return ss.str();
 }
 
 void SemanticAnalyzer::prepareParameters(SymbolScope* scope, const ParametersPtr& params)

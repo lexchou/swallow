@@ -47,16 +47,16 @@ public:
     void setAttributes(const std::vector<AttributePtr>& attrs);
     const std::vector<AttributePtr>& getAttributes();
     AttributePtr getAttribute(const wchar_t* name);
+
+    int getModifiers()const;
+    void setModifiers(int modifiers);
 protected:
-    int getSpecifiers();
-    void setSpecifiers(int specifiers);
-    
     GenericParametersDefPtr getGenericParametersDef();
     void setGenericParametersDef(const GenericParametersDefPtr& val);
     
 protected:
     std::vector<AttributePtr> attributes;
-    int specifiers;
+    int modifiers;
     GenericParametersDefPtr genericParameters;
 };
 

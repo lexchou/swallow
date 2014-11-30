@@ -42,6 +42,7 @@ static inline bool iswhite(wchar_t ch)
         case 0x000B:// vertical tab
         case 0x000C:// form feed
         case 0x0000:// null
+        case 0x200b://
             return true;
         default:
             return false;

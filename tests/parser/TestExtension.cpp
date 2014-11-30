@@ -136,7 +136,7 @@ TEST(TestExtension, testInit)
     ASSERT_EQ(1, s->numDeclarations());
 
     ASSERT_NOT_NULL(init = std::dynamic_pointer_cast<InitializerDef>(s->getDeclaration(0)));
-    ASSERT_FALSE(init->isConvenience());
+    ASSERT_EQ(0, init->getModifiers());
     ASSERT_NOT_NULL(params = std::dynamic_pointer_cast<Parameters>(init->getParameters()));
     ASSERT_EQ(2, params->numParameters());
 
@@ -159,7 +159,7 @@ TEST(TestExtension, testMutatingMethod)
     ASSERT_EQ(1, s->numDeclarations());
 
     ASSERT_NOT_NULL(square = std::dynamic_pointer_cast<FunctionDef>(s->getDeclaration(0)));
-    ASSERT_EQ((int)TypeSpecifier::Mutating, square->getSpecifiers());
+    ASSERT_EQ((int)DeclarationModifiers::Mutating, square->getModifiers());
     ASSERT_NOT_NULL(params = std::dynamic_pointer_cast<Parameters>(square->getParameters(0)));
     ASSERT_EQ(0, params->numParameters());
 

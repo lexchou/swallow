@@ -191,19 +191,35 @@ struct Associativity
     };
 };
 
-struct TypeSpecifier
+struct DeclarationModifiers
 {
     enum T
     {
-        Class         =   1,
-        Mutating      =   2,
-        NonMutating   =   4,
-        Override      =   8,
-        Static        =   0x10,
-        Unowned       =   0x20,
-        Unowned_Safe  =   0x20 | 0x40,
-        Unowned_Unsafe=   0x20 | 0x80,
-        Weak          =   0x100
+        Class         =        1,
+        Convenience   =        2,
+        Dynamic       =        4,
+        Final         =        8,
+        Infix         =     0x10,
+        Lazy          =     0x20,
+        Mutating      =     0x40,
+        NonMutating   =     0x80,
+        Optional      =    0x100,
+        Override      =    0x200,
+        Postfix       =    0x400,
+        Prefix        =    0x800,
+        Required      =   0x1000,
+        Static        =   0x2000,
+        Unowned       =   0x4000,
+        Unowned_Safe  =   0x4000 | 0x8000,
+        Unowned_Unsafe=   0x4000 | 0x10000,
+        Weak          =  0x20000,
+        //Access Level Modifiers
+        Internal      =  0x40000,
+        Internal_Set  =  0x40000 | 0x80000,
+        Private       = 0x100000,
+        Private_Set   = 0x100000 | 0x200000,
+        Public        = 0x400000,
+        Public_Set    = 0x400000 | 0x800000
     };
 };
 

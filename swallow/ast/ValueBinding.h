@@ -43,9 +43,6 @@ class SWALLOW_EXPORT ValueBinding : public Declaration
 public:
     ValueBinding();
 public:
-    using Declaration::setSpecifiers;
-    using Declaration::getSpecifiers;
-public:
 
     void setTypeAttributes(const Attributes& attrs);
     const Attributes& getTypeAttributes() const;

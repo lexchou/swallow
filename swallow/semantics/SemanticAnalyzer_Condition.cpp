@@ -47,9 +47,90 @@
 USE_SWALLOW_NS
 using namespace std;
 
+
+static bool isOptionalChainingChecking(const ExpressionPtr& expr)
+{
+    if(expr->getNodeType() != NodeType::Assignment)
+        return false;
+    AssignmentPtr assignment = static_pointer_cast<Assignment>(expr);
+    if(assignment->getLHS()->getNodeType() != NodeType::ValueBindingPattern)
+        return false;
+    return true;
+}
+
 void SemanticAnalyzer::visitIf(const IfStatementPtr& node)
 {
+    ExpressionPtr condition = node->getCondition();
+    if(isOptionalChainingChecking(condition))
+    {
+        AssignmentPtr assignment = static_pointer_cast<Assignment>(condition);
+        PatternPtr expr = assignment->getRHS();
+        ValueBindingPatternPtr binding = static_pointer_cast<ValueBindingPattern>(assignment->getLHS());
+        expr->accept(this);
+        if(!symbolRegistry->getGlobalScope()->isOptional(expr->getType()))
+        {
+            error(expr, Errors::E_BOUND_VALUE_IN_A_CONDITIONAL_BINDING_MUST_BE_OF_OPTIONAL_TYPE);
+            return;
+        }
+        //create value binding
+        TypePtr unpackedType = expr->getType()->getGenericArguments()->get(0);
+        if(binding->getDeclaredType())
+        {
+            TypePtr declaredType = lookupType(binding->getDeclaredType());
+            assert(declaredType != nullptr);
+            //check if type is identical to initializer type
+            if(!Type::equals(unpackedType, declaredType))
+            {
+                error(expr, Errors::E_A_IS_NOT_IDENTICIAL_TO_B_2, unpackedType->toString(), declaredType->toString());
+                return;
+            }
+        }
+        ScopedCodeBlockPtr then = static_pointer_cast<ScopedCodeBlock>(node->getThen());
+        SymbolScope* scope = then->getScope();
+        int symbolFlags = SymbolFlagInitialized | SymbolFlagReadable;
+        if(!binding->isReadOnly())
+            symbolFlags |= SymbolFlagWritable;
+        //TODO: refactor here and visitValueBindings, these code can be shared
+        if(IdentifierPtr id = dynamic_pointer_cast<Identifier>(binding->getBinding()))
+        {
+            SymbolPtr sym(new SymbolPlaceHolder(id->getIdentifier(), unpackedType, SymbolPlaceHolder::R_LOCAL_VARIABLE, symbolFlags));
+            scope->addSymbol(sym);
+        }
+        else if(TuplePtr tuple = dynamic_pointer_cast<Tuple>(binding->getBinding()))
+        {
+            vector<TupleExtractionResult> results;
+            vector<int> indices;
+            wstring tempName = generateTempName();
+            this->expandTuple(results, indices, tuple, tempName, unpackedType, binding->isReadOnly() ? AccessibilityConstant : AccessibilityVariable);
+            SymbolPtr temp(new SymbolPlaceHolder(tempName, unpackedType, SymbolPlaceHolder::R_LOCAL_VARIABLE, SymbolFlagInitialized | SymbolFlagReadable | SymbolFlagTemporary));
+            scope->addSymbol(temp);
+            for(const TupleExtractionResult& res : results)
+            {
+                SymbolPtr sym(new SymbolPlaceHolder(res.name->getIdentifier(), res.type, SymbolPlaceHolder::R_LOCAL_VARIABLE, symbolFlags));
+                scope->addSymbol(sym);
+            }
+        }
+        else
+        {
+            assert(0 && "Invalid instance");
+        }
+    }
+    else
+    {
+        condition->accept(this);
+        //the condition must be conform to type BooleanType
+        TypePtr condType = condition->getType();
+        assert(condType != nullptr);
+        if(!condType->canAssignTo(symbolRegistry->getGlobalScope()->BooleanType))
+        {
+            error(node->getCondition(), Errors::E_TYPE_DOES_NOT_CONFORM_TO_PROTOCOL_2_, condType->toString(), L"BooleanType");
+            return;
+        }
+    }
 
+    node->getThen()->accept(this);
+    if(node->getElse())
+        node->getElse()->accept(this);
 }
 
 static void checkExhausiveSwitch(SemanticAnalyzer* sa, const SwitchCasePtr& node)

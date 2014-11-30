@@ -34,7 +34,7 @@ USE_SWALLOW_NS
 
 
 Declaration::Declaration(NodeType::T nodeType)
-    :Statement(nodeType), specifiers(0), genericParameters(NULL)
+    :Statement(nodeType), modifiers(0), genericParameters(NULL)
 {
 }
 Declaration::~Declaration()
@@ -63,13 +63,13 @@ AttributePtr Declaration::getAttribute(const wchar_t* name)
 }
 
 
-int Declaration::getSpecifiers()
+int Declaration::getModifiers()const
 {
-    return specifiers;
+    return modifiers;
 }
-void Declaration::setSpecifiers(int specifiers)
+void Declaration::setModifiers(int modifiers)
 {
-    this->specifiers = specifiers;
+    this->modifiers = modifiers;
 }
 
 

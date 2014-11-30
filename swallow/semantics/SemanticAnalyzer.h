@@ -212,6 +212,11 @@ private:
      * This will make implicit type conversion like expanding optional
      */
     ExpressionPtr transformExpression(const TypePtr& contextualType, const ExpressionPtr& expr);
+
+    /*!
+     * This will generate a unique temporary name for symbol
+     */
+    std::wstring generateTempName();
 public:
     /*!
     * Abort the visitor
@@ -252,7 +257,7 @@ private:
     NodePtr parentNode;
     NodePtr currentNode;
     std::stack<NodePtr> parentNodes;
-
+    int numTemporaryNames;
 private:
     TypePtr currentType;
 };

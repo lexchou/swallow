@@ -94,11 +94,11 @@ private://Attribute
     
 private://declaration
     DeclarationPtr parseDeclaration();
-    int parseDeclarationSpecifiers();
+    int parseDeclarationModifiers();
     void verifyDeclarationSpecifiers(const Token& token, int actualSpecifiers, int expectedSpecifiers);
     DeclarationPtr parseImport(const std::vector<AttributePtr>& attrs);
-    DeclarationPtr parseLet(const std::vector<AttributePtr>& attrs, int specifiers);
-    DeclarationPtr parseVar(const std::vector<AttributePtr>& attrs, int specifiers);
+    DeclarationPtr parseLet(const std::vector<AttributePtr>& attrs, int modifiers);
+    DeclarationPtr parseVar(const std::vector<AttributePtr>& attrs, int modifiers);
     ValueBindingPtr parseVariableDeclaration();
     void parseWillSetDidSetBlock(const ComputedPropertyPtr& property);
     void parseWillSetClause(const ComputedPropertyPtr& property, bool opt);
@@ -109,7 +109,7 @@ private://declaration
     std::pair<CodeBlockPtr, CodeBlockPtr> parseGetterSetterKeywordBlock();
     
     DeclarationPtr parseTypealias(const std::vector<AttributePtr>& attrs);
-    DeclarationPtr parseFunc(const std::vector<AttributePtr>& attrs, int specifiers);
+    DeclarationPtr parseFunc(const std::vector<AttributePtr>& attrs, int modifiers);
     ParametersPtr parseParameterClause();
 
     DeclarationPtr parseEnum(const std::vector<AttributePtr>& attrs);
@@ -120,7 +120,7 @@ private://declaration
     DeclarationPtr parseStruct(const std::vector<AttributePtr>& attrs);
     DeclarationPtr parseClass(const std::vector<AttributePtr>& attrs);
     DeclarationPtr parseProtocol(const std::vector<AttributePtr>& attrs);
-    DeclarationPtr parseInit(const std::vector<AttributePtr>& attrs);
+    DeclarationPtr parseInit(const std::vector<AttributePtr>& attrs, int modifiers);
     DeclarationPtr parseDeinit(const std::vector<AttributePtr>& attrs);
     DeclarationPtr parseExtension(const std::vector<AttributePtr>& attrs);
     DeclarationPtr parseSubscript(const std::vector<AttributePtr>& attrs);

@@ -45,9 +45,6 @@ public:
     ComputedProperty();
     ~ComputedProperty();
 public:
-    using Declaration::setSpecifiers;
-    using Declaration::getSpecifiers;
-public:
 
     void setTypeAttributes(const Attributes& attrs);
     const Attributes& getTypeAttributes() const;

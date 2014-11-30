@@ -272,7 +272,7 @@ void SemanticAnalyzer::visitFunction(const FunctionDefPtr& node)
 
         if(generic)
             generic->registerTo(scope);
-        if(currentType && (node->getSpecifiers() & (TypeSpecifier::Class | TypeSpecifier::Static)) == 0)
+        if(currentType && (node->getModifiers() & (DeclarationModifiers::Class | DeclarationModifiers::Static)) == 0)
         {
             SymbolPlaceHolderPtr self(new SymbolPlaceHolder(L"self", currentType, SymbolPlaceHolder::R_PARAMETER, SymbolFlagReadable | SymbolFlagInitialized));
             scope->addSymbol(self);

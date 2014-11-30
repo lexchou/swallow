@@ -44,10 +44,7 @@ public:
 public:
     using Declaration::setGenericParametersDef;
     using Declaration::getGenericParametersDef;
-    void setConvenience(bool convenience);
-    bool isConvenience()const;
-    
-    
+
     void setParameters(const ParametersPtr& parameters);
     ParametersPtr getParameters();
     
@@ -56,7 +53,6 @@ public:
 public:
     virtual void accept(NodeVisitor* visitor);
 private:
-    bool convenience;
     ParametersPtr parameters;
     CodeBlockPtr body;
 };

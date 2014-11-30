@@ -64,11 +64,11 @@ DeclarationPtr Parser::parseDeclaration()
     std::vector<AttributePtr> attrs;
     if(predicate(L"@"))
         parseAttributes(attrs);
-    int specifiers = 0;
+    int modifiers = 0;
     if(flags & (UNDER_CLASS | UNDER_STRUCT | UNDER_ENUM | UNDER_PROTOCOL |UNDER_EXTENSION))
     {
         //read declaration specifiers
-        specifiers = parseDeclarationSpecifiers();
+        modifiers = parseDeclarationModifiers();
     }
     expect_next(token);
     restore(token);
@@ -79,13 +79,13 @@ DeclarationPtr Parser::parseDeclaration()
         case Keyword::Import://declaration → import-declaration
             return parseImport(attrs);
         case Keyword::Let://declaration → constant-declaration
-            return parseLet(attrs, specifiers);
+            return parseLet(attrs, modifiers);
         case Keyword::Var://declaration → variable-declaration
-            return parseVar(attrs, specifiers);
+            return parseVar(attrs, modifiers);
         case Keyword::Typealias://declaration → typealias-declaration    ‌
             return parseTypealias(attrs);
         case Keyword::Func://declaration → function-declaration
-            return parseFunc(attrs, specifiers);
+            return parseFunc(attrs, modifiers);
         case Keyword::Enum://declaration → enum-declaration
             return parseEnum(attrs);
         case Keyword::Struct://declaration → struct-declaration
@@ -96,7 +96,7 @@ DeclarationPtr Parser::parseDeclaration()
             return parseProtocol(attrs);
         case Keyword::Init://declaration → initializer-declaration
         case Keyword::Convenience:
-            return parseInit(attrs);
+            return parseInit(attrs, modifiers);
         case Keyword::Deinit://declaration → deinitializer-declaration
             return parseDeinit(attrs);
         case Keyword::Extension://declaration → extension-declaration
@@ -108,7 +108,7 @@ DeclarationPtr Parser::parseDeclaration()
         default:
             //destroy attributes before reporting an issue
             attrs.clear();
-            verifyDeclarationSpecifiers(token, specifiers, 0);
+            verifyDeclarationSpecifiers(token, modifiers, 0);
             unexpected(token);
             return NULL;
     }
@@ -118,9 +118,9 @@ DeclarationPtr Parser::parseDeclaration()
 // declaration-specifiers → declaration-specifier declaration-specifiers opt
 // declaration-specifier → class  mutating  nonmutating  override  static  unowned  unowned(safe) unowned(unsafe)  weak”
 
-int Parser::parseDeclarationSpecifiers()
+int Parser::parseDeclarationModifiers()
 {
-    //class  mutating  nonmutating  override  static  unowned  unowned(safe) unowned(unsafe)  weak”
+
     Token token, t;
     int ret = 0;
     while(match_identifier(token))
@@ -136,36 +136,90 @@ int Parser::parseDeclarationSpecifiers()
                     restore(token);
                     break;
                 }
-                ret |= TypeSpecifier::Class;
+                ret |= DeclarationModifiers::Class;
+                continue;
+            case Keyword::Convenience:
+                ret |= DeclarationModifiers::Convenience;
+                continue;
+            case Keyword::Dynamic:
+                ret |= DeclarationModifiers::Dynamic;
+                continue;
+            case Keyword::Final:
+                ret |= DeclarationModifiers::Final;
+                continue;
+            case Keyword::Infix:
+                ret |= DeclarationModifiers::Infix;
+                continue;
+            case Keyword::Lazy:
+                ret |= DeclarationModifiers::Lazy;
                 continue;
             case Keyword::Mutating:
-                ret |= TypeSpecifier::Mutating;
+                ret |= DeclarationModifiers::Mutating;
                 continue;
             case Keyword::Nonmutating:
-                ret |= TypeSpecifier::NonMutating;
+                ret |= DeclarationModifiers::NonMutating;
+                continue;
+            case Keyword::Optional:
+                ret |= DeclarationModifiers::Optional;
                 continue;
             case Keyword::Override:
-                ret |= TypeSpecifier::Override;
+                ret |= DeclarationModifiers::Override;
+                continue;
+            case Keyword::Postfix:
+                ret |= DeclarationModifiers::Postfix;
+                continue;
+            case Keyword::Prefix:
+                ret |= DeclarationModifiers::Prefix;
+                continue;
+            case Keyword::Required:
+                ret |= DeclarationModifiers::Required;
                 continue;
             case Keyword::Static:
-                ret |= TypeSpecifier::Static;
+                ret |= DeclarationModifiers::Static;
                 continue;
             case Keyword::Unowned:
-                ret |= TypeSpecifier::Unowned;
+                ret |= DeclarationModifiers::Unowned;
                 if(match(L"("))
                 {
                     expect_identifier(token);
                     if(token == L"safe")
-                        ret |= TypeSpecifier::Unowned_Safe;
+                        ret |= DeclarationModifiers::Unowned_Safe;
                     else if(token == L"unsafe")
-                        ret |= TypeSpecifier::Unowned_Unsafe;
+                        ret |= DeclarationModifiers::Unowned_Unsafe;
                     else
                         unexpected(token);
                     expect(L")");
                 }
                 break;
             case Keyword::Weak:
-                ret |= TypeSpecifier::Weak;
+                ret |= DeclarationModifiers::Weak;
+                continue;
+            case Keyword::Internal:
+                ret = DeclarationModifiers::Internal;
+                if(match(L"("))
+                {
+                    expect(L"set");
+                    expect(L")");
+                    ret = DeclarationModifiers::Internal_Set;
+                }
+                continue;
+            case Keyword::Private:
+                ret = DeclarationModifiers::Private;
+                if(match(L"("))
+                {
+                    expect(L"set");
+                    expect(L")");
+                    ret = DeclarationModifiers::Private_Set;
+                }
+                continue;
+            case Keyword::Public:
+                ret = DeclarationModifiers::Public;
+                if(match(L"("))
+                {
+                    expect(L"set");
+                    expect(L")");
+                    ret = DeclarationModifiers::Public_Set;
+                }
                 continue;
             default:
                 restore(token);
@@ -250,7 +304,7 @@ DeclarationPtr Parser::parseImport(const std::vector<AttributePtr>& attrs)
  ‌ pattern-initializer → pattern initializer opt
  ‌ initializer → =expression
 */
-DeclarationPtr Parser::parseLet(const std::vector<AttributePtr>& attrs, int specifiers)
+DeclarationPtr Parser::parseLet(const std::vector<AttributePtr>& attrs, int modifiers)
 {
     Token token;
     Flags flag(this, UNDER_LET);
@@ -258,7 +312,7 @@ DeclarationPtr Parser::parseLet(const std::vector<AttributePtr>& attrs, int spec
     ValueBindingsPtr ret = nodeFactory->createValueBindings(token.state);
     ret->setReadOnly(true);
     ret->setAttributes(attrs);
-    ret->setSpecifiers(specifiers);
+    ret->setModifiers(modifiers);
     do
     {
         PatternPtr pattern = parsePattern();
@@ -270,7 +324,7 @@ DeclarationPtr Parser::parseLet(const std::vector<AttributePtr>& attrs, int spec
 
         ValueBindingPtr constant = nodeFactory->createValueBinding(*pattern->getSourceInfo());
         constant->setAttributes(attrs);
-        constant->setSpecifiers(specifiers);
+        constant->setModifiers(modifiers);
         constant->setName(pattern);
         TypedPatternPtr typedPattern = std::dynamic_pointer_cast<TypedPattern>(pattern);
         if(typedPattern)
@@ -334,7 +388,7 @@ ValueBindingPtr Parser::parseVariableDeclaration()
  ‌ variable-declaration-head → attributes opt declaration-specifiers opt var
  ‌ variable-name → identifier
 */
-DeclarationPtr Parser::parseVar(const std::vector<AttributePtr>& attrs, int specifiers)
+DeclarationPtr Parser::parseVar(const std::vector<AttributePtr>& attrs, int modifiers)
 {
 
     Token token;
@@ -344,16 +398,16 @@ DeclarationPtr Parser::parseVar(const std::vector<AttributePtr>& attrs, int spec
     ValueBindingsPtr ret = nodeFactory->createValueBindings(token.state);
     ret->setReadOnly(false);
     ret->setAttributes(attrs);
-    ret->setSpecifiers(specifiers);
+    ret->setModifiers(modifiers);
     ValueBindingPtr var = parseVariableDeclaration();
-    var->setSpecifiers(specifiers);
+    var->setModifiers(modifiers);
     ret->add(var);
     if(predicate(L","))
     {
         while(match(L","))
         {
             var = parseVariableDeclaration();
-            var->setSpecifiers(specifiers);
+            var->setModifiers(modifiers);
             ret->add(var);
         }
         return ret;
@@ -368,7 +422,7 @@ DeclarationPtr Parser::parseVar(const std::vector<AttributePtr>& attrs, int spec
 
     ComputedPropertyPtr prop = nodeFactory->createComputedProperty(*var->getSourceInfo());
     prop->setAttributes(attrs);
-    prop->setSpecifiers(specifiers);
+    prop->setModifiers(modifiers);
     prop->setTypeAttributes(var->getTypeAttributes());
     prop->setName(name->getIdentifier());
     prop->setDeclaredType(var->getDeclaredType());
@@ -632,13 +686,13 @@ DeclarationPtr Parser::parseTypealias(const Attributes& attrs)
  ‌ function-result → ->attributes opt type
  ‌ function-body → code-block
 */
-DeclarationPtr Parser::parseFunc(const std::vector<AttributePtr>& attrs, int specifiers)
+DeclarationPtr Parser::parseFunc(const std::vector<AttributePtr>& attrs, int modifiers)
 {
     Token token;
     expect(Keyword::Func, token);
     FunctionDefPtr ret = nodeFactory->createFunction(token.state);
     ret->setAttributes(attrs);
-    ret->setSpecifiers(specifiers);
+    ret->setModifiers(modifiers);
     expect_next(token);
     if(token.type != TokenType::Identifier && token.type != TokenType::Operator)
         unexpected(token);
@@ -1039,13 +1093,13 @@ DeclarationPtr Parser::parseProtocol(const std::vector<AttributePtr>& attrs)
  ‌ initializer-body → code-block
  
 */
-DeclarationPtr Parser::parseInit(const std::vector<AttributePtr>& attrs)
+DeclarationPtr Parser::parseInit(const std::vector<AttributePtr>& attrs, int modifiers)
 {
     Token token;
-    bool convenience = match(L"convenience");
     expect(Keyword::Init, token);
     InitializerDefPtr ret = nodeFactory->createInitializer(token.state);
     ret->setAttributes(attrs);
+    ret->setModifiers(modifiers);
     if(predicate(L"<"))
     {
         GenericParametersDefPtr params = this->parseGenericParametersDef();
@@ -1053,7 +1107,6 @@ DeclarationPtr Parser::parseInit(const std::vector<AttributePtr>& attrs)
     }
     ParametersPtr parameters = parseParameterClause();
     CodeBlockPtr body = parseCodeBlock();
-    ret->setConvenience(convenience);
     ret->setParameters(parameters);
     ret->setBody(body);
     return ret;

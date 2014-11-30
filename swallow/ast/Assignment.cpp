@@ -37,6 +37,7 @@ Assignment::Assignment()
     this->op = L"=";
     this->associativity = Associativity::Right;
     this->precedence = 90;
+    this->nodeType = NodeType::Assignment;
 }
 
 

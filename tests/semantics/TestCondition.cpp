@@ -119,3 +119,77 @@ TEST(TestCondition, SwitchCase_NonBoolGuard)
     ASSERT_EQ(Errors::E_TYPE_DOES_NOT_CONFORM_TO_PROTOCOL_2_, res.code);
 
 }
+
+
+TEST(TestCondition, If)
+{
+    SEMANTIC_ANALYZE(L"var a = 3\n"
+            L"if a = 3\n"
+            L"{\n"
+            L"    \n"
+            L"}");
+    ASSERT_EQ(1, compilerResults.numResults());
+    auto res = compilerResults.getResult(0);
+    ASSERT_EQ(Errors::E_TYPE_DOES_NOT_CONFORM_TO_PROTOCOL_2_, res.code);
+}
+
+
+TEST(TestCondition, If_Unpack_Optional)
+{
+    SEMANTIC_ANALYZE(L"if var a = 3\n"
+            L"{\n"
+            L"    \n"
+            L"}");
+    ASSERT_EQ(1, compilerResults.numResults());
+    auto res = compilerResults.getResult(0);
+    ASSERT_EQ(Errors::E_BOUND_VALUE_IN_A_CONDITIONAL_BINDING_MUST_BE_OF_OPTIONAL_TYPE, res.code);
+}
+
+
+
+
+TEST(TestCondition, If_Unpack_Optional2)
+{
+    SEMANTIC_ANALYZE(L"var b : Int? = 3\n"
+            L"if var a = b\n"
+            L"{\n"
+            L"    \n"
+            L"}");
+    dumpCompilerResults(compilerResults);
+    ASSERT_EQ(0, compilerResults.numResults());
+    ASSERT_EQ(2, root->numStatements());
+    IfStatementPtr _if = dynamic_pointer_cast<IfStatement>(root->getStatement(1));
+    ASSERT_NOT_NULL(_if);
+    ScopedCodeBlockPtr then = dynamic_pointer_cast<ScopedCodeBlock>(_if->getThen());
+    ASSERT_NOT_NULL(then);
+    SymbolScope* thenScope = then->getScope();
+    ASSERT_NOT_NULL(thenScope);
+    SymbolPtr a = thenScope->lookup(L"a");
+    ASSERT_NOT_NULL(a);
+    ASSERT_EQ(symbolRegistry.getGlobalScope()->Int, a->getType());
+}
+
+
+TEST(TestCondition, If_Unpack_Optional3)
+{
+    SEMANTIC_ANALYZE(L"if var a\n"
+            L"{\n"
+            L"    \n"
+            L"}");
+    ASSERT_EQ(1, compilerResults.numResults());
+    auto res = compilerResults.getResult(0);
+    ASSERT_EQ(Errors::E_VARIABLE_BINDING_IN_A_CONDITION_REQUIRES_AN_INITIALIZER, res.code);
+}
+
+
+TEST(TestCondition, If_Unpack_Optional4)
+{
+    SEMANTIC_ANALYZE(L"var b : Int? = 3\n"
+            L"if var a : Float = b\n"
+            L"{\n"
+            L"    \n"
+            L"}");
+    ASSERT_EQ(1, compilerResults.numResults());
+    auto res = compilerResults.getResult(0);
+    ASSERT_EQ(Errors::E_A_IS_NOT_IDENTICIAL_TO_B_2, res.code);
+}

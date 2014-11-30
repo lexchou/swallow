@@ -78,7 +78,7 @@ TEST(TestProtocol, testPropertyRequirements)
 
     ASSERT_NOT_NULL(var = std::dynamic_pointer_cast<ComputedProperty>(p->getDeclaration(0)));
     ASSERT_EQ(L"mustBeSettable", var->getName());
-    ASSERT_EQ(0, var->getSpecifiers());
+    ASSERT_EQ(0, var->getModifiers());
     ASSERT_NOT_NULL(var->getGetter());
     ASSERT_NOT_NULL(var->getSetter());
 
@@ -102,7 +102,7 @@ TEST(TestProtocol, testPropertyRequirements2)
     ComputedPropertyPtr var;
 
     ASSERT_NOT_NULL(var = std::dynamic_pointer_cast<ComputedProperty>(p->getDeclaration(0)));
-    ASSERT_EQ((int)TypeSpecifier::Class, var->getSpecifiers());
+    ASSERT_EQ((int)DeclarationModifiers::Class, var->getModifiers());
     ASSERT_EQ(L"someTypeProperty", var->getName());
     ASSERT_NOT_NULL(var->getGetter());
     ASSERT_NOT_NULL(var->getSetter());
@@ -119,7 +119,7 @@ TEST(TestProtocol, testPropertyRequirements3)
     ComputedPropertyPtr var;
 
     ASSERT_NOT_NULL(var = std::dynamic_pointer_cast<ComputedProperty>(p->getDeclaration(0)));
-    ASSERT_EQ(0, var->getSpecifiers());
+    ASSERT_EQ(0, var->getModifiers());
     ASSERT_EQ(L"fullName", var->getName());
     ASSERT_NOT_NULL(var->getGetter());
     ASSERT_NULL(var->getSetter());
@@ -138,7 +138,7 @@ TEST(TestProtocol, testMethodRequirements)
     FunctionDefPtr f;
 
     ASSERT_NOT_NULL(f = std::dynamic_pointer_cast<FunctionDef>(p->getDeclaration(0)));
-    ASSERT_EQ((int)TypeSpecifier::Class, f->getSpecifiers());
+    ASSERT_EQ((int)DeclarationModifiers::Class, f->getModifiers());
     ASSERT_EQ(L"someTypeMethod", f->getName());
     //ASSERT_NULL(f->getBody());
 }
@@ -155,7 +155,7 @@ TEST(TestProtocol, testMethodRequirements2)
     FunctionDefPtr f;
 
     ASSERT_NOT_NULL(f = std::dynamic_pointer_cast<FunctionDef>(p->getDeclaration(0)));
-    ASSERT_EQ(0, f->getSpecifiers());
+    ASSERT_EQ(0, f->getModifiers());
     ASSERT_EQ(L"random", f->getName());
     //ASSERT_NULL(f->getBody());
 }
@@ -174,7 +174,7 @@ TEST(TestProtocol, testMutatingMethod)
     FunctionDefPtr f;
 
     ASSERT_NOT_NULL(f = std::dynamic_pointer_cast<FunctionDef>(p->getDeclaration(0)));
-    ASSERT_EQ((int)TypeSpecifier::Mutating, f->getSpecifiers());
+    ASSERT_EQ((int)DeclarationModifiers::Mutating, f->getModifiers());
     ASSERT_EQ(L"toggle", f->getName());
     //ASSERT_NULL(f->getBody());
 }
@@ -195,7 +195,7 @@ TEST(TestProtocol, testInheritance)
     FunctionDefPtr f;
 
     ASSERT_NOT_NULL(f = std::dynamic_pointer_cast<FunctionDef>(p->getDeclaration(0)));
-    ASSERT_EQ(0, f->getSpecifiers());
+    ASSERT_EQ(0, f->getModifiers());
     ASSERT_EQ(L"asPrettyText", f->getName());
     //ASSERT_NULL(f->getBody());
 
@@ -204,8 +204,8 @@ TEST(TestProtocol, testInheritance)
 TEST(TestProtocol, testOptional)
 {
     PARSE_STATEMENT(L"@objc protocol CounterDataSource {\n"
-                    L"@optional func incrementForCount(count: Int) -> Int\n"
-                    L"@optional var fixedIncrement: Int { get }\n"
+                    L"optional func incrementForCount(count: Int) -> Int\n"
+                    L"optional var fixedIncrement: Int { get }\n"
                     L"}");
     ProtocolDefPtr p;
     ASSERT_NOT_NULL(p = std::dynamic_pointer_cast<ProtocolDef>(root));
@@ -217,16 +217,13 @@ TEST(TestProtocol, testOptional)
     FunctionDefPtr f;
 
     ASSERT_NOT_NULL(f = std::dynamic_pointer_cast<FunctionDef>(p->getDeclaration(0)));
-    ASSERT_EQ(0, f->getSpecifiers());
     ASSERT_EQ(L"incrementForCount", f->getName());
-    //ASSERT_NULL(f->getBody());
-    ASSERT_NOT_NULL(f->getAttribute(L"optional"));
+    ASSERT_TRUE(f->getModifiers() & DeclarationModifiers::Optional);
 
     ComputedPropertyPtr var;
 
     ASSERT_NOT_NULL(var = std::dynamic_pointer_cast<ComputedProperty>(p->getDeclaration(1)));
-    ASSERT_NOT_NULL(var->getAttribute(L"optional"));
-    ASSERT_EQ(0, var->getSpecifiers());
+    ASSERT_TRUE(f->getModifiers() & DeclarationModifiers::Optional);
     ASSERT_EQ(L"fixedIncrement", var->getName());
     ASSERT_NOT_NULL(var->getGetter());
     ASSERT_NULL(var->getSetter());

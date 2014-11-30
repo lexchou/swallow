@@ -46,9 +46,7 @@ class SWALLOW_EXPORT ValueBindings : public Declaration
         ~ValueBindings();
     public:
         using Declaration::setAttributes;
-        using Declaration::setSpecifiers;
         using Declaration::getAttributes;
-        using Declaration::getSpecifiers;
     public:
         void add(const ValueBindingPtr& var);
         ValueBindingPtr get(int i);

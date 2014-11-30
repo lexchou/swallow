@@ -33,7 +33,7 @@ USE_SWALLOW_NS
 
 
 InitializerDef::InitializerDef()
-    :Declaration(NodeType::Init), convenience(false), parameters(NULL), body(NULL)
+    :Declaration(NodeType::Init), parameters(NULL), body(NULL)
 {
 }
 
@@ -47,16 +47,6 @@ void InitializerDef::accept(NodeVisitor* visitor)
 {
     accept2(visitor, &NodeVisitor::visitInit);
 }
-
-void InitializerDef::setConvenience(bool convenience)
-{
-    this->convenience = convenience;
-}
-bool InitializerDef::isConvenience()const
-{
-    return convenience;
-}
-
 
 void InitializerDef::setParameters(const ParametersPtr& parameters)
 {

@@ -45,8 +45,6 @@ public:
     FunctionDef();
     ~FunctionDef();
 public:
-    using Declaration::setSpecifiers;
-    using Declaration::getSpecifiers;
     using Declaration::setAttributes;
     using Declaration::getAttributes;
     

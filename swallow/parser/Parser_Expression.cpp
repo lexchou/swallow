@@ -445,14 +445,15 @@ ParenthesizedExpressionPtr Parser::parseParenthesizedExpression()
     if(!predicate(L")"))
     {
         parseExpressionItem(ret);
+
+        while (match(L","))
+        {
+            if (predicate(L")"))
+                break;
+            parseExpressionItem(ret);
+        }
     }
-    while(match(L","))
-    {
-        if(predicate(L")"))
-            break;
-        parseExpressionItem(ret);
-    }
-    match(L")");
+    expect(L")");
     return ret;
 }
 
