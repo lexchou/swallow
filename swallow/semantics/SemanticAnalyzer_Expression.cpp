@@ -640,7 +640,7 @@ void SemanticAnalyzer::visitMemberAccess(const MemberAccessPtr& node)
     }
 
     //Optional Chaining, if parent node is not a member access and there's a optional chaining expression inside Self, mark the expression optional
-    if(!parentNode || parentNode->getNodeType() != NodeType::MemberAccess)
+    if(!parentNode || (parentNode->getNodeType() != NodeType::MemberAccess && parentNode->getNodeType() != NodeType::Assignment))
     {
         if(hasOptionalChaining(node->getSelf()))
         {
@@ -783,6 +783,8 @@ void SemanticAnalyzer::visitArrayLiteral(const ArrayLiteralPtr& node)
                         }
 
                     }
+                    if(type->getCategory() == Type::MetaType)
+                        type = type->getInnerType();
                     break;
             }
         }
@@ -792,7 +794,6 @@ void SemanticAnalyzer::visitArrayLiteral(const ArrayLiteralPtr& node)
 
     if(!type && hint)
         type = hint;
-
     TypePtr arrayType = scope->makeArray(type);
     node->setType(arrayType);
 }

@@ -181,7 +181,7 @@ TEST(TestGeneric, GenericConstraint7)
 
 TEST(TestGeneric, GenericConstraint7)
 {
-    SEMANTIC_ANALYZE_F("TestGeneric_GenericConstraint7.swallow");
+    SEMANTIC_ANALYZE_F("semantics/TestGeneric_GenericConstraint7.swift");
     dumpCompilerResults(compilerResults);
     ASSERT_EQ(0, compilerResults.numResults());
 }

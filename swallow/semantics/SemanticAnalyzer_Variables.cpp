@@ -47,15 +47,46 @@ using namespace std;
 
 void SemanticAnalyzer::visitAssignment(const AssignmentPtr& node)
 {
-    //check node's LHS, it must be a tuple or identifier
+    node->setType(symbolRegistry->getGlobalScope()->Void);
     PatternPtr pattern = node->getLHS();
     pattern->accept(this);
+    switch(pattern->getNodeType())
+    {
+        case NodeType::Identifier:
+        case NodeType::Tuple:
+        {
+            //check if the symbol is writable
+            verifyTuplePattern(pattern);
+            break;
+        }
+        case NodeType::SubscriptAccess:
+        {
+            //TODO: check if this subscript access is writable
+            break;
+        }
+        case NodeType::MemberAccess:
+        {
+            //TODO check if the member's access is writable
+            break;
+        }
+        default:
+            assert(0);
+            break;
+    }
+
+    //value(s) assignment
     TypePtr destinationType = pattern->getType();
     assert(destinationType != nullptr);
-    StackedValueGuard<TypePtr> contextualType(this->t_hint);
-    contextualType.set(destinationType);
-    verifyTuplePattern(pattern);
-    node->getRHS()->accept(this);
+    if(ExpressionPtr expr = dynamic_pointer_cast<Expression>(node->getRHS()))
+    {
+        node->setRHS(this->transformExpression(destinationType, expr));
+    }
+    else
+    {
+        StackedValueGuard<TypePtr> contextualType(this->t_hint);
+        contextualType.set(destinationType);
+        node->getRHS()->accept(this);
+    }
     TypePtr sourceType = node->getRHS()->getType();
     assert(sourceType != nullptr);
     if(!sourceType->canAssignTo(destinationType))
@@ -63,7 +94,7 @@ void SemanticAnalyzer::visitAssignment(const AssignmentPtr& node)
         error(node, Errors::E_A_IS_NOT_CONVERTIBLE_TO_B_2, sourceType->toString(), destinationType->toString());
         return;
     }
-    node->setType(symbolRegistry->getGlobalScope()->Void);
+
 }
 void SemanticAnalyzer::verifyTuplePattern(const PatternPtr& pattern)
 {

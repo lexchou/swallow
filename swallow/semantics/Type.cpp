@@ -439,6 +439,8 @@ bool Type::containsGenericParameters() const
         if(param.type->containsGenericParameters())
             return true;
     }
+    if(returnType && returnType->containsGenericParameters())
+        return true;
     if(genericArguments == nullptr)
         return false;
     for(const TypePtr& type : *this->genericArguments)

@@ -182,3 +182,10 @@ TEST(TestOptional, OptionalChaining3)
     ASSERT_NOT_NULL(roomCount);
     ASSERT_EQ(L"Int", roomCount->getType()->toString());
 }
+
+TEST(TestOptional, OptionalChaining_Property)
+{
+    SEMANTIC_ANALYZE_F("semantics/TestOptional_OptionalChaining_Property.swift");
+    dumpCompilerResults(compilerResults);
+    ASSERT_EQ(0, compilerResults.numResults());
+}

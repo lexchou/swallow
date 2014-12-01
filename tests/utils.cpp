@@ -41,14 +41,22 @@
 #include "common/Errors.h"
 #include <semantics/GlobalScope.h>
 //#include <codecvt>
-
-std::wstring readFile(const char* fileName)
+using namespace std;
+wstring readFile(const char* fileName)
 {
-    std::wifstream wif(fileName);
+    wifstream wif;
+    wif.open(fileName, istream::in);
+    if(!wif.is_open())
+    {
+        cerr << "Failed to open swift source file for testing, file name " <<fileName<<endl;
+        abort();
+    }
     //wif.imbue(std::locale(std::locale(), new std::codecvt_utf8<wchar_t>));
-    std::wstringstream wss;
+    wstringstream wss;
+    assert(!wif.eof() && "Failed to open file.");
     wss << wif.rdbuf();
-    return wss.str();
+    wstring ret = wss.str();
+    return ret;
 }
 
 void dumpCompilerResults(Swallow::CompilerResults& compilerResults)

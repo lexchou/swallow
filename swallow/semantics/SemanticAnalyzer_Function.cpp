@@ -226,7 +226,7 @@ void SemanticAnalyzer::visitSubscript(const SubscriptDefPtr &node)
     if(node->getSetter())
     {
         //TODO: replace nullptr to void
-        TypePtr funcType = this->createFunctionType(paramsList.begin(), paramsList.end(), nullptr, nullptr);
+        TypePtr funcType = this->createFunctionType(paramsList.begin(), paramsList.end(), symbolRegistry->getGlobalScope()->Void, nullptr);
         node->getSetter()->setType(funcType);
         static_pointer_cast<TypeBuilder>(funcType)->addParameter(Type::Parameter(retType));
         FunctionSymbolPtr func(new FunctionSymbol(L"subscript", funcType, node->getSetter()));
@@ -251,7 +251,7 @@ void SemanticAnalyzer::visitSubscript(const SubscriptDefPtr &node)
     wstring setterName = L"newValue";
     if(!node->getSetterName().empty())
         setterName = node->getSetterName();
-    SymbolPlaceHolderPtr setter(new SymbolPlaceHolder(setterName, currentType, SymbolPlaceHolder::R_PARAMETER, SymbolFlagReadable | SymbolFlagInitialized));
+    SymbolPlaceHolderPtr setter(new SymbolPlaceHolder(setterName, retType, SymbolPlaceHolder::R_PARAMETER, SymbolFlagReadable | SymbolFlagInitialized));
     visitAccessor(node->getSetter(), parameters, setter);
     //process setter
 }
