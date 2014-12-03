@@ -253,6 +253,7 @@ protected:
 private:
     //hint for parsing Array/tuple/dictionary literal
     TypePtr t_hint;
+    TypePtr currentFunction;
     NodePtr parentNode;
     NodePtr currentNode;
     std::stack<NodePtr> parentNodes;

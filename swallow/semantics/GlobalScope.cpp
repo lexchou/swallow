@@ -358,6 +358,20 @@ void GlobalScope::initOperators()
         overloads->add(func);
         this->addSymbol(overloads);
     }
+
+    {
+        TypePtr T = Type::newType(L"T", Type::GenericParameter);
+        TypePtr optionalT = makeOptional(Type::newType(L"T", Type::Alias));
+        GenericDefinitionPtr def(new GenericDefinition());
+        def->add(L"T", T);
+        vector<Type::Parameter> parameterTypes = {optionalT, _OptionalNilComparisonType};
+        TypePtr funcType = Type::newFunction(parameterTypes, Bool, false, def);
+        FunctionSymbolPtr func(new FunctionSymbol(L"!=", funcType, nullptr));
+
+        FunctionOverloadedSymbolPtr overloads(new FunctionOverloadedSymbol(L"!="));
+        overloads->add(func);
+        this->addSymbol(overloads);
+    }
 }
 
 void GlobalScope::initProtocols()

@@ -46,6 +46,8 @@
 
 USE_SWALLOW_NS
 using namespace std;
+static bool hasOptionalChaining(const NodePtr& node);
+
 bool SemanticAnalyzer::isInteger(const TypePtr& type)
 {
     GlobalScope* scope = symbolRegistry->getGlobalScope();
@@ -424,31 +426,20 @@ void SemanticAnalyzer::visitFunctionCall(const SymbolPtr& sym, const Parenthesiz
 
 void SemanticAnalyzer::visitReturn(const ReturnStatementPtr& node)
 {
-    NodeVisitor::visitReturn(node);
-    Node* owner = symbolRegistry->getCurrentScope()->getOwner();
-    assert(owner != nullptr);
-    TypePtr funcType;
-    switch(owner->getNodeType())
+    if(!currentFunction)
     {
-        case NodeType::Program:
-            return;//return type checking is ignored in program scope
-        case NodeType::CodeBlock:
-            funcType = static_cast<CodeBlock*>(owner)->getType();
-            assert(funcType != nullptr);
-            break;
-        case NodeType::Closure:
-            funcType = static_cast<Closure*>(owner)->getType();
-            assert(funcType != nullptr);
-            break;
-        default:
-            assert(0 && "Unsupported scope of return keyword detected.");
-            break;
-
+        error(node, Errors::E_RETURN_INVALID_OUTSIDE_OF_A_FUNC);
+        return;
     }
+    TypePtr funcType = currentFunction;
+
+    StackedValueGuard<TypePtr> contextualType(t_hint);
+    contextualType.set(funcType->getReturnType());
+
     float score = 0;
     TypePtr retType = this->getExpressionType(node->getExpression(), funcType->getReturnType(), score);
     TypePtr expectedType = funcType->getReturnType();
-    if(!Type::equals(retType, expectedType))
+    if(!retType->canAssignTo(expectedType))
     {
         error(node->getExpression(), Errors::E_CANNOT_CONVERT_EXPRESSION_TYPE_2, retType->toString(), expectedType->toString());
     }
@@ -516,6 +507,11 @@ void SemanticAnalyzer::visitFunctionCall(const FunctionCallPtr& node)
             }
             assert(sym != nullptr);//
             visitFunctionCall(sym, node->getArguments(), node);
+            if(hasOptionalChaining(ma->getSelf()))
+            {
+                TypePtr type = symbolRegistry->getGlobalScope()->makeOptional(node->getType());
+                node->setType(type);
+            }
             break;
         }
         case NodeType::Closure:

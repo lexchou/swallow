@@ -173,6 +173,10 @@ void SemanticAnalyzer::visitClosure(const ClosurePtr& node)
     {
         node->getCapture()->accept(this);
     }
+
+    StackedValueGuard<TypePtr> currentFunction(this->currentFunction);
+    currentFunction.set(type);
+
     for(const StatementPtr& st : *node)
     {
         st->accept(this);
@@ -196,6 +200,9 @@ void SemanticAnalyzer::visitAccessor(const CodeBlockPtr& accessor, const Paramet
 
     params->accept(this);
     prepareParameters(scope, params);
+    StackedValueGuard<TypePtr> contextualType(currentFunction);
+    contextualType.set(accessor->getType());
+
     accessor->accept(this);
 }
 void SemanticAnalyzer::visitSubscript(const SubscriptDefPtr &node)
@@ -290,6 +297,8 @@ void SemanticAnalyzer::visitFunction(const FunctionDefPtr& node)
         node->setType(func->getType());
         node->getBody()->setType(func->getType());
 
+        StackedValueGuard<TypePtr> currentFunction(this->currentFunction);
+        currentFunction.set(func->getType());
 
         node->getBody()->accept(this);
         lookupType(node->getReturnType());

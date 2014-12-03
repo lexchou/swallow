@@ -199,11 +199,9 @@ TEST(TestFunctionOverloads, testCovarianceOverload3)
             L"let a = bar(3.4)");
     SymbolPtr a, b;
     TypePtr type;
-    ASSERT_EQ(1, compilerResults.numResults());
-
-    const CompilerResult& r = compilerResults.getResult(0);
-    ASSERT_EQ((int)Errors::E_AMBIGUOUS_USE_1, r.code);
-    ASSERT_EQ(L"bar", r.items[0]);
+    ASSERT_EQ(0, compilerResults.numResults());
+    ASSERT_NOT_NULL(a = scope->lookup(L"a"));
+    ASSERT_EQ(global->Bool, a->getType());
 }
 
 TEST(TestFunctionOverloads, testCovarianceOverload4)

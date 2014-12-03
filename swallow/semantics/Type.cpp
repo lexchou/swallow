@@ -628,6 +628,7 @@ bool Type::operator ==(const Type& rhs)const
                     if (!Type::equals(*iter, *iter2))
                         return false;
                 }
+                return true;
             }
             if(genericArguments == nullptr && rhs.genericArguments == nullptr)
                 return true;

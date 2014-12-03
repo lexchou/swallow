@@ -38,6 +38,8 @@
 #include "ast/NodeFactory.h"
 #include "common/CompilerResults.h"
 #include "semantics/semantic-types.h"
+#include "semantics/SymbolRegistry.h"
+#include "semantics/GlobalScope.h"
 
 
 #define ASSERT_EQUALS(E, A) wcs_assertEquals((E), (A), __FILE__, __LINE__)
@@ -73,6 +75,7 @@ struct Tracer
 
 #define SEMANTIC_ANALYZE(s) Tracer tracer(__FILE__, __LINE__, __FUNCTION__); \
     Swallow::SymbolRegistry symbolRegistry; \
+    Swallow::GlobalScope* global = symbolRegistry.getGlobalScope(); (void)global; \
     Swallow::CompilerResults compilerResults; \
     ScopedProgramPtr root = analyzeStatement(symbolRegistry, compilerResults, __FUNCTION__, (s)); \
     Swallow::SymbolScope* scope = root ? root->getScope() : nullptr; \

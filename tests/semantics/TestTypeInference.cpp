@@ -261,6 +261,17 @@ TEST(TestTypeInference, Expression)
     ASSERT_TRUE(type == t_int);
 }
 
+TEST(TestTypeInference, Expression2)
+{
+    SEMANTIC_ANALYZE(L"let a = 3 * 4.5");
+    dumpCompilerResults(compilerResults);
+    ASSERT_EQ(0, compilerResults.numResults());
+
+    SymbolPtr a;
+    ASSERT_NOT_NULL(a = scope->lookup(L"a"));
+    ASSERT_EQ(symbolRegistry.getGlobalScope()->Double, a->getType());
+}
+
 TEST(TestTypeInference, StructInstance)
 {
 

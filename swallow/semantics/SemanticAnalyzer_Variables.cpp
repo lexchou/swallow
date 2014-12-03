@@ -150,6 +150,8 @@ void SemanticAnalyzer::visitComputedProperty(const ComputedPropertyPtr& node)
     if(getter)
     {
         getter->setType(getterType);
+        StackedValueGuard<TypePtr> contextualType(currentFunction);
+        contextualType.set(getterType);
         getter->accept(this);
     }
     if(setter)
@@ -159,6 +161,9 @@ void SemanticAnalyzer::visitComputedProperty(const ComputedPropertyPtr& node)
         ScopedCodeBlockPtr cb = std::static_pointer_cast<ScopedCodeBlock>(setter);
         cb->setType(setterType);
         cb->getScope()->addSymbol(SymbolPtr(new SymbolPlaceHolder(name, type, SymbolPlaceHolder::R_PARAMETER, SymbolFlagInitialized)));
+
+        StackedValueGuard<TypePtr> contextualType(currentFunction);
+        contextualType.set(setterType);
         cb->accept(this);
     }
     if(willSet)
@@ -168,6 +173,8 @@ void SemanticAnalyzer::visitComputedProperty(const ComputedPropertyPtr& node)
         ScopedCodeBlockPtr cb = std::static_pointer_cast<ScopedCodeBlock>(willSet);
         cb->setType(setterType);
         cb->getScope()->addSymbol(SymbolPtr(new SymbolPlaceHolder(setter, type, SymbolPlaceHolder::R_PARAMETER, SymbolFlagInitialized)));
+        StackedValueGuard<TypePtr> contextualType(currentFunction);
+        contextualType.set(setterType);
         cb->accept(this);
     }
     if(didSet)
@@ -177,6 +184,8 @@ void SemanticAnalyzer::visitComputedProperty(const ComputedPropertyPtr& node)
         ScopedCodeBlockPtr cb = std::static_pointer_cast<ScopedCodeBlock>(didSet);
         cb->setType(setterType);
         cb->getScope()->addSymbol(SymbolPtr(new SymbolPlaceHolder(setter, type, SymbolPlaceHolder::R_PARAMETER, SymbolFlagInitialized)));
+        StackedValueGuard<TypePtr> contextualType(currentFunction);
+        contextualType.set(setterType);
         cb->accept(this);
     }
     //register symbol

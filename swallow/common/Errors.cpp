@@ -149,6 +149,8 @@ std::wstring getErrorTemplate(int errorCode)
         case Errors::E_EXPECTED_EXPRESSION_VAR_OR_LET_IN_A_CONDITION_1: return L"Expected expression, var, or let in '%0' condition";
         case Errors::E_VARIABLE_BINDING_IN_A_CONDITION_REQUIRES_AN_INITIALIZER: return L"Variable binding in a condition requires an initializer";
         case Errors::E_A_IS_NOT_IDENTICIAL_TO_B_2: return L"'%0' is not identical to '%1'";
+        case Errors::E_RETURN_INVALID_OUTSIDE_OF_A_FUNC: return L"return invalid outside of a func";
+
 
         case Errors::W_PARAM_CAN_BE_EXPRESSED_MORE_SUCCINCTLY_1: return L"'%0 %0' can be expressed more succinctly as '#%0'";
         case Errors::W_EXTRANEOUS_SHARTP_IN_PARAMETER_1: return L"Extraneous '#' in parameter: '%0' is already the keyword argument name";

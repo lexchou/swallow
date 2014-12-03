@@ -142,6 +142,7 @@ struct SWALLOW_EXPORT Errors
         E_EXPECTED_EXPRESSION_VAR_OR_LET_IN_A_CONDITION_1, //Expected expression, var, or let in '%0' condition
         E_VARIABLE_BINDING_IN_A_CONDITION_REQUIRES_AN_INITIALIZER,//Variable binding in a condition requires an initializer
         E_A_IS_NOT_IDENTICIAL_TO_B_2,//'%0' is not identical to '%1'
+        E_RETURN_INVALID_OUTSIDE_OF_A_FUNC,//return invalid outside of a func
 
         W_PARAM_CAN_BE_EXPRESSED_MORE_SUCCINCTLY_1, // '%0 %0' can be expressed more succinctly as '#%0'
         W_EXTRANEOUS_SHARTP_IN_PARAMETER_1 //Extraneous '#' in parameter: '%0' is already the keyword argument name
