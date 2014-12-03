@@ -45,6 +45,8 @@ public:
 
     void setInnerType(const TypePtr& type);
 
+    void setGenericArguments(const GenericArgumentPtr& arguments);
+
     /*!
      * Adds a protocol that this type conform to
      */

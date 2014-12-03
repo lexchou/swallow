@@ -165,6 +165,20 @@ TEST(TestGeneric, GenericConstraint6)
     ASSERT_EQ(Errors::E_PROTOCOL_CAN_ONLY_BE_USED_AS_GENERIC_CONSTRAINT_1, res.code);
 
 }
+
+TEST(TestGeneric, FuncSpecialization)
+{
+    SEMANTIC_ANALYZE(L"func foo<T>(b : T) -> T { return b;}\n"
+            L"var a = foo(1);\n"
+            L"var b = foo(true);");
+    ASSERT_EQ(0, compilerResults.numResults());
+    SymbolPtr a, b;
+    ASSERT_NOT_NULL(a = scope->lookup(L"a"));
+    ASSERT_NOT_NULL(b = scope->lookup(L"b"));
+    ASSERT_EQ(L"Int", a->getType()->toString());
+    ASSERT_EQ(L"Bool", b->getType()->toString());
+}
+
 /*
 TODO: check unused generic type
 TEST(TestGeneric, GenericConstraint7)

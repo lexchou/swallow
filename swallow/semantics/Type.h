@@ -94,6 +94,7 @@ public:
     static TypePtr newTypeReference(const TypePtr& innerType);
     static TypePtr newFunction(const std::vector<Parameter>& parameters, const TypePtr& returnType, bool hasVariadicParameters, const GenericDefinitionPtr& generic = nullptr);
     static TypePtr newSpecializedType(const TypePtr& innerType, const GenericArgumentPtr& arguments);
+    static TypePtr newSpecializedType(const TypePtr& innerType, const std::map<std::wstring, TypePtr>& arguments);
     static TypePtr newSpecializedType(const TypePtr& innerType, const TypePtr& argument);
     /*!
      * A type place holder for protocol's typealias

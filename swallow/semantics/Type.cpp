@@ -434,6 +434,8 @@ bool Type::containsGenericParameters() const
     //TODO: this can be optimized
     if(category == GenericParameter)
         return true;
+    if(this->genericDefinition && category != Specialized)//it is already unspecialized type, means it always cotnains a generic parameter
+        return true;
     for(const Parameter& param : parameters)
     {
         if(param.type->containsGenericParameters())

@@ -60,6 +60,10 @@ void TypeBuilder::setInnerType(const TypePtr &type)
 {
     innerType = type;
 }
+void TypeBuilder::setGenericArguments(const GenericArgumentPtr& arguments)
+{
+    genericArguments = arguments;
+}
 void TypeBuilder::addProtocol(const TypePtr &protocol)
 {
     assert(protocol != nullptr);

@@ -38,6 +38,8 @@ using namespace std;
 
 int GenericDefinition::validate(const std::wstring& typeName, const TypePtr& typeToTest, TypePtr& expectedType) const
 {
+    if(constraints.empty())
+        return 1;
     auto iter = constraints.find(typeName);
     if(iter == constraints.end())
         return 0;
@@ -121,7 +123,7 @@ void GenericDefinition::registerTo(SymbolScope* scope)
 {
     for(auto entry : constraints)
     {
-        scope->addSymbol(entry.first, entry.second->type);
+        scope->addSymbol(entry.first, Type::newType(entry.first, Type::Alias));//
     }
 
 }

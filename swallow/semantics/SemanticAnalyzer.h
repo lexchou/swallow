@@ -150,8 +150,7 @@ private:
     void registerSymbol(const SymbolPlaceHolderPtr& symbol);
     GenericDefinitionPtr prepareGenericTypes(const GenericParametersDefPtr& params);
 
-    void visitFunctionCall(const IdentifierPtr& name, const FunctionCallPtr& node);
-    void visitFunctionCall(const SymbolPtr& func, const FunctionCallPtr& node);
+    void visitFunctionCall(const SymbolPtr& func, const ParenthesizedExpressionPtr& args, const PatternPtr& node);
 private:
     void checkTupleDefinition(const TuplePtr& tuple, const ExpressionPtr& initializer);
     TypePtr evaluateType(const ExpressionPtr& expr);
@@ -160,9 +159,9 @@ private:
      * Calculates the fit score of arguments on given function
      * @return -1 if the type is not matched
      */
-    float calculateFitScore(const TypePtr& func, const ParenthesizedExpressionPtr& arguments, bool supressErrors);
+    float calculateFitScore(TypePtr& func, const ParenthesizedExpressionPtr& arguments, bool supressErrors);
 
-    bool checkArgument(const TypePtr& funcType, const Type::Parameter& parameter, const std::pair<std::wstring, ExpressionPtr>& argument, bool variadic, float& score, bool supressErrors);
+    bool checkArgument(const TypePtr& funcType, const Type::Parameter& parameter, const std::pair<std::wstring, ExpressionPtr>& argument, bool variadic, float& score, bool supressErrors, std::map<std::wstring, TypePtr>& genericTypes);
     TypePtr getExpressionType(const ExpressionPtr& expr, const TypePtr& hint, float& score);
 
     /*!

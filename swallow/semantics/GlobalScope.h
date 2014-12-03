@@ -105,6 +105,7 @@ public:
     TypePtr Comparable;
     TypePtr Hashable;
     TypePtr RawRepresentable;
+    TypePtr _OptionalNilComparisonType;
     TypePtr _IntegerType;
     TypePtr UnsignedIntegerType;
     TypePtr SignedIntegerType;

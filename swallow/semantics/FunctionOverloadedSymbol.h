@@ -44,7 +44,6 @@ public:
     FunctionOverloadedSymbol();
 public:
     virtual const std::wstring& getName() const;
-    FunctionSymbolPtr lookupOverload(int argc, TypePtr argv[]);
     void add(const FunctionSymbolPtr& func);
     void add(const FunctionOverloadedSymbolPtr& funcs);
 

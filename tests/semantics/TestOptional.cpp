@@ -86,6 +86,19 @@ TEST(TestOptional, Type5)
     dumpCompilerResults(compilerResults);
     ASSERT_EQ(0, compilerResults.numResults());
 }
+
+TEST(TestOptional, NilComparison)
+{
+    SEMANTIC_ANALYZE(L"var a : Int? = 3;\n"
+            L"var b = a == nil;");
+    dumpCompilerResults(compilerResults);
+    ASSERT_EQ(0, compilerResults.numResults());
+    SymbolPtr b = scope->lookup(L"b");
+    ASSERT_NOT_NULL(b);
+    ASSERT_EQ(symbolRegistry.getGlobalScope()->Bool, b->getType());
+}
+
+
 TEST(TestOptional, ForcedValue)
 {
     SEMANTIC_ANALYZE(
@@ -189,3 +202,6 @@ TEST(TestOptional, OptionalChaining_Property)
     dumpCompilerResults(compilerResults);
     ASSERT_EQ(0, compilerResults.numResults());
 }
+
+
+

@@ -41,6 +41,7 @@
 #include "FunctionIterator.h"
 #include <cassert>
 #include <algorithm>
+#include "ast/NodeFactory.h"
 
 
 USE_SWALLOW_NS
@@ -138,7 +139,7 @@ TypePtr SemanticAnalyzer::getExpressionType(const ExpressionPtr& expr, const Typ
 {
     if(expr->getType() == nullptr)
         expr->accept(this);
-    score = 1;
+    score = 0.9;
     GlobalScope* scope = symbolRegistry->getGlobalScope();
     if(expr->getNodeType() == NodeType::IntegerLiteral && hint != nullptr)
     {
@@ -149,7 +150,11 @@ TypePtr SemanticAnalyzer::getExpressionType(const ExpressionPtr& expr, const Typ
             return hint;
         }
         if(hint->canAssignTo(scope->_IntegerType))
+        {
+            if(hint == scope->Int)
+                score = 1;
             return hint;
+        }
 
     }
     if(expr->getNodeType() == NodeType::FloatLiteral && hint != nullptr)
@@ -170,7 +175,7 @@ TypePtr SemanticAnalyzer::getExpressionType(const ExpressionPtr& expr, const Typ
  * \param score
  * \param supressErrors
 */
-bool SemanticAnalyzer::checkArgument(const TypePtr& funcType, const Type::Parameter& parameter, const std::pair<std::wstring, ExpressionPtr>& argument, bool variadic, float& score, bool supressErrors)
+bool SemanticAnalyzer::checkArgument(const TypePtr& funcType, const Type::Parameter& parameter, const std::pair<std::wstring, ExpressionPtr>& argument, bool variadic, float& score, bool supressErrors, map<wstring, TypePtr>& genericTypes)
 {
 
     const std::wstring& name = argument.first;
@@ -205,37 +210,32 @@ bool SemanticAnalyzer::checkArgument(const TypePtr& funcType, const Type::Parame
             return false;
         }
     }
-    //only consider it's a generic parameter when and only when the generic definition is provided by the function
-    //otherwise the generic parameter may be provided by the type definition
-    if((parameter.type->getCategory() == Type::GenericParameter) && (funcType->getGenericDefinition() != nullptr))
+    if(!argType->canAssignTo(parameter.type))
     {
-        //check for type constraint
-        GenericDefinitionPtr generic = funcType->getGenericDefinition();
-        assert(generic != nullptr);
-        TypePtr expectedType;
-        bool constraintSatisfied = generic->validate(parameter.type->getName(), argType, expectedType);
-        if(!constraintSatisfied)
+        //cannot assign to, check if it's a generic type and can be specialized to
+        bool canSpecialized = false;
+        if(funcType->getGenericDefinition())
         {
-            if(supressErrors)
-                return false;
-            error(argument.second, Errors::E_TYPE_DOES_NOT_CONFORM_TO_PROTOCOL_2_, argType->getName(), expectedType->getName());
-            abort();
+            if(parameter.type->canSpecializeTo(argType, genericTypes))
+            {
+                canSpecialized = true;
+            }
         }
-    }
-    else if(!argType->canAssignTo(parameter.type))
-    {
-        if (!supressErrors)
+        if (!canSpecialized)
         {
-            error(argument.second, Errors::E_CANNOT_CONVERT_EXPRESSION_TYPE_2, argType->toString(), parameter.type->toString());
-            abort();
+            if (!supressErrors)
+            {
+                error(argument.second, Errors::E_CANNOT_CONVERT_EXPRESSION_TYPE_2, argType->toString(), parameter.type->toString());
+                abort();
+            }
+            return false;//parameter is not matched
         }
-        return false;//parameter is not matched
     }
     score += s;
     return true;
 }
 
-float SemanticAnalyzer::calculateFitScore(const TypePtr& func, const ParenthesizedExpressionPtr& arguments, bool supressErrors)
+float SemanticAnalyzer::calculateFitScore(TypePtr& func, const ParenthesizedExpressionPtr& arguments, bool supressErrors)
 {
     float score = 0;
     const std::vector<Type::Parameter>& parameters = func->getParameters();
@@ -247,6 +247,7 @@ float SemanticAnalyzer::calculateFitScore(const TypePtr& func, const Parenthesiz
     std::vector<Type::Parameter>::const_iterator paramIter = parameters.begin();
     std::vector<ParenthesizedExpression::Term>::iterator argumentIter = arguments->begin();
     std::vector<Type::Parameter>::const_iterator paramEnd = variadic ? parameters.end() - 1 : parameters.end();
+    map<wstring, TypePtr> genericTypes;
     for(;argumentIter != arguments->end() && paramIter != paramEnd; argumentIter++, paramIter++)
     {
         const Type::Parameter& parameter = *paramIter;
@@ -254,7 +255,7 @@ float SemanticAnalyzer::calculateFitScore(const TypePtr& func, const Parenthesiz
         StackedValueGuard<TypePtr> contextualType(t_hint);
         contextualType.set(parameter.type);
         argument.transformedExpression = this->transformExpression(parameter.type, argument.expression);
-        bool ret = checkArgument(func, parameter, make_pair(argumentIter->name, argumentIter->transformedExpression), false, score, supressErrors);
+        bool ret = checkArgument(func, parameter, make_pair(argumentIter->name, argumentIter->transformedExpression), false, score, supressErrors, genericTypes);
         if(!ret)
             return -1;
     }
@@ -289,7 +290,7 @@ float SemanticAnalyzer::calculateFitScore(const TypePtr& func, const Parenthesiz
         //the first variadic argument must have a label if the parameter got a label
         if(!parameter.name.empty())
         {
-            bool ret = checkArgument(func, parameter, make_pair(argumentIter->name, argumentIter->transformedExpression), false, score, supressErrors);
+            bool ret = checkArgument(func, parameter, make_pair(argumentIter->name, argumentIter->transformedExpression), false, score, supressErrors, genericTypes);
             argumentIter++;
             if(!ret)
                 return -1;
@@ -298,29 +299,53 @@ float SemanticAnalyzer::calculateFitScore(const TypePtr& func, const Parenthesiz
         //check rest argument
         for(;argumentIter != arguments->end(); argumentIter++)
         {
-            bool ret = checkArgument(func, parameter, make_pair(argumentIter->name, argumentIter->transformedExpression), true, score, supressErrors);
+            bool ret = checkArgument(func, parameter, make_pair(argumentIter->name, argumentIter->transformedExpression), true, score, supressErrors, genericTypes);
             if(!ret)
                 return -1;
         }
     }
+
+    if(func->getGenericDefinition())// && !genericTypes.empty())
+    {
+        GenericDefinitionPtr generic = func->getGenericDefinition();
+        //the generic types are infered from previous stage while calculating the fitness score, now need to verify if they
+        //satisify the generic constraints.
+        //NOTE: only name and types are available, so it's impossible here to know which argument used the generic type.
+        for(auto iter : genericTypes)
+        {
+            TypePtr argType = iter.second;
+            assert(argType != nullptr);
+            //check for type constraint
+            TypePtr expectedType;
+            bool constraintSatisfied = generic->validate(iter.first, argType, expectedType);
+            if(!constraintSatisfied)
+            {
+                if(supressErrors)
+                    return false;
+                error(arguments, Errors::E_TYPE_DOES_NOT_CONFORM_TO_PROTOCOL_2_, argType->getName(), expectedType->getName());
+                abort();
+            }
+        }
+        assert(generic->numParameters() == genericTypes.size());
+        func = func->newSpecializedType(func, genericTypes);
+    }
+
     if(!arguments->numExpressions())
         return 1;
     return score / arguments->numExpressions();
 }
 
-void SemanticAnalyzer::visitFunctionCall(const IdentifierPtr& name, const FunctionCallPtr& node)
-{
-    //visitFunctionCall(sym, node);
-}
 FunctionSymbolPtr SemanticAnalyzer::getOverloadedFunction(const NodePtr& node, const FunctionOverloadedSymbolPtr& funcs, const ParenthesizedExpressionPtr& arguments)
 {
-    typedef std::pair<float, FunctionSymbolPtr> ScoredFunction;
+    typedef std::tuple<float, FunctionSymbolPtr, TypePtr> ScoredFunction;
     std::vector<ScoredFunction> candidates;
     for(const FunctionSymbolPtr& func : *funcs)
     {
-        float score = calculateFitScore(func->getType(), arguments, true);
+        TypePtr type = func->getType();
+        wstring s = func->getName() + L" : " + type->toString();
+        float score = calculateFitScore(type, arguments, true);
         if(score > 0)
-            candidates.push_back(std::make_pair(score, func));
+            candidates.push_back(std::make_tuple(score, func, type));
     }
     if(candidates.empty())
     {
@@ -331,33 +356,28 @@ FunctionSymbolPtr SemanticAnalyzer::getOverloadedFunction(const NodePtr& node, c
     if(candidates.size() > 1)
     {
         sort(candidates.begin(), candidates.end(), [](const ScoredFunction& lhs, const ScoredFunction& rhs ){
-            return rhs.first < lhs.first;
+            return get<0>(rhs) < get<0>(lhs);
         });
-        if(candidates[0].first == candidates[1].first)
+        if(get<0>(candidates[0]) == get<0>(candidates[1]))
         {
             error(node, Errors::E_AMBIGUOUS_USE_1, funcs->getName());
             abort();
         }
     }
-    FunctionSymbolPtr matched = candidates.front().second;
+    FunctionSymbolPtr matched = get<1>(candidates.front());
     return matched;
 }
-void SemanticAnalyzer::visitFunctionCall(const SymbolPtr& sym, const FunctionCallPtr& node)
+
+void SemanticAnalyzer::visitFunctionCall(const SymbolPtr& sym, const ParenthesizedExpressionPtr& args, const PatternPtr& node)
 {
-    //Prepare the arguments
-    /*
-    for(const ParenthesizedExpression::Term& term : *node->getArguments())
-    {
-        term.second->accept(this);
-    }
-    */
 
     if(FunctionSymbolPtr func = std::dynamic_pointer_cast<FunctionSymbol>(sym))
     {
         //verify argument
         std::wstring name = func->getName();
-        calculateFitScore(func->getType(), node->getArguments(), false);
-        node->setType(func->getReturnType());
+        TypePtr type = func->getType();
+        calculateFitScore(type, args, false);
+        node->setType(type->getReturnType());
     }
     else if(FunctionOverloadedSymbolPtr funcs = std::dynamic_pointer_cast<FunctionOverloadedSymbol>(sym))
     {
@@ -366,12 +386,13 @@ void SemanticAnalyzer::visitFunctionCall(const SymbolPtr& sym, const FunctionCal
             FunctionSymbolPtr func = *funcs->begin();
             //verify argument
             std::wstring name = func->getName();
-            calculateFitScore(func->getType(), node->getArguments(), false);
-            node->setType(func->getReturnType());
+            TypePtr type = func->getType();
+            calculateFitScore(type, args, false);
+            node->setType(type->getReturnType());
         }
         else
         {
-            FunctionSymbolPtr matched = getOverloadedFunction(node, funcs, node->getArguments());
+            FunctionSymbolPtr matched = getOverloadedFunction(node, funcs, args);
             node->setType(matched->getReturnType());
         }
     }
@@ -386,7 +407,7 @@ void SemanticAnalyzer::visitFunctionCall(const SymbolPtr& sym, const FunctionCal
             abort();
             return;
         }
-        calculateFitScore(type, node->getArguments(), false);
+        calculateFitScore(type, args, false);
         node->setType(type->getReturnType());
     }
     else
@@ -453,7 +474,7 @@ void SemanticAnalyzer::visitFunctionCall(const FunctionCallPtr& node)
                     sym = type->getInitializer();
                 }
             }
-            visitFunctionCall(sym, node);
+            visitFunctionCall(sym, node->getArguments(), node);
             break;
         }
         case NodeType::MemberAccess:
@@ -489,7 +510,7 @@ void SemanticAnalyzer::visitFunctionCall(const FunctionCallPtr& node)
                 return;
             }
             assert(sym != nullptr);//
-            visitFunctionCall(sym, node);
+            visitFunctionCall(sym, node->getArguments(), node);
             break;
         }
         case NodeType::Closure:
@@ -881,7 +902,6 @@ void SemanticAnalyzer::visitConditionalOperator(const ConditionalOperatorPtr& no
 }
 void SemanticAnalyzer::visitBinaryOperator(const BinaryOperatorPtr& node)
 {
-    NodeVisitor::visitBinaryOperator(node);
     //look for binary function that matches
     OperatorInfo* op = symbolRegistry->getOperator(node->getOperator());
     SymbolPtr sym = symbolRegistry->lookupSymbol(node->getOperator());
@@ -897,26 +917,16 @@ void SemanticAnalyzer::visitBinaryOperator(const BinaryOperatorPtr& node)
         error(node, Errors::E_UNKNOWN_BINARY_OPERATOR_1, node->getOperator());
         abort();
     }
+
+    ExpressionPtr lhs = dynamic_pointer_cast<Expression>(node->getLHS());
+    ExpressionPtr rhs = dynamic_pointer_cast<Expression>(node->getRHS());
+    assert(lhs != nullptr);
+    assert(rhs != nullptr);
+    ParenthesizedExpressionPtr args(node->getNodeFactory()->createParenthesizedExpression(*node->getSourceInfo()));
+    args->append(lhs);
+    args->append(rhs);
+    this->visitFunctionCall(sym, args, node);
     //find for overload
-    FunctionSymbolPtr func = nullptr;
-    FunctionOverloadedSymbolPtr overloaded = std::dynamic_pointer_cast<FunctionOverloadedSymbol>(sym);
-    if(overloaded)
-    {
-        TypePtr argv[2];
-        argv[0] = node->getLHS()->getType();
-        argv[1] = node->getRHS()->getType();
-        func = overloaded->lookupOverload(2, argv);
-    }
-    else
-    {
-        func = std::dynamic_pointer_cast<FunctionSymbol>(sym);
-    }
-    if(!func)
-    {
-        error(node, Errors::E_NO_OVERLOAD_ACCEPTS_ARGUMENTS_1, node->getOperator());
-        abort();
-    }
-    node->setType(func->getReturnType());
 }
 void SemanticAnalyzer::visitUnaryOperator(const UnaryOperatorPtr& node)
 {
