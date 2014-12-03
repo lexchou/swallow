@@ -160,6 +160,11 @@ TypePtr SemanticAnalyzer::getExpressionType(const ExpressionPtr& expr, const Typ
     if(expr->getNodeType() == NodeType::FloatLiteral && hint != nullptr)
     {
         FloatLiteralPtr literal = std::static_pointer_cast<FloatLiteral>(expr);
+        if(hint == scope->Double)
+        {
+            score = 1;
+            return hint;
+        }
         if(isFloat(hint))
             return hint;
     }
