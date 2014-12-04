@@ -91,6 +91,7 @@ std::wstring getErrorTemplate(int errorCode)
         case Errors::E_MISSING_ARGUMENT_LABEL_IN_CALL_1: return L"Missing argument label '%0:' in call";
         case Errors::E_EXTRANEOUS_ARGUMENT_LABEL_IN_CALL_1: return L"Extraneous argument label '%0:' in call";
         case Errors::E_EXTRANEOUS_ARGUMENT: return L"Extraneous argument in call";
+        case Errors::E_INCORRECT_ARGUMENT_LABEL_IN_CALL_HAVE_A_EXPECTED_B_2: return L"incorrect argument label in call (have '%0', expected '%1')";
         case Errors::E_AMBIGUOUS_USE_1: return L"Ambiguous use of '%0'";
         case Errors::E_INOUT_ARGUMENTS_CANNOT_BE_VARIADIC: return L"Inout arguments cannot be variadic";
         case Errors::E_DOES_NOT_HAVE_A_MEMBER_2: return L"'%0' does not have a member named '%1'";

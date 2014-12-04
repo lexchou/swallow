@@ -224,7 +224,7 @@ void SemanticAnalyzer::registerSymbol(const SymbolPlaceHolderPtr& symbol)
 
 void SemanticAnalyzer::visitValueBinding(const ValueBindingPtr& node)
 {
-    if(node->getOwner()->isReadOnly() && !node->getInitializer())
+    if(node->getOwner()->isReadOnly() && !node->getInitializer() && currentType == nullptr)
     {
         error(node, Errors::E_LET_REQUIRES_INITIALIZER);
         return;

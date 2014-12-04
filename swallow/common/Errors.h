@@ -82,6 +82,7 @@ struct SWALLOW_EXPORT Errors
         E_MISSING_ARGUMENT_LABEL_IN_CALL_1,// Missing argument label '%0:' in call
         E_EXTRANEOUS_ARGUMENT_LABEL_IN_CALL_1, //Extraneous argument label '%0:' in call
         E_EXTRANEOUS_ARGUMENT, //Extraneous argument in call
+        E_INCORRECT_ARGUMENT_LABEL_IN_CALL_HAVE_A_EXPECTED_B_2,//incorrect argument label in call (have 'b:', expected 'a:')
         E_AMBIGUOUS_USE_1,    // Ambiguous use of '%0'
         E_INOUT_ARGUMENTS_CANNOT_BE_VARIADIC, // Inout arguments cannot be variadic
         E_DOES_NOT_HAVE_A_MEMBER_2, // '%0' does not have a member named '%1'

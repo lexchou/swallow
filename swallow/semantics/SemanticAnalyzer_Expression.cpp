@@ -205,13 +205,11 @@ bool SemanticAnalyzer::checkArgument(const TypePtr& funcType, const Type::Parame
             if (!supressErrors)
             {
                 if (name.empty() && !parameter.name.empty())
-                {
                     error(argument.second, Errors::E_MISSING_ARGUMENT_LABEL_IN_CALL_1, parameter.name);
-                }
-                else
-                {
+                else if(!name.empty() && parameter.name.empty())
                     error(argument.second, Errors::E_EXTRANEOUS_ARGUMENT_LABEL_IN_CALL_1, name);
-                }
+                else
+                    error(argument.second, Errors::E_INCORRECT_ARGUMENT_LABEL_IN_CALL_HAVE_A_EXPECTED_B_2, name, parameter.name);
                 abort();
             }
             return false;
@@ -592,6 +590,8 @@ static bool hasOptionalChaining(const NodePtr& node)
         return true;
     if(nodeType == NodeType::MemberAccess)
         return hasOptionalChaining(static_pointer_cast<MemberAccess>(node)->getSelf());
+    if(nodeType == NodeType::SubscriptAccess)
+        return hasOptionalChaining(static_pointer_cast<SubscriptAccess>(node)->getSelf());
     return false;
 }
 void SemanticAnalyzer::visitMemberAccess(const MemberAccessPtr& node)

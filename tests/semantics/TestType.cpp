@@ -156,3 +156,13 @@ TEST(TestType, InitsWithStoredProperties)
     dumpCompilerResults(compilerResults);
     ASSERT_EQ(0, compilerResults.numResults());
 }
+
+
+TEST(TestType, LetWithoutInitializer)
+{
+    SEMANTIC_ANALYZE(L"class Foo\n"
+            L"{"
+            L"    let a : Int"
+            L"}");
+    ASSERT_EQ(0, compilerResults.numResults());
+}

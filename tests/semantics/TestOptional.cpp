@@ -212,3 +212,9 @@ TEST(TestOptional, OptionalChaining_Method)
 }
 
 
+TEST(TestOptional, OptionalChaining_Subscript)
+{
+    SEMANTIC_ANALYZE_F("semantics/TestOptional_OptionalChaining_Subscript.swift");
+    dumpCompilerResults(compilerResults);
+    ASSERT_EQ(0, compilerResults.numResults());
+}

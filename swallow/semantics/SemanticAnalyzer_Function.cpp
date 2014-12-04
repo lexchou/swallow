@@ -359,13 +359,17 @@ void SemanticAnalyzer::visitDeinit(const DeinitializerDefPtr& node)
 
 void SemanticAnalyzer::visitInit(const InitializerDefPtr& node)
 {
-    TypeDeclaration* declaration = dynamic_cast<TypeDeclaration*>(symbolRegistry->getCurrentScope()->getOwner());
+    //TypeDeclaration* declaration = dynamic_cast<TypeDeclaration*>(symbolRegistry->getCurrentScope()->getOwner());
 
-    assert(declaration != nullptr);
-    TypePtr type = declaration->getType();
+    assert(currentType != nullptr);
+    TypeBuilderPtr type = static_pointer_cast<TypeBuilder>(currentType);
 
-    node->getParameters()->accept(this);
     ScopedCodeBlockPtr body = std::static_pointer_cast<ScopedCodeBlock>(node->getBody());
+
+    ScopeGuard scopeGuard(body.get(), this);
+    (void) scopeGuard;
+    node->getParameters()->accept(this);
+
     prepareParameters(body->getScope(), node->getParameters());
     //prepare implicit self
     SymbolPlaceHolderPtr self(new SymbolPlaceHolder(L"self", currentType, SymbolPlaceHolder::R_PARAMETER, SymbolFlagReadable | SymbolFlagInitialized));
@@ -374,18 +378,27 @@ void SemanticAnalyzer::visitInit(const InitializerDefPtr& node)
     std::vector<Type::Parameter> params;
     for(const ParameterPtr& param : *node->getParameters())
     {
-        const std::wstring& externalName = param->isShorthandExternalName() ? param->getLocalName() : param->getExternalName();
+        //init's parameter always has an external name
+        //local name will be used if external name is undeclared
+        const std::wstring& externalName = param->getExternalName().empty() ? param->getLocalName() : param->getExternalName();
         params.push_back(Type::Parameter(externalName, param->isInout(), param->getType()));
     }
 
     TypePtr funcType = Type::newFunction(params, type, node->getParameters()->isVariadicParameters());
+    funcType->setFlags(SymbolFlagInit, true);
 
 
+    FunctionOverloadedSymbolPtr inits = type->getInitializer();
+    if(!inits)
+    {
+        inits = FunctionOverloadedSymbolPtr(new FunctionOverloadedSymbol(L"init"));
+        type->setInitializer(inits);
+    }
     FunctionSymbolPtr init(new FunctionSymbol(type->getName(), funcType, nullptr));
-    type->getInitializer()->add(init);
+    inits->add(init);
 
-
-
+    StackedValueGuard<TypePtr> currentFunction(this->currentFunction);
+    currentFunction.set(funcType);
     node->getBody()->accept(this);
 }
 

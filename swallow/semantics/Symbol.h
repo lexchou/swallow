@@ -53,8 +53,10 @@ enum SymbolFlags
     SymbolFlagHasInitializer = 0x40,
     //Static members can be accessed directly from type
     SymbolFlagStatic = 0x80,
-    //The symbol is a type's init, init function cannot be hold by a value binding
-    SymbolFlagInit = 0x100
+    //The symbol is a type's init, init function cannot be hold by a value binding, and cannot have return value
+    SymbolFlagInit = 0x100,
+    //The symbol is a type's deinit, deinit cannot have return value
+    SymbolFlagDeinit = 0x200,
 };
 
 class SWALLOW_EXPORT Symbol
