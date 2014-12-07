@@ -90,6 +90,7 @@
 #include "TypeIdentifier.h"
 #include "FunctionType.h"
 #include "ArrayType.h"
+#include "DictionaryType.h"
 #include "OptionalType.h"
 #include "ImplicitlyUnwrappedOptional.h"
 #include "ProtocolComposition.h"

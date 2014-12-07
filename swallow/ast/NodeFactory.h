@@ -104,6 +104,7 @@ public:
     virtual ProtocolCompositionPtr createProtocolComposition(const SourceInfo& state);
     virtual TupleTypePtr createTupleType(const SourceInfo& state);
     virtual AttributePtr createAttribute(const SourceInfo& state);
+    virtual DictionaryTypePtr createDictionaryType(const SourceInfo& state);
 
     
     

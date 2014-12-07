@@ -89,7 +89,8 @@ struct SWALLOW_EXPORT Errors
 
         E_CANNOT_CONVERT_EXPRESSION_TYPE_2, //Cannot convert expression's type '%0' to type '%1'
         E_LET_REQUIRES_INITIALIZER, //'let' declarations require an initializer expression
-        E_CANNOT_DEFINE_EMPTY_ARRAY_WITHOUT_TYPE, // cannot define an empty array without type declaration.
+        E_CANNOT_DEFINE_AN_EMPTY_ARRAY_WITHOUT_CONTEXTUAL_TYPE, // cannot define an empty array without contextual type.
+        E_CANNOT_DEFINE_AN_EMPTY_DICTIONARY_WITHOUT_CONTEXTUAL_TYPE,// cannot define an empty dictionary without contextual type.
         E_ARRAY_CONTAINS_DIFFERENT_TYPES, // Array contains different types
         E_TYPE_DOES_NOT_CONFORM_TO_PROTOCOL_2_, // Type '%0' does not conform to '%1' protocol
         E_SUPERCLASS_MUST_APPEAR_FIRST_IN_INHERITANCE_CLAUSE_1, // Superclass '%0' must appear first in the inheritance clause
@@ -144,6 +145,9 @@ struct SWALLOW_EXPORT Errors
         E_VARIABLE_BINDING_IN_A_CONDITION_REQUIRES_AN_INITIALIZER,//Variable binding in a condition requires an initializer
         E_A_IS_NOT_IDENTICIAL_TO_B_2,//'%0' is not identical to '%1'
         E_RETURN_INVALID_OUTSIDE_OF_A_FUNC,//return invalid outside of a func
+        E_SUBSCRIPT_ACCESS_ON_A_IS_NOT_WRITABLE_1,// Subscript access on '%0' is not writable
+        E_DICTIONARY_KEY_CONTAINS_DIFFERENT_TYPES,// Dictionary key contains different types
+        E_DICTIONARY_VALUE_CONTAINS_DIFFERENT_TYPES,// Dictionary key contains different types
 
         W_PARAM_CAN_BE_EXPRESSED_MORE_SUCCINCTLY_1, // '%0 %0' can be expressed more succinctly as '#%0'
         W_EXTRANEOUS_SHARTP_IN_PARAMETER_1 //Extraneous '#' in parameter: '%0' is already the keyword argument name

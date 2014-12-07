@@ -98,6 +98,9 @@ public:
     virtual void visitString(const StringLiteralPtr& node) override;
     virtual void visitInteger(const IntegerLiteralPtr& node) override;
     virtual void visitFloat(const FloatLiteralPtr& node) override;
+
+    virtual void visitNilLiteral(const NilLiteralPtr& node) override;
+    virtual void visitBooleanLiteral(const BooleanLiteralPtr& node) override;
 public:
     virtual void visitArrayType(const ArrayTypePtr& node) override;
     virtual void visitFunctionType(const FunctionTypePtr& node) override;

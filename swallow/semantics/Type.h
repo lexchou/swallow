@@ -284,9 +284,18 @@ public://member access
 
     /*!
      * Check if an instance of current type can be assigned to a variable with given type
+     * NOTE: Protocol with Self and associated types cannot be used to declare a value-binding then need conformTo to verify
      */
     bool canAssignTo(const TypePtr& type)const;
 
+    /*!
+     * Check if current type can conform to given protocol.
+     */
+    bool conformTo(const TypePtr& protocol) const;
+
+    /*!
+     * Gets all base classes and conformed protocols in the inheritance hierachy
+     */
     const std::map<TypePtr, int>& getAllParents() const;
 
     const std::vector<FunctionOverloadedSymbolPtr>& getFunctions() const;

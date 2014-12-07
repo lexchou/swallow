@@ -64,6 +64,10 @@ TypeNodePtr Parser::parseType()
     {
         ret = parseProtocolComposition();
     }
+    else if(token == TokenType::OpenBracket)
+    {
+        ret = parseCollectionType();
+    }
     else
     {
         unexpected(token);
@@ -121,6 +125,35 @@ TypeNodePtr Parser::parseType()
         break;
     }while(true);
     return ret;
+}
+
+/*!
+ * dictionary-type → [­type­:­type­]­
+ * array-type → [­type­]­
+ */
+TypeNodePtr Parser::parseCollectionType()
+{
+    Token token;
+    expect(L"[", token);
+    TypeNodePtr type = this->parseType();
+    if(match(L":"))
+    {
+        //it's a dictionary type
+        TypeNodePtr valueType = parseType();
+        expect(L"]");
+        DictionaryTypePtr ret = nodeFactory->createDictionaryType(token.state);
+        ret->setKeyType(type);
+        ret->setValueType(valueType);
+        return ret;
+    }
+    else
+    {
+        //it's an array type
+        expect(L"]");
+        ArrayTypePtr ret = nodeFactory->createArrayType(token.state);
+        ret->setInnerType(type);
+        return ret;
+    }
 }
 
 /*

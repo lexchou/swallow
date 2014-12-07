@@ -1,4 +1,4 @@
-/* GenericArgumentDef.h --
+/* CollectionTypeAnalyzer.h --
  *
  * Copyright (c) 2014, Lex Chou <lex at chou dot it>
  * All rights reserved.
@@ -27,29 +27,36 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef GENERIC_ARGUMENT_DEF_H
-#define GENERIC_ARGUMENT_DEF_H
-#include "Node.h"
+#ifndef COLLECTION_TYPE_ANALYZER_H
+#define COLLECTION_TYPE_ANALYZER_H
+#include "swallow_conf.h"
 #include <string>
+#include <vector>
 
 SWALLOW_NS_BEGIN
+typedef std::shared_ptr<class Expression> ExpressionPtr;
+typedef std::shared_ptr<class Type> TypePtr;
+class GlobalScope;
 
-class TypeNode;
-class SWALLOW_EXPORT GenericArgumentDef : public Node
+/*!
+ * This will analyze the type of a set of expression within a collection
+ */
+class SWALLOW_EXPORT CollectionTypeAnalyzer
 {
 public:
-    GenericArgumentDef();
-    ~GenericArgumentDef();
+    CollectionTypeAnalyzer(const TypePtr& contextualType, GlobalScope* global);
 public:
-    void addArgument(const TypeNodePtr& type);
-    TypeNodePtr getArgument(int i);
-    int numArguments();
-    std::vector<TypeNodePtr>::iterator begin();
-    std::vector<TypeNodePtr>::iterator end();
+    void analyze(const ExpressionPtr& expr);
+public:
+    TypePtr finalType;
+    int differentTypes;
 private:
-    std::vector<TypeNodePtr> arguments;
+    GlobalScope* global;
+    TypePtr contextualType;
+    bool changable;
 };
 
 SWALLOW_NS_END
 
-#endif//GENERIC_ARGUMENT_DEF_H
+
+#endif//COLLECTION_TYPE_ANALYZER_H

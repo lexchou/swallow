@@ -121,6 +121,8 @@ public:
     TypePtr UnicodeScalarLiteralConvertible;
     TypePtr ExtendedGraphemeClusterLiteralConvertible;
 
+    TypePtr SequenceType;
+    TypePtr CollectionType;
     std::vector<TypePtr> t_Numbers;
     std::vector<TypePtr> t_Ints;
 

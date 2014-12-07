@@ -242,11 +242,16 @@ public:
     /*!
      * Convert a AST TypeNode into symboled Type
      */
-    TypePtr lookupType(const TypeNodePtr& type);
+    TypePtr lookupType(const TypeNodePtr& type, bool supressErrors = false);
     std::wstring toString(const NodePtr& node);
     std::wstring toString(int i);
+
+    /*!
+     * Convert expression node to type node
+     */
+    TypeNodePtr expressionToType(const ExpressionPtr& expr);
 private:
-    TypePtr lookupTypeImpl(const TypeNodePtr& type);
+    TypePtr lookupTypeImpl(const TypeNodePtr& type, bool supressErrors);
 protected:
     SymbolRegistry* symbolRegistry;
     CompilerResults* compilerResults;

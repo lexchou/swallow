@@ -62,6 +62,31 @@ void SemanticAnalyzer::visitAssignment(const AssignmentPtr& node)
         case NodeType::SubscriptAccess:
         {
             //TODO: check if this subscript access is writable
+            SubscriptAccessPtr subscriptAccess = static_pointer_cast<SubscriptAccess>(pattern);
+            TypePtr selfType = subscriptAccess->getSelf()->getType();
+            SymbolPtr sym = selfType->getMember(L"subscript");
+            if (!sym)
+            {
+                error(subscriptAccess, Errors::E_DOES_NOT_HAVE_A_MEMBER_2, selfType->toString(), L"subscript");
+                return;
+            }
+            bool hasSetter = false;
+            FunctionOverloadedSymbolPtr subscripts = dynamic_pointer_cast<FunctionOverloadedSymbol>(sym);
+            assert(subscripts != nullptr);
+            for(const FunctionSymbolPtr& func : *subscripts)
+            {
+                TypePtr type = func->getType();
+                if(type->getParameters().size() == 2 && func->getReturnType() == symbolRegistry->getGlobalScope()->Void)
+                {
+                    hasSetter = true;
+                    break;
+                }
+            }
+            if (!hasSetter)
+            {
+                error(subscriptAccess, Errors::E_SUBSCRIPT_ACCESS_ON_A_IS_NOT_WRITABLE_1, toString(subscriptAccess->getSelf()));
+                return;
+            }
             break;
         }
         case NodeType::MemberAccess:

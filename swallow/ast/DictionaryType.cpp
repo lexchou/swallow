@@ -1,4 +1,4 @@
-/* GenericArgumentDef.h --
+/* DictionaryType.cpp --
  *
  * Copyright (c) 2014, Lex Chou <lex at chou dot it>
  * All rights reserved.
@@ -27,29 +27,37 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef GENERIC_ARGUMENT_DEF_H
-#define GENERIC_ARGUMENT_DEF_H
-#include "Node.h"
-#include <string>
 
-SWALLOW_NS_BEGIN
+#include "DictionaryType.h"
+#include "NodeVisitor.h"
+USE_SWALLOW_NS
 
-class TypeNode;
-class SWALLOW_EXPORT GenericArgumentDef : public Node
+
+DictionaryType::DictionaryType()
+        :TypeNode(NodeType::DictionaryType)
 {
-public:
-    GenericArgumentDef();
-    ~GenericArgumentDef();
-public:
-    void addArgument(const TypeNodePtr& type);
-    TypeNodePtr getArgument(int i);
-    int numArguments();
-    std::vector<TypeNodePtr>::iterator begin();
-    std::vector<TypeNodePtr>::iterator end();
-private:
-    std::vector<TypeNodePtr> arguments;
-};
+}
+DictionaryType::~DictionaryType()
+{
+}
 
-SWALLOW_NS_END
-
-#endif//GENERIC_ARGUMENT_DEF_H
+void DictionaryType::setKeyType(const TypeNodePtr& keyType)
+{
+    this->keyType = keyType;
+}
+const TypeNodePtr& DictionaryType::getKeyType() const
+{
+    return keyType;
+}
+void DictionaryType::setValueType(const TypeNodePtr& valueType)
+{
+    this->valueType = valueType;
+}
+const TypeNodePtr& DictionaryType::getValueType() const
+{
+    return valueType;
+}
+void DictionaryType::accept(NodeVisitor* visitor)
+{
+    //accept2(visitor, &NodeVisitor::visitArrayType);
+}

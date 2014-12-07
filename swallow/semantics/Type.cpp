@@ -501,6 +501,10 @@ const std::map<TypePtr, int>& Type::getAllParents() const
     return parents;
 }
 
+bool Type::conformTo(const TypePtr &type) const
+{
+    return canAssignTo(type);
+}
 bool Type::canAssignTo(const TypePtr &type) const
 {
     if(type == nullptr)

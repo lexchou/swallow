@@ -42,7 +42,7 @@
 #include <cassert>
 #include <algorithm>
 #include "ast/NodeFactory.h"
-
+#include "CollectionTypeAnalyzer.h"
 
 USE_SWALLOW_NS
 using namespace std;
@@ -548,6 +548,19 @@ void SemanticAnalyzer::visitFunctionCall(const FunctionCallPtr& node)
         }
         case NodeType::DictionaryLiteral:
         {
+            func->accept(this);
+            TypePtr initType = func->getType();
+            assert(initType != nullptr);
+            //check if it's an array expression
+            if(initType->getCategory() != Type::MetaType)
+            {
+                wstring call = toString(func);
+                wstring type = initType->toString();
+                error(func, Errors::E_INVALID_USE_OF_A_TO_CALL_A_VALUE_OF_NON_FUNCTION_TYPE_B_2, call, type);
+                break;
+            }
+            TypePtr dictType = initType->getInnerType();
+            node->setType(dictType);
             break;
         }
         default:
@@ -731,14 +744,21 @@ void SemanticAnalyzer::visitFloat(const FloatLiteralPtr& node)
 //Will be replaced by stdlib's type constructor
 bool SemanticAnalyzer::canConvertTo(const ExpressionPtr& expr, const TypePtr& type)
 {
+    GlobalScope* global = symbolRegistry->getGlobalScope();
     switch(expr->getNodeType())
     {
         case NodeType::IntegerLiteral:
-            return isNumber(type);
+            return type->canAssignTo(global->IntegerLiteralConvertible);
         case NodeType::FloatLiteral:
-            return isFloat(type);
+            return type->canAssignTo(global->FloatLiteralConvertible);
+        case NodeType::BooleanLiteral:
+            return type->canAssignTo(global->BooleanLiteralConvertible);
+        case NodeType::NilLiteral:
+            return type->canAssignTo(global->NilLiteralConvertible);
+        case NodeType::StringLiteral:
+            return type->canAssignTo(global->StringLiteralConvertible);
         default:
-            return false;
+            return expr->getType()->canAssignTo(type);
     }
     return false;
 }
@@ -746,11 +766,11 @@ bool SemanticAnalyzer::canConvertTo(const ExpressionPtr& expr, const TypePtr& ty
 void SemanticAnalyzer::visitArrayLiteral(const ArrayLiteralPtr& node)
 {
     int num = node->numElements();
-    GlobalScope* scope = symbolRegistry->getGlobalScope();
+    GlobalScope* global = symbolRegistry->getGlobalScope();
     if(t_hint)
     {
         //TODO if hint specified, it must be Array type nor conform to ArrayLiteralConvertible protocol
-        if(t_hint->getInnerType() != scope->Array)
+        if(t_hint->getInnerType() != global->Array)
         {
             bool conformToArrayLiteralConvertible = false;
             if(!conformToArrayLiteralConvertible)
@@ -766,61 +786,123 @@ void SemanticAnalyzer::visitArrayLiteral(const ArrayLiteralPtr& node)
     if(num == 0)
     {
         if(!t_hint)//cannot define an empty array without type hint.
-            error(node, Errors::E_CANNOT_DEFINE_EMPTY_ARRAY_WITHOUT_TYPE);
+            error(node, Errors::E_CANNOT_DEFINE_AN_EMPTY_ARRAY_WITHOUT_CONTEXTUAL_TYPE);
+        else
+            node->setType(t_hint);
         return;
     }
-    //bool hasHint = t_hint != nullptr;
-    TypePtr type = t_hint != nullptr ? t_hint->getInnerType() : nullptr;
-    TypePtr hint;
+
+    TypePtr elementType = t_hint != nullptr ? t_hint->getGenericArguments()->get(0) : nullptr;
+    CollectionTypeAnalyzer analyzer(elementType, global);
     for(const ExpressionPtr& el : *node)
     {
+        StackedValueGuard<TypePtr> contextualType(t_hint);
+        contextualType.set(analyzer.finalType);
         el->accept(this);
-        if(type != nullptr)
-        {
-            //check if element can be converted into given type
-            if(!canConvertTo(el, type))
-            {
-                error(el, Errors::E_CANNOT_CONVERT_EXPRESSION_TYPE_2, toString(el), type->getName());
-            }
-        }
-        else
-        {
-            switch(el->getNodeType())
-            {
-                case NodeType::IntegerLiteral:
-                    hint = scope->Int;
-                    break;
-                case NodeType::FloatLiteral:
-                    hint = scope->Double;
-                    break;
-                default:
-                    type = el->getType();
-                    if(hint)
-                    {
-                        //check if the hint can be converted to type
-                        bool success = (hint == scope->Double && isFloat(type)) || (hint == scope->Int && isNumber(type));
-                        if(!success)
-                        {
-                            error(el, Errors::E_ARRAY_CONTAINS_DIFFERENT_TYPES);
-                        }
+        analyzer.analyze(el);
 
-                    }
-                    if(type->getCategory() == Type::MetaType)
-                        type = type->getInnerType();
-                    break;
-            }
+        if(analyzer.differentTypes > 0)
+        {
+            error(el, Errors::E_ARRAY_CONTAINS_DIFFERENT_TYPES);
         }
+        if(!canConvertTo(el, analyzer.finalType))
+        {
+            error(el, Errors::E_CANNOT_CONVERT_EXPRESSION_TYPE_2, toString(el), analyzer.finalType->toString());
+        }
+
     }
 
-    assert(type != nullptr || hint != nullptr);
-
-    if(!type && hint)
-        type = hint;
-    TypePtr arrayType = scope->makeArray(type);
+    assert(analyzer.finalType != nullptr);
+    TypePtr arrayType = global->makeArray(analyzer.finalType);
     node->setType(arrayType);
 }
 void SemanticAnalyzer::visitDictionaryLiteral(const DictionaryLiteralPtr& node)
 {
+    TypePtr keyHint, valueHint;
+    GlobalScope* global = symbolRegistry->getGlobalScope();
+
+    //if it only contains one entry and both key and value are type, then it's a type constructor
+    if(node->numElements() == 1)
+    {
+        auto entry = *node->begin();
+        TypeNodePtr keyTypeNode = expressionToType(entry.first);
+        TypeNodePtr valueTypeNode = expressionToType(entry.second);
+        TypePtr keyType = lookupType(keyTypeNode, true);
+        TypePtr valueType = lookupType(valueTypeNode, true);
+        if(keyType && valueType)
+        {
+            TypePtr dict = global->makeDictionary(keyType, valueType);
+            TypePtr ref = Type::newTypeReference(dict);
+            node->setType(ref);
+            return;
+        }
+    }
+
+    if(t_hint)
+    {
+        if(!t_hint->conformTo(global->DictionaryLiteralConvertible))
+        {
+            error(node, Errors::E_A_IS_NOT_CONVERTIBLE_TO_B_2, t_hint->toString(), L"DictionaryLiteralConvertible");
+            return;
+        }
+        if(global->isDictionary(t_hint))
+        {
+            keyHint = t_hint->getGenericArguments()->get(0);
+            valueHint = t_hint->getGenericArguments()->get(1);
+            if(!keyHint->conformTo(global->Hashable))
+            {
+                error(node, Errors::E_TYPE_DOES_NOT_CONFORM_TO_PROTOCOL_2_, keyHint->toString(), L"Hashable");
+                return;
+            }
+        }
+    }
+
+    if(node->numElements() == 0)
+    {
+        if(!t_hint)//cannot define an empty array without type hint.
+            error(node, Errors::E_CANNOT_DEFINE_AN_EMPTY_DICTIONARY_WITHOUT_CONTEXTUAL_TYPE);
+        else
+            node->setType(t_hint);
+        return;
+    }
+
+    CollectionTypeAnalyzer keyAnalyzer(keyHint, global);
+    CollectionTypeAnalyzer valueAnalyzer(valueHint, global);
+
+    for(auto entry : *node)
+    {
+        StackedValueGuard<TypePtr> contextualType(t_hint);
+        t_hint = keyHint;
+        entry.first->accept(this);
+        t_hint = valueHint;
+        entry.second->accept(this);
+        keyAnalyzer.analyze(entry.first);
+        valueAnalyzer.analyze(entry.second);
+        entry.first = this->transformExpression(keyAnalyzer.finalType, entry.first);
+        entry.second = transformExpression(valueAnalyzer.finalType, entry.second);
+
+        if(keyAnalyzer.differentTypes > 0)
+            error(entry.first, Errors::E_DICTIONARY_KEY_CONTAINS_DIFFERENT_TYPES);
+        if(valueAnalyzer.differentTypes > 0)
+            error(entry.second, Errors::E_DICTIONARY_VALUE_CONTAINS_DIFFERENT_TYPES);
+        if(!canConvertTo(entry.first, keyAnalyzer.finalType))
+            error(entry.first, Errors::E_CANNOT_CONVERT_EXPRESSION_TYPE_2, toString(entry.first), keyAnalyzer.finalType->toString());
+        if(!canConvertTo(entry.second, valueAnalyzer.finalType))
+            error(entry.second, Errors::E_CANNOT_CONVERT_EXPRESSION_TYPE_2, toString(entry.second), valueAnalyzer.finalType->toString());
+    }
+
+    if(t_hint)
+    {
+        node->setType(t_hint);
+    }
+    else
+    {
+        assert(keyAnalyzer.finalType != nullptr);
+        assert(valueAnalyzer.finalType != nullptr);
+        TypePtr type = global->makeDictionary(keyAnalyzer.finalType, valueAnalyzer.finalType);
+        node->setType(type);
+    }
+
 
 }
 void SemanticAnalyzer::visitParenthesizedExpression(const ParenthesizedExpressionPtr& node)

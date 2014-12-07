@@ -79,8 +79,14 @@ void GlobalScope::initPrimitiveTypes()
     }
 
 
+    DECLARE_TYPE(Protocol, SequenceType);
+
+    DECLARE_TYPE(Protocol, CollectionType);
+    IMPLEMENTS(SequenceType);
+
     DECLARE_TYPE(Protocol, _IntegerType);
     IMPLEMENTS(IntegerLiteralConvertible);
+    IMPLEMENTS(Hashable);
 
     DECLARE_TYPE(Protocol, SignedIntegerType);
     IMPLEMENTS(_IntegerType);
@@ -95,6 +101,7 @@ void GlobalScope::initPrimitiveTypes()
     DECLARE_TYPE(Protocol, FloatingPointType);
     IMPLEMENTS(Comparable);
     IMPLEMENTS(Equatable);
+    IMPLEMENTS(Hashable);
 
     DECLARE_TYPE(Protocol, StringInterpolationConvertible);
 
@@ -166,14 +173,29 @@ void GlobalScope::initPrimitiveTypes()
     IMPLEMENTS(Hashable);
     IMPLEMENTS(Comparable);
 
+
     addSymbol(L"Void", Void = Type::newTuple(vector<TypePtr>()));
 
     {
         TypePtr T = Type::newType(L"T", Type::GenericParameter);
         GenericDefinitionPtr generic(new GenericDefinition());
         generic->add(L"T", T);
+        Optional = Type::newType(L"Optional", Type::Enum, nullptr, nullptr, std::vector<TypePtr>(), generic);
+        type = static_pointer_cast<TypeBuilder>(Optional);
+        type->addProtocol(NilLiteralConvertible);
+
+        type->addEnumCase(L"None", Void);
+        std::vector<TypePtr> SomeArgs = {T};
+        type->addEnumCase(L"Some", Type::newTuple(SomeArgs));
+        addSymbol(Optional);
+    }
+    {
+        TypePtr T = Type::newType(L"T", Type::GenericParameter);
+        GenericDefinitionPtr generic(new GenericDefinition());
+        generic->add(L"T", T);
         Array = Type::newType(L"Array", Type::Struct, nullptr, nullptr, std::vector<TypePtr>(), generic);
         TypeBuilderPtr builder = static_pointer_cast<TypeBuilder>(Array);
+        builder->addProtocol(CollectionType);
         {
             std::vector<Type::Parameter> params = {Type::Parameter(T)};
             TypePtr t_append = Type::newFunction(params, Void, false, nullptr);
@@ -193,28 +215,56 @@ void GlobalScope::initPrimitiveTypes()
             builder->addMember(count);
         }
         {
-            std::vector<Type::Parameter> params = {Type::Parameter(Int)};
-            TypePtr t_append = Type::newFunction(params, T, false, nullptr);
+            std::vector<Type::Parameter> getterParams = {Type::Parameter(Int)};
+            TypePtr getterType = Type::newFunction(getterParams, T, false, nullptr);
+            std::vector<Type::Parameter> setterParams = {Type::Parameter(Int), Type::Parameter(T)};
+            TypePtr setterType = Type::newFunction(setterParams, Void, false, nullptr);
 
-            FunctionSymbolPtr subscript(new FunctionSymbol(L"subscript", t_append, nullptr));
+            FunctionSymbolPtr getter(new FunctionSymbol(L"subscript", getterType, nullptr));
+            FunctionSymbolPtr setter(new FunctionSymbol(L"subscript", setterType, nullptr));
             FunctionOverloadedSymbolPtr subscripts(new FunctionOverloadedSymbol(L"subscript"));
-            subscripts->add(subscript);
+            subscripts->add(getter);
+            subscripts->add(setter);
             builder->addMember(subscripts);
         }
         addSymbol(Array);
     }
-    {
-        TypePtr T = Type::newType(L"T", Type::GenericParameter);
-        GenericDefinitionPtr generic(new GenericDefinition());
-        generic->add(L"T", T);
-        Optional = Type::newType(L"Optional", Type::Enum, nullptr, nullptr, std::vector<TypePtr>(), generic);
-        type = static_pointer_cast<TypeBuilder>(Optional);
-        type->addProtocol(NilLiteralConvertible);
 
-        type->addEnumCase(L"None", Void);
-        std::vector<TypePtr> SomeArgs = {T};
-        type->addEnumCase(L"Some", Type::newTuple(SomeArgs));
-        addSymbol(Optional);
+    {
+        TypePtr Key = Type::newType(L"Key", Type::GenericParameter);
+        TypePtr Value = Type::newType(L"Value", Type::GenericParameter);
+        GenericDefinitionPtr generic(new GenericDefinition());
+        generic->add(L"Key", Key);
+        generic->add(L"Value", Value);
+        Dictionary = Type::newType(L"Dictionary", Type::Struct, nullptr, nullptr, std::vector<TypePtr>(), generic);
+        TypeBuilderPtr builder = static_pointer_cast<TypeBuilder>(Dictionary);
+        builder->addProtocol(CollectionType);
+        builder->addProtocol(DictionaryLiteralConvertible);
+        {
+            SymbolPlaceHolderPtr count(new SymbolPlaceHolder(L"count", Int, SymbolPlaceHolder::R_PROPERTY, SymbolFlagInitialized | SymbolFlagReadable | SymbolFlagMember));
+            builder->addMember(count);
+        }
+        {
+            SymbolPlaceHolderPtr isEmpty(new SymbolPlaceHolder(L"isEmpty", Bool, SymbolPlaceHolder::R_PROPERTY, SymbolFlagInitialized | SymbolFlagReadable | SymbolFlagMember));
+            builder->addMember(isEmpty);
+        }
+        {
+            std::vector<Type::Parameter> getterParams = {Type::Parameter(Key)};
+            TypePtr getter = Type::newFunction(getterParams, makeOptional(Value), false, nullptr);
+
+            std::vector<Type::Parameter> setterParams = {Type::Parameter(Key), Type::Parameter(makeOptional(Value))};
+            TypePtr setter = Type::newFunction(setterParams, Void, false, nullptr);
+
+            FunctionSymbolPtr subscriptGet(new FunctionSymbol(L"subscript", getter, nullptr));
+            FunctionSymbolPtr subscriptSet(new FunctionSymbol(L"subscript", setter, nullptr));
+
+
+            FunctionOverloadedSymbolPtr subscripts(new FunctionOverloadedSymbol(L"subscript"));
+            subscripts->add(subscriptGet);
+            subscripts->add(subscriptSet);
+            builder->addMember(subscripts);
+        }
+        addSymbol(Dictionary);
     }
 }
 
@@ -294,6 +344,7 @@ TypePtr GlobalScope::makeArray(const TypePtr& elementType) const
  */
 TypePtr GlobalScope::makeOptional(const TypePtr& elementType) const
 {
+    assert(elementType != nullptr);
     GenericArgumentPtr ga(new GenericArgument(Optional->getGenericDefinition()));
     ga->add(elementType);
     return Type::newSpecializedType(Optional, ga);

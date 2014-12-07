@@ -1,4 +1,4 @@
-/* GenericArgumentDef.h --
+/* DictionaryType.h --
  *
  * Copyright (c) 2014, Lex Chou <lex at chou dot it>
  * All rights reserved.
@@ -27,29 +27,32 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef GENERIC_ARGUMENT_DEF_H
-#define GENERIC_ARGUMENT_DEF_H
-#include "Node.h"
+#ifndef DICTIONARY_TYPE_H
+#define DICTIONARY_TYPE_H
+#include "TypeNode.h"
 #include <string>
 
 SWALLOW_NS_BEGIN
 
-class TypeNode;
-class SWALLOW_EXPORT GenericArgumentDef : public Node
+class SWALLOW_EXPORT DictionaryType : public TypeNode
 {
 public:
-    GenericArgumentDef();
-    ~GenericArgumentDef();
+    DictionaryType();
+    ~DictionaryType();
 public:
-    void addArgument(const TypeNodePtr& type);
-    TypeNodePtr getArgument(int i);
-    int numArguments();
-    std::vector<TypeNodePtr>::iterator begin();
-    std::vector<TypeNodePtr>::iterator end();
+    void setKeyType(const TypeNodePtr& keyType);
+    const TypeNodePtr& getKeyType() const;
+
+    void setValueType(const TypeNodePtr& valueType);
+    const TypeNodePtr& getValueType() const;
+
+public:
+    virtual void accept(NodeVisitor* visitor);
 private:
-    std::vector<TypeNodePtr> arguments;
+    TypeNodePtr keyType;
+    TypeNodePtr valueType;
 };
 
 SWALLOW_NS_END
 
-#endif//GENERIC_ARGUMENT_DEF_H
+#endif//DICTIONARY_TYPE_H

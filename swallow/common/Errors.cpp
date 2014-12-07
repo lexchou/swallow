@@ -97,7 +97,8 @@ std::wstring getErrorTemplate(int errorCode)
         case Errors::E_DOES_NOT_HAVE_A_MEMBER_2: return L"'%0' does not have a member named '%1'";
         case Errors::E_CANNOT_CONVERT_EXPRESSION_TYPE_2: return L"Cannot convert expression's type '%0' to type '%1'";
         case Errors::E_LET_REQUIRES_INITIALIZER: return L"'let' declarations require an initializer expression";
-        case Errors::E_CANNOT_DEFINE_EMPTY_ARRAY_WITHOUT_TYPE: return L"cannot define an empty array without type declaration.";
+        case Errors::E_CANNOT_DEFINE_AN_EMPTY_ARRAY_WITHOUT_CONTEXTUAL_TYPE: return L"cannot define an empty array without contextual type.";
+        case Errors::E_CANNOT_DEFINE_AN_EMPTY_DICTIONARY_WITHOUT_CONTEXTUAL_TYPE: return L"cannot define an empty dictionary without contextual type.";
         case Errors::E_ARRAY_CONTAINS_DIFFERENT_TYPES: return L"Array contains different types";
         case Errors::E_TYPE_DOES_NOT_CONFORM_TO_PROTOCOL_2_: return L"Type '%0' does not conform to '%1' protocol";
         case Errors::E_SUPERCLASS_MUST_APPEAR_FIRST_IN_INHERITANCE_CLAUSE_1: return L"Superclass '%0' must appear first in the inheritance clause";
@@ -151,6 +152,9 @@ std::wstring getErrorTemplate(int errorCode)
         case Errors::E_VARIABLE_BINDING_IN_A_CONDITION_REQUIRES_AN_INITIALIZER: return L"Variable binding in a condition requires an initializer";
         case Errors::E_A_IS_NOT_IDENTICIAL_TO_B_2: return L"'%0' is not identical to '%1'";
         case Errors::E_RETURN_INVALID_OUTSIDE_OF_A_FUNC: return L"return invalid outside of a func";
+        case Errors::E_SUBSCRIPT_ACCESS_ON_A_IS_NOT_WRITABLE_1: return L"Subscript access on '%0' is not writable";
+        case Errors::E_DICTIONARY_KEY_CONTAINS_DIFFERENT_TYPES: return L"Dictionary key contains different types";
+        case Errors::E_DICTIONARY_VALUE_CONTAINS_DIFFERENT_TYPES: return L"Dictionary value contains different types";
 
 
         case Errors::W_PARAM_CAN_BE_EXPRESSED_MORE_SUCCINCTLY_1: return L"'%0 %0' can be expressed more succinctly as '#%0'";

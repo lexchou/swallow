@@ -41,11 +41,11 @@ ArrayType::~ArrayType()
 {
 }
 
-void ArrayType::setInnerType(TypeNodePtr innerType)
+void ArrayType::setInnerType(const TypeNodePtr& innerType)
 {
     this->innerType = innerType;
 }
-TypeNodePtr ArrayType::getInnerType()
+const TypeNodePtr& ArrayType::getInnerType() const
 {
     return innerType;
 }

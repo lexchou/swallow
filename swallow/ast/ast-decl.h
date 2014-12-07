@@ -137,6 +137,7 @@ class FunctionType;
 typedef std::shared_ptr<FunctionType> FunctionTypePtr;
 class ArrayType;
 typedef std::shared_ptr<ArrayType> ArrayTypePtr;
+typedef std::shared_ptr<class DictionaryType> DictionaryTypePtr;
 class OptionalType;
 typedef std::shared_ptr<OptionalType> OptionalTypePtr;
 class ImplicitlyUnwrappedOptional;

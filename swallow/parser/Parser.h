@@ -55,6 +55,7 @@ public:
 private:
     TypeNodePtr parseType();
     TypeNodePtr parseTypeAnnotation();
+    TypeNodePtr parseCollectionType();
     
     TupleTypePtr parseTupleType();
     TypeIdentifierPtr parseTypeIdentifier();

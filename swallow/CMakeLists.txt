@@ -63,6 +63,7 @@ SET(SWALLOW_SRC
     semantics/TypeSpecialization.cpp
     semantics/TypeBuilder.cpp
     semantics/FunctionIterator.cpp
+    semantics/CollectionTypeAnalyzer.cpp
     semantics/SemanticAnalyzer.cpp
     semantics/SemanticAnalyzer_TypeCreation.cpp
     semantics/SemanticAnalyzer_Function.cpp
@@ -133,6 +134,7 @@ SET(SWALLOW_SRC
     ast/ImplicitlyUnwrappedOptional.cpp
     ast/TupleType.cpp
     ast/ProtocolComposition.cpp
+    ast/DictionaryType.cpp
 
     ast/DictionaryLiteral.cpp
     ast/ArrayLiteral.cpp

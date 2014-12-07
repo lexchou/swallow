@@ -52,3 +52,12 @@ int GenericArgumentDef::numArguments()
 {
     return arguments.size();
 }
+std::vector<TypeNodePtr>::iterator GenericArgumentDef::begin()
+{
+    return arguments.begin();
+}
+std::vector<TypeNodePtr>::iterator GenericArgumentDef::end()
+{
+    return arguments.end();
+}
+

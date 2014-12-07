@@ -40,8 +40,8 @@ public:
     ArrayType();
     ~ArrayType();
 public:
-    void setInnerType(TypeNodePtr innerType);
-    TypeNodePtr getInnerType();
+    void setInnerType(const TypeNodePtr& innerType);
+    const TypeNodePtr& getInnerType()const;
 public:
     virtual void accept(NodeVisitor* visitor);
 private:

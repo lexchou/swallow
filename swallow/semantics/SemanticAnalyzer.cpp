@@ -252,19 +252,19 @@ std::wstring SemanticAnalyzer::toString(int i)
     s<<i;
     return s.str();
 }
-TypePtr SemanticAnalyzer::lookupType(const TypeNodePtr& type)
+TypePtr SemanticAnalyzer::lookupType(const TypeNodePtr& type, bool supressErrors)
 {
     if(!type)
         return nullptr;
     TypePtr ret = type->getType();
     if(!ret)
     {
-        ret = lookupTypeImpl(type);
+        ret = lookupTypeImpl(type, supressErrors);
         type->setType(ret);
     }
     return ret;
 }
-TypePtr SemanticAnalyzer::lookupTypeImpl(const TypeNodePtr &type)
+TypePtr SemanticAnalyzer::lookupTypeImpl(const TypeNodePtr &type, bool supressErrors)
 {
     if(TypeIdentifierPtr id = std::dynamic_pointer_cast<TypeIdentifier>(type))
     {
@@ -272,39 +272,55 @@ TypePtr SemanticAnalyzer::lookupTypeImpl(const TypeNodePtr &type)
         TypePtr ret = symbolRegistry->lookupType(id->getName());
         if(!ret)
         {
-            std::wstring str = toString(type);
-            error(type, Errors::E_USE_OF_UNDECLARED_TYPE_1, str);
-            abort();
+            if(!supressErrors)
+            {
+                std::wstring str = toString(type);
+                error(type, Errors::E_USE_OF_UNDECLARED_TYPE_1, str);
+                abort();
+            }
+            return nullptr;
         }
         GenericDefinitionPtr generic = ret->getGenericDefinition();
         if(generic == nullptr && id->numGenericArguments() == 0)
             return ret;
         if(generic == nullptr && id->numGenericArguments() > 0)
         {
-            std::wstring str = toString(type);
-            error(id, Errors::E_CANNOT_SPECIALIZE_NON_GENERIC_TYPE_1, str);
+            if(!supressErrors)
+            {
+                std::wstring str = toString(type);
+                error(id, Errors::E_CANNOT_SPECIALIZE_NON_GENERIC_TYPE_1, str);
+            }
             return nullptr;
         }
         if(generic != nullptr && id->numGenericArguments() == 0)
         {
-            std::wstring str = toString(type);
-            error(id, Errors::E_GENERIC_TYPE_ARGUMENT_REQUIRED, str);
+            if(!supressErrors)
+            {
+                std::wstring str = toString(type);
+                error(id, Errors::E_GENERIC_TYPE_ARGUMENT_REQUIRED, str);
+            }
             return nullptr;
         }
         if(id->numGenericArguments() > generic->numParameters())
         {
-            std::wstring str = toString(type);
-            std::wstring got = toString(id->numGenericArguments());
-            std::wstring expected = toString(generic->numParameters());
-            error(id, Errors::E_GENERIC_TYPE_SPECIALIZED_WITH_TOO_MANY_TYPE_PARAMETERS_3, str, got, expected);
+            if(!supressErrors)
+            {
+                std::wstring str = toString(type);
+                std::wstring got = toString(id->numGenericArguments());
+                std::wstring expected = toString(generic->numParameters());
+                error(id, Errors::E_GENERIC_TYPE_SPECIALIZED_WITH_TOO_MANY_TYPE_PARAMETERS_3, str, got, expected);
+            }
             return nullptr;
         }
         if(id->numGenericArguments() < generic->numParameters())
         {
-            std::wstring str = toString(type);
-            std::wstring got = toString(id->numGenericArguments());
-            std::wstring expected = toString(generic->numParameters());
-            error(id, Errors::E_GENERIC_TYPE_SPECIALIZED_WITH_INSUFFICIENT_TYPE_PARAMETERS_3, str, got, expected);
+            if(!supressErrors)
+            {
+                std::wstring str = toString(type);
+                std::wstring got = toString(id->numGenericArguments());
+                std::wstring expected = toString(generic->numParameters());
+                error(id, Errors::E_GENERIC_TYPE_SPECIALIZED_WITH_INSUFFICIENT_TYPE_PARAMETERS_3, str, got, expected);
+            }
             return nullptr;
         }
         //check type
@@ -324,13 +340,15 @@ TypePtr SemanticAnalyzer::lookupTypeImpl(const TypeNodePtr &type)
             TypePtr childType = ret->getAssociatedType(n->getName());
             if(!childType)
             {
-                error(n, Errors::E_A_IS_NOT_A_MEMBER_TYPE_OF_B_2, n->getName(), ret->toString());
+                if(!supressErrors)
+                    error(n, Errors::E_A_IS_NOT_A_MEMBER_TYPE_OF_B_2, n->getName(), ret->toString());
                 return nullptr;
             }
             if(n->numGenericArguments())
             {
                 //nested type is always a non-generic type
-                error(n, Errors::E_CANNOT_SPECIALIZE_NON_GENERIC_TYPE_1, childType->toString());
+                if(!supressErrors)
+                    error(n, Errors::E_CANNOT_SPECIALIZE_NON_GENERIC_TYPE_1, childType->toString());
                 return nullptr;
             }
             ret = childType;
@@ -350,22 +368,28 @@ TypePtr SemanticAnalyzer::lookupTypeImpl(const TypeNodePtr &type)
     }
     if(ArrayTypePtr array = std::dynamic_pointer_cast<ArrayType>(type))
     {
-        GlobalScope* scope = symbolRegistry->getGlobalScope();
-        TypePtr Array = scope->Array;
+        GlobalScope* global = symbolRegistry->getGlobalScope();
         TypePtr innerType = lookupType(array->getInnerType());
         assert(innerType != nullptr);
-        assert(Array != nullptr);
-        TypePtr ret = Type::newSpecializedType(Array, innerType);
+        TypePtr ret = global->makeArray(innerType);
+        return ret;
+    }
+    if(DictionaryTypePtr array = std::dynamic_pointer_cast<DictionaryType>(type))
+    {
+        GlobalScope* scope = symbolRegistry->getGlobalScope();
+        TypePtr keyType = lookupType(array->getKeyType());
+        TypePtr valueType = lookupType(array->getValueType());
+        assert(keyType != nullptr);
+        assert(valueType != nullptr);
+        TypePtr ret = scope->makeDictionary(keyType, valueType);
         return ret;
     }
     if(OptionalTypePtr opt = std::dynamic_pointer_cast<OptionalType>(type))
     {
-        GlobalScope* scope = symbolRegistry->getGlobalScope();
-        TypePtr Optional = scope->Optional;
+        GlobalScope* global = symbolRegistry->getGlobalScope();
         TypePtr innerType = lookupType(opt->getInnerType());
         assert(innerType != nullptr);
-        assert(Optional != nullptr);
-        TypePtr ret = Type::newSpecializedType(Optional, innerType);
+        TypePtr ret = global->makeOptional(innerType);
         return ret;
     }
     if(FunctionTypePtr func = std::dynamic_pointer_cast<FunctionType>(type))
@@ -379,7 +403,64 @@ TypePtr SemanticAnalyzer::lookupTypeImpl(const TypeNodePtr &type)
     assert(0 && "Unsupported type");
     return nullptr;
 }
-
+/*!
+ * Convert expression node to type node
+ */
+TypeNodePtr SemanticAnalyzer::expressionToType(const ExpressionPtr& expr)
+{
+    assert(expr != nullptr);
+    NodeType::T nodeType = expr->getNodeType();
+    switch(nodeType)
+    {
+        case NodeType::Identifier:
+        {
+            IdentifierPtr id = static_pointer_cast<Identifier>(expr);
+            TypeIdentifierPtr ret = id->getNodeFactory()->createTypeIdentifier(*id->getSourceInfo());
+            ret->setName(id->getIdentifier());
+            if(id->getGenericArgumentDef())
+            {
+                for(const TypeNodePtr& type : *id->getGenericArgumentDef())
+                {
+                    ret->addGenericArgument(type);
+                }
+            }
+            return ret;
+        }
+        case NodeType::MemberAccess:
+        {
+            MemberAccessPtr memberAccess = static_pointer_cast<MemberAccess>(expr);
+            TypeIdentifierPtr self = dynamic_pointer_cast<TypeIdentifier>(expressionToType(memberAccess->getSelf()));
+            assert(memberAccess->getField() != nullptr);
+            TypeIdentifierPtr tail = dynamic_pointer_cast<TypeIdentifier>(expressionToType(memberAccess->getField()));
+            if(!self || !tail)
+                return nullptr;
+            //append the tail to the end of the expression
+            TypeIdentifierPtr p = self;
+            while(p->getNestedType())
+            {
+                p = p->getNestedType();
+            }
+            p->setNestedType(tail);
+            return self;
+        }
+        case NodeType::Tuple:
+        {
+            TuplePtr tuple = static_pointer_cast<Tuple>(expr);
+            TupleTypePtr ret = tuple->getNodeFactory()->createTupleType(*tuple->getSourceInfo());
+            for(const PatternPtr& pattern : *tuple)
+            {
+                ExpressionPtr expr = dynamic_pointer_cast<Expression>(pattern);
+                TypeNodePtr t = expressionToType(expr);
+                if(!t)
+                    return nullptr;
+                ret->add(false, L"", t);
+            }
+            return ret;
+        }
+        default:
+            return nullptr;
+    }
+}
 
 /*!
  * Expand given expression to given Optional<T> type by adding implicit Optional<T>.Some calls
@@ -449,5 +530,9 @@ ExpressionPtr SemanticAnalyzer::transformExpression(const TypePtr& contextualTyp
             return transformed;
         return expr;
     }
+    //if(!expr->getType()->canAssignTo(contextualType))
+    //{
+    //   error(expr, Errors::E_CANNOT_CONVERT_EXPRESSION_TYPE_2, toString(expr), contextualType->toString());
+    //}
     return expr;
 }

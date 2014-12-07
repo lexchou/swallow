@@ -65,6 +65,7 @@ struct NodeType
         Continue,
         Deinit,
         DictionaryLiteral,
+        DictionaryType,
         Do,
         DynamicType,
         EnumCasePattern,

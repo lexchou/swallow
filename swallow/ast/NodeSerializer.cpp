@@ -183,11 +183,27 @@ void NodeSerializer::visitOperator(const OperatorDefPtr& node)
 }
 void NodeSerializer::visitArrayLiteral(const ArrayLiteralPtr& node)
 {
-
+    append(L"[");
+    for(auto el : *node)
+    {
+        el->accept(this);
+    }
+    append(L"]");
 }
 void NodeSerializer::visitDictionaryLiteral(const DictionaryLiteralPtr& node)
 {
-
+    bool first = true;
+    append(L"[");
+    for(auto item : *node)
+    {
+        if(!first)
+            append(L", ");
+        first = false;
+        item.first->accept(this);
+        append(L" : ");
+        item.second->accept(this);
+    }
+    append(L"]");
 }
 void NodeSerializer::visitBreak(const BreakStatementPtr& node)
 {
@@ -308,7 +324,11 @@ void NodeSerializer::visitMemberAccess(const MemberAccessPtr& node)
 }
 void NodeSerializer::visitFunctionCall(const FunctionCallPtr& node)
 {
-
+    node->getFunction()->accept(this);
+    if(node->getArguments())
+        node->getArguments()->accept(this);
+    if(node->getTrailingClosure())
+        node->getTrailingClosure()->accept(this);
 }
 void NodeSerializer::visitClosure(const ClosurePtr& node)
 {
@@ -370,6 +390,17 @@ void NodeSerializer::visitInteger(const IntegerLiteralPtr& node)
 void NodeSerializer::visitFloat(const FloatLiteralPtr& node)
 {
     append(node->valueAsString);
+}
+void NodeSerializer::visitNilLiteral(const NilLiteralPtr& node)
+{
+    append(L"nil");
+}
+void NodeSerializer::visitBooleanLiteral(const BooleanLiteralPtr& node)
+{
+    if(node->getValue())
+        append(L"true");
+    else
+        append(L"false");
 }
 
 void NodeSerializer::visitArrayType(const ArrayTypePtr& node)

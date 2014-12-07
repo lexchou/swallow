@@ -247,6 +247,10 @@ ArrayTypePtr NodeFactory::createArrayType(const SourceInfo&state)
 {
     return _(state, new ArrayType());
 }
+DictionaryTypePtr NodeFactory::createDictionaryType(const SourceInfo& state)
+{
+    return _(state, new DictionaryType());
+}
 OptionalTypePtr NodeFactory::createOptionalType(const SourceInfo&state)
 {
     return _(state, new OptionalType());
