@@ -218,3 +218,12 @@ TEST(TestOptional, OptionalChaining_Subscript)
     dumpCompilerResults(compilerResults);
     ASSERT_EQ(0, compilerResults.numResults());
 }
+TEST(TestOptional, DictSubscriptAccess)
+{
+    SEMANTIC_ANALYZE(L"var testScores = [\"Dave\": [86, 82, 84], \"Bev\": [79, 94, 81]]\n"
+            L"testScores[\"Dave\"]?[0] = 91\n"
+            L"testScores[\"Bev\"]?[0]++\n"
+            L"testScores[\"Brian\"]?[0] = 72");
+    dumpCompilerResults(compilerResults);
+    ASSERT_EQ(0, compilerResults.numResults());
+}

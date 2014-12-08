@@ -320,11 +320,17 @@ FunctionSymbolPtr GlobalScope::vcreateFunction(const std::wstring&name, int flag
     while(true)
     {
         const wchar_t* typeName = va_arg(va, const wchar_t*);
+        bool inout = false;
         if(!typeName)
             break;
+        if(*typeName == '&')
+        {
+            inout = true;
+            typeName++;
+        }
         TypePtr paramType = dynamic_pointer_cast<Type>(lookup(typeName));
         assert(paramType != nullptr);
-        params.push_back(Type::Parameter(paramType));
+        params.push_back(Type::Parameter(L"", inout, paramType));
     }
     TypePtr funcType = Type::newFunction(params, retType, variadicParams, nullptr);
     FunctionSymbolPtr ret(new FunctionSymbol(name, funcType, nullptr));
@@ -395,6 +401,8 @@ void GlobalScope::initOperators()
         }
     }
 
+    this->declareFunction(L"++", SymbolFlagPostfix, L"Int", L"&Int", NULL);
+
     // T? == nil
     {
         TypePtr T = Type::newType(L"T", Type::GenericParameter);
@@ -404,6 +412,7 @@ void GlobalScope::initOperators()
         vector<Type::Parameter> parameterTypes = {optionalT, _OptionalNilComparisonType};
         TypePtr funcType = Type::newFunction(parameterTypes, Bool, false, def);
         FunctionSymbolPtr func(new FunctionSymbol(L"==", funcType, nullptr));
+        func->setFlags(SymbolFlagInfix);
 
         FunctionOverloadedSymbolPtr overloads(new FunctionOverloadedSymbol(L"=="));
         overloads->add(func);
@@ -418,6 +427,7 @@ void GlobalScope::initOperators()
         vector<Type::Parameter> parameterTypes = {optionalT, _OptionalNilComparisonType};
         TypePtr funcType = Type::newFunction(parameterTypes, Bool, false, def);
         FunctionSymbolPtr func(new FunctionSymbol(L"!=", funcType, nullptr));
+        func->setFlags(SymbolFlagInfix);
 
         FunctionOverloadedSymbolPtr overloads(new FunctionOverloadedSymbol(L"!="));
         overloads->add(func);
@@ -435,6 +445,7 @@ bool GlobalScope::registerOperatorFunction(const std::wstring& name, const TypeP
     std::vector<Type::Parameter> parameterTypes = {lhs, rhs};
     TypePtr funcType = Type::newFunction(parameterTypes, returnType, false);
     FunctionSymbolPtr func(new FunctionSymbol(name, funcType, nullptr));
+    func->setFlags(SymbolFlagInfix);
 
     if(sym)
     {

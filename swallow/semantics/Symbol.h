@@ -57,6 +57,9 @@ enum SymbolFlags
     SymbolFlagInit = 0x100,
     //The symbol is a type's deinit, deinit cannot have return value
     SymbolFlagDeinit = 0x200,
+    SymbolFlagPrefix = 0x400,
+    SymbolFlagInfix = 0x800,
+    SymbolFlagPostfix = 0x1000,
 };
 
 class SWALLOW_EXPORT Symbol

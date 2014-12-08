@@ -41,6 +41,8 @@
 #include "ast/NodeSerializer.h"
 #include "GlobalScope.h"
 #include "ast/NodeFactory.h"
+#include "FunctionOverloadedSymbol.h"
+#include "FunctionSymbol.h"
 
 USE_SWALLOW_NS
 using namespace std;
@@ -535,4 +537,48 @@ ExpressionPtr SemanticAnalyzer::transformExpression(const TypePtr& contextualTyp
     //   error(expr, Errors::E_CANNOT_CONVERT_EXPRESSION_TYPE_2, toString(expr), contextualType->toString());
     //}
     return expr;
+}
+/*!
+ * Gets all functions from current scope to top scope with given name, if flagMasks is specified, only functions
+ * with given mask will be returned
+ */
+std::vector<SymbolPtr> SemanticAnalyzer::allFunctions(const std::wstring& name, int flagMasks, bool allScopes)
+{
+    SymbolScope* scope = symbolRegistry->getCurrentScope();
+    std::vector<SymbolPtr> ret;
+    for(; scope; scope = scope->getParentScope())
+    {
+        SymbolPtr sym = scope->lookup(name);
+        if(!sym)
+            continue;
+        if(FunctionOverloadedSymbolPtr funcs = dynamic_pointer_cast<FunctionOverloadedSymbol>(sym))
+        {
+            for(const FunctionSymbolPtr& func : *funcs)
+            {
+                if((func->getFlags() & flagMasks) == flagMasks)
+                    ret.push_back(func);
+            }
+        }
+        else if(FunctionSymbolPtr func = dynamic_pointer_cast<FunctionSymbol>(sym))
+        {
+            if((func->getFlags() & flagMasks) == flagMasks)
+                ret.push_back(func);
+        }
+        else if(sym->getType() && sym->getType()->getCategory() == Type::Function)
+        {
+            if((sym->getFlags() & flagMasks) == flagMasks)
+                ret.push_back(sym);
+            else
+                continue;
+        }
+        else if(TypePtr type = dynamic_pointer_cast<Type>(sym))
+        {
+            ret.push_back(type);
+        }
+        else
+            continue;
+        if(!allScopes)
+            break;
+    }
+    return std::move(ret);
 }

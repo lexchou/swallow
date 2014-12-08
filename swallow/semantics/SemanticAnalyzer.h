@@ -150,7 +150,7 @@ private:
     void registerSymbol(const SymbolPlaceHolderPtr& symbol);
     GenericDefinitionPtr prepareGenericTypes(const GenericParametersDefPtr& params);
 
-    void visitFunctionCall(const SymbolPtr& func, const ParenthesizedExpressionPtr& args, const PatternPtr& node);
+    void visitFunctionCall(const std::vector<SymbolPtr>& func, const ParenthesizedExpressionPtr& args, const PatternPtr& node);
 private:
     void checkTupleDefinition(const TuplePtr& tuple, const ExpressionPtr& initializer);
     TypePtr evaluateType(const ExpressionPtr& expr);
@@ -168,7 +168,7 @@ private:
      * Return a function that matches the given argument
      * This will always returns a matched function, if no functions matched it will throw exception and abort the process
      */
-    FunctionSymbolPtr getOverloadedFunction(const NodePtr& node, const FunctionOverloadedSymbolPtr& funcs, const ParenthesizedExpressionPtr& arguments);
+    SymbolPtr getOverloadedFunction(const NodePtr& node, const std::vector<SymbolPtr>& funcs, const ParenthesizedExpressionPtr& arguments);
     /*!
      * Check if the given expression can be converted to given type
      */
@@ -250,6 +250,12 @@ public:
      * Convert expression node to type node
      */
     TypeNodePtr expressionToType(const ExpressionPtr& expr);
+
+    /*!
+     * Gets all functions from current scope to top scope with given name, if flagMasks is specified, only functions
+     * with given mask will be returned
+     */
+    std::vector<SymbolPtr> allFunctions(const std::wstring& name, int flagMasks = 0, bool allScopes = true);
 private:
     TypePtr lookupTypeImpl(const TypeNodePtr& type, bool supressErrors);
 protected:

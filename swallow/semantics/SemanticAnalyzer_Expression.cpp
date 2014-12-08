@@ -340,14 +340,14 @@ float SemanticAnalyzer::calculateFitScore(TypePtr& func, const ParenthesizedExpr
     return score / arguments->numExpressions();
 }
 
-FunctionSymbolPtr SemanticAnalyzer::getOverloadedFunction(const NodePtr& node, const FunctionOverloadedSymbolPtr& funcs, const ParenthesizedExpressionPtr& arguments)
+SymbolPtr SemanticAnalyzer::getOverloadedFunction(const NodePtr& node, const std::vector<SymbolPtr>& funcs, const ParenthesizedExpressionPtr& arguments)
 {
-    typedef std::tuple<float, FunctionSymbolPtr, TypePtr> ScoredFunction;
+    typedef std::tuple<float, SymbolPtr, TypePtr> ScoredFunction;
     std::vector<ScoredFunction> candidates;
-    for(const FunctionSymbolPtr& func : *funcs)
+    for(const SymbolPtr& func : funcs)
     {
         TypePtr type = func->getType();
-        wstring s = func->getName() + L" : " + type->toString();
+        assert(type->getCategory() == Type::Function);
         float score = calculateFitScore(type, arguments, true);
         if(score > 0)
             candidates.push_back(std::make_tuple(score, func, type));
@@ -365,59 +365,51 @@ FunctionSymbolPtr SemanticAnalyzer::getOverloadedFunction(const NodePtr& node, c
         });
         if(get<0>(candidates[0]) == get<0>(candidates[1]))
         {
-            error(node, Errors::E_AMBIGUOUS_USE_1, funcs->getName());
+            error(node, Errors::E_AMBIGUOUS_USE_1, funcs[0]->getName());
             abort();
         }
     }
-    FunctionSymbolPtr matched = get<1>(candidates.front());
+    SymbolPtr matched = get<1>(candidates.front());
     return matched;
 }
 
-void SemanticAnalyzer::visitFunctionCall(const SymbolPtr& sym, const ParenthesizedExpressionPtr& args, const PatternPtr& node)
+void SemanticAnalyzer::visitFunctionCall(const std::vector<SymbolPtr>& funcs, const ParenthesizedExpressionPtr& args, const PatternPtr& node)
 {
-
-    if(FunctionSymbolPtr func = std::dynamic_pointer_cast<FunctionSymbol>(sym))
+    if(funcs.size() == 1)
     {
-        //verify argument
-        std::wstring name = func->getName();
-        TypePtr type = func->getType();
-        calculateFitScore(type, args, false);
-        node->setType(type->getReturnType());
-    }
-    else if(FunctionOverloadedSymbolPtr funcs = std::dynamic_pointer_cast<FunctionOverloadedSymbol>(sym))
-    {
-        if(funcs->numOverloads() == 1)
+        SymbolPtr sym = funcs.front();
+        if(FunctionSymbolPtr func = std::dynamic_pointer_cast<FunctionSymbol>(sym))
         {
-            FunctionSymbolPtr func = *funcs->begin();
             //verify argument
             std::wstring name = func->getName();
             TypePtr type = func->getType();
             calculateFitScore(type, args, false);
             node->setType(type->getReturnType());
         }
+        else if(SymbolPlaceHolderPtr symbol = std::dynamic_pointer_cast<SymbolPlaceHolder>(sym))
+        {
+            //it must be a function type to call
+            TypePtr type = symbol->getType();
+            assert(type != nullptr);
+            if(type->getCategory() != Type::Function && type->getCategory() != Type::Closure)
+            {
+                error(node, Errors::E_INVALID_USE_OF_A_TO_CALL_A_VALUE_OF_NON_FUNCTION_TYPE_B_2, toString(node), type->toString());
+                abort();
+                return;
+            }
+            calculateFitScore(type, args, false);
+            node->setType(type->getReturnType());
+        }
         else
         {
-            FunctionSymbolPtr matched = getOverloadedFunction(node, funcs, args);
-            node->setType(matched->getReturnType());
+            assert(0 && "Unsupported function to call");
         }
-    }
-    else if(SymbolPlaceHolderPtr symbol = std::dynamic_pointer_cast<SymbolPlaceHolder>(sym))
-    {
-        //it must be a function type to call
-        TypePtr type = symbol->getType();
-        assert(type != nullptr);
-        if(type->getCategory() != Type::Function && type->getCategory() != Type::Closure)
-        {
-            error(node, Errors::E_INVALID_USE_OF_A_TO_CALL_A_VALUE_OF_NON_FUNCTION_TYPE_B_2, toString(node), type->toString());
-            abort();
-            return;
-        }
-        calculateFitScore(type, args, false);
-        node->setType(type->getReturnType());
     }
     else
     {
-        assert(0 && "Unsupported function to call");
+        SymbolPtr matched = getOverloadedFunction(node, funcs, args);
+        assert(matched != nullptr && matched->getType()->getCategory() == Type::Function);
+        node->setType(matched->getType()->getReturnType());
     }
 
 }
@@ -454,21 +446,30 @@ void SemanticAnalyzer::visitFunctionCall(const FunctionCallPtr& node)
             func->accept(this);
             IdentifierPtr id = std::static_pointer_cast<Identifier>(func);
             const std::wstring &symbolName = id->getIdentifier();
-            SymbolPtr sym = symbolRegistry->lookupSymbol(symbolName);
-            if (!sym)
+            //TODO: add a parameter on allFunctions to allow it to select types
+            vector<SymbolPtr> funcs = allFunctions(symbolName, 0, true);
+            if (funcs.empty())
             {
                 error(id, Errors::E_USE_OF_UNRESOLVED_IDENTIFIER_1, symbolName);
                 return;
             }
             //if symbol points to a type, then redirect it to a initializer
-            if (TypePtr type = std::dynamic_pointer_cast<Type>(sym))
+            if(funcs.size() == 1)
             {
-                if (type->getCategory() == Type::Class || type->getCategory() == Type::Struct)
+                SymbolPtr sym = funcs[0];
+                if (TypePtr type = std::dynamic_pointer_cast<Type>(sym))
                 {
-                    sym = type->getInitializer();
+                    if (type->getCategory() == Type::Class || type->getCategory() == Type::Struct)
+                    {
+                        funcs.erase(funcs.begin());
+                        for(const FunctionSymbolPtr& init : *type->getInitializer())
+                        {
+                            funcs.push_back(init);
+                        }
+                    }
                 }
             }
-            visitFunctionCall(sym, node->getArguments(), node);
+            visitFunctionCall(funcs, node->getArguments(), node);
             break;
         }
         case NodeType::MemberAccess:
@@ -480,6 +481,7 @@ void SemanticAnalyzer::visitFunctionCall(const FunctionCallPtr& node)
             const wstring& identifier = ma->getField()->getIdentifier();
             SymbolPtr sym;
             const EnumCase*c = nullptr;
+
             if(selfType->getCategory() == Type::MetaType)
             {
                 selfType = selfType->getInnerType();
@@ -504,7 +506,17 @@ void SemanticAnalyzer::visitFunctionCall(const FunctionCallPtr& node)
                 return;
             }
             assert(sym != nullptr);//
-            visitFunctionCall(sym, node->getArguments(), node);
+            vector<SymbolPtr> funcs;
+            if(FunctionOverloadedSymbolPtr overloads = dynamic_pointer_cast<FunctionOverloadedSymbol>(sym))
+            {
+                for(const FunctionSymbolPtr& func : *overloads)
+                {
+                    funcs.push_back(func);
+                }
+            }
+            else
+                funcs.push_back(sym);
+            visitFunctionCall(funcs, node->getArguments(), node);
             if(hasOptionalChaining(ma->getSelf()))
             {
                 TypePtr type = symbolRegistry->getGlobalScope()->makeOptional(node->getType());
@@ -987,20 +999,24 @@ void SemanticAnalyzer::visitBinaryOperator(const BinaryOperatorPtr& node)
 {
     //look for binary function that matches
     OperatorInfo* op = symbolRegistry->getOperator(node->getOperator());
+    std::vector<SymbolPtr> funcs = allFunctions(node->getOperator(), SymbolFlagInfix, true);
     SymbolPtr sym = symbolRegistry->lookupSymbol(node->getOperator());
-    if(!op || !sym)
+    if(!op)
     {
-        error(node, Errors::E_USE_OF_UNRESOLVED_IDENTIFIER_1, node->getOperator());
         error(node, Errors::E_UNKNOWN_BINARY_OPERATOR_1, node->getOperator());
-        abort();
+        return;
     }
     if((op->type & OperatorType::InfixBinary) == 0)
     {
         error(node, Errors::E_IS_NOT_BINARY_OPERATOR_1, node->getOperator());
         error(node, Errors::E_UNKNOWN_BINARY_OPERATOR_1, node->getOperator());
-        abort();
+        return;
     }
-
+    if(funcs.empty())
+    {
+        error(node, Errors::E_USE_OF_UNRESOLVED_IDENTIFIER_1, node->getOperator());
+        return;
+    }
     ExpressionPtr lhs = dynamic_pointer_cast<Expression>(node->getLHS());
     ExpressionPtr rhs = dynamic_pointer_cast<Expression>(node->getRHS());
     assert(lhs != nullptr);
@@ -1008,12 +1024,23 @@ void SemanticAnalyzer::visitBinaryOperator(const BinaryOperatorPtr& node)
     ParenthesizedExpressionPtr args(node->getNodeFactory()->createParenthesizedExpression(*node->getSourceInfo()));
     args->append(lhs);
     args->append(rhs);
-    this->visitFunctionCall(sym, args, node);
+    visitFunctionCall(funcs, args, node);
     //find for overload
 }
 void SemanticAnalyzer::visitUnaryOperator(const UnaryOperatorPtr& node)
 {
-    error(node, Errors::E_NO_OVERLOAD_ACCEPTS_ARGUMENTS_1, node->getOperator());
+    int mask = 0;
+    if(node->getOperatorType() == OperatorType::PostfixUnary)
+        mask = SymbolFlagPostfix;
+    else if(node->getOperatorType() == OperatorType::PrefixUnary)
+        mask = SymbolFlagPrefix;
+    else
+        assert(0 && "Invalid operator type for unary operator");
+
+    std::vector<SymbolPtr> funcs = allFunctions(node->getOperator(), mask, true);
+    ParenthesizedExpressionPtr args(node->getNodeFactory()->createParenthesizedExpression(*node->getSourceInfo()));
+    args->append(node->getOperand());
+    visitFunctionCall(funcs, args, node);
 }
 
 
@@ -1064,9 +1091,13 @@ void SemanticAnalyzer::visitSubscriptAccess(const SubscriptAccessPtr& node)
         //undefined subscript access
         wstring s = this->toString(node);
         error(node, Errors::E_UNDEFINED_SUBSCRIPT_ACCESS_FOR_1, s);
-        abort();
+        return;
     }
+    vector<SymbolPtr> functions;
+    for(const FunctionSymbolPtr& func : *funcs)
+        functions.push_back(func);
     //Now inference the type returned by this subscript access
-    FunctionSymbolPtr func = getOverloadedFunction(node, funcs, node->getIndex());
-    node->setType(func->getReturnType());
+    SymbolPtr func = getOverloadedFunction(node, functions, node->getIndex());
+    assert(func && func->getType() && func->getType()->getCategory() == Type::Function);
+    node->setType(func->getType()->getReturnType());
 }
