@@ -227,3 +227,32 @@ TEST(TestOptional, DictSubscriptAccess)
     dumpCompilerResults(compilerResults);
     ASSERT_EQ(0, compilerResults.numResults());
 }
+
+
+TEST(TestOptional, MultipleLevelChaining)
+{
+    SEMANTIC_ANALYZE_F("semantics/TestOptional_OptionalChaining_MultipleLevelChaining.swift");
+    dumpCompilerResults(compilerResults);
+    ASSERT_EQ(0, compilerResults.numResults());
+}
+
+TEST(TestOptional, MultipleLevelChaining2)
+{
+    SEMANTIC_ANALYZE(L"class Address { var name : String?}; class Residence { var address : Address?}\n"
+            L"var res : Residence? = Residence()\n"
+            L"if var a = res?.address?.name { \n"
+            L"   println(a)\n"
+            L"}");
+    dumpCompilerResults(compilerResults);
+    ASSERT_EQ(0, compilerResults.numResults());
+}
+
+
+TEST(TestOptional, ChainingMethods)
+{
+    SEMANTIC_ANALYZE_F("semantics/TestOptional_ChainingMethods.swift");
+    dumpCompilerResults(compilerResults);
+    ASSERT_EQ(0, compilerResults.numResults());
+}
+
+

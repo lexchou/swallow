@@ -42,7 +42,8 @@
 #include "FunctionIterator.h"
 #include <cassert>
 #include <algorithm>
-
+#include <iostream>
+#include "ast/utils/ASTHierachyDumper.h"
 
 USE_SWALLOW_NS
 using namespace std;
@@ -60,6 +61,7 @@ static bool isOptionalChainingChecking(const ExpressionPtr& expr)
 
 void SemanticAnalyzer::visitIf(const IfStatementPtr& node)
 {
+    GlobalScope* global = symbolRegistry->getGlobalScope();
     ExpressionPtr condition = node->getCondition();
     if(isOptionalChainingChecking(condition))
     {
@@ -67,13 +69,20 @@ void SemanticAnalyzer::visitIf(const IfStatementPtr& node)
         PatternPtr expr = assignment->getRHS();
         ValueBindingPatternPtr binding = static_pointer_cast<ValueBindingPattern>(assignment->getLHS());
         expr->accept(this);
-        if(!symbolRegistry->getGlobalScope()->isOptional(expr->getType()))
+        if(!global->isOptional(expr->getType()))
         {
             error(expr, Errors::E_BOUND_VALUE_IN_A_CONDITIONAL_BINDING_MUST_BE_OF_OPTIONAL_TYPE);
             return;
         }
+
+        //ASTHierachyDumper dumper(std::wcout);
+        //node->accept(&dumper);
         //create value binding
-        TypePtr unpackedType = expr->getType()->getGenericArguments()->get(0);
+        TypePtr unpackedType = expr->getType();
+        while(global->isOptional(unpackedType))
+        {
+            unpackedType = unpackedType->getGenericArguments()->get(0);
+        }
         if(binding->getDeclaredType())
         {
             TypePtr declaredType = lookupType(binding->getDeclaredType());
@@ -121,7 +130,7 @@ void SemanticAnalyzer::visitIf(const IfStatementPtr& node)
         //the condition must be conform to type BooleanType
         TypePtr condType = condition->getType();
         assert(condType != nullptr);
-        if(!condType->canAssignTo(symbolRegistry->getGlobalScope()->BooleanType))
+        if(!condType->canAssignTo(global->BooleanType))
         {
             error(node->getCondition(), Errors::E_TYPE_DOES_NOT_CONFORM_TO_PROTOCOL_2_, condType->toString(), L"BooleanType");
             return;

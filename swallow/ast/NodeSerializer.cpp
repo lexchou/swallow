@@ -413,7 +413,7 @@ void NodeSerializer::visitFunctionType(const FunctionTypePtr& node)
 {
 
 }
-void NodeSerializer::visitImplicitlyUnwrappedOptional(const ImplicitlyUnwrappedOptional& node)
+void NodeSerializer::visitImplicitlyUnwrappedOptional(const ImplicitlyUnwrappedOptionalPtr& node)
 {
 
 }

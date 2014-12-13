@@ -425,7 +425,7 @@ void NodeVisitor::visitFunctionType(const FunctionTypePtr& node)
 {
 
 }
-void NodeVisitor::visitImplicitlyUnwrappedOptional(const ImplicitlyUnwrappedOptional& node)
+void NodeVisitor::visitImplicitlyUnwrappedOptional(const ImplicitlyUnwrappedOptionalPtr& node)
 {
 
 }

@@ -150,7 +150,7 @@ private:
     void registerSymbol(const SymbolPlaceHolderPtr& symbol);
     GenericDefinitionPtr prepareGenericTypes(const GenericParametersDefPtr& params);
 
-    void visitFunctionCall(const std::vector<SymbolPtr>& func, const ParenthesizedExpressionPtr& args, const PatternPtr& node);
+    SymbolPtr visitFunctionCall(const std::vector<SymbolPtr>& func, const ParenthesizedExpressionPtr& args, const PatternPtr& node);
 private:
     void checkTupleDefinition(const TuplePtr& tuple, const ExpressionPtr& initializer);
     TypePtr evaluateType(const ExpressionPtr& expr);

@@ -307,7 +307,7 @@ void NodeVisitorDecorator::visitFunctionType(const FunctionTypePtr& node)
 {
     VISIT(visitFunctionType);
 }
-void NodeVisitorDecorator::visitImplicitlyUnwrappedOptional(const ImplicitlyUnwrappedOptional& node)
+void NodeVisitorDecorator::visitImplicitlyUnwrappedOptional(const ImplicitlyUnwrappedOptionalPtr& node)
 {
     VISIT(visitImplicitlyUnwrappedOptional);
 }

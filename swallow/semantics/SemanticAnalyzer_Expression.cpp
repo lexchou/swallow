@@ -47,6 +47,8 @@
 USE_SWALLOW_NS
 using namespace std;
 static bool hasOptionalChaining(const NodePtr& node);
+static bool isParentInOptionalChain(const NodePtr& node);
+
 
 bool SemanticAnalyzer::isInteger(const TypePtr& type)
 {
@@ -373,7 +375,7 @@ SymbolPtr SemanticAnalyzer::getOverloadedFunction(const NodePtr& node, const std
     return matched;
 }
 
-void SemanticAnalyzer::visitFunctionCall(const std::vector<SymbolPtr>& funcs, const ParenthesizedExpressionPtr& args, const PatternPtr& node)
+SymbolPtr SemanticAnalyzer::visitFunctionCall(const std::vector<SymbolPtr>& funcs, const ParenthesizedExpressionPtr& args, const PatternPtr& node)
 {
     if(funcs.size() == 1)
     {
@@ -385,6 +387,7 @@ void SemanticAnalyzer::visitFunctionCall(const std::vector<SymbolPtr>& funcs, co
             TypePtr type = func->getType();
             calculateFitScore(type, args, false);
             node->setType(type->getReturnType());
+            return func;
         }
         else if(SymbolPlaceHolderPtr symbol = std::dynamic_pointer_cast<SymbolPlaceHolder>(sym))
         {
@@ -395,14 +398,16 @@ void SemanticAnalyzer::visitFunctionCall(const std::vector<SymbolPtr>& funcs, co
             {
                 error(node, Errors::E_INVALID_USE_OF_A_TO_CALL_A_VALUE_OF_NON_FUNCTION_TYPE_B_2, toString(node), type->toString());
                 abort();
-                return;
+                return nullptr;
             }
             calculateFitScore(type, args, false);
             node->setType(type->getReturnType());
+            return symbol;
         }
         else
         {
             assert(0 && "Unsupported function to call");
+            return nullptr;
         }
     }
     else
@@ -410,6 +415,7 @@ void SemanticAnalyzer::visitFunctionCall(const std::vector<SymbolPtr>& funcs, co
         SymbolPtr matched = getOverloadedFunction(node, funcs, args);
         assert(matched != nullptr && matched->getType()->getCategory() == Type::Function);
         node->setType(matched->getType()->getReturnType());
+        return matched;
     }
 
 }
@@ -516,8 +522,10 @@ void SemanticAnalyzer::visitFunctionCall(const FunctionCallPtr& node)
             }
             else
                 funcs.push_back(sym);
-            visitFunctionCall(funcs, node->getArguments(), node);
-            if(hasOptionalChaining(ma->getSelf()))
+            SymbolPtr func = visitFunctionCall(funcs, node->getArguments(), node);
+            assert(func != nullptr);
+            ma->setType(func->getType());
+            if(hasOptionalChaining(ma->getSelf()) && !isParentInOptionalChain(parentNode))
             {
                 TypePtr type = symbolRegistry->getGlobalScope()->makeOptional(node->getType());
                 node->setType(type);
@@ -599,12 +607,14 @@ void SemanticAnalyzer::visitOptionalChaining(const OptionalChainingPtr& node)
 
     node->getExpression()->accept(this);
     TypePtr type = node->getExpression()->getType();
-    if(!symbolRegistry->getGlobalScope()->isOptional(type))
+    GlobalScope* global = symbolRegistry->getGlobalScope();
+    if(!global->isOptional(type))
     {
         error(node, Errors::E_OPERAND_OF_POSTFIX_A_SHOULD_HAVE_OPTIONAL_TYPE_TYPE_IS_B_2, L"?", type->toString());
         return;
     }
-    node->setType(type->getGenericArguments()->get(0));
+    type = type->getGenericArguments()->get(0);
+    node->setType(type);
 }
 static bool hasOptionalChaining(const NodePtr& node)
 {
@@ -619,6 +629,25 @@ static bool hasOptionalChaining(const NodePtr& node)
         return hasOptionalChaining(static_pointer_cast<SubscriptAccess>(node)->getSelf());
     return false;
 }
+
+
+static bool isParentInOptionalChain(const NodePtr& node)
+{
+    if(node == nullptr)
+        return false;
+    switch(node->getNodeType())
+    {
+        case NodeType::MemberAccess:
+        case NodeType::Assignment:
+        case NodeType::OptionalChaining:
+        case NodeType::FunctionCall:
+            return true;
+        default:
+            return false;
+    }
+    return false;
+}
+
 void SemanticAnalyzer::visitMemberAccess(const MemberAccessPtr& node)
 {
     TypePtr selfType = t_hint;
@@ -687,7 +716,8 @@ void SemanticAnalyzer::visitMemberAccess(const MemberAccessPtr& node)
     }
 
     //Optional Chaining, if parent node is not a member access and there's a optional chaining expression inside Self, mark the expression optional
-    if(!parentNode || (parentNode->getNodeType() != NodeType::MemberAccess && parentNode->getNodeType() != NodeType::Assignment))
+    //if(!parentNode || (parentNode->getNodeType() != NodeType::MemberAccess && parentNode->getNodeType() != NodeType::Assignment && parentNode->getNodeType() != NodeType::OptionalChaining))
+    if(!isParentInOptionalChain(parentNode))
     {
         if(hasOptionalChaining(node->getSelf()))
         {

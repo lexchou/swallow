@@ -32,9 +32,29 @@
 USE_SWALLOW_NS
 
 ValueBinding::ValueBinding()
-    :Declaration(NodeType::ValueBinding), temporary(false)
+    :Expression(NodeType::ValueBinding), temporary(false), modifiers(0)
 {
 }
+
+
+void ValueBinding::setAttributes(const Attributes& attrs)
+{
+    attributes = attrs;
+}
+const Attributes& ValueBinding::getAttributes() const
+{
+    return attributes;
+}
+
+int ValueBinding::getModifiers() const
+{
+    return modifiers;
+}
+void ValueBinding::setModifiers(int modifiers)
+{
+    this->modifiers = modifiers;
+}
+
 
 void ValueBinding::accept(NodeVisitor* visitor)
 {

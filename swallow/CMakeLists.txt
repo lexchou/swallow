@@ -163,6 +163,8 @@ SET(SWALLOW_SRC
     ast/TypeDeclaration.cpp
     ast/GenericParametersDef.cpp
     ast/GenericConstraintDef.cpp
+
+    ast/utils/ASTHierachyDumper.cpp
     )
 
 add_definitions(-DTRACE_NODE)

@@ -108,7 +108,7 @@ public:
 public:
     virtual void visitArrayType(const ArrayTypePtr& node);
     virtual void visitFunctionType(const FunctionTypePtr& node);
-    virtual void visitImplicitlyUnwrappedOptional(const ImplicitlyUnwrappedOptional& node);
+    virtual void visitImplicitlyUnwrappedOptional(const ImplicitlyUnwrappedOptionalPtr& node);
     virtual void visitOptionalType(const OptionalTypePtr& node);
     virtual void visitProtocolComposition(const ProtocolCompositionPtr& node);
     virtual void visitTupleType(const TupleTypePtr& node);

@@ -177,6 +177,17 @@ void GlobalScope::initPrimitiveTypes()
     addSymbol(L"Void", Void = Type::newTuple(vector<TypePtr>()));
 
     {
+        TypeBuilderPtr builder = dynamic_pointer_cast<TypeBuilder>(String);
+        {
+            std::vector<Type::Parameter> params = {Type::Parameter(String)};
+            TypePtr t_hasPrefix = Type::newFunction(params, Bool, false, nullptr);
+
+            FunctionSymbolPtr hasPrefix(new FunctionSymbol(L"hasPrefix", t_hasPrefix, nullptr));
+            builder->addMember(hasPrefix);
+        }
+    }
+
+    {
         TypePtr T = Type::newType(L"T", Type::GenericParameter);
         GenericDefinitionPtr generic(new GenericDefinition());
         generic->add(L"T", T);

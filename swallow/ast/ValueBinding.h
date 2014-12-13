@@ -29,7 +29,7 @@
  */
 #ifndef VALUE_BINDING_H
 #define VALUE_BINDING_H
-#include "Declaration.h"
+#include "Expression.h"
 #include <string>
 
 SWALLOW_NS_BEGIN
@@ -37,7 +37,7 @@ SWALLOW_NS_BEGIN
 class Pattern;
 class Expression;
 typedef std::shared_ptr<class Type> TypePtr;
-class SWALLOW_EXPORT ValueBinding : public Declaration
+class SWALLOW_EXPORT ValueBinding : public Expression
 {
     friend class ValueBindings;
 public:
@@ -46,6 +46,12 @@ public:
 
     void setTypeAttributes(const Attributes& attrs);
     const Attributes& getTypeAttributes() const;
+
+    void setAttributes(const Attributes& attrs);
+    const Attributes& getAttributes() const;
+
+    int getModifiers() const;
+    void setModifiers(int modifiers);
 
     void setDeclaredType(const TypeNodePtr& t);
     TypeNodePtr getDeclaredType();
@@ -73,6 +79,8 @@ private:
     Attributes typeAttributes;
     std::weak_ptr<class ValueBindings> owner;
     bool temporary;
+    int modifiers;
+    Attributes attributes;
 };
 
 SWALLOW_NS_END
