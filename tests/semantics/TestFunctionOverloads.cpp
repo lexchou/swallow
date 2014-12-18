@@ -201,7 +201,7 @@ TEST(TestFunctionOverloads, testCovarianceOverload3)
     TypePtr type;
     ASSERT_EQ(0, compilerResults.numResults());
     ASSERT_NOT_NULL(a = scope->lookup(L"a"));
-    ASSERT_EQ(global->Bool, a->getType());
+    ASSERT_EQ(global->Bool(), a->getType());
 }
 
 TEST(TestFunctionOverloads, testCovarianceOverload4)

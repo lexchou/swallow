@@ -273,31 +273,6 @@ private:
     TypePtr currentType;
 };
 
-
-
-template<class T>
-struct StackedValueGuard
-{
-    StackedValueGuard(T & value)
-            :ref(value), value(value)
-    {
-
-    }
-    void set(const T& val)
-    {
-        ref = val;
-    }
-
-    ~StackedValueGuard()
-    {
-        ref = value;
-    }
-
-    T& ref;
-    T value;
-
-};
-
 SWALLOW_NS_END
 
 

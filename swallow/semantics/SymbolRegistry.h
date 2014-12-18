@@ -52,8 +52,8 @@ public:
     bool registerOperator(const std::wstring& name, OperatorType::T type, Associativity::T associativity = Associativity::None, int precedence = 100);
     bool registerOperator(SymbolScope* scope, const std::wstring& name, OperatorType::T type, Associativity::T associativity = Associativity::None, int precedence = 100);
 
-    OperatorInfo* getOperator(const std::wstring& name);
-    OperatorInfo* getOperator(SymbolScope* scope, const std::wstring& name);
+    OperatorInfo* getOperator(const std::wstring& name, int typeMask);
+    OperatorInfo* getOperator(SymbolScope* scope, const std::wstring& name, int typeMask);
 
     bool isPrefixOperator(const std::wstring& name);
     bool isPostfixOperator(const std::wstring& name);

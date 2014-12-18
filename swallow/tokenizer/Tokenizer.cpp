@@ -51,6 +51,7 @@ Tokenizer::Tokenizer(const wchar_t* data)
         const wchar_t* name;
         KeywordType::T type;
         Keyword::T keyword;
+        TokenizerContext context;
     } keywords[] = {
         //Declaration keywords
         {L"class",          D, Keyword::Class},
@@ -62,7 +63,7 @@ Tokenizer::Tokenizer(const wchar_t* data)
         {L"init",           D, Keyword::Init},
         {L"internal",       D, Keyword::Internal},
         {L"let",            D, Keyword::Let},
-        {L"operator",       R, Keyword::Operator},
+        {L"operator",       D, Keyword::Operator},
         {L"private",        D, Keyword::Private},
         {L"protocol",       D, Keyword::Protocol},
         {L"public",         D, Keyword::Public},
@@ -105,38 +106,38 @@ Tokenizer::Tokenizer(const wchar_t* data)
         {L"__FUNCTION__",   E, Keyword::Function},
         {L"__LINE__",       E, Keyword::Line},
         //Reserved keywords
-        {L"associativity",  R, Keyword::Associativity},
-        {L"convenience",    R, Keyword::Convenience},
-        {L"dynamic",        R, Keyword::Dynamic},
-        {L"didSet",         R, Keyword::DidSet},
-        {L"final",          R, Keyword::Final},
-        {L"get",            R, Keyword::Get},
-        {L"infix",          R, Keyword::Infix},
-        {L"inout",          R, Keyword::Inout},
-        {L"lazy",           R, Keyword::Lazy},
-        {L"left",           R, Keyword::Left},
-        {L"mutating",       R, Keyword::Mutating},
-        {L"none",           R, Keyword::None},
-        {L"nonmutating",    R, Keyword::Nonmutating},
-        {L"optional",       R, Keyword::Optional},
-        {L"override",       R, Keyword::Override},
-        {L"postfix",        R, Keyword::Postfix},
-        {L"precedence",     R, Keyword::Precedence},
-        {L"prefix",         R, Keyword::Prefix},
-        {L"Protocol",       R, Keyword::Protocol_Reserved},
-        {L"required",       R, Keyword::Required},
-        {L"right",          R, Keyword::Right},
-        {L"set",            R, Keyword::Set},
-        {L"Type",           R, Keyword::Type},
-        {L"unowned",        R, Keyword::Unowned},
-        {L"weak",           R, Keyword::Weak},
-        {L"willSet",        R, Keyword::WillSet}
+        {L"associativity",  R, Keyword::Associativity, TokenizerContextOperator},
+        {L"convenience",    R, Keyword::Convenience, TokenizerContextClass},
+        {L"dynamic",        R, Keyword::Dynamic, TokenizerContextClass},
+        {L"didSet",         R, Keyword::DidSet, TokenizerContextComputedProperty},
+        {L"final",          R, Keyword::Final, TokenizerContextClass},
+        {L"get",            R, Keyword::Get, TokenizerContextComputedProperty},
+        {L"infix",          R, Keyword::Infix, TokenizerContextAll},
+        {L"inout",          R, Keyword::Inout, TokenizerContextFunctionSignature},
+        {L"lazy",           R, Keyword::Lazy, TokenizerContextClass},
+        {L"left",           R, Keyword::Left, TokenizerContextOperator},
+        {L"mutating",       R, Keyword::Mutating, TokenizerContextClass},
+        {L"none",           R, Keyword::None, TokenizerContextOperator},
+        {L"nonmutating",    R, Keyword::Nonmutating, TokenizerContextClass},
+        {L"optional",       R, Keyword::Optional, TokenizerContextClass},
+        {L"override",       R, Keyword::Override, TokenizerContextClass},
+        {L"postfix",        R, Keyword::Postfix, TokenizerContextAll},
+        {L"precedence",     R, Keyword::Precedence, TokenizerContextOperator},
+        {L"prefix",         R, Keyword::Prefix, TokenizerContextAll},
+        {L"Protocol",       R, Keyword::Protocol_Reserved, TokenizerContextUnknown}, //TODO: update the context here
+        {L"required",       R, Keyword::Required, TokenizerContextClass},
+        {L"right",          R, Keyword::Right, TokenizerContextOperator},
+        {L"set",            R, Keyword::Set, TokenizerContextComputedProperty},
+        {L"Type",           R, Keyword::Type, TokenizerContextUnknown}, //TODO: update the context according to its usage.
+        {L"unowned",        R, Keyword::Unowned, (TokenizerContext)(TokenizerContextCaptureList | TokenizerContextClass)},
+        {L"weak",           R, Keyword::Weak, (TokenizerContext)(TokenizerContextCaptureList | TokenizerContextClass)},
+        {L"willSet",        R, Keyword::WillSet, TokenizerContextComputedProperty}
     };
     
     for(unsigned i = 0; i < sizeof(keywords) / sizeof(keywords[0]); i++)
     {
         std::wstring name = keywords[i].name;
-        KeywordInfo info = {keywords[i].keyword, keywords[i].type};
+        KeywordInfo info = {keywords[i].keyword, keywords[i].type, keywords[i].context};
         this->keywords.insert(std::make_pair(name, info));
         this->keywordNames.insert(std::make_pair(info.keyword, name));
     }
@@ -163,6 +164,7 @@ void Tokenizer::set(const wchar_t* data)
     state.inStringExpression = 0;
     state.line = 1;
     state.column = 1;
+    state.context = TokenizerContextFile;
     //copy string
     if(data)
     {
@@ -182,7 +184,7 @@ Tokenizer::~Tokenizer()
 /*!
  * Save current state for restoring later
  */
-const TokenizerState& Tokenizer::save()
+TokenizerState& Tokenizer::save()
 {
     return state;
 }
@@ -200,6 +202,15 @@ void Tokenizer::restore(const Token& token)
 {
     this->state = token.state;
 }
+
+/*!
+ * Tells the tokenizer which context it is in
+ */
+void Tokenizer::setContext(TokenizerContext context)
+{
+    state.context = context;
+}
+
 void Tokenizer::resetToken(Token& token)
 {
     token.type = TokenType::_;
@@ -671,15 +682,28 @@ bool Tokenizer::readIdentifier(Token& token)
     if(!token.identifier.backtick && !token.identifier.implicitParameterName)
     {
         //resolve keyword
-        using namespace std;
-        map<wstring, KeywordInfo>::iterator iter = keywords.find(token.token);
-        if(iter != keywords.end())
+        KeywordInfo* keyword = getKeyword(token.token);
+        if(keyword)
         {
-            token.identifier.keyword = iter->second.keyword;
-            token.identifier.type = iter->second.type;
+            token.identifier.keyword = keyword->keyword;
+            token.identifier.type = keyword->type;
         }
     }
     return true;
+}
+
+KeywordInfo* Tokenizer::getKeyword(const std::wstring& identifier)
+{
+    std::map<std::wstring, KeywordInfo>::iterator iter = keywords.find(identifier);
+    if(iter == keywords.end())
+        return nullptr;
+    //if not a reserved keyword or can exists in any context
+    if(iter->second.type != KeywordType::Reserved || iter->second.context == TokenizerContextAll)
+        return &iter->second;
+    //check if it's in right context
+    if(state.context != TokenizerContextUnknown && (state.context & iter->second.context) == state.context)
+        return &iter->second;
+    return nullptr;
 }
 
 wchar_t Tokenizer::must_get()

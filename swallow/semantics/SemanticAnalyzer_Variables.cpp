@@ -41,13 +41,14 @@
 #include "semantics/FunctionOverloadedSymbol.h"
 #include "GlobalScope.h"
 #include "ast/NodeFactory.h"
+#include "common/ScopedValue.h"
 
 USE_SWALLOW_NS
 using namespace std;
 
 void SemanticAnalyzer::visitAssignment(const AssignmentPtr& node)
 {
-    node->setType(symbolRegistry->getGlobalScope()->Void);
+    node->setType(symbolRegistry->getGlobalScope()->Void());
     PatternPtr pattern = node->getLHS();
     pattern->accept(this);
     switch(pattern->getNodeType())
@@ -76,7 +77,7 @@ void SemanticAnalyzer::visitAssignment(const AssignmentPtr& node)
             for(const FunctionSymbolPtr& func : *subscripts)
             {
                 TypePtr type = func->getType();
-                if(type->getParameters().size() == 2 && func->getReturnType() == symbolRegistry->getGlobalScope()->Void)
+                if(type->getParameters().size() == 2 && func->getReturnType() == symbolRegistry->getGlobalScope()->Void())
                 {
                     hasSetter = true;
                     break;
@@ -108,8 +109,8 @@ void SemanticAnalyzer::visitAssignment(const AssignmentPtr& node)
     }
     else
     {
-        StackedValueGuard<TypePtr> contextualType(this->t_hint);
-        contextualType.set(destinationType);
+
+        SCOPED_SET(t_hint, destinationType);
         node->getRHS()->accept(this);
     }
     TypePtr sourceType = node->getRHS()->getType();
@@ -170,13 +171,12 @@ void SemanticAnalyzer::visitComputedProperty(const ComputedPropertyPtr& node)
     std::vector<Type::Parameter> params;
     TypePtr getterType = Type::newFunction(params, type, nullptr);
     params.push_back(Type::Parameter(type));
-    TypePtr setterType = Type::newFunction(params, symbolRegistry->getGlobalScope()->Void, false);
+    TypePtr setterType = Type::newFunction(params, symbolRegistry->getGlobalScope()->Void(), false);
 
     if(getter)
     {
         getter->setType(getterType);
-        StackedValueGuard<TypePtr> contextualType(currentFunction);
-        contextualType.set(getterType);
+        SCOPED_SET(currentFunction, getterType);
         getter->accept(this);
     }
     if(setter)
@@ -187,8 +187,7 @@ void SemanticAnalyzer::visitComputedProperty(const ComputedPropertyPtr& node)
         cb->setType(setterType);
         cb->getScope()->addSymbol(SymbolPtr(new SymbolPlaceHolder(name, type, SymbolPlaceHolder::R_PARAMETER, SymbolFlagInitialized)));
 
-        StackedValueGuard<TypePtr> contextualType(currentFunction);
-        contextualType.set(setterType);
+        SCOPED_SET(currentFunction, setterType);
         cb->accept(this);
     }
     if(willSet)
@@ -198,8 +197,8 @@ void SemanticAnalyzer::visitComputedProperty(const ComputedPropertyPtr& node)
         ScopedCodeBlockPtr cb = std::static_pointer_cast<ScopedCodeBlock>(willSet);
         cb->setType(setterType);
         cb->getScope()->addSymbol(SymbolPtr(new SymbolPlaceHolder(setter, type, SymbolPlaceHolder::R_PARAMETER, SymbolFlagInitialized)));
-        StackedValueGuard<TypePtr> contextualType(currentFunction);
-        contextualType.set(setterType);
+
+        SCOPED_SET(currentFunction, setterType);
         cb->accept(this);
     }
     if(didSet)
@@ -209,8 +208,8 @@ void SemanticAnalyzer::visitComputedProperty(const ComputedPropertyPtr& node)
         ScopedCodeBlockPtr cb = std::static_pointer_cast<ScopedCodeBlock>(didSet);
         cb->setType(setterType);
         cb->getScope()->addSymbol(SymbolPtr(new SymbolPlaceHolder(setter, type, SymbolPlaceHolder::R_PARAMETER, SymbolFlagInitialized)));
-        StackedValueGuard<TypePtr> contextualType(currentFunction);
-        contextualType.set(setterType);
+
+        SCOPED_SET(currentFunction, setterType);
         cb->accept(this);
     }
     //register symbol
@@ -262,8 +261,7 @@ void SemanticAnalyzer::visitValueBinding(const ValueBindingPtr& node)
     if(IdentifierPtr id = std::dynamic_pointer_cast<Identifier>(node->getName()))
     {
         TypePtr declaredType = node->getType() ? node->getType() : lookupType(node->getDeclaredType());//node->getDeclaredType() == nullptr ? id->getDeclaredType() : node->getDeclaredType());
-        StackedValueGuard<TypePtr> guard(t_hint);
-        guard.set(declaredType);
+        SCOPED_SET(t_hint, declaredType);
         if(!declaredType && !node->getInitializer())
         {
             error(node, Errors::E_TYPE_ANNOTATION_MISSING_IN_PATTERN);
@@ -335,8 +333,7 @@ void SemanticAnalyzer::explodeValueBinding(const ValueBindingsPtr& valueBindings
     TypePtr initializerType;
     if(var->getInitializer())
     {
-        StackedValueGuard<TypePtr> guard(t_hint);
-        guard.set(declaredType);
+        SCOPED_SET(t_hint, declaredType);
         var->getInitializer()->accept(this);
         initializerType = var->getInitializer()->getType();
         assert(initializerType != nullptr);

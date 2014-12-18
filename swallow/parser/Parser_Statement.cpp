@@ -32,8 +32,8 @@
 #include "ast/NodeFactory.h"
 #include "ast/ast.h"
 #include "common/Errors.h"
+#include "tokenizer/Tokenizer.h"
 using namespace Swallow;
-
 
 /*
  statement → expression;opt
@@ -96,6 +96,9 @@ StatementPtr Parser::parseStatement()
                 case Keyword::Protocol:
                 case Keyword::Extension:
                 case Keyword::Operator:
+                case Keyword::Prefix:
+                case Keyword::Postfix:
+                case Keyword::Infix:
                     return parseDeclaration();
                 default:
                     break;
@@ -577,6 +580,7 @@ CodeBlockPtr Parser::parseCodeBlock()
     flags -= SUPPRESS_TRAILING_CLOSURE;
     expect(L"{", token);
     CodeBlockPtr ret = nodeFactory->createCodeBlock(token.state);
+    ENTER_CONTEXT(TokenizerContextUnknown);
     while(!match(L"}"))
     {
         StatementPtr st = parseStatement();

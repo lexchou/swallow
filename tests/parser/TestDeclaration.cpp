@@ -258,7 +258,7 @@ TEST(TestDeclaration, testVar_Typed)
 
 TEST(TestDeclaration, testOperator)
 {
-    PARSE_STATEMENT(L"operator infix +- { associativity left precedence 140 }");
+    PARSE_STATEMENT(L"infix operator +- { associativity left precedence 140 }");
     OperatorDefPtr o;
     ASSERT_NOT_NULL(o = std::dynamic_pointer_cast<OperatorDef>(root));
     ASSERT_EQ(L"+-", o->getName());

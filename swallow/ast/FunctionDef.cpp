@@ -33,7 +33,7 @@ USE_SWALLOW_NS
 
 
 FunctionDef::FunctionDef()
-    :Declaration(NodeType::Function), returnType(NULL), body(NULL)
+    :Declaration(NodeType::Function), kind(FunctionKindNormal), returnType(NULL), body(NULL)
 {
 }
 
@@ -107,3 +107,12 @@ void FunctionDef::setType(const TypePtr& type)
 {
     this->type = type;
 }
+void FunctionDef::setKind(FunctionKind kind)
+{
+    this->kind = kind;
+}
+FunctionKind FunctionDef::getKind() const
+{
+    return kind;
+}
+

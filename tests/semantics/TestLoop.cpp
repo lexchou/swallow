@@ -1,4 +1,4 @@
-/* Parser_Details.h --
+/* TestLoop.cpp --
  *
  * Copyright (c) 2014, Lex Chou <lex at chou dot it>
  * All rights reserved.
@@ -27,72 +27,28 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef PARSER_DETAILS_H
-#define PARSER_DETAILS_H
-#include "swallow_conf.h"
-#include "common/ScopedValue.h"
-SWALLOW_NS_BEGIN
+#include "../utils.h"
+#include "semantics/SymbolRegistry.h"
+#include "semantics/Symbol.h"
+#include "semantics/ScopedNodes.h"
+#include "semantics/Type.h"
+#include "common/Errors.h"
+#include "semantics/GlobalScope.h"
+#include "semantics/GenericArgument.h"
 
-enum
+using namespace Swallow;
+using namespace std;
+
+
+//TODO: Implement loops after advanced operator done
+TEST(TestLoop, ForIn)
 {
-    ENABLE_GENERIC      = 1,
-    UNDER_SWITCH_CASE   = 2,
-    UNDER_PROTOCOL      = 4,
-    UNDER_CLASS         = 8,
-    UNDER_STRUCT        = 0x10,
-    UNDER_ENUM          = 0x20,
-    UNDER_LET           = 0x40,
-    UNDER_VAR           = 0x80,
-    UNDER_CASE          = 0x100,
-    UNDER_IF            = 0x200,
-    UNDER_FOR_LOOP      = 0x400,
-    UNDER_WHILE_LOOP    = 0x800,
-    UNDER_DO_LOOP       = 0x1000,
-    SUPPRESS_TRAILING_CLOSURE = 0x2000,
-    UNDER_EXTENSION     = 0x4000
-};
-struct Flags
-{
-    Flags(Parser* parser, int f = 0)
-        :parser(parser), oldFlags(parser->flags)
-    {
-        this->flags = parser->flags;
-        if(f)
-            *this += f;
-    }
-    Flags(const Flags& flags)
-        :oldFlags(flags.parser->flags)
-    {
-        this->parser = flags.parser;
-        parser->flags = this->flags = flags.flags;
-    }
-    ~Flags()
-    {
-        parser->flags = oldFlags;
-    }
-    
-    
-    Flags& operator += (int flag)
-    {
-        flags |= flag;
-        parser->flags = flags;
-        return *this;
-    }
-    Flags& operator -= (int flag)
-    {
-        flags &= ~flag;
-        parser->flags = flags;
-        return *this;
-    }
-    
-    
-    Parser* parser;
-    int oldFlags;
-    int flags;
-};
+    /*
+    SEMANTIC_ANALYZE(L"for index in 1...5 {\n"
+            L"    println(\"\\(index) times 5 is \\(index * 5)\")\n"
+            L"}");
+    dumpCompilerResults(compilerResults);
+    ASSERT_EQ(0, compilerResults.numResults());
+    */
+}
 
-#define ENTER_CONTEXT(ctx) TokenizerState& state_##__LINE__ = tokenizer->save(); SCOPED_SET(state_##__LINE__.context, ctx);
-
-
-SWALLOW_NS_END
-#endif//PARSER_DETAILS_H

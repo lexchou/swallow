@@ -55,28 +55,19 @@ void EnumDef::setValueStyle(EnumDef::ValueStyle style)
     this->valueStyle = style;
 }
 
-void EnumDef::addAssociatedType(const std::wstring& name, const TupleTypePtr& associatedType)
+void EnumDef::addCase(const std::wstring& name, const NodePtr& value)
 {
-    associatedTypes.push_back(AssociatedType(name, associatedType));
+    cases.push_back(Case(name, value));
 }
-int EnumDef::numAssociatedTypes()const
+int EnumDef::numCases() const
 {
-    return associatedTypes.size();
+    return cases.size();
 }
-const EnumDef::AssociatedType& EnumDef::getAssociatedType(int i)
+const EnumDef::Case& EnumDef::getCase(int i) const
 {
-    return associatedTypes[i];
+    return cases[i];
 }
-
-void EnumDef::addConstant(const std::wstring& name, const ExpressionPtr& value)
+const std::vector<EnumDef::Case>& EnumDef::getCases() const
 {
-    constants.push_back(Constant(name, value));
-}
-int EnumDef::numConstants()
-{
-    return constants.size();
-}
-const EnumDef::Constant& EnumDef::getConstant(int i)
-{
-    return constants[i];
+    return cases;
 }

@@ -1,4 +1,4 @@
-/* SymbolScope.cpp --
+/* SwallowUtils.cpp --
  *
  * Copyright (c) 2014, Lex Chou <lex at chou dot it>
  * All rights reserved.
@@ -27,50 +27,66 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "SymbolScope.h"
-#include "SymbolRegistry.h"
-#include "Type.h"
+#include "SwallowUtils.h"
+#include <sstream>
+#include <fstream>
 #include <cassert>
 #include <iostream>
+#include "common/CompilerResults.h"
+#include "common/Errors.h"
+//#include <codecvt>
 
 USE_SWALLOW_NS
+using namespace std;
 
-SymbolScope::SymbolScope()
-    :owner(NULL), parent(NULL)
-{
-}
-SymbolScope::~SymbolScope()
-{
-}
-Node* SymbolScope::getOwner()
-{
-    return owner;
-}
 
-void SymbolScope::addSymbol(const std::wstring& name, const SymbolPtr& symbol)
+std::wstring SwallowUtils::readFile(const char* fileName)
 {
-    assert(!name.empty());
-    SymbolMap::iterator iter = symbols.find(name);
-    assert(iter == symbols.end() && "The symbol already exists with the same name.");
-    this->symbols.insert(std::make_pair(name, symbol));
-}
-void SymbolScope::addSymbol(const SymbolPtr& symbol)
-{
-    addSymbol(symbol->getName(), symbol);
-}
 
-void SymbolScope::removeSymbol(const SymbolPtr& symbol)
-{
-    SymbolMap::iterator iter = symbols.find(symbol->getName());
-    if(iter != symbols.end() && iter->second == symbol)
-        symbols.erase(iter);
+    wifstream wif;
+    wif.open(fileName, istream::in);
+    if(!wif.is_open())
+    {
+        cerr << "Failed to open swift source file for testing, file name " <<fileName<<endl;
+        abort();
+    }
+    //wif.imbue(std::locale(std::locale(), new std::codecvt_utf8<wchar_t>));
+    wstringstream wss;
+    assert(!wif.eof() && "Failed to open file.");
+    wss << wif.rdbuf();
+    wstring ret = wss.str();
+    return ret;
 
 }
-SymbolPtr SymbolScope::lookup(const std::wstring& name)
+void SwallowUtils::dumpCompilerResults(const std::wstring& src, const CompilerResults& compilerResults, std::wostream& out)
 {
-    assert(!name.empty());
-    SymbolMap::iterator iter = symbols.find(name);
-    if(iter != symbols.end())
-        return iter->second;
-    return nullptr;
+
+    using namespace Swallow;
+    if(!compilerResults.numResults())
+        return;
+
+    for(int i = 0; i < compilerResults.numResults(); i++)
+    {
+        const CompilerResult &res = compilerResults.getResult(i);
+        switch (res.level)
+        {
+            case ErrorLevel::Fatal:
+                out << L"Fatal:";
+                break;
+            case ErrorLevel::Error:
+                out << L"Error:";
+                break;
+            case ErrorLevel::Warning:
+                out << L"Warning:";
+                break;
+            case ErrorLevel::Note:
+                out << L"Note:";
+                break;
+        }
+        out << L"(" << res.line << L", " << res.column << ") ";
+        std::wstring msg = Errors::format(res.code, res.items);
+        out << msg << std::endl;
+    }
+
+
 }

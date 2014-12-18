@@ -48,6 +48,7 @@ class SWALLOW_EXPORT ScopedProgram : public Program, public ScopeOwner
 {
 public:
     virtual void accept(NodeVisitor* visitor) override;
+    void setScope(SymbolScope* scope);
 };
 class SWALLOW_EXPORT ScopedClass : public ClassDef, public ScopeOwner, public Symbol
 {

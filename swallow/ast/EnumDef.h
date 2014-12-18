@@ -40,40 +40,38 @@ class SWALLOW_EXPORT EnumDef : public TypeDeclaration
 public:
     enum ValueStyle
     {
+        Undefined,
         AssociatedValues,
         RawValues
     };
 public:
-    template<class ValueType>
-    struct KeyValue
+    struct Case
     {
         std::wstring name;
-        ValueType value;
-        KeyValue(const std::wstring& name, ValueType value)
+        NodePtr value;
+        Case(const std::wstring& name, const NodePtr& value)
         :name(name), value(value){}
     };
-    typedef KeyValue<TupleTypePtr> AssociatedType;
-    typedef KeyValue<ExpressionPtr> Constant;
 public:
     EnumDef();
     ~EnumDef();
 public:
+    using Declaration::setGenericParametersDef;
+    using Declaration::getGenericParametersDef;
+public:
     ValueStyle getValueStyle()const;
     void setValueStyle(ValueStyle style);
     
-    void addAssociatedType(const std::wstring& name, const TupleTypePtr& associatedType);
-    int numAssociatedTypes()const;
-    const AssociatedType& getAssociatedType(int i);
-    
-    void addConstant(const std::wstring& name, const ExpressionPtr& value);
-    int numConstants();
-    const Constant& getConstant(int i);
-    
+    void addCase(const std::wstring& name, const NodePtr& value);
+    int numCases() const;
+    const Case& getCase(int i) const;
+    const std::vector<Case>& getCases() const;
+
+
 public:
     virtual void accept(NodeVisitor* visitor);
 private:
-    std::vector<AssociatedType> associatedTypes;
-    std::vector<Constant> constants;
+    std::vector<Case> cases;
     ValueStyle valueStyle;
 };
 

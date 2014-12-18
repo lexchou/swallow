@@ -67,8 +67,8 @@ class SWALLOW_EXPORT CompilerResults
 {
 public:
     void clear();
-    int numResults();
-    const CompilerResult& getResult(int i);
+    int numResults() const;
+    const CompilerResult& getResult(int i) const;
     void add(ErrorLevel::T level, const SourceInfo&, int code, const ResultItems& items);
     void add(ErrorLevel::T level, const SourceInfo&, int code, const std::wstring& item = std::wstring());
 

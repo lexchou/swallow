@@ -45,6 +45,7 @@ SET(SEMANTICS_SRC
     semantics/TestCondition.cpp
     semantics/TestOptional.cpp
     semantics/TestCollection.cpp
+    semantics/TestOperators.cpp
     )
 
 ADD_EXECUTABLE(TestTokenizer

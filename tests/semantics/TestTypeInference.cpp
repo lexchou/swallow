@@ -97,7 +97,7 @@ TEST(TestTypeInference, ArrayLiteral)
     t_Int = symbolRegistry.lookupType(L"Int");
 
     ASSERT_NOT_NULL(type);
-    ASSERT_EQ(symbolRegistry.getGlobalScope()->Array, type->getInnerType());
+    ASSERT_EQ(symbolRegistry.getGlobalScope()->Array(), type->getInnerType());
 
     ASSERT_NOT_NULL(innerType = type->getGenericArguments()->get(0));
     ASSERT_EQ(t_Int, innerType);
@@ -114,7 +114,7 @@ TEST(TestTypeInference, ArrayLiteral2)
     t_Double = symbolRegistry.lookupType(L"Double");
 
     ASSERT_NOT_NULL(type);
-    ASSERT_EQ(symbolRegistry.getGlobalScope()->Array, type->getInnerType());
+    ASSERT_EQ(symbolRegistry.getGlobalScope()->Array(), type->getInnerType());
 
     ASSERT_NOT_NULL(innerType = type->getGenericArguments()->get(0));
     ASSERT_EQ(t_Double, innerType);
@@ -132,7 +132,7 @@ TEST(TestTypeInference, ArrayLiteral3)
 
     ASSERT_NOT_NULL(type);
     ASSERT_EQ(Type::Specialized, type->getCategory());
-    ASSERT_EQ(symbolRegistry.getGlobalScope()->Array, type->getInnerType());
+    ASSERT_EQ(symbolRegistry.getGlobalScope()->Array(), type->getInnerType());
 
     TypePtr innerType = type->getGenericArguments()->get(0);
     ASSERT_EQ(Int8, innerType);
@@ -269,7 +269,7 @@ TEST(TestTypeInference, Expression2)
 
     SymbolPtr a;
     ASSERT_NOT_NULL(a = scope->lookup(L"a"));
-    ASSERT_EQ(symbolRegistry.getGlobalScope()->Double, a->getType());
+    ASSERT_EQ(symbolRegistry.getGlobalScope()->Double(), a->getType());
 }
 
 TEST(TestTypeInference, StructInstance)

@@ -33,6 +33,7 @@
 #include "FunctionOverloadedSymbol.h"
 #include "FunctionSymbol.h"
 #include "GlobalScope.h"
+#include <cassert>
 
 using namespace Swallow;
 
@@ -40,71 +41,8 @@ SymbolRegistry::SymbolRegistry()
 :currentScope(nullptr), fileScope(nullptr)
 {
     globalScope = new GlobalScope();
+    globalScope->initRuntime(this);
     enterScope(globalScope);
-    //Assignment operator
-    registerOperator(L"=", OperatorType::InfixBinary, Associativity::Right, 90);
-    //Compound assignment operators
-    registerOperator(L"+=", OperatorType::InfixBinary, Associativity::Right, 90);
-    registerOperator(L"-=", OperatorType::InfixBinary, Associativity::Right, 90);
-    registerOperator(L"*=", OperatorType::InfixBinary, Associativity::Right, 90);
-    registerOperator(L"/=", OperatorType::InfixBinary, Associativity::Right, 90);
-    registerOperator(L"%=", OperatorType::InfixBinary, Associativity::Right, 90);
-    registerOperator(L"<<=", OperatorType::InfixBinary, Associativity::Right, 90);
-    registerOperator(L">>=", OperatorType::InfixBinary, Associativity::Right, 90);
-    registerOperator(L"&=", OperatorType::InfixBinary, Associativity::Right, 90);
-    registerOperator(L"|=", OperatorType::InfixBinary, Associativity::Right, 90);
-    registerOperator(L"&&=", OperatorType::InfixBinary, Associativity::Right, 90);
-    registerOperator(L"||=", OperatorType::InfixBinary, Associativity::Right, 90);
-
-    //Arithmetic operators
-    registerOperator(L"+", OperatorType::InfixBinary, Associativity::Left, 140);
-    registerOperator(L"-", OperatorType::InfixBinary, Associativity::Left, 140);
-    registerOperator(L"*", OperatorType::InfixBinary, Associativity::Left, 150);
-    registerOperator(L"/", OperatorType::InfixBinary, Associativity::Left, 150);
-    //remainder operator
-    registerOperator(L"%", OperatorType::InfixBinary, Associativity::Left, 150);
-    //Increment and decrement operators
-    registerOperator(L"++", (OperatorType::T)(OperatorType::PostfixUnary | OperatorType::PrefixUnary));
-    registerOperator(L"--", (OperatorType::T)(OperatorType::PostfixUnary | OperatorType::PrefixUnary));
-    //Unary minus operator
-    registerOperator(L"-", OperatorType::PrefixUnary, Associativity::None, 100);
-    registerOperator(L"+", OperatorType::PrefixUnary, Associativity::None, 100);
-    //Comparison operators
-    registerOperator(L"==", OperatorType::InfixBinary, Associativity::None, 130);
-    registerOperator(L"!=", OperatorType::InfixBinary, Associativity::None, 130);
-    registerOperator(L"===", OperatorType::InfixBinary, Associativity::None, 130);
-    registerOperator(L"!==", OperatorType::InfixBinary, Associativity::None, 130);
-    registerOperator(L"!===", OperatorType::InfixBinary, Associativity::None, 130);
-    registerOperator(L">", OperatorType::InfixBinary, Associativity::None, 130);
-    registerOperator(L"<", OperatorType::InfixBinary, Associativity::None, 130);
-    registerOperator(L"<=", OperatorType::InfixBinary, Associativity::None, 130);
-    registerOperator(L">=", OperatorType::InfixBinary, Associativity::None, 130);
-    registerOperator(L"~=", OperatorType::InfixBinary, Associativity::None, 130);
-    //Range operator
-    registerOperator(L"..", OperatorType::InfixBinary, Associativity::None, 135);
-    registerOperator(L"...", OperatorType::InfixBinary, Associativity::None, 135);
-    //Cast operator
-    registerOperator(L"is", OperatorType::InfixBinary, Associativity::None, 132);
-    registerOperator(L"as", OperatorType::InfixBinary, Associativity::None, 132);
-    //Logical operator
-    registerOperator(L"!", OperatorType::InfixBinary, Associativity::None, 100);
-    registerOperator(L"&&", OperatorType::InfixBinary, Associativity::Left, 120);
-    registerOperator(L"||", OperatorType::InfixBinary, Associativity::Left, 110);
-    //Bitwise operator
-    registerOperator(L"~", OperatorType::InfixBinary, Associativity::None, 100);
-    registerOperator(L"&", OperatorType::InfixBinary, Associativity::Left, 150);
-    registerOperator(L"|", OperatorType::InfixBinary, Associativity::Left, 140);
-    registerOperator(L"^", OperatorType::InfixBinary, Associativity::Left, 140);
-    registerOperator(L"<<", OperatorType::InfixBinary, Associativity::None, 160);
-    registerOperator(L">>", OperatorType::InfixBinary, Associativity::None, 160);
-    //Overflow operators
-    registerOperator(L"&+", OperatorType::InfixBinary, Associativity::Left, 140);
-    registerOperator(L"&-", OperatorType::InfixBinary, Associativity::Left, 140);
-    registerOperator(L"&*", OperatorType::InfixBinary, Associativity::Left, 150);
-    registerOperator(L"&/", OperatorType::InfixBinary, Associativity::Left, 150);
-    registerOperator(L"&%", OperatorType::InfixBinary, Associativity::Left, 150);
-    
-
     //?:  Right associative, precedence level 100
 
     //Register built-in type
@@ -117,14 +55,17 @@ SymbolRegistry::~SymbolRegistry()
 
 bool SymbolRegistry::registerOperator(const std::wstring& name, OperatorType::T type, Associativity::T associativity, int precedence)
 {
-    return registerOperator(currentScope, name, type, associativity, precedence);
+    assert(fileScope != nullptr);
+    return registerOperator(fileScope, name, type, associativity, precedence);
 }
 bool SymbolRegistry::registerOperator(SymbolScope* scope, const std::wstring& name, OperatorType::T type, Associativity::T associativity, int precedence)
 {
+    assert(scope != nullptr && "Operator cannot be registered in an invalid scope");
     SymbolScope::OperatorMap::iterator iter = scope->operators.find(name);
     if(iter == scope->operators.end())
     {
-        iter = scope->operators.insert(std::make_pair(name, OperatorInfo(name, associativity))).first;
+        auto ret = scope->operators.insert(std::make_pair(name, OperatorInfo(name, associativity)));
+        iter = ret.first;
     }
     else
     {
@@ -142,38 +83,40 @@ bool SymbolRegistry::registerOperator(SymbolScope* scope, const std::wstring& na
         iter->second.precedence.postfix = precedence;
     return true;
 }
-OperatorInfo* SymbolRegistry::getOperator(const std::wstring& name)
+OperatorInfo* SymbolRegistry::getOperator(const std::wstring& name, int typeMask)
 {
     OperatorInfo* ret = NULL;
     if(fileScope)
     {
-        ret = getOperator(fileScope, name);
+        ret = getOperator(fileScope, name, typeMask);
     }
     if(!ret)
-        ret = getOperator(globalScope, name);
+        ret = getOperator(globalScope, name, typeMask);
     return ret;
 }
-OperatorInfo* SymbolRegistry::getOperator(SymbolScope* scope, const std::wstring& name)
+OperatorInfo* SymbolRegistry::getOperator(SymbolScope* scope, const std::wstring& name, int typeMask)
 {
     SymbolScope::OperatorMap::iterator iter = scope->operators.find(name);
     if(iter == scope->operators.end())
-        return NULL;
+        return nullptr;
+    if((iter->second.type & typeMask) == 0)
+        return nullptr;
     return &iter->second;
 }
 bool SymbolRegistry::isPrefixOperator(const std::wstring& name)
 {
-    OperatorInfo* op = getOperator(name);
-    return op && ((op->type & OperatorType::PrefixUnary) != 0);
+    OperatorInfo* op = getOperator(name, OperatorType::PrefixUnary);
+    return op != nullptr;
 }
 bool SymbolRegistry::isPostfixOperator(const std::wstring& name)
 {
-    OperatorInfo* op = getOperator(name);
-    return op && ((op->type & OperatorType::PostfixUnary) != 0);
+    OperatorInfo* op = getOperator(name, OperatorType::PostfixUnary);
+    return op != nullptr;
 }
 bool SymbolRegistry::isInfixOperator(const std::wstring& name)
 {
-    OperatorInfo* op = getOperator(name);
-    return op && ((op->type & OperatorType::InfixBinary) != 0);
+    OperatorInfo* op = getOperator(name, OperatorType::InfixBinary);
+    return op != nullptr;
 }
 
 GlobalScope* SymbolRegistry::getGlobalScope()

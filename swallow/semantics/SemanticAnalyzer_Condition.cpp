@@ -44,6 +44,7 @@
 #include <algorithm>
 #include <iostream>
 #include "ast/utils/ASTHierachyDumper.h"
+#include "common/ScopedValue.h"
 
 USE_SWALLOW_NS
 using namespace std;
@@ -130,7 +131,7 @@ void SemanticAnalyzer::visitIf(const IfStatementPtr& node)
         //the condition must be conform to type BooleanType
         TypePtr condType = condition->getType();
         assert(condType != nullptr);
-        if(!condType->canAssignTo(global->BooleanType))
+        if(!condType->canAssignTo(global->BooleanType()))
         {
             error(node->getCondition(), Errors::E_TYPE_DOES_NOT_CONFORM_TO_PROTOCOL_2_, condType->toString(), L"BooleanType");
             return;
@@ -146,7 +147,7 @@ static void checkExhausiveSwitch(SemanticAnalyzer* sa, const SwitchCasePtr& node
 {
     TypePtr conditionType = node->getControlExpression()->getType();
     //only check for enum and bool type
-    TypePtr Bool = sa->getSymbolRegistry()->getGlobalScope()->Bool;
+    TypePtr Bool = sa->getSymbolRegistry()->getGlobalScope()->Bool();
     if(conditionType->getCategory() != Type::Enum && conditionType != Bool)
         return;
     //do not check if it already has a default case
@@ -173,8 +174,7 @@ void SemanticAnalyzer::visitSwitchCase(const SwitchCasePtr& node)
     node->getControlExpression()->accept(this);
     TypePtr conditionType = node->getControlExpression()->getType();
     assert(conditionType != nullptr);
-    StackedValueGuard<TypePtr> contextualType(this->t_hint);
-    contextualType.set(conditionType);
+    SCOPED_SET(t_hint, conditionType);
 
     checkExhausiveSwitch(this, node);
 
@@ -241,7 +241,7 @@ void SemanticAnalyzer::visitCase(const CaseStatementPtr& node)
             cond.guard->accept(this);
             TypePtr whereType = cond.guard->getType();
             assert(whereType != nullptr);
-            TypePtr p_BooleanType = symbolRegistry->getGlobalScope()->BooleanType;
+            TypePtr p_BooleanType = symbolRegistry->getGlobalScope()->BooleanType();
             if(!whereType->canAssignTo(p_BooleanType))
             {
                 error(cond.guard, Errors::E_TYPE_DOES_NOT_CONFORM_TO_PROTOCOL_2_, whereType->toString(), p_BooleanType->toString());
@@ -264,7 +264,7 @@ void SemanticAnalyzer::visitCase(const CaseStatementPtr& node)
             }
             assert(enumCase != nullptr);
             const EnumCase* ec = t_hint->getEnumCase(enumCase->getName());
-            if(ec && ec->type != symbolRegistry->getGlobalScope()->Void)
+            if(ec && ec->type != symbolRegistry->getGlobalScope()->Void())
             {
                 vector<TupleExtractionResult> results;
                 vector<int> indices;

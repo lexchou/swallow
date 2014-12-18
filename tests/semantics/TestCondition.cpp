@@ -166,7 +166,7 @@ TEST(TestCondition, If_Unpack_Optional2)
     ASSERT_NOT_NULL(thenScope);
     SymbolPtr a = thenScope->lookup(L"a");
     ASSERT_NOT_NULL(a);
-    ASSERT_EQ(symbolRegistry.getGlobalScope()->Int, a->getType());
+    ASSERT_EQ(symbolRegistry.getGlobalScope()->Int(), a->getType());
 }
 
 

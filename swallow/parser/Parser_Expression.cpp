@@ -34,6 +34,8 @@
 #include "ast/ast.h"
 #include "common/Errors.h"
 
+
+
 using namespace Swallow;
 
 ExpressionPtr Parser::parseFloat()
@@ -981,6 +983,7 @@ ClosurePtr Parser::parseClosureExpression()
     {
         if(match(L"["))
         {
+            ENTER_CONTEXT(TokenizerContextCaptureList);
             //read capture-list
             expect_next(token);
             Keyword::T k = token.getKeyword();

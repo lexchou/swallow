@@ -33,6 +33,7 @@
 #include "ast/ast.h"
 #include "Parser_Details.h"
 #include "common/Errors.h"
+#include <cassert>
 
 using namespace Swallow;
 
@@ -64,12 +65,8 @@ DeclarationPtr Parser::parseDeclaration()
     std::vector<AttributePtr> attrs;
     if(predicate(L"@"))
         parseAttributes(attrs);
-    int modifiers = 0;
-    if(flags & (UNDER_CLASS | UNDER_STRUCT | UNDER_ENUM | UNDER_PROTOCOL |UNDER_EXTENSION))
-    {
-        //read declaration specifiers
-        modifiers = parseDeclarationModifiers();
-    }
+    int modifiers = parseDeclarationModifiers();
+
     expect_next(token);
     restore(token);
     if(token.type != TokenType::Identifier)
@@ -104,7 +101,7 @@ DeclarationPtr Parser::parseDeclaration()
         case Keyword::Subscript://declaration → subscript-declaration
             return parseSubscript(attrs);
         case Keyword::Operator://declaration → operator-declaration
-            return parseOperator(attrs);
+            return parseOperator(attrs, modifiers);
         default:
             //destroy attributes before reporting an issue
             attrs.clear();
@@ -415,6 +412,9 @@ DeclarationPtr Parser::parseVar(const std::vector<AttributePtr>& attrs, int modi
 
     if(!match(L"{"))
         return ret;
+
+    ENTER_CONTEXT(TokenizerContextComputedProperty);
+
     peek(token);
     IdentifierPtr name = std::dynamic_pointer_cast<Identifier>(var->getName());
     tassert(token, name != nullptr, Errors::E_GETTER_SETTER_CAN_ONLY_BE_DEFINED_FOR_A_SINGLE_VARIABLE, L"");
@@ -429,6 +429,8 @@ DeclarationPtr Parser::parseVar(const std::vector<AttributePtr>& attrs, int modi
     prop->setInitializer(var->getInitializer());
     var = nullptr;
     ret = nullptr;
+
+
 
     if(token.type != TokenType::CloseBrace)
     {
@@ -488,6 +490,9 @@ void Parser::parseWillSetClause(const ComputedPropertyPtr& property, bool opt)
         return;
     Attributes attrs;
     parseAttributes(attrs);
+
+    ENTER_CONTEXT(TokenizerContextComputedProperty);
+
     expect(Keyword::WillSet);
     if(match(L"("))
     {
@@ -530,6 +535,8 @@ void Parser::parseWillSetDidSetBlock(const ComputedPropertyPtr& property)
     Token token;
     Attributes attrs;
 
+    ENTER_CONTEXT(TokenizerContextComputedProperty);
+
     parseAttributes(attrs);
     if(predicate(L"willSet"))
     {
@@ -557,6 +564,9 @@ std::pair<CodeBlockPtr, std::pair<std::wstring, CodeBlockPtr> > Parser::parseGet
     Token token;
     Attributes attrs;
     parseAttributes(attrs);
+
+    ENTER_CONTEXT(TokenizerContextComputedProperty);
+
     peek(token);
     CodeBlockPtr getter = NULL;
     std::pair<std::wstring, CodeBlockPtr> setter = std::make_pair(std::wstring(), CodeBlockPtr());
@@ -610,9 +620,14 @@ std::pair<CodeBlockPtr, CodeBlockPtr> Parser::parseGetterSetterKeywordBlock()
 {
     Token token;
     Attributes attributes;
-    parseAttributes(attributes);
     CodeBlockPtr getter = NULL;
     CodeBlockPtr setter = NULL;
+
+    parseAttributes(attributes);
+
+    ENTER_CONTEXT(TokenizerContextComputedProperty);
+
+
     if(match(Keyword::Get, token))
     {
         getter = nodeFactory->createCodeBlock(token.state);
@@ -697,16 +712,24 @@ DeclarationPtr Parser::parseFunc(const std::vector<AttributePtr>& attrs, int mod
     if(token.type != TokenType::Identifier && token.type != TokenType::Operator)
         unexpected(token);
     ret->setName(token.token);
+    if(token.type == TokenType::Operator)
+        ret->setKind(FunctionKindOperator);
+    else
+        ret->setKind(FunctionKindNormal);
     if(predicate(L"<"))
     {
         GenericParametersDefPtr params = this->parseGenericParametersDef();
         ret->setGenericParametersDef(params);
     }
-    do
+    //parse parameters
     {
-        ParametersPtr parameters = parseParameterClause();
-        ret->addParameters(parameters);
-    }while(predicate(L"("));
+        ENTER_CONTEXT(TokenizerContextFunctionSignature);
+        do
+        {
+            ParametersPtr parameters = parseParameterClause();
+            ret->addParameters(parameters);
+        } while (predicate(L"("));
+    }
     if(match(L"->"))
     {
         //function-result → ->attributes opt type
@@ -826,105 +849,65 @@ DeclarationPtr Parser::parseEnum(const std::vector<AttributePtr>& attrs)
     expect_identifier(token);
     TypeIdentifierPtr typeId = nodeFactory->createTypeIdentifier(token.state);
     typeId->setName(token.token);
+    GenericParametersDefPtr generic = nullptr;
+    if(predicate(L"<"))
+    {
+        generic = this->parseGenericParametersDef();
+    }
+    EnumDefPtr ret = nodeFactory->createEnum(token.state);
+    ret->setValueStyle(EnumDef::Undefined);
+    ret->setIdentifier(typeId);
+    ret->setGenericParametersDef(generic);
+
     if(match(L":"))
     {
-        //this is a raw-value-style-enum
-        return parseRawValueEnum(attrs, typeId);
+        do
+        {
+            TypeIdentifierPtr baseType = this->parseTypeIdentifier();
+            ret->addParent(baseType);
+        } while(match(L","));
     }
-    else
-    {
-        return parseUnionEnum(attrs, typeId);
-    }
-}
-/*
- ‌ raw-value-style-enum → enum-name generic-parameter-clause opt : type-identifier{raw-value-style-enum-members opt}
- ‌ raw-value-style-enum-members → raw-value-style-enum-member raw-value-style-enum-members opt
- ‌ raw-value-style-enum-member → declaration | raw-value-style-enum-case-clause
- ‌ raw-value-style-enum-case-clause → attributes opt case raw-value-style-enum-case-list
- ‌ raw-value-style-enum-case-list → raw-value-style-enum-case | raw-value-style-enum-case,raw-value-style-enum-case-list
- ‌ raw-value-style-enum-case → enum-case-name raw-value-assignment opt
- ‌ raw-value-assignment → =literal
-*/
-DeclarationPtr Parser::parseRawValueEnum(const std::vector<AttributePtr>& attrs, const TypeIdentifierPtr& name)
-{
-    Token token;
-    EnumDefPtr ret = nodeFactory->createEnum(token.state);
-    ret->setAttributes(attrs);
-    ret->setIdentifier(name);
-    ret->setValueStyle(EnumDef::RawValues);
-    do
-    {
-        TypeIdentifierPtr baseType = this->parseTypeIdentifier();
-        ret->addParent(baseType);
-    } while(match(L","));
+    expect(L"{");
 
-    expect(L"{", token);
+    ENTER_CONTEXT(TokenizerContextClass);
+
     while(!predicate(L"}"))
     {
-        if(match(Keyword::Case))
-        {
-            do
-            {
-                expect_identifier(token);
-                ExpressionPtr val = NULL;
-                if(match(L"="))
-                {
-                    //the raw value must be a literal, but to offer accurate compilation error,
-                    //use expression here, and check if it's literal in semantic analyzing stage.
-                    val = parseExpression();
-                }
-                ret->addConstant(token.token, val);
-            }while(match(L","));
-        }
-        else
+        if(!match(Keyword::Case))
         {
             DeclarationPtr decl = parseDeclaration();
             ret->addDeclaration(decl);
+            continue;
         }
-    }
-    expect(L"}");
-    return ret;
-}
-/*
- ‌ union-style-enum → enum-name generic-parameter-clause opt{union-style-enum-members opt}
- ‌ union-style-enum-members → union-style-enum-member union-style-enum-members opt
- ‌ union-style-enum-member → declaration | union-style-enum-case-clause
- ‌ union-style-enum-case-clause → attributes opt case union-style-enum-case-list
- ‌ union-style-enum-case-list → union-style-enum-case | union-style-enum-case,union-style-enum-case-list
- ‌ union-style-enum-case → enum-case-name tuple-type opt
-*/
-DeclarationPtr Parser::parseUnionEnum(const std::vector<AttributePtr>& attrs, const TypeIdentifierPtr& name)
-{
-    Token token;
-    expect(L"{", token);
-    EnumDefPtr ret = nodeFactory->createEnum(token.state);
-    ret->setAttributes(attrs);
-    ret->setIdentifier(name);
-    ret->setValueStyle(EnumDef::AssociatedValues);
-    while(!predicate(L"}"))
-    {
-        if(match(Keyword::Case))
+        //parse cases
+        do
         {
-            do
+            expect_identifier(token);
+            ExpressionPtr val = NULL;
+            if(match(L"="))
             {
-                expect_identifier(token);
-                TupleTypePtr associatedType = NULL;
-                if(predicate(L"("))
-                {
-                    associatedType = parseTupleType();
-                }
-                ret->addAssociatedType(token.token, associatedType);
-            }while(match(L","));
-        }
-        else
-        {
-            DeclarationPtr decl = parseDeclaration();
-            ret->addDeclaration(decl);
-        }
+                ret->setValueStyle(EnumDef::RawValues);
+                //the raw value must be a literal, but to offer accurate compilation error,
+                //use expression here, and check if it's literal in semantic analyzing stage.
+                val = parseExpression();
+                ret->addCase(token.token, val);
+            }
+            else if(predicate(L"("))
+            {
+                TypeNodePtr associatedType = parseTupleType();
+                ret->addCase(token.token, associatedType);
+            }
+            else
+            {
+                ret->addCase(token.token, nullptr);
+            }
+        }while(match(L","));
     }
     expect(L"}");
+
     return ret;
 }
+
 
 /*
  “GRAMMAR OF A STRUCTURE DECLARATION
@@ -962,7 +945,9 @@ DeclarationPtr Parser::parseStruct(const std::vector<AttributePtr>& attrs)
     
     Flags f(this);
     flags += UNDER_STRUCT;
-    
+
+    ENTER_CONTEXT(TokenizerContextClass);
+
     expect(L"{");
     while(!predicate(L"}"))
     {
@@ -1006,7 +991,9 @@ DeclarationPtr Parser::parseClass(const std::vector<AttributePtr>& attrs)
     
     Flags f(this);
     f += UNDER_CLASS;
-    
+
+
+    ENTER_CONTEXT(TokenizerContextClass);
     expect(L"{");
     while(!predicate(L"}"))
     {
@@ -1075,7 +1062,9 @@ DeclarationPtr Parser::parseProtocol(const std::vector<AttributePtr>& attrs)
     
     Flags f(this);
     f += UNDER_PROTOCOL;
-    
+
+
+    ENTER_CONTEXT(TokenizerContextClass);
     
     while(!predicate(L"}"))
     {
@@ -1151,6 +1140,9 @@ DeclarationPtr Parser::parseExtension(const std::vector<AttributePtr>& attrs)
         }while(match(L","));
     }
     expect(L"{");
+
+    ENTER_CONTEXT(TokenizerContextClass);
+
     while(!predicate(L"}"))
     {
         DeclarationPtr decl = parseDeclaration();
@@ -1196,6 +1188,9 @@ DeclarationPtr Parser::parseSubscript(const std::vector<AttributePtr>& attrs)
         Token token;
         TokenizerState s = tokenizer->save();
         expect(L"{");
+
+        ENTER_CONTEXT(TokenizerContextComputedProperty);
+
         expect_next(token);
         restore(token);
         if(token.getKeyword() == Keyword::Set || token.getKeyword() == Keyword::Get)
@@ -1217,40 +1212,43 @@ DeclarationPtr Parser::parseSubscript(const std::vector<AttributePtr>& attrs)
 }
 /*
   GRAMMAR OF AN OPERATOR DECLARATION
- 
- ‌ operator-declaration → prefix-operator-declaration | postfix-operator-declaration | infix-operator-declaration
- ‌ prefix-operator-declaration → operator prefix operator{}
- ‌ postfix-operator-declaration → operator postfix operator{}
- ‌ infix-operator-declaration → operator infix operator{infix-operator-attributes opt}
- ‌ infix-operator-attributes → precedence-clause opt associativity-clause opt
- ‌ precedence-clause → precedence precedence-level
- ‌ precedence-level → Digit 0 through 255
- ‌ associativity-clause → associativity associativity
- ‌ associativity → left  right  none
+
+  operator-declaration → prefix-operator-declaration | postfix-operator-declaration | infix-operator-declaration­
+  prefix-operator-declaration → prefix operator operator{}
+  postfix-operator-declaration → postfix operator operator{}
+  infix-operator-declaration → infix operator operator { infix-operator-attributes opt}
+  infix-operator-attributes → precedence-clause opt associativity-clause opt
+  precedence-clause → precedence precedence-level
+  precedence-level → A decimal integer between 0 and 255, inclusive
+  associativity-clause → associativity associativity­
+  associativity → left  right  none
+
 */
-DeclarationPtr Parser::parseOperator(const std::vector<AttributePtr>& attrs)
+DeclarationPtr Parser::parseOperator(const std::vector<AttributePtr>& attrs, int modifiers)
 {
     Token token;
+    //validate modifiers
+    if((modifiers & (DeclarationModifiers::Prefix | DeclarationModifiers::Postfix | DeclarationModifiers::Infix)) == 0)
+    {
+        tassert(token, false, Errors::E_OPERATOR_MUST_BE_DECLARED_AS_PREFIX_POSTFIX_OR_INFIX);
+        return nullptr;
+    }
+    expect(Keyword::Operator);
+
+    ENTER_CONTEXT(TokenizerContextOperator);
+
     OperatorType::T type = OperatorType::_;
-    expect(Keyword::Operator, token);
     OperatorDefPtr op = nodeFactory->createOperator(token.state);
     op->setAttributes(attrs);
-    expect_next(token);
-    switch(token.getKeyword())
-    {
-        case Keyword::Prefix:
-            type = OperatorType::PrefixUnary;
-            break;
-        case Keyword::Postfix:
-            type = OperatorType::PostfixUnary;
-            break;
-        case Keyword::Infix:
-            type = OperatorType::InfixBinary;
-            break;
-        default:
-            unexpected(token);
-            break;
-    }
+
+    if(modifiers & DeclarationModifiers::Prefix)
+        type = OperatorType::PrefixUnary;
+    else if(modifiers & DeclarationModifiers::Postfix)
+        type = OperatorType::PostfixUnary;
+    else if(modifiers & DeclarationModifiers::Infix)
+        type = OperatorType::InfixBinary;
+    else
+        assert(0 && "Should never happen here");
     expect_next(token);
     tassert(token, token.type == TokenType::Operator, Errors::E_EXPECT_OPERATOR_1, token.token);
     op->setName(token.token);
@@ -1264,7 +1262,6 @@ DeclarationPtr Parser::parseOperator(const std::vector<AttributePtr>& attrs)
             case Keyword::Precedence:
                 expect_next(token);
                 tassert(token, token.type == TokenType::Integer, Errors::E_EXPECT_INTEGER_PRECEDENCE, token.token);
-                tassert(token, token.number.value >= 0 && token.number.value <= 255, Errors::E_INVALID_OPERATOR_PRECEDENCE, token.token);
                 op->setPrecedence(token.number.value);
                 break;
             case Keyword::Associativity:

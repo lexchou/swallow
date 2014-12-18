@@ -40,7 +40,7 @@
 #include "GlobalScope.h"
 #include "ScopeGuard.h"
 #include "ScopedNodes.h"
-
+#include "common/ScopedValue.h"
 #include <set>
 #include <cassert>
 
@@ -141,7 +141,7 @@ FunctionSymbolPtr SemanticAnalyzer::createFunctionSymbol(const FunctionDefPtr& f
 
 
 
-    TypePtr retType = symbolRegistry->getGlobalScope()->Void;
+    TypePtr retType = symbolRegistry->getGlobalScope()->Void();
     if(func->getReturnType())
         retType = lookupType(func->getReturnType());
     TypePtr funcType = createFunctionType(func->getParametersList().begin(), func->getParametersList().end(), retType, generic);
@@ -174,8 +174,7 @@ void SemanticAnalyzer::visitClosure(const ClosurePtr& node)
         node->getCapture()->accept(this);
     }
 
-    StackedValueGuard<TypePtr> currentFunction(this->currentFunction);
-    currentFunction.set(type);
+    SCOPED_SET(currentFunction, type);
 
     for(const StatementPtr& st : *node)
     {
@@ -200,8 +199,8 @@ void SemanticAnalyzer::visitAccessor(const CodeBlockPtr& accessor, const Paramet
 
     params->accept(this);
     prepareParameters(scope, params);
-    StackedValueGuard<TypePtr> contextualType(currentFunction);
-    contextualType.set(accessor->getType());
+
+    SCOPED_SET(currentFunction, accessor->getType());
 
     accessor->accept(this);
 }
@@ -233,7 +232,7 @@ void SemanticAnalyzer::visitSubscript(const SubscriptDefPtr &node)
     if(node->getSetter())
     {
         //TODO: replace nullptr to void
-        TypePtr funcType = this->createFunctionType(paramsList.begin(), paramsList.end(), symbolRegistry->getGlobalScope()->Void, nullptr);
+        TypePtr funcType = this->createFunctionType(paramsList.begin(), paramsList.end(), symbolRegistry->getGlobalScope()->Void(), nullptr);
         node->getSetter()->setType(funcType);
         static_pointer_cast<TypeBuilder>(funcType)->addParameter(Type::Parameter(retType));
         FunctionSymbolPtr func(new FunctionSymbol(L"subscript", funcType, node->getSetter()));
@@ -268,6 +267,53 @@ void SemanticAnalyzer::visitFunction(const FunctionDefPtr& node)
     if(node->getGenericParametersDef())
         generic = prepareGenericTypes(node->getGenericParametersDef());
 
+    //validate function as operator implemention
+    if(node->getKind() == FunctionKindOperator)
+    {
+        int params = node->getParameters(0)->numParameters();
+        if(params != 1 && params != 2)
+        {
+            error(node, Errors::E_OPERATORS_MUST_HAVE_ONE_OR_TWO_ARGUMENTS);
+            return;
+        }
+        int modifiers = node->getModifiers();
+        bool isPrefix = modifiers & DeclarationModifiers::Prefix;
+        bool isPostfix = modifiers & DeclarationModifiers::Postfix;
+        if(isPrefix && params != 1)
+        {
+            error(node, Errors::E_A_REQUIRES_A_FUNCTION_WITH_ONE_ARGUMENT_1, L"prefix");
+            return;
+        }
+        if(isPostfix && params != 1)
+        {
+            error(node, Errors::E_A_REQUIRES_A_FUNCTION_WITH_ONE_ARGUMENT_1, L"postfix");
+            return;
+        }
+        if(params == 1 && (!isPrefix && !isPostfix))
+        {
+            error(node, Errors::E_UNARY_OPERATOR_IMPLEMENTATION_MUST_HAVE_A_PREFIX_OR_POSTFIX_MODIFIER);
+            return;
+        }
+        if(isPostfix && !symbolRegistry->getOperator(node->getName(), OperatorType::PostfixUnary))
+        {
+            error(node, Errors::E_OPERATOR_IMPLEMENTATION_WITHOUT_MATCHING_OPERATOR_DECLARATION);
+            return;
+        }
+        if(isPrefix && !symbolRegistry->getOperator(node->getName(), OperatorType::PrefixUnary))
+        {
+            error(node, Errors::E_OPERATOR_IMPLEMENTATION_WITHOUT_MATCHING_OPERATOR_DECLARATION);
+            return;
+        }
+        if(params == 2 && !symbolRegistry->getOperator(node->getName(), OperatorType::InfixBinary))
+        {
+            error(node, Errors::E_OPERATOR_IMPLEMENTATION_WITHOUT_MATCHING_OPERATOR_DECLARATION);
+            return;
+        }
+
+    }
+
+
+
     FunctionSymbolPtr func;
     //enter code block's scope
     {
@@ -297,11 +343,15 @@ void SemanticAnalyzer::visitFunction(const FunctionDefPtr& node)
         node->setType(func->getType());
         node->getBody()->setType(func->getType());
 
-        StackedValueGuard<TypePtr> currentFunction(this->currentFunction);
-        currentFunction.set(func->getType());
+        SCOPED_SET(currentFunction, func->getType());
 
         node->getBody()->accept(this);
         lookupType(node->getReturnType());
+
+        if(node->getModifiers() & DeclarationModifiers::Prefix)
+            func->setFlags(SymbolFlagPrefix, true);
+        else if(node->getModifiers() & DeclarationModifiers::Postfix)
+            func->setFlags(SymbolFlagPostfix, true);
     }
 
 
@@ -397,8 +447,7 @@ void SemanticAnalyzer::visitInit(const InitializerDefPtr& node)
     FunctionSymbolPtr init(new FunctionSymbol(type->getName(), funcType, nullptr));
     inits->add(init);
 
-    StackedValueGuard<TypePtr> currentFunction(this->currentFunction);
-    currentFunction.set(funcType);
+    SCOPED_SET(currentFunction, funcType);
     node->getBody()->accept(this);
 }
 

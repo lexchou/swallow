@@ -36,11 +36,11 @@ void CompilerResults::clear()
 {
     results.clear();
 }
-int CompilerResults::numResults()
+int CompilerResults::numResults() const
 {
     return results.size();
 }
-const CompilerResult& CompilerResults::getResult(int i)
+const CompilerResult& CompilerResults::getResult(int i) const
 {
     return results[i];
 }

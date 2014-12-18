@@ -36,6 +36,7 @@
 
 SWALLOW_NS_BEGIN
 
+
 struct TokenizerError
 {
     int line;
@@ -47,6 +48,10 @@ struct KeywordInfo
 {
     Keyword::T keyword;
     KeywordType::T type;
+    /*!
+     * When the keyword's type is reserved, it should only appears in given context
+     */
+    TokenizerContext context;
 };
 
 class SWALLOW_EXPORT Tokenizer
@@ -64,7 +69,7 @@ public:
     /*!
      * Save current state for restoring later
      */
-    const TokenizerState& save();
+    TokenizerState& save();
     /*!
      * Restore the specified state
      */
@@ -73,6 +78,11 @@ public:
      * Restore the state that used to parse given token
      */
     void restore(const Token& token);
+
+    /*!
+     * Tells the tokenizer which context it is in
+     */
+    void setContext(TokenizerContext context);
 private:
     bool nextImpl(Token& token);
     void resetToken(Token& token);
@@ -98,6 +108,8 @@ private:
     bool readNumberLiteral(Token& token, int base, int64_t& out);
     bool readFraction(Token& token, int base, double& out);
     bool readIdentifier(Token& token);
+
+    KeywordInfo* getKeyword(const std::wstring& identifier);
 private:
     void error(int errorCode, const std::wstring& str = L"");
 private:

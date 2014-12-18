@@ -47,7 +47,10 @@ void ScopedProgram::accept(NodeVisitor* visitor)
     accept2(visitor, &NodeVisitor::visitProgram);
     scope.symbolRegistry->setFileScope(nullptr);
 }
-
+void ScopedProgram::setScope(SymbolScope* scope)
+{
+    this->symbolScope = scope;
+}
 
 void ScopedClass::accept(NodeVisitor* visitor)
 {

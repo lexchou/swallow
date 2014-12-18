@@ -43,6 +43,8 @@
 #include <algorithm>
 #include "ast/NodeFactory.h"
 #include "CollectionTypeAnalyzer.h"
+#include <iostream>
+#include "common/ScopedValue.h"
 
 USE_SWALLOW_NS
 using namespace std;
@@ -53,12 +55,7 @@ static bool isParentInOptionalChain(const NodePtr& node);
 bool SemanticAnalyzer::isInteger(const TypePtr& type)
 {
     GlobalScope* scope = symbolRegistry->getGlobalScope();
-    for(const TypePtr& t : scope->t_Ints)
-    {
-        if(t == type)
-            return true;
-    }
-    return false;
+    return type->conformTo(scope->_IntegerType());
 }
 bool SemanticAnalyzer::isNumber(const TypePtr& type)
 {
@@ -71,9 +68,7 @@ bool SemanticAnalyzer::isNumber(const TypePtr& type)
 bool SemanticAnalyzer::isFloat(const TypePtr& type)
 {
     GlobalScope* scope = symbolRegistry->getGlobalScope();
-    if(type == scope->Float || type == scope->Double)
-        return true;
-    return false;
+    return type->conformTo(scope->FloatingPointType());
 }
 
 void SemanticAnalyzer::checkTupleDefinition(const TuplePtr& tuple, const ExpressionPtr& initializer)
@@ -148,14 +143,14 @@ TypePtr SemanticAnalyzer::getExpressionType(const ExpressionPtr& expr, const Typ
     if(expr->getNodeType() == NodeType::IntegerLiteral && hint != nullptr)
     {
         IntegerLiteralPtr literal = std::static_pointer_cast<IntegerLiteral>(expr);
-        if(hint->canAssignTo(scope->FloatingPointType))
+        if(hint->conformTo(scope->FloatingPointType()))
         {
             score  = 0.5;
             return hint;
         }
-        if(hint->canAssignTo(scope->_IntegerType))
+        if(hint->conformTo(scope->_IntegerType()))
         {
-            if(hint == scope->Int)
+            if(hint == scope->Int())
                 score = 1;
             return hint;
         }
@@ -164,7 +159,7 @@ TypePtr SemanticAnalyzer::getExpressionType(const ExpressionPtr& expr, const Typ
     if(expr->getNodeType() == NodeType::FloatLiteral && hint != nullptr)
     {
         FloatLiteralPtr literal = std::static_pointer_cast<FloatLiteral>(expr);
-        if(hint == scope->Double)
+        if(hint == scope->Double())
         {
             score = 1;
             return hint;
@@ -259,8 +254,7 @@ float SemanticAnalyzer::calculateFitScore(TypePtr& func, const ParenthesizedExpr
     {
         const Type::Parameter& parameter = *paramIter;
         ParenthesizedExpression::Term& argument = *argumentIter;
-        StackedValueGuard<TypePtr> contextualType(t_hint);
-        contextualType.set(parameter.type);
+        SCOPED_SET(t_hint, parameter.type);
         argument.transformedExpression = this->transformExpression(parameter.type, argument.expression);
         bool ret = checkArgument(func, parameter, make_pair(argumentIter->name, argumentIter->transformedExpression), false, score, supressErrors, genericTypes);
         if(!ret)
@@ -358,6 +352,7 @@ SymbolPtr SemanticAnalyzer::getOverloadedFunction(const NodePtr& node, const std
     {
         error(node, Errors::E_NO_MATCHED_OVERLOAD);
         abort();
+        return nullptr;
     }
     //sort by fit score
     if(candidates.size() > 1)
@@ -369,6 +364,7 @@ SymbolPtr SemanticAnalyzer::getOverloadedFunction(const NodePtr& node, const std
         {
             error(node, Errors::E_AMBIGUOUS_USE_1, funcs[0]->getName());
             abort();
+            return nullptr;
         }
     }
     SymbolPtr matched = get<1>(candidates.front());
@@ -429,8 +425,7 @@ void SemanticAnalyzer::visitReturn(const ReturnStatementPtr& node)
     }
     TypePtr funcType = currentFunction;
 
-    StackedValueGuard<TypePtr> contextualType(t_hint);
-    contextualType.set(funcType->getReturnType());
+    SCOPED_SET(t_hint, funcType->getReturnType());
 
     float score = 0;
     TypePtr retType = this->getExpressionType(node->getExpression(), funcType->getReturnType(), score);
@@ -729,7 +724,7 @@ void SemanticAnalyzer::visitMemberAccess(const MemberAccessPtr& node)
 void SemanticAnalyzer::visitNilLiteral(const NilLiteralPtr& node)
 {
     GlobalScope* scope = symbolRegistry->getGlobalScope();
-    if(!t_hint || !t_hint->canAssignTo(scope->NilLiteralConvertible))
+    if(!t_hint || !t_hint->canAssignTo(scope->NilLiteralConvertible()))
     {
         error(node, Errors::E_EXPRESSION_DOES_NOT_CONFORM_TO_PROTOCOL_1, L"NilLiteralConvertible");
         return;
@@ -739,48 +734,48 @@ void SemanticAnalyzer::visitNilLiteral(const NilLiteralPtr& node)
 void SemanticAnalyzer::visitBooleanLiteral(const BooleanLiteralPtr& node)
 {
     GlobalScope* scope = symbolRegistry->getGlobalScope();
-    if(t_hint && t_hint->canAssignTo(scope->BooleanLiteralConvertible))
+    if(t_hint && t_hint->canAssignTo(scope->BooleanLiteralConvertible()))
         node->setType(t_hint);
     else
-        node->setType(scope->Bool);
+        node->setType(scope->Bool());
 }
 void SemanticAnalyzer::visitString(const StringLiteralPtr& node)
 {
     GlobalScope* scope = symbolRegistry->getGlobalScope();
-    if(t_hint && t_hint->canAssignTo(scope->StringLiteralConvertible))
+    if(t_hint && t_hint->canAssignTo(scope->StringLiteralConvertible()))
         node->setType(t_hint);
-    else if(t_hint && node->value.length() == 1 && t_hint->canAssignTo(scope->UnicodeScalarLiteralConvertible))
+    else if(t_hint && node->value.length() == 1 && t_hint->canAssignTo(scope->UnicodeScalarLiteralConvertible()))
         node->setType(t_hint);
     else
-        node->setType(scope->String);
+        node->setType(scope->String());
 }
 void SemanticAnalyzer::visitStringInterpolation(const StringInterpolationPtr &node)
 {
     //TODO: check all expressions inside can be converted to string
     GlobalScope* scope = symbolRegistry->getGlobalScope();
-    if(t_hint && t_hint->canAssignTo(scope->StringInterpolationConvertible))
+    if(t_hint && t_hint->canAssignTo(scope->StringInterpolationConvertible()))
         node->setType(t_hint);
     else
-        node->setType(scope->String);
+        node->setType(scope->String());
 }
 void SemanticAnalyzer::visitInteger(const IntegerLiteralPtr& node)
 {
     GlobalScope* scope = symbolRegistry->getGlobalScope();
     //TODO: it will changed to use standard library's overloaded type constructor to infer type when the facility is mature enough.
-    if(t_hint && t_hint->canAssignTo(scope->IntegerLiteralConvertible))
+    if(t_hint && t_hint->canAssignTo(scope->IntegerLiteralConvertible()))
         node->setType(t_hint);
-    else if(t_hint && t_hint->canAssignTo(scope->FloatLiteralConvertible))
+    else if(t_hint && t_hint->canAssignTo(scope->FloatLiteralConvertible()))
         node->setType(t_hint);
     else
-        node->setType(scope->Int);
+        node->setType(scope->Int());
 }
 void SemanticAnalyzer::visitFloat(const FloatLiteralPtr& node)
 {
     GlobalScope* scope = symbolRegistry->getGlobalScope();
-    if(t_hint && t_hint->canAssignTo(scope->FloatLiteralConvertible))
+    if(t_hint && t_hint->canAssignTo(scope->FloatLiteralConvertible()))
         node->setType(t_hint);
     else
-        node->setType(scope->Double);
+        node->setType(scope->Double());
 }
 
 //Will be replaced by stdlib's type constructor
@@ -790,15 +785,15 @@ bool SemanticAnalyzer::canConvertTo(const ExpressionPtr& expr, const TypePtr& ty
     switch(expr->getNodeType())
     {
         case NodeType::IntegerLiteral:
-            return type->canAssignTo(global->IntegerLiteralConvertible);
+            return type->canAssignTo(global->IntegerLiteralConvertible());
         case NodeType::FloatLiteral:
-            return type->canAssignTo(global->FloatLiteralConvertible);
+            return type->canAssignTo(global->FloatLiteralConvertible());
         case NodeType::BooleanLiteral:
-            return type->canAssignTo(global->BooleanLiteralConvertible);
+            return type->canAssignTo(global->BooleanLiteralConvertible());
         case NodeType::NilLiteral:
-            return type->canAssignTo(global->NilLiteralConvertible);
+            return type->canAssignTo(global->NilLiteralConvertible());
         case NodeType::StringLiteral:
-            return type->canAssignTo(global->StringLiteralConvertible);
+            return type->canAssignTo(global->StringLiteralConvertible());
         default:
             return expr->getType()->canAssignTo(type);
     }
@@ -812,7 +807,7 @@ void SemanticAnalyzer::visitArrayLiteral(const ArrayLiteralPtr& node)
     if(t_hint)
     {
         //TODO if hint specified, it must be Array type nor conform to ArrayLiteralConvertible protocol
-        if(t_hint->getInnerType() != global->Array)
+        if(t_hint->getInnerType() != global->Array())
         {
             bool conformToArrayLiteralConvertible = false;
             if(!conformToArrayLiteralConvertible)
@@ -838,8 +833,7 @@ void SemanticAnalyzer::visitArrayLiteral(const ArrayLiteralPtr& node)
     CollectionTypeAnalyzer analyzer(elementType, global);
     for(const ExpressionPtr& el : *node)
     {
-        StackedValueGuard<TypePtr> contextualType(t_hint);
-        contextualType.set(analyzer.finalType);
+        SCOPED_SET(t_hint, analyzer.finalType);
         el->accept(this);
         analyzer.analyze(el);
 
@@ -882,7 +876,7 @@ void SemanticAnalyzer::visitDictionaryLiteral(const DictionaryLiteralPtr& node)
 
     if(t_hint)
     {
-        if(!t_hint->conformTo(global->DictionaryLiteralConvertible))
+        if(!t_hint->conformTo(global->DictionaryLiteralConvertible()))
         {
             error(node, Errors::E_A_IS_NOT_CONVERTIBLE_TO_B_2, t_hint->toString(), L"DictionaryLiteralConvertible");
             return;
@@ -891,7 +885,7 @@ void SemanticAnalyzer::visitDictionaryLiteral(const DictionaryLiteralPtr& node)
         {
             keyHint = t_hint->getGenericArguments()->get(0);
             valueHint = t_hint->getGenericArguments()->get(1);
-            if(!keyHint->conformTo(global->Hashable))
+            if(!keyHint->conformTo(global->Hashable()))
             {
                 error(node, Errors::E_TYPE_DOES_NOT_CONFORM_TO_PROTOCOL_2_, keyHint->toString(), L"Hashable");
                 return;
@@ -913,7 +907,7 @@ void SemanticAnalyzer::visitDictionaryLiteral(const DictionaryLiteralPtr& node)
 
     for(auto entry : *node)
     {
-        StackedValueGuard<TypePtr> contextualType(t_hint);
+        SCOPED_SET(t_hint, keyHint);
         t_hint = keyHint;
         entry.first->accept(this);
         t_hint = valueHint;
@@ -960,16 +954,22 @@ void SemanticAnalyzer::visitParenthesizedExpression(const ParenthesizedExpressio
         {
             elementHint = t_hint->getElementType(index++);
         }
-        StackedValueGuard<TypePtr> hintGuard(t_hint);
-        hintGuard.set(elementHint);
+        SCOPED_SET(t_hint, elementHint);
         element.expression->accept(this);
         element.expression = transformExpression(elementHint, element.expression);
         TypePtr elementType = element.expression->getType();
         assert(elementType != nullptr);
         types.push_back(elementType);
     }
-    TypePtr type = Type::newTuple(types);
-    node->setType(type);
+    if(types.size() == 1)
+    {
+        node->setType(types[0]);
+    }
+    else
+    {
+        TypePtr type = Type::newTuple(types);
+        node->setType(type);
+    }
 }
 void SemanticAnalyzer::visitTuple(const TuplePtr& node)
 {
@@ -984,8 +984,7 @@ void SemanticAnalyzer::visitTuple(const TuplePtr& node)
         {
             elementHint = t_hint->getElementType(index++);
         }
-        StackedValueGuard<TypePtr> hintGuard(t_hint);
-        hintGuard.set(elementHint);
+        SCOPED_SET(t_hint, elementHint);
         PatternPtr element = *iter;
         element->accept(this);
         if(ExpressionPtr expr = dynamic_pointer_cast<Expression>(element))
@@ -1003,6 +1002,13 @@ void SemanticAnalyzer::visitTuple(const TuplePtr& node)
 
 void SemanticAnalyzer::visitOperator(const OperatorDefPtr& node)
 {
+    Node* owner = symbolRegistry->getCurrentScope()->getOwner();
+    if(owner && owner->getNodeType() != NodeType::Program)
+    {
+        error(node, Errors::E_A_MAY_ONLY_BE_DECLARED_AT_FILE_SCOPE_1, L"operator");
+        abort();
+        return;
+    }
     //register operator
     if(node->getType() == OperatorType::InfixBinary)
     {
@@ -1028,8 +1034,8 @@ void SemanticAnalyzer::visitConditionalOperator(const ConditionalOperatorPtr& no
 void SemanticAnalyzer::visitBinaryOperator(const BinaryOperatorPtr& node)
 {
     //look for binary function that matches
-    OperatorInfo* op = symbolRegistry->getOperator(node->getOperator());
-    std::vector<SymbolPtr> funcs = allFunctions(node->getOperator(), SymbolFlagInfix, true);
+    OperatorInfo* op = symbolRegistry->getOperator(node->getOperator(), OperatorType::InfixBinary);
+    std::vector<SymbolPtr> funcs = allFunctions(node->getOperator(), 0, true);
     SymbolPtr sym = symbolRegistry->lookupSymbol(node->getOperator());
     if(!op)
     {
@@ -1068,6 +1074,11 @@ void SemanticAnalyzer::visitUnaryOperator(const UnaryOperatorPtr& node)
         assert(0 && "Invalid operator type for unary operator");
 
     std::vector<SymbolPtr> funcs = allFunctions(node->getOperator(), mask, true);
+    if(funcs.empty())
+    {
+        error(node, Errors::E_USE_OF_UNRESOLVED_IDENTIFIER_1, node->getOperator());
+        return;
+    }
     ParenthesizedExpressionPtr args(node->getNodeFactory()->createParenthesizedExpression(*node->getSourceInfo()));
     args->append(node->getOperand());
     visitFunctionCall(funcs, args, node);
@@ -1080,11 +1091,11 @@ void SemanticAnalyzer::visitCompileConstant(const CompileConstantPtr& node)
     GlobalScope* scope = symbolRegistry->getGlobalScope();
     if(name == L"__LINE__" || name == L"__COLUMN__")
     {
-        node->setType(scope->Int);
+        node->setType(scope->Int());
     }
     else if(name == L"__FUNCTION__" || name == L"__FILE__")
     {
-        node->setType(scope->String);
+        node->setType(scope->String());
     }
     else
     {

@@ -39,6 +39,11 @@ class Parameters;
 class CodeBlock;
 class TypeNode;
 typedef std::shared_ptr<class Type> TypePtr;
+enum FunctionKind
+{
+    FunctionKindNormal,
+    FunctionKindOperator
+};
 class SWALLOW_EXPORT FunctionDef : public Declaration
 {
 public:
@@ -74,9 +79,13 @@ public:
     const TypePtr& getType()const;
     void setType(const TypePtr& type);
 
+    void setKind(FunctionKind kind);
+    FunctionKind getKind() const;
+
 public:
     virtual void accept(NodeVisitor* visitor);
 protected:
+    FunctionKind kind;
     std::wstring name;
     Attributes returnAttributes;
     std::vector<ParametersPtr> parametersList;

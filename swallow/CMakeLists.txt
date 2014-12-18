@@ -36,6 +36,7 @@ endif()
 SET(SWALLOW_SRC
     common/CompilerResults.cpp
     common/Errors.cpp
+    common/SwallowUtils.cpp
 
     tokenizer/Tokenizer.cpp
 

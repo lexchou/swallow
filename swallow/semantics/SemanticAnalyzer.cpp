@@ -43,6 +43,7 @@
 #include "ast/NodeFactory.h"
 #include "FunctionOverloadedSymbol.h"
 #include "FunctionSymbol.h"
+#include "common/ScopedValue.h"
 
 USE_SWALLOW_NS
 using namespace std;
@@ -475,7 +476,7 @@ bool SemanticAnalyzer::expandOptional(const TypePtr& optionalType, ExpressionPtr
     assert(exprType != nullptr);
     if(exprType->canAssignTo(optionalType))
         return true;
-    if(optionalType->getCategory() == Type::Specialized && optionalType->getInnerType() == global->Optional)
+    if(optionalType->getCategory() == Type::Specialized && optionalType->getInnerType() == global->Optional())
     {
         TypePtr innerType = optionalType->getGenericArguments()->get(0);
         bool ret = expandOptional(innerType, expr);
@@ -508,7 +509,7 @@ bool SemanticAnalyzer::expandOptional(const TypePtr& optionalType, ExpressionPtr
  */
 TypePtr SemanticAnalyzer::finalTypeOfOptional(const TypePtr& optionalType)
 {
-    if(optionalType->getCategory() == Type::Specialized && optionalType->getInnerType() != symbolRegistry->getGlobalScope()->Optional)
+    if(optionalType->getCategory() == Type::Specialized && optionalType->getInnerType() != symbolRegistry->getGlobalScope()->Optional())
         return optionalType;
     TypePtr inner = optionalType->getGenericArguments()->get(0);
     return finalTypeOfOptional(inner);
@@ -519,8 +520,7 @@ TypePtr SemanticAnalyzer::finalTypeOfOptional(const TypePtr& optionalType)
  */
 ExpressionPtr SemanticAnalyzer::transformExpression(const TypePtr& contextualType, const ExpressionPtr& expr)
 {
-    StackedValueGuard<TypePtr> hint(t_hint);
-    hint.set(contextualType);
+    SCOPED_SET(t_hint, contextualType);
     expr->accept(this);
     if(!contextualType)
         return expr;

@@ -38,8 +38,7 @@ TEST(TestEnumeration, testEnum)
     EnumDefPtr e;
     ASSERT_NOT_NULL(e = std::dynamic_pointer_cast<EnumDef>(root));
     ASSERT_EQ(L"SomeEnumeration", std::static_pointer_cast<TypeIdentifier>(e->getIdentifier())->getName());
-    ASSERT_EQ(0, e->numConstants());
-    ASSERT_EQ(0, e->numAssociatedTypes());
+    ASSERT_EQ(0, e->numCases());
 }
 
 TEST(TestEnumeration, testEnum2)
@@ -52,11 +51,11 @@ TEST(TestEnumeration, testEnum2)
                        L"}");
     EnumDefPtr e;
     ASSERT_NOT_NULL(e = std::dynamic_pointer_cast<EnumDef>(root));
-    ASSERT_EQ(4, e->numAssociatedTypes());
-    ASSERT_EQ(L"North", e->getAssociatedType(0).name);
-    ASSERT_EQ(L"South", e->getAssociatedType(1).name);
-    ASSERT_EQ(L"East", e->getAssociatedType(2).name);
-    ASSERT_EQ(L"West", e->getAssociatedType(3).name);
+    ASSERT_EQ(4, e->numCases());
+    ASSERT_EQ(L"North", e->getCase(0).name);
+    ASSERT_EQ(L"South", e->getCase(1).name);
+    ASSERT_EQ(L"East", e->getCase(2).name);
+    ASSERT_EQ(L"West", e->getCase(3).name);
 
 }
 TEST(TestEnumeration, testEnum3)
@@ -66,11 +65,11 @@ TEST(TestEnumeration, testEnum3)
                        L"}");
     EnumDefPtr e;
     ASSERT_NOT_NULL(e = std::dynamic_pointer_cast<EnumDef>(root));
-    ASSERT_EQ(8, e->numAssociatedTypes());
-    ASSERT_EQ(L"Mercury", e->getAssociatedType(0).name);
-    ASSERT_EQ(L"Venus", e->getAssociatedType(1).name);
-    ASSERT_EQ(L"Earth", e->getAssociatedType(2).name);
-    ASSERT_EQ(L"Mars", e->getAssociatedType(3).name);
+    ASSERT_EQ(8, e->numCases());
+    ASSERT_EQ(L"Mercury", e->getCase(0).name);
+    ASSERT_EQ(L"Venus", e->getCase(1).name);
+    ASSERT_EQ(L"Earth", e->getCase(2).name);
+    ASSERT_EQ(L"Mars", e->getCase(3).name);
 
 }
 
@@ -84,10 +83,10 @@ TEST(TestEnumeration, testAssociatedValues)
     TupleTypePtr tuple;
     TypeIdentifierPtr t;
     ASSERT_NOT_NULL(e = std::dynamic_pointer_cast<EnumDef>(root));
-    ASSERT_EQ(2, e->numAssociatedTypes());
+    ASSERT_EQ(2, e->numCases());
 
-    ASSERT_EQ(L"UPCA", e->getAssociatedType(0).name);
-    ASSERT_NOT_NULL(tuple = e->getAssociatedType(0).value);
+    ASSERT_EQ(L"UPCA", e->getCase(0).name);
+    ASSERT_NOT_NULL(tuple = std::dynamic_pointer_cast<TupleType>(e->getCase(0).value));
     ASSERT_EQ(3, tuple->numElements());
     ASSERT_NOT_NULL(t = std::dynamic_pointer_cast<TypeIdentifier>(tuple->getElementType(0)));
     ASSERT_EQ(L"Int", t->getName());
@@ -96,8 +95,8 @@ TEST(TestEnumeration, testAssociatedValues)
     ASSERT_NOT_NULL(t = std::dynamic_pointer_cast<TypeIdentifier>(tuple->getElementType(2)));
     ASSERT_EQ(L"Int", t->getName());
 
-    ASSERT_EQ(L"QRCode", e->getAssociatedType(1).name);
-    ASSERT_NOT_NULL(tuple = e->getAssociatedType(1).value);
+    ASSERT_EQ(L"QRCode", e->getCase(1).name);
+    ASSERT_NOT_NULL(tuple = std::dynamic_pointer_cast<TupleType>(e->getCase(1).value));
     ASSERT_EQ(1, tuple->numElements());
     ASSERT_NOT_NULL(t = std::dynamic_pointer_cast<TypeIdentifier>(tuple->getElementType(0)));
     ASSERT_EQ(L"String", t->getName());
@@ -114,23 +113,23 @@ TEST(TestEnumeration, testRawValues)
     StringLiteralPtr s;
     TypeIdentifierPtr t;
     ASSERT_NOT_NULL(e = std::dynamic_pointer_cast<EnumDef>(root));
-    ASSERT_EQ(3, e->numConstants());
+    ASSERT_EQ(3, e->numCases());
     ASSERT_EQ(1, e->numParents());
     ASSERT_NOT_NULL(t = std::dynamic_pointer_cast<TypeIdentifier>(e->getIdentifier()));
     ASSERT_EQ(L"ASCIIControlCharacter", t->getName());
     ASSERT_NOT_NULL(t = std::dynamic_pointer_cast<TypeIdentifier>(e->getParent(0)));
     ASSERT_EQ(L"Character", t->getName());
 
-    ASSERT_EQ(L"Tab", e->getConstant(0).name);
-    ASSERT_NOT_NULL(s = std::dynamic_pointer_cast<StringLiteral>(e->getConstant(0).value));
+    ASSERT_EQ(L"Tab", e->getCase(0).name);
+    ASSERT_NOT_NULL(s = std::dynamic_pointer_cast<StringLiteral>(e->getCase(0).value));
     ASSERT_EQ(L"\t", s->toString());
 
-    ASSERT_EQ(L"LineFeed", e->getConstant(1).name);
-    ASSERT_NOT_NULL(s = std::dynamic_pointer_cast<StringLiteral>(e->getConstant(1).value));
+    ASSERT_EQ(L"LineFeed", e->getCase(1).name);
+    ASSERT_NOT_NULL(s = std::dynamic_pointer_cast<StringLiteral>(e->getCase(1).value));
     ASSERT_EQ(L"\n", s->toString());
 
-    ASSERT_EQ(L"CarriageReturn", e->getConstant(2).name);
-    ASSERT_NOT_NULL(s = std::dynamic_pointer_cast<StringLiteral>(e->getConstant(2).value));
+    ASSERT_EQ(L"CarriageReturn", e->getCase(2).name);
+    ASSERT_NOT_NULL(s = std::dynamic_pointer_cast<StringLiteral>(e->getCase(2).value));
     ASSERT_EQ(L"\r", s->toString());
 
 }
@@ -145,15 +144,15 @@ TEST(TestEnumeration, testRawValues2)
     TypeIdentifierPtr t;
     IntegerLiteralPtr i;
     ASSERT_NOT_NULL(e = std::dynamic_pointer_cast<EnumDef>(root));
-    ASSERT_EQ(8, e->numConstants());
+    ASSERT_EQ(8, e->numCases());
     ASSERT_EQ(1, e->numParents());
     ASSERT_NOT_NULL(t = std::dynamic_pointer_cast<TypeIdentifier>(e->getIdentifier()));
     ASSERT_EQ(L"Planet", t->getName());
     ASSERT_NOT_NULL(t = std::dynamic_pointer_cast<TypeIdentifier>(e->getParent(0)));
     ASSERT_EQ(L"Int", t->getName());
 
-    ASSERT_EQ(L"Mercury", e->getConstant(0).name);
-    ASSERT_NOT_NULL(i = std::dynamic_pointer_cast<IntegerLiteral>(e->getConstant(0).value));
+    ASSERT_EQ(L"Mercury", e->getCase(0).name);
+    ASSERT_NOT_NULL(i = std::dynamic_pointer_cast<IntegerLiteral>(e->getCase(0).value));
     ASSERT_EQ(L"1", i->valueAsString);
 
 }

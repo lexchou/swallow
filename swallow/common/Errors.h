@@ -48,7 +48,6 @@ struct SWALLOW_EXPORT Errors
         E_EXPECT_EXPRESSION_1, // Expression expected but %0 found.
         E_EXPECT_OPERATOR_1, // Operator expected but %0 found.
         E_EXPECT_INTEGER_PRECEDENCE,// Operator's precedence must be an integer
-        E_INVALID_OPERATOR_PRECEDENCE, // Operator's precedence must be between [0, 255]
         E_EXPECT_INIT_SELF_DYNAMICTYPE_IDENTIFIER_1, // init/self/dynamicType or member field is expected, but %0 found.
         E_UNDEFINED_INFIX_OPERATOR_1, // Undefined infix operator %0
         E_EXPECT_CAPTURE_SPECIFIER, // The capture specifier is not specified.
@@ -137,6 +136,8 @@ struct SWALLOW_EXPORT Errors
         E_ENUM_WITH_NO_CASES_CANNOT_DECLARE_A_RAW_TYPE,//An enum with no cases cannot declare a raw type
         E_RAW_VALUE_FOR_ENUM_CASE_MUST_BE_LITERAL,//Raw value for enum case must be literal
         E_ENUM_CASES_REQUIRE_EXPLICIT_RAW_VALUES_WHEN_THE_RAW_TYPE_IS_NOT_INTEGER_LITERAL_CONVERTIBLE, //Enum cases require explicit raw values when the raw type is not integer literal convertible
+        E_ENUM_WITH_RAW_TYPE_CANNOT_HAVE_CASES_WITH_ARGUMENTS, //Enum with raw type cannot have cases with arguments
+        E_ENUM_CASE_CANNOT_HAVE_A_RAW_VALUE_IF_THE_ENUM_DOES_NOT_HAVE_A_RAW_TYPE, //Enum case cannot have a raw value if the enum does not have a raw type
         E_EXPRESSION_DOES_NOT_CONFORM_TO_PROTOCOL_1, // Expression does not conform to protocol '%0'
 
         E_OPERAND_OF_POSTFIX_A_SHOULD_HAVE_OPTIONAL_TYPE_TYPE_IS_B_2, // Operand of postfix '%0' should have optional type; type is '%1'
@@ -148,6 +149,13 @@ struct SWALLOW_EXPORT Errors
         E_SUBSCRIPT_ACCESS_ON_A_IS_NOT_WRITABLE_1,// Subscript access on '%0' is not writable
         E_DICTIONARY_KEY_CONTAINS_DIFFERENT_TYPES,// Dictionary key contains different types
         E_DICTIONARY_VALUE_CONTAINS_DIFFERENT_TYPES,// Dictionary key contains different types
+
+        E_OPERATOR_IMPLEMENTATION_WITHOUT_MATCHING_OPERATOR_DECLARATION,//Operator implementation without matching operator declaration
+        E_A_REQUIRES_A_FUNCTION_WITH_ONE_ARGUMENT_1, //'%0' requires a function with one argument
+        E_UNARY_OPERATOR_IMPLEMENTATION_MUST_HAVE_A_PREFIX_OR_POSTFIX_MODIFIER,//Unary operator implementation must have a 'prefix' or 'postfix' modifier
+        E_OPERATORS_MUST_HAVE_ONE_OR_TWO_ARGUMENTS,//Operators must have one or two arguments
+        E_OPERATOR_MUST_BE_DECLARED_AS_PREFIX_POSTFIX_OR_INFIX,//Operator must be declared as 'prefix', 'postfix', or 'infix'
+        E_A_MAY_ONLY_BE_DECLARED_AT_FILE_SCOPE_1, //'%0' may only be declared at file scope
 
         W_PARAM_CAN_BE_EXPRESSED_MORE_SUCCINCTLY_1, // '%0 %0' can be expressed more succinctly as '#%0'
         W_EXTRANEOUS_SHARTP_IN_PARAMETER_1 //Extraneous '#' in parameter: '%0' is already the keyword argument name

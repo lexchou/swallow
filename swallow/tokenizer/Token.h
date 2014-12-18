@@ -37,12 +37,28 @@
 
 SWALLOW_NS_BEGIN
 
+
+/*!
+ * Swift's tokenizer is context-sensitive, some keywords only appears in special context, parser need to tell
+ * tokenizer about context
+ */
+enum TokenizerContext
+{
+    TokenizerContextUnknown,
+    TokenizerContextFile = 1,
+    TokenizerContextOperator = 2,
+    TokenizerContextClass = 4,
+    TokenizerContextComputedProperty = 8,
+    TokenizerContextFunctionSignature = 0x10,
+    TokenizerContextCaptureList = 0x20,
+    TokenizerContextAll = TokenizerContextFile | TokenizerContextOperator | TokenizerContextClass | TokenizerContextComputedProperty | TokenizerContextFunctionSignature | TokenizerContextCaptureList,
+};
 struct TokenizerState : SourceInfo
 {
-
     int cursor;
     bool hasSpace;
     int inStringExpression;
+    TokenizerContext context;
 };
 
 struct Token

@@ -95,7 +95,7 @@ TEST(TestOptional, NilComparison)
     ASSERT_EQ(0, compilerResults.numResults());
     SymbolPtr b = scope->lookup(L"b");
     ASSERT_NOT_NULL(b);
-    ASSERT_EQ(symbolRegistry.getGlobalScope()->Bool, b->getType());
+    ASSERT_EQ(symbolRegistry.getGlobalScope()->Bool(), b->getType());
 }
 
 
@@ -115,7 +115,7 @@ TEST(TestOptional, ForcedValue)
     ASSERT_EQ(0, compilerResults.numResults());
     SymbolPtr roomCount = scope->lookup(L"roomCount");
     ASSERT_NOT_NULL(roomCount);
-    ASSERT_EQ(symbolRegistry.getGlobalScope()->Int, roomCount->getType());
+    ASSERT_EQ(symbolRegistry.getGlobalScope()->Int(), roomCount->getType());
 }
 
 TEST(TestOptional, ForcedValue2)

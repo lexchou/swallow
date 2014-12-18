@@ -56,14 +56,14 @@ void CollectionTypeAnalyzer::analyze(const ExpressionPtr& expr)
     {
         case NodeType::IntegerLiteral:
             if(finalType == nullptr)
-                finalType = global->Int;
-            else if(!finalType->canAssignTo(global->_IntegerType))
+                finalType = global->Int();
+            else if(!finalType->canAssignTo(global->_IntegerType()))
                 differentTypes++;
             break;
         case NodeType::FloatLiteral:
-            if(finalType == nullptr || (finalType == global->Int && changable))
-                finalType = global->Double;
-            else if(!finalType->canAssignTo(global->FloatingPointType))
+            if(finalType == nullptr || (finalType == global->Int() && changable))
+                finalType = global->Double();
+            else if(!finalType->canAssignTo(global->FloatingPointType()))
                 differentTypes++;
             break;
         default:

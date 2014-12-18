@@ -1,4 +1,4 @@
-/* Parser_Details.h --
+/* ScopedValue.h --
  *
  * Copyright (c) 2014, Lex Chou <lex at chou dot it>
  * All rights reserved.
@@ -27,72 +27,42 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef PARSER_DETAILS_H
-#define PARSER_DETAILS_H
+#ifndef SCOPED_VALUE_H
+#define SCOPED_VALUE_H
 #include "swallow_conf.h"
-#include "common/ScopedValue.h"
+
 SWALLOW_NS_BEGIN
 
-enum
-{
-    ENABLE_GENERIC      = 1,
-    UNDER_SWITCH_CASE   = 2,
-    UNDER_PROTOCOL      = 4,
-    UNDER_CLASS         = 8,
-    UNDER_STRUCT        = 0x10,
-    UNDER_ENUM          = 0x20,
-    UNDER_LET           = 0x40,
-    UNDER_VAR           = 0x80,
-    UNDER_CASE          = 0x100,
-    UNDER_IF            = 0x200,
-    UNDER_FOR_LOOP      = 0x400,
-    UNDER_WHILE_LOOP    = 0x800,
-    UNDER_DO_LOOP       = 0x1000,
-    SUPPRESS_TRAILING_CLOSURE = 0x2000,
-    UNDER_EXTENSION     = 0x4000
-};
-struct Flags
-{
-    Flags(Parser* parser, int f = 0)
-        :parser(parser), oldFlags(parser->flags)
-    {
-        this->flags = parser->flags;
-        if(f)
-            *this += f;
-    }
-    Flags(const Flags& flags)
-        :oldFlags(flags.parser->flags)
-    {
-        this->parser = flags.parser;
-        parser->flags = this->flags = flags.flags;
-    }
-    ~Flags()
-    {
-        parser->flags = oldFlags;
-    }
-    
-    
-    Flags& operator += (int flag)
-    {
-        flags |= flag;
-        parser->flags = flags;
-        return *this;
-    }
-    Flags& operator -= (int flag)
-    {
-        flags &= ~flag;
-        parser->flags = flags;
-        return *this;
-    }
-    
-    
-    Parser* parser;
-    int oldFlags;
-    int flags;
-};
 
-#define ENTER_CONTEXT(ctx) TokenizerState& state_##__LINE__ = tokenizer->save(); SCOPED_SET(state_##__LINE__.context, ctx);
+    /*!
+     * This class uses RAAI to garantee the variable will be changed to specified value during it's scope.
+     */
+    template<class T>
+    struct ScopedValue
+    {
+        ScopedValue(T & ref)
+                :ref(ref), value(ref)
+        {
 
+        }
+        ScopedValue(T & ref, const T& newValue)
+                :ref(ref), value(ref)
+        {
+            set(newValue);
+        }
+        void set(const T& val)
+        {
+            ref = val;
+        }
 
+        ~ScopedValue()
+        {
+            ref = value;
+        }
+        T& ref;
+        T value;
+    };
+    #define SCOPED_SET(ref, val) ScopedValue<decltype(ref)> scopedValue_##__LINE__(ref, val); (void)scopedValue_##__LINE__;
 SWALLOW_NS_END
-#endif//PARSER_DETAILS_H
+
+#endif//SCOPED_VALUE_H

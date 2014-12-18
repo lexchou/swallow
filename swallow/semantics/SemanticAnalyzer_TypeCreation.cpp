@@ -40,23 +40,24 @@
 #include "TypeBuilder.h"
 #include "GlobalScope.h"
 #include <cassert>
-#include <ast/NodeFactory.h>
+#include "ast/NodeFactory.h"
+#include "common/ScopedValue.h"
 
 USE_SWALLOW_NS
 using namespace std;
 static bool isLiteralTypeForEnum(GlobalScope* global, const TypePtr& type)
 {
-    if(type->canAssignTo(global->IntegerLiteralConvertible))
+    if(type->canAssignTo(global->IntegerLiteralConvertible()))
         return true;
-    if(type->canAssignTo(global->StringLiteralConvertible))
+    if(type->canAssignTo(global->StringLiteralConvertible()))
         return true;
-    if(type->canAssignTo(global->FloatLiteralConvertible))
+    if(type->canAssignTo(global->FloatLiteralConvertible()))
         return true;
     //if(type->canAssignTo(global->BooleanLiteralConvertible))
     //    return true;
-    if(type->canAssignTo(global->UnicodeScalarLiteralConvertible))
+    if(type->canAssignTo(global->UnicodeScalarLiteralConvertible()))
         return true;
-    if(type->canAssignTo(global->ExtendedGraphemeClusterLiteralConvertible))
+    if(type->canAssignTo(global->ExtendedGraphemeClusterLiteralConvertible()))
         return true;
     //nil, array, dictionary literal is not working for enum
     return false;
@@ -83,7 +84,8 @@ TypePtr SemanticAnalyzer::defineType(const std::shared_ptr<TypeDeclaration>& nod
     SymbolScope* scope = NULL;
     TypePtr type;
     //it's inside the type's scope, so need to access parent scope;
-    SymbolScope* currentScope = symbolRegistry->getCurrentScope()->getParentScope();
+    SymbolScope* typeScope = symbolRegistry->getCurrentScope();
+    SymbolScope* currentScope = typeScope->getParentScope();
 
     //check if this type is already defined
     symbolRegistry->lookupType(id->getName(), &scope, &type);
@@ -95,11 +97,7 @@ TypePtr SemanticAnalyzer::defineType(const std::shared_ptr<TypeDeclaration>& nod
     }
     //prepare for generic types
     GenericDefinitionPtr generic;
-    GenericParametersDefPtr genericParams;
-    if(node->getNodeType() == NodeType::Class)
-        genericParams = std::static_pointer_cast<ClassDef>(node)->getGenericParametersDef();
-    else if(node->getNodeType() == NodeType::Struct)
-        genericParams = std::static_pointer_cast<StructDef>(node)->getGenericParametersDef();
+    GenericParametersDefPtr genericParams = node->getGenericParametersDef();
 
     //check if it's defined as a nested type
     if(currentType)
@@ -119,7 +117,7 @@ TypePtr SemanticAnalyzer::defineType(const std::shared_ptr<TypeDeclaration>& nod
     if(genericParams)
     {
         generic = prepareGenericTypes(genericParams);
-        generic->registerTo(currentScope);
+        generic->registerTo(typeScope);
     }
 
     //check inheritance clause
@@ -163,7 +161,7 @@ TypePtr SemanticAnalyzer::defineType(const std::shared_ptr<TypeDeclaration>& nod
                 error(parentType, Errors::E_RAW_TYPE_A_IS_NOT_CONVERTIBLE_FROM_ANY_LITERAL_1, ptr->toString());
                 return nullptr;
             }
-            if(!ptr->canAssignTo(symbolRegistry->getGlobalScope()->Equatable))
+            if(!ptr->canAssignTo(symbolRegistry->getGlobalScope()->Equatable()))
             {
                 error(parentType, Errors::E_RAWREPRESENTABLE_INIT_CANNOT_BE_SYNTHESIZED_BECAUSE_RAW_TYPE_A_IS_NOT_EQUATABLE_1, ptr->toString());
                 return nullptr;
@@ -273,7 +271,9 @@ void SemanticAnalyzer::visitTypeAlias(const TypeAliasPtr& node)
     else
     {
         TypePtr innerType = lookupType(node->getType());
-        static_pointer_cast<TypeBuilder>(type)->setInnerType(innerType);
+        if(innerType)
+            type = innerType;
+        //static_pointer_cast<TypeBuilder>(type)->setInnerType(innerType);
     }
     currentScope->addSymbol(node->getName(), type);
     if(currentType)
@@ -286,8 +286,8 @@ void SemanticAnalyzer::visitTypeAlias(const TypeAliasPtr& node)
 void SemanticAnalyzer::visitClass(const ClassDefPtr& node)
 {
     TypePtr type = defineType(node, Type::Class);
-    StackedValueGuard<TypePtr> currentType(this->currentType);
-    currentType.set(type);
+
+    SCOPED_SET(currentType, type);
 
 
     NodeVisitor::visitClass(node);
@@ -299,8 +299,7 @@ void SemanticAnalyzer::visitStruct(const StructDefPtr& node)
 {
     TypeBuilderPtr type = static_pointer_cast<TypeBuilder>(defineType(node, Type::Struct));
 
-    StackedValueGuard<TypePtr> currentType(this->currentType);
-    currentType.set(type);
+    SCOPED_SET(currentType, type);
 
     NodeVisitor::visitStruct(node);
     //prepare default initializers
@@ -376,7 +375,7 @@ void SemanticAnalyzer::visitStruct(const StructDefPtr& node)
  */
 static void makeRawRepresentable(const TypeBuilderPtr& type, GlobalScope* global)
 {
-    type->addProtocol(global->RawRepresentable);
+    type->addProtocol(global->RawRepresentable());
     //var rawValue: RawValue { get }
     TypePtr RawValue = type->getParentType();
     SymbolPlaceHolderPtr rawValue(new SymbolPlaceHolder(L"rawValue", RawValue, SymbolPlaceHolder::R_PROPERTY, SymbolFlagMember | SymbolFlagReadable));
@@ -387,25 +386,37 @@ void SemanticAnalyzer::visitEnum(const EnumDefPtr& node)
     TypeBuilderPtr type = static_pointer_cast<TypeBuilder>(defineType(node, Type::Enum));
     NodeVisitor::visitEnum(node);
     GlobalScope* global = symbolRegistry->getGlobalScope();
-    if(node->getValueStyle() == EnumDef::RawValues)
+    //check if it's raw value enum
+    bool isRawValues = false;
+    if(node->numParents() > 0)
     {
-        if(!node->numConstants())
+        TypePtr firstParent = lookupType(node->getParent(0));
+        if(firstParent)
+        {
+            Type::Category  category = firstParent->getCategory();
+            isRawValues = category == Type::Struct || category == Type::Enum || category == Type::Aggregate || category == Type::Class;
+        }
+    }
+
+
+    if(isRawValues)
+    {
+        if(!node->numCases())
         {
             error(node, Errors::E_ENUM_WITH_NO_CASES_CANNOT_DECLARE_A_RAW_TYPE);
             return;
         }
         //Add RawRepresentable protocol if it's not implemented
-        if(!type->canAssignTo(global->RawRepresentable))
+        if(!type->canAssignTo(global->RawRepresentable()))
         {
             makeRawRepresentable(type, global);
         }
 
         TypePtr rawType = type->getParentType();
         assert(rawType != nullptr);
-        bool integerConvertible = rawType->canAssignTo(global->IntegerLiteralConvertible);
-        for(int i = 0; i < node->numConstants(); i++)
+        bool integerConvertible = rawType->canAssignTo(global->IntegerLiteralConvertible());
+        for(auto c : node->getCases())
         {
-            auto c = node->getConstant(i);
             if(!c.value && !integerConvertible)
             {
                 //Enum cases require explicit raw values when the raw type is not integer literal convertible
@@ -414,15 +425,22 @@ void SemanticAnalyzer::visitEnum(const EnumDefPtr& node)
             }
             if(c.value)
             {
-                if(!isLiteralExpression(c.value))
+                if(dynamic_pointer_cast<TupleType>(c.value))
+                {
+                    error(node, Errors::E_ENUM_WITH_RAW_TYPE_CANNOT_HAVE_CASES_WITH_ARGUMENTS);
+                    return;
+                }
+                ExpressionPtr initializer = dynamic_pointer_cast<Expression>(c.value);
+                assert(initializer != nullptr);
+                if(!isLiteralExpression(initializer))
                 {
                     error(node, Errors::E_RAW_VALUE_FOR_ENUM_CASE_MUST_BE_LITERAL);
                     return;
                 }
-                StackedValueGuard<TypePtr> contextualType(this->t_hint);
-                contextualType.set(rawType);
-                c.value->accept(this);
-                TypePtr caseType = c.value->getType();
+
+                SCOPED_SET(t_hint, rawType);
+                initializer->accept(this);
+                TypePtr caseType = initializer->getType();
                 assert(caseType != nullptr);
                 if(!caseType->canAssignTo(rawType))
                 {
@@ -430,31 +448,35 @@ void SemanticAnalyzer::visitEnum(const EnumDefPtr& node)
                     return;
                 }
             }
-            type->addEnumCase(c.name, global->Void);
-        }
-    }
-    else if(node->getValueStyle() == EnumDef::AssociatedValues)
-    {
-        for(int i = 0; i < node->numAssociatedTypes(); i++)
-        {
-            auto c = node->getAssociatedType(i);
-            TypePtr associatedType = global->Void;
-            if(c.value)
-                associatedType = lookupType(c.value);
-            type->addEnumCase(c.name, associatedType);
+            type->addEnumCase(c.name, global->Void());
         }
     }
     else
     {
-        assert(0);
+        //it's an associated-values enum
+        for(auto c : node->getCases())
+        {
+            TypePtr associatedType = global->Void();
+            if(c.value)
+            {
+                TypeNodePtr typeNode = dynamic_pointer_cast<TypeNode>(c.value);
+                if(!typeNode)
+                {
+                    error(node, Errors::E_ENUM_CASE_CANNOT_HAVE_A_RAW_VALUE_IF_THE_ENUM_DOES_NOT_HAVE_A_RAW_TYPE);
+                    return;
+                }
+                assert(typeNode != nullptr);
+                associatedType = lookupType(typeNode);
+            }
+            type->addEnumCase(c.name, associatedType);
+        }
     }
 }
 void SemanticAnalyzer::visitProtocol(const ProtocolDefPtr& node)
 {
     TypePtr type = defineType(node, Type::Protocol);
 
-    StackedValueGuard<TypePtr> currentType(this->currentType);
-    currentType.set(type);
+    SCOPED_SET(currentType, type);
 
     NodeVisitor::visitProtocol(node);
 }

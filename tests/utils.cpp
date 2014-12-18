@@ -40,54 +40,19 @@
 #include <fstream>
 #include "common/Errors.h"
 #include <semantics/GlobalScope.h>
-//#include <codecvt>
+#include "common/SwallowUtils.h"
+
 using namespace std;
+USE_SWALLOW_NS
+
 wstring readFile(const char* fileName)
 {
-    wifstream wif;
-    wif.open(fileName, istream::in);
-    if(!wif.is_open())
-    {
-        cerr << "Failed to open swift source file for testing, file name " <<fileName<<endl;
-        abort();
-    }
-    //wif.imbue(std::locale(std::locale(), new std::codecvt_utf8<wchar_t>));
-    wstringstream wss;
-    assert(!wif.eof() && "Failed to open file.");
-    wss << wif.rdbuf();
-    wstring ret = wss.str();
-    return ret;
+    return SwallowUtils::readFile(fileName);
 }
 
 void dumpCompilerResults(Swallow::CompilerResults& compilerResults)
 {
-    using namespace Swallow;
-    if(compilerResults.numResults() > 0)
-    {
-        for(int i = 0; i < compilerResults.numResults(); i++)
-        {
-            const CompilerResult& res = compilerResults.getResult(i);
-            switch(res.level)
-            {
-                case ErrorLevel::Fatal:
-                    std::wcout<<L"Fatal:";
-                    break;
-                case ErrorLevel::Error:
-                    std::wcout<<L"Error:";
-                    break;
-                case ErrorLevel::Warning:
-                    std::wcout<<L"Warning:";
-                    break;
-                case ErrorLevel::Note:
-                    std::wcout<<L"Note:";
-                    break;
-            }
-            std::wcout<<L"("<<res.line<<L", "<<res.column<<") ";
-            std::wstring msg = Errors::format(res.code, res.items);
-            std::wcout<<msg<<std::endl;
-        }
-
-    }
+    SwallowUtils::dumpCompilerResults(L"", compilerResults, std::wcout);
 }
 
 

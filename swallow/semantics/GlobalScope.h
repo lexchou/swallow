@@ -37,14 +37,19 @@ class SWALLOW_EXPORT GlobalScope : public SymbolScope
 {
 public:
     GlobalScope();
+public:
+    void initRuntime(SymbolRegistry* symbolRegistry);
 private:
     void initPrimitiveTypes();
-    void initOperators();
+    void initOperators(SymbolRegistry* symbolRegistry);
     void initProtocols();
+
     /*!
      * Register the implementation of binary operator
      */
     bool registerOperatorFunction(const std::wstring& name, const TypePtr& returnType, const TypePtr& lhs, const TypePtr& rhs);
+    bool registerOperatorFunction(const std::wstring& name, const TypePtr& returnType, const TypePtr& operand, OperatorType::T operatorType);
+    bool registerFunction(const std::wstring& name, const FunctionSymbolPtr& func);
 public:
     /*!
      * A short-hand way to declare an external function.
@@ -80,49 +85,93 @@ public:
     SymbolPtr True;
     SymbolPtr False;
 
-    TypePtr Bool;
-    TypePtr Void;
-    TypePtr String;
-    TypePtr Character;
-    TypePtr Int;
-    TypePtr UInt;
-    TypePtr Int8;
-    TypePtr UInt8;
-    TypePtr Int16;
-    TypePtr UInt16;
-    TypePtr Int32;
-    TypePtr UInt32;
-    TypePtr Int64;
-    TypePtr UInt64;
-    TypePtr Float;
-    TypePtr Double;
-    TypePtr Array;
-    TypePtr Dictionary;
-    TypePtr Optional;
-    //Common used protocols
-    TypePtr BooleanType;
-    TypePtr Equatable;
-    TypePtr Comparable;
-    TypePtr Hashable;
-    TypePtr RawRepresentable;
-    TypePtr _OptionalNilComparisonType;
-    TypePtr _IntegerType;
-    TypePtr UnsignedIntegerType;
-    TypePtr SignedIntegerType;
-    TypePtr FloatingPointType;
-    TypePtr StringInterpolationConvertible;
-    TypePtr IntegerLiteralConvertible;
-    TypePtr BooleanLiteralConvertible;
-    TypePtr StringLiteralConvertible;
-    TypePtr FloatLiteralConvertible;
-    TypePtr NilLiteralConvertible;
-    TypePtr ArrayLiteralConvertible;
-    TypePtr DictionaryLiteralConvertible;
-    TypePtr UnicodeScalarLiteralConvertible;
-    TypePtr ExtendedGraphemeClusterLiteralConvertible;
 
-    TypePtr SequenceType;
-    TypePtr CollectionType;
+    TypePtr Bool() const;
+    TypePtr Void() const;
+    TypePtr String() const;
+    TypePtr Character() const;
+    TypePtr Int() const;
+    TypePtr UInt() const;
+    TypePtr Int8() const;
+    TypePtr UInt8() const;
+    TypePtr Int16() const;
+    TypePtr UInt16() const;
+    TypePtr Int32() const;
+    TypePtr UInt32() const;
+    TypePtr Int64() const;
+    TypePtr UInt64() const;
+    TypePtr Float() const;
+    TypePtr Double() const;
+    TypePtr Array() const;
+    TypePtr Dictionary() const;
+    TypePtr Optional() const;
+    TypePtr BooleanType() const;
+    TypePtr Equatable() const;
+    TypePtr Comparable() const;
+    TypePtr Hashable() const;
+    TypePtr RawRepresentable() const;
+    TypePtr _OptionalNilComparisonType() const;
+    TypePtr _IntegerType() const;
+    TypePtr UnsignedIntegerType() const;
+    TypePtr SignedIntegerType() const;
+    TypePtr FloatingPointType() const;
+    TypePtr StringInterpolationConvertible() const;
+    TypePtr IntegerLiteralConvertible() const;
+    TypePtr BooleanLiteralConvertible() const;
+    TypePtr StringLiteralConvertible() const;
+    TypePtr FloatLiteralConvertible() const;
+    TypePtr NilLiteralConvertible() const;
+    TypePtr ArrayLiteralConvertible() const;
+    TypePtr DictionaryLiteralConvertible() const;
+    TypePtr UnicodeScalarLiteralConvertible() const;
+    TypePtr ExtendedGraphemeClusterLiteralConvertible() const;
+    TypePtr SequenceType() const;
+    TypePtr CollectionType() const;
+private:
+
+    TypePtr _Bool;
+    TypePtr _Void;
+    TypePtr _String;
+    TypePtr _Character;
+    TypePtr _Int;
+    TypePtr _UInt;
+    TypePtr _Int8;
+    TypePtr _UInt8;
+    TypePtr _Int16;
+    TypePtr _UInt16;
+    TypePtr _Int32;
+    TypePtr _UInt32;
+    TypePtr _Int64;
+    TypePtr _UInt64;
+    TypePtr _Float;
+    TypePtr _Double;
+    TypePtr _Array;
+    TypePtr _Dictionary;
+    TypePtr _Optional;
+    //Common used protocols
+    TypePtr _BooleanType;
+    TypePtr _Equatable;
+    TypePtr _Comparable;
+    TypePtr _Hashable;
+    TypePtr _RawRepresentable;
+    TypePtr __OptionalNilComparisonType;
+    TypePtr __IntegerType;
+    TypePtr _UnsignedIntegerType;
+    TypePtr _SignedIntegerType;
+    TypePtr _FloatingPointType;
+    TypePtr _StringInterpolationConvertible;
+    TypePtr _IntegerLiteralConvertible;
+    TypePtr _BooleanLiteralConvertible;
+    TypePtr _StringLiteralConvertible;
+    TypePtr _FloatLiteralConvertible;
+    TypePtr _NilLiteralConvertible;
+    TypePtr _ArrayLiteralConvertible;
+    TypePtr _DictionaryLiteralConvertible;
+    TypePtr _UnicodeScalarLiteralConvertible;
+    TypePtr _ExtendedGraphemeClusterLiteralConvertible;
+
+    TypePtr _SequenceType;
+    TypePtr _CollectionType;
     std::vector<TypePtr> t_Numbers;
     std::vector<TypePtr> t_Ints;
 

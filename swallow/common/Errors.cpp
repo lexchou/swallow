@@ -59,7 +59,6 @@ std::wstring getErrorTemplate(int errorCode)
         case Errors::E_EXPECT_EXPRESSION_1: return L"Expression expected but %0 found.";
         case Errors::E_EXPECT_OPERATOR_1: return L"Operator expected but %0 found.";
         case Errors::E_EXPECT_INTEGER_PRECEDENCE: return L"Operator's precedence must be an integer";
-        case Errors::E_INVALID_OPERATOR_PRECEDENCE: return L"Operator's precedence must be between [0, 255]";
         case Errors::E_EXPECT_INIT_SELF_DYNAMICTYPE_IDENTIFIER_1: return L"init/self/dynamicType or member field is expected, but %0 found.";
         case Errors::E_UNDEFINED_INFIX_OPERATOR_1: return L"Undefined infix operator %0";
         case Errors::E_EXPECT_CAPTURE_SPECIFIER: return L"The capture specifier is not specified.";
@@ -145,6 +144,9 @@ std::wstring getErrorTemplate(int errorCode)
         case Errors::E_ENUM_WITH_NO_CASES_CANNOT_DECLARE_A_RAW_TYPE: return L"An enum with no cases cannot declare a raw type";
         case Errors::E_RAW_VALUE_FOR_ENUM_CASE_MUST_BE_LITERAL: return L"Raw value for enum case must be literal";
         case Errors::E_ENUM_CASES_REQUIRE_EXPLICIT_RAW_VALUES_WHEN_THE_RAW_TYPE_IS_NOT_INTEGER_LITERAL_CONVERTIBLE: return L"Enum cases require explicit raw values when the raw type is not integer literal convertible";
+        case Errors::E_ENUM_WITH_RAW_TYPE_CANNOT_HAVE_CASES_WITH_ARGUMENTS: return L"Enum with raw type cannot have cases with arguments";
+        case Errors::E_ENUM_CASE_CANNOT_HAVE_A_RAW_VALUE_IF_THE_ENUM_DOES_NOT_HAVE_A_RAW_TYPE: return L"Enum case cannot have a raw value if the enum does not have a raw type";
+
         case Errors::E_EXPRESSION_DOES_NOT_CONFORM_TO_PROTOCOL_1: return L"Expression does not conform to protocol '%0'";
         case Errors::E_OPERAND_OF_POSTFIX_A_SHOULD_HAVE_OPTIONAL_TYPE_TYPE_IS_B_2: return L"Operand of postfix '%0' should have optional type; type is '%1'";
         case Errors::E_BOUND_VALUE_IN_A_CONDITIONAL_BINDING_MUST_BE_OF_OPTIONAL_TYPE: return L"Bound value in a conditional binding must be of Optional type";
@@ -155,7 +157,12 @@ std::wstring getErrorTemplate(int errorCode)
         case Errors::E_SUBSCRIPT_ACCESS_ON_A_IS_NOT_WRITABLE_1: return L"Subscript access on '%0' is not writable";
         case Errors::E_DICTIONARY_KEY_CONTAINS_DIFFERENT_TYPES: return L"Dictionary key contains different types";
         case Errors::E_DICTIONARY_VALUE_CONTAINS_DIFFERENT_TYPES: return L"Dictionary value contains different types";
-
+        case Errors::E_OPERATOR_IMPLEMENTATION_WITHOUT_MATCHING_OPERATOR_DECLARATION: return L"Operator implementation without matching operator declaration";
+        case Errors::E_A_REQUIRES_A_FUNCTION_WITH_ONE_ARGUMENT_1: return L"'%0' requires a function with one argument";
+        case Errors::E_UNARY_OPERATOR_IMPLEMENTATION_MUST_HAVE_A_PREFIX_OR_POSTFIX_MODIFIER: return L"Unary operator implementation must have a 'prefix' or 'postfix' modifier";
+        case Errors::E_OPERATORS_MUST_HAVE_ONE_OR_TWO_ARGUMENTS: return L"Operators must have one or two arguments";
+        case Errors::E_OPERATOR_MUST_BE_DECLARED_AS_PREFIX_POSTFIX_OR_INFIX: return L"Operator must be declared as 'prefix', 'postfix', or 'infix'";
+        case Errors::E_A_MAY_ONLY_BE_DECLARED_AT_FILE_SCOPE_1: return L"'%0' may only be declared at file scope";
 
         case Errors::W_PARAM_CAN_BE_EXPRESSED_MORE_SUCCINCTLY_1: return L"'%0 %0' can be expressed more succinctly as '#%0'";
         case Errors::W_EXTRANEOUS_SHARTP_IN_PARAMETER_1: return L"Extraneous '#' in parameter: '%0' is already the keyword argument name";

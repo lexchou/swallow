@@ -141,6 +141,22 @@ TEST(TestEnumeration, AssociatedValues)
     ASSERT_EQ(Barcode, a->getType());
 }
 
+TEST(TestEnumeration, AssociatedValuesWithProtocols)
+{
+    SEMANTIC_ANALYZE(L"enum MyOptional<T> : NilLiteralConvertible {\n"
+            L"    case None\n"
+            L"    case Some(T)\n"
+            L"}");
+    dumpCompilerResults(compilerResults);
+    ASSERT_EQ(0, compilerResults.numResults());
+    TypePtr MyOptional;
+
+    ASSERT_NOT_NULL(MyOptional = dynamic_pointer_cast<Type>(scope->lookup(L"MyOptional")));
+
+
+
+}
+
 TEST(TestEnumeration, PartialApplication)
 {
     SEMANTIC_ANALYZE(L"enum Barcode {\n"
@@ -148,7 +164,6 @@ TEST(TestEnumeration, PartialApplication)
             L"    case QRCode(String)\n"
             L"}\n"
             L"var productBarcode = Barcode.UPCA\n");
-    dumpCompilerResults(compilerResults);
     ASSERT_EQ(1, compilerResults.numResults());
     auto res = compilerResults.getResult(0);
     ASSERT_EQ(Errors::E_PARTIAL_APPLICATION_OF_ENUM_CONSTRUCTOR_IS_NOT_ALLOWED, res.code);
@@ -350,7 +365,7 @@ TEST(TestEnumeration, ImplicitRawRepresentable)
     ASSERT_EQ(0, compilerResults.numResults());
     SymbolPtr earthsOrder;
     ASSERT_NOT_NULL(earthsOrder = scope->lookup(L"earthsOrder"));
-    ASSERT_EQ(symbolRegistry.getGlobalScope()->Int, earthsOrder->getType());
+    ASSERT_EQ(symbolRegistry.getGlobalScope()->Int(), earthsOrder->getType());
 }
 
 TEST(TestEnumeration, ImplicitRawRepresentable2)
