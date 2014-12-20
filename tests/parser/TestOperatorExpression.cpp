@@ -59,16 +59,14 @@ TEST(TestOperatorExpression, testTypeCheck)
 
 TEST(TestOperatorExpression, testTypeCast)
 {
-    PARSE_STATEMENT(L"m = item as? Movie");
+    PARSE_STATEMENT(L"item as? Movie");
 
 
-    AssignmentPtr eq;
     TypeCastPtr as;
     IdentifierPtr id;
     TypeIdentifierPtr type;
 
-    ASSERT_NOT_NULL(eq = std::dynamic_pointer_cast<Assignment>(root));
-    ASSERT_NOT_NULL(as = std::dynamic_pointer_cast<TypeCast>(eq->getRHS()));
+    ASSERT_NOT_NULL(as = std::dynamic_pointer_cast<TypeCast>(root));
     ASSERT_EQ(L"as?", as->getOperator());
     ASSERT_NOT_NULL(id = std::dynamic_pointer_cast<Identifier>(as->getLHS()));
     ASSERT_NOT_NULL(type = std::dynamic_pointer_cast<TypeIdentifier>(as->getDeclaredType()));
@@ -80,16 +78,14 @@ TEST(TestOperatorExpression, testTypeCast)
 
 TEST(TestOperatorExpression, testTypeCast2)
 {
-    PARSE_STATEMENT(L"m = item as Movie");
+    PARSE_STATEMENT(L"item as Movie");
 
 
-    AssignmentPtr eq;
     TypeCastPtr as;
     IdentifierPtr id;
     TypeIdentifierPtr type;
 
-    ASSERT_NOT_NULL(eq = std::dynamic_pointer_cast<Assignment>(root));
-    ASSERT_NOT_NULL(as = std::dynamic_pointer_cast<TypeCast>(eq->getRHS()));
+    ASSERT_NOT_NULL(as = std::dynamic_pointer_cast<TypeCast>(root));
     ASSERT_EQ(L"as", as->getOperator());
     ASSERT_NOT_NULL(id = std::dynamic_pointer_cast<Identifier>(as->getLHS()));
     ASSERT_NOT_NULL(type = std::dynamic_pointer_cast<TypeIdentifier>(as->getDeclaredType()));

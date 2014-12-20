@@ -86,7 +86,7 @@ std::wstring getErrorTemplate(int errorCode)
         case Errors::E_INVALID_USE_OF_A_TO_CALL_A_VALUE_OF_NON_FUNCTION_TYPE_B_2: return L"invalid use of '%0' to call a value of non-function type '%1'";
         case Errors::E_UNMATCHED_PARAMETERS: return L"Unmatched number of supplied parameters";
         case Errors::E_UNMATCHED_PARAMETER_1: return L"Unmatched type of parameter %0";
-        case Errors::E_NO_MATCHED_OVERLOAD: return L"No matched overload found";
+        case Errors::E_NO_MATCHED_OVERLOAD_FOR_A_1: return L"No matched overload found for '%0'";
         case Errors::E_MISSING_ARGUMENT_LABEL_IN_CALL_1: return L"Missing argument label '%0:' in call";
         case Errors::E_EXTRANEOUS_ARGUMENT_LABEL_IN_CALL_1: return L"Extraneous argument label '%0:' in call";
         case Errors::E_EXTRANEOUS_ARGUMENT: return L"Extraneous argument in call";

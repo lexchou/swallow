@@ -1,4 +1,4 @@
-/* ScopeGuard.cpp --
+/* SemanticPass.h --
  *
  * Copyright (c) 2014, Lex Chou <lex at chou dot it>
  * All rights reserved.
@@ -27,37 +27,37 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "ScopeGuard.h"
-#include "ScopeOwner.h"
-#include "SemanticPass.h"
-#include "SymbolRegistry.h"
-USE_SWALLOW_NS
+#ifndef SEMANTIC_PASS_H
+#define SEMANTIC_PASS_H
+#include "ast/NodeVisitor.h"
+#include <stack>
+#include "CompilerResultEmitter.h"
 
+SWALLOW_NS_BEGIN
 
-ScopeGuard::ScopeGuard(ScopeOwner* owner, NodeVisitor* visitor)
-    :symbolRegistry(nullptr)
-{
-    SemanticPass* semanticNodeVisitor = dynamic_cast<SemanticPass*>(visitor);
-    if(semanticNodeVisitor)
+    class SymbolRegistry;
+    class CompilerResults;
+
+    class SWALLOW_EXPORT SemanticPass : public NodeVisitor, public CompilerResultEmitter
     {
-        symbolRegistry = semanticNodeVisitor->getSymbolRegistry();
-        SymbolScope *scope = owner->getScope();
-        if(symbolRegistry->getCurrentScope() == scope)
-        {
-            //func and code block will shares the same scope,
-            //do not enter the same scope twice
-            symbolRegistry = nullptr;
-            return;
-        }
+    public:
+        SemanticPass(SymbolRegistry* symbolRegistry, CompilerResults* compilerResults);
+    public:
+        virtual void beforeVisiting(const NodePtr& node);
+        virtual void afterVisited(const NodePtr& node);
+    public:
+        SymbolRegistry* getSymbolRegistry() { return symbolRegistry;}
+    protected:
+        SymbolRegistry* symbolRegistry;
+        //hint for parsing Array/tuple/dictionary literal
+        NodePtr parentNode;
+        NodePtr currentNode;
+        std::stack<NodePtr> parentNodes;
+    };
 
-        symbolRegistry->enterScope(scope);
-    }
-}
-ScopeGuard::~ScopeGuard()
-{
-    if(symbolRegistry)
-    {
-        symbolRegistry->leaveScope();
-    }
-}
+SWALLOW_NS_END
 
+
+
+
+#endif//SEMANTIC_PASS_H

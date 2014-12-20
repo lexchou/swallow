@@ -43,9 +43,11 @@ USE_SWALLOW_NS
 void ScopedProgram::accept(NodeVisitor* visitor)
 {
     ScopeGuard scope(this, visitor);
-    scope.symbolRegistry->setFileScope(this->getScope());
+    if(scope.symbolRegistry)
+        scope.symbolRegistry->setFileScope(this->getScope());
     accept2(visitor, &NodeVisitor::visitProgram);
-    scope.symbolRegistry->setFileScope(nullptr);
+    if(scope.symbolRegistry)
+        scope.symbolRegistry->setFileScope(nullptr);
 }
 void ScopedProgram::setScope(SymbolScope* scope)
 {

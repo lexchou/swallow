@@ -790,51 +790,6 @@ static inline bool isBinaryExpr(const Token& token)
         return true;
     return false;
 }
-/*!
- * Rotate the AST tree if required
- */
-static int rotateRequired(const OperatorPtr& lhs, const OperatorPtr& rhs)
-{
-    if(lhs->getPrecedence() == rhs->getPrecedence())
-    {
-        //only right associativity is required because it's left associativity
-        return lhs->getAssociativity() == Associativity::Right;
-    }
-    return lhs->getPrecedence() < rhs->getPrecedence();
-}
-/*!
- * Sort the AST tree by precedence, if the precedence is the same, sort by associativity
- */
-static OperatorPtr sortExpression(OperatorPtr op)
-{
-    OperatorPtr root = op;
-    OperatorPtr c;
-    if(op->numChildren() != 2)
-        return op;
-    NodePtr left = op->get(0);
-    NodePtr right = op->get(1);
-    if(left && (c = std::dynamic_pointer_cast<Operator>(left)) && c->numChildren() == 2)
-    {
-        left = c = sortExpression(c);
-        if(rotateRequired(c, root))
-        {
-            //make c the root
-            NodePtr r = c->get(1);
-            c->set(1, root);
-            root->set(0, r);
-            root = c;
-            //sort new right child
-            NodePtr r2 = sortExpression(std::static_pointer_cast<Operator>(c->get(1)));
-            c->set(1, r2);
-            return root;
-        }
-    }
-    //sort old right child
-    c = std::dynamic_pointer_cast<Operator>(right);
-    if(c != NULL)
-        sortExpression(c);
-    return root;
-}
 /*
  expression → prefix-expression binary-expressions opt
  ‌ expression-list → expression | expression,expression-list
@@ -854,11 +809,7 @@ ExpressionPtr Parser::parseExpression()
             ret = parseBinaryExpression(ret);
         }
     }
-    if(OperatorPtr op = std::dynamic_pointer_cast<Operator>(ret))
-    {
-        //sort the tree by associativity and precedence
-        ret = sortExpression(op);
-    }
+
     return ret;
 }
 /*

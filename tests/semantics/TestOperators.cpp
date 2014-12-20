@@ -243,11 +243,11 @@ TEST(TestOperators, CustomOperators)
             L"}\n"
             L"func + (left: Vector2D, right: Vector2D) -> Vector2D {\n"
             L"    return Vector2D(x: left.x + right.x, y: left.y + right.y)\n"
-            L"}"
+            L"}\n"
             L"func += (inout left: Vector2D, right: Vector2D) {\n"
             L"    left = left + right\n"
             L"}\n"
-            L"prefix operator +++ {}"
+            L"prefix operator +++ {}\n"
             L"prefix func +++ (inout vector: Vector2D) -> Vector2D {\n"
             L"    vector += vector\n"
             L"    return vector\n"
@@ -304,15 +304,15 @@ TEST(TestOperators, CustomOperators2)
             L"}\n"
             L"func + (left: Vector2D, right: Vector2D) -> Vector2D {\n"
             L"    return Vector2D(x: left.x + right.x, y: left.y + right.y)\n"
-            L"}"
+            L"}\n"
             L"func += (inout left: Vector2D, right: Vector2D) {\n"
             L"    left = left + right\n"
             L"}\n"
-            L"prefix operator +++ {}"
+            L"prefix operator +++ {}\n"
             L"prefix func +++ (inout vector: Vector2D) -> Vector2D {\n"
             L"    vector += vector\n"
             L"    return vector\n"
-            L"}"
+            L"}\n"
             L"infix operator +- { associativity left precedence 140 }\n"
             L"func +- (left: Vector2D, right: Vector2D) -> Vector2D {\n"
             L"    return Vector2D(x: left.x + right.x, y: left.y - right.y)\n"
@@ -324,4 +324,32 @@ TEST(TestOperators, CustomOperators2)
     ASSERT_EQ(0, compilerResults.numResults());
     SymbolPtr plusMinusVector = scope->lookup(L"plusMinusVector");
     ASSERT_EQ(L"Vector2D", plusMinusVector->getType()->toString());
+}
+
+TEST(TestOperators, Precedence)
+{
+    SEMANTIC_ANALYZE(L"var a = 3 + 4 * 5");
+    //Without precedence it will be parsed into (* (+ 3 4) 5)
+    //we need to make sure it is (+ 3 (* 4 5))
+    ASSERT_EQ(0, compilerResults.numResults());
+    ValueBindingsPtr bindings = dynamic_pointer_cast<ValueBindings>(root->getStatement(0));
+    ASSERT_NOT_NULL(bindings);
+    ValueBindingPtr a = bindings->get(0);
+    BinaryOperatorPtr op = dynamic_pointer_cast<BinaryOperator>(a->getInitializer());
+    ASSERT_NOT_NULL(op);
+    ASSERT_EQ(L"+", op->getOperator());
+}
+
+TEST(TestOperators, Precedence2)
+{
+    SEMANTIC_ANALYZE(L"var a : Int = 0\n"
+            L"a = 3 + 4 * 5");
+    //Without precedence it will be parsed into (* (+ 3 4) 5)
+    //we need to make sure it is (+ 3 (* 4 5))
+    ASSERT_EQ(0, compilerResults.numResults());
+    AssignmentPtr assignment = dynamic_pointer_cast<Assignment>(root->getStatement(1));
+    ASSERT_NOT_NULL(assignment);
+    BinaryOperatorPtr op = dynamic_pointer_cast<BinaryOperator>(assignment->getRHS());
+    ASSERT_NOT_NULL(op);
+    ASSERT_EQ(L"+", op->getOperator());
 }

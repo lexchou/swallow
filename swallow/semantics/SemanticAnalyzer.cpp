@@ -50,30 +50,9 @@ using namespace std;
 
 
 SemanticAnalyzer::SemanticAnalyzer(SymbolRegistry* symbolRegistry, CompilerResults* compilerResults)
-:symbolRegistry(symbolRegistry), compilerResults(compilerResults)
+:SemanticPass(symbolRegistry, compilerResults)
 {
     numTemporaryNames = 0;
-}
-
-void SemanticAnalyzer::beforeVisiting(const NodePtr& node)
-{
-    parentNodes.push(parentNode);
-    parentNode = currentNode;
-    currentNode = node;
-
-}
-void SemanticAnalyzer::afterVisited(const NodePtr& node)
-{
-    currentNode = parentNode;
-    if(parentNodes.empty())
-    {
-        parentNode = nullptr;
-    }
-    else
-    {
-        parentNode = parentNodes.top();
-        parentNodes.pop();
-    }
 }
 
 std::wstring SemanticAnalyzer::generateTempName()
@@ -196,51 +175,6 @@ GenericDefinitionPtr SemanticAnalyzer::prepareGenericTypes(const GenericParamete
     return ret;
 }
 
-/*!
- * Abort the visitor
- */
-void SemanticAnalyzer::abort()
-{
-    throw Abort();
-}
-void SemanticAnalyzer::error(const NodePtr& node, int code, const std::vector<std::wstring>& items)
-{
-    assert(node != nullptr);
-    compilerResults->add(ErrorLevel::Error, *node->getSourceInfo(), code, items);
-    abort();
-}
-/*!
- * Outputs an compiler error
- */
-void SemanticAnalyzer::error(const NodePtr& node, int code, const std::wstring& item)
-{
-    ResultItems items = {item};
-    error(node, code, items);
-}
-void SemanticAnalyzer::error(const NodePtr& node, int code, const std::wstring& item1, const std::wstring& item2)
-{
-    ResultItems items = {item1, item2};
-    error(node, code, items);
-}
-void SemanticAnalyzer::error(const NodePtr& node, int code, const std::wstring& item1, const std::wstring& item2, const std::wstring& item3)
-{
-    ResultItems items = {item1, item2, item3};
-    error(node, code, items);
-}
-void SemanticAnalyzer::error(const NodePtr& node, int code, const std::wstring& item1, const std::wstring& item2, const std::wstring& item3, const std::wstring& item4)
-{
-    ResultItems items = {item1, item2, item3, item4};
-    error(node, code, items);
-}
-
-void SemanticAnalyzer::error(const NodePtr& node, int code)
-{
-    error(node, code, L"");
-}
-void SemanticAnalyzer::warning(const NodePtr& node, int code, const std::wstring& item)
-{
-    compilerResults->add(ErrorLevel::Warning, *node->getSourceInfo(), code, item);
-}
 
 std::wstring SemanticAnalyzer::toString(const NodePtr& node)
 {
@@ -515,10 +449,11 @@ TypePtr SemanticAnalyzer::finalTypeOfOptional(const TypePtr& optionalType)
     return finalTypeOfOptional(inner);
 }
 
+
 /*!
  * This will make implicit type conversion like expanding optional
  */
-ExpressionPtr SemanticAnalyzer::transformExpression(const TypePtr& contextualType, const ExpressionPtr& expr)
+ExpressionPtr SemanticAnalyzer::transformExpression(const TypePtr& contextualType, ExpressionPtr expr)
 {
     SCOPED_SET(t_hint, contextualType);
     expr->accept(this);

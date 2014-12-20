@@ -33,7 +33,7 @@ using namespace Swallow;
     
 TEST(TestStatement, testFor)
 {
-    PARSE_STATEMENT(L"for i = 0;i < 10; i++ {a = i * 2;println(a);}");
+    PARSE_STATEMENT(L"for i = 0;i < 10; i++ {a = i;println(a);}");
     ASSERT_NOT_NULL(root);
     ForLoopPtr loop = std::dynamic_pointer_cast<ForLoop>(root);
     ASSERT_NOT_NULL(loop);

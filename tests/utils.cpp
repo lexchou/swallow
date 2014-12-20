@@ -41,6 +41,9 @@
 #include "common/Errors.h"
 #include <semantics/GlobalScope.h>
 #include "common/SwallowUtils.h"
+#include "ast/utils/ASTHierachyDumper.h"
+#include "semantics/OperatorResolver.h"
+#include <iostream>
 
 using namespace std;
 USE_SWALLOW_NS
@@ -77,6 +80,17 @@ Swallow::ProgramPtr parseStatements(Swallow::CompilerResults& compilerResults, c
     dumpCompilerResults(compilerResults);
     return ret;
 }
+static void dumpAST(const NodePtr& node, const wchar_t* title)
+{
+    #if 0
+    if(node)
+    {
+        std::wcout<<title<<std::endl;
+        ASTHierachyDumper dumper(std::wcout);
+        node->accept(&dumper);
+    }
+    #endif
+}
 Swallow::ScopedProgramPtr analyzeStatement(Swallow::SymbolRegistry& registry, Swallow::CompilerResults& compilerResults, const char* func, const wchar_t* str)
 {
     using namespace Swallow;
@@ -94,12 +108,17 @@ Swallow::ScopedProgramPtr analyzeStatement(Swallow::SymbolRegistry& registry, Sw
         return ret;
     try
     {
+        dumpAST(ret, L"Before transform AST:");
+        OperatorResolver operatorResolver(&registry, &compilerResults);
         SemanticAnalyzer analyzer(&registry, &compilerResults);
+        ret->accept(&operatorResolver);
         ret->accept(&analyzer);
+
+        dumpAST(ret, L"Successed to transform AST< result:");
     }
     catch(const Abort&)
     {
-//ignore this
+        dumpAST(ret, L"Failed to transform AST< result:");
     }
 
     return ret;

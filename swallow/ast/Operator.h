@@ -45,12 +45,14 @@ public:
     void setAssociativity(Associativity::T a) { associativity = a;}
     int getPrecedence() const { return precedence;}
     void setPrecedence(int v) { precedence = v;}
-    
+    const std::wstring& getOperator() const { return op;}
+    void setOperator(const std::wstring& op) {this->op = op;}
 public:
     virtual int numChildren() = 0;
     virtual NodePtr get(int i) = 0;
     virtual void set(int i, const NodePtr& val) = 0;
 protected:
+    std::wstring op;
     OperatorType::T operatorType;
     Associativity::T associativity;
     int precedence;

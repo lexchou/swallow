@@ -1,4 +1,4 @@
-/* ScopeGuard.cpp --
+/* SemanticPass.cpp --
  *
  * Copyright (c) 2014, Lex Chou <lex at chou dot it>
  * All rights reserved.
@@ -27,37 +27,38 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "ScopeGuard.h"
-#include "ScopeOwner.h"
 #include "SemanticPass.h"
+#include <cassert>
+#include "ast/ast.h"
 #include "SymbolRegistry.h"
+
 USE_SWALLOW_NS
+using namespace std;
 
 
-ScopeGuard::ScopeGuard(ScopeOwner* owner, NodeVisitor* visitor)
-    :symbolRegistry(nullptr)
+SemanticPass::SemanticPass(SymbolRegistry* symbolRegistry, CompilerResults* compilerResults)
+        :CompilerResultEmitter(compilerResults), symbolRegistry(symbolRegistry)
 {
-    SemanticPass* semanticNodeVisitor = dynamic_cast<SemanticPass*>(visitor);
-    if(semanticNodeVisitor)
-    {
-        symbolRegistry = semanticNodeVisitor->getSymbolRegistry();
-        SymbolScope *scope = owner->getScope();
-        if(symbolRegistry->getCurrentScope() == scope)
-        {
-            //func and code block will shares the same scope,
-            //do not enter the same scope twice
-            symbolRegistry = nullptr;
-            return;
-        }
 
-        symbolRegistry->enterScope(scope);
-    }
-}
-ScopeGuard::~ScopeGuard()
-{
-    if(symbolRegistry)
-    {
-        symbolRegistry->leaveScope();
-    }
 }
 
+void SemanticPass::beforeVisiting(const NodePtr& node)
+{
+    parentNodes.push(parentNode);
+    parentNode = currentNode;
+    currentNode = node;
+
+}
+void SemanticPass::afterVisited(const NodePtr& node)
+{
+    currentNode = parentNode;
+    if(parentNodes.empty())
+    {
+        parentNode = nullptr;
+    }
+    else
+    {
+        parentNode = parentNodes.top();
+        parentNodes.pop();
+    }
+}

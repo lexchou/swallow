@@ -29,15 +29,12 @@
  */
 #ifndef SEMANTIC_ANALYZER_H
 #define SEMANTIC_ANALYZER_H
-#include "ast/NodeVisitor.h"
+#include "SemanticPass.h"
 #include "Type.h"
-#include <stack>
 #include <list>
 
 SWALLOW_NS_BEGIN
 
-class SymbolRegistry;
-class CompilerResults;
 class TypeDeclaration;
 class Expression;
 class Pattern;
@@ -62,13 +59,10 @@ enum PatternAccessibility
     AccessibilityConstant,
     AccessibilityVariable
 };
-class SWALLOW_EXPORT SemanticAnalyzer : public NodeVisitor
+class SWALLOW_EXPORT SemanticAnalyzer : public SemanticPass
 {
 public:
     SemanticAnalyzer(SymbolRegistry* symbolRegistry, CompilerResults* compilerResults);
-public:
-    virtual void beforeVisiting(const NodePtr& node);
-    virtual void afterVisited(const NodePtr& node);
 public:
     virtual void visitAssignment(const AssignmentPtr& node) override;
     virtual void visitComputedProperty(const ComputedPropertyPtr& node) override;
@@ -87,11 +81,11 @@ public:
     virtual void visitParameter(const ParameterPtr& node) override;
     virtual void visitDeinit(const DeinitializerDefPtr& node) override;
     virtual void visitInit(const InitializerDefPtr& node) override;
+    virtual void visitCodeBlock(const CodeBlockPtr& node) override;
     virtual void visitParameters(const ParametersPtr& node) override;
 public:
 
     virtual void visitFunctionCall(const FunctionCallPtr& node) override;
-    virtual void visitOperator(const OperatorDefPtr& node) override;
     virtual void visitValueBinding(const ValueBindingPtr& node) override;
     virtual void visitString(const StringLiteralPtr& node) override;
     virtual void visitStringInterpolation(const StringInterpolationPtr& node);
@@ -130,7 +124,6 @@ public:// Condition control flow
     virtual void visitExtension(const ExtensionDefPtr& node) override;
     virtual void visitProtocol(const ProtocolDefPtr& node) override;
     */
-    SymbolRegistry* getSymbolRegistry() { return symbolRegistry;}
 public://Syntax sugar for type
     virtual void visitOptionalType(const OptionalTypePtr& node);
 private:
@@ -210,35 +203,12 @@ private:
     /*!
      * This will make implicit type conversion like expanding optional
      */
-    ExpressionPtr transformExpression(const TypePtr& contextualType, const ExpressionPtr& expr);
+    ExpressionPtr transformExpression(const TypePtr& contextualType, ExpressionPtr expr);
 
     /*!
      * This will generate a unique temporary name for symbol
      */
     std::wstring generateTempName();
-public:
-    /*!
-    * Abort the visitor
-    */
-    void abort();
-
-    /*!
-     * Outputs an compiler error
-     */
-    void error(const NodePtr& node, int code);
-    void error(const NodePtr& node, int code, const std::vector<std::wstring>& items);
-    void error(const NodePtr& node, int code, const std::wstring& item);
-    void error(const NodePtr& node, int code, const std::wstring& item1, const std::wstring& item2);
-    void error(const NodePtr& node, int code, const std::wstring& item1, const std::wstring& item2, const std::wstring& item3);
-    void error(const NodePtr& node, int code, const std::wstring& item1, const std::wstring& item2, const std::wstring& item3, const std::wstring& item4);
-
-
-    /*!
-     * Outputs an compiler error
-     */
-    void warning(const NodePtr& node, int code, const std::wstring& item = std::wstring());
-
-
     /*!
      * Convert a AST TypeNode into symboled Type
      */
@@ -259,15 +229,9 @@ public:
 private:
     TypePtr lookupTypeImpl(const TypeNodePtr& type, bool supressErrors);
 protected:
-    SymbolRegistry* symbolRegistry;
-    CompilerResults* compilerResults;
-private:
     //hint for parsing Array/tuple/dictionary literal
     TypePtr t_hint;
     TypePtr currentFunction;
-    NodePtr parentNode;
-    NodePtr currentNode;
-    std::stack<NodePtr> parentNodes;
     int numTemporaryNames;
 private:
     TypePtr currentType;

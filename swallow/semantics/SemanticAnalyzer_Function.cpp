@@ -451,3 +451,14 @@ void SemanticAnalyzer::visitInit(const InitializerDefPtr& node)
     node->getBody()->accept(this);
 }
 
+void SemanticAnalyzer::visitCodeBlock(const CodeBlockPtr &node)
+{
+    auto iter = node->begin();
+    for(; iter != node->end(); iter++)
+    {
+        StatementPtr st = *iter;
+        if(BinaryOperatorPtr op = dynamic_pointer_cast<BinaryOperator>(st))
+            *iter = transformExpression(nullptr, op);
+        st->accept(this);
+    }
+}

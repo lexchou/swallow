@@ -77,7 +77,7 @@ struct SWALLOW_EXPORT Errors
         E_INVALID_USE_OF_A_TO_CALL_A_VALUE_OF_NON_FUNCTION_TYPE_B_2,//invalid use of '%0' to call a value of non-function type '%1'
         E_UNMATCHED_PARAMETERS, // Unmatched number of supplied parameters
         E_UNMATCHED_PARAMETER_1, // Unmatched type of parameter %0
-        E_NO_MATCHED_OVERLOAD, // No matched overload found
+        E_NO_MATCHED_OVERLOAD_FOR_A_1, // No matched overload found
         E_MISSING_ARGUMENT_LABEL_IN_CALL_1,// Missing argument label '%0:' in call
         E_EXTRANEOUS_ARGUMENT_LABEL_IN_CALL_1, //Extraneous argument label '%0:' in call
         E_EXTRANEOUS_ARGUMENT, //Extraneous argument in call

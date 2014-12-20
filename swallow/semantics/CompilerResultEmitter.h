@@ -1,4 +1,4 @@
-/* ScopeGuard.cpp --
+/* CompilerResultEmitter.h --
  *
  * Copyright (c) 2014, Lex Chou <lex at chou dot it>
  * All rights reserved.
@@ -27,37 +27,49 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "ScopeGuard.h"
-#include "ScopeOwner.h"
-#include "SemanticPass.h"
-#include "SymbolRegistry.h"
-USE_SWALLOW_NS
+#ifndef COMPILER_RESULT_EMITTER_H
+#define COMPILER_RESULT_EMITTER_H
+#include "swallow_conf.h"
+#include <vector>
+#include <string>
 
+SWALLOW_NS_BEGIN
 
-ScopeGuard::ScopeGuard(ScopeOwner* owner, NodeVisitor* visitor)
-    :symbolRegistry(nullptr)
+class CompilerResults;
+typedef std::shared_ptr<class Node> NodePtr;
+class SWALLOW_EXPORT CompilerResultEmitter
 {
-    SemanticPass* semanticNodeVisitor = dynamic_cast<SemanticPass*>(visitor);
-    if(semanticNodeVisitor)
-    {
-        symbolRegistry = semanticNodeVisitor->getSymbolRegistry();
-        SymbolScope *scope = owner->getScope();
-        if(symbolRegistry->getCurrentScope() == scope)
-        {
-            //func and code block will shares the same scope,
-            //do not enter the same scope twice
-            symbolRegistry = nullptr;
-            return;
-        }
+public:
+    CompilerResultEmitter(CompilerResults* compilerResults);
+public:
+    /*!
+    * Abort the visitor
+    */
+    void abort();
 
-        symbolRegistry->enterScope(scope);
-    }
-}
-ScopeGuard::~ScopeGuard()
-{
-    if(symbolRegistry)
-    {
-        symbolRegistry->leaveScope();
-    }
-}
+    /*!
+     * Outputs an compiler error
+     */
+    void error(const NodePtr& node, int code);
+    void error(const NodePtr& node, int code, const std::vector<std::wstring>& items);
+    void error(const NodePtr& node, int code, const std::wstring& item);
+    void error(const NodePtr& node, int code, const std::wstring& item1, const std::wstring& item2);
+    void error(const NodePtr& node, int code, const std::wstring& item1, const std::wstring& item2, const std::wstring& item3);
+    void error(const NodePtr& node, int code, const std::wstring& item1, const std::wstring& item2, const std::wstring& item3, const std::wstring& item4);
 
+
+    /*!
+     * Outputs an compiler error
+     */
+    void warning(const NodePtr& node, int code, const std::wstring& item = std::wstring());
+
+protected:
+    CompilerResults* compilerResults;
+};
+
+SWALLOW_NS_END
+
+
+
+
+#endif//OPERATOR_RESOLVER_H

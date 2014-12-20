@@ -350,7 +350,7 @@ SymbolPtr SemanticAnalyzer::getOverloadedFunction(const NodePtr& node, const std
     }
     if(candidates.empty())
     {
-        error(node, Errors::E_NO_MATCHED_OVERLOAD);
+        error(node, Errors::E_NO_MATCHED_OVERLOAD_FOR_A_1, funcs[0]->getName());
         abort();
         return nullptr;
     }
@@ -1000,33 +1000,7 @@ void SemanticAnalyzer::visitTuple(const TuplePtr& node)
     node->setType(type);
 }
 
-void SemanticAnalyzer::visitOperator(const OperatorDefPtr& node)
-{
-    Node* owner = symbolRegistry->getCurrentScope()->getOwner();
-    if(owner && owner->getNodeType() != NodeType::Program)
-    {
-        error(node, Errors::E_A_MAY_ONLY_BE_DECLARED_AT_FILE_SCOPE_1, L"operator");
-        abort();
-        return;
-    }
-    //register operator
-    if(node->getType() == OperatorType::InfixBinary)
-    {
-        //check precedence range
-        if(node->getPrecedence() < 0 || node->getPrecedence() > 255)
-        {
-            error(node, Errors::E_OPERATOR_PRECEDENCE_OUT_OF_RANGE);
-            abort();
-        }
-    }
 
-    bool r = symbolRegistry->registerOperator(node->getName(), node->getType(), node->getAssociativity(), node->getPrecedence());
-    if(!r)
-    {
-        error(node, Errors::E_OPERATOR_REDECLARED);
-        abort();
-    }
-}
 void SemanticAnalyzer::visitConditionalOperator(const ConditionalOperatorPtr& node)
 {
 

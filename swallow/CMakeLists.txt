@@ -71,6 +71,9 @@ SET(SWALLOW_SRC
     semantics/SemanticAnalyzer_Variables.cpp
     semantics/SemanticAnalyzer_Expression.cpp
     semantics/SemanticAnalyzer_Condition.cpp
+    semantics/OperatorResolver.cpp
+    semantics/CompilerResultEmitter.cpp
+    semantics/SemanticPass.cpp
 
     ast/Node.cpp
     ast/Program.cpp
