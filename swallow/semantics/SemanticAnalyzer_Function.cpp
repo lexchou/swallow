@@ -215,11 +215,11 @@ void SemanticAnalyzer::visitSubscript(const SubscriptDefPtr &node)
     TypePtr retType = lookupType(node->getReturnType());
     if(!node->getGetter() && !node->getSetter())
         return;
-    FunctionOverloadedSymbolPtr funcs = currentType->getSubscript();
+    FunctionOverloadedSymbolPtr funcs = (currentExtension ? currentExtension : currentType)->getSubscript();
     if(!funcs)
     {
         funcs = FunctionOverloadedSymbolPtr(new FunctionOverloadedSymbol(L"subscript"));
-        static_pointer_cast<TypeBuilder>(currentType)->addMember(funcs);
+        declarationFinished(funcs->getName(), funcs);
     }
 
     if(node->getGetter())
@@ -388,6 +388,8 @@ void SemanticAnalyzer::visitFunction(const FunctionDefPtr& node)
         sym = func;
     }
     //put it into type's SymbolMap
+    declarationFinished(sym->getName(), func);
+    /*
     if(TypeDeclaration* declaration = dynamic_cast<TypeDeclaration*>(symbolRegistry->getCurrentScope()->getOwner()))
     {
         if(declaration->getType())
@@ -396,7 +398,7 @@ void SemanticAnalyzer::visitFunction(const FunctionDefPtr& node)
             type->addMember(sym->getName(), func);
         }
     }
-
+*/
 
 
 
@@ -442,7 +444,8 @@ void SemanticAnalyzer::visitInit(const InitializerDefPtr& node)
     if(!inits)
     {
         inits = FunctionOverloadedSymbolPtr(new FunctionOverloadedSymbol(L"init"));
-        type->setInitializer(inits);
+        //type->setInitializer(inits);
+        declarationFinished(inits->getName(), inits);
     }
     FunctionSymbolPtr init(new FunctionSymbol(type->getName(), funcType, nullptr));
     inits->add(init);

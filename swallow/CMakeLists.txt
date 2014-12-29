@@ -79,7 +79,6 @@ SET(SWALLOW_SRC
     ast/Program.cpp
     ast/NodeVisitor.cpp
     ast/NodeSerializer.cpp
-    ast/NodeVisitorDecorator.cpp
     ast/Expression.cpp
     ast/Pattern.cpp
     ast/Comment.cpp
@@ -100,7 +99,6 @@ SET(SWALLOW_SRC
     ast/FunctionCall.cpp
     ast/InitializerReference.cpp
     ast/SelfExpression.cpp
-    ast/DynamicType.cpp
     ast/ForcedValue.cpp
     ast/OptionalChaining.cpp
     ast/IntegerLiteral.cpp
@@ -132,13 +130,14 @@ SET(SWALLOW_SRC
 
     ast/TypeNode.cpp
     ast/TypeIdentifier.cpp
+    ast/ImplicitlyUnwrappedOptional.cpp
+    ast/ProtocolComposition.cpp
     ast/FunctionType.cpp
     ast/ArrayType.cpp
     ast/OptionalType.cpp
-    ast/ImplicitlyUnwrappedOptional.cpp
     ast/TupleType.cpp
-    ast/ProtocolComposition.cpp
     ast/DictionaryType.cpp
+    ast/DynamicType.cpp
 
     ast/DictionaryLiteral.cpp
     ast/ArrayLiteral.cpp

@@ -211,65 +211,76 @@ void GlobalScope::initPrimitiveTypes()
 
 
     //Types
-    DECLARE_TYPE(Aggregate, Int8);
+    DECLARE_TYPE(Struct, Int8);
     IMPLEMENTS(SignedIntegerType);
 
-    DECLARE_TYPE(Aggregate, UInt8);
+    DECLARE_TYPE(Struct, UInt8);
     IMPLEMENTS(UnsignedIntegerType);
 
-    DECLARE_TYPE(Aggregate, Int16);
+    DECLARE_TYPE(Struct, Int16);
     IMPLEMENTS(SignedIntegerType);
 
-    DECLARE_TYPE(Aggregate, UInt16);
+    DECLARE_TYPE(Struct, UInt16);
     IMPLEMENTS(UnsignedIntegerType);
 
-    DECLARE_TYPE(Aggregate, Int32);
+    DECLARE_TYPE(Struct, Int32);
     IMPLEMENTS(SignedIntegerType);
 
-    DECLARE_TYPE(Aggregate, UInt32);
+    DECLARE_TYPE(Struct, UInt32);
     IMPLEMENTS(UnsignedIntegerType);
 
-    DECLARE_TYPE(Aggregate, Int64);
+    DECLARE_TYPE(Struct, Int64);
     IMPLEMENTS(SignedIntegerType);
 
-    DECLARE_TYPE(Aggregate, UInt64);
+    DECLARE_TYPE(Struct, UInt64);
     IMPLEMENTS(UnsignedIntegerType);
 
-    DECLARE_TYPE(Aggregate, Int);
+    DECLARE_TYPE(Struct, Int);
     IMPLEMENTS(SignedIntegerType);
 
-    DECLARE_TYPE(Aggregate, UInt);
+    DECLARE_TYPE(Struct, UInt);
     IMPLEMENTS(UnsignedIntegerType);
 
     DECLARE_TYPE(Struct, _OptionalNilComparisonType);
     IMPLEMENTS(NilLiteralConvertible);
 
 
-    DECLARE_TYPE(Aggregate, Bool);
+    DECLARE_TYPE(Struct, Bool);
     IMPLEMENTS(BooleanType);
     IMPLEMENTS(BooleanLiteralConvertible);
     IMPLEMENTS(Equatable)
     IMPLEMENTS(Hashable)
 
-    DECLARE_TYPE(Aggregate, Float);
+    DECLARE_TYPE(Struct, Float);
     IMPLEMENTS(FloatingPointType);
     IMPLEMENTS(IntegerLiteralConvertible);
     IMPLEMENTS(FloatLiteralConvertible);
 
-    DECLARE_TYPE(Aggregate, Double);
+    DECLARE_TYPE(Struct, Double);
     IMPLEMENTS(FloatingPointType);
     IMPLEMENTS(IntegerLiteralConvertible);
     IMPLEMENTS(FloatLiteralConvertible);
 
-    DECLARE_TYPE(Aggregate, String);
+    DECLARE_TYPE(Struct, String);
     IMPLEMENTS(StringLiteralConvertible);
     IMPLEMENTS(UnicodeScalarLiteralConvertible);
     IMPLEMENTS(ExtendedGraphemeClusterLiteralConvertible);
     IMPLEMENTS(Hashable);
     IMPLEMENTS(Equatable);
     IMPLEMENTS(StringInterpolationConvertible);
+    {
+        {
+            std::vector<Type::Parameter> params = {Type::Parameter(_String)};
+            TypePtr t_hasPrefix = Type::newFunction(params, _Bool, false, nullptr);
 
-    DECLARE_TYPE(Aggregate, Character);
+            FunctionSymbolPtr hasPrefix(new FunctionSymbol(L"hasPrefix", t_hasPrefix, nullptr));
+            type->addMember(hasPrefix);
+        }
+    }
+
+
+
+    DECLARE_TYPE(Struct, Character);
     IMPLEMENTS(ExtendedGraphemeClusterLiteralConvertible);
     IMPLEMENTS(Equatable);
     IMPLEMENTS(Hashable);
@@ -277,17 +288,6 @@ void GlobalScope::initPrimitiveTypes()
 
 
     addSymbol(L"Void", _Void = Type::newTuple(vector<TypePtr>()));
-
-    {
-        TypeBuilderPtr builder = dynamic_pointer_cast<TypeBuilder>(_String);
-        {
-            std::vector<Type::Parameter> params = {Type::Parameter(_String)};
-            TypePtr t_hasPrefix = Type::newFunction(params, _Bool, false, nullptr);
-
-            FunctionSymbolPtr hasPrefix(new FunctionSymbol(L"hasPrefix", t_hasPrefix, nullptr));
-            builder->addMember(hasPrefix);
-        }
-    }
 
     {
         TypePtr T = Type::newType(L"T", Type::GenericParameter);

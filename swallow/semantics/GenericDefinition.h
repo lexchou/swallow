@@ -88,6 +88,8 @@ public:
     int validate(const std::wstring& typeName, const TypePtr& typeToTest, TypePtr& expectedType) const;
 
     const std::vector<Parameter> getParameters()const;
+public:
+    static bool equals(const GenericDefinitionPtr& a, const GenericDefinitionPtr& b);
 private:
     int validate(const NodeDefPtr& node, const TypePtr& typeToTest, TypePtr& expectedType) const;
 private:

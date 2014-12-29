@@ -157,6 +157,13 @@ struct SWALLOW_EXPORT Errors
         E_OPERATOR_MUST_BE_DECLARED_AS_PREFIX_POSTFIX_OR_INFIX,//Operator must be declared as 'prefix', 'postfix', or 'infix'
         E_A_MAY_ONLY_BE_DECLARED_AT_FILE_SCOPE_1, //'%0' may only be declared at file scope
 
+
+
+        E_GENERIC_ARGUMENTS_ARE_NOT_ALLOWED_ON_AN_EXTENSION,//Generic arguments are not allowed on an extension
+        E_PROTOCOL_A_CANNOT_BE_EXTENDED_1,//Protocol '%0' cannot be extended
+        E_NON_NOMINAL_TYPE_A_CANNOT_BE_EXTENDED_1,//Non-nominal type '%0' cannot be extended
+        E_EXTENSIONS_MAY_NOT_CONTAIN_STORED_PROPERTIES,//Extensions may not contain stored properties
+
         W_PARAM_CAN_BE_EXPRESSED_MORE_SUCCINCTLY_1, // '%0 %0' can be expressed more succinctly as '#%0'
         W_EXTRANEOUS_SHARTP_IN_PARAMETER_1 //Extraneous '#' in parameter: '%0' is already the keyword argument name
         //linking errors

@@ -155,3 +155,14 @@ bool GenericDefinition::equals(const GenericDefinitionPtr& rhs) const
 
     return true;
 }
+
+bool GenericDefinition::equals(const GenericDefinitionPtr& a, const GenericDefinitionPtr& b)
+{
+    if(a == b)
+        return true;
+    if(a == nullptr || b == nullptr)
+        return false;
+    if(a->equals(b))
+        return true;
+    return false;
+}

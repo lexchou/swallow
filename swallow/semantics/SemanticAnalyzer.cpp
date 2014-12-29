@@ -517,3 +517,22 @@ std::vector<SymbolPtr> SemanticAnalyzer::allFunctions(const std::wstring& name, 
     }
     return std::move(ret);
 }
+
+/*!
+ * Declaration finished, added it as a member to current type or current type extension.
+ */
+void SemanticAnalyzer::declarationFinished(const std::wstring& name, const SymbolPtr& decl)
+{
+    //if(currentExtension)
+    {
+    //    currentExtension->addMember(name, decl);
+    }
+    if(currentType)
+    {
+        TypeBuilderPtr builder = static_pointer_cast<TypeBuilder>(currentType);
+        if(name == L"init")
+            builder->setInitializer(static_pointer_cast<FunctionOverloadedSymbol>(decl));
+        else
+            builder->addMember(name, decl);
+    }
+}

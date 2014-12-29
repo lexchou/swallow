@@ -128,7 +128,7 @@ public://Syntax sugar for type
     virtual void visitOptionalType(const OptionalTypePtr& node);
 private:
     void visitAccessor(const CodeBlockPtr& accessor, const ParametersPtr& params, const SymbolPtr& setter);
-    TypePtr defineType(const std::shared_ptr<TypeDeclaration>& node, Type::Category category);
+    TypePtr defineType(const std::shared_ptr<TypeDeclaration>& node);
     void prepareDefaultInitializers(const TypePtr& type);
     //Verify each symbol in the tuple is initialized
     void verifyTuplePattern(const PatternPtr& pattern);
@@ -226,6 +226,11 @@ private:
      * with given mask will be returned
      */
     std::vector<SymbolPtr> allFunctions(const std::wstring& name, int flagMasks = 0, bool allScopes = true);
+
+    /*!
+     * Declaration finished, added it as a member to current type or current type extension.
+     */
+    void declarationFinished(const std::wstring& name, const SymbolPtr& decl);
 private:
     TypePtr lookupTypeImpl(const TypeNodePtr& type, bool supressErrors);
 protected:
@@ -235,6 +240,7 @@ protected:
     int numTemporaryNames;
 private:
     TypePtr currentType;
+    TypePtr currentExtension;
 };
 
 SWALLOW_NS_END

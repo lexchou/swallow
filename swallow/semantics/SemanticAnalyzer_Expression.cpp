@@ -390,7 +390,7 @@ SymbolPtr SemanticAnalyzer::visitFunctionCall(const std::vector<SymbolPtr>& func
             //it must be a function type to call
             TypePtr type = symbol->getType();
             assert(type != nullptr);
-            if(type->getCategory() != Type::Function && type->getCategory() != Type::Closure)
+            if(type->getCategory() != Type::Function)
             {
                 error(node, Errors::E_INVALID_USE_OF_A_TO_CALL_A_VALUE_OF_NON_FUNCTION_TYPE_B_2, toString(node), type->toString());
                 abort();

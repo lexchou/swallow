@@ -78,11 +78,32 @@ static bool isLiteralExpression(const ExpressionPtr& expr)
     }
     return false;
 }
-TypePtr SemanticAnalyzer::defineType(const std::shared_ptr<TypeDeclaration>& node, Type::Category category)
+TypePtr SemanticAnalyzer::defineType(const std::shared_ptr<TypeDeclaration>& node)
 {
     TypeIdentifierPtr id = node->getIdentifier();
     SymbolScope* scope = NULL;
     TypePtr type;
+
+    //Analyze the type's category
+    Type::Category category;
+    switch(node->getNodeType())
+    {
+        case NodeType::Enum:
+            category = Type::Enum;
+            break;
+        case NodeType::Class:
+            category = Type::Class;
+            break;
+        case NodeType::Struct:
+            category = Type::Struct;
+            break;
+        case NodeType::Protocol:
+            category = Type::Protocol;
+            break;
+        default:
+            assert(0 && "Impossible to execute here.");
+    }
+
     //it's inside the type's scope, so need to access parent scope;
     SymbolScope* typeScope = symbolRegistry->getCurrentScope();
     SymbolScope* currentScope = typeScope->getParentScope();
@@ -191,8 +212,7 @@ TypePtr SemanticAnalyzer::defineType(const std::shared_ptr<TypeDeclaration>& nod
     node->setType(type);
     currentScope->addSymbol(type);
 
-    if(currentType)
-        static_pointer_cast<TypeBuilder>(currentType)->addMember(type->getName(), type);
+    declarationFinished(type->getName(), type);
     return type;
 }
 
@@ -276,16 +296,13 @@ void SemanticAnalyzer::visitTypeAlias(const TypeAliasPtr& node)
         //static_pointer_cast<TypeBuilder>(type)->setInnerType(innerType);
     }
     currentScope->addSymbol(node->getName(), type);
-    if(currentType)
-    {
-        static_pointer_cast<TypeBuilder>(currentType)->addMember(node->getName(), type);
-    }
+    declarationFinished(node->getName(), type);
 }
 
 
 void SemanticAnalyzer::visitClass(const ClassDefPtr& node)
 {
-    TypePtr type = defineType(node, Type::Class);
+    TypePtr type = defineType(node);
 
     SCOPED_SET(currentType, type);
 
@@ -297,7 +314,7 @@ void SemanticAnalyzer::visitClass(const ClassDefPtr& node)
 
 void SemanticAnalyzer::visitStruct(const StructDefPtr& node)
 {
-    TypeBuilderPtr type = static_pointer_cast<TypeBuilder>(defineType(node, Type::Struct));
+    TypePtr type = defineType(node);
 
     SCOPED_SET(currentType, type);
 
@@ -355,7 +372,7 @@ void SemanticAnalyzer::visitStruct(const StructDefPtr& node)
         {
             if(entry.first == L"Self")
                 continue;
-            type->addMember(entry.first, entry.second);
+            static_pointer_cast<TypeBuilder>(type)->addMember(entry.first, entry.second);
         }
     }
 
@@ -383,7 +400,7 @@ static void makeRawRepresentable(const TypeBuilderPtr& type, GlobalScope* global
 }
 void SemanticAnalyzer::visitEnum(const EnumDefPtr& node)
 {
-    TypeBuilderPtr type = static_pointer_cast<TypeBuilder>(defineType(node, Type::Enum));
+    TypeBuilderPtr type = static_pointer_cast<TypeBuilder>(defineType(node));
     NodeVisitor::visitEnum(node);
     GlobalScope* global = symbolRegistry->getGlobalScope();
     //check if it's raw value enum
@@ -474,7 +491,7 @@ void SemanticAnalyzer::visitEnum(const EnumDefPtr& node)
 }
 void SemanticAnalyzer::visitProtocol(const ProtocolDefPtr& node)
 {
-    TypePtr type = defineType(node, Type::Protocol);
+    TypePtr type = defineType(node);
 
     SCOPED_SET(currentType, type);
 
@@ -482,8 +499,39 @@ void SemanticAnalyzer::visitProtocol(const ProtocolDefPtr& node)
 }
 void SemanticAnalyzer::visitExtension(const ExtensionDefPtr& node)
 {
-    NodeVisitor::visitExtension(node);
+    if(parentNode && parentNode->getNodeType() != NodeType::Program)
+    {
+        error(node, Errors::E_A_MAY_ONLY_BE_DECLARED_AT_FILE_SCOPE_1, node->getIdentifier()->getName());
+        return;
+    }
+    if(node->getGenericParametersDef())
+    {
+        error(node, Errors::E_GENERIC_ARGUMENTS_ARE_NOT_ALLOWED_ON_AN_EXTENSION);
+        return;
+    }
+    TypePtr type = lookupType(node->getIdentifier());
+    Type::Category category = type->getCategory();
+    if(category == Type::Protocol)
+    {
+        error(node, Errors::E_PROTOCOL_A_CANNOT_BE_EXTENDED_1, type->getName());
+        return;
+    }
+    if(category != Type::Struct && category != Type::Enum && category != Type::Class)
+    {
+        error(node, Errors::E_NON_NOMINAL_TYPE_A_CANNOT_BE_EXTENDED_1, node->getIdentifier()->getName());
+        return;
+    }
 
+    SCOPED_SET(currentType, type);
+    for(const DeclarationPtr& decl : *node)
+    {
+        if(decl->getNodeType() == NodeType::ValueBindings)
+        {
+            error(node, Errors::E_EXTENSIONS_MAY_NOT_CONTAIN_STORED_PROPERTIES);
+            continue;
+        }
+        decl->accept(this);
+    }
 }
 
 
@@ -567,7 +615,7 @@ void SemanticAnalyzer::verifyProtocolFunction(const TypePtr& type, const TypePtr
         //verify if they're the same type
         TypePtr funcType = func->getType();
         assert(funcType != nullptr);
-        if(*funcType != *expectedType)
+        if(!Type::equals(funcType, expectedType))
         {
             error(type->getReference(),  Errors::E_TYPE_DOES_NOT_CONFORM_TO_PROTOCOL_UNIMPLEMENTED_FUNCTION_3, type->getName(), protocol->getName(), expected->getName());
         }
@@ -579,7 +627,7 @@ void SemanticAnalyzer::verifyProtocolFunction(const TypePtr& type, const TypePtr
         bool found = false;
         for(const FunctionSymbolPtr& func : *funcs)
         {
-            if(*func->getType() == *expectedType)
+            if(Type::equals(func->getType(), expectedType))
             {
                 found = true;
                 break;

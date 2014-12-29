@@ -239,7 +239,7 @@ void SemanticAnalyzer::registerSymbol(const SymbolPlaceHolderPtr& symbol)
         case NodeType::Extension:
         case NodeType::Enum:
             assert(currentType != nullptr);
-            static_pointer_cast<TypeBuilder>(currentType)->addMember(symbol->getName(), symbol);
+            declarationFinished(symbol->getName(), symbol);
             break;
         default:
             break;

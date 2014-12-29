@@ -1,4 +1,4 @@
-/* FunctionOverloadedSymbol.cpp --
+/* TestExtension.cpp --
  *
  * Copyright (c) 2014, Lex Chou <lex at chou dot it>
  * All rights reserved.
@@ -27,35 +27,53 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "FunctionOverloadedSymbol.h"
-#include "FunctionSymbol.h"
-USE_SWALLOW_NS
+#include "../utils.h"
+#include "semantics/SymbolRegistry.h"
+#include "semantics/Symbol.h"
+#include "semantics/ScopedNodes.h"
+#include "semantics/Type.h"
+#include "common/Errors.h"
+#include "semantics/GlobalScope.h"
+#include "semantics/GenericArgument.h"
 
-FunctionOverloadedSymbol::FunctionOverloadedSymbol(const std::wstring& name)
-:name(name)
-{
+using namespace Swallow;
+using namespace std;
 
-}
-FunctionOverloadedSymbol::FunctionOverloadedSymbol()
+TEST(TestExtension, ExtensionWithIncorrectType)
 {
-
-}
-const std::wstring& FunctionOverloadedSymbol::getName() const
-{
-    return name;
-}
-int FunctionOverloadedSymbol::numOverloads()const
-{
-    return functions.size();
+    SEMANTIC_ANALYZE(L"extension SomeType { \n"
+            L"}");
+    ASSERT_EQ(1, compilerResults.numResults());
+    auto res = compilerResults.getResult(0);
+    ASSERT_EQ(Errors::E_USE_OF_UNDECLARED_TYPE_1, res.code);
 }
 
 
-void FunctionOverloadedSymbol::add(const FunctionSymbolPtr& func)
+TEST(TestExtension, ExtensionUnderBadScope)
 {
-    functions.push_back(func);
+    SEMANTIC_ANALYZE(L"class SomeType { \n"
+            L"  extension SomeType {}\n"
+            L"}");
+    ASSERT_EQ(1, compilerResults.numResults());
+    auto res = compilerResults.getResult(0);
+    ASSERT_EQ(Errors::E_A_MAY_ONLY_BE_DECLARED_AT_FILE_SCOPE_1, res.code);
 }
-void FunctionOverloadedSymbol::add(const FunctionOverloadedSymbolPtr& funcs)
+
+
+TEST(TestExtension, ExtensionOfProtocol)
 {
-    for(const FunctionSymbolPtr& func : funcs->functions)
-        functions.push_back(func);
+    SEMANTIC_ANALYZE(L"protocol SomeProtocol {} \n"
+            L"  extension SomeProtocol {}\n");
+    ASSERT_EQ(1, compilerResults.numResults());
+    auto res = compilerResults.getResult(0);
+    ASSERT_EQ(Errors::E_PROTOCOL_A_CANNOT_BE_EXTENDED_1, res.code);
+}
+
+
+TEST(TestExtension, ExtensionCannotContainStoredProperties)
+{
+    SEMANTIC_ANALYZE(L"  extension Int {var a : Int }\n");
+    ASSERT_EQ(1, compilerResults.numResults());
+    auto res = compilerResults.getResult(0);
+    ASSERT_EQ(Errors::E_EXTENSIONS_MAY_NOT_CONTAIN_STORED_PROPERTIES, res.code);
 }

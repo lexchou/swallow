@@ -96,6 +96,7 @@ public:
     static TypePtr newSpecializedType(const TypePtr& innerType, const GenericArgumentPtr& arguments);
     static TypePtr newSpecializedType(const TypePtr& innerType, const std::map<std::wstring, TypePtr>& arguments);
     static TypePtr newSpecializedType(const TypePtr& innerType, const TypePtr& argument);
+    static TypePtr newExtension(const TypePtr& innerType);
     /*!
      * A type place holder for protocol's typealias
      */
