@@ -47,6 +47,17 @@
 
 using namespace std;
 USE_SWALLOW_NS
+static bool opt_dumpAST = false;
+void testInit(int argc, char** argv)
+{
+    for(int i = 1; i < argc; i++)
+    {
+        if(!strcmp("--ast", argv[i]))
+        opt_dumpAST = true;
+    }
+    testing::InitGoogleTest(&argc, argv);
+}
+
 
 wstring readFile(const char* fileName)
 {
@@ -82,14 +93,12 @@ Swallow::ProgramPtr parseStatements(Swallow::CompilerResults& compilerResults, c
 }
 static void dumpAST(const NodePtr& node, const wchar_t* title)
 {
-    #if 0
-    if(node)
+    if(node && opt_dumpAST)
     {
         std::wcout<<title<<std::endl;
         ASTHierachyDumper dumper(std::wcout);
         node->accept(&dumper);
     }
-    #endif
 }
 Swallow::ScopedProgramPtr analyzeStatement(Swallow::SymbolRegistry& registry, Swallow::CompilerResults& compilerResults, const char* func, const wchar_t* str)
 {

@@ -77,3 +77,29 @@ TEST(TestExtension, ExtensionCannotContainStoredProperties)
     auto res = compilerResults.getResult(0);
     ASSERT_EQ(Errors::E_EXTENSIONS_MAY_NOT_CONTAIN_STORED_PROPERTIES, res.code);
 }
+
+
+TEST(TestExtension, ExtensionOfDouble)
+{
+    SEMANTIC_ANALYZE(L"protocol SomeProtocol {} \n"
+            L"  extension Double : SomeProtocol {}\n");
+    ASSERT_EQ(0, compilerResults.numResults());
+}
+
+TEST(TestExtension, ExtensionOfDouble2)
+{
+    SEMANTIC_ANALYZE(L"extension Double {\n"
+            L"    var km: Double { return self * 1_000.0 }\n"
+            L"    var m: Double { return self }\n"
+            L"    var cm: Double { return self / 100.0 }\n"
+            L"    var mm: Double { return self / 1_000.0 }\n"
+            L"    var ft: Double { return self / 3.28084 }\n"
+            L"}\n"
+            L"let oneInch = 25.4.mm\n"
+            L"println(\"One inch is \\(oneInch) meters\")\n"
+            L"// prints \"One inch is 0.0254 meters\"\n"
+            L"let threeFeet = 3.ft\n"
+            L"println(\"Three feet is \\(threeFeet) meters\")");
+    dumpCompilerResults(compilerResults);
+    ASSERT_EQ(0, compilerResults.numResults());
+}

@@ -33,6 +33,6 @@ using namespace Swallow;
 
 int main(int argc, char** argv)
 {
-    testing::InitGoogleTest(&argc, argv);
+    testInit(argc, argv);
     return RUN_ALL_TESTS();
 }

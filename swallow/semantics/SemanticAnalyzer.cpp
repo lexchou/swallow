@@ -523,16 +523,55 @@ std::vector<SymbolPtr> SemanticAnalyzer::allFunctions(const std::wstring& name, 
  */
 void SemanticAnalyzer::declarationFinished(const std::wstring& name, const SymbolPtr& decl)
 {
-    //if(currentExtension)
+    TypePtr target = currentExtension ? currentExtension : currentType;
+    if(target)
     {
-    //    currentExtension->addMember(name, decl);
-    }
-    if(currentType)
-    {
-        TypeBuilderPtr builder = static_pointer_cast<TypeBuilder>(currentType);
+        TypeBuilderPtr builder = static_pointer_cast<TypeBuilder>(target);
+        if(currentExtension)
+        {
+            decl->setFlags(SymbolFlagExtension, true);
+        }
         if(name == L"init")
-            builder->setInitializer(static_pointer_cast<FunctionOverloadedSymbol>(decl));
+        {
+            FunctionSymbolPtr init = dynamic_pointer_cast<FunctionSymbol>(decl);
+            assert(init != nullptr);
+            FunctionOverloadedSymbolPtr inits = builder->getInitializer();
+            if(!inits)
+            {
+                inits = FunctionOverloadedSymbolPtr(new FunctionOverloadedSymbol(name));
+                builder->setInitializer(inits);
+            }
+            inits->add(init);
+        }
         else
+        {
             builder->addMember(name, decl);
+        }
     }
+}
+
+static SymbolPtr getMember(const TypePtr& type, const std::wstring& fieldName, bool staticMember)
+{
+    if (staticMember)
+        return type->getDeclaredStaticMember(fieldName);
+    else
+        return type->getMember(fieldName);
+}
+/*!
+ * This implementation will try to find the member from the type, and look up from extension as a fallback.
+ */
+SymbolPtr SemanticAnalyzer::getMemberFromType(const TypePtr& type, const std::wstring& fieldName, bool staticMember)
+{
+    SymbolPtr ret = getMember(type, fieldName, staticMember);
+    SymbolScope* scope = this->symbolRegistry->getFileScope();
+    if(!ret && scope)
+    {
+        TypePtr extension = scope->getExtension(type->getName());
+        if(extension)
+        {
+            assert(extension->getCategory() == Type::Extension);
+            ret = getMember(extension, fieldName, staticMember);
+        }
+    }
+    return ret;
 }

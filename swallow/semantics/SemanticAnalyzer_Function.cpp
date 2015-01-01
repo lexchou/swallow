@@ -439,16 +439,8 @@ void SemanticAnalyzer::visitInit(const InitializerDefPtr& node)
     TypePtr funcType = Type::newFunction(params, type, node->getParameters()->isVariadicParameters());
     funcType->setFlags(SymbolFlagInit, true);
 
-
-    FunctionOverloadedSymbolPtr inits = type->getInitializer();
-    if(!inits)
-    {
-        inits = FunctionOverloadedSymbolPtr(new FunctionOverloadedSymbol(L"init"));
-        //type->setInitializer(inits);
-        declarationFinished(inits->getName(), inits);
-    }
     FunctionSymbolPtr init(new FunctionSymbol(type->getName(), funcType, nullptr));
-    inits->add(init);
+    declarationFinished(L"init", init);
 
     SCOPED_SET(currentFunction, funcType);
     node->getBody()->accept(this);

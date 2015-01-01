@@ -52,7 +52,7 @@ Swallow::ProgramPtr parseStatements(Swallow::CompilerResults& compilerResults, c
 
 Swallow::ScopedProgramPtr analyzeStatement(Swallow::SymbolRegistry& registry, Swallow::CompilerResults& compilerResults, const char* func, const wchar_t* str);
 std::wstring readFile(const char* fileName);
-
+void testInit(int argc, char** argv);
 
 
 

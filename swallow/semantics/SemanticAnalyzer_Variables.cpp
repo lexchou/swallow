@@ -157,6 +157,20 @@ void SemanticAnalyzer::verifyTuplePattern(const PatternPtr& pattern)
 
 }
 
+/*!
+ * This will register a self symbol to getter/setter/willSet/didSet of a computed property
+ */
+static void registerSelfToAccessor(const TypePtr& currentType, const CodeBlockPtr& accessor)
+{
+
+    if(currentType && accessor)
+    {
+        ScopedCodeBlockPtr cb = static_pointer_cast<ScopedCodeBlock>(accessor);
+        SymbolScope* scope = cb->getScope();
+        SymbolPlaceHolderPtr self(new SymbolPlaceHolder(L"self", currentType, SymbolPlaceHolder::R_PARAMETER, SymbolFlagReadable | SymbolFlagInitialized));
+        scope->addSymbol(self);
+    }
+}
 void SemanticAnalyzer::visitComputedProperty(const ComputedPropertyPtr& node)
 {
 
@@ -172,6 +186,12 @@ void SemanticAnalyzer::visitComputedProperty(const ComputedPropertyPtr& node)
     TypePtr getterType = Type::newFunction(params, type, nullptr);
     params.push_back(Type::Parameter(type));
     TypePtr setterType = Type::newFunction(params, symbolRegistry->getGlobalScope()->Void(), false);
+
+    registerSelfToAccessor(currentType, getter);
+    registerSelfToAccessor(currentType, setter);
+    registerSelfToAccessor(currentType, willSet);
+    registerSelfToAccessor(currentType, didSet);
+
 
     if(getter)
     {

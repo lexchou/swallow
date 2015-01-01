@@ -60,6 +60,8 @@ enum SymbolFlags
     SymbolFlagPrefix = 0x400,
     SymbolFlagInfix = 0x800,
     SymbolFlagPostfix = 0x1000,
+    //The symbol is declared through extension
+    SymbolFlagExtension = 0x2000,
 };
 
 class SWALLOW_EXPORT Symbol

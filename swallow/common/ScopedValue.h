@@ -62,7 +62,9 @@ SWALLOW_NS_BEGIN
         T& ref;
         T value;
     };
-    #define SCOPED_SET(ref, val) ScopedValue<decltype(ref)> scopedValue_##__LINE__(ref, val); (void)scopedValue_##__LINE__;
+    #define COMBINE1(A,B) A ## B
+    #define COMBINE(A,B) COMBINE1(A,B)
+    #define SCOPED_SET(ref, val) ScopedValue<decltype(ref)> COMBINE(scopedValue_, __LINE__) (ref, val); (void)COMBINE(scopedValue_, __LINE__);
 SWALLOW_NS_END
 
 #endif//SCOPED_VALUE_H

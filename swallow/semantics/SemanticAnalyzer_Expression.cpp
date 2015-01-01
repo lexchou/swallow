@@ -674,11 +674,8 @@ void SemanticAnalyzer::visitMemberAccess(const MemberAccessPtr& node)
 
     if(node->getField())
     {
-        SymbolPtr member;
-        if (staticAccess)
-            member = selfType->getDeclaredStaticMember(fieldName);
-        else
-            member = selfType->getMember(fieldName);
+        SymbolPtr member = getMemberFromType(selfType, fieldName, staticAccess);
+
         if (member == nullptr)
         {
             //diagnose why it's not found
@@ -688,8 +685,24 @@ void SemanticAnalyzer::visitMemberAccess(const MemberAccessPtr& node)
                 error(node, Errors::E_PARTIAL_APPLICATION_OF_ENUM_CONSTRUCTOR_IS_NOT_ALLOWED);
                 abort();
             }
-            error(node->getField(), Errors::E_DOES_NOT_HAVE_A_MEMBER_2, selfType->toString(), fieldName);
-            return;
+            //if it's a int litertal, we can try to look it up in double type
+            //this is not defined in official's document, but infered from official's example
+            GlobalScope* global = symbolRegistry->getGlobalScope();
+            if(node->getSelf()->getNodeType() == NodeType::IntegerLiteral && selfType == global->Int() && !staticAccess)
+            {
+                member = getMemberFromType(global->Double(), fieldName, staticAccess);
+                if(member)
+                {
+                    //now we're sure it's Double, make it double
+                    selfType = global->Double();
+                    node->getSelf()->setType(selfType);
+                }
+            }
+            if(!member)
+            {
+                error(node->getField(), Errors::E_DOES_NOT_HAVE_A_MEMBER_2, selfType->toString(), fieldName);
+                return;
+            }
         }
         node->setType(member->getType());
     }

@@ -270,7 +270,10 @@ void ASTHierachyDumper::visitProtocol(const ProtocolDefPtr& node)
 
 void ASTHierachyDumper::visitExtension(const ExtensionDefPtr& node)
 {
-
+    beginIndent(L"extension_decl");
+    attr(L"name", node->getIdentifier()->getName());
+    NodeVisitor::visitExtension(node);
+    endIndent();
 }
 
 void ASTHierachyDumper::visitFunction(const FunctionDefPtr& node)

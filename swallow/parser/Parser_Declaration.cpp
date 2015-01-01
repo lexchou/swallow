@@ -1148,6 +1148,7 @@ DeclarationPtr Parser::parseExtension(const std::vector<AttributePtr>& attrs)
         DeclarationPtr decl = parseDeclaration();
         ret->addDeclaration(decl);
     }
+    expect(L"}");
     return ret;
 }
 /*

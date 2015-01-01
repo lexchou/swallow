@@ -74,3 +74,26 @@ SymbolPtr SymbolScope::lookup(const std::wstring& name)
         return iter->second;
     return nullptr;
 }
+
+/*!
+ * Get an extension definition by given name
+ */
+TypePtr SymbolScope::getExtension(const std::wstring& name)
+{
+    auto iter = extensions.find(name);
+    if(iter == extensions.end())
+        return nullptr;
+    return iter->second;
+}
+
+/*!
+ * Register an extension to this scope.
+ */
+void SymbolScope::addExtension(const TypePtr& extension)
+{
+    assert(extension != nullptr);
+    assert(extension->getCategory() == Type::Extension);
+    auto iter = extensions.find(extension->getName());
+    assert(iter == extensions.end());
+    extensions.insert(std::make_pair(extension->getName(), extension));
+}

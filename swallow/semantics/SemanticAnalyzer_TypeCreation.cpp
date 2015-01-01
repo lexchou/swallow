@@ -523,6 +523,9 @@ void SemanticAnalyzer::visitExtension(const ExtensionDefPtr& node)
     }
 
     SCOPED_SET(currentType, type);
+    TypePtr extension = Type::newExtension(type);
+    symbolRegistry->getFileScope()->addExtension(extension);
+    SCOPED_SET(currentExtension, extension);
     for(const DeclarationPtr& decl : *node)
     {
         if(decl->getNodeType() == NodeType::ValueBindings)

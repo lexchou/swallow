@@ -233,6 +233,11 @@ private:
     void declarationFinished(const std::wstring& name, const SymbolPtr& decl);
 private:
     TypePtr lookupTypeImpl(const TypeNodePtr& type, bool supressErrors);
+
+    /*!
+     * This implementation will try to find the member from the type, and look up from extension as a fallback.
+     */
+    SymbolPtr getMemberFromType(const TypePtr& type, const std::wstring& fieldName, bool staticMember);
 protected:
     //hint for parsing Array/tuple/dictionary literal
     TypePtr t_hint;

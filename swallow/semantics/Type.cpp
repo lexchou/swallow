@@ -92,6 +92,14 @@ TypePtr Type::newTypeReference(const TypePtr& innerType)
 }
 
 
+TypePtr Type::newExtension(const TypePtr& innerType)
+{
+    TypePtr ret(new TypeBuilder(Extension));
+    ret->name = innerType->getName();
+    ret->innerType = innerType;
+    return ret;
+}
+
 TypePtr Type::newTuple(const std::vector<TypePtr>& types)
 {
     Type* ret = new TypeBuilder(Tuple);

@@ -78,11 +78,22 @@ public:
     Node* getOwner();
     SymbolScope* getParentScope() {return parent;}
     const SymbolMap& getSymbols() {return symbols;}
+
+    /*!
+     * Get an extension definition by given name
+     */
+    TypePtr getExtension(const std::wstring& name);
+
+    /*!
+     * Register an extension to this scope.
+     */
+    void addExtension(const TypePtr& extension);
 protected:
     OperatorMap operators;
     Node* owner;
     SymbolScope* parent;
     SymbolMap symbols;
+    std::map<std::wstring, TypePtr> extensions;
 };
 
 
