@@ -48,6 +48,12 @@ public:
     void setGenericArguments(const GenericArgumentPtr& arguments);
 
     /*!
+     * One generic type can be specialized to different concrete types with different generic arguments
+     * This can be used to cache the varying final specialized types.
+     */
+    void addSpecializedType(const GenericArgumentPtr& arguments, const TypePtr& type);
+
+    /*!
      * Adds a protocol that this type conform to
      */
     void addProtocol(const TypePtr& protocol);

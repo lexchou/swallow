@@ -44,6 +44,7 @@
 #include "FunctionOverloadedSymbol.h"
 #include "FunctionSymbol.h"
 #include "common/ScopedValue.h"
+#include <set>
 
 USE_SWALLOW_NS
 using namespace std;
@@ -574,4 +575,72 @@ SymbolPtr SemanticAnalyzer::getMemberFromType(const TypePtr& type, const std::ws
         }
     }
     return ret;
+}
+
+struct FunctionSymbolWrapper
+{
+    SymbolPtr symbol;
+    FunctionSymbolWrapper(const SymbolPtr& symbol)
+            :symbol(symbol)
+    {}
+    bool operator<(const FunctionSymbolWrapper& rhs) const
+    {
+        return Type::compare(symbol->getType(), rhs.symbol->getType()) < 0;
+    }
+};
+static void addCandidateMethod(std::set<FunctionSymbolWrapper>& result, const FunctionSymbolPtr& func)
+{
+    auto iter = result.find(FunctionSymbolWrapper(func));
+    if(iter == result.end())
+        result.insert(FunctionSymbolWrapper(func));
+}
+
+/*!
+ * This will extract all methods that has the same name in the given type(including all base types)
+ */
+static void loadMethods(const TypePtr& type, const std::wstring& fieldName, bool staticMember, std::set<FunctionSymbolWrapper>& result)
+{
+    SymbolPtr sym;
+    if (staticMember)
+        sym = type->getDeclaredStaticMember(fieldName);
+    else
+        sym = type->getMember(fieldName);
+    if(!sym)
+        return;
+    if(FunctionOverloadedSymbolPtr funcs = dynamic_pointer_cast<FunctionOverloadedSymbol>(sym))
+    {
+        for(auto func : *funcs)
+            addCandidateMethod(result, func);
+    }
+    else if(FunctionSymbolPtr func = dynamic_pointer_cast<FunctionSymbol>(sym))
+    {
+        addCandidateMethod(result, func);
+    }
+    TypePtr parent = type->getParentType();
+    if(parent)
+    {
+       loadMethods(parent, fieldName, staticMember, result);
+    }
+}
+/*!
+ * This implementation will try to all methods from the type, including defined in parent class or extension
+ */
+void SemanticAnalyzer::getMethodsFromType(const TypePtr& type, const std::wstring& fieldName, bool staticMember, std::vector<SymbolPtr>& result)
+{
+    std::set<FunctionSymbolWrapper> functions;
+    loadMethods(type, fieldName, staticMember, functions);
+    SymbolScope* scope = this->symbolRegistry->getFileScope();
+    if(scope)
+    {
+        TypePtr extension = scope->getExtension(type->getName());
+        if(extension)
+        {
+            assert(extension->getCategory() == Type::Extension);
+            loadMethods(extension, fieldName, staticMember, functions);
+        }
+    }
+    for(const FunctionSymbolWrapper& wrapper : functions)
+    {
+        result.push_back(wrapper.symbol);
+    }
 }

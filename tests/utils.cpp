@@ -64,9 +64,9 @@ wstring readFile(const char* fileName)
     return SwallowUtils::readFile(fileName);
 }
 
-void dumpCompilerResults(Swallow::CompilerResults& compilerResults)
+void dumpCompilerResults(Swallow::CompilerResults& compilerResults, const std::wstring& code)
 {
-    SwallowUtils::dumpCompilerResults(L"", compilerResults, std::wcout);
+    SwallowUtils::dumpCompilerResults(code, compilerResults, std::wcout);
 }
 
 

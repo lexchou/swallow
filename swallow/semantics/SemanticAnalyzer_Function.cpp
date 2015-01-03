@@ -442,6 +442,8 @@ void SemanticAnalyzer::visitInit(const InitializerDefPtr& node)
     FunctionSymbolPtr init(new FunctionSymbol(type->getName(), funcType, nullptr));
     declarationFinished(L"init", init);
 
+    node->getBody()->setType(funcType);
+
     SCOPED_SET(currentFunction, funcType);
     node->getBody()->accept(this);
 }

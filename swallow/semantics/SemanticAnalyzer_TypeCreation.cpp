@@ -230,9 +230,6 @@ void SemanticAnalyzer::prepareDefaultInitializers(const TypePtr& type)
 
     if(type->getInitializer() && type->getInitializer()->numOverloads() > 0)
         return;
-    if(!type->getInitializer())
-        static_pointer_cast<TypeBuilder>(type)->setInitializer(FunctionOverloadedSymbolPtr(new FunctionOverloadedSymbol()));
-
 
     bool createDefaultInit = true;
     vector<Type::Parameter> initParams;
@@ -258,14 +255,15 @@ void SemanticAnalyzer::prepareDefaultInitializers(const TypePtr& type)
         //apply rule 1
         std::vector<Type::Parameter> params;
         TypePtr initType = Type::newFunction(params, type, false);
-        FunctionSymbolPtr initializer(new FunctionSymbol(type->getName(), initType, nullptr));
-        type->getInitializer()->add(initializer);
+        std::wstring s = initType->toString();
+        FunctionSymbolPtr initializer(new FunctionSymbol(L"init", initType, nullptr));
+        declarationFinished(initializer->getName(), initializer);
     }
     if(type->getCategory() == Type::Struct && !initParams.empty())
     {
         TypePtr initType = Type::newFunction(initParams, type, false);
-        FunctionSymbolPtr initializer(new FunctionSymbol(type->getName(), initType, nullptr));
-        type->getInitializer()->add(initializer);
+        FunctionSymbolPtr initializer(new FunctionSymbol(L"init", initType, nullptr));
+        declarationFinished(initializer->getName(), initializer);
     }
 }
 
@@ -401,7 +399,18 @@ static void makeRawRepresentable(const TypeBuilderPtr& type, GlobalScope* global
 void SemanticAnalyzer::visitEnum(const EnumDefPtr& node)
 {
     TypeBuilderPtr type = static_pointer_cast<TypeBuilder>(defineType(node));
-    NodeVisitor::visitEnum(node);
+    //check member declaration of enum
+    for(const DeclarationPtr& decl : *node)
+    {
+        if(decl->getNodeType() == NodeType::ValueBindings)
+        {
+            error(node, Errors::E_ENUMS_MAY_NOT_CONTAIN_STORED_PROPERTIES);
+            continue;
+        }
+        decl->accept(this);
+    }
+
+
     GlobalScope* global = symbolRegistry->getGlobalScope();
     //check if it's raw value enum
     bool isRawValues = false;

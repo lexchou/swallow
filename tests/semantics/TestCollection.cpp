@@ -118,7 +118,7 @@ TEST(TestCollection, ValidArray3)
 {
     SEMANTIC_ANALYZE(L"class Base{}; class Child1 : Base{}; class Child2 : Base{}\n"
             L"var a = [Child1(), Child2()]");
-    dumpCompilerResults(compilerResults);
+    dumpCompilerResults(compilerResults, content);
     ASSERT_EQ(0, compilerResults.numResults());
     SymbolPtr a;
     ASSERT_NOT_NULL(a = scope->lookup(L"a"));

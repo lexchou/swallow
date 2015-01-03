@@ -163,6 +163,11 @@ struct SWALLOW_EXPORT Errors
         E_PROTOCOL_A_CANNOT_BE_EXTENDED_1,//Protocol '%0' cannot be extended
         E_NON_NOMINAL_TYPE_A_CANNOT_BE_EXTENDED_1,//Non-nominal type '%0' cannot be extended
         E_EXTENSIONS_MAY_NOT_CONTAIN_STORED_PROPERTIES,//Extensions may not contain stored properties
+        E_ENUMS_MAY_NOT_CONTAIN_STORED_PROPERTIES,//Enums may not contain stored properties
+
+        E_INIT_CAN_ONLY_REFER_TO_THE_INITIALIZERS_OF_SELF,//'init' can only refer to the initializers of 'self'
+        E_INITIALIZER_DELEGATION_CAN_ONLY_OCCUR_WITHIN_AN_INITIALIZER,// Initializer delegation can only occur within an initializer
+
 
         W_PARAM_CAN_BE_EXPRESSED_MORE_SUCCINCTLY_1, // '%0 %0' can be expressed more succinctly as '#%0'
         W_EXTRANEOUS_SHARTP_IN_PARAMETER_1 //Extraneous '#' in parameter: '%0' is already the keyword argument name

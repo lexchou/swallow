@@ -38,6 +38,7 @@ SWALLOW_NS_BEGIN
 
 typedef std::shared_ptr<class Type> TypePtr;
 typedef std::shared_ptr<class GenericDefinition> GenericDefinitionPtr;
+typedef std::shared_ptr<class GenericArgument> GenericArgumentPtr;
 class SWALLOW_EXPORT GenericArgument
 {
 public:
@@ -48,6 +49,8 @@ public:
 
     std::vector<TypePtr>::iterator begin() { return types.begin();}
     std::vector<TypePtr>::iterator end() { return types.end();}
+    std::vector<TypePtr>::const_iterator begin() const{ return types.begin();}
+    std::vector<TypePtr>::const_iterator end() const{ return types.end();}
 
     size_t size() const { return types.size();}
 
@@ -55,6 +58,9 @@ public:
     TypePtr get(const std::wstring& name) const;
 
     GenericDefinitionPtr getDefinition() const;
+
+    static int compare(const GenericArgumentPtr& lhs, const GenericArgumentPtr& rhs);
+
 private:
     GenericDefinitionPtr definition;
     std::vector<TypePtr> types;

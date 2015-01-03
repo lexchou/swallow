@@ -30,6 +30,7 @@
 #include "GenericArgument.h"
 #include "GenericDefinition.h"
 #include <cassert>
+#include "Type.h"
 
 USE_SWALLOW_NS
 
@@ -60,4 +61,20 @@ TypePtr GenericArgument::get(const std::wstring& name) const
 GenericDefinitionPtr GenericArgument::getDefinition() const
 {
     return definition;
+}
+int GenericArgument::compare(const GenericArgumentPtr& lhs, const GenericArgumentPtr& rhs)
+{
+    auto iter1 = lhs->begin(), iter2 = rhs->begin();
+    for (; iter1 != lhs->end() && iter2 != rhs->end(); iter1++, iter2++)
+    {
+        int c = Type::compare(*iter1, *iter2);
+        if (c != 0)
+            return c;
+    }
+    if (iter1 == lhs->end() && iter2 == rhs->end())
+        return 0;
+    if (iter1 == lhs->end())//right is not ended
+        return 1;
+    else//left is not ended
+        return -1;
 }

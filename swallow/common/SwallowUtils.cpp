@@ -65,9 +65,20 @@ void SwallowUtils::dumpCompilerResults(const std::wstring& src, const CompilerRe
     if(!compilerResults.numResults())
         return;
 
+    //separate source code by lines
+    vector<wstring> lines;
+    wstringstream stream(src);
+    wstring line;
+    while(getline(stream, line))
+    {
+        lines.push_back(line);
+    }
+
     for(int i = 0; i < compilerResults.numResults(); i++)
     {
         const CompilerResult &res = compilerResults.getResult(i);
+
+
         switch (res.level)
         {
             case ErrorLevel::Fatal:
@@ -86,6 +97,18 @@ void SwallowUtils::dumpCompilerResults(const std::wstring& src, const CompilerRe
         out << L"(" << res.line << L", " << res.column << ") ";
         std::wstring msg = Errors::format(res.code, res.items);
         out << msg << std::endl;
+
+
+        if(res.line > 0 && res.line <= (int)lines.size())
+        {
+            wstring line = lines[res.line - 1];
+            out<<line<<endl;
+            for(int i = 0; i < res.column - 1; i++)
+            {
+                out<<L' ';
+            }
+            out<<L'^'<<endl;
+        }
     }
 
 

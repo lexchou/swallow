@@ -46,15 +46,6 @@ Type::Type(Category category)
     variadicParameters = false;
     inheritantDepth = 0;
 }
-
-bool Type::equals(const TypePtr& lhs, const TypePtr& rhs)
-{
-    if(lhs == rhs)
-        return true;
-    if(lhs == nullptr || rhs == nullptr)
-        return false;
-    return *lhs == *rhs;
-}
 /*!
  * A type place holder for protocol's typealias
  */
@@ -279,7 +270,9 @@ const GenericDefinitionPtr& Type::getGenericDefinition() const
 
 FunctionOverloadedSymbolPtr Type::getInitializer()
 {
-    return initializer;
+    SymbolPtr s = getMember(L"init");
+    FunctionOverloadedSymbolPtr ret = dynamic_pointer_cast<FunctionOverloadedSymbol>(s);
+    return ret;
 }
 
 FunctionOverloadedSymbolPtr Type::getSubscript()
@@ -377,7 +370,7 @@ bool Type::containsSelfTypeImpl() const
 {
     if(category == Self)
         return true;
-    if(category == Function || category == Closure)
+    if(category == Function)
     {
         if(returnType && returnType->containsSelfType())
             return true;
@@ -549,16 +542,61 @@ bool Type::canAssignTo(const TypePtr &type) const
         }
     }
     */
-    return *this == *type;
+    return equals(self, type);
 }
 
-bool Type::operator ==(const Type& rhs)const
+
+bool Type::equals(const TypePtr& lhs, const TypePtr& rhs)
 {
-    if(category != rhs.category)
+    if(lhs == rhs)
+        return true;
+    if(lhs == nullptr || rhs == nullptr)
         return false;
-    if(moduleName != rhs.moduleName)
-        return false;
-    switch(category)
+    return compare(lhs, rhs) == 0;
+}
+
+static bool compare(const std::wstring& lhs, const std::wstring& rhs, int& result)
+{
+    if(lhs == rhs)
+        result = 0;
+    else if(lhs < rhs)
+        result = -1;
+    else
+        result = 1;
+    return result == 0;
+}
+
+static bool compare(int lhs, int rhs, int& result)
+{
+    if(lhs == rhs)
+        result = 0;
+    else if(lhs < rhs)
+        result = -1;
+    else
+        result = 1;
+    return result == 0;
+}
+
+static bool compare(const TypePtr& lhs, const TypePtr& rhs, int& result)
+{
+    result = Type::compare(lhs, rhs);
+    return result == 0;
+}
+int Type::compare(const TypePtr &lhs, const TypePtr &rhs)
+{
+    int result = 0;
+    if(lhs == rhs)
+        return 0;
+    if(lhs == nullptr)
+        return -1;
+    if(rhs == nullptr)
+        return 1;
+
+    if(!::compare(lhs->category, rhs->category, result))
+        return result;
+    if(!::compare(lhs->moduleName, rhs->moduleName, result))
+        return result;
+    switch(lhs->category)
     {
         case Aggregate:
         case Class:
@@ -567,98 +605,86 @@ bool Type::operator ==(const Type& rhs)const
         case Extension:
         case Enum:
             //check name
-            if (fullName != rhs.fullName)
-                return false;
-            if(name != rhs.name)
-                return false;
-            if(getReference() != rhs.getReference())
-                return false;
-            if(!isGenericDefinitionEquals(genericDefinition, rhs.genericDefinition))
-                return false;
-            break;
+            if (!::compare(lhs->fullName, rhs->fullName, result))
+                return result;
+            if(!::compare(lhs->name, rhs->name, result))
+                return result;
+            assert(lhs->getReference() == rhs->getReference());
+            assert(isGenericDefinitionEquals(lhs->genericDefinition, rhs->genericDefinition));
+            return 0;
         case Alias:
         {
-            TypePtr a = this->unwrap();
-            TypePtr b = rhs.unwrap();
+            TypePtr a = lhs->unwrap();
+            TypePtr b = rhs->unwrap();
             if(a->category == Alias)
                 a = a->innerType;
             if(b->category == Alias)
                 b = b->innerType;
-            return equals(a, b);
+            return compare(a, b);
         }
         case Tuple:
         {
-            if (elementTypes.size() != rhs.elementTypes.size())
+            if (lhs->elementTypes.size() != rhs->elementTypes.size())
                 return false;
-            auto iter = elementTypes.begin(), iter2 = rhs.elementTypes.begin();
-            for (; iter != elementTypes.end(); iter++, iter2++)
+            auto iter = lhs->elementTypes.begin(), iter2 = rhs->elementTypes.begin();
+            for (; iter != lhs->elementTypes.end() && iter2 != rhs->elementTypes.end(); iter++, iter2++)
             {
-                if (!Type::equals(*iter, *iter2))
-                    return false;
+                if(!::compare(*iter, *iter2, result))
+                    return result;
             }
-            break;
+            ::compare(lhs->elementTypes.size(), rhs->elementTypes.size(), result);
+            return result;
         }
         case MetaType:
-            if(*innerType != *rhs.innerType)
-                return false;
-            break;
+            return compare(lhs->innerType, rhs->innerType);
         case Function:
-        case Closure:
         {
-            if(!Type::equals(returnType, rhs.returnType))
-                return false;
-            if(parameters.size() != rhs.parameters.size())
-                return false;
-            if(variadicParameters != rhs.variadicParameters)
-                return false;
-            if(!isGenericDefinitionEquals(genericDefinition, rhs.genericDefinition))
-                return false;
-            auto iter = parameters.begin(), iter2 = rhs.parameters.begin();
-            for(; iter != parameters.end(); iter++, iter2++)
+            auto iter = lhs->parameters.begin(), iter2 = rhs->parameters.begin();
+            for(; iter != lhs->parameters.end() && iter2 != rhs->parameters.end(); iter++, iter2++)
             {
-                if(iter->name != iter2->name)
-                    return false;
-                if(iter->inout != iter2->inout)
-                    return false;
-                if(*iter->type != *iter2->type)
-                    return false;
+                if(!::compare(iter->name, iter2->name, result))
+                    return result;
+                if(!::compare(iter->inout, iter2->inout, result))
+                    return result;
+                if(!::compare(iter->type, iter2->type, result))
+                    return result;
             }
-            break;
+            if(!::compare(lhs->parameters.size(), rhs->parameters.size(), result))
+                return result;
+            if(!::compare(lhs->returnType, rhs->returnType, result))
+                return result;
+            if(!::compare(lhs->variadicParameters, rhs->variadicParameters, result))
+                return result;
+            assert(isGenericDefinitionEquals(lhs->genericDefinition, rhs->genericDefinition));
+            return 0;
         }
         case Specialized:
         {
-            if (!Type::equals(innerType, rhs.innerType))
-                return false;
-            if(genericArguments != nullptr && rhs.genericArguments != nullptr)
+            if (!::compare(lhs->innerType, rhs->innerType, result))
+                return result;
+            assert(lhs->genericArguments != nullptr && rhs->genericArguments != nullptr);
+
+            auto iter = lhs->genericArguments->begin();
+            auto iter2 = rhs->genericArguments->begin();
+            for (; iter != lhs->genericArguments->end() && iter2 != rhs->genericArguments->end(); iter++, iter2++)
             {
-                if (genericArguments->size() != rhs.genericArguments->size())
-                    return false;
-                auto iter = genericArguments->begin();
-                auto iter2 = rhs.genericArguments->begin();
-                for (; iter != genericArguments->end(); iter++, iter2++)
-                {
-                    if (!Type::equals(*iter, *iter2))
-                        return false;
-                }
-                return true;
+                if (!::compare(*iter, *iter2, result))
+                    return result;
             }
-            if(genericArguments == nullptr && rhs.genericArguments == nullptr)
-                return true;
-            return false;
+            if (!::compare(lhs->genericArguments->size(), rhs->genericArguments->size(), result))
+                return result;
+            return 0;
         }
         case GenericParameter:
-            return true;
+            ::compare(lhs->name, rhs->name, result);
+            return result;
         case Self:
-            return true;
+            return 0;
     }
 
-    return true;
+    return 0;
 }
 
-bool Type::operator !=(const Type& rhs)const
-{
-    return !this->operator==(rhs);
-}
 
 
 /*!
@@ -712,7 +738,6 @@ std::wstring Type::toString() const
             return s.str();
         }
         case Function:
-        case Closure:
         {
             wstringstream s;
             s<<L"(";

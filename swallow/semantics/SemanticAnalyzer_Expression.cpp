@@ -106,7 +106,7 @@ void SemanticAnalyzer::checkTupleDefinition(const TuplePtr& tuple, const Express
     if(initializer)
     {
         TypePtr valueType = evaluateType(initializer);
-        if(valueType && *valueType != *type)
+        if(valueType && !Type::equals(valueType, type))
         {
             //tuple pattern has the wrong length for tuple type '%'
             std::wstringstream out;
@@ -463,10 +463,7 @@ void SemanticAnalyzer::visitFunctionCall(const FunctionCallPtr& node)
                     if (type->getCategory() == Type::Class || type->getCategory() == Type::Struct)
                     {
                         funcs.erase(funcs.begin());
-                        for(const FunctionSymbolPtr& init : *type->getInitializer())
-                        {
-                            funcs.push_back(init);
-                        }
+                        getMethodsFromType(type, L"init", false, funcs);
                     }
                 }
             }
@@ -483,40 +480,41 @@ void SemanticAnalyzer::visitFunctionCall(const FunctionCallPtr& node)
             SymbolPtr sym;
             const EnumCase*c = nullptr;
 
+            if(identifier == L"init")
+            {
+                if(ma->getSelf()->getNodeType() == NodeType::Identifier && static_pointer_cast<Identifier>(ma->getSelf())->getIdentifier() == L"self")
+                {
+                    //it must be inside a init
+                    if(!currentFunction || !currentFunction->hasFlags(SymbolFlagInit))
+                    {
+                        error(ma, Errors::E_INITIALIZER_DELEGATION_CAN_ONLY_OCCUR_WITHIN_AN_INITIALIZER);
+                        return;
+                    }
+                }
+                else
+                {
+                    error(ma, Errors::E_INIT_CAN_ONLY_REFER_TO_THE_INITIALIZERS_OF_SELF);
+                    return;
+                }
+            }
+            vector<SymbolPtr> funcs;
             if(selfType->getCategory() == Type::MetaType)
             {
                 selfType = selfType->getInnerType();
                 if(selfType->getCategory() == Type::Enum && (c = selfType->getEnumCase(identifier)) && c->constructor)
-                {
                     //constructing an enum
-                    sym = c->constructor;
-                }
+                    funcs.push_back(c->constructor);
                 else
-                {
-                    sym = selfType->getDeclaredStaticMember(identifier);
-                }
+                    getMethodsFromType(selfType, identifier, true, funcs);
             }
             else
-            {
-                sym = selfType->getMember(identifier);
-            }
-            if(!sym)
+                getMethodsFromType(selfType, identifier, false, funcs);
+            if(funcs.empty())
             {
                 error(ma, Errors::E_DOES_NOT_HAVE_A_MEMBER_2, selfType->toString(), identifier);
                 abort();
                 return;
             }
-            assert(sym != nullptr);//
-            vector<SymbolPtr> funcs;
-            if(FunctionOverloadedSymbolPtr overloads = dynamic_pointer_cast<FunctionOverloadedSymbol>(sym))
-            {
-                for(const FunctionSymbolPtr& func : *overloads)
-                {
-                    funcs.push_back(func);
-                }
-            }
-            else
-                funcs.push_back(sym);
             SymbolPtr func = visitFunctionCall(funcs, node->getArguments(), node);
             assert(func != nullptr);
             ma->setType(func->getType());

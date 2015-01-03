@@ -46,7 +46,7 @@
 #define ASSERT_NOT_NULL(condition) GTEST_TEST_BOOLEAN_((condition) != NULL, #condition, false, true, GTEST_FATAL_FAILURE_)
 #define ASSERT_NULL(condition) GTEST_TEST_BOOLEAN_((condition) == NULL, #condition, false, true, GTEST_FATAL_FAILURE_)
 
-void dumpCompilerResults(Swallow::CompilerResults& compilerResults);
+void dumpCompilerResults(Swallow::CompilerResults& compilerResults, const std::wstring& code = L"");
 Swallow::NodePtr parseStatement(Swallow::CompilerResults& compilerResults, const char* func, const wchar_t* str);
 Swallow::ProgramPtr parseStatements(Swallow::CompilerResults& compilerResults, const char* func, const wchar_t* str);
 
@@ -75,13 +75,13 @@ struct Tracer
 
 #define SEMANTIC_ANALYZE(s) Tracer tracer(__FILE__, __LINE__, __FUNCTION__); \
     Swallow::SymbolRegistry symbolRegistry; \
+    std::wstring content = s; \
     Swallow::GlobalScope* global = symbolRegistry.getGlobalScope(); (void)global; \
     Swallow::CompilerResults compilerResults; \
-    ScopedProgramPtr root = analyzeStatement(symbolRegistry, compilerResults, __FUNCTION__, (s)); \
+    ScopedProgramPtr root = analyzeStatement(symbolRegistry, compilerResults, __FUNCTION__, content.c_str()); \
     Swallow::SymbolScope* scope = root ? root->getScope() : nullptr; \
     (void)scope;
-#define SEMANTIC_ANALYZE_F(fileName) std::wstring content = readFile(fileName); \
-    SEMANTIC_ANALYZE(content.c_str());
+#define SEMANTIC_ANALYZE_F(fileName) SEMANTIC_ANALYZE(readFile(fileName));
 
 #endif//TEST_UTILS_H
 

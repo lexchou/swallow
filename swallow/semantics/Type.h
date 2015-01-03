@@ -51,6 +51,19 @@ struct SWALLOW_EXPORT EnumCase
     TypePtr type;
     FunctionSymbolPtr constructor;
 };
+
+/*!
+ * The container class for GenericArgumentPtr, allow a GenericArgument container to be used as key in specialization cache
+ */
+struct GenericArgumentKey
+{
+    GenericArgumentPtr arguments;
+    GenericArgumentKey(const GenericArgumentPtr& args);
+    GenericArgumentKey();
+    bool operator <(const GenericArgumentKey& rhs) const;
+};
+
+
 class SWALLOW_EXPORT Type : public Symbol, public  std::enable_shared_from_this<Symbol>
 {
     friend class TypeBuilder;
@@ -80,7 +93,6 @@ public:
         Protocol,
         Extension,
         Function,
-        Closure,
         MetaType,
         GenericParameter,//Placeholder for generic type
         Alias,// Alias for another type
@@ -102,6 +114,13 @@ public:
      */
     static const TypePtr& getPlaceHolder();
 
+    /*!
+     * Compare two types
+     */
+    static int compare(const TypePtr& lhs, const TypePtr& rhs);
+    /*!
+     * Compare if two types are equal
+     */
     static bool equals(const TypePtr& lhs, const TypePtr& rhs);
 public://methods
     /*!
@@ -284,6 +303,11 @@ public://member access
     bool canSpecializeTo(const TypePtr& type, std::map<std::wstring, TypePtr>& typeMap)const;
 
     /*!
+     * Return a specialized type of current type by given generic arguments.
+     */
+    TypePtr getSpecializedCache(const GenericArgumentPtr& arguments) const;
+
+    /*!
      * Check if an instance of current type can be assigned to a variable with given type
      * NOTE: Protocol with Self and associated types cannot be used to declare a value-binding then need conformTo to verify
      */
@@ -301,9 +325,6 @@ public://member access
 
     const std::vector<FunctionOverloadedSymbolPtr>& getFunctions() const;
 
-public:
-    bool operator ==(const Type& rhs)const;
-    bool operator !=(const Type& rhs)const;
 private:
 
     /*!
@@ -321,6 +342,10 @@ protected:
 
     //for function and custom type
     GenericDefinitionPtr genericDefinition;
+    /*!
+     * Cache of specialized versions
+     */
+    std::map<GenericArgumentKey, TypePtr> specializations;
 
     //for specialized type
     TypePtr innerType;
@@ -344,7 +369,6 @@ protected:
     std::map<TypePtr, int> parents;//All parent types and protocols in inheritance tree
     SymbolMap members;
     SymbolMap staticMembers;
-    FunctionOverloadedSymbolPtr initializer;
     std::vector<SymbolPtr> storedProperties;
     std::vector<SymbolPlaceHolderPtr> computedProperties;
     std::map<std::wstring, TypePtr> associatedTypes;

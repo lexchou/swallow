@@ -103,3 +103,31 @@ TEST(TestExtension, ExtensionOfDouble2)
     dumpCompilerResults(compilerResults);
     ASSERT_EQ(0, compilerResults.numResults());
 }
+
+TEST(TestExtension, Initializers)
+{
+    SEMANTIC_ANALYZE(L"struct Size {\n"
+            L"    var width = 0.0, height = 0.0\n"
+            L"}\n"
+            L"struct Point {\n"
+            L"    var x = 0.0, y = 0.0\n"
+            L"}\n"
+            L"struct Rect {\n"
+            L"    var origin = Point()\n"
+            L"    var size = Size()\n"
+            L"}\n"
+            L"let defaultRect = Rect()\n"
+            L"let memberwiseRect = Rect(origin: Point(x: 2.0, y: 2.0),\n"
+            L"    size: Size(width: 5.0, height: 5.0))\n"
+            L"extension Rect {\n"
+            L"    init(center: Point, size: Size) {\n"
+            L"        let originX = center.x - (size.width / 2)\n"
+            L"        let originY = center.y - (size.height / 2)\n"
+            L"        self.init(origin: Point(x: originX, y: originY), size: size)\n"
+            L"    }\n"
+            L"}\n"
+            L"let centerRect = Rect(center: Point(x: 4.0, y: 4.0),\n"
+            L"    size: Size(width: 3.0, height: 3.0))");
+    dumpCompilerResults(compilerResults, content);
+    ASSERT_EQ(0, compilerResults.numResults());
+}

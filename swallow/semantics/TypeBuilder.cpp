@@ -43,7 +43,7 @@ TypeBuilder::TypeBuilder(Category category)
 }
 void TypeBuilder::setInitializer(const FunctionOverloadedSymbolPtr& initializer)
 {
-    this->initializer = initializer;
+    members[L"init"] = initializer;
 }
 
 void TypeBuilder::addParameter(const Type::Parameter& param)
@@ -63,6 +63,14 @@ void TypeBuilder::setInnerType(const TypePtr &type)
 void TypeBuilder::setGenericArguments(const GenericArgumentPtr& arguments)
 {
     genericArguments = arguments;
+}
+/*!
+ * One generic type can be specialized to different concrete types with different generic arguments
+ * This can be used to cache the varying final specialized types.
+ */
+void TypeBuilder::addSpecializedType(const GenericArgumentPtr& arguments, const TypePtr& type)
+{
+    specializations.insert(make_pair(GenericArgumentKey(arguments), type));
 }
 void TypeBuilder::addProtocol(const TypePtr &protocol)
 {

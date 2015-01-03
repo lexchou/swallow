@@ -45,6 +45,12 @@ static TypePtr specialize(const TypePtr& type, const GenericArgumentPtr& argumen
     bool containsGeneric = (type->getCategory() == Type::Alias && arguments->get(type->getName())) || type->containsGenericParameters();
     if(!containsGeneric)
         return type;
+
+    //check if the argument was already been specialized before
+    TypePtr ret = type->getSpecializedCache(arguments);
+    if(ret)
+        return ret;
+
     Type::Category category = type->getCategory();
     switch(category)
     {
@@ -55,7 +61,6 @@ static TypePtr specialize(const TypePtr& type, const GenericArgumentPtr& argumen
             return ret;
         }
         case Type::Function:
-        case Type::Closure:
         {
             std::vector<Type::Parameter> params;
             TypePtr returnType = specialize(type->getReturnType(), arguments);
@@ -64,8 +69,8 @@ static TypePtr specialize(const TypePtr& type, const GenericArgumentPtr& argumen
                 TypePtr paramType = specialize(param.type, arguments);
                 params.push_back(Type::Parameter(param.name, param.inout, paramType));
             }
-            //Type::newFunction(<#(vector<Type::Parameter> const &)parameters#>, <#(const TypePtr&)returnType#>, <#(bool)hasVariadicParameters#>, <#(shared_ptr<GenericDefinition> const &)generic#>)
             TypePtr ret = Type::newFunction(params, returnType, type->hasVariadicParameters(), type->getGenericDefinition());
+            static_pointer_cast<TypeBuilder>(type)->addSpecializedType(arguments, ret);
             return ret;
         }
         case Type::Tuple:
@@ -78,16 +83,20 @@ static TypePtr specialize(const TypePtr& type, const GenericArgumentPtr& argumen
                 TypePtr newType = specialize(oldType, arguments);
                 elementTypes.push_back(newType);
             }
-            return Type::newTuple(elementTypes);
+            TypePtr ret = Type::newTuple(elementTypes);
+            static_pointer_cast<TypeBuilder>(type)->addSpecializedType(arguments, ret);
+            return ret;
         }
         case Type::Class:
         case Type::Protocol:
         case Type::Enum:
         case Type::Struct:
         {
-            TypeBuilder* ret = new TypeBuilder(Type::Specialized);
-            ret->setInnerType(type);
-            ret->setGenericArguments(arguments);
+            TypeBuilder* builder = new TypeBuilder(Type::Specialized);
+            TypePtr ret(builder);
+            static_pointer_cast<TypeBuilder>(type)->addSpecializedType(arguments, ret);
+            builder->setInnerType(type);
+            builder->setGenericArguments(arguments);
 
 
             //copy members from innerType and update types with given argument
@@ -121,10 +130,10 @@ static TypePtr specialize(const TypePtr& type, const GenericArgumentPtr& argumen
                     SymbolPlaceHolderPtr newSym(new SymbolPlaceHolder(s->getName(), t, s->getRole(), s->getFlags()));
                     sym = newSym;
                 }
-                ret->addMember(entry.first, sym);
+                builder->addMember(entry.first, sym);
             }
             //replace parents and protocols to apply with the generic arguments
-            return TypePtr(ret);
+            return ret;
         }
 
         case Type::Specialized:
@@ -136,6 +145,7 @@ static TypePtr specialize(const TypePtr& type, const GenericArgumentPtr& argumen
                 args->add(arg);
             }
             TypePtr ret = Type::newSpecializedType(type->getInnerType(), args);
+            static_pointer_cast<TypeBuilder>(type)->addSpecializedType(arguments, ret);
             return ret;
         }
         default:
@@ -147,6 +157,8 @@ static TypePtr specialize(const TypePtr& type, const GenericArgumentPtr& argumen
 
 static FunctionSymbolPtr specialize(const FunctionSymbolPtr& func, const GenericArgumentPtr& arguments)
 {
+    std::wstring s = func->getType()->toString();
+
     TypePtr funcType = specialize(func->getType(), arguments);
     FunctionSymbolPtr ret(new FunctionSymbol(func->getName(), funcType, func->getDefinition()));
     return ret;
@@ -168,7 +180,6 @@ TypePtr Type::newSpecializedType(const TypePtr& innerType, const std::map<std::w
 TypePtr Type::newSpecializedType(const TypePtr& innerType, const GenericArgumentPtr& arguments)
 {
     assert(innerType->containsGenericParameters());
-    // specialize func type
     return specialize(innerType, arguments);
 }
 TypePtr Type::newSpecializedType(const TypePtr& innerType, const TypePtr& argument)
@@ -256,7 +267,6 @@ bool Type::canSpecializeTo(const TypePtr& type, std::map<std::wstring, TypePtr>&
         case Extension:
             return false;
         case Function:
-        case Closure:
         {
             if(self->parameters.size() != type->parameters.size())
                 return false;
@@ -286,4 +296,31 @@ bool Type::canSpecializeTo(const TypePtr& type, std::map<std::wstring, TypePtr>&
             return Type::equals(iter->second, type);
     }
     return false;
+}
+
+
+
+TypePtr Type::getSpecializedCache(const GenericArgumentPtr& arguments) const
+{
+    GenericArgumentKey key(arguments);
+    auto iter = specializations.find(key);
+    if(iter == specializations.end())
+        return nullptr;
+    return iter->second;
+}
+
+GenericArgumentKey::GenericArgumentKey(const GenericArgumentPtr& args)
+:arguments(args)
+{
+
+}
+GenericArgumentKey::GenericArgumentKey()
+{
+
+}
+
+bool GenericArgumentKey::operator <(const GenericArgumentKey& rhs) const
+{
+    int ret = GenericArgument::compare(arguments, rhs.arguments);
+    return ret < 0;
 }
