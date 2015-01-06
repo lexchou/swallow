@@ -39,12 +39,12 @@
 #include "GenericArgument.h"
 #include "TypeBuilder.h"
 #include "ScopedNodes.h"
-#include "FunctionIterator.h"
 #include <cassert>
 #include <algorithm>
 #include <iostream>
 #include "ast/utils/ASTHierachyDumper.h"
 #include "common/ScopedValue.h"
+#include "ScopeGuard.h"
 
 USE_SWALLOW_NS
 using namespace std;
@@ -236,18 +236,6 @@ void SemanticAnalyzer::visitCase(const CaseStatementPtr& node)
             error(cond.condition, Errors::E_CANNOT_CONVERT_EXPRESSION_TYPE_2, patternType->toString(), t_hint->toString());
             break;
         }
-        if(cond.guard)
-        {
-            cond.guard->accept(this);
-            TypePtr whereType = cond.guard->getType();
-            assert(whereType != nullptr);
-            TypePtr p_BooleanType = symbolRegistry->getGlobalScope()->BooleanType();
-            if(!whereType->canAssignTo(p_BooleanType))
-            {
-                error(cond.guard, Errors::E_TYPE_DOES_NOT_CONFORM_TO_PROTOCOL_2_, whereType->toString(), p_BooleanType->toString());
-                break;
-            }
-        }
         //create symbols that used for unpacking associated values
         if(t_hint->getCategory() == Type::Enum)
         {
@@ -268,6 +256,7 @@ void SemanticAnalyzer::visitCase(const CaseStatementPtr& node)
             {
                 vector<TupleExtractionResult> results;
                 vector<int> indices;
+                wstring tempName = generateTempName();
                 this->expandTuple(results, indices, cond.condition, L"#0", ec->type, accessibility);
                 for (auto var : results)
                 {
@@ -276,6 +265,52 @@ void SemanticAnalyzer::visitCase(const CaseStatementPtr& node)
                     SymbolPlaceHolderPtr sym(new SymbolPlaceHolder(name, var.type, SymbolPlaceHolder::R_LOCAL_VARIABLE, SymbolFlagInitialized | SymbolFlagReadable));
                     codeBlock->getScope()->addSymbol(sym);
                 }
+            }
+        }
+        else
+        {
+            if(ValueBindingPatternPtr binding = dynamic_pointer_cast<ValueBindingPattern>(cond.condition))
+            {
+                PatternAccessibility accessibility = binding->isReadOnly() ? AccessibilityConstant : AccessibilityVariable;
+                int flags = SymbolFlagInitialized | SymbolFlagReadable | (binding->isReadOnly() ? 0 : SymbolFlagWritable);
+                if(binding->getBinding()->getNodeType() == NodeType::Tuple)
+                {
+                    //register as tuple
+                    vector<TupleExtractionResult> results;
+                    vector<int> indices;
+                    wstring tempName = this->generateTempName();
+                    this->expandTuple(results, indices, binding->getBinding(), tempName, t_hint, accessibility);
+                    for (auto var : results)
+                    {
+                        //register symbol
+                        const wstring &name = var.name->getIdentifier();
+                        SymbolPlaceHolderPtr sym(new SymbolPlaceHolder(name, var.type, SymbolPlaceHolder::R_LOCAL_VARIABLE, flags));
+                        codeBlock->getScope()->addSymbol(sym);
+                    }
+                }
+                else
+                {
+                    //register as one variable
+                    IdentifierPtr id = dynamic_pointer_cast<Identifier>(binding->getBinding());
+                    assert(id != nullptr);
+                    const wstring &name = id->getIdentifier();
+                    SymbolPlaceHolderPtr sym(new SymbolPlaceHolder(name, t_hint, SymbolPlaceHolder::R_LOCAL_VARIABLE, flags));
+                    codeBlock->getScope()->addSymbol(sym);
+                }
+            }
+        }
+
+        if(cond.guard)
+        {
+            ScopeGuard scope(codeBlock.get(), this);
+            cond.guard->accept(this);
+            TypePtr whereType = cond.guard->getType();
+            assert(whereType != nullptr);
+            TypePtr p_BooleanType = symbolRegistry->getGlobalScope()->BooleanType();
+            if(!whereType->canAssignTo(p_BooleanType))
+            {
+                error(cond.guard, Errors::E_TYPE_DOES_NOT_CONFORM_TO_PROTOCOL_2_, whereType->toString(), p_BooleanType->toString());
+                break;
             }
         }
     }

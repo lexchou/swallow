@@ -131,3 +131,154 @@ TEST(TestExtension, Initializers)
     dumpCompilerResults(compilerResults, content);
     ASSERT_EQ(0, compilerResults.numResults());
 }
+
+TEST(TestExtension, Methods)
+{
+    SEMANTIC_ANALYZE(L"extension Int {\n"
+            L"    func repetitions(task: () -> ()) {\n"
+            L"        var i : Int\n"
+            L"        for i = 0; i < self; i++ {\n"
+            L"            task()\n"
+            L"        }\n"
+            L"    }\n"
+            L"}\n"
+            L"3.repetitions({\n"
+            L"    println(\"Hello!\")\n"
+            L"})\n"
+            L"3.repetitions {\n"
+            L"    println(\"Goodbye!\")\n"
+            L"}");
+    dumpCompilerResults(compilerResults, content);
+    ASSERT_EQ(0, compilerResults.numResults());
+}
+TEST(TestExtension, MutaingMethods)
+{
+    SEMANTIC_ANALYZE(L"extension Int {\n"
+            L"    mutating func square() {\n"
+            L"        self = self * self\n"
+            L"    }\n"
+            L"}\n"
+            L"var someInt = 3\n"
+            L"someInt.square()");
+    dumpCompilerResults(compilerResults, content);
+    ASSERT_EQ(0, compilerResults.numResults());
+}
+TEST(TestExtension, Subscript)
+{
+    //TODO use *= and --  ref: https://developer.apple.com/library/ios/documentation/Swift/Conceptual/Swift_Programming_Language/Extensions.html#//apple_ref/doc/uid/TP40014097-CH24-XID_229
+    SEMANTIC_ANALYZE(L"extension Int {\n"
+            L"    subscript(var digitIndex: Int) -> Int {\n"
+            L"        var decimalBase = 1\n"
+            L"        while digitIndex > 0 {\n"
+            L"            decimalBase = decimalBase * 10\n"
+            L"            digitIndex = digitIndex - 1\n"
+            L"        }\n"
+            L"        return (self / decimalBase) % 10\n"
+            L"    }\n"
+            L"}\n"
+            "var a = 343434[2]");
+    dumpCompilerResults(compilerResults, content);
+    ASSERT_EQ(0, compilerResults.numResults());
+}
+
+TEST(TestExtension, NestedType)
+{
+    SEMANTIC_ANALYZE_F("semantics/TestExtension_NestedTypes.swift");
+    dumpCompilerResults(compilerResults, content);
+    ASSERT_EQ(0, compilerResults.numResults());
+}
+
+TEST(TestExtension, Redeclaration_Property)
+{
+    SEMANTIC_ANALYZE(L"class TestClass\n"
+            L"{\n"
+            L"    var a : Int { return 3}\n"
+            L"}\n"
+            L"extension TestClass\n"
+            L"{\n"
+            L"    var a : Int { return 3}\n"
+            L"}");
+    ASSERT_EQ(1, compilerResults.numResults());
+    auto res = compilerResults.getResult(0);
+    ASSERT_EQ(Errors::E_INVALID_REDECLARATION_1, res.code);
+}
+
+TEST(TestExtension, Redeclaration_Property2)
+{
+    SEMANTIC_ANALYZE(L"class TestClass\n"
+            L"{\n"
+            L"    func a() {}\n"
+            L"}\n"
+            L"extension TestClass\n"
+            L"{\n"
+            L"    var a : Int { return 3}\n"
+            L"}");
+    ASSERT_EQ(1, compilerResults.numResults());
+    auto res = compilerResults.getResult(0);
+    ASSERT_EQ(Errors::E_INVALID_REDECLARATION_1, res.code);
+}
+
+
+
+TEST(TestExtension, Redeclaration_Func)
+{
+    SEMANTIC_ANALYZE(L"class TestClass\n"
+            L"{\n"
+            L"    var a : Int { return 3}\n"
+            L"}\n"
+            L"extension TestClass\n"
+            L"{\n"
+            L"    func a() {}\n"
+            L"}");
+    ASSERT_EQ(1, compilerResults.numResults());
+    auto res = compilerResults.getResult(0);
+    ASSERT_EQ(Errors::E_INVALID_REDECLARATION_1, res.code);
+}
+
+TEST(TestExtension, Redeclaration_Func2)
+{
+    SEMANTIC_ANALYZE(L"\n"
+            L"class TestClass\n"
+            L"{\n"
+            L"    func a() -> Bool{ return true}\n"
+            L"}\n"
+            L"extension TestClass\n"
+            L"{\n"
+            L"    func a(){}\n"
+            L"}");
+    ASSERT_EQ(0, compilerResults.numResults());
+}
+
+
+
+TEST(TestExtension, Redeclaration_Subscription)
+{
+    SEMANTIC_ANALYZE(L"\n"
+            L"class TestClass\n"
+            L"{\n"
+            L"    subscript(a : Int) -> Int { return 3 }\n"
+            L"}\n"
+            L"extension TestClass\n"
+            L"{\n"
+            L"    subscript(a : Int) -> Bool {return true;}\n"
+            L"}");
+    dumpCompilerResults(compilerResults, content);
+    ASSERT_EQ(0, compilerResults.numResults());
+}
+
+
+TEST(TestExtension, Redeclaration_Init)
+{
+    SEMANTIC_ANALYZE(L"\n"
+            L"class TestClass\n"
+            L"{\n"
+            L"    init(a : Int) {}\n"
+            L"}\n"
+            L"extension TestClass\n"
+            L"{\n"
+            L"    init(a : Int) {}\n"
+            L"}");
+    ASSERT_EQ(1, compilerResults.numResults());
+    auto res = compilerResults.getResult(0);
+    ASSERT_EQ(Errors::E_INVALID_REDECLARATION_1, res.code);
+}

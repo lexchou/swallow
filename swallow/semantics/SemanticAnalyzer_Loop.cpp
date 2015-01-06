@@ -1,4 +1,4 @@
-/* FunctionIterator.cpp --
+/* SemanticAnalyzer_Loop.cpp --
  *
  * Copyright (c) 2014, Lex Chou <lex at chou dot it>
  * All rights reserved.
@@ -27,71 +27,57 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "FunctionIterator.h"
-#include "Type.h"
+#include "SemanticAnalyzer.h"
+#include "GlobalScope.h"
+#include "SymbolRegistry.h"
+#include "ast/ast.h"
+#include "common/Errors.h"
 #include "FunctionOverloadedSymbol.h"
 #include "FunctionSymbol.h"
+#include "ast/NodeSerializer.h"
+#include "GenericDefinition.h"
+#include "GenericArgument.h"
+#include "TypeBuilder.h"
+#include "ScopedNodes.h"
+#include <cassert>
+#include <algorithm>
+#include <iostream>
+#include "ast/utils/ASTHierachyDumper.h"
+#include "common/ScopedValue.h"
+#include "ScopeGuard.h"
 
 USE_SWALLOW_NS
-
 using namespace std;
 
-FunctionIterator::iterator::iterator(const TypePtr& type, const std::wstring& name)
-:type(type), name(name)
-{
-    if(type)
-    {
-        moveNext();
-    }
-}
-bool FunctionIterator::iterator::operator!=(const FunctionIterator::iterator& rhs)const
-{
-    return value != rhs.value;
-}
-const FunctionIterator::iterator& FunctionIterator::iterator::operator++()
-{
-    if(!type)
-        return *this;
-    value = *begin;
-    begin++;
-    if(begin == end)
-        moveNext();
-    return *this;
-}
-void FunctionIterator::iterator::moveNext()
-{
-    if(begin == end)
-    {
-        value = nullptr;
-        type = type->getParentType();
-    }
-    //move to the parent type
-    for(;type; type = type->getParentType())
-    {
-        FunctionOverloadedSymbolPtr funcs = dynamic_pointer_cast<FunctionOverloadedSymbol>(type->getDeclaredMember(name));
-        if(!funcs)
-            continue;//this type doesn't defined the function, going upward
-        begin = funcs->begin();
-        end = funcs->end();
-        value = *begin;
-        break;
-    }
-}
-FunctionSymbolPtr FunctionIterator::iterator::operator*()
-{
-    return value;
-}
 
-FunctionIterator::FunctionIterator(const TypePtr& type, const std::wstring& name)
-:type(type), name(name)
+
+void SemanticAnalyzer::visitWhileLoop(const WhileLoopPtr& node)
 {
+    NodeVisitor::visitWhileLoop(node);
+}
+void SemanticAnalyzer::visitForIn(const ForInLoopPtr& node)
+{
+    ScopedCodeBlockPtr codeBlock = static_pointer_cast<ScopedCodeBlock>(node->getCodeBlock());
+    SCOPED_SET(t_hint, nullptr);
+    if(node->getDeclaredType())
+        t_hint = lookupType(node->getDeclaredType());
+    node->getContainer()->accept(this);
+    TypePtr sequenceType = node->getContainer()->getType();
+    GlobalScope* global = symbolRegistry->getGlobalScope();
+    if(!sequenceType->conformTo(global->SequenceType()))
+    {
+        error(node->getContainer(), Errors::E_TYPE_DOES_NOT_CONFORM_TO_PROTOCOL_2_, sequenceType->toString(), L"SequenceType");
+        return;
+    }
+
 
 }
-FunctionIterator::iterator FunctionIterator::begin()
+void SemanticAnalyzer::visitForLoop(const ForLoopPtr& node)
 {
-    return iterator(type, name);
+    NodeVisitor::visitForLoop(node);
 }
-FunctionIterator::iterator FunctionIterator::end()
+void SemanticAnalyzer::visitDoLoop(const DoLoopPtr& node)
 {
-    return iterator(nullptr, L"");
+    NodeVisitor::visitDoLoop(node);
 }
+

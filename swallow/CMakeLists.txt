@@ -63,7 +63,6 @@ SET(SWALLOW_SRC
     semantics/GenericArgument.cpp
     semantics/TypeSpecialization.cpp
     semantics/TypeBuilder.cpp
-    semantics/FunctionIterator.cpp
     semantics/CollectionTypeAnalyzer.cpp
     semantics/SemanticAnalyzer.cpp
     semantics/SemanticAnalyzer_TypeCreation.cpp
@@ -71,6 +70,7 @@ SET(SWALLOW_SRC
     semantics/SemanticAnalyzer_Variables.cpp
     semantics/SemanticAnalyzer_Expression.cpp
     semantics/SemanticAnalyzer_Condition.cpp
+    semantics/SemanticAnalyzer_Loop.cpp
     semantics/OperatorResolver.cpp
     semantics/CompilerResultEmitter.cpp
     semantics/SemanticPass.cpp

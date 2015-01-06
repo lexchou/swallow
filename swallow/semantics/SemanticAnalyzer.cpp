@@ -45,6 +45,7 @@
 #include "FunctionSymbol.h"
 #include "common/ScopedValue.h"
 #include <set>
+#include <semantics/Symbol.h>
 
 USE_SWALLOW_NS
 using namespace std;
@@ -337,6 +338,14 @@ TypePtr SemanticAnalyzer::lookupTypeImpl(const TypeNodePtr &type, bool supressEr
         {
             retType = lookupType(func->getReturnType());
         }
+        vector<Type::Parameter> params;
+        for(auto p : *func->getArgumentsType())
+        {
+            TypePtr paramType = lookupType(p.type);
+            params.push_back(Type::Parameter(p.name, p.inout, paramType));
+        }
+        TypePtr ret = Type::newFunction(params, retType, false, nullptr);
+        return ret;
     }
     assert(0 && "Unsupported type");
     return nullptr;
@@ -522,8 +531,43 @@ std::vector<SymbolPtr> SemanticAnalyzer::allFunctions(const std::wstring& name, 
 /*!
  * Declaration finished, added it as a member to current type or current type extension.
  */
-void SemanticAnalyzer::declarationFinished(const std::wstring& name, const SymbolPtr& decl)
+void SemanticAnalyzer::declarationFinished(const std::wstring& name, const SymbolPtr& decl, const NodePtr& node)
 {
+    //verify if this has been declared in the type or its extension
+    if(currentType)
+    {
+        bool staticMember = decl->hasFlags(SymbolFlagStatic);
+        SymbolPtr m = getMemberFromType(currentType, name, staticMember);
+
+        if(FunctionSymbolPtr func = dynamic_pointer_cast<FunctionSymbol>(decl))
+        {
+            bool isFunc = dynamic_pointer_cast<FunctionSymbol>(m) || dynamic_pointer_cast<FunctionOverloadedSymbol>(m);
+            if(!isFunc && m)
+            {
+                error(node, Errors::E_INVALID_REDECLARATION_1, name);
+                return;
+            }
+            //check if there's the same signature exists
+            std::vector<SymbolPtr> funcs;
+            getMethodsFromType(currentType, name, staticMember, funcs);
+            for(const SymbolPtr& func : funcs)
+            {
+                if(Type::equals(func->getType(), decl->getType()))
+                {
+                    error(node, Errors::E_INVALID_REDECLARATION_1, name);
+                    return;
+                }
+            }
+        }
+        else if (m)
+        {
+            error(node, Errors::E_INVALID_REDECLARATION_1, name);
+            return;
+        }
+    }
+
+
+
     TypePtr target = currentExtension ? currentExtension : currentType;
     if(target)
     {

@@ -105,6 +105,7 @@ Swallow::ScopedProgramPtr analyzeStatement(Swallow::SymbolRegistry& registry, Sw
     using namespace Swallow;
     registry.getGlobalScope()->declareFunction(L"println", 0, L"Void", L"Int", NULL);
     registry.getGlobalScope()->declareFunction(L"println", 0, L"Void", L"String", NULL);
+    registry.getGlobalScope()->declareFunction(L"print", 0, L"Void", L"String", NULL);
 
     ScopedNodeFactory nodeFactory;
     Parser parser(&nodeFactory, &compilerResults);

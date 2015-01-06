@@ -38,7 +38,6 @@
 #include "GenericDefinition.h"
 #include "GenericArgument.h"
 #include "TypeBuilder.h"
-#include "FunctionIterator.h"
 #include <cassert>
 #include <algorithm>
 #include "ast/NodeFactory.h"
@@ -439,6 +438,13 @@ void SemanticAnalyzer::visitFunctionCall(const FunctionCallPtr& node)
 {
     NodeType::T nodeType = node->getFunction()->getNodeType();
     ExpressionPtr func = node->getFunction();
+
+    //merge trailing closure as the last parameter
+    if(node->getTrailingClosure())
+    {
+        node->getArguments()->append(node->getTrailingClosure());
+    }
+
 
     switch(nodeType)
     {
@@ -1111,19 +1117,24 @@ void SemanticAnalyzer::visitSubscriptAccess(const SubscriptAccessPtr& node)
     node->getSelf()->accept(this);
     TypePtr selfType = node->getSelf()->getType();
     assert(selfType != nullptr);
-    FunctionOverloadedSymbolPtr funcs = selfType->getSubscript();
-    if(funcs == nullptr)
+    vector<SymbolPtr> funcs;
+    this->getMethodsFromType(selfType, L"subscript", false, funcs);
+    if(funcs.empty())
     {
         //undefined subscript access
-        wstring s = this->toString(node);
+        wstring s = this->toString(node->getSelf());
         error(node, Errors::E_UNDEFINED_SUBSCRIPT_ACCESS_FOR_1, s);
         return;
     }
-    vector<SymbolPtr> functions;
-    for(const FunctionSymbolPtr& func : *funcs)
-        functions.push_back(func);
     //Now inference the type returned by this subscript access
-    SymbolPtr func = getOverloadedFunction(node, functions, node->getIndex());
+    SymbolPtr func = getOverloadedFunction(node, funcs, node->getIndex());
     assert(func && func->getType() && func->getType()->getCategory() == Type::Function);
     node->setType(func->getType()->getReturnType());
+}
+
+
+void SemanticAnalyzer::visitValueBindingPattern(const ValueBindingPatternPtr& node)
+{
+    assert(t_hint != nullptr);
+    node->setType(t_hint);
 }

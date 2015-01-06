@@ -172,6 +172,7 @@ std::wstring getErrorTemplate(int errorCode)
         case Errors::E_EXTENSIONS_MAY_NOT_CONTAIN_STORED_PROPERTIES: return L"Extensions may not contain stored properties";
         case Errors::E_ENUMS_MAY_NOT_CONTAIN_STORED_PROPERTIES: return L"Enums may not contain stored properties";
         case Errors::E_INIT_CAN_ONLY_REFER_TO_THE_INITIALIZERS_OF_SELF: return L"'init' can only refer to the initializers of 'self'";
+        case Errors::E_FUNCTION_PROCEDURES_EXPECTD_TYPE_A_DID_YOU_MEAN_TO_CALL_IT_WITH_1: return L"function produces expected type '%0'; did you mean to call it with '()'?";
 
 
 

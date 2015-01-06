@@ -356,7 +356,11 @@ void ASTHierachyDumper::visitFunctionCall(const FunctionCallPtr& node)
     beginIndent(L"call_expr");
     attr(L"type", node->getType());
     node->getFunction()->accept(this);
-    node->getArguments()->accept(this);
+    if(node->getArguments())
+        node->getArguments()->accept(this);
+    if(node->getTrailingClosure())
+        node->getTrailingClosure()->accept(this);
+
     endIndent();
 }
 

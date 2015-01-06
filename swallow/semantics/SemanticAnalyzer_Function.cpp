@@ -152,29 +152,45 @@ void SemanticAnalyzer::visitClosure(const ClosurePtr& node)
 {
     ScopedClosurePtr closure = std::static_pointer_cast<ScopedClosure>(node);
 
-    node->getParameters()->accept(this);
+    //check contextual type
+    if(t_hint && t_hint->getCategory() != Type::Function)
+    {
+        error(node, Errors::E_FUNCTION_PROCEDURES_EXPECTD_TYPE_A_DID_YOU_MEAN_TO_CALL_IT_WITH_1, t_hint->toString());
+        return;
+    }
+
     TypePtr returnedType = this->lookupType(node->getReturnType());
     std::vector<Type::Parameter> params;
-    prepareParameters(closure->getScope(), node->getParameters());
-
-    //create a function type for this
-    for(const ParameterPtr& param : *node->getParameters())
+    if(node->getParameters())
     {
-        TypePtr type = lookupType(param->getDeclaredType());
-        assert(type != nullptr);
-        const std::wstring& name = param->isShorthandExternalName() ? param->getLocalName() : param->getExternalName();
-        params.push_back(Type::Parameter(name, param->isInout(), type));
-    }
-    TypePtr type = Type::newFunction(params, returnedType, node->getParameters()->isVariadicParameters());
-    node->setType(type);
+        node->getParameters()->accept(this);
+        prepareParameters(closure->getScope(), node->getParameters());
 
+        //create a function type for this
+        for(const ParameterPtr& param : *node->getParameters())
+        {
+            TypePtr type = lookupType(param->getDeclaredType());
+            assert(type != nullptr);
+            const std::wstring& name = param->isShorthandExternalName() ? param->getLocalName() : param->getExternalName();
+            params.push_back(Type::Parameter(name, param->isInout(), type));
+        }
+    }
+    if(t_hint)
+    {
+        node->setType(t_hint);
+    }
+    else
+    {
+        TypePtr type = Type::newFunction(params, returnedType, node->getParameters()->isVariadicParameters());
+        node->setType(type);
+    }
 
     if(node->getCapture())
     {
         node->getCapture()->accept(this);
     }
 
-    SCOPED_SET(currentFunction, type);
+    SCOPED_SET(currentFunction, node->getType());
 
     for(const StatementPtr& st : *node)
     {
@@ -215,19 +231,13 @@ void SemanticAnalyzer::visitSubscript(const SubscriptDefPtr &node)
     TypePtr retType = lookupType(node->getReturnType());
     if(!node->getGetter() && !node->getSetter())
         return;
-    FunctionOverloadedSymbolPtr funcs = (currentExtension ? currentExtension : currentType)->getSubscript();
-    if(!funcs)
-    {
-        funcs = FunctionOverloadedSymbolPtr(new FunctionOverloadedSymbol(L"subscript"));
-        declarationFinished(funcs->getName(), funcs);
-    }
 
     if(node->getGetter())
     {
         TypePtr funcType = this->createFunctionType(paramsList.begin(), paramsList.end(), retType, nullptr);
         node->getGetter()->setType(funcType);
         FunctionSymbolPtr func(new FunctionSymbol(L"subscript", funcType, node->getGetter()));
-        funcs->add(func);
+        declarationFinished(func->getName(), func, node->getGetter());
     }
     if(node->getSetter())
     {
@@ -236,7 +246,7 @@ void SemanticAnalyzer::visitSubscript(const SubscriptDefPtr &node)
         node->getSetter()->setType(funcType);
         static_pointer_cast<TypeBuilder>(funcType)->addParameter(Type::Parameter(retType));
         FunctionSymbolPtr func(new FunctionSymbol(L"subscript", funcType, node->getSetter()));
-        funcs->add(func);
+        declarationFinished(func->getName(), func, node->getSetter());
     }
 
     //TypeInference
@@ -388,7 +398,7 @@ void SemanticAnalyzer::visitFunction(const FunctionDefPtr& node)
         sym = func;
     }
     //put it into type's SymbolMap
-    declarationFinished(sym->getName(), func);
+    declarationFinished(sym->getName(), func, node);
     /*
     if(TypeDeclaration* declaration = dynamic_cast<TypeDeclaration*>(symbolRegistry->getCurrentScope()->getOwner()))
     {
@@ -440,7 +450,7 @@ void SemanticAnalyzer::visitInit(const InitializerDefPtr& node)
     funcType->setFlags(SymbolFlagInit, true);
 
     FunctionSymbolPtr init(new FunctionSymbol(type->getName(), funcType, nullptr));
-    declarationFinished(L"init", init);
+    declarationFinished(L"init", init, node);
 
     node->getBody()->setType(funcType);
 

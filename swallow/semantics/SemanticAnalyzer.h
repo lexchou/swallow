@@ -87,6 +87,7 @@ public:
 
     virtual void visitFunctionCall(const FunctionCallPtr& node) override;
     virtual void visitValueBinding(const ValueBindingPtr& node) override;
+    virtual void visitValueBindingPattern(const ValueBindingPatternPtr& node) override;
     virtual void visitString(const StringLiteralPtr& node) override;
     virtual void visitStringInterpolation(const StringInterpolationPtr& node);
     virtual void visitInteger(const IntegerLiteralPtr& node) override;
@@ -112,18 +113,14 @@ public:
     virtual void visitOptionalChaining(const OptionalChainingPtr& node) override;
     //virtual void visitStruct(const StructDefPtr& node) override;
 public:// Condition control flow
-    virtual void visitIf(const IfStatementPtr& node);
-    virtual void visitSwitchCase(const SwitchCasePtr& node);
-    virtual void visitCase(const CaseStatementPtr& node);
-    /*
-    virtual void visitValueBindings(const ValueBindingsPtr& node) override;
-    virtual void visitValueBinding(const ValueBindingPtr& node) override;
-    virtual void visitClass(const ClassDefPtr& node) override;
-    virtual void visitStruct(const StructDefPtr& node) override;
-    virtual void visitEnum(const EnumDefPtr& node) override;
-    virtual void visitExtension(const ExtensionDefPtr& node) override;
-    virtual void visitProtocol(const ProtocolDefPtr& node) override;
-    */
+    virtual void visitIf(const IfStatementPtr& node) override;
+    virtual void visitSwitchCase(const SwitchCasePtr& node) override;
+    virtual void visitCase(const CaseStatementPtr& node) override;
+
+    virtual void visitWhileLoop(const WhileLoopPtr& node) override;
+    virtual void visitForIn(const ForInLoopPtr& node) override;
+    virtual void visitForLoop(const ForLoopPtr& node) override;
+    virtual void visitDoLoop(const DoLoopPtr& node) override;
 public://Syntax sugar for type
     virtual void visitOptionalType(const OptionalTypePtr& node);
 private:
@@ -140,7 +137,7 @@ private:
      * Prepare parameters as symbols in given code block
      */
     void prepareParameters(SymbolScope* scope, const ParametersPtr& params);
-    void registerSymbol(const SymbolPlaceHolderPtr& symbol);
+    void registerSymbol(const SymbolPlaceHolderPtr& symbol, const NodePtr& node);
     GenericDefinitionPtr prepareGenericTypes(const GenericParametersDefPtr& params);
 
     SymbolPtr visitFunctionCall(const std::vector<SymbolPtr>& func, const ParenthesizedExpressionPtr& args, const PatternPtr& node);
@@ -230,7 +227,7 @@ private:
     /*!
      * Declaration finished, added it as a member to current type or current type extension.
      */
-    void declarationFinished(const std::wstring& name, const SymbolPtr& decl);
+    void declarationFinished(const std::wstring& name, const SymbolPtr& decl, const NodePtr& node);
 private:
     TypePtr lookupTypeImpl(const TypeNodePtr& type, bool supressErrors);
 

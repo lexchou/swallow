@@ -241,10 +241,10 @@ void SemanticAnalyzer::visitComputedProperty(const ComputedPropertyPtr& node)
     if(getter)
         flags |= SymbolFlagReadable;
     SymbolPlaceHolderPtr symbol(new SymbolPlaceHolder(node->getName(), type, SymbolPlaceHolder::R_PROPERTY, flags));
-    registerSymbol(symbol);
+    registerSymbol(symbol, node);
 
 }
-void SemanticAnalyzer::registerSymbol(const SymbolPlaceHolderPtr& symbol)
+void SemanticAnalyzer::registerSymbol(const SymbolPlaceHolderPtr& symbol, const NodePtr& node)
 {
     SymbolScope* scope = symbolRegistry->getCurrentScope();
     NodeType::T nodeType = scope->getOwner()->getNodeType();
@@ -259,7 +259,7 @@ void SemanticAnalyzer::registerSymbol(const SymbolPlaceHolderPtr& symbol)
         case NodeType::Extension:
         case NodeType::Enum:
             assert(currentType != nullptr);
-            declarationFinished(symbol->getName(), symbol);
+            declarationFinished(symbol->getName(), symbol, node);
             break;
         default:
             break;
@@ -533,7 +533,7 @@ void SemanticAnalyzer::visitValueBindings(const ValueBindingsPtr& node)
         else
         {
             SymbolPlaceHolderPtr pattern(new SymbolPlaceHolder(id->getIdentifier(), id->getType(), SymbolPlaceHolder::R_LOCAL_VARIABLE, 0));
-            registerSymbol(pattern);
+            registerSymbol(pattern, id);
         }
     }
     int flags = SymbolFlagInitializing | SymbolFlagReadable;

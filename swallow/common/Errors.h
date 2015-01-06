@@ -167,7 +167,7 @@ struct SWALLOW_EXPORT Errors
 
         E_INIT_CAN_ONLY_REFER_TO_THE_INITIALIZERS_OF_SELF,//'init' can only refer to the initializers of 'self'
         E_INITIALIZER_DELEGATION_CAN_ONLY_OCCUR_WITHIN_AN_INITIALIZER,// Initializer delegation can only occur within an initializer
-
+        E_FUNCTION_PROCEDURES_EXPECTD_TYPE_A_DID_YOU_MEAN_TO_CALL_IT_WITH_1,//function produces expected type '%0'; did you mean to call it with '()'?
 
         W_PARAM_CAN_BE_EXPRESSED_MORE_SUCCINCTLY_1, // '%0 %0' can be expressed more succinctly as '#%0'
         W_EXTRANEOUS_SHARTP_IN_PARAMETER_1 //Extraneous '#' in parameter: '%0' is already the keyword argument name

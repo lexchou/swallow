@@ -279,6 +279,11 @@ FunctionCallPtr Parser::parseFunctionCallExpression()
         ParenthesizedExpressionPtr p = this->parseParenthesizedExpression();
         ret->setArguments(p);
     }
+    else
+    {
+        ParenthesizedExpressionPtr p = nodeFactory->createParenthesizedExpression(tokenizer->save());
+        ret->setArguments(p);
+    }
     bool suppressTrailingClosure = (this->flags & SUPPRESS_TRAILING_CLOSURE) != 0;
     if(!suppressTrailingClosure && predicate(L"{"))
     {

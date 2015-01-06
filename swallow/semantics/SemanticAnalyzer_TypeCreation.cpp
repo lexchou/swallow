@@ -30,7 +30,6 @@
 #include "SemanticAnalyzer.h"
 #include "ast/ast.h"
 #include "SymbolRegistry.h"
-#include "FunctionIterator.h"
 #include "FunctionOverloadedSymbol.h"
 #include "FunctionSymbol.h"
 #include "GenericDefinition.h"
@@ -212,7 +211,7 @@ TypePtr SemanticAnalyzer::defineType(const std::shared_ptr<TypeDeclaration>& nod
     node->setType(type);
     currentScope->addSymbol(type);
 
-    declarationFinished(type->getName(), type);
+    declarationFinished(type->getName(), type, node);
     return type;
 }
 
@@ -257,13 +256,13 @@ void SemanticAnalyzer::prepareDefaultInitializers(const TypePtr& type)
         TypePtr initType = Type::newFunction(params, type, false);
         std::wstring s = initType->toString();
         FunctionSymbolPtr initializer(new FunctionSymbol(L"init", initType, nullptr));
-        declarationFinished(initializer->getName(), initializer);
+        declarationFinished(initializer->getName(), initializer, type->getReference());
     }
     if(type->getCategory() == Type::Struct && !initParams.empty())
     {
         TypePtr initType = Type::newFunction(initParams, type, false);
         FunctionSymbolPtr initializer(new FunctionSymbol(L"init", initType, nullptr));
-        declarationFinished(initializer->getName(), initializer);
+        declarationFinished(initializer->getName(), initializer, type->getReference());
     }
 }
 
@@ -294,7 +293,7 @@ void SemanticAnalyzer::visitTypeAlias(const TypeAliasPtr& node)
         //static_pointer_cast<TypeBuilder>(type)->setInnerType(innerType);
     }
     currentScope->addSymbol(node->getName(), type);
-    declarationFinished(node->getName(), type);
+    declarationFinished(node->getName(), type, node);
 }
 
 
@@ -345,8 +344,11 @@ void SemanticAnalyzer::visitStruct(const StructDefPtr& node)
                 TypePtr expectedType = expectedFunc->getType();
                 assert(expectedType != nullptr);
                 bool matched = false;
-
-                for(auto func : FunctionIterator(type, expectedFunc->getName()))
+                //get all methods with the same name, and check their signature one by one
+                vector<SymbolPtr> funcs;
+                bool staticMember = expectedFunc->hasFlags(SymbolFlagStatic);
+                this->getMethodsFromType(type, expectedFunc->getName(), staticMember, funcs);
+                for(const SymbolPtr& func : funcs)
                 {
                     TypePtr actualType = func->getType();
                     assert(actualType != nullptr);

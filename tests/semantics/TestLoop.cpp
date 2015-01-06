@@ -39,16 +39,31 @@
 using namespace Swallow;
 using namespace std;
 
-
-//TODO: Implement loops after advanced operator done
+/*
 TEST(TestLoop, ForIn)
 {
-    /*
+
     SEMANTIC_ANALYZE(L"for index in 1...5 {\n"
             L"    println(\"\\(index) times 5 is \\(index * 5)\")\n"
             L"}");
     dumpCompilerResults(compilerResults);
     ASSERT_EQ(0, compilerResults.numResults());
-    */
 }
+*/
+
+
+/*
+TEST(TestLoop, ForIn_NotSequenceType)
+{
+
+    SEMANTIC_ANALYZE(L"for index in 3 {\n"
+            L"    println(\"\\(index) times 5 is \\(index * 5)\")\n"
+            L"}");
+    dumpCompilerResults(compilerResults);
+    ASSERT_EQ(1, compilerResults.numResults());
+    auto res = compilerResults.getResult(0);
+    ASSERT_EQ(Errors::E_TYPE_DOES_NOT_CONFORM_TO_PROTOCOL_2_, res.code);
+
+}
+*/
 
