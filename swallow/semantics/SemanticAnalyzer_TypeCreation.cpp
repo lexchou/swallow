@@ -243,10 +243,7 @@ void SemanticAnalyzer::prepareDefaultInitializers(const TypePtr& type)
             initParams.push_back(Type::Parameter(sym->getName(), false, sym->getType()));
             //do not create default init if there's a variable has no initializer
             if (!s->hasFlags(SymbolFlagHasInitializer))
-            {
                 createDefaultInit = false;
-                break;
-            }
         }
     }
     if(createDefaultInit)

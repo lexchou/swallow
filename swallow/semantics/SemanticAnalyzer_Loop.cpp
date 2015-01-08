@@ -53,7 +53,15 @@ using namespace std;
 
 void SemanticAnalyzer::visitWhileLoop(const WhileLoopPtr& node)
 {
-    NodeVisitor::visitWhileLoop(node);
+    node->getCondition()->accept(this);
+    GlobalScope* global = symbolRegistry->getGlobalScope();
+    TypePtr conditionType = node->getCondition()->getType();
+    if(!conditionType->conformTo(global->BooleanType()))
+    {
+        error(node->getCondition(), Errors::E_TYPE_DOES_NOT_CONFORM_TO_PROTOCOL_2_, conditionType->toString(), L"BooleanType");
+        return;
+    }
+    node->getCodeBlock()->accept(this);
 }
 void SemanticAnalyzer::visitForIn(const ForInLoopPtr& node)
 {
@@ -74,10 +82,48 @@ void SemanticAnalyzer::visitForIn(const ForInLoopPtr& node)
 }
 void SemanticAnalyzer::visitForLoop(const ForLoopPtr& node)
 {
-    NodeVisitor::visitForLoop(node);
+    ScopedCodeBlockPtr codeBlock = static_pointer_cast<ScopedCodeBlock>(node->getCodeBlock());
+    if(node->getInitializer())
+    {
+        ScopeGuard guard(codeBlock.get(), this);
+        node->getInitializer()->accept(this);
+    }
+    else
+    {
+        for(int i = 0; i < node->numInit(); i++)
+        {
+            node->getInit(i)->accept(this);
+        }
+    }
+    {
+        //condition and step expression should be evaluated under for statement's scope
+        ScopeGuard guard(codeBlock.get(), this);
+
+        //check condition
+        node->getCondition()->accept(this);
+        GlobalScope *global = symbolRegistry->getGlobalScope();
+        TypePtr conditionType = node->getCondition()->getType();
+        if (!conditionType->conformTo(global->BooleanType()))
+        {
+            error(node->getCondition(), Errors::E_TYPE_DOES_NOT_CONFORM_TO_PROTOCOL_2_, conditionType->toString(), L"BooleanType");
+            return;
+        }
+        //visit step expressions
+        node->getStep()->accept(this);
+    }
+    //visit code block
+    node->getCodeBlock()->accept(this);
 }
 void SemanticAnalyzer::visitDoLoop(const DoLoopPtr& node)
 {
-    NodeVisitor::visitDoLoop(node);
+    node->getCondition()->accept(this);
+    GlobalScope* global = symbolRegistry->getGlobalScope();
+    TypePtr conditionType = node->getCondition()->getType();
+    if(!conditionType->conformTo(global->BooleanType()))
+    {
+        error(node->getCondition(), Errors::E_TYPE_DOES_NOT_CONFORM_TO_PROTOCOL_2_, conditionType->toString(), L"BooleanType");
+        return;
+    }
+    node->getCodeBlock()->accept(this);
 }
 

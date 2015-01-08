@@ -67,10 +67,13 @@ std::wstring getErrorTemplate(int errorCode)
         case Errors::E_UNTERMINATED_STRING_LITERAL: return L"Unterminated string literal";
         case Errors::E_UNEXPECTED_CHARACTER_A_IN_STRING_INTERPOLATION: return L"Unexpected '%0' character in string interpolation";
         case Errors::E_INVALID_ESCAPE_SEQUENCE_IN_LITERAL: return L"Invalid escape sequence in literal";
+        case Errors::E_COMPUTED_PROPERTY_CANNOT_BE_DECLARED_UNDER_FOR_LOOP: return L"Computed property cannot be declared under for loop";
+
 
         case Errors::E_INVALID_REDECLARATION_1: return L"Invalid redeclaration of type %0";
         case Errors::E_USE_OF_UNDECLARED_TYPE_1: return L"Use of undeclared type %0";
-        case Errors::E_CANNOT_ASSIGN: return L"cannot assign to the result of this expression";
+        case Errors::E_CANNOT_ASSIGN_TO_THE_RESULT_OF_THIS_EXPRESSION: return L"cannot assign to the result of this expression";
+        case Errors::E_CANNOT_ASSIGN_TO_A_IN_B_2: return L"Cannot assign to '%0' in '%1'";
         case Errors::E_USE_OF_UNRESOLVED_IDENTIFIER_1: return L"use of unresolved identifier '%0'";
         case Errors::E_USE_OF_UNINITIALIZED_VARIABLE_1: return L"use of local variable '%0' before its declaration";
         case Errors::E_USE_OF_INITIALIZING_VARIABLE: return L"variable used within its own initial value";

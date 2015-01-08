@@ -175,6 +175,12 @@ bool Parser::predicate(const wchar_t* token)
         return false;
     return t == token;
 }
+bool Parser::predicate(const wchar_t* token, Token& t)
+{
+    if(!peek(t))
+        return false;
+    return t == token;
+}
 void Parser::expect(const wchar_t* str)
 {
     Token token;

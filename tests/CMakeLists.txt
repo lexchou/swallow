@@ -48,6 +48,7 @@ SET(SEMANTICS_SRC
     semantics/TestOperators.cpp
     semantics/TestExtension.cpp
     semantics/TestLoop.cpp
+    semantics/TestProperties.cpp
     )
 
 ADD_EXECUTABLE(TestTokenizer

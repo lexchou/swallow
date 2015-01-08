@@ -199,6 +199,7 @@ private:
      * Return true if the next token is the specified one, no token will be consumed
      */
     bool predicate(const wchar_t* token);
+    bool predicate(const wchar_t* token, Token& t);
 
     void tassert(Token& token, bool cond, int errorCode, const std::wstring& s = std::wstring());
 private:

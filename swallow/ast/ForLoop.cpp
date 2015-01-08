@@ -50,14 +50,25 @@ void ForLoop::addInit(const ExpressionPtr& init)
 {
     inits.push_back(init);
 }
-int ForLoop::numInit()
+int ForLoop::numInit() const
 {
     return inits.size();
 }
-ExpressionPtr ForLoop::getInit(int idx)
+ExpressionPtr ForLoop::getInit(int idx) const
 {
     return inits[idx];
 }
+
+ValueBindingsPtr ForLoop::getInitializer() const
+{
+    return initializer;
+}
+void ForLoop::setInitializer(const ValueBindingsPtr& initializer)
+{
+    this->initializer = initializer;
+}
+
+
 
 void ForLoop::setCondition(const ExpressionPtr& cond)
 {

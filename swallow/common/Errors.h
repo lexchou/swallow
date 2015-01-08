@@ -56,11 +56,13 @@ struct SWALLOW_EXPORT Errors
         E_UNTERMINATED_STRING_LITERAL, //Unterminated string literal
         E_UNEXPECTED_CHARACTER_A_IN_STRING_INTERPOLATION,// Unexpected '%0' character in string interpolation
         E_INVALID_ESCAPE_SEQUENCE_IN_LITERAL,
+        E_COMPUTED_PROPERTY_CANNOT_BE_DECLARED_UNDER_FOR_LOOP, //Computed property cannot be declared under for loop
 
         //semantic errors
         E_INVALID_REDECLARATION_1, // Invalid redeclaration of type %0
         E_USE_OF_UNDECLARED_TYPE_1, // Use of undeclared type %0
-        E_CANNOT_ASSIGN, // cannot assign to the result of this expression
+        E_CANNOT_ASSIGN_TO_THE_RESULT_OF_THIS_EXPRESSION, // cannot assign to the result of this expression
+        E_CANNOT_ASSIGN_TO_A_IN_B_2,//Cannot assign to '%0' in '%1'
         E_USE_OF_UNRESOLVED_IDENTIFIER_1, //use of unresolved identifier '%0'
         E_USE_OF_UNINITIALIZED_VARIABLE_1, //use of local variable '%0' before its declaration
         E_USE_OF_INITIALIZING_VARIABLE, //variable used within its own initial value

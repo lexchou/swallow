@@ -46,24 +46,57 @@
 USE_SWALLOW_NS
 using namespace std;
 
+/*!
+ * Return true if one of the component node is read only
+ */
+static bool containsReadonlyNode(const ExpressionPtr& node, SymbolRegistry* registry)
+{
+    NodeType::T nodeType = node->getNodeType();
+    if(nodeType == NodeType::Identifier)
+    {
+        IdentifierPtr id = static_pointer_cast<Identifier>(node);
+        SymbolPtr sym = registry->lookupSymbol(id->getIdentifier());
+        //Check if the identifier is a structure, according to official document:
+        //This behavior is due to structures being value types. When an instance of a value type is marked as a constant, so are all of its properties.
+        //The same is not true for classes, which are reference types. If you assign an instance of a reference type to a constant, you can still change that instance’s variable properties.
+        if(sym && !sym->hasFlags(SymbolFlagWritable) && sym->getType() && sym->getType()->getCategory() == Type::Struct)
+            return true;
+    }
+    else if(nodeType == NodeType::MemberAccess)
+    {
+        MemberAccessPtr ma = static_pointer_cast<MemberAccess>(node);
+        if(containsReadonlyNode(ma->getSelf(), registry))
+            return true;
+        TypePtr selfType = ma->getSelf()->getType();
+        if(ma->getField() && selfType)
+        {
+            SymbolPtr sym = selfType->getMember(ma->getField()->getIdentifier());
+            //a constant member
+            if(sym && !sym->hasFlags(SymbolFlagWritable))
+                return true;
+        }
+    }
+    return false;
+}
+
 void SemanticAnalyzer::visitAssignment(const AssignmentPtr& node)
 {
     node->setType(symbolRegistry->getGlobalScope()->Void());
-    PatternPtr pattern = node->getLHS();
-    pattern->accept(this);
-    switch(pattern->getNodeType())
+    PatternPtr destination = node->getLHS();
+    destination->accept(this);
+    switch(destination->getNodeType())
     {
         case NodeType::Identifier:
         case NodeType::Tuple:
         {
             //check if the symbol is writable
-            verifyTuplePattern(pattern);
+            verifyTuplePattern(destination);
             break;
         }
         case NodeType::SubscriptAccess:
         {
             //TODO: check if this subscript access is writable
-            SubscriptAccessPtr subscriptAccess = static_pointer_cast<SubscriptAccess>(pattern);
+            SubscriptAccessPtr subscriptAccess = static_pointer_cast<SubscriptAccess>(destination);
             TypePtr selfType = subscriptAccess->getSelf()->getType();
             SymbolPtr sym = selfType->getMember(L"subscript");
             if (!sym)
@@ -92,7 +125,39 @@ void SemanticAnalyzer::visitAssignment(const AssignmentPtr& node)
         }
         case NodeType::MemberAccess:
         {
-            //TODO check if the member's access is writable
+            MemberAccessPtr ma = static_pointer_cast<MemberAccess>(node->getLHS());
+            if(ma->getSelf()->getNodeType() == NodeType::Identifier)
+            {
+                //simple format to check, to give better compilation result
+                IdentifierPtr self = static_pointer_cast<Identifier>(ma->getSelf());
+                SymbolPtr selfSymbol = symbolRegistry->lookupSymbol(self->getIdentifier());
+                assert(selfSymbol != nullptr);
+                wstring index = ma->getField() ? ma->getField()->getIdentifier() : toString(ma->getIndex());
+                //the members will be read only if the struct instance is marked by 'let'
+                if(selfSymbol->getType()->getCategory() == Type::Struct && !selfSymbol->hasFlags(SymbolFlagWritable))
+                {
+                    error(self, Errors::E_CANNOT_ASSIGN_TO_A_IN_B_2, index, self->getIdentifier());
+                    return;
+                }
+                if(ma->getField() && self->getIdentifier() != L"self")
+                {
+                    SymbolPtr member = selfSymbol->getType()->getMember(ma->getField()->getIdentifier());
+                    assert(member != nullptr);
+                    if(!member->hasFlags(SymbolFlagWritable))
+                    {
+                        error(ma->getField(), Errors::E_CANNOT_ASSIGN_TO_A_IN_B_2, index, self->getIdentifier());
+                        return;
+                    }
+                }
+            }
+            else
+            {
+                //TODO:lookup in the chain to find if any node is read only
+                if(containsReadonlyNode(ma, symbolRegistry))
+                {
+                    error(ma, Errors::E_CANNOT_ASSIGN_TO_THE_RESULT_OF_THIS_EXPRESSION);
+                }
+            }
             break;
         }
         default:
@@ -101,7 +166,7 @@ void SemanticAnalyzer::visitAssignment(const AssignmentPtr& node)
     }
 
     //value(s) assignment
-    TypePtr destinationType = pattern->getType();
+    TypePtr destinationType = destination->getType();
     assert(destinationType != nullptr);
     if(ExpressionPtr expr = dynamic_pointer_cast<Expression>(node->getRHS()))
     {
@@ -132,7 +197,7 @@ void SemanticAnalyzer::verifyTuplePattern(const PatternPtr& pattern)
         if(type)
         {
             //cannot assign expression to type
-            error(id, Errors::E_CANNOT_ASSIGN, id->getIdentifier());
+            error(id, Errors::E_CANNOT_ASSIGN_TO_THE_RESULT_OF_THIS_EXPRESSION, id->getIdentifier());
             return;
         }
         SymbolPtr sym = symbolRegistry->lookupSymbol(id->getIdentifier());
@@ -151,7 +216,7 @@ void SemanticAnalyzer::verifyTuplePattern(const PatternPtr& pattern)
     }
     else
     {
-        error(pattern, Errors::E_CANNOT_ASSIGN);
+        error(pattern, Errors::E_CANNOT_ASSIGN_TO_THE_RESULT_OF_THIS_EXPRESSION);
         return;
     }
 
@@ -524,10 +589,12 @@ void SemanticAnalyzer::visitValueBindings(const ValueBindingsPtr& node)
         if(name->getNodeType() != NodeType::Identifier)
             continue;//The tuple has been exploded into a sequence of single variable bindings, no need to handle tuple again
         IdentifierPtr id = std::static_pointer_cast<Identifier>(name);
-        SymbolPtr s = symbolRegistry->lookupSymbol(id->getIdentifier());
-        if(s)
+        SymbolPtr s = nullptr;
+        SymbolScope* scope = nullptr;
+        symbolRegistry->lookupSymbol(id->getIdentifier(), &scope, &s);
+        if(s && scope == symbolRegistry->getCurrentScope())
         {
-            //already defined
+            //already defined in current scope
             error(id, Errors::E_DEFINITION_CONFLICT, id->getIdentifier());
         }
         else

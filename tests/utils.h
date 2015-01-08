@@ -79,7 +79,7 @@ struct Tracer
     Swallow::GlobalScope* global = symbolRegistry.getGlobalScope(); (void)global; \
     Swallow::CompilerResults compilerResults; \
     ScopedProgramPtr root = analyzeStatement(symbolRegistry, compilerResults, __FUNCTION__, content.c_str()); \
-    Swallow::SymbolScope* scope = root ? root->getScope() : nullptr; \
+    Swallow::SymbolScope* scope = root ? root->getScope() : (Swallow::SymbolScope*)nullptr; \
     (void)scope;
 #define SEMANTIC_ANALYZE_F(fileName) SEMANTIC_ANALYZE(readFile(fileName));
 

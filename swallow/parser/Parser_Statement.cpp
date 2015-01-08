@@ -33,6 +33,7 @@
 #include "ast/ast.h"
 #include "common/Errors.h"
 #include "tokenizer/Tokenizer.h"
+#include <cassert>
 using namespace Swallow;
 
 /*
@@ -205,17 +206,39 @@ StatementPtr Parser::parseForStatement()
     flags += SUPPRESS_TRAILING_CLOSURE;
     ForLoopPtr ret = nodeFactory->createForLoop(token.state);
     bool parenthesized = match(L"(");
-    if(!predicate(L";"))
+    if(!predicate(L";", token))
     {
-        do
+        if(token.getKeyword() == Keyword::Let || token.getKeyword() == Keyword::Var)
         {
-            if(predicate(L";"))
-                break;
-            ExpressionPtr init = parseExpression();
-            ret->addInit(init);
+            //read value bindings
+            Attributes attrs;
+            DeclarationPtr init = parseVar(attrs, 0);
+            if(std::dynamic_pointer_cast<ComputedProperty>(init))
+            {
+                tassert(token, false, Errors::E_COMPUTED_PROPERTY_CANNOT_BE_DECLARED_UNDER_FOR_LOOP, L"");
+                return nullptr;
+            }
+            else if(ValueBindingsPtr initializer = std::dynamic_pointer_cast<ValueBindings>(init))
+            {
+                ret->setInitializer(initializer);
+            }
+            else
+            {
+                assert(0 && "Invalid variable declaration on for loop");
+            }
         }
-        while(match(L","));
-
+        else
+        {
+            //read initializer list
+            do
+            {
+                if (predicate(L";"))
+                    break;
+                ExpressionPtr init = parseExpression();
+                ret->addInit(init);
+            }
+            while (match(L","));
+        }
     }
     expect(L";");
     if(!predicate(L";"))

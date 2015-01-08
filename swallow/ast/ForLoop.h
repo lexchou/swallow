@@ -44,9 +44,13 @@ public:
     ~ForLoop();
 public:
     void addInit(const ExpressionPtr& init);
-    int numInit();
-    ExpressionPtr getInit(int idx);
-    
+    int numInit() const;
+    ExpressionPtr getInit(int idx) const;
+
+    ValueBindingsPtr getInitializer() const;
+    void setInitializer(const ValueBindingsPtr& initializer);
+
+
     void setCondition(const ExpressionPtr& cond);
     ExpressionPtr getCondition();
     
@@ -60,6 +64,7 @@ public:
     virtual void accept(NodeVisitor* visitor);
 public:
     std::vector<ExpressionPtr> inits;
+    ValueBindingsPtr initializer;
     ExpressionPtr condition;
     ExpressionPtr step;
     CodeBlockPtr codeBlock;

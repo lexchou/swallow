@@ -85,6 +85,7 @@ void NodeVisitor::visitForLoop(const ForLoopPtr& node)
     {
         ACCEPT(init);
     }
+    ACCEPT(node->getInitializer());
     ACCEPT(node->condition);
     ACCEPT(node->step);
     ACCEPT(node->codeBlock);

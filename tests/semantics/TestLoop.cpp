@@ -40,9 +40,11 @@ using namespace Swallow;
 using namespace std;
 
 /*
+TODO: Fix the ForIn test case after migrated standard library to external file and implemented Range/SequenceType/...
+
+
 TEST(TestLoop, ForIn)
 {
-
     SEMANTIC_ANALYZE(L"for index in 1...5 {\n"
             L"    println(\"\\(index) times 5 is \\(index * 5)\")\n"
             L"}");
@@ -66,4 +68,95 @@ TEST(TestLoop, ForIn_NotSequenceType)
 
 }
 */
+
+TEST(TestLoop, For)
+{
+    SEMANTIC_ANALYZE(L"for var index = 0; index < 3; index++ {\n"
+            L"    println(\"index is \\(index)\")\n"
+            L"}");
+    dumpCompilerResults(compilerResults, content);
+    ASSERT_EQ(0, compilerResults.numResults());
+}
+
+
+TEST(TestLoop, For_InnerScope)
+{
+    SEMANTIC_ANALYZE(L"var index = 0\n"
+            L"for var index = 0; index < 3; index++ {\n"
+            L"    println(\"index is \\(index)\")\n"
+            L"}");
+    dumpCompilerResults(compilerResults, content);
+    ASSERT_EQ(0, compilerResults.numResults());
+}
+
+
+TEST(TestLoop, For_NonBooleanCondition)
+{
+    SEMANTIC_ANALYZE(L"for var index = 0; index; index++ {\n"
+            L"    println(\"index is \\(index)\")\n"
+            L"}");
+    ASSERT_EQ(1, compilerResults.numResults());
+    auto res = compilerResults.getResult(0);
+    ASSERT_EQ(Errors::E_TYPE_DOES_NOT_CONFORM_TO_PROTOCOL_2_, res.code);
+}
+
+
+TEST(TestLoop, For_Undeclared)
+{
+    SEMANTIC_ANALYZE(L"for index = 0; index < 3; ++index {\n"
+            L"    println(\"index is \\(index)\")\n"
+            L"}");
+    ASSERT_EQ(1, compilerResults.numResults());
+    auto res = compilerResults.getResult(0);
+    ASSERT_EQ(Errors::E_USE_OF_UNRESOLVED_IDENTIFIER_1, res.code);
+    ASSERT_EQ(L"index", res.items[0]);
+}
+
+
+TEST(TestLoop, While)
+{
+    SEMANTIC_ANALYZE(L"var i = 0, sum = 0\n"
+            L"while i < 10 {\n"
+            L"  sum = sum + i\n"
+            L"  i++\n"
+            L"}");
+    ASSERT_EQ(0, compilerResults.numResults());
+}
+
+TEST(TestLoop, While_NonBooleanCondition)
+{
+    SEMANTIC_ANALYZE(L"var i = 0, sum = 0\n"
+            L"while i {\n"
+            L"  sum = sum + i\n"
+            L"  i++\n"
+            L"}");
+    ASSERT_EQ(1, compilerResults.numResults());
+    auto res = compilerResults.getResult(0);
+    ASSERT_EQ(Errors::E_TYPE_DOES_NOT_CONFORM_TO_PROTOCOL_2_, res.code);
+}
+
+
+
+TEST(TestLoop, Do)
+{
+    SEMANTIC_ANALYZE(L"var i = 0, sum = 0\n"
+            L"do {\n"
+            L"  sum = sum + i\n"
+            L"  i++\n"
+            L"} while i < 20");
+    ASSERT_EQ(0, compilerResults.numResults());
+}
+
+TEST(TestLoop, Do_NonBooleanCondition)
+{
+    SEMANTIC_ANALYZE(L"var i = 0, sum = 0\n"
+            L"do {\n"
+            L"  sum = sum + i\n"
+            L"  i++\n"
+            L"} while i");
+    ASSERT_EQ(1, compilerResults.numResults());
+    auto res = compilerResults.getResult(0);
+    ASSERT_EQ(Errors::E_TYPE_DOES_NOT_CONFORM_TO_PROTOCOL_2_, res.code);
+}
+
 

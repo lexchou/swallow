@@ -199,7 +199,7 @@ TEST(TestOptional, OptionalChaining3)
 TEST(TestOptional, OptionalChaining_Property)
 {
     SEMANTIC_ANALYZE_F("semantics/TestOptional_OptionalChaining_Property.swift");
-    dumpCompilerResults(compilerResults);
+    dumpCompilerResults(compilerResults, content);
     ASSERT_EQ(0, compilerResults.numResults());
 }
 
@@ -207,7 +207,7 @@ TEST(TestOptional, OptionalChaining_Property)
 TEST(TestOptional, OptionalChaining_Method)
 {
     SEMANTIC_ANALYZE_F("semantics/TestOptional_OptionalChaining_Method.swift");
-    dumpCompilerResults(compilerResults);
+    dumpCompilerResults(compilerResults, content);
     ASSERT_EQ(0, compilerResults.numResults());
 }
 
@@ -215,7 +215,7 @@ TEST(TestOptional, OptionalChaining_Method)
 TEST(TestOptional, OptionalChaining_Subscript)
 {
     SEMANTIC_ANALYZE_F("semantics/TestOptional_OptionalChaining_Subscript.swift");
-    dumpCompilerResults(compilerResults);
+    dumpCompilerResults(compilerResults, content);
     ASSERT_EQ(0, compilerResults.numResults());
 }
 TEST(TestOptional, DictSubscriptAccess)
@@ -251,7 +251,7 @@ TEST(TestOptional, MultipleLevelChaining2)
 TEST(TestOptional, ChainingMethods)
 {
     SEMANTIC_ANALYZE_F("semantics/TestOptional_ChainingMethods.swift");
-    dumpCompilerResults(compilerResults);
+    dumpCompilerResults(compilerResults, content);
     ASSERT_EQ(0, compilerResults.numResults());
 }
 
