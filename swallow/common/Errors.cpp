@@ -176,6 +176,17 @@ std::wstring getErrorTemplate(int errorCode)
         case Errors::E_ENUMS_MAY_NOT_CONTAIN_STORED_PROPERTIES: return L"Enums may not contain stored properties";
         case Errors::E_INIT_CAN_ONLY_REFER_TO_THE_INITIALIZERS_OF_SELF: return L"'init' can only refer to the initializers of 'self'";
         case Errors::E_FUNCTION_PROCEDURES_EXPECTD_TYPE_A_DID_YOU_MEAN_TO_CALL_IT_WITH_1: return L"function produces expected type '%0'; did you mean to call it with '()'?";
+        case Errors::E_LAZY_PROPERTIES_MUST_HAVE_AN_INITIALIZER: return L"Lazy properties must have an initializer";
+        case Errors::E_LAZY_CANNOT_DESTRUCTURE_AN_INITIALIZER: return L"'lazy' cannot destructure an initializer";
+        case Errors::E_LAZY_CANNOT_BE_USED_ON_A_LET: return L"'lazy' cannot be used on a let";
+        case Errors::E_LAZY_IS_ONLY_VALID_FOR_MEMBERS_OF_A_STRUCT_OR_CLASS: return L"Lazy is only valid for members of a struct or class";
+        case Errors::E_LAZY_MAY_NOT_BE_USED_ON_A_COMPUTED_PROPERTY: return L"'lazy' may not be used on a computed property";
+        case Errors::E_CLASS_PROPERTIES_MAY_ONLY_BE_DECLARED_ON_A_TYPE: return L"Class properties may only be declared on a type";
+        case Errors::E_STATIC_PROPERTIES_MAY_ONLY_BE_DECLARED_ON_A_TYPE: return L"Static properties may only be declared on a type";
+        case Errors::E_STATIC_PROPERTIES_ARE_ONLY_ALLOWED_WITHIN_STRUCTS_AND_ENUMS: return L"Static properties are only allowed within structs and enums; use 'class' to declare a class property";
+        case Errors::E_CLASS_PROPERTIES_ARE_ONLY_ALLOWED_WITHIN_CLASSES_AND_PROTOCOLS: return L"Class properties are only allowed within classes and protocols; use 'static' to declare a static property";
+
+
 
 
 

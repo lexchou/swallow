@@ -398,10 +398,12 @@ static void makeRawRepresentable(const TypeBuilderPtr& type, GlobalScope* global
 void SemanticAnalyzer::visitEnum(const EnumDefPtr& node)
 {
     TypeBuilderPtr type = static_pointer_cast<TypeBuilder>(defineType(node));
+    SCOPED_SET(currentType, type);
     //check member declaration of enum
     for(const DeclarationPtr& decl : *node)
     {
-        if(decl->getNodeType() == NodeType::ValueBindings)
+        bool isStatic = decl->hasModifier(DeclarationModifiers::Class) || decl->hasModifier(DeclarationModifiers::Static);
+        if(!isStatic && (decl->getNodeType() == NodeType::ValueBindings))
         {
             error(node, Errors::E_ENUMS_MAY_NOT_CONTAIN_STORED_PROPERTIES);
             continue;

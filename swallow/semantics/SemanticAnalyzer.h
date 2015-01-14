@@ -123,6 +123,9 @@ public:// Condition control flow
     virtual void visitDoLoop(const DoLoopPtr& node) override;
 public://Syntax sugar for type
     virtual void visitOptionalType(const OptionalTypePtr& node);
+public://properties
+    const TypePtr& getCurrentFunction() const;
+    const TypePtr& getCurrentType() const;
 private:
     void visitAccessor(const CodeBlockPtr& accessor, const ParametersPtr& params, const SymbolPtr& setter);
     TypePtr defineType(const std::shared_ptr<TypeDeclaration>& node);
@@ -240,6 +243,11 @@ private:
      * This implementation will try to all methods from the type, including defined in parent class or extension
      */
     void getMethodsFromType(const TypePtr& type, const std::wstring& fieldName, bool staticMember, std::vector<SymbolPtr>& result);
+private:
+    /*!
+     * Validate modifiers for declarations.
+     */
+    void validateDeclarationModifiers(const DeclarationPtr& declaration);
 protected:
     //hint for parsing Array/tuple/dictionary literal
     TypePtr t_hint;

@@ -51,42 +51,44 @@ void CompilerResultEmitter::abort()
 {
     throw Abort();
 }
-void CompilerResultEmitter::error(const NodePtr& node, int code, const std::vector<std::wstring>& items)
+bool CompilerResultEmitter::error(const NodePtr& node, int code, const std::vector<std::wstring>& items)
 {
     assert(node != nullptr);
     compilerResults->add(ErrorLevel::Error, *node->getSourceInfo(), code, items);
     abort();
+    return false;
 }
 /*!
  * Outputs an compiler error
  */
-void CompilerResultEmitter::error(const NodePtr& node, int code, const std::wstring& item)
+bool CompilerResultEmitter::error(const NodePtr& node, int code, const std::wstring& item)
 {
     ResultItems items = {item};
-    error(node, code, items);
+    return error(node, code, items);
 }
-void CompilerResultEmitter::error(const NodePtr& node, int code, const std::wstring& item1, const std::wstring& item2)
+bool CompilerResultEmitter::error(const NodePtr& node, int code, const std::wstring& item1, const std::wstring& item2)
 {
     ResultItems items = {item1, item2};
-    error(node, code, items);
+    return error(node, code, items);
 }
-void CompilerResultEmitter::error(const NodePtr& node, int code, const std::wstring& item1, const std::wstring& item2, const std::wstring& item3)
+bool CompilerResultEmitter::error(const NodePtr& node, int code, const std::wstring& item1, const std::wstring& item2, const std::wstring& item3)
 {
     ResultItems items = {item1, item2, item3};
-    error(node, code, items);
+    return error(node, code, items);
 }
-void CompilerResultEmitter::error(const NodePtr& node, int code, const std::wstring& item1, const std::wstring& item2, const std::wstring& item3, const std::wstring& item4)
+bool CompilerResultEmitter::error(const NodePtr& node, int code, const std::wstring& item1, const std::wstring& item2, const std::wstring& item3, const std::wstring& item4)
 {
     ResultItems items = {item1, item2, item3, item4};
-    error(node, code, items);
+    return error(node, code, items);
 }
 
-void CompilerResultEmitter::error(const NodePtr& node, int code)
+bool CompilerResultEmitter::error(const NodePtr& node, int code)
 {
-    error(node, code, L"");
+    return error(node, code, L"");
 }
 void CompilerResultEmitter::warning(const NodePtr& node, int code, const std::wstring& item)
 {
     compilerResults->add(ErrorLevel::Warning, *node->getSourceInfo(), code, item);
 }
+
 

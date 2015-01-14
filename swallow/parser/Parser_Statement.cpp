@@ -100,6 +100,8 @@ StatementPtr Parser::parseStatement()
                 case Keyword::Prefix:
                 case Keyword::Postfix:
                 case Keyword::Infix:
+                case Keyword::Lazy:
+                case Keyword::Static:
                     return parseDeclaration();
                 default:
                     break;

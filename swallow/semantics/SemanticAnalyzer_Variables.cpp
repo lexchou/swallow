@@ -134,14 +134,29 @@ void SemanticAnalyzer::visitAssignment(const AssignmentPtr& node)
                 assert(selfSymbol != nullptr);
                 wstring index = ma->getField() ? ma->getField()->getIdentifier() : toString(ma->getIndex());
                 //the members will be read only if the struct instance is marked by 'let'
-                if(selfSymbol->getType()->getCategory() == Type::Struct && !selfSymbol->hasFlags(SymbolFlagWritable))
+                TypePtr selfType;
+                bool staticAccess = false;
+                if(TypePtr t = dynamic_pointer_cast<Type>(selfSymbol))
+                {
+                    //Type access
+                    selfType = t;
+                    staticAccess = true;
+                }
+                else
+                {
+                    //variable access
+                    selfType = selfSymbol->getType();
+                    assert(selfType != nullptr);
+                }
+                if(!staticAccess && selfType->getCategory() == Type::Struct && !selfSymbol->hasFlags(SymbolFlagWritable))
                 {
                     error(self, Errors::E_CANNOT_ASSIGN_TO_A_IN_B_2, index, self->getIdentifier());
                     return;
                 }
                 if(ma->getField() && self->getIdentifier() != L"self")
                 {
-                    SymbolPtr member = selfSymbol->getType()->getMember(ma->getField()->getIdentifier());
+                    SymbolPtr member = getMemberFromType(selfType, ma->getField()->getIdentifier(), staticAccess);
+                    //SymbolPtr member = selfSymbol->getType()->getMember(ma->getField()->getIdentifier());
                     assert(member != nullptr);
                     if(!member->hasFlags(SymbolFlagWritable))
                     {
@@ -258,6 +273,22 @@ void SemanticAnalyzer::visitComputedProperty(const ComputedPropertyPtr& node)
     registerSelfToAccessor(currentType, didSet);
 
 
+    //register symbol
+    int flags = SymbolFlagInitialized;
+    if(didSet || willSet)
+        flags |= SymbolFlagReadable | SymbolFlagWritable;
+    if(setter)
+        flags |= SymbolFlagWritable;
+    if(getter)
+        flags |= SymbolFlagReadable;
+    if(node->hasModifier(DeclarationModifiers::Static) || node->hasModifier(DeclarationModifiers::Class))
+        flags |= SymbolFlagStatic;
+
+    SymbolPlaceHolderPtr symbol(new SymbolPlaceHolder(node->getName(), type, SymbolPlaceHolder::R_PROPERTY, flags));
+    registerSymbol(symbol, node);
+    validateDeclarationModifiers(node);
+
+    //prepare and visit each accessors
     if(getter)
     {
         getter->setType(getterType);
@@ -297,17 +328,6 @@ void SemanticAnalyzer::visitComputedProperty(const ComputedPropertyPtr& node)
         SCOPED_SET(currentFunction, setterType);
         cb->accept(this);
     }
-    //register symbol
-    int flags = SymbolFlagInitialized;
-    if(didSet || willSet)
-        flags |= SymbolFlagReadable | SymbolFlagWritable;
-    if(setter)
-        flags |= SymbolFlagWritable;
-    if(getter)
-        flags |= SymbolFlagReadable;
-    SymbolPlaceHolderPtr symbol(new SymbolPlaceHolder(node->getName(), type, SymbolPlaceHolder::R_PROPERTY, flags));
-    registerSymbol(symbol, node);
-
 }
 void SemanticAnalyzer::registerSymbol(const SymbolPlaceHolderPtr& symbol, const NodePtr& node)
 {
@@ -583,6 +603,14 @@ void SemanticAnalyzer::visitValueBindings(const ValueBindingsPtr& node)
         return;
     }
 
+    int flags = SymbolFlagInitializing | SymbolFlagReadable;
+    if(dynamic_cast<TypeDeclaration*>(symbolRegistry->getCurrentScope()->getOwner()))
+        flags |= SymbolFlagMember;
+    if(!node->isReadOnly())
+        flags |= SymbolFlagWritable;
+    if(node->hasModifier(DeclarationModifiers::Static) || node->hasModifier(DeclarationModifiers::Class))
+        flags |= SymbolFlagStatic;
+
     for(const ValueBindingPtr& var : *node)
     {
         PatternPtr name = var->getName();
@@ -599,15 +627,10 @@ void SemanticAnalyzer::visitValueBindings(const ValueBindingsPtr& node)
         }
         else
         {
-            SymbolPlaceHolderPtr pattern(new SymbolPlaceHolder(id->getIdentifier(), id->getType(), SymbolPlaceHolder::R_LOCAL_VARIABLE, 0));
+            SymbolPlaceHolderPtr pattern(new SymbolPlaceHolder(id->getIdentifier(), id->getType(), SymbolPlaceHolder::R_LOCAL_VARIABLE, flags));
             registerSymbol(pattern, id);
         }
     }
-    int flags = SymbolFlagInitializing | SymbolFlagReadable;
-    if(dynamic_cast<TypeDeclaration*>(symbolRegistry->getCurrentScope()->getOwner()))
-        flags |= SymbolFlagMember;
-    if(!node->isReadOnly())
-        flags |= SymbolFlagWritable;
     for(const ValueBindingPtr& v : *node)
     {
         PatternPtr name = v->getName();
@@ -620,7 +643,6 @@ void SemanticAnalyzer::visitValueBindings(const ValueBindingsPtr& node)
         ExpressionPtr initializer = v->getInitializer();
         SymbolPlaceHolderPtr placeholder = std::dynamic_pointer_cast<SymbolPlaceHolder>(s);
         assert(placeholder != nullptr);
-        placeholder->setFlags((SymbolFlags)flags, true);
         if(initializer)
             placeholder->setFlags(SymbolFlagHasInitializer, true);
         if(v->isTemporary())
@@ -630,6 +652,7 @@ void SemanticAnalyzer::visitValueBindings(const ValueBindingsPtr& node)
         placeholder->setFlags(SymbolFlagInitialized, true);
         placeholder->setFlags(SymbolFlagInitializing, false);
     }
+    validateDeclarationModifiers(node);
 }
 
 void SemanticAnalyzer::visitIdentifier(const IdentifierPtr& id)

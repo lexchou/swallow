@@ -688,3 +688,12 @@ void SemanticAnalyzer::getMethodsFromType(const TypePtr& type, const std::wstrin
         result.push_back(wrapper.symbol);
     }
 }
+
+const TypePtr& SemanticAnalyzer::getCurrentFunction() const
+{
+    return currentFunction;
+}
+const TypePtr& SemanticAnalyzer::getCurrentType() const
+{
+    return currentType;
+}

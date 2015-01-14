@@ -50,6 +50,7 @@ public:
 
     int getModifiers()const;
     void setModifiers(int modifiers);
+    bool hasModifier(int modifier) const;
 
     GenericParametersDefPtr getGenericParametersDef();
     void setGenericParametersDef(const GenericParametersDefPtr& val);

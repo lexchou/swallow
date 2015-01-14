@@ -62,6 +62,8 @@ enum SymbolFlags
     SymbolFlagPostfix = 0x1000,
     //The symbol is declared through extension
     SymbolFlagExtension = 0x2000,
+    //The variable is lazy
+    SymbolFlagLazy = 0x4000,
 };
 
 class SWALLOW_EXPORT Symbol

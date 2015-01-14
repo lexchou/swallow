@@ -171,6 +171,17 @@ struct SWALLOW_EXPORT Errors
         E_INITIALIZER_DELEGATION_CAN_ONLY_OCCUR_WITHIN_AN_INITIALIZER,// Initializer delegation can only occur within an initializer
         E_FUNCTION_PROCEDURES_EXPECTD_TYPE_A_DID_YOU_MEAN_TO_CALL_IT_WITH_1,//function produces expected type '%0'; did you mean to call it with '()'?
 
+        E_LAZY_PROPERTIES_MUST_HAVE_AN_INITIALIZER,//Lazy properties must have an initializer
+        E_LAZY_CANNOT_DESTRUCTURE_AN_INITIALIZER,//'lazy' cannot destructure an initializer
+        E_LAZY_CANNOT_BE_USED_ON_A_LET,//'lazy' cannot be used on a let
+        E_LAZY_IS_ONLY_VALID_FOR_MEMBERS_OF_A_STRUCT_OR_CLASS,//Lazy is only valid for members of a struct or class
+        E_LAZY_MAY_NOT_BE_USED_ON_A_COMPUTED_PROPERTY,//'lazy' may not be used on a computed property
+        E_CLASS_PROPERTIES_MAY_ONLY_BE_DECLARED_ON_A_TYPE,//Class properties may only be declared on a type
+        E_STATIC_PROPERTIES_MAY_ONLY_BE_DECLARED_ON_A_TYPE,//Static properties may only be declared on a type
+        E_STATIC_PROPERTIES_ARE_ONLY_ALLOWED_WITHIN_STRUCTS_AND_ENUMS,//Static properties are only allowed within structs and enums; use 'class' to declare a class property
+        E_CLASS_PROPERTIES_ARE_ONLY_ALLOWED_WITHIN_CLASSES_AND_PROTOCOLS,//Class properties are only allowed within classes and protocols; use 'static' to declare a static property
+
+
         W_PARAM_CAN_BE_EXPRESSED_MORE_SUCCINCTLY_1, // '%0 %0' can be expressed more succinctly as '#%0'
         W_EXTRANEOUS_SHARTP_IN_PARAMETER_1 //Extraneous '#' in parameter: '%0' is already the keyword argument name
         //linking errors

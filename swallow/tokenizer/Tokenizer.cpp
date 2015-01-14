@@ -114,7 +114,7 @@ Tokenizer::Tokenizer(const wchar_t* data)
         {L"get",            R, Keyword::Get, TokenizerContextComputedProperty},
         {L"infix",          R, Keyword::Infix, TokenizerContextAll},
         {L"inout",          R, Keyword::Inout, TokenizerContextFunctionSignature},
-        {L"lazy",           R, Keyword::Lazy, TokenizerContextClass},
+        {L"lazy",           R, Keyword::Lazy, TokenizerContextAll},
         {L"left",           R, Keyword::Left, TokenizerContextOperator},
         {L"mutating",       R, Keyword::Mutating, TokenizerContextClass},
         {L"none",           R, Keyword::None, TokenizerContextOperator},

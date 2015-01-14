@@ -71,6 +71,10 @@ void Declaration::setModifiers(int modifiers)
 {
     this->modifiers = modifiers;
 }
+bool Declaration::hasModifier(int modifier) const
+{
+    return (modifiers & modifier) == modifier;
+}
 
 
 GenericParametersDefPtr Declaration::getGenericParametersDef()

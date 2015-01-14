@@ -50,12 +50,12 @@ public:
     /*!
      * Outputs an compiler error
      */
-    void error(const NodePtr& node, int code);
-    void error(const NodePtr& node, int code, const std::vector<std::wstring>& items);
-    void error(const NodePtr& node, int code, const std::wstring& item);
-    void error(const NodePtr& node, int code, const std::wstring& item1, const std::wstring& item2);
-    void error(const NodePtr& node, int code, const std::wstring& item1, const std::wstring& item2, const std::wstring& item3);
-    void error(const NodePtr& node, int code, const std::wstring& item1, const std::wstring& item2, const std::wstring& item3, const std::wstring& item4);
+    bool error(const NodePtr& node, int code);
+    bool error(const NodePtr& node, int code, const std::vector<std::wstring>& items);
+    bool error(const NodePtr& node, int code, const std::wstring& item);
+    bool error(const NodePtr& node, int code, const std::wstring& item1, const std::wstring& item2);
+    bool error(const NodePtr& node, int code, const std::wstring& item1, const std::wstring& item2, const std::wstring& item3);
+    bool error(const NodePtr& node, int code, const std::wstring& item1, const std::wstring& item2, const std::wstring& item3, const std::wstring& item4);
 
 
     /*!
