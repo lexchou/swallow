@@ -469,3 +469,24 @@ void SemanticAnalyzer::visitCodeBlock(const CodeBlockPtr &node)
         st->accept(this);
     }
 }
+
+
+void SemanticAnalyzer::visitReturn(const ReturnStatementPtr& node)
+{
+    if(!currentFunction)
+    {
+        error(node, Errors::E_RETURN_INVALID_OUTSIDE_OF_A_FUNC);
+        return;
+    }
+    TypePtr funcType = currentFunction;
+
+    SCOPED_SET(t_hint, funcType->getReturnType());
+
+    float score = 0;
+    TypePtr retType = this->getExpressionType(node->getExpression(), funcType->getReturnType(), score);
+    TypePtr expectedType = funcType->getReturnType();
+    if(!retType->canAssignTo(expectedType))
+    {
+        error(node->getExpression(), Errors::E_CANNOT_CONVERT_EXPRESSION_TYPE_2, retType->toString(), expectedType->toString());
+    }
+}

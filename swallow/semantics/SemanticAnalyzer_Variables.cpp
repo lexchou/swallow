@@ -46,162 +46,6 @@
 USE_SWALLOW_NS
 using namespace std;
 
-/*!
- * Return true if one of the component node is read only
- */
-static bool containsReadonlyNode(const ExpressionPtr& node, SymbolRegistry* registry)
-{
-    NodeType::T nodeType = node->getNodeType();
-    if(nodeType == NodeType::Identifier)
-    {
-        IdentifierPtr id = static_pointer_cast<Identifier>(node);
-        SymbolPtr sym = registry->lookupSymbol(id->getIdentifier());
-        //Check if the identifier is a structure, according to official document:
-        //This behavior is due to structures being value types. When an instance of a value type is marked as a constant, so are all of its properties.
-        //The same is not true for classes, which are reference types. If you assign an instance of a reference type to a constant, you can still change that instance’s variable properties.
-        if(sym && !sym->hasFlags(SymbolFlagWritable) && sym->getType() && sym->getType()->getCategory() == Type::Struct)
-            return true;
-    }
-    else if(nodeType == NodeType::MemberAccess)
-    {
-        MemberAccessPtr ma = static_pointer_cast<MemberAccess>(node);
-        if(containsReadonlyNode(ma->getSelf(), registry))
-            return true;
-        TypePtr selfType = ma->getSelf()->getType();
-        if(ma->getField() && selfType)
-        {
-            SymbolPtr sym = selfType->getMember(ma->getField()->getIdentifier());
-            //a constant member
-            if(sym && !sym->hasFlags(SymbolFlagWritable))
-                return true;
-        }
-    }
-    return false;
-}
-
-void SemanticAnalyzer::visitAssignment(const AssignmentPtr& node)
-{
-    node->setType(symbolRegistry->getGlobalScope()->Void());
-    PatternPtr destination = node->getLHS();
-    destination->accept(this);
-    switch(destination->getNodeType())
-    {
-        case NodeType::Identifier:
-        case NodeType::Tuple:
-        {
-            //check if the symbol is writable
-            verifyTuplePattern(destination);
-            break;
-        }
-        case NodeType::SubscriptAccess:
-        {
-            //TODO: check if this subscript access is writable
-            SubscriptAccessPtr subscriptAccess = static_pointer_cast<SubscriptAccess>(destination);
-            TypePtr selfType = subscriptAccess->getSelf()->getType();
-            SymbolPtr sym = selfType->getMember(L"subscript");
-            if (!sym)
-            {
-                error(subscriptAccess, Errors::E_DOES_NOT_HAVE_A_MEMBER_2, selfType->toString(), L"subscript");
-                return;
-            }
-            bool hasSetter = false;
-            FunctionOverloadedSymbolPtr subscripts = dynamic_pointer_cast<FunctionOverloadedSymbol>(sym);
-            assert(subscripts != nullptr);
-            for(const FunctionSymbolPtr& func : *subscripts)
-            {
-                TypePtr type = func->getType();
-                if(type->getParameters().size() == 2 && func->getReturnType() == symbolRegistry->getGlobalScope()->Void())
-                {
-                    hasSetter = true;
-                    break;
-                }
-            }
-            if (!hasSetter)
-            {
-                error(subscriptAccess, Errors::E_SUBSCRIPT_ACCESS_ON_A_IS_NOT_WRITABLE_1, toString(subscriptAccess->getSelf()));
-                return;
-            }
-            break;
-        }
-        case NodeType::MemberAccess:
-        {
-            MemberAccessPtr ma = static_pointer_cast<MemberAccess>(node->getLHS());
-            if(ma->getSelf()->getNodeType() == NodeType::Identifier)
-            {
-                //simple format to check, to give better compilation result
-                IdentifierPtr self = static_pointer_cast<Identifier>(ma->getSelf());
-                SymbolPtr selfSymbol = symbolRegistry->lookupSymbol(self->getIdentifier());
-                assert(selfSymbol != nullptr);
-                wstring index = ma->getField() ? ma->getField()->getIdentifier() : toString(ma->getIndex());
-                //the members will be read only if the struct instance is marked by 'let'
-                TypePtr selfType;
-                bool staticAccess = false;
-                if(TypePtr t = dynamic_pointer_cast<Type>(selfSymbol))
-                {
-                    //Type access
-                    selfType = t;
-                    staticAccess = true;
-                }
-                else
-                {
-                    //variable access
-                    selfType = selfSymbol->getType();
-                    assert(selfType != nullptr);
-                }
-                if(!staticAccess && selfType->getCategory() == Type::Struct && !selfSymbol->hasFlags(SymbolFlagWritable))
-                {
-                    error(self, Errors::E_CANNOT_ASSIGN_TO_A_IN_B_2, index, self->getIdentifier());
-                    return;
-                }
-                if(ma->getField() && self->getIdentifier() != L"self")
-                {
-                    SymbolPtr member = getMemberFromType(selfType, ma->getField()->getIdentifier(), staticAccess);
-                    //SymbolPtr member = selfSymbol->getType()->getMember(ma->getField()->getIdentifier());
-                    assert(member != nullptr);
-                    if(!member->hasFlags(SymbolFlagWritable))
-                    {
-                        error(ma->getField(), Errors::E_CANNOT_ASSIGN_TO_A_IN_B_2, index, self->getIdentifier());
-                        return;
-                    }
-                }
-            }
-            else
-            {
-                //TODO:lookup in the chain to find if any node is read only
-                if(containsReadonlyNode(ma, symbolRegistry))
-                {
-                    error(ma, Errors::E_CANNOT_ASSIGN_TO_THE_RESULT_OF_THIS_EXPRESSION);
-                }
-            }
-            break;
-        }
-        default:
-            assert(0);
-            break;
-    }
-
-    //value(s) assignment
-    TypePtr destinationType = destination->getType();
-    assert(destinationType != nullptr);
-    if(ExpressionPtr expr = dynamic_pointer_cast<Expression>(node->getRHS()))
-    {
-        node->setRHS(this->transformExpression(destinationType, expr));
-    }
-    else
-    {
-
-        SCOPED_SET(t_hint, destinationType);
-        node->getRHS()->accept(this);
-    }
-    TypePtr sourceType = node->getRHS()->getType();
-    assert(sourceType != nullptr);
-    if(!sourceType->canAssignTo(destinationType))
-    {
-        error(node, Errors::E_A_IS_NOT_CONVERTIBLE_TO_B_2, sourceType->toString(), destinationType->toString());
-        return;
-    }
-
-}
 void SemanticAnalyzer::verifyTuplePattern(const PatternPtr& pattern)
 {
 
@@ -350,6 +194,57 @@ void SemanticAnalyzer::registerSymbol(const SymbolPlaceHolderPtr& symbol, const 
             break;
     }
 }
+
+void SemanticAnalyzer::checkTupleDefinition(const TuplePtr& tuple, const ExpressionPtr& initializer)
+{
+    //this is a tuple definition, the corresponding declared type must be a tuple type
+    TypeNodePtr declaredType = tuple->getDeclaredType();
+    TypePtr type = lookupType(declaredType);
+    if(!type)
+    {
+        error(tuple, Errors::E_USE_OF_UNDECLARED_TYPE_1, toString(declaredType));
+        return;
+    }
+    if(!(type->getCategory() == Type::Tuple))
+    {
+        //tuple definition must have a tuple type definition
+        error(tuple, Errors::E_TUPLE_PATTERN_MUST_MATCH_TUPLE_TYPE_1, toString(declaredType));
+        return;
+    }
+    if(tuple->numElements() != type->numElementTypes())
+    {
+        //tuple pattern has the wrong length for tuple type '%'
+        error(tuple, Errors::E_TUPLE_PATTERN_MUST_MATCH_TUPLE_TYPE_1, toString(declaredType));
+        return;
+    }
+    //check if initializer has the same type with the declared type
+    if(initializer)
+    {
+        TypePtr valueType = evaluateType(initializer);
+        if(valueType && !Type::equals(valueType, type))
+        {
+            //tuple pattern has the wrong length for tuple type '%'
+            //tuple types '%0' and '%1' have a different number of elements (%2 vs. %3)
+            wstring expectedType = type->toString();
+            wstring got = toString(valueType->numElementTypes());
+            wstring expected = toString(type->numElementTypes());
+            error(initializer, Errors::E_TUPLE_TYPES_HAVE_A_DIFFERENT_NUMBER_OF_ELEMENT_4, toString(declaredType), expectedType, got, expected);
+            return;
+        }
+    }
+
+
+    for(const PatternPtr& p : *tuple)
+    {
+        NodeType::T nodeType = p->getNodeType();
+        if(nodeType != NodeType::Identifier)
+        {
+
+        }
+
+    }
+}
+
 
 void SemanticAnalyzer::visitValueBinding(const ValueBindingPtr& node)
 {
@@ -653,50 +548,4 @@ void SemanticAnalyzer::visitValueBindings(const ValueBindingsPtr& node)
         placeholder->setFlags(SymbolFlagInitializing, false);
     }
     validateDeclarationModifiers(node);
-}
-
-void SemanticAnalyzer::visitIdentifier(const IdentifierPtr& id)
-{
-    SymbolPtr sym = NULL;
-    SymbolScope* scope = NULL;
-    symbolRegistry->lookupSymbol(id->getIdentifier(), &scope, &sym);
-    if(!sym)
-    {
-        error(id, Errors::E_USE_OF_UNRESOLVED_IDENTIFIER_1, id->getIdentifier());
-        return;
-    }
-    if(SymbolPlaceHolderPtr placeholder = std::dynamic_pointer_cast<SymbolPlaceHolder>(sym))
-    {
-        if(placeholder->hasFlags(SymbolFlagInitializing))
-        {
-            error(id, Errors::E_USE_OF_INITIALIZING_VARIABLE, placeholder->getName());
-        }
-        else if(!placeholder->hasFlags(SymbolFlagInitialized))
-        {
-            error(id, Errors::E_USE_OF_UNINITIALIZED_VARIABLE_1, placeholder->getName());
-        }
-        //check if this identifier is accessed inside a class/protocol/extension/struct/enum but defined not in program
-        if(dynamic_cast<TypeDeclaration*>(symbolRegistry->getCurrentScope()->getOwner()) && symbolRegistry->getCurrentScope() != scope)
-        {
-            if(scope->getOwner()->getNodeType() != NodeType::Program)
-            {
-                error(id, Errors::E_USE_OF_FUNCTION_LOCAL_INSIDE_TYPE, placeholder->getName());
-            }
-        }
-        id->setType(sym->getType());
-    }
-    else if(TypePtr type = dynamic_pointer_cast<Type>(sym))
-    {
-        TypePtr ref = Type::newTypeReference(type);
-        id->setType(ref);
-    }
-    else if(FunctionSymbolPtr func = dynamic_pointer_cast<FunctionSymbol>(sym))
-    {
-        id->setType(func->getType());
-    }
-    else if(FunctionOverloadedSymbolPtr func = dynamic_pointer_cast<FunctionOverloadedSymbol>(sym))
-    {
-        //TODO: check contextual type hint
-        //error(id, Errors::E_AMBIGUOUS_USE_1, id->getIdentifier());
-    }
 }

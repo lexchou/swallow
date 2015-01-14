@@ -148,6 +148,9 @@ private:
     void checkTupleDefinition(const TuplePtr& tuple, const ExpressionPtr& initializer);
     TypePtr evaluateType(const ExpressionPtr& expr);
 
+    bool hasOptionalChaining(const NodePtr& node);
+    bool isParentInOptionalChain(const NodePtr& node);
+
     /*!
      * Calculates the fit score of arguments on given function
      * @return -1 if the type is not matched
