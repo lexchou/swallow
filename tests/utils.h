@@ -53,7 +53,7 @@ Swallow::ProgramPtr parseStatements(Swallow::CompilerResults& compilerResults, c
 Swallow::ScopedProgramPtr analyzeStatement(Swallow::SymbolRegistry& registry, Swallow::CompilerResults& compilerResults, const char* func, const wchar_t* str);
 std::wstring readFile(const char* fileName);
 void testInit(int argc, char** argv);
-
+const Swallow::CompilerResult* getCompilerResultByError(Swallow::CompilerResults& results, int error);
 
 
 
@@ -80,8 +80,24 @@ struct Tracer
     Swallow::CompilerResults compilerResults; \
     ScopedProgramPtr root = analyzeStatement(symbolRegistry, compilerResults, __FUNCTION__, content.c_str()); \
     Swallow::SymbolScope* scope = root ? root->getScope() : (Swallow::SymbolScope*)nullptr; \
-    (void)scope;
+    (void)scope; \
+    const CompilerResult* error = nullptr; \
+    (void)error;
+
+
 #define SEMANTIC_ANALYZE_F(fileName) SEMANTIC_ANALYZE(readFile(fileName));
+#define ASSERT_NO_ERRORS() if(0 != compilerResults.numResults()) { \
+        dumpCompilerResults(compilerResults, content); \
+        GTEST_FATAL_FAILURE_("Unexpected compilation errors."); \
+    }
+
+#define ASSERT_ERROR(e) error = getCompilerResultByError(compilerResults, e); \
+    if(!error) { \
+        dumpCompilerResults(compilerResults, content); \
+        GTEST_FATAL_FAILURE_("Expect compiler result " #e); \
+    }
+
+
 
 #endif//TEST_UTILS_H
 

@@ -28,12 +28,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "../utils.h"
-#include "semantics/SymbolRegistry.h"
 #include "semantics/Symbol.h"
 #include "semantics/ScopedNodes.h"
 #include "semantics/Type.h"
 #include "common/Errors.h"
-#include "semantics/GlobalScope.h"
 #include "semantics/GenericArgument.h"
 
 using namespace Swallow;
@@ -61,23 +59,20 @@ TEST(TestMethods, InstanceMethods)
             L"// the counter's value is now 6\n"
             L"counter.reset()\n"
             L"// the counter's value is now 0");
-    dumpCompilerResults(compilerResults, content);
-    ASSERT_EQ(0, compilerResults.numResults());
+    ASSERT_NO_ERRORS();
 }
 
 TEST(TestMethods, ChangeFieldWithoutMutating)
 {
-        SEMANTIC_ANALYZE(L"struct XX\n"
-                L"{\n"
-                L"    var A = 3\n"
-                L"    func foo()\n"
-                L"    {\n"
-                L"        self.A = 2;\n"
-                L"    }\n"
-                L"}");
-        ASSERT_EQ(1, compilerResults.numResults());
-        auto res = compilerResults.getResult(0);
-        ASSERT_EQ(Errors::E_CANNOT_ASSIGN_TO_A_IN_B_2, res.code);
+    SEMANTIC_ANALYZE(L"struct XX\n"
+        L"{\n"
+        L"    var A = 3\n"
+        L"    func foo()\n"
+        L"    {\n"
+        L"        self.A = 2;\n"
+        L"    }\n"
+        L"}");
+    ASSERT_ERROR(Errors::E_CANNOT_ASSIGN_TO_A_IN_B_2);
 }
 
 TEST(TestMethods, ChangeFieldWithMutating)
@@ -90,7 +85,7 @@ TEST(TestMethods, ChangeFieldWithMutating)
                 L"        self.A = 2;\n"
                 L"    }\n"
                 L"}");
-    ASSERT_EQ(0, compilerResults.numResults());
+    ASSERT_NO_ERRORS();
 }
 
 TEST(TestMethods, ChangeFieldWithoutMutating_Enum)
@@ -103,9 +98,7 @@ TEST(TestMethods, ChangeFieldWithoutMutating_Enum)
         L"        self = XX.AA;\n"
         L"    }\n"
         L"}");
-    ASSERT_EQ(1, compilerResults.numResults());
-    auto res = compilerResults.getResult(0);
-    ASSERT_EQ(Errors::E_CANNOT_ASSIGN_TO_A_IN_A_METHOD_1, res.code);
+    ASSERT_ERROR(Errors::E_CANNOT_ASSIGN_TO_A_IN_A_METHOD_1);
 }
 
 TEST(TestMethods, ChangeFieldWithMutating_Enum)
@@ -118,8 +111,7 @@ TEST(TestMethods, ChangeFieldWithMutating_Enum)
         L"        self = XX.AA;\n"
         L"    }\n"
         L"}");
-    dumpCompilerResults(compilerResults, content);
-    ASSERT_EQ(0, compilerResults.numResults());
+    ASSERT_NO_ERRORS();
 }
 
 
@@ -131,111 +123,89 @@ TEST(TestMethods, BothMutatingAndNonMutating)
         L"    {\n"
         L"    }\n"
         L"}");
-    ASSERT_EQ(1, compilerResults.numResults());
-    auto res = compilerResults.getResult(0);
-    ASSERT_EQ(Errors::E_METHOD_MAY_NOT_BE_DECLARED_BOTH_MUTATING_AND_NONMUTATING, res.code);
-
-
+    ASSERT_ERROR(Errors::E_METHOD_MAY_NOT_BE_DECLARED_BOTH_MUTATING_AND_NONMUTATING);
 }
 
 TEST(TestMethods, StaticNonmutating)
 {
-        SEMANTIC_ANALYZE(L"struct XX\n"
-            L"{\n"
-            L"    static nonmutating func foo()\n"
-            L"    {\n"
-            L"    }\n"
-            L"}");
-        ASSERT_EQ(1, compilerResults.numResults());
-        auto res = compilerResults.getResult(0);
-        ASSERT_EQ(Errors::E_STATIC_FUNCTIONS_MAY_NOT_BE_DECLARED_A_1, res.code);
-        ASSERT_EQ(L"nonmutating", res.items[0]);
+    SEMANTIC_ANALYZE(L"struct XX\n"
+        L"{\n"
+        L"    static nonmutating func foo()\n"
+        L"    {\n"
+        L"    }\n"
+        L"}");
+    ASSERT_ERROR(Errors::E_STATIC_FUNCTIONS_MAY_NOT_BE_DECLARED_A_1);
+    ASSERT_EQ(L"nonmutating", error->items[0]);
 }
 
 TEST(TestMethods, StaticMutating)
 {
-        SEMANTIC_ANALYZE(L"struct XX\n"
-            L"{\n"
-            L"    static mutating func foo()\n"
-            L"    {\n"
-            L"    }\n"
-            L"}");
-        ASSERT_EQ(1, compilerResults.numResults());
-        auto res = compilerResults.getResult(0);
-        ASSERT_EQ(Errors::E_STATIC_FUNCTIONS_MAY_NOT_BE_DECLARED_A_1, res.code);
-        ASSERT_EQ(L"mutating", res.items[0]);
+    SEMANTIC_ANALYZE(L"struct XX\n"
+        L"{\n"
+        L"    static mutating func foo()\n"
+        L"    {\n"
+        L"    }\n"
+        L"}");
+    ASSERT_ERROR(Errors::E_STATIC_FUNCTIONS_MAY_NOT_BE_DECLARED_A_1);
+    ASSERT_EQ(L"mutating", error->items[0]);
 }
 
 
 TEST(TestMethods, MutatingVar)
 {
-        SEMANTIC_ANALYZE(L"mutating var a = 3");
-        ASSERT_EQ(1, compilerResults.numResults());
-        auto res = compilerResults.getResult(0);
-        ASSERT_EQ(Errors::E_A_MAY_ONLY_BE_USED_ON_B_DECLARATION_2, res.code);
-        ASSERT_EQ(L"mutating", res.items[0]);
-        ASSERT_EQ(L"func", res.items[1]);
+    SEMANTIC_ANALYZE(L"mutating var a = 3");
+    ASSERT_ERROR(Errors::E_A_MAY_ONLY_BE_USED_ON_B_DECLARATION_2);
+    ASSERT_EQ(L"mutating", error->items[0]);
+    ASSERT_EQ(L"func", error->items[1]);
 }
 
 TEST(TestMethods, MutatingClass)
 {
     SEMANTIC_ANALYZE(L"mutating class A{}");
-    ASSERT_EQ(1, compilerResults.numResults());
-    auto res = compilerResults.getResult(0);
-    ASSERT_EQ(Errors::E_A_MAY_ONLY_BE_USED_ON_B_DECLARATION_2, res.code);
-    ASSERT_EQ(L"mutating", res.items[0]);
-    ASSERT_EQ(L"func", res.items[1]);
+    ASSERT_ERROR(Errors::E_A_MAY_ONLY_BE_USED_ON_B_DECLARATION_2);
+    ASSERT_EQ(L"mutating", error->items[0]);
+    ASSERT_EQ(L"func", error->items[1]);
 }
 
 TEST(TestMethods, MutatingStruct)
 {
     SEMANTIC_ANALYZE(L"mutating struct A{}");
-    ASSERT_EQ(1, compilerResults.numResults());
-    auto res = compilerResults.getResult(0);
-    ASSERT_EQ(Errors::E_A_MAY_ONLY_BE_USED_ON_B_DECLARATION_2, res.code);
-    ASSERT_EQ(L"mutating", res.items[0]);
-    ASSERT_EQ(L"func", res.items[1]);
+    ASSERT_ERROR(Errors::E_A_MAY_ONLY_BE_USED_ON_B_DECLARATION_2);
+    ASSERT_EQ(L"mutating", error->items[0]);
+    ASSERT_EQ(L"func", error->items[1]);
 }
 
 
 TEST(TestMethods, MutatingProtocol)
 {
     SEMANTIC_ANALYZE(L"mutating protocol A{}");
-    ASSERT_EQ(1, compilerResults.numResults());
-    auto res = compilerResults.getResult(0);
-    ASSERT_EQ(Errors::E_A_MAY_ONLY_BE_USED_ON_B_DECLARATION_2, res.code);
-    ASSERT_EQ(L"mutating", res.items[0]);
-    ASSERT_EQ(L"func", res.items[1]);
+    ASSERT_ERROR(Errors::E_A_MAY_ONLY_BE_USED_ON_B_DECLARATION_2);
+    ASSERT_EQ(L"mutating", error->items[0]);
+    ASSERT_EQ(L"func", error->items[1]);
 }
 
 TEST(TestMethods, MutatingEnum)
 {
     SEMANTIC_ANALYZE(L"mutating enum A{}");
-    ASSERT_EQ(1, compilerResults.numResults());
-    auto res = compilerResults.getResult(0);
-    ASSERT_EQ(Errors::E_A_MAY_ONLY_BE_USED_ON_B_DECLARATION_2, res.code);
-    ASSERT_EQ(L"mutating", res.items[0]);
-    ASSERT_EQ(L"func", res.items[1]);
+    ASSERT_ERROR(Errors::E_A_MAY_ONLY_BE_USED_ON_B_DECLARATION_2);
+    ASSERT_EQ(L"mutating", error->items[0]);
+    ASSERT_EQ(L"func", error->items[1]);
 }
 
 
 TEST(TestMethods, MutatingFunc)
 {
     SEMANTIC_ANALYZE(L"mutating func foo() {}");
-    ASSERT_EQ(1, compilerResults.numResults());
-    auto res = compilerResults.getResult(0);
-    ASSERT_EQ(Errors::E_A_IS_ONLY_VALID_ON_METHODS_1, res.code);
-    ASSERT_EQ(L"mutating", res.items[0]);
+    ASSERT_ERROR(Errors::E_A_IS_ONLY_VALID_ON_METHODS_1);
+    ASSERT_EQ(L"mutating", error->items[0]);
 }
 
 
 TEST(TestMethods, NonMutatingFunc)
 {
     SEMANTIC_ANALYZE(L"nonmutating func foo() {}");
-    ASSERT_EQ(1, compilerResults.numResults());
-    auto res = compilerResults.getResult(0);
-    ASSERT_EQ(Errors::E_A_IS_ONLY_VALID_ON_METHODS_1, res.code);
-    ASSERT_EQ(L"nonmutating", res.items[0]);
+    ASSERT_ERROR(Errors::E_A_IS_ONLY_VALID_ON_METHODS_1);
+    ASSERT_EQ(L"nonmutating", error->items[0]);
 }
 TEST(TestMethods, MutatingClassFunc)
 {
@@ -246,10 +216,8 @@ TEST(TestMethods, MutatingClassFunc)
         L"        \n"
         L"    }\n"
         L"}");
-    ASSERT_EQ(1, compilerResults.numResults());
-    auto res = compilerResults.getResult(0);
-    ASSERT_EQ(Errors::E_A_ISNT_VALID_ON_METHODS_IN_CLASSES_OR_CLASS_BOUND_PROTOCOLS, res.code);
-    ASSERT_EQ(L"mutating", res.items[0]);
+    ASSERT_ERROR(Errors::E_A_ISNT_VALID_ON_METHODS_IN_CLASSES_OR_CLASS_BOUND_PROTOCOLS);
+    ASSERT_EQ(L"mutating", error->items[0]);
 }
 
 TEST(TestMethods, ModifyValuesFromInstanceMethods)
@@ -264,9 +232,7 @@ TEST(TestMethods, ModifyValuesFromInstanceMethods)
         L"var somePoint = Point(x: 1.0, y: 1.0)\n"
         L"somePoint.moveByX(2.0, y: 3.0)\n"
         L"println(\"The point is now at (\\(somePoint.x), \\(somePoint.y))\")");
-    dumpCompilerResults(compilerResults, content);
-    ASSERT_EQ(0, compilerResults.numResults());
-
+    ASSERT_NO_ERRORS();
 }
 
 
@@ -281,10 +247,11 @@ TEST(TestMethods, ModifyValuesFromInstanceMethods_Let)
         L"}\n"
         L"let fixedPoint = Point(x: 3.0, y: 3.0)\n"
         L"fixedPoint.moveByX(2.0, y: 3.0)\n");
-    ASSERT_EQ(1, compilerResults.numResults());
-    auto res = compilerResults.getResult(0);
-    ASSERT_EQ(Errors::E_IMMUTABLE_VALUE_OF_TYPE_A_ONLY_HAS_MUTATING_MEMBERS_NAMED_B_2, res.code);
+    ASSERT_ERROR(Errors::E_IMMUTABLE_VALUE_OF_TYPE_A_ONLY_HAS_MUTATING_MEMBERS_NAMED_B_2);
 }
+
+
+
 TEST(TestMethods, ModifyValuesFromInstanceMethods_NonmutatingSelf)
 {
     SEMANTIC_ANALYZE(
@@ -300,10 +267,17 @@ TEST(TestMethods, ModifyValuesFromInstanceMethods_NonmutatingSelf)
         L"        \n"
         L"    }\n"
         L"}");
-    ASSERT_EQ(1, compilerResults.numResults());
-    auto res = compilerResults.getResult(0);
-    ASSERT_EQ(Errors::E_IMMUTABLE_VALUE_OF_TYPE_A_ONLY_HAS_MUTATING_MEMBERS_NAMED_B_2, res.code);
+    ASSERT_ERROR(Errors::E_IMMUTABLE_VALUE_OF_TYPE_A_ONLY_HAS_MUTATING_MEMBERS_NAMED_B_2);
 }
 
-
+TEST(TestMethods, AssigningToSelfWithinMutatingMethod)
+{
+    SEMANTIC_ANALYZE(L"struct Point {\n"
+        L"    var x = 0.0, y = 0.0\n"
+        L"    mutating func moveByX(deltaX: Double, y deltaY: Double) {\n"
+        L"        self = Point(x: x + deltaX, y: y + deltaY)\n"
+        L"    }\n"
+        L"}");
+    ASSERT_NO_ERRORS();
+}
 

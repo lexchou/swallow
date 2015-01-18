@@ -196,6 +196,7 @@ struct SWALLOW_EXPORT Errors
         //linking errors
     };
     static std::wstring format(int code, const std::vector<std::wstring>& items);
+    static std::wstring getErrorTemplate(int errorCode);
 };
 
 

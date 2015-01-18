@@ -70,6 +70,17 @@ void dumpCompilerResults(Swallow::CompilerResults& compilerResults, const std::w
 }
 
 
+const CompilerResult* getCompilerResultByError(CompilerResults& results, int error)
+{
+    for(const CompilerResult& res : results)
+    {
+        if(res.code == error)
+            return &res;
+    }
+    return nullptr;
+}
+
+
 Swallow::NodePtr parseStatement(Swallow::CompilerResults& compilerResults, const char* func, const wchar_t* str)
 {
     using namespace Swallow;

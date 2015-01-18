@@ -31,9 +31,6 @@
 
 USE_SWALLOW_NS
 
-static std::wstring getErrorTemplate(int errorCode);
-
-
 std::wstring Errors::format(int code, const std::vector<std::wstring>& items)
 {
     std::wstring temp = getErrorTemplate(code);
@@ -47,7 +44,7 @@ std::wstring Errors::format(int code, const std::vector<std::wstring>& items)
     }
     return temp;
 }
-std::wstring getErrorTemplate(int errorCode)
+std::wstring Errors::getErrorTemplate(int errorCode)
 {
     switch(errorCode)
     {
