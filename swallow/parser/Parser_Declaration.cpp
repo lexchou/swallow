@@ -84,13 +84,13 @@ DeclarationPtr Parser::parseDeclaration()
         case Keyword::Func://declaration → function-declaration
             return parseFunc(attrs, modifiers);
         case Keyword::Enum://declaration → enum-declaration
-            return parseEnum(attrs);
+            return parseEnum(attrs, modifiers);
         case Keyword::Struct://declaration → struct-declaration
-            return parseStruct(attrs);
+            return parseStruct(attrs, modifiers);
         case Keyword::Class://declaration → class-declaration
-            return parseClass(attrs);
+            return parseClass(attrs, modifiers);
         case Keyword::Protocol://declaration → protocol-declaration
-            return parseProtocol(attrs);
+            return parseProtocol(attrs, modifiers);
         case Keyword::Init://declaration → initializer-declaration
         case Keyword::Convenience:
             return parseInit(attrs, modifiers);
@@ -741,6 +741,7 @@ DeclarationPtr Parser::parseFunc(const std::vector<AttributePtr>& attrs, int mod
     }
     if((UNDER_PROTOCOL & flags) == 0)
     {
+        ENTER_CONTEXT(TokenizerContextFunctionBody);
         CodeBlockPtr body = parseCodeBlock();
         ret->setBody(body);
     }
@@ -840,7 +841,7 @@ ParametersPtr Parser::parseParameterClause()
  ‌ enum-case-name → identifier
  
 */
-DeclarationPtr Parser::parseEnum(const std::vector<AttributePtr>& attrs)
+DeclarationPtr Parser::parseEnum(const std::vector<AttributePtr>& attrs, int modifiers)
 {
     Token token;
     expect(Keyword::Enum);
@@ -858,6 +859,7 @@ DeclarationPtr Parser::parseEnum(const std::vector<AttributePtr>& attrs)
     ret->setValueStyle(EnumDef::Undefined);
     ret->setIdentifier(typeId);
     ret->setGenericParametersDef(generic);
+    ret->setModifiers(modifiers);
 
     if(match(L":"))
     {
@@ -916,12 +918,13 @@ DeclarationPtr Parser::parseEnum(const std::vector<AttributePtr>& attrs)
  ‌ struct-name → identifier
  ‌ struct-body → {declarations opt}”
 */
-DeclarationPtr Parser::parseStruct(const std::vector<AttributePtr>& attrs)
+DeclarationPtr Parser::parseStruct(const std::vector<AttributePtr>& attrs, int modifiers)
 {
     Token token;
     expect(Keyword::Struct);
     StructDefPtr ret = nodeFactory->createStruct(token.state);
     ret->setAttributes(attrs);
+    ret->setModifiers(modifiers);
     expect_identifier(token);
     TypeIdentifierPtr typeId = nodeFactory->createTypeIdentifier(token.state);
     typeId->setName(token.token);
@@ -965,12 +968,13 @@ DeclarationPtr Parser::parseStruct(const std::vector<AttributePtr>& attrs)
  ‌ class-body → {declarations opt}”
  
 */
-DeclarationPtr Parser::parseClass(const std::vector<AttributePtr>& attrs)
+DeclarationPtr Parser::parseClass(const std::vector<AttributePtr>& attrs, int modifiers)
 {
     Token token;
     expect(Keyword::Class, token);
     ClassDefPtr ret = nodeFactory->createClass(token.state);
     ret->setAttributes(attrs);
+    ret->setModifiers(modifiers);
     expect_identifier(token);
     TypeIdentifierPtr typeId = nodeFactory->createTypeIdentifier(token.state);
     typeId->setName(token.token);
@@ -1040,12 +1044,13 @@ DeclarationPtr Parser::parseClass(const std::vector<AttributePtr>& attrs)
  
 
 */
-DeclarationPtr Parser::parseProtocol(const std::vector<AttributePtr>& attrs)
+DeclarationPtr Parser::parseProtocol(const std::vector<AttributePtr>& attrs, int modifiers)
 {
     Token token;
     expect(Keyword::Protocol);
     ProtocolDefPtr ret = nodeFactory->createProtocol(token.state);
     ret->setAttributes(attrs);
+    ret->setModifiers(modifiers);
     expect_identifier(token);
     TypeIdentifierPtr typeId = nodeFactory->createTypeIdentifier(token.state);
     typeId->setName(token.token);

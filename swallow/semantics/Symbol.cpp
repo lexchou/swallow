@@ -30,6 +30,16 @@ void Symbol::setFlags(SymbolFlags flags, bool set)
         this->flags &= ~flags;
 }
 
+/*!
+ * If this symbol is defined as a member of a type, returns the type that declared this symbol.
+ */
+TypePtr Symbol::getDeclaringType() const
+{
+    return declaringType;
+}
+
+
+
 SymbolPlaceHolder::SymbolPlaceHolder(const std::wstring& name, const TypePtr& type, Role role, int flags)
         :name(name), type(type), role(role)
 {

@@ -77,7 +77,10 @@ void SemanticAnalyzer::prepareParameters(SymbolScope* scope, const ParametersPtr
             error(param, Errors::E_DEFINITION_CONFLICT, param->getLocalName());
             return;
         }
-        sym = SymbolPtr(new SymbolPlaceHolder(param->getLocalName(), param->getType(), SymbolPlaceHolder::R_PARAMETER, SymbolFlagInitialized));
+        int flags = SymbolFlagInitialized | SymbolFlagReadable;
+        if(param->getAccessibility() == Parameter::Variable || param->isInout())
+            flags |= SymbolFlagWritable;
+        sym = SymbolPtr(new SymbolPlaceHolder(param->getLocalName(), param->getType(), SymbolPlaceHolder::R_PARAMETER, flags));
         scope->addSymbol(sym);
     }
     //prepare for implicit parameter self

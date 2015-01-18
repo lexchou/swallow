@@ -102,6 +102,8 @@ StatementPtr Parser::parseStatement()
                 case Keyword::Infix:
                 case Keyword::Lazy:
                 case Keyword::Static:
+                case Keyword::Mutating:
+                case Keyword::Nonmutating:
                     return parseDeclaration();
                 default:
                     break;
@@ -605,7 +607,7 @@ CodeBlockPtr Parser::parseCodeBlock()
     flags -= SUPPRESS_TRAILING_CLOSURE;
     expect(L"{", token);
     CodeBlockPtr ret = nodeFactory->createCodeBlock(token.state);
-    ENTER_CONTEXT(TokenizerContextUnknown);
+    //ENTER_CONTEXT(TokenizerContextUnknown);
     while(!match(L"}"))
     {
         StatementPtr st = parseStatement();

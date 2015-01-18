@@ -84,7 +84,7 @@ void SemanticAnalyzer::visitBinaryOperator(const BinaryOperatorPtr& node)
     ParenthesizedExpressionPtr args(node->getNodeFactory()->createParenthesizedExpression(*node->getSourceInfo()));
     args->append(lhs);
     args->append(rhs);
-    visitFunctionCall(funcs, args, node);
+    visitFunctionCall(false, funcs, args, node);
     //find for overload
 }
 void SemanticAnalyzer::visitUnaryOperator(const UnaryOperatorPtr& node)
@@ -105,7 +105,7 @@ void SemanticAnalyzer::visitUnaryOperator(const UnaryOperatorPtr& node)
     }
     ParenthesizedExpressionPtr args(node->getNodeFactory()->createParenthesizedExpression(*node->getSourceInfo()));
     args->append(node->getOperand());
-    visitFunctionCall(funcs, args, node);
+    visitFunctionCall(false, funcs, args, node);
 }
 
 
@@ -114,13 +114,13 @@ void SemanticAnalyzer::visitUnaryOperator(const UnaryOperatorPtr& node)
 /*!
  * Return true if one of the component node is read only
  */
-static bool containsReadonlyNode(const ExpressionPtr& node, SymbolRegistry* registry)
+bool SemanticAnalyzer::containsReadonlyNode(const ExpressionPtr& node)
 {
     NodeType::T nodeType = node->getNodeType();
     if(nodeType == NodeType::Identifier)
     {
         IdentifierPtr id = static_pointer_cast<Identifier>(node);
-        SymbolPtr sym = registry->lookupSymbol(id->getIdentifier());
+        SymbolPtr sym = symbolRegistry->lookupSymbol(id->getIdentifier());
         //Check if the identifier is a structure, according to official document:
         //This behavior is due to structures being value types. When an instance of a value type is marked as a constant, so are all of its properties.
         //The same is not true for classes, which are reference types. If you assign an instance of a reference type to a constant, you can still change that instance’s variable properties.
@@ -130,7 +130,7 @@ static bool containsReadonlyNode(const ExpressionPtr& node, SymbolRegistry* regi
     else if(nodeType == NodeType::MemberAccess)
     {
         MemberAccessPtr ma = static_pointer_cast<MemberAccess>(node);
-        if(containsReadonlyNode(ma->getSelf(), registry))
+        if(containsReadonlyNode(ma->getSelf()))
             return true;
         TypePtr selfType = ma->getSelf()->getType();
         if(ma->getField() && selfType)
@@ -141,9 +141,53 @@ static bool containsReadonlyNode(const ExpressionPtr& node, SymbolRegistry* regi
                 return true;
         }
     }
+    //TODO: check non-mutating function call on struct/enum variable
     return false;
 }
 
+
+void SemanticAnalyzer::verifyTuplePatternForAssignment(const PatternPtr& pattern)
+{
+
+    if(pattern->getNodeType() == NodeType::Identifier)
+    {
+        IdentifierPtr id = std::static_pointer_cast<Identifier>(pattern);
+        TypePtr type = symbolRegistry->lookupType(id->getIdentifier());
+        if(type)
+        {
+            //cannot assign expression to type
+            error(id, Errors::E_CANNOT_ASSIGN_TO_THE_RESULT_OF_THIS_EXPRESSION, id->getIdentifier());
+            return;
+        }
+        SymbolPtr sym = symbolRegistry->lookupSymbol(id->getIdentifier());
+        if(!sym)
+        {
+            error(id, Errors::E_USE_OF_UNRESOLVED_IDENTIFIER_1, id->getIdentifier());
+        }
+        if(!sym->hasFlags(SymbolFlagWritable))
+        {
+            if(id->getIdentifier() == L"self")
+                error(id, Errors::E_CANNOT_ASSIGN_TO_A_IN_A_METHOD_1, id->getIdentifier());
+            else
+                error(id, Errors::E_CANNOT_ASSIGN_TO_LET_VALUE_A_1, id->getIdentifier());
+
+        }
+    }
+    else if(pattern->getNodeType() == NodeType::Tuple)
+    {
+        TuplePtr tuple = std::static_pointer_cast<Tuple>(pattern);
+        for(const PatternPtr& element : *tuple)
+        {
+            verifyTuplePatternForAssignment(element);
+        }
+    }
+    else
+    {
+        error(pattern, Errors::E_CANNOT_ASSIGN_TO_THE_RESULT_OF_THIS_EXPRESSION);
+        return;
+    }
+
+}
 
 void SemanticAnalyzer::visitAssignment(const AssignmentPtr& node)
 {
@@ -156,7 +200,7 @@ void SemanticAnalyzer::visitAssignment(const AssignmentPtr& node)
         case NodeType::Tuple:
         {
             //check if the symbol is writable
-            verifyTuplePattern(destination);
+            verifyTuplePatternForAssignment(destination);
             break;
         }
         case NodeType::SubscriptAccess:
@@ -233,10 +277,10 @@ void SemanticAnalyzer::visitAssignment(const AssignmentPtr& node)
             }
             else
             {
-                //TODO:lookup in the chain to find if any node is read only
-                if(containsReadonlyNode(ma, symbolRegistry))
+                if(containsReadonlyNode(ma))
                 {
                     error(ma, Errors::E_CANNOT_ASSIGN_TO_THE_RESULT_OF_THIS_EXPRESSION);
+                    return;
                 }
             }
             break;

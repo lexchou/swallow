@@ -46,41 +46,6 @@
 USE_SWALLOW_NS
 using namespace std;
 
-void SemanticAnalyzer::verifyTuplePattern(const PatternPtr& pattern)
-{
-
-    if(pattern->getNodeType() == NodeType::Identifier)
-    {
-        IdentifierPtr id = std::static_pointer_cast<Identifier>(pattern);
-        TypePtr type = symbolRegistry->lookupType(id->getIdentifier());
-        if(type)
-        {
-            //cannot assign expression to type
-            error(id, Errors::E_CANNOT_ASSIGN_TO_THE_RESULT_OF_THIS_EXPRESSION, id->getIdentifier());
-            return;
-        }
-        SymbolPtr sym = symbolRegistry->lookupSymbol(id->getIdentifier());
-        if(!sym)
-        {
-            error(id, Errors::E_USE_OF_UNRESOLVED_IDENTIFIER_1, id->getIdentifier());
-        }
-    }
-    else if(pattern->getNodeType() == NodeType::Tuple)
-    {
-        TuplePtr tuple = std::static_pointer_cast<Tuple>(pattern);
-        for(const PatternPtr& element : *tuple)
-        {
-            verifyTuplePattern(element);
-        }
-    }
-    else
-    {
-        error(pattern, Errors::E_CANNOT_ASSIGN_TO_THE_RESULT_OF_THIS_EXPRESSION);
-        return;
-    }
-
-}
-
 /*!
  * This will register a self symbol to getter/setter/willSet/didSet of a computed property
  */

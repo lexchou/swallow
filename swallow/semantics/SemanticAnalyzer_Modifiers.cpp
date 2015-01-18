@@ -110,6 +110,16 @@ static bool validateGeneralModifiers(SemanticAnalyzer* analyzer, const Declarati
         if(currentType->getCategory() != Type::Class && currentType->getCategory() != Type::Protocol)
             return analyzer->error(decl, Errors::E_CLASS_PROPERTIES_ARE_ONLY_ALLOWED_WITHIN_CLASSES_AND_PROTOCOLS);
     }
+    if(modifiers & (DeclarationModifiers::Mutating | DeclarationModifiers::NonMutating))
+    {
+        if(decl->getNodeType() != NodeType::Function)
+        {
+            if(modifiers & DeclarationModifiers::Mutating)
+                return analyzer->error(decl, Errors::E_A_MAY_ONLY_BE_USED_ON_B_DECLARATION_2, L"mutating", L"func");
+            else
+                return analyzer->error(decl, Errors::E_A_MAY_ONLY_BE_USED_ON_B_DECLARATION_2, L"nonmutating", L"func");
+        }
+    }
     return true;
 }
 
@@ -175,6 +185,40 @@ static bool validateDeclarationModifiers(SemanticAnalyzer* analyzer, const Compu
         return analyzer->error(prop, Errors::E_LAZY_MAY_NOT_BE_USED_ON_A_COMPUTED_PROPERTY);
     return true;
 }
+static bool validateDeclarationModifiers(SemanticAnalyzer* analyzer, const FunctionDefPtr& func)
+{
+    if(!validateGeneralModifiers(analyzer, func))
+        return false;
+    bool mutating = func->hasModifier(DeclarationModifiers::Mutating);
+    bool nonmutating = func->hasModifier(DeclarationModifiers::NonMutating);
+    TypePtr currentType = analyzer->getCurrentType();
+    if(mutating && nonmutating)
+        return analyzer->error(func, Errors::E_METHOD_MAY_NOT_BE_DECLARED_BOTH_MUTATING_AND_NONMUTATING);
+    if(!currentType)
+    {
+        if(mutating || nonmutating)
+            return analyzer->error(func, Errors::E_A_IS_ONLY_VALID_ON_METHODS_1, mutating ? L"mutating" : L"nonmutating");
+    }
+    else
+    {
+        //the type must be struct or enum
+        Type::Category  category = currentType->getCategory();
+        //TODO: what is class-bound protocol?
+        if(category != Type::Struct && category != Type::Enum && category != Type::Protocol)
+        {
+            if(mutating || nonmutating)
+                return analyzer->error(func, Errors::E_A_ISNT_VALID_ON_METHODS_IN_CLASSES_OR_CLASS_BOUND_PROTOCOLS, mutating ? L"mutating" : L"nonmutating");
+        }
+
+    }
+
+    if(func->hasModifier(DeclarationModifiers::Static))
+    {
+        if(mutating || nonmutating)
+            return analyzer->error(func, Errors::E_STATIC_FUNCTIONS_MAY_NOT_BE_DECLARED_A_1, mutating ? L"mutating" : L"nonmutating");
+    }
+    return true;
+}
 /*!
  * Validate modifiers for declarations.
  */
@@ -193,6 +237,21 @@ void SemanticAnalyzer::validateDeclarationModifiers(const DeclarationPtr& declar
         {
             ValueBindingsPtr bindings = static_pointer_cast<ValueBindings>(declaration);
             ::validateDeclarationModifiers(this, bindings);
+            break;
+        };
+        case NodeType::Function:
+        {
+            FunctionDefPtr func = static_pointer_cast<FunctionDef>(declaration);
+            ::validateDeclarationModifiers(this, func);
+            break;
+        };
+        case NodeType::Class:
+        case NodeType::Struct:
+        case NodeType::Enum:
+        case NodeType::Protocol:
+        {
+            TypeDeclarationPtr decl = static_pointer_cast<TypeDeclaration>(declaration);
+            validateGeneralModifiers(this, decl);
             break;
         };
         default:

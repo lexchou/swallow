@@ -51,6 +51,8 @@ enum TokenizerContext
     TokenizerContextComputedProperty = 8,
     TokenizerContextFunctionSignature = 0x10,
     TokenizerContextCaptureList = 0x20,
+    TokenizerContextFunctionBody = 0x40,
+    TokenizerContextDeclaration = TokenizerContextFile | TokenizerContextClass | TokenizerContextFunctionBody,
     TokenizerContextAll = TokenizerContextFile | TokenizerContextOperator | TokenizerContextClass | TokenizerContextComputedProperty | TokenizerContextFunctionSignature | TokenizerContextCaptureList,
 };
 struct TokenizerState : SourceInfo

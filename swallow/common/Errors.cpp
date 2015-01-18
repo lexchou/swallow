@@ -74,6 +74,8 @@ std::wstring getErrorTemplate(int errorCode)
         case Errors::E_USE_OF_UNDECLARED_TYPE_1: return L"Use of undeclared type %0";
         case Errors::E_CANNOT_ASSIGN_TO_THE_RESULT_OF_THIS_EXPRESSION: return L"cannot assign to the result of this expression";
         case Errors::E_CANNOT_ASSIGN_TO_A_IN_B_2: return L"Cannot assign to '%0' in '%1'";
+        case Errors::E_CANNOT_ASSIGN_TO_A_IN_A_METHOD_1: return L"Cannot assign to '%0' in a method";
+        case Errors::E_CANNOT_ASSIGN_TO_LET_VALUE_A_1: return L"Cannot assign to 'let' value '%0'";
         case Errors::E_USE_OF_UNRESOLVED_IDENTIFIER_1: return L"use of unresolved identifier '%0'";
         case Errors::E_USE_OF_UNINITIALIZED_VARIABLE_1: return L"use of local variable '%0' before its declaration";
         case Errors::E_USE_OF_INITIALIZING_VARIABLE: return L"variable used within its own initial value";
@@ -185,7 +187,12 @@ std::wstring getErrorTemplate(int errorCode)
         case Errors::E_STATIC_PROPERTIES_MAY_ONLY_BE_DECLARED_ON_A_TYPE: return L"Static properties may only be declared on a type";
         case Errors::E_STATIC_PROPERTIES_ARE_ONLY_ALLOWED_WITHIN_STRUCTS_AND_ENUMS: return L"Static properties are only allowed within structs and enums; use 'class' to declare a class property";
         case Errors::E_CLASS_PROPERTIES_ARE_ONLY_ALLOWED_WITHIN_CLASSES_AND_PROTOCOLS: return L"Class properties are only allowed within classes and protocols; use 'static' to declare a static property";
-
+        case Errors::E_A_MAY_ONLY_BE_USED_ON_B_DECLARATION_2: return L"'%0' may only be used on '%1' declaration";
+        case Errors::E_A_IS_ONLY_VALID_ON_METHODS_1: return L"'%0' is only valid on methods";
+        case Errors::E_A_ISNT_VALID_ON_METHODS_IN_CLASSES_OR_CLASS_BOUND_PROTOCOLS: return L"'%0' isn't valid on methods in classes or class-bound protocols";
+        case Errors::E_STATIC_FUNCTIONS_MAY_NOT_BE_DECLARED_A_1: return L"Static functions may not be declared %0";
+        case Errors::E_METHOD_MAY_NOT_BE_DECLARED_BOTH_MUTATING_AND_NONMUTATING: return L"Method may not be declared both mutating and nonmutating";
+        case Errors::E_IMMUTABLE_VALUE_OF_TYPE_A_ONLY_HAS_MUTATING_MEMBERS_NAMED_B_2: return L"Immutable value of type '%0' only has mutating members named '%1'";
 
 
 

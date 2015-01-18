@@ -64,10 +64,13 @@ enum SymbolFlags
     SymbolFlagExtension = 0x2000,
     //The variable is lazy
     SymbolFlagLazy = 0x4000,
+    //The function is mutating
+    SymbolFlagMutating = 0x8000,
 };
 
 class SWALLOW_EXPORT Symbol
 {
+    friend class TypeBuilder;
 public:
     Symbol();
     virtual ~Symbol(){}
@@ -79,8 +82,13 @@ public:
     bool hasFlags(SymbolFlags flags)const;
     void setFlags(SymbolFlags flags, bool set);
 
+    /*!
+     * If this symbol is defined as a member of a type, returns the type that declared this symbol.
+     */
+    TypePtr getDeclaringType() const;
 protected:
     int flags;
+    TypePtr declaringType;
 };
 class SWALLOW_EXPORT SymbolPlaceHolder : public Symbol
 {

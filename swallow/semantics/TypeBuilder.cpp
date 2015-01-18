@@ -117,6 +117,7 @@ void TypeBuilder::addMember(const std::wstring& name, const SymbolPtr& member)
 {
     assert(!name.empty());
     assert(member != nullptr);
+    member->declaringType = self();
     if(member->hasFlags(SymbolFlagStatic))
     {
         staticMembers.insert(make_pair(name, member));

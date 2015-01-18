@@ -63,6 +63,8 @@ struct SWALLOW_EXPORT Errors
         E_USE_OF_UNDECLARED_TYPE_1, // Use of undeclared type %0
         E_CANNOT_ASSIGN_TO_THE_RESULT_OF_THIS_EXPRESSION, // cannot assign to the result of this expression
         E_CANNOT_ASSIGN_TO_A_IN_B_2,//Cannot assign to '%0' in '%1'
+        E_CANNOT_ASSIGN_TO_A_IN_A_METHOD_1,//Cannot assign to '%0' in a method
+        E_CANNOT_ASSIGN_TO_LET_VALUE_A_1,//Cannot assign to 'let' value '%0'
         E_USE_OF_UNRESOLVED_IDENTIFIER_1, //use of unresolved identifier '%0'
         E_USE_OF_UNINITIALIZED_VARIABLE_1, //use of local variable '%0' before its declaration
         E_USE_OF_INITIALIZING_VARIABLE, //variable used within its own initial value
@@ -180,6 +182,13 @@ struct SWALLOW_EXPORT Errors
         E_STATIC_PROPERTIES_MAY_ONLY_BE_DECLARED_ON_A_TYPE,//Static properties may only be declared on a type
         E_STATIC_PROPERTIES_ARE_ONLY_ALLOWED_WITHIN_STRUCTS_AND_ENUMS,//Static properties are only allowed within structs and enums; use 'class' to declare a class property
         E_CLASS_PROPERTIES_ARE_ONLY_ALLOWED_WITHIN_CLASSES_AND_PROTOCOLS,//Class properties are only allowed within classes and protocols; use 'static' to declare a static property
+
+        E_A_MAY_ONLY_BE_USED_ON_B_DECLARATION_2,//'%0' may only be used on '%1' declaration
+        E_A_IS_ONLY_VALID_ON_METHODS_1,//'%0' is only valid on methods
+        E_A_ISNT_VALID_ON_METHODS_IN_CLASSES_OR_CLASS_BOUND_PROTOCOLS,//'%0' isn't valid on methods in classes or class-bound protocols
+        E_STATIC_FUNCTIONS_MAY_NOT_BE_DECLARED_A_1,//Static functions may not be declared %0
+        E_METHOD_MAY_NOT_BE_DECLARED_BOTH_MUTATING_AND_NONMUTATING,//Method may not be declared both mutating and nonmutating
+        E_IMMUTABLE_VALUE_OF_TYPE_A_ONLY_HAS_MUTATING_MEMBERS_NAMED_B_2,//Immutable value of type '%0' only has mutating members named '%1'
 
 
         W_PARAM_CAN_BE_EXPRESSED_MORE_SUCCINCTLY_1, // '%0 %0' can be expressed more succinctly as '#%0'

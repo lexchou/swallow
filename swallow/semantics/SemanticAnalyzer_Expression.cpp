@@ -228,8 +228,9 @@ void SemanticAnalyzer::visitSubscriptAccess(const SubscriptAccessPtr& node)
         error(node, Errors::E_UNDEFINED_SUBSCRIPT_ACCESS_FOR_1, s);
         return;
     }
+    bool mutatingSelf = false;//TODO update this variable
     //Now inference the type returned by this subscript access
-    SymbolPtr func = getOverloadedFunction(node, funcs, node->getIndex());
+    SymbolPtr func = getOverloadedFunction(mutatingSelf, node, funcs, node->getIndex());
     assert(func && func->getType() && func->getType()->getCategory() == Type::Function);
     node->setType(func->getType()->getReturnType());
 }

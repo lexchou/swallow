@@ -304,6 +304,7 @@ void SemanticAnalyzer::visitClass(const ClassDefPtr& node)
     NodeVisitor::visitClass(node);
     verifyProtocolConform(type);
     prepareDefaultInitializers(type);
+    validateDeclarationModifiers(node);
 }
 
 void SemanticAnalyzer::visitStruct(const StructDefPtr& node)
@@ -374,7 +375,7 @@ void SemanticAnalyzer::visitStruct(const StructDefPtr& node)
     }
 
     verifyProtocolConform(type);
-
+    validateDeclarationModifiers(node);
 
 
 
@@ -399,18 +400,6 @@ void SemanticAnalyzer::visitEnum(const EnumDefPtr& node)
 {
     TypeBuilderPtr type = static_pointer_cast<TypeBuilder>(defineType(node));
     SCOPED_SET(currentType, type);
-    //check member declaration of enum
-    for(const DeclarationPtr& decl : *node)
-    {
-        bool isStatic = decl->hasModifier(DeclarationModifiers::Class) || decl->hasModifier(DeclarationModifiers::Static);
-        if(!isStatic && (decl->getNodeType() == NodeType::ValueBindings))
-        {
-            error(node, Errors::E_ENUMS_MAY_NOT_CONTAIN_STORED_PROPERTIES);
-            continue;
-        }
-        decl->accept(this);
-    }
-
 
     GlobalScope* global = symbolRegistry->getGlobalScope();
     //check if it's raw value enum
@@ -425,7 +414,7 @@ void SemanticAnalyzer::visitEnum(const EnumDefPtr& node)
         }
     }
 
-
+    //initialize enum's cases
     if(isRawValues)
     {
         if(!node->numCases())
@@ -498,6 +487,19 @@ void SemanticAnalyzer::visitEnum(const EnumDefPtr& node)
             type->addEnumCase(c.name, associatedType);
         }
     }
+    //check member declaration of enum
+    for(const DeclarationPtr& decl : *node)
+    {
+        bool isStatic = decl->hasModifier(DeclarationModifiers::Class) || decl->hasModifier(DeclarationModifiers::Static);
+        if(!isStatic && (decl->getNodeType() == NodeType::ValueBindings))
+        {
+            error(node, Errors::E_ENUMS_MAY_NOT_CONTAIN_STORED_PROPERTIES);
+            continue;
+        }
+        decl->accept(this);
+    }
+
+    validateDeclarationModifiers(node);
 }
 void SemanticAnalyzer::visitProtocol(const ProtocolDefPtr& node)
 {
@@ -506,6 +508,7 @@ void SemanticAnalyzer::visitProtocol(const ProtocolDefPtr& node)
     SCOPED_SET(currentType, type);
 
     NodeVisitor::visitProtocol(node);
+    validateDeclarationModifiers(node);
 }
 void SemanticAnalyzer::visitExtension(const ExtensionDefPtr& node)
 {

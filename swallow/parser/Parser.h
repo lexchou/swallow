@@ -113,10 +113,10 @@ private://declaration
     DeclarationPtr parseFunc(const std::vector<AttributePtr>& attrs, int modifiers);
     ParametersPtr parseParameterClause();
 
-    DeclarationPtr parseEnum(const std::vector<AttributePtr>& attrs);
-    DeclarationPtr parseStruct(const std::vector<AttributePtr>& attrs);
-    DeclarationPtr parseClass(const std::vector<AttributePtr>& attrs);
-    DeclarationPtr parseProtocol(const std::vector<AttributePtr>& attrs);
+    DeclarationPtr parseEnum(const std::vector<AttributePtr>& attrs, int modifiers);
+    DeclarationPtr parseStruct(const std::vector<AttributePtr>& attrs, int modifiers);
+    DeclarationPtr parseClass(const std::vector<AttributePtr>& attrs, int modifiers);
+    DeclarationPtr parseProtocol(const std::vector<AttributePtr>& attrs, int modifiers);
     DeclarationPtr parseInit(const std::vector<AttributePtr>& attrs, int modifiers);
     DeclarationPtr parseDeinit(const std::vector<AttributePtr>& attrs);
     DeclarationPtr parseExtension(const std::vector<AttributePtr>& attrs);

@@ -130,8 +130,8 @@ private:
     void visitAccessor(const CodeBlockPtr& accessor, const ParametersPtr& params, const SymbolPtr& setter);
     TypePtr defineType(const std::shared_ptr<TypeDeclaration>& node);
     void prepareDefaultInitializers(const TypePtr& type);
-    //Verify each symbol in the tuple is initialized
-    void verifyTuplePattern(const PatternPtr& pattern);
+    //Verify each symbol in the tuple is initialized and writable
+    void verifyTuplePatternForAssignment(const PatternPtr& pattern);
 
     FunctionSymbolPtr createFunctionSymbol(const FunctionDefPtr& func, const GenericDefinitionPtr& generic);
     TypePtr createFunctionType(const std::vector<ParametersPtr>::const_iterator& begin, const std::vector<ParametersPtr>::const_iterator& end, const TypePtr& retType, const GenericDefinitionPtr& generic);
@@ -143,7 +143,7 @@ private:
     void registerSymbol(const SymbolPlaceHolderPtr& symbol, const NodePtr& node);
     GenericDefinitionPtr prepareGenericTypes(const GenericParametersDefPtr& params);
 
-    SymbolPtr visitFunctionCall(const std::vector<SymbolPtr>& func, const ParenthesizedExpressionPtr& args, const PatternPtr& node);
+    SymbolPtr visitFunctionCall(bool mutatingSelf, const std::vector<SymbolPtr>& func, const ParenthesizedExpressionPtr& args, const PatternPtr& node);
 private:
     void checkTupleDefinition(const TuplePtr& tuple, const ExpressionPtr& initializer);
     TypePtr evaluateType(const ExpressionPtr& expr);
@@ -153,9 +153,10 @@ private:
 
     /*!
      * Calculates the fit score of arguments on given function
+     * func will be specialized if possible
      * @return -1 if the type is not matched
      */
-    float calculateFitScore(TypePtr& func, const ParenthesizedExpressionPtr& arguments, bool supressErrors);
+    float calculateFitScore(bool mutatingSelf, SymbolPtr& func, const ParenthesizedExpressionPtr& arguments, bool supressErrors);
 
     bool checkArgument(const TypePtr& funcType, const Type::Parameter& parameter, const std::pair<std::wstring, ExpressionPtr>& argument, bool variadic, float& score, bool supressErrors, std::map<std::wstring, TypePtr>& genericTypes);
     TypePtr getExpressionType(const ExpressionPtr& expr, const TypePtr& hint, float& score);
@@ -164,7 +165,7 @@ private:
      * Return a function that matches the given argument
      * This will always returns a matched function, if no functions matched it will throw exception and abort the process
      */
-    SymbolPtr getOverloadedFunction(const NodePtr& node, const std::vector<SymbolPtr>& funcs, const ParenthesizedExpressionPtr& arguments);
+    SymbolPtr getOverloadedFunction(bool mutatingSelf, const NodePtr& node, const std::vector<SymbolPtr>& funcs, const ParenthesizedExpressionPtr& arguments);
     /*!
      * Check if the given expression can be converted to given type
      */
@@ -251,6 +252,13 @@ private:
      * Validate modifiers for declarations.
      */
     void validateDeclarationModifiers(const DeclarationPtr& declaration);
+
+    /*!
+     * Return true if one of the component node is read only(non-mutating)
+     * Used by assignment and nonmutating function call checking
+    */
+    bool containsReadonlyNode(const ExpressionPtr& node);
+
 protected:
     //hint for parsing Array/tuple/dictionary literal
     TypePtr t_hint;

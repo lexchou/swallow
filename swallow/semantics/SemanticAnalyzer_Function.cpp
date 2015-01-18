@@ -145,6 +145,17 @@ FunctionSymbolPtr SemanticAnalyzer::createFunctionSymbol(const FunctionDefPtr& f
     if(func->getReturnType())
         retType = lookupType(func->getReturnType());
     TypePtr funcType = createFunctionType(func->getParametersList().begin(), func->getParametersList().end(), retType, generic);
+    //prepare flags
+    if(currentType)
+    {
+        Type::Category category = currentType->getCategory();
+        bool valueType = category == Type::Struct || category == Type::Enum;
+        bool prototype = category == Type::Protocol;
+        bool mutating = func->hasModifier(DeclarationModifiers::Mutating);
+        if(!prototype && (!valueType || mutating))
+            funcType->setFlags(SymbolFlagMutating, true);
+        funcType->setFlags(SymbolFlagMember, true);
+    }
     FunctionSymbolPtr ret(new FunctionSymbol(func->getName(), funcType, func->getBody()));
     return ret;
 }
@@ -337,7 +348,13 @@ void SemanticAnalyzer::visitFunction(const FunctionDefPtr& node)
             generic->registerTo(scope);
         if(currentType && (node->getModifiers() & (DeclarationModifiers::Class | DeclarationModifiers::Static)) == 0)
         {
-            SymbolPlaceHolderPtr self(new SymbolPlaceHolder(L"self", currentType, SymbolPlaceHolder::R_PARAMETER, SymbolFlagReadable | SymbolFlagInitialized));
+            int flags = SymbolFlagReadable | SymbolFlagInitialized;
+            bool readonly = currentType->getCategory() == Type::Enum || currentType->getCategory() == Type::Struct;
+            if(readonly && node->hasModifier(DeclarationModifiers::Mutating))
+                readonly = false;
+            if(!readonly)
+                flags |= SymbolFlagWritable;
+            SymbolPlaceHolderPtr self(new SymbolPlaceHolder(L"self", currentType, SymbolPlaceHolder::R_PARAMETER, flags));
             scope->addSymbol(self);
         }
 
@@ -398,6 +415,7 @@ void SemanticAnalyzer::visitFunction(const FunctionDefPtr& node)
         sym = func;
     }
     //put it into type's SymbolMap
+    validateDeclarationModifiers(node);
     declarationFinished(sym->getName(), func, node);
     /*
     if(TypeDeclaration* declaration = dynamic_cast<TypeDeclaration*>(symbolRegistry->getCurrentScope()->getOwner()))

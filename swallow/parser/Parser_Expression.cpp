@@ -990,10 +990,14 @@ ClosurePtr Parser::parseClosureExpression()
         }
         expect(Keyword::In);
     }
-    while(!predicate(L"}"))
     {
-        StatementPtr s = parseStatement();
-        ret->addStatement(s);
+        ENTER_CONTEXT(TokenizerContextFunctionBody);
+
+        while (!predicate(L"}"))
+        {
+            StatementPtr s = parseStatement();
+            ret->addStatement(s);
+        }
     }
     expect(L"}");
     return ret;
