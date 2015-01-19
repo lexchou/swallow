@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 2.6)
 
 INCLUDE_DIRECTORIES(
     ${PROJECT_SOURCE_DIR}
-    ../swallow
+    ../swallow/includes
 )
 LINK_DIRECTORIES(${PROJECT_BINARY_DIR}/../bin)
 
