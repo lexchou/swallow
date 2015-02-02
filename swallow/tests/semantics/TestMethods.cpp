@@ -281,3 +281,113 @@ TEST(TestMethods, AssigningToSelfWithinMutatingMethod)
     ASSERT_NO_ERRORS();
 }
 
+TEST(TestMethods, AssigningToSelfWithinMutatingMethod2)
+{
+    SEMANTIC_ANALYZE(L"enum TriStateSwitch {\n"
+        L"    case Off, Low, High\n"
+        L"    mutating func next() {\n"
+        L"        switch self {\n"
+        L"        case Off:\n"
+        L"            self = Low\n"
+        L"        case Low:\n"
+        L"            self = High\n"
+        L"        case High:\n"
+        L"            self = Off\n"
+        L"        }\n"
+        L"    }\n"
+        L"}\n"
+        L"var ovenLight = TriStateSwitch.Low\n"
+        L"ovenLight.next()\n"
+        L"ovenLight.next()");
+    ASSERT_NO_ERRORS();
+}
+
+TEST(TestMethods, TypeMethods)
+{
+    SEMANTIC_ANALYZE(L"class SomeClass {\n"
+        L"    static func someTypeMethod() {\n"
+        L"        // type method implementation goes here\n"
+        L"    }\n"
+        L"}\n"
+        L"SomeClass.someTypeMethod()");
+    ASSERT_ERROR(Errors::E_STATIC_PROPERTIES_ARE_ONLY_ALLOWED_WITHIN_STRUCTS_AND_ENUMS);
+}
+
+
+TEST(TestMethods, TypeMethods2)
+{
+    SEMANTIC_ANALYZE(L"class SomeClass {\n"
+        L"    class func someTypeMethod() {\n"
+        L"        // type method implementation goes here\n"
+        L"    }\n"
+        L"}\n"
+        L"SomeClass.someTypeMethod()");
+    ASSERT_NO_ERRORS();
+}
+
+TEST(TestMethods, TypeMethods3)
+{
+    SEMANTIC_ANALYZE(L"class func test()\n"
+        L"{\n"
+        L"    \n"
+        L"}");
+    ASSERT_ERROR(Errors::E_CLASS_PROPERTIES_MAY_ONLY_BE_DECLARED_ON_A_TYPE);
+}
+
+TEST(TestMethods, TypeMethods4)
+{
+    SEMANTIC_ANALYZE(L"struct LevelTracker {\n"
+        L"    static var highestUnlockedLevel = 1\n"
+        L"    static func unlockLevel(level: Int) {\n"
+        L"        if level > highestUnlockedLevel { highestUnlockedLevel = level }\n"
+        L"    }\n"
+        L"    static func levelIsUnlocked(level: Int) -> Bool {\n"
+        L"        return level <= highestUnlockedLevel\n"
+        L"    }\n"
+        L"    var currentLevel = 1\n"
+        L"    mutating func advanceToLevel(level: Int) -> Bool {\n"
+        L"        if LevelTracker.levelIsUnlocked(level) {\n"
+        L"            currentLevel = level\n"
+        L"            return true\n"
+        L"        } else {\n"
+        L"            return false\n"
+        L"        }\n"
+        L"    }\n"
+        L"}\n"
+        L"class Player {\n"
+        L"    var tracker = LevelTracker()\n"
+        L"    let playerName: String\n"
+        L"    func completedLevel(level: Int) {\n"
+        L"        LevelTracker.unlockLevel(level + 1)\n"
+        L"        tracker.advanceToLevel(level + 1)\n"
+        L"    }\n"
+        L"    init(name: String) {\n"
+        L"        playerName = name\n"
+        L"    }\n"
+        L"}\n"
+        L"var player = Player(name: \"Argyrios\")\n"
+        L"player.completedLevel(1)\n"
+        L"println(\"highest unlocked level is now \\(LevelTracker.highestUnlockedLevel)\")\n"
+        L"player = Player(name: \"Beto\")\n"
+        L"if player.tracker.advanceToLevel(6) {\n"
+        L"    println(\"player is now on level 6\")\n"
+        L"} else {\n"
+        L"    println(\"level 6 has not yet been unlocked\")\n"
+        L"}");
+    ASSERT_NO_ERRORS();
+}
+
+
+TEST(TestMethods, InitLet)
+{
+    SEMANTIC_ANALYZE(L"class test\n"
+        L"{\n"
+        L"    let a = 3\n"
+        L"    init()\n"
+        L"    {\n"
+        L"        a = 5\n"
+        L"    }\n"
+        L"    \n"
+        L"}");
+    ASSERT_NO_ERRORS();
+}

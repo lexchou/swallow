@@ -227,7 +227,20 @@ void SemanticAnalyzer::visitCase(const CaseStatementPtr& node)
     for(const CaseStatement::Condition& cond : node->getConditions())
     {
         //the pattern should be evaluated to the contextual type where the condition must evaluate to BooleanLiteralConvertible
-        cond.condition->accept(this);
+        if(ctx.currentType && ctx.currentType->getCategory() == Type::Enum && cond.condition->getNodeType() == NodeType::Identifier)
+        {
+            IdentifierPtr id = static_pointer_cast<Identifier>(cond.condition);
+            if(ctx.currentType->getEnumCase(id->getIdentifier()))
+            {
+                cond.condition->setType(ctx.currentType);
+            }
+            else
+            {
+                cond.condition->accept(this);
+            }
+        }
+        else
+            cond.condition->accept(this);
         TypePtr patternType = cond.condition->getType();
         assert(patternType != nullptr);
         if(!patternType->canAssignTo(ctx.contextualType))
@@ -240,17 +253,26 @@ void SemanticAnalyzer::visitCase(const CaseStatementPtr& node)
         {
             PatternAccessibility accessibility = AccessibilityUndefined;
             TuplePtr tuple = nullptr;
-            EnumCasePatternPtr enumCase = dynamic_pointer_cast<EnumCasePattern>(cond.condition);
-            if(!enumCase)
+            const EnumCase* ec = nullptr;
+            if(cond.condition->getNodeType() == NodeType::Identifier)
             {
-                if (ValueBindingPatternPtr binding = dynamic_pointer_cast<ValueBindingPattern>(cond.condition))
-                {
-                    enumCase = dynamic_pointer_cast<EnumCasePattern>(binding->getBinding());
-                    accessibility = binding->isReadOnly() ? AccessibilityConstant : AccessibilityVariable;
-                }
+                IdentifierPtr id = static_pointer_cast<Identifier>(cond.condition);
+                ec = ctx.contextualType->getEnumCase(id->getIdentifier());
             }
-            assert(enumCase != nullptr);
-            const EnumCase* ec = ctx.contextualType->getEnumCase(enumCase->getName());
+            else
+            {
+                EnumCasePatternPtr enumCase = dynamic_pointer_cast<EnumCasePattern>(cond.condition);
+                if (!enumCase)
+                {
+                    if (ValueBindingPatternPtr binding = dynamic_pointer_cast<ValueBindingPattern>(cond.condition))
+                    {
+                        enumCase = dynamic_pointer_cast<EnumCasePattern>(binding->getBinding());
+                        accessibility = binding->isReadOnly() ? AccessibilityConstant : AccessibilityVariable;
+                    }
+                }
+                assert(enumCase != nullptr);
+                ec = ctx.contextualType->getEnumCase(enumCase->getName());
+            }
             if(ec && ec->type != symbolRegistry->getGlobalScope()->Void())
             {
                 vector<TupleExtractionResult> results;

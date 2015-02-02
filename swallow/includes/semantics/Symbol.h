@@ -66,6 +66,10 @@ enum SymbolFlags
     SymbolFlagLazy = 0x4000,
     //The function is mutating
     SymbolFlagMutating = 0x8000,
+    //This is a stored property declared on a type
+    SymbolFlagStoredProperty = 0x10000,
+    //This is a computed property declared on a type
+    SymbolFlagComputedProperty = 0x20000
 };
 
 class SWALLOW_EXPORT Symbol

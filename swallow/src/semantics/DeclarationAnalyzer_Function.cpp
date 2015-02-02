@@ -384,6 +384,9 @@ void DeclarationAnalyzer::visitFunctionDeclaration(const FunctionDefPtr& node)
             func->setFlags(SymbolFlagPrefix, true);
         else if(node->getModifiers() & DeclarationModifiers::Postfix)
             func->setFlags(SymbolFlagPostfix, true);
+
+        if(node->getModifiers() & (DeclarationModifiers::Class | DeclarationModifiers::Static))
+            func->setFlags(SymbolFlagStatic, true);
     }
 
 

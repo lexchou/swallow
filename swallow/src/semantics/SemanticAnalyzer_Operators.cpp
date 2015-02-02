@@ -168,9 +168,17 @@ void SemanticAnalyzer::verifyTuplePatternForAssignment(const PatternPtr& pattern
         if(!sym->hasFlags(SymbolFlagWritable))
         {
             if(id->getIdentifier() == L"self")
+            {
                 error(id, Errors::E_CANNOT_ASSIGN_TO_A_IN_A_METHOD_1, id->getIdentifier());
+            }
             else
-                error(id, Errors::E_CANNOT_ASSIGN_TO_LET_VALUE_A_1, id->getIdentifier());
+            {
+                //do not emit this error if and only if the target is a member variable and inside an initializer
+                bool init = ctx.currentFunction && ctx.currentFunction->hasFlags(SymbolFlagInit);
+                bool storedProperty = sym->hasFlags(SymbolFlagStoredProperty);
+                if(!(init && storedProperty))
+                    error(id, Errors::E_CANNOT_ASSIGN_TO_LET_VALUE_A_1, id->getIdentifier());
+            }
 
         }
     }

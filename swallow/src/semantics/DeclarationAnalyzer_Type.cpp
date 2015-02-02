@@ -418,6 +418,7 @@ void DeclarationAnalyzer::visitEnum(const EnumDefPtr& node)
     SCOPED_SET(ctx->currentType, type);
 
     GlobalScope* global = symbolRegistry->getGlobalScope();
+    SymbolScope* local = symbolRegistry->getCurrentScope();
     //check if it's raw value enum
     bool isRawValues = false;
     if(node->numParents() > 0)
@@ -481,6 +482,8 @@ void DeclarationAnalyzer::visitEnum(const EnumDefPtr& node)
                 }
             }
             type->addEnumCase(c.name, global->Void());
+            //register it to scope
+            local->addSymbol(SymbolPlaceHolderPtr(new SymbolPlaceHolder(c.name, type, SymbolPlaceHolder::R_PARAMETER, SymbolFlagReadable | SymbolFlagMember | SymbolFlagStatic | SymbolFlagInitialized)));
         }
     }
     else
@@ -501,6 +504,8 @@ void DeclarationAnalyzer::visitEnum(const EnumDefPtr& node)
                 associatedType = lookupType(typeNode);
             }
             type->addEnumCase(c.name, associatedType);
+            if(associatedType == global->Void())
+                local->addSymbol(SymbolPlaceHolderPtr(new SymbolPlaceHolder(c.name, type, SymbolPlaceHolder::R_PARAMETER, SymbolFlagReadable | SymbolFlagMember | SymbolFlagStatic | SymbolFlagInitialized)));
         }
     }
     //check member declaration of enum

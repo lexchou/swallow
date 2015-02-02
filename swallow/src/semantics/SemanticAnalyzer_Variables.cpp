@@ -85,6 +85,7 @@ void SemanticAnalyzer::visitComputedProperty(const ComputedPropertyPtr& node)
             flags |= SymbolFlagReadable;
         if (node->hasModifier(DeclarationModifiers::Static) || node->hasModifier(DeclarationModifiers::Class))
             flags |= SymbolFlagStatic;
+        flags |= SymbolFlagComputedProperty;
 
         SymbolPlaceHolderPtr symbol(new SymbolPlaceHolder(node->getName(), type, SymbolPlaceHolder::R_PROPERTY, flags));
         registerSymbol(symbol, node);
@@ -481,6 +482,10 @@ void SemanticAnalyzer::visitValueBindings(const ValueBindingsPtr& node)
     if(node->hasModifier(DeclarationModifiers::Static) || node->hasModifier(DeclarationModifiers::Class))
         flags |= SymbolFlagStatic;
 
+    SymbolPlaceHolder::Role role = (!ctx.currentFunction && ctx.currentType) ? SymbolPlaceHolder::R_PROPERTY : SymbolPlaceHolder::R_LOCAL_VARIABLE;
+    if(role == SymbolPlaceHolder::R_PROPERTY)
+        flags |= SymbolFlagStoredProperty;
+
     for(const ValueBindingPtr& var : *node)
     {
         PatternPtr name = var->getName();
@@ -497,7 +502,7 @@ void SemanticAnalyzer::visitValueBindings(const ValueBindingsPtr& node)
         }
         else
         {
-            SymbolPlaceHolderPtr pattern(new SymbolPlaceHolder(id->getIdentifier(), id->getType(), SymbolPlaceHolder::R_LOCAL_VARIABLE, flags));
+            SymbolPlaceHolderPtr pattern(new SymbolPlaceHolder(id->getIdentifier(), id->getType(), role, flags));
             registerSymbol(pattern, id);
         }
     }
