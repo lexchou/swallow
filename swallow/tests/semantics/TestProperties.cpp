@@ -203,7 +203,7 @@ TEST(TestProperties, ComputedProperty)
             L"let initialSquareCenter = square.center\n"
             L"square.center = Point(x: 15.0, y: 15.0)\n"
             L"println(\"square.origin is now at (\\(square.origin.x), \\(square.origin.y))\")");
-    ASSERT_EQ(0, compilerResults.numResults());
+    ASSERT_NO_ERRORS();
 }
 TEST(TestProperties, ComputedProperty_ShorthandSetter)
 {

@@ -3,16 +3,10 @@ cmake_minimum_required(VERSION 2.6)
 SUBDIRS(tests)
 set(CMAKE_BUILD_TYPE Release)
 
-#FIND_PATH(GTEST_DIR libgtest.a
-#    ../gtest-1.7.0
-#    /usr/lib
-#    /usr/lib/x86_64-linux-gnu/
-#)
 SET(GTEST_LIBS gtest gtest_main pthread)
-#LINK_DIRECTORIES(${GTEST_DIR})
 
 INCLUDE_DIRECTORIES(
-    ${PROJECT_SOURCE_DIR}/includes
+    ${PROJECT_SOURCE_DIR}/includes/
     ../gtest-1.7.0/include/
 )
 
@@ -65,8 +59,9 @@ SET(SWALLOW_SRC
     src/semantics/TypeBuilder.cpp
     src/semantics/CollectionTypeAnalyzer.cpp
     src/semantics/SemanticAnalyzer.cpp
-    src/semantics/SemanticAnalyzer_TypeCreation.cpp
-    src/semantics/SemanticAnalyzer_Function.cpp
+    src/semantics/DeclarationAnalyzer.cpp
+    src/semantics/DeclarationAnalyzer_Type.cpp
+    src/semantics/DeclarationAnalyzer_Function.cpp
     src/semantics/SemanticAnalyzer_Variables.cpp
     src/semantics/SemanticAnalyzer_Expression.cpp
     src/semantics/SemanticAnalyzer_Condition.cpp
@@ -74,6 +69,8 @@ SET(SWALLOW_SRC
     src/semantics/SemanticAnalyzer_Modifiers.cpp
     src/semantics/SemanticAnalyzer_Literal.cpp
     src/semantics/SemanticAnalyzer_FunctionCall.cpp
+    src/semantics/SemanticAnalyzer_Function.cpp
+    src/semantics/SemanticAnalyzer_TypeCreation.cpp
     src/semantics/SemanticAnalyzer_Operators.cpp
     src/semantics/OperatorResolver.cpp
     src/semantics/CompilerResultEmitter.cpp

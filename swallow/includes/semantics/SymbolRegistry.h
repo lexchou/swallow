@@ -59,7 +59,14 @@ public:
     bool isPostfixOperator(const std::wstring& name);
     bool isInfixOperator(const std::wstring& name);
 
+    /*!
+     * Returns the current scope
+     */
     SymbolScope* getCurrentScope();
+    /*!
+     * Not recommended to use, it will interrupt the internal scope state, use it wisely.
+     */
+    void setCurrentScope(SymbolScope* scope);
     GlobalScope* getGlobalScope();
     SymbolScope* getFileScope();
     void setFileScope(SymbolScope* scope);

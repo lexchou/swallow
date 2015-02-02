@@ -32,6 +32,7 @@
 #include "SemanticPass.h"
 #include "Type.h"
 #include <list>
+#include "SemanticContext.h"
 
 SWALLOW_NS_BEGIN
 
@@ -59,10 +60,13 @@ enum PatternAccessibility
     AccessibilityConstant,
     AccessibilityVariable
 };
+class DeclarationAnalyzer;
 class SWALLOW_EXPORT SemanticAnalyzer : public SemanticPass
 {
+    friend class DeclarationAnalyzer;
 public:
     SemanticAnalyzer(SymbolRegistry* symbolRegistry, CompilerResults* compilerResults);
+    ~SemanticAnalyzer();
 public:
     virtual void visitAssignment(const AssignmentPtr& node) override;
     virtual void visitComputedProperty(const ComputedPropertyPtr& node) override;
@@ -78,11 +82,10 @@ public:
     virtual void visitClosure(const ClosurePtr& node) override;
     virtual void visitIdentifier(const IdentifierPtr& id) override;
     virtual void visitEnumCasePattern(const EnumCasePatternPtr& node) override;
-    virtual void visitParameter(const ParameterPtr& node) override;
     virtual void visitDeinit(const DeinitializerDefPtr& node) override;
     virtual void visitInit(const InitializerDefPtr& node) override;
     virtual void visitCodeBlock(const CodeBlockPtr& node) override;
-    virtual void visitParameters(const ParametersPtr& node) override;
+    virtual void visitProgram(const ProgramPtr& node) override;
 public:
 
     virtual void visitFunctionCall(const FunctionCallPtr& node) override;
@@ -123,25 +126,14 @@ public:// Condition control flow
     virtual void visitDoLoop(const DoLoopPtr& node) override;
 public://Syntax sugar for type
     virtual void visitOptionalType(const OptionalTypePtr& node);
-public://properties
-    const TypePtr& getCurrentFunction() const;
-    const TypePtr& getCurrentType() const;
+public:
+    SemanticContext* getContext() {return &ctx;}
 private:
     void visitAccessor(const CodeBlockPtr& accessor, const ParametersPtr& params, const SymbolPtr& setter);
-    TypePtr defineType(const std::shared_ptr<TypeDeclaration>& node);
-    void prepareDefaultInitializers(const TypePtr& type);
     //Verify each symbol in the tuple is initialized and writable
     void verifyTuplePatternForAssignment(const PatternPtr& pattern);
 
-    FunctionSymbolPtr createFunctionSymbol(const FunctionDefPtr& func, const GenericDefinitionPtr& generic);
-    TypePtr createFunctionType(const std::vector<ParametersPtr>::const_iterator& begin, const std::vector<ParametersPtr>::const_iterator& end, const TypePtr& retType, const GenericDefinitionPtr& generic);
-
-    /*!
-     * Prepare parameters as symbols in given code block
-     */
-    void prepareParameters(SymbolScope* scope, const ParametersPtr& params);
     void registerSymbol(const SymbolPlaceHolderPtr& symbol, const NodePtr& node);
-    GenericDefinitionPtr prepareGenericTypes(const GenericParametersDefPtr& params);
 
     SymbolPtr visitFunctionCall(bool mutatingSelf, const std::vector<SymbolPtr>& func, const ParenthesizedExpressionPtr& args, const PatternPtr& node);
 private:
@@ -175,13 +167,19 @@ private:
     bool isNumber(const TypePtr& type);
     bool isFloat(const TypePtr& type);
 
+    /*!
+     * Check if the declaration is declared as global
+     */
+    bool isGlobal(const DeclarationPtr& node);
 
     /*!
-     * Verify if the specified type conform to the given protocol
+     * Mark this declaration node as lazy declaration, it will be processed only when being used or after the end of the program.
      */
-    void verifyProtocolConform(const TypePtr& type);
-    void verifyProtocolConform(const TypePtr& type, const TypePtr& protocol);
-    void verifyProtocolFunction(const TypePtr& type, const TypePtr& protocol, const FunctionSymbolPtr& expected);
+    void delayDeclare(const DeclarationPtr& node);
+    /*!
+     * The declarations that marked as lazy will be declared immediately
+     */
+    void declareImmediately(const std::wstring& name);
 
 
     /*!
@@ -217,8 +215,6 @@ private:
      * Convert a AST TypeNode into symboled Type
      */
     TypePtr lookupType(const TypeNodePtr& type, bool supressErrors = false);
-    std::wstring toString(const NodePtr& node);
-    std::wstring toString(int i);
 
     /*!
      * Convert expression node to type node
@@ -260,13 +256,10 @@ private:
     bool containsReadonlyNode(const ExpressionPtr& node);
 
 protected:
-    //hint for parsing Array/tuple/dictionary literal
-    TypePtr t_hint;
-    TypePtr currentFunction;
-    int numTemporaryNames;
-private:
-    TypePtr currentType;
-    TypePtr currentExtension;
+    SemanticContext ctx;
+    DeclarationAnalyzer* declarationAnalyzer;
+    std::map<std::wstring, std::list<DeclarationPtr>> lazyDeclarations;
+    bool lazyDeclaration;
 };
 
 SWALLOW_NS_END

@@ -183,7 +183,7 @@ float SemanticAnalyzer::calculateFitScore(bool mutatingSelf, SymbolPtr& func, co
     {
         const Type::Parameter& parameter = *paramIter;
         ParenthesizedExpression::Term& argument = *argumentIter;
-        SCOPED_SET(t_hint, parameter.type);
+        SCOPED_SET(ctx.contextualType, parameter.type);
         argument.transformedExpression = this->transformExpression(parameter.type, argument.expression);
         bool ret = checkArgument(type, parameter, make_pair(argumentIter->name, argumentIter->transformedExpression), false, score, supressErrors, genericTypes);
         if(!ret)
@@ -370,6 +370,7 @@ void SemanticAnalyzer::visitFunctionCall(const FunctionCallPtr& node)
             func->accept(this);
             IdentifierPtr id = std::static_pointer_cast<Identifier>(func);
             const std::wstring &symbolName = id->getIdentifier();
+            declareImmediately(symbolName);
             //TODO: add a parameter on allFunctions to allow it to select types
             vector<SymbolPtr> funcs = allFunctions(symbolName, 0, true);
             if (funcs.empty())
@@ -378,13 +379,13 @@ void SemanticAnalyzer::visitFunctionCall(const FunctionCallPtr& node)
                 return;
             }
             bool mutatingSelf = true;
-            if(currentType)
+            if(ctx.currentType)
             {
                 // TODO: currentFunction might be nullptr while this is called during variable initialization
-                Type::Category category = currentType->getCategory();
+                Type::Category category = ctx.currentType->getCategory();
                 if(category == Type::Struct || category == Type::Enum)
                 {
-                    if(!currentFunction || !currentFunction->hasFlags(SymbolFlagMutating))
+                    if(!ctx.currentFunction || !ctx.currentFunction->hasFlags(SymbolFlagMutating))
                     {
                         mutatingSelf = false;
                     }
@@ -422,7 +423,7 @@ void SemanticAnalyzer::visitFunctionCall(const FunctionCallPtr& node)
                 if(ma->getSelf()->getNodeType() == NodeType::Identifier && static_pointer_cast<Identifier>(ma->getSelf())->getIdentifier() == L"self")
                 {
                     //it must be inside a init
-                    if(!currentFunction || !currentFunction->hasFlags(SymbolFlagInit))
+                    if(!ctx.currentFunction || !ctx.currentFunction->hasFlags(SymbolFlagInit))
                     {
                         error(ma, Errors::E_INITIALIZER_DELEGATION_CAN_ONLY_OCCUR_WITHIN_AN_INITIALIZER);
                         return;
@@ -455,7 +456,7 @@ void SemanticAnalyzer::visitFunctionCall(const FunctionCallPtr& node)
             SymbolPtr func = visitFunctionCall(mutatingSelf, funcs, node->getArguments(), node);
             assert(func != nullptr);
             ma->setType(func->getType());
-            if(hasOptionalChaining(ma->getSelf()) && !isParentInOptionalChain(parentNode))
+            if(hasOptionalChaining(ma->getSelf()) && !isParentInOptionalChain(node->getParentNode()))
             {
                 TypePtr type = symbolRegistry->getGlobalScope()->makeOptional(node->getType());
                 node->setType(type);
@@ -523,4 +524,26 @@ void SemanticAnalyzer::visitFunctionCall(const FunctionCallPtr& node)
         }
     }
 
+}
+
+
+
+void SemanticAnalyzer::visitReturn(const ReturnStatementPtr& node)
+{
+    if(!ctx.currentFunction)
+    {
+        error(node, Errors::E_RETURN_INVALID_OUTSIDE_OF_A_FUNC);
+        return;
+    }
+    TypePtr funcType = ctx.currentFunction;
+
+    SCOPED_SET(ctx.contextualType, funcType->getReturnType());
+
+    float score = 0;
+    TypePtr retType = this->getExpressionType(node->getExpression(), funcType->getReturnType(), score);
+    TypePtr expectedType = funcType->getReturnType();
+    if(!retType->canAssignTo(expectedType))
+    {
+        error(node->getExpression(), Errors::E_CANNOT_CONVERT_EXPRESSION_TYPE_2, retType->toString(), expectedType->toString());
+    }
 }

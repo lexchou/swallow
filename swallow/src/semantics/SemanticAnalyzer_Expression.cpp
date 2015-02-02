@@ -108,7 +108,7 @@ bool SemanticAnalyzer::isParentInOptionalChain(const NodePtr& node)
 
 void SemanticAnalyzer::visitMemberAccess(const MemberAccessPtr& node)
 {
-    TypePtr selfType = t_hint;
+    TypePtr selfType = ctx.contextualType;
     wstring fieldName = node->getField() ? node->getField()->getIdentifier() : toString(node->getIndex());
     bool staticAccess = false;
     if(node->getSelf())
@@ -125,8 +125,8 @@ void SemanticAnalyzer::visitMemberAccess(const MemberAccessPtr& node)
     }
     else //Type is implicitly retrieved from contextual type
     {
-        selfType = t_hint;
-        if(!t_hint)
+        selfType = ctx.contextualType;
+        if(!ctx.contextualType)
         {
             //invalid contextual type
             error(node, Errors::E_NO_CONTEXTUAL_TYPE_TO_ACCESS_MEMBER_A_1, fieldName);
@@ -188,7 +188,7 @@ void SemanticAnalyzer::visitMemberAccess(const MemberAccessPtr& node)
 
     //Optional Chaining, if parent node is not a member access and there's a optional chaining expression inside Self, mark the expression optional
     //if(!parentNode || (parentNode->getNodeType() != NodeType::MemberAccess && parentNode->getNodeType() != NodeType::Assignment && parentNode->getNodeType() != NodeType::OptionalChaining))
-    if(!isParentInOptionalChain(parentNode))
+    if(!isParentInOptionalChain(node->getParentNode()))
     {
         if(hasOptionalChaining(node->getSelf()))
         {
@@ -237,6 +237,6 @@ void SemanticAnalyzer::visitSubscriptAccess(const SubscriptAccessPtr& node)
 
 void SemanticAnalyzer::visitValueBindingPattern(const ValueBindingPatternPtr& node)
 {
-    assert(t_hint != nullptr);
-    node->setType(t_hint);
+    assert(ctx.contextualType != nullptr);
+    node->setType(ctx.contextualType);
 }

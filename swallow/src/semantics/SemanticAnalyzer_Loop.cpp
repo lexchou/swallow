@@ -65,9 +65,9 @@ void SemanticAnalyzer::visitWhileLoop(const WhileLoopPtr& node)
 void SemanticAnalyzer::visitForIn(const ForInLoopPtr& node)
 {
     ScopedCodeBlockPtr codeBlock = static_pointer_cast<ScopedCodeBlock>(node->getCodeBlock());
-    SCOPED_SET(t_hint, nullptr);
+    SCOPED_SET(ctx.contextualType, nullptr);
     if(node->getDeclaredType())
-        t_hint = lookupType(node->getDeclaredType());
+        ctx.contextualType = lookupType(node->getDeclaredType());
     node->getContainer()->accept(this);
     TypePtr sequenceType = node->getContainer()->getType();
     GlobalScope* global = symbolRegistry->getGlobalScope();

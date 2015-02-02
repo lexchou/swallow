@@ -36,6 +36,7 @@
 #include <sstream>
 #include <memory>
 #include "NodeVisitor.h"
+#include "common/ScopedValue.h"
 #ifdef TRACE_NODE
 #include <list>
 #endif//TRACE_NODE
@@ -126,6 +127,7 @@ struct NodeType
 };
 
 class NodeFactory;
+class NodeVisitor;
 class SWALLOW_EXPORT Node : public std::enable_shared_from_this<Node>
 {
     friend class NodeFactory;
@@ -137,6 +139,7 @@ public:
     SourceInfo* getSourceInfo();
     NodeType::T getNodeType();
     NodeFactory* getNodeFactory();
+    NodePtr getParentNode() const;
 public:
     virtual void accept(NodeVisitor* visitor){}
 
@@ -144,19 +147,10 @@ protected:
     template<class ASTNode>
     inline void accept2(NodeVisitor* visitor, void (NodeVisitor::*visit)(const std::shared_ptr<ASTNode>&))
     {
-        std::shared_ptr<ASTNode> ptr = std::static_pointer_cast<ASTNode>(shared_from_this());
-        visitor->beforeVisiting(ptr);
-        try
-        {
-            (visitor->*visit)(ptr);
-            visitor->afterVisited(ptr);
-        }
-        catch(...)
-        {
-            visitor->afterVisited(ptr);
-            throw;
-        }
-
+        std::shared_ptr<ASTNode> self = std::static_pointer_cast<ASTNode>(shared_from_this());
+        this->parentNode = visitor->currentNode;
+        SCOPED_SET(visitor->currentNode, self);
+        (visitor->*visit)(self);
     }
 
 public:
@@ -170,6 +164,7 @@ protected:
     SourceInfo sourceInfo;
     NodeType::T nodeType;
     NodeFactory* nodeFactory;
+    std::weak_ptr<Node> parentNode;
 #ifdef TRACE_NODE
 public:
     static std::list<Node*> UnreleasedNodes;

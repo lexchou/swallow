@@ -53,12 +53,12 @@ typedef std::shared_ptr<FunctionOverloadedSymbol> FunctionOverloadedSymbolPtr;
 class FunctionSymbol;
 typedef std::shared_ptr<FunctionSymbol> FunctionSymbolPtr;
 
-class SymboledFunction;
-typedef std::shared_ptr<SymboledFunction> SymboledFunctionPtr;
+//class SymboledFunction;
+//typedef std::shared_ptr<class SymboledFunction> SymboledFunctionPtr;
 
-class ScopedClass;
-typedef std::shared_ptr<ScopedClass> ScopedClassPtr;
+typedef std::shared_ptr<class ScopedClass> ScopedClassPtr;
 typedef std::shared_ptr<class ScopedStruct> ScopedStructPtr;
+typedef std::shared_ptr<class ScopedEnum> ScopedEnumPtr;
 typedef std::shared_ptr<class ScopedExtension> ScopedExtensionPtr;
 typedef std::shared_ptr<class ScopedProtocol> ScopedProtocolPtr;
 typedef std::shared_ptr<class ScopedClosure> ScopedClosurePtr;

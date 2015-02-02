@@ -137,6 +137,14 @@ SymbolScope* SymbolRegistry::getCurrentScope()
 {
     return currentScope;
 }
+
+/*!
+ * Not recommended to use, it will interrupt the internal scope state, use it wisely.
+ */
+void SymbolRegistry::setCurrentScope(SymbolScope* scope)
+{
+    this->currentScope = scope;
+}
 void SymbolRegistry::enterScope(SymbolScope* scope)
 {
     scopes.push(currentScope);
@@ -145,6 +153,11 @@ void SymbolRegistry::enterScope(SymbolScope* scope)
 }
 void SymbolRegistry::leaveScope()
 {
+    if(scopes.empty())
+    {
+        currentScope = nullptr;
+        return;
+    }
     currentScope = scopes.top();
     scopes.pop();
 }

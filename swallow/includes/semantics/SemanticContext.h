@@ -1,4 +1,4 @@
-/* ScopedNodeFactory.cpp --
+/* SemanticContext.h --
  *
  * Copyright (c) 2014, Lex Chou <lex at chou dot it>
  * All rights reserved.
@@ -27,57 +27,34 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "semantics/ScopedNodeFactory.h"
-#include "semantics/ScopedNodes.h"
-#include "ast/InitializerDef.h"
-USE_SWALLOW_NS
+#ifndef SEMANTIC_CONTEXT_H
+#define SEMANTIC_CONTEXT_H
+#include "Type.h"
+
+SWALLOW_NS_BEGIN
 
 
-IdentifierPtr ScopedNodeFactory::createIdentifier(const SourceInfo& state)
+struct SemanticContext
 {
-    return NodeFactory::createIdentifier(state);
-}
-EnumDefPtr ScopedNodeFactory::createEnum(const SourceInfo& state)
-{
-    return _(state, new ScopedEnum());
-}
-StructDefPtr ScopedNodeFactory::createStruct(const SourceInfo& state)
-{
-    return _(state, new ScopedStruct());
-}
-ClassDefPtr ScopedNodeFactory::createClass(const SourceInfo& state)
-{
-    return _(state, new ScopedClass());
-}
-ProtocolDefPtr ScopedNodeFactory::createProtocol(const SourceInfo& state)
-{
-    return _(state, new ScopedProtocol());
-}
-ExtensionDefPtr ScopedNodeFactory::createExtension(const SourceInfo& state)
-{
-    return _(state, new ScopedExtension());
-}
-ProgramPtr ScopedNodeFactory::createProgram()
-{
-    return _(SourceInfo(), new ScopedProgram());
-}
-CodeBlockPtr ScopedNodeFactory::createCodeBlock(const SourceInfo& state)
-{
-    return _(state, new ScopedCodeBlock());
-}
-ClosurePtr ScopedNodeFactory::createClosure(const SourceInfo& state)
-{
-    return _(state, new ScopedClosure());
-}
-FunctionDefPtr ScopedNodeFactory::createFunction(const SourceInfo& state)
-{
-    return _(state, new SymboledFunction());
-}
-InitializerDefPtr ScopedNodeFactory::createInitializer(const SourceInfo& state)
-{
-    return _(state, new SymboledInit);
-}
-DeinitializerDefPtr ScopedNodeFactory::createDeinitializer(const SourceInfo& state)
-{
-    return NodeFactory::createDeinitializer(state);
-}
+
+    enum
+    {
+        FLAG_PROCESS_DECLARATION = 1,
+        FLAG_PROCESS_IMPLEMENTATION = 2
+    };
+    TypePtr contextualType;
+    TypePtr currentType;
+    TypePtr currentExtension;
+    TypePtr currentFunction;
+    int numTemporaryNames;
+    int flags;
+
+    SemanticContext()
+        :numTemporaryNames(0), flags(FLAG_PROCESS_DECLARATION | FLAG_PROCESS_IMPLEMENTATION)
+    {}
+};
+
+
+SWALLOW_NS_END
+
+#endif//SEMANTIC_CONTEXT_H

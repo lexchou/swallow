@@ -56,6 +56,7 @@ void SemanticAnalyzer::visitConditionalOperator(const ConditionalOperatorPtr& no
 }
 void SemanticAnalyzer::visitBinaryOperator(const BinaryOperatorPtr& node)
 {
+    declareImmediately(node->getOperator());
     //look for binary function that matches
     OperatorInfo* op = symbolRegistry->getOperator(node->getOperator(), OperatorType::InfixBinary);
     std::vector<SymbolPtr> funcs = allFunctions(node->getOperator(), 0, true);
@@ -88,6 +89,7 @@ void SemanticAnalyzer::visitBinaryOperator(const BinaryOperatorPtr& node)
 }
 void SemanticAnalyzer::visitUnaryOperator(const UnaryOperatorPtr& node)
 {
+    declareImmediately(node->getOperator());
     int mask = 0;
     if(node->getOperatorType() == OperatorType::PostfixUnary)
         mask = SymbolFlagPostfix;
@@ -190,6 +192,7 @@ void SemanticAnalyzer::verifyTuplePatternForAssignment(const PatternPtr& pattern
 
 void SemanticAnalyzer::visitAssignment(const AssignmentPtr& node)
 {
+    declareImmediately(node->getOperator());
     node->setType(symbolRegistry->getGlobalScope()->Void());
     PatternPtr destination = node->getLHS();
     destination->accept(this);
@@ -299,7 +302,7 @@ void SemanticAnalyzer::visitAssignment(const AssignmentPtr& node)
     else
     {
 
-        SCOPED_SET(t_hint, destinationType);
+        SCOPED_SET(ctx.contextualType, destinationType);
         node->getRHS()->accept(this);
     }
     TypePtr sourceType = node->getRHS()->getType();

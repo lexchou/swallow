@@ -35,13 +35,15 @@
 SWALLOW_NS_BEGIN
 
 class Statement;
+class Node;
+/*!
+ * The NodeVisitor and its derived classes are not thread-safe.
+ */
 class SWALLOW_EXPORT NodeVisitor
 {
+    friend class Node;
 public:
     virtual ~NodeVisitor(){}
-public:
-    virtual void beforeVisiting(const NodePtr& node);
-    virtual void afterVisited(const NodePtr& node);
 public:
     virtual void visitValueBindings(const ValueBindingsPtr& node);
     virtual void visitComputedProperty(const ComputedPropertyPtr& node);
@@ -113,6 +115,8 @@ public:
     virtual void visitProtocolComposition(const ProtocolCompositionPtr& node);
     virtual void visitTupleType(const TupleTypePtr& node);
     virtual void visitTypeIdentifier(const TypeIdentifierPtr& node);
+protected:
+    NodePtr currentNode;
 };
 
 

@@ -55,6 +55,8 @@ class SWALLOW_EXPORT ScopedClass : public ClassDef, public ScopeOwner, public Sy
 public:
     virtual void accept(NodeVisitor* visitor) override;
     virtual const std::wstring& getName()const override;
+public:
+    TypePtr type;
 
 };
 class SWALLOW_EXPORT ScopedProtocol : public ProtocolDef, public ScopeOwner, public Symbol
@@ -62,21 +64,24 @@ class SWALLOW_EXPORT ScopedProtocol : public ProtocolDef, public ScopeOwner, pub
 public:
     virtual void accept(NodeVisitor* visitor) override;
     virtual const std::wstring& getName()const override;
-
+public:
+    TypePtr type;
 };
 class SWALLOW_EXPORT ScopedStruct : public StructDef, public ScopeOwner, public Symbol
 {
 public:
     virtual void accept(NodeVisitor* visitor) override;
     virtual const std::wstring& getName()const override;
-
+public:
+    TypePtr type;
 };
 class SWALLOW_EXPORT ScopedEnum : public EnumDef, public ScopeOwner, public Symbol
 {
 public:
     virtual void accept(NodeVisitor* visitor) override;
     virtual const std::wstring& getName()const override;
-
+public:
+    TypePtr type;
 };
 class SWALLOW_EXPORT ScopedExtension : public ExtensionDef, public ScopeOwner, public Symbol
 {
@@ -97,11 +102,14 @@ public:
     virtual void accept(NodeVisitor* visitor) override;
 };
 
-class SWALLOW_EXPORT SymboledFunction : public FunctionDef, public Symbol
+template<class NodeType, class SymbolType>
+class SWALLOW_EXPORT SymboledNode : public NodeType
 {
 public:
-    const std::wstring& getName()const override;
+    std::shared_ptr<SymbolType> symbol;
 };
+typedef SymboledNode<FunctionDef, class FunctionSymbol> SymboledFunction;
+typedef SymboledNode<InitializerDef, class FunctionSymbol> SymboledInit;
 
 
 

@@ -101,7 +101,7 @@ OperatorPtr OperatorResolver::sortExpression(const OperatorPtr& op)
 
 void OperatorResolver::visitOperator(const OperatorDefPtr& node)
 {
-
+    NodePtr parentNode = node->getParentNode();
     if(!parentNode || parentNode->getNodeType() != NodeType::Program)
     {
         error(node, Errors::E_A_MAY_ONLY_BE_DECLARED_AT_FILE_SCOPE_1, L"operator");

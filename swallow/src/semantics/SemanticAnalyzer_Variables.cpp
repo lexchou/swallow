@@ -62,80 +62,87 @@ static void registerSelfToAccessor(const TypePtr& currentType, const CodeBlockPt
 }
 void SemanticAnalyzer::visitComputedProperty(const ComputedPropertyPtr& node)
 {
-
     CodeBlockPtr didSet = node->getDidSet();
     CodeBlockPtr willSet = node->getWillSet();
     CodeBlockPtr getter = node->getGetter();
     CodeBlockPtr setter = node->getSetter();
     TypePtr type = lookupType(node->getDeclaredType());
     assert(type != nullptr);
-    node->setType(type);
-    //prepare type for getter/setter
-    std::vector<Type::Parameter> params;
-    TypePtr getterType = Type::newFunction(params, type, nullptr);
-    params.push_back(Type::Parameter(type));
-    TypePtr setterType = Type::newFunction(params, symbolRegistry->getGlobalScope()->Void(), false);
-
-    registerSelfToAccessor(currentType, getter);
-    registerSelfToAccessor(currentType, setter);
-    registerSelfToAccessor(currentType, willSet);
-    registerSelfToAccessor(currentType, didSet);
 
 
-    //register symbol
-    int flags = SymbolFlagInitialized;
-    if(didSet || willSet)
-        flags |= SymbolFlagReadable | SymbolFlagWritable;
-    if(setter)
-        flags |= SymbolFlagWritable;
-    if(getter)
-        flags |= SymbolFlagReadable;
-    if(node->hasModifier(DeclarationModifiers::Static) || node->hasModifier(DeclarationModifiers::Class))
-        flags |= SymbolFlagStatic;
 
-    SymbolPlaceHolderPtr symbol(new SymbolPlaceHolder(node->getName(), type, SymbolPlaceHolder::R_PROPERTY, flags));
-    registerSymbol(symbol, node);
-    validateDeclarationModifiers(node);
+    if(ctx.flags & SemanticContext::FLAG_PROCESS_DECLARATION)
+    {
+        node->setType(type);
 
+        //register symbol
+        int flags = SymbolFlagInitialized;
+        if (didSet || willSet)
+            flags |= SymbolFlagReadable | SymbolFlagWritable;
+        if (setter)
+            flags |= SymbolFlagWritable;
+        if (getter)
+            flags |= SymbolFlagReadable;
+        if (node->hasModifier(DeclarationModifiers::Static) || node->hasModifier(DeclarationModifiers::Class))
+            flags |= SymbolFlagStatic;
+
+        SymbolPlaceHolderPtr symbol(new SymbolPlaceHolder(node->getName(), type, SymbolPlaceHolder::R_PROPERTY, flags));
+        registerSymbol(symbol, node);
+        validateDeclarationModifiers(node);
+    }
     //prepare and visit each accessors
-    if(getter)
+    if(ctx.flags & SemanticContext::FLAG_PROCESS_IMPLEMENTATION)
     {
-        getter->setType(getterType);
-        SCOPED_SET(currentFunction, getterType);
-        getter->accept(this);
-    }
-    if(setter)
-    {
-        std::wstring name = node->getSetterName().empty() ? L"newValue" : node->getSetterName();
-        //TODO: replace the symbol to internal value
-        ScopedCodeBlockPtr cb = std::static_pointer_cast<ScopedCodeBlock>(setter);
-        cb->setType(setterType);
-        cb->getScope()->addSymbol(SymbolPtr(new SymbolPlaceHolder(name, type, SymbolPlaceHolder::R_PARAMETER, SymbolFlagInitialized)));
+        //prepare type for getter/setter
+        std::vector<Type::Parameter> params;
+        TypePtr getterType = Type::newFunction(params, type, nullptr);
+        params.push_back(Type::Parameter(type));
+        TypePtr setterType = Type::newFunction(params, symbolRegistry->getGlobalScope()->Void(), false);
 
-        SCOPED_SET(currentFunction, setterType);
-        cb->accept(this);
-    }
-    if(willSet)
-    {
-        std::wstring setter = node->getWillSetSetter().empty() ? L"newValue" : node->getWillSetSetter();
-        //TODO: replace the symbol to internal value
-        ScopedCodeBlockPtr cb = std::static_pointer_cast<ScopedCodeBlock>(willSet);
-        cb->setType(setterType);
-        cb->getScope()->addSymbol(SymbolPtr(new SymbolPlaceHolder(setter, type, SymbolPlaceHolder::R_PARAMETER, SymbolFlagInitialized)));
 
-        SCOPED_SET(currentFunction, setterType);
-        cb->accept(this);
-    }
-    if(didSet)
-    {
-        std::wstring setter = node->getDidSetSetter().empty() ? L"oldValue" : node->getDidSetSetter();
-        //TODO: replace the symbol to internal value
-        ScopedCodeBlockPtr cb = std::static_pointer_cast<ScopedCodeBlock>(didSet);
-        cb->setType(setterType);
-        cb->getScope()->addSymbol(SymbolPtr(new SymbolPlaceHolder(setter, type, SymbolPlaceHolder::R_PARAMETER, SymbolFlagInitialized)));
+        if (getter)
+        {
+            getter->setType(getterType);
+            SCOPED_SET(ctx.currentFunction, getterType);
+            registerSelfToAccessor(ctx.currentType, getter);
+            getter->accept(this);
+        }
+        if (setter)
+        {
+            registerSelfToAccessor(ctx.currentType, setter);
+            std::wstring name = node->getSetterName().empty() ? L"newValue" : node->getSetterName();
+            //TODO: replace the symbol to internal value
+            ScopedCodeBlockPtr cb = std::static_pointer_cast<ScopedCodeBlock>(setter);
+            cb->setType(setterType);
+            cb->getScope()->addSymbol(SymbolPtr(new SymbolPlaceHolder(name, type, SymbolPlaceHolder::R_PARAMETER, SymbolFlagInitialized)));
 
-        SCOPED_SET(currentFunction, setterType);
-        cb->accept(this);
+            SCOPED_SET(ctx.currentFunction, setterType);
+            cb->accept(this);
+        }
+        if (willSet)
+        {
+            std::wstring setter = node->getWillSetSetter().empty() ? L"newValue" : node->getWillSetSetter();
+            //TODO: replace the symbol to internal value
+            ScopedCodeBlockPtr cb = std::static_pointer_cast<ScopedCodeBlock>(willSet);
+            cb->setType(setterType);
+            cb->getScope()->addSymbol(SymbolPtr(new SymbolPlaceHolder(setter, type, SymbolPlaceHolder::R_PARAMETER, SymbolFlagInitialized)));
+
+            SCOPED_SET(ctx.currentFunction, setterType);
+            registerSelfToAccessor(ctx.currentType, willSet);
+            cb->accept(this);
+        }
+        if (didSet)
+        {
+            std::wstring setter = node->getDidSetSetter().empty() ? L"oldValue" : node->getDidSetSetter();
+            //TODO: replace the symbol to internal value
+            ScopedCodeBlockPtr cb = std::static_pointer_cast<ScopedCodeBlock>(didSet);
+            cb->setType(setterType);
+            cb->getScope()->addSymbol(SymbolPtr(new SymbolPlaceHolder(setter, type, SymbolPlaceHolder::R_PARAMETER, SymbolFlagInitialized)));
+
+            SCOPED_SET(ctx.currentFunction, setterType);
+            registerSelfToAccessor(ctx.currentType, didSet);
+            cb->accept(this);
+        }
     }
 }
 void SemanticAnalyzer::registerSymbol(const SymbolPlaceHolderPtr& symbol, const NodePtr& node)
@@ -152,7 +159,7 @@ void SemanticAnalyzer::registerSymbol(const SymbolPlaceHolderPtr& symbol, const 
         case NodeType::Protocol:
         case NodeType::Extension:
         case NodeType::Enum:
-            assert(currentType != nullptr);
+            assert(ctx.currentType != nullptr);
             declarationFinished(symbol->getName(), symbol, node);
             break;
         default:
@@ -213,7 +220,7 @@ void SemanticAnalyzer::checkTupleDefinition(const TuplePtr& tuple, const Express
 
 void SemanticAnalyzer::visitValueBinding(const ValueBindingPtr& node)
 {
-    if(node->getOwner()->isReadOnly() && !node->getInitializer() && currentType == nullptr)
+    if(node->getOwner()->isReadOnly() && !node->getInitializer() && ctx.currentType == nullptr)
     {
         error(node, Errors::E_LET_REQUIRES_INITIALIZER);
         return;
@@ -226,7 +233,7 @@ void SemanticAnalyzer::visitValueBinding(const ValueBindingPtr& node)
     if(IdentifierPtr id = std::dynamic_pointer_cast<Identifier>(node->getName()))
     {
         TypePtr declaredType = node->getType() ? node->getType() : lookupType(node->getDeclaredType());//node->getDeclaredType() == nullptr ? id->getDeclaredType() : node->getDeclaredType());
-        SCOPED_SET(t_hint, declaredType);
+        SCOPED_SET(ctx.contextualType, declaredType);
         if(!declaredType && !node->getInitializer())
         {
             error(node, Errors::E_TYPE_ANNOTATION_MISSING_IN_PATTERN);
@@ -268,7 +275,7 @@ void SemanticAnalyzer::visitValueBinding(const ValueBindingPtr& node)
             checkTupleDefinition(id, node->getInitializer());
         }
     }
-    if(currentType && currentType->getCategory() == Type::Protocol)
+    if(ctx.currentType && ctx.currentType->getCategory() == Type::Protocol)
     {
         error(node, Errors::E_PROTOCOL_VAR_MUST_BE_COMPUTED_PROPERTY_1);
     }
@@ -298,7 +305,7 @@ void SemanticAnalyzer::explodeValueBinding(const ValueBindingsPtr& valueBindings
     TypePtr initializerType;
     if(var->getInitializer())
     {
-        SCOPED_SET(t_hint, declaredType);
+        SCOPED_SET(ctx.contextualType, declaredType);
         var->getInitializer()->accept(this);
         initializerType = var->getInitializer()->getType();
         assert(initializerType != nullptr);
@@ -454,10 +461,13 @@ void SemanticAnalyzer::expandTuple(vector<TupleExtractionResult>& results, vecto
 
 void SemanticAnalyzer::visitValueBindings(const ValueBindingsPtr& node)
 {
+    if(!(ctx.flags & SemanticContext::FLAG_PROCESS_DECLARATION))
+        return;
+
     explodeValueBindings(node);
 
 
-    if(node->isReadOnly() && currentType && currentType->getCategory() == Type::Protocol)
+    if(node->isReadOnly() && ctx.currentType && ctx.currentType->getCategory() == Type::Protocol)
     {
         error(node, Errors::E_PROTOCOL_CANNOT_DEFINE_LET_CONSTANT_1);
         return;

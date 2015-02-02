@@ -28,9 +28,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "semantics/SemanticPass.h"
-#include <cassert>
 #include "ast/ast.h"
 #include "semantics/SymbolRegistry.h"
+#include "ast/utils/NodeSerializer.h"
 
 USE_SWALLOW_NS
 using namespace std;
@@ -41,24 +41,22 @@ SemanticPass::SemanticPass(SymbolRegistry* symbolRegistry, CompilerResults* comp
 {
 
 }
-
-void SemanticPass::beforeVisiting(const NodePtr& node)
+SemanticPass::SemanticPass(SemanticPass* pass)
+    :CompilerResultEmitter(pass->compilerResults), symbolRegistry(pass->symbolRegistry)
 {
-    parentNodes.push(parentNode);
-    parentNode = currentNode;
-    currentNode = node;
 
 }
-void SemanticPass::afterVisited(const NodePtr& node)
+
+std::wstring SemanticPass::toString(const NodePtr& node) const
 {
-    currentNode = parentNode;
-    if(parentNodes.empty())
-    {
-        parentNode = nullptr;
-    }
-    else
-    {
-        parentNode = parentNodes.top();
-        parentNodes.pop();
-    }
+    std::wstringstream out;
+    NodeSerializerW serializer(out);
+    node->accept(&serializer);
+    return out.str();
+}
+std::wstring SemanticPass::toString(int i) const
+{
+    std::wstringstream s;
+    s<<i;
+    return s.str();
 }

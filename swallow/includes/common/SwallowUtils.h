@@ -39,6 +39,7 @@ class CompilerResults;
 
 struct SwallowUtils
 {
+    static void dumpHex(const char* s);
     static std::wstring readFile(const char* fileName);
     static void dumpCompilerResults(const std::wstring& src, const CompilerResults& compilerResults, std::wostream& out);
 };

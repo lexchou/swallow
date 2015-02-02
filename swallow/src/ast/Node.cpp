@@ -164,3 +164,7 @@ NodeType::T Node::getNodeType()
 {
     return nodeType;
 }
+NodePtr Node::getParentNode() const
+{
+    return parentNode.lock();
+}

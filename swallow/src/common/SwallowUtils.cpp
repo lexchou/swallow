@@ -40,6 +40,30 @@ USE_SWALLOW_NS
 using namespace std;
 
 
+
+void SwallowUtils::dumpHex(const char* s)
+{
+    char hex[100];
+    char raw[20];
+    int addr = 0;
+    while(s[addr])
+    {
+        int p = sprintf(hex, "0x%08x ", addr);
+        int i = 0;
+        for(; i < 16 && s[addr]; i++, addr++)
+        {
+            p += sprintf(hex + p, "%02x ", s[addr]);
+            raw[i] = s[addr];
+        }
+        raw[i] = 0;
+        for(; i < 16; i++)
+        {
+            p += sprintf(hex + p, "   ");
+        }
+        printf("%s %s\n", hex, raw);
+    }
+}
+
 std::wstring SwallowUtils::readFile(const char* fileName)
 {
 

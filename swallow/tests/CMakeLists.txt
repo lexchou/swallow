@@ -50,6 +50,7 @@ SET(SEMANTICS_SRC
     semantics/TestLoop.cpp
     semantics/TestProperties.cpp
     semantics/TestMethods.cpp
+    semantics/TestDeclarationOrder.cpp
     )
 
 ADD_EXECUTABLE(TestTokenizer

@@ -118,10 +118,3 @@ void ScopedClosure::accept(NodeVisitor* visitor)
 }
 
 
-const std::wstring& SymboledFunction::getName()const
-{
-    return name;
-}
-
-
-

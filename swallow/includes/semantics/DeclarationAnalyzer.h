@@ -1,0 +1,130 @@
+/* DeclarationAnalyzer.h --
+ *
+ * Copyright (c) 2014, Lex Chou <lex at chou dot it>
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ *   * Redistributions of source code must retain the above copyright notice,
+ *     this list of conditions and the following disclaimer.
+ *   * Redistributions in binary form must reproduce the above copyright
+ *     notice, this list of conditions and the following disclaimer in the
+ *     documentation and/or other materials provided with the distribution.
+ *   * Neither the name of Swallow nor the names of its contributors may be used
+ *     to endorse or promote products derived from this software without
+ *     specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
+#ifndef DECLARATION_ANALYZER_H
+#define DECLARATION_ANALYZER_H
+#include "SemanticPass.h"
+#include "Type.h"
+#include <list>
+
+SWALLOW_NS_BEGIN
+
+class TypeDeclaration;
+class Expression;
+class Pattern;
+class NodeFactory;
+typedef std::shared_ptr<class Identifier> IdentifierPtr;
+
+class SemanticAnalyzer;
+struct SemanticContext;
+/*!
+ * This analyzer will make a lazy declaration on types and functions
+ */
+class SWALLOW_EXPORT DeclarationAnalyzer : public SemanticPass
+{
+public:
+    DeclarationAnalyzer(SemanticAnalyzer* semanticAnalyzer, SemanticContext* ctx);
+public:
+    virtual void visitTypeAlias(const TypeAliasPtr& node) override;
+    virtual void visitClass(const ClassDefPtr& node) override;
+    virtual void visitStruct(const StructDefPtr& node) override;
+    virtual void visitEnum(const EnumDefPtr& node) override;
+    virtual void visitProtocol(const ProtocolDefPtr& node) override;
+    virtual void visitExtension(const ExtensionDefPtr& node) override;
+    virtual void visitFunction(const FunctionDefPtr& node) override;
+    void visitFunctionDeclaration(const FunctionDefPtr& node);
+    virtual void visitParameter(const ParameterPtr& node) override;
+    virtual void visitParameters(const ParametersPtr& node) override;
+    virtual void visitClosure(const ClosurePtr& node) override;
+    virtual void visitSubscript(const SubscriptDefPtr &node) override;
+    virtual void visitDeinit(const DeinitializerDefPtr& node) override;
+    virtual void visitInit(const InitializerDefPtr& node) override;
+    virtual void visitCodeBlock(const CodeBlockPtr &node) override;
+    void visitAccessor(const CodeBlockPtr& accessor, const ParametersPtr& params, const SymbolPtr& setter);
+
+    /*!
+     * Only visits the implementation of members of given type definition
+     */
+    void visitImplementation(const TypeDeclarationPtr& node);
+    /*!
+     * Only visits the declaration of members of given type definition
+     */
+    void visitDeclaration(const TypeDeclarationPtr& node);
+public:
+
+
+public://properties
+    const TypePtr& getCurrentFunction() const;
+    const TypePtr& getCurrentType() const;
+private:
+    TypePtr defineType(const std::shared_ptr<TypeDeclaration>& node);
+    void prepareDefaultInitializers(const TypePtr& type);
+    FunctionSymbolPtr createFunctionSymbol(const FunctionDefPtr& func, const GenericDefinitionPtr& generic);
+    TypePtr createFunctionType(const std::vector<ParametersPtr>::const_iterator& begin, const std::vector<ParametersPtr>::const_iterator& end, const TypePtr& retType, const GenericDefinitionPtr& generic);
+
+    /*!
+     * Prepare parameters as symbols in given code block
+     */
+    void prepareParameters(SymbolScope* scope, const ParametersPtr& params);
+
+    /*!
+     * Verify if the specified type conform to the given protocol
+     */
+    void verifyProtocolConform(const TypePtr& type);
+    void verifyProtocolConform(const TypePtr& type, const TypePtr& protocol);
+    void verifyProtocolFunction(const TypePtr& type, const TypePtr& protocol, const FunctionSymbolPtr& expected);
+
+    GenericDefinitionPtr prepareGenericTypes(const GenericParametersDefPtr& params);
+
+    /*!
+     * Validate modifiers for declarations.
+     */
+    void validateDeclarationModifiers(const DeclarationPtr& declaration);
+    /*!
+     * Convert a AST TypeNode into symboled Type
+     */
+    TypePtr lookupType(const TypeNodePtr& type, bool supressErrors = false);
+    /*!
+     * Declaration finished, added it as a member to current type or current type extension.
+     */
+    void declarationFinished(const std::wstring& name, const SymbolPtr& decl, const NodePtr& node);
+
+    TypePtr defineType(const TypeDeclarationPtr& decl, Type::Category category);
+protected:
+    SemanticAnalyzer* semanticAnalyzer;
+
+    SemanticContext* ctx;
+};
+
+SWALLOW_NS_END
+
+
+
+
+#endif//DECLARATION_ANALYZER_H

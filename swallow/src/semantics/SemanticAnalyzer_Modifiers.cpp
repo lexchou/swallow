@@ -82,9 +82,10 @@ using namespace std;
  */
 static bool isDeclaredInTypeLevel(SemanticAnalyzer* analyzer)
 {
-    if(analyzer->getCurrentFunction())
+    SemanticContext* ctx = analyzer->getContext();
+    if(ctx->currentFunction)
         return false;
-    if(analyzer->getCurrentType())
+    if(ctx->currentType)
         return true;
     return false;
 }
@@ -92,13 +93,13 @@ static bool isDeclaredInTypeLevel(SemanticAnalyzer* analyzer)
 static bool validateGeneralModifiers(SemanticAnalyzer* analyzer, const DeclarationPtr& decl)
 {
     int modifiers = decl->getModifiers();
-    TypePtr currentType = analyzer->getCurrentType();
+    SemanticContext* ctx = analyzer->getContext();
     if(modifiers & DeclarationModifiers::Static)
     {
         //static only exists in struct/enum
         if(!isDeclaredInTypeLevel(analyzer))
             return analyzer->error(decl, Errors::E_STATIC_PROPERTIES_MAY_ONLY_BE_DECLARED_ON_A_TYPE);
-        if(currentType->getCategory() != Type::Struct && currentType->getCategory() != Type::Enum)
+        if(ctx->currentType->getCategory() != Type::Struct && ctx->currentType->getCategory() != Type::Enum)
             return analyzer->error(decl, Errors::E_STATIC_PROPERTIES_ARE_ONLY_ALLOWED_WITHIN_STRUCTS_AND_ENUMS);
 
     }
@@ -107,7 +108,7 @@ static bool validateGeneralModifiers(SemanticAnalyzer* analyzer, const Declarati
         //class only exists in class/protocol
         if(!isDeclaredInTypeLevel(analyzer))
             return analyzer->error(decl, Errors::E_CLASS_PROPERTIES_MAY_ONLY_BE_DECLARED_ON_A_TYPE);
-        if(currentType->getCategory() != Type::Class && currentType->getCategory() != Type::Protocol)
+        if(ctx->currentType->getCategory() != Type::Class && ctx->currentType->getCategory() != Type::Protocol)
             return analyzer->error(decl, Errors::E_CLASS_PROPERTIES_ARE_ONLY_ALLOWED_WITHIN_CLASSES_AND_PROTOCOLS);
     }
     if(modifiers & (DeclarationModifiers::Mutating | DeclarationModifiers::NonMutating))
@@ -154,7 +155,8 @@ static bool validateDeclarationModifiers(SemanticAnalyzer* analyzer, const Value
     if(!validateGeneralModifiers(analyzer, bindings))
         return false;
     SymbolRegistry* symbolRegistry = analyzer->getSymbolRegistry();
-    TypePtr currentType = analyzer->getCurrentType();
+    SemanticContext* ctx = analyzer->getContext();
+    TypePtr currentType = ctx->currentType;
     for(const ValueBindingPtr binding : *bindings)
     {
         if(bindings->hasModifier(DeclarationModifiers::Lazy))
@@ -165,7 +167,7 @@ static bool validateDeclarationModifiers(SemanticAnalyzer* analyzer, const Value
                 return analyzer->error(binding, Errors::E_LAZY_PROPERTIES_MUST_HAVE_AN_INITIALIZER);
             if (binding->getName()->getNodeType() != NodeType::Identifier)
                 return analyzer->error(binding, Errors::E_LAZY_CANNOT_DESTRUCTURE_AN_INITIALIZER);
-            if (analyzer->getCurrentFunction() || !currentType || (currentType->getCategory() != Type::Struct && currentType->getCategory() != Type::Class))
+            if (ctx->currentFunction || !currentType || (currentType->getCategory() != Type::Struct && currentType->getCategory() != Type::Class))
                 return analyzer->error(binding, Errors::E_LAZY_IS_ONLY_VALID_FOR_MEMBERS_OF_A_STRUCT_OR_CLASS);
 
             addFlags(symbolRegistry, binding->getName(), SymbolFlagLazy);
@@ -191,7 +193,7 @@ static bool validateDeclarationModifiers(SemanticAnalyzer* analyzer, const Funct
         return false;
     bool mutating = func->hasModifier(DeclarationModifiers::Mutating);
     bool nonmutating = func->hasModifier(DeclarationModifiers::NonMutating);
-    TypePtr currentType = analyzer->getCurrentType();
+    TypePtr currentType = analyzer->getContext()->currentType;
     if(mutating && nonmutating)
         return analyzer->error(func, Errors::E_METHOD_MAY_NOT_BE_DECLARED_BOTH_MUTATING_AND_NONMUTATING);
     if(!currentType)

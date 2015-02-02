@@ -173,7 +173,7 @@ void SemanticAnalyzer::visitSwitchCase(const SwitchCasePtr& node)
     node->getControlExpression()->accept(this);
     TypePtr conditionType = node->getControlExpression()->getType();
     assert(conditionType != nullptr);
-    SCOPED_SET(t_hint, conditionType);
+    SCOPED_SET(ctx.contextualType, conditionType);
 
     checkExhausiveSwitch(this, node);
 
@@ -202,19 +202,19 @@ void SemanticAnalyzer::visitSwitchCase(const SwitchCasePtr& node)
 void SemanticAnalyzer::visitEnumCasePattern(const EnumCasePatternPtr& node)
 {
     //enum-case is similar to member access but also provided associated-value-enum binding's unpacking
-    if(!t_hint)
+    if(!ctx.contextualType)
     {
         //invalid contextual type
         error(node, Errors::E_NO_CONTEXTUAL_TYPE_TO_ACCESS_MEMBER_A_1, node->getName());
         return;
     }
-    const EnumCase* ec = t_hint->getEnumCase(node->getName());
+    const EnumCase* ec = ctx.contextualType->getEnumCase(node->getName());
     if (ec == nullptr)
     {
-        error(node, Errors::E_DOES_NOT_HAVE_A_MEMBER_2, t_hint->toString(), node->getName());
+        error(node, Errors::E_DOES_NOT_HAVE_A_MEMBER_2, ctx.contextualType->toString(), node->getName());
         return;
     }
-    node->setType(t_hint);
+    node->setType(ctx.contextualType);
     //TODO check for associated values for unpacking
 
 }
@@ -222,7 +222,7 @@ void SemanticAnalyzer::visitEnumCasePattern(const EnumCasePatternPtr& node)
 
 void SemanticAnalyzer::visitCase(const CaseStatementPtr& node)
 {
-    assert(t_hint != nullptr);
+    assert(ctx.contextualType != nullptr);
     ScopedCodeBlockPtr codeBlock = static_pointer_cast<ScopedCodeBlock>(node->getCodeBlock());
     for(const CaseStatement::Condition& cond : node->getConditions())
     {
@@ -230,13 +230,13 @@ void SemanticAnalyzer::visitCase(const CaseStatementPtr& node)
         cond.condition->accept(this);
         TypePtr patternType = cond.condition->getType();
         assert(patternType != nullptr);
-        if(!patternType->canAssignTo(t_hint))
+        if(!patternType->canAssignTo(ctx.contextualType))
         {
-            error(cond.condition, Errors::E_CANNOT_CONVERT_EXPRESSION_TYPE_2, patternType->toString(), t_hint->toString());
+            error(cond.condition, Errors::E_CANNOT_CONVERT_EXPRESSION_TYPE_2, patternType->toString(), ctx.contextualType->toString());
             break;
         }
         //create symbols that used for unpacking associated values
-        if(t_hint->getCategory() == Type::Enum)
+        if(ctx.contextualType->getCategory() == Type::Enum)
         {
             PatternAccessibility accessibility = AccessibilityUndefined;
             TuplePtr tuple = nullptr;
@@ -250,7 +250,7 @@ void SemanticAnalyzer::visitCase(const CaseStatementPtr& node)
                 }
             }
             assert(enumCase != nullptr);
-            const EnumCase* ec = t_hint->getEnumCase(enumCase->getName());
+            const EnumCase* ec = ctx.contextualType->getEnumCase(enumCase->getName());
             if(ec && ec->type != symbolRegistry->getGlobalScope()->Void())
             {
                 vector<TupleExtractionResult> results;
@@ -278,7 +278,7 @@ void SemanticAnalyzer::visitCase(const CaseStatementPtr& node)
                     vector<TupleExtractionResult> results;
                     vector<int> indices;
                     wstring tempName = this->generateTempName();
-                    this->expandTuple(results, indices, binding->getBinding(), tempName, t_hint, accessibility);
+                    this->expandTuple(results, indices, binding->getBinding(), tempName, ctx.contextualType, accessibility);
                     for (auto var : results)
                     {
                         //register symbol
@@ -293,7 +293,7 @@ void SemanticAnalyzer::visitCase(const CaseStatementPtr& node)
                     IdentifierPtr id = dynamic_pointer_cast<Identifier>(binding->getBinding());
                     assert(id != nullptr);
                     const wstring &name = id->getIdentifier();
-                    SymbolPlaceHolderPtr sym(new SymbolPlaceHolder(name, t_hint, SymbolPlaceHolder::R_LOCAL_VARIABLE, flags));
+                    SymbolPlaceHolderPtr sym(new SymbolPlaceHolder(name, ctx.contextualType, SymbolPlaceHolder::R_LOCAL_VARIABLE, flags));
                     codeBlock->getScope()->addSymbol(sym);
                 }
             }

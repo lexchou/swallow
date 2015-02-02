@@ -42,17 +42,14 @@ SWALLOW_NS_BEGIN
     {
     public:
         SemanticPass(SymbolRegistry* symbolRegistry, CompilerResults* compilerResults);
-    public:
-        virtual void beforeVisiting(const NodePtr& node);
-        virtual void afterVisited(const NodePtr& node);
+        SemanticPass(SemanticPass* pass);
+    protected://general utilities
+        std::wstring toString(const NodePtr& node) const;
+        std::wstring toString(int i) const;
     public:
         SymbolRegistry* getSymbolRegistry() { return symbolRegistry;}
     protected:
         SymbolRegistry* symbolRegistry;
-        //hint for parsing Array/tuple/dictionary literal
-        NodePtr parentNode;
-        NodePtr currentNode;
-        std::stack<NodePtr> parentNodes;
     };
 
 SWALLOW_NS_END

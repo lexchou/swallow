@@ -127,7 +127,7 @@ TEST(TestProtocol, TypeRequirements)
         L"{\n"
         L"  class Element {}\n"
         L"}\n");
-    ASSERT_EQ(0, compilerResults.numResults());
+    ASSERT_NO_ERRORS();
 }
 /*
 NOTE: TypeRequirement is optional, if the type is being used in methods, it should be infered by compiler
