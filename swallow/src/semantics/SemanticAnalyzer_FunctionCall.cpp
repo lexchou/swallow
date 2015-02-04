@@ -400,7 +400,12 @@ void SemanticAnalyzer::visitFunctionCall(const FunctionCallPtr& node)
                     if (type->getCategory() == Type::Class || type->getCategory() == Type::Struct)
                     {
                         funcs.erase(funcs.begin());
-                        getMethodsFromType(type, L"init", false, funcs);
+                        //getMethodsFromType(type, L"init", false, funcs);
+                        FunctionOverloadedSymbolPtr inits = type->getDeclaredInitializer();
+                        for(FunctionSymbolPtr init : *inits)
+                        {
+                            funcs.push_back(init);
+                        }
                     }
                 }
             }
@@ -443,10 +448,10 @@ void SemanticAnalyzer::visitFunctionCall(const FunctionCallPtr& node)
                     //constructing an enum
                     funcs.push_back(c->constructor);
                 else
-                    getMethodsFromType(selfType, identifier, true, funcs);
+                    getMethodsFromType(selfType, identifier,  (MemberFilter)(FilterStaticMember | FilterLookupInExtension | FilterRecursive), funcs);
             }
             else
-                getMethodsFromType(selfType, identifier, false, funcs);
+                getMethodsFromType(selfType, identifier,  (MemberFilter)(FilterLookupInExtension | FilterRecursive), funcs);
             if(funcs.empty())
             {
                 error(ma, Errors::E_DOES_NOT_HAVE_A_MEMBER_2, selfType->toString(), identifier);

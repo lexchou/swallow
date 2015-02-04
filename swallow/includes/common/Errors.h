@@ -189,7 +189,10 @@ struct SWALLOW_EXPORT Errors
         E_STATIC_FUNCTIONS_MAY_NOT_BE_DECLARED_A_1,//Static functions may not be declared %0
         E_METHOD_MAY_NOT_BE_DECLARED_BOTH_MUTATING_AND_NONMUTATING,//Method may not be declared both mutating and nonmutating
         E_IMMUTABLE_VALUE_OF_TYPE_A_ONLY_HAS_MUTATING_MEMBERS_NAMED_B_2,//Immutable value of type '%0' only has mutating members named '%1'
-
+        E_A_CAN_ONLY_BE_SPECIFIED_ON_CLASS_MEMBERS,//'%0' can only be specified on class members
+        E_METHOD_DOES_NOT_OVERRIDE_ANY_METHOD_FROM_ITS_SUPERCLASS,//Method does not override any method from its superclass
+        E_OVERRIDING_DECLARATION_REQUIRES_AN_OVERRIDE_KEYWORD,// Overriding declaration requires an 'override' keyword
+        E_DECLARATIONS_IN_EXTENSIONS_CANNOT_OVERRIDE_YET,//Declarations in extensions cannot override yet
 
         W_PARAM_CAN_BE_EXPRESSED_MORE_SUCCINCTLY_1, // '%0 %0' can be expressed more succinctly as '#%0'
         W_EXTRANEOUS_SHARTP_IN_PARAMETER_1 //Extraneous '#' in parameter: '%0' is already the keyword argument name

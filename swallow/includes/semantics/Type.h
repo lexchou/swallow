@@ -225,9 +225,9 @@ public://properties
 
 
     /*!
-     * Returns the initializer of class/structure
+     * Returns the declared initializer of class/structure(not including initializers defined in base classes)
      */
-    FunctionOverloadedSymbolPtr getInitializer();
+    FunctionOverloadedSymbolPtr getDeclaredInitializer();
 
     /*!
      * Returns the subscript getters defined by this type

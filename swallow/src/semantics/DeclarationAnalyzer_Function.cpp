@@ -422,11 +422,11 @@ void DeclarationAnalyzer::visitFunctionDeclaration(const FunctionDefPtr& node)
         scope->addSymbol(func);
         sym = func;
     }
+    static_pointer_cast<SymboledFunction>(node)->symbol = func;
     //validate it and mark it declared
     validateDeclarationModifiers(node);
     declarationFinished(sym->getName(), func, node);
 
-    static_pointer_cast<SymboledFunction>(node)->symbol = func;
 }
 
 void DeclarationAnalyzer::visitFunction(const FunctionDefPtr& node)

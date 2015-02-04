@@ -76,16 +76,6 @@ StatementPtr Parser::parseStatement()
                 case Keyword::Return:
                     return parseReturn();
                     break;
-                case Keyword::_:
-                    expect_next(token);
-                    //‌ statement → labeled-statement
-                    if(predicate(L":"))
-                    {
-                        restore(token);
-                        return parseLabeledStatement();
-                    }
-                    restore(token);
-                    break;
                 case Keyword::Import:
                 case Keyword::Let:
                 case Keyword::Var:
@@ -104,7 +94,18 @@ StatementPtr Parser::parseStatement()
                 case Keyword::Static:
                 case Keyword::Mutating:
                 case Keyword::Nonmutating:
+                case Keyword::Override:
                     return parseDeclaration();
+                case Keyword::_:
+                    expect_next(token);
+                    //‌ statement → labeled-statement
+                    if(predicate(L":"))
+                    {
+                        restore(token);
+                        return parseLabeledStatement();
+                    }
+                    restore(token);
+                    break;
                 default:
                     break;
             }

@@ -219,7 +219,7 @@ void SemanticAnalyzer::visitSubscriptAccess(const SubscriptAccessPtr& node)
     TypePtr selfType = node->getSelf()->getType();
     assert(selfType != nullptr);
     vector<SymbolPtr> funcs;
-    this->getMethodsFromType(selfType, L"subscript", false, funcs);
+    this->getMethodsFromType(selfType, L"subscript",  (MemberFilter)(FilterLookupInExtension | FilterRecursive), funcs);
     if(funcs.empty())
     {
         //undefined subscript access

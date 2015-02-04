@@ -60,6 +60,16 @@ enum PatternAccessibility
     AccessibilityConstant,
     AccessibilityVariable
 };
+
+/*!
+ * Filter can be used by getMemberFromType/getMethodsFromType
+ */
+enum MemberFilter
+{
+    FilterRecursive = 1,
+    FilterStaticMember = 2,
+    FilterLookupInExtension = 4
+};
 class DeclarationAnalyzer;
 class SWALLOW_EXPORT SemanticAnalyzer : public SemanticPass
 {
@@ -128,6 +138,16 @@ public://Syntax sugar for type
     virtual void visitOptionalType(const OptionalTypePtr& node);
 public:
     SemanticContext* getContext() {return &ctx;}
+
+    /*!
+     * This implementation will try to find the member from the type, and look up from extension as a fallback.
+     */
+    SymbolPtr getMemberFromType(const TypePtr& type, const std::wstring& fieldName, bool staticMember);
+
+    /*!
+     * This implementation will try to all methods from the type, including defined in parent class or extension
+     */
+    void getMethodsFromType(const TypePtr& type, const std::wstring& fieldName, MemberFilter filter, std::vector<SymbolPtr>& result);
 private:
     void visitAccessor(const CodeBlockPtr& accessor, const ParametersPtr& params, const SymbolPtr& setter);
     //Verify each symbol in the tuple is initialized and writable
@@ -231,19 +251,10 @@ private:
      * Declaration finished, added it as a member to current type or current type extension.
      */
     void declarationFinished(const std::wstring& name, const SymbolPtr& decl, const NodePtr& node);
+
 private:
     TypePtr lookupTypeImpl(const TypeNodePtr& type, bool supressErrors);
 
-    /*!
-     * This implementation will try to find the member from the type, and look up from extension as a fallback.
-     */
-    SymbolPtr getMemberFromType(const TypePtr& type, const std::wstring& fieldName, bool staticMember);
-
-    /*!
-     * This implementation will try to all methods from the type, including defined in parent class or extension
-     */
-    void getMethodsFromType(const TypePtr& type, const std::wstring& fieldName, bool staticMember, std::vector<SymbolPtr>& result);
-private:
     /*!
      * Validate modifiers for declarations.
      */

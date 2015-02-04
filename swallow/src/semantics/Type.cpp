@@ -268,12 +268,13 @@ const GenericDefinitionPtr& Type::getGenericDefinition() const
     return genericDefinition;
 }
 
-FunctionOverloadedSymbolPtr Type::getInitializer()
+FunctionOverloadedSymbolPtr Type::getDeclaredInitializer()
 {
-    SymbolPtr s = getMember(L"init");
+    SymbolPtr s = getDeclaredMember(L"init");
     FunctionOverloadedSymbolPtr ret = dynamic_pointer_cast<FunctionOverloadedSymbol>(s);
     return ret;
 }
+
 
 FunctionOverloadedSymbolPtr Type::getSubscript()
 {

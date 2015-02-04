@@ -117,9 +117,12 @@ static void dumpAST(const NodePtr& node, const wchar_t* title)
 Swallow::ScopedProgramPtr analyzeStatement(Swallow::SymbolRegistry& registry, Swallow::CompilerResults& compilerResults, const char* func, const wchar_t* str)
 {
     using namespace Swallow;
-    registry.getGlobalScope()->declareFunction(L"println", 0, L"Void", L"Int", NULL);
-    registry.getGlobalScope()->declareFunction(L"println", 0, L"Void", L"String", NULL);
-    registry.getGlobalScope()->declareFunction(L"print", 0, L"Void", L"String", NULL);
+    GlobalScope* global = registry.getGlobalScope();
+    global->declareFunction(L"println", 0, L"Void", L"Int", NULL);
+    global->declareFunction(L"println", 0, L"Void", L"String", NULL);
+    global->declareFunction(L"print", 0, L"Void", L"String", NULL);
+    global->declareFunction(L"assert", 0, L"Void", L"Bool", L"String", NULL);
+
 
     ScopedNodeFactory nodeFactory;
     Parser parser(&nodeFactory, &compilerResults);

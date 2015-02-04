@@ -378,14 +378,29 @@ TEST(TestMethods, TypeMethods4)
 }
 
 
-TEST(TestMethods, InitLet)
+TEST(TestMethods, StructInitLet)
 {
-    SEMANTIC_ANALYZE(L"class test\n"
+    SEMANTIC_ANALYZE(L"struct test\n"
         L"{\n"
         L"    let a = 3\n"
         L"    init()\n"
         L"    {\n"
         L"        a = 5\n"
+        L"    }\n"
+        L"    \n"
+        L"}");
+    ASSERT_NO_ERRORS();
+}
+
+
+TEST(TestMethods, StructInitSelfLet)
+{
+    SEMANTIC_ANALYZE(L"struct test\n"
+        L"{\n"
+        L"    let a = 3\n"
+        L"    init()\n"
+        L"    {\n"
+        L"        self.a = 5\n"
         L"    }\n"
         L"    \n"
         L"}");

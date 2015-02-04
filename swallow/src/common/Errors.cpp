@@ -190,8 +190,10 @@ std::wstring Errors::getErrorTemplate(int errorCode)
         case Errors::E_STATIC_FUNCTIONS_MAY_NOT_BE_DECLARED_A_1: return L"Static functions may not be declared %0";
         case Errors::E_METHOD_MAY_NOT_BE_DECLARED_BOTH_MUTATING_AND_NONMUTATING: return L"Method may not be declared both mutating and nonmutating";
         case Errors::E_IMMUTABLE_VALUE_OF_TYPE_A_ONLY_HAS_MUTATING_MEMBERS_NAMED_B_2: return L"Immutable value of type '%0' only has mutating members named '%1'";
-
-
+        case Errors::E_A_CAN_ONLY_BE_SPECIFIED_ON_CLASS_MEMBERS: return L"'%0' can only be specified on class members";
+        case Errors::E_METHOD_DOES_NOT_OVERRIDE_ANY_METHOD_FROM_ITS_SUPERCLASS: return L"Method does not override any method from its superclass";
+        case Errors::E_OVERRIDING_DECLARATION_REQUIRES_AN_OVERRIDE_KEYWORD: return L"Overriding declaration requires an 'override' keyword";
+        case Errors::E_DECLARATIONS_IN_EXTENSIONS_CANNOT_OVERRIDE_YET: return L"Declarations in extensions cannot override yet";
 
 
         case Errors::W_PARAM_CAN_BE_EXPRESSED_MORE_SUCCINCTLY_1: return L"'%0 %0' can be expressed more succinctly as '#%0'";

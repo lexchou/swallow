@@ -268,21 +268,27 @@ void SemanticAnalyzer::visitAssignment(const AssignmentPtr& node)
                     selfType = selfSymbol->getType();
                     assert(selfType != nullptr);
                 }
-                if(!staticAccess && selfType->getCategory() == Type::Struct && !selfSymbol->hasFlags(SymbolFlagWritable))
+                bool isSelf = self->getIdentifier() == L"self";
+                SymbolPtr member = nullptr;
+                if(ma->getField())
+                    member = getMemberFromType(selfType, ma->getField()->getIdentifier(), staticAccess);
+
+                if(ma->getField() && !isSelf)
                 {
-                    error(self, Errors::E_CANNOT_ASSIGN_TO_A_IN_B_2, index, self->getIdentifier());
-                    return;
-                }
-                if(ma->getField() && self->getIdentifier() != L"self")
-                {
-                    SymbolPtr member = getMemberFromType(selfType, ma->getField()->getIdentifier(), staticAccess);
-                    //SymbolPtr member = selfSymbol->getType()->getMember(ma->getField()->getIdentifier());
                     assert(member != nullptr);
                     if(!member->hasFlags(SymbolFlagWritable))
                     {
                         error(ma->getField(), Errors::E_CANNOT_ASSIGN_TO_A_IN_B_2, index, self->getIdentifier());
                         return;
                     }
+                }
+                bool supressError = false;
+                if(isSelf && member && ctx.currentFunction && ctx.currentFunction->hasFlags(SymbolFlagInit) && member->hasFlags(SymbolFlagStoredProperty))
+                    supressError = true;//it's allowed to modify 'let' variable inside an initializer
+                if(!supressError && !staticAccess && selfType->getCategory() == Type::Struct && !selfSymbol->hasFlags(SymbolFlagWritable))
+                {
+                    error(self, Errors::E_CANNOT_ASSIGN_TO_A_IN_B_2, index, self->getIdentifier());
+                    return;
                 }
             }
             else

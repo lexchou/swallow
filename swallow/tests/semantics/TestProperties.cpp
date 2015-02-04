@@ -59,9 +59,7 @@ TEST(TestProperties, StoredProperties_ConstantStructure)
             L"}\n"
             L"let rangeOfFourItems = FixedLengthRange(firstValue: 0, length: 4)\n"
             L"rangeOfFourItems.firstValue = 6");
-    ASSERT_EQ(1, compilerResults.numResults());
-    auto res = compilerResults.getResult(0);
-    ASSERT_EQ(Errors::E_CANNOT_ASSIGN_TO_A_IN_B_2, res.code);
+    ASSERT_ERROR(Errors::E_CANNOT_ASSIGN_TO_A_IN_B_2);
 }
 TEST(TestProperties, StoredProperties_ConstantClass)
 {

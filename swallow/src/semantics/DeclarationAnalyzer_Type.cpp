@@ -220,8 +220,8 @@ void DeclarationAnalyzer::prepareDefaultInitializers(const TypePtr& type)
             the order of the parameters are the exactly the same as them defined in structure
     2) Compiler will not generate initializers if there's custom initializers
      */
-
-    if(type->getInitializer() && type->getInitializer()->numOverloads() > 0)
+    FunctionOverloadedSymbolPtr initializers = type->getDeclaredInitializer();
+    if(initializers && initializers->numOverloads() > 0)
         return;
 
     bool createDefaultInit = true;
@@ -247,13 +247,13 @@ void DeclarationAnalyzer::prepareDefaultInitializers(const TypePtr& type)
         TypePtr initType = Type::newFunction(params, type, false);
         std::wstring s = initType->toString();
         FunctionSymbolPtr initializer(new FunctionSymbol(L"init", initType, nullptr));
-        declarationFinished(initializer->getName(), initializer, type->getReference());
+        declarationFinished(initializer->getName(), initializer, nullptr);
     }
     if(type->getCategory() == Type::Struct && !initParams.empty())
     {
         TypePtr initType = Type::newFunction(initParams, type, false);
         FunctionSymbolPtr initializer(new FunctionSymbol(L"init", initType, nullptr));
-        declarationFinished(initializer->getName(), initializer, type->getReference());
+        declarationFinished(initializer->getName(), initializer, nullptr);
     }
 }
 
@@ -362,7 +362,7 @@ void DeclarationAnalyzer::visitStruct(const StructDefPtr& node)
                 //get all methods with the same name, and check their signature one by one
                 vector<SymbolPtr> funcs;
                 bool staticMember = expectedFunc->hasFlags(SymbolFlagStatic);
-                semanticAnalyzer->getMethodsFromType(type, expectedFunc->getName(), staticMember, funcs);
+                semanticAnalyzer->getMethodsFromType(type, expectedFunc->getName(), (MemberFilter)((staticMember ? FilterStaticMember : 0) | (FilterLookupInExtension | FilterRecursive)), funcs);
                 for(const SymbolPtr& func : funcs)
                 {
                     TypePtr actualType = func->getType();

@@ -219,6 +219,13 @@ static bool validateDeclarationModifiers(SemanticAnalyzer* analyzer, const Funct
         if(mutating || nonmutating)
             return analyzer->error(func, Errors::E_STATIC_FUNCTIONS_MAY_NOT_BE_DECLARED_A_1, mutating ? L"mutating" : L"nonmutating");
     }
+    if(func->hasModifier(DeclarationModifiers::Override))
+    {
+        if(analyzer->getContext()->currentExtension)
+            return analyzer->error(func, Errors::E_DECLARATIONS_IN_EXTENSIONS_CANNOT_OVERRIDE_YET);
+        if(!currentType || currentType->getCategory() != Type::Class)
+            return analyzer->error(func, Errors::E_A_CAN_ONLY_BE_SPECIFIED_ON_CLASS_MEMBERS, L"override");
+    }
     return true;
 }
 /*!

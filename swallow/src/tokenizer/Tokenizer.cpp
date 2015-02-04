@@ -120,7 +120,7 @@ Tokenizer::Tokenizer(const wchar_t* data)
         {L"none",           R, Keyword::None, TokenizerContextOperator},
         {L"nonmutating",    R, Keyword::Nonmutating, TokenizerContextDeclaration},
         {L"optional",       R, Keyword::Optional, TokenizerContextClass},
-        {L"override",       R, Keyword::Override, TokenizerContextClass},
+        {L"override",       R, Keyword::Override, (TokenizerContext)(TokenizerContextClass | TokenizerContextFile)},
         {L"postfix",        R, Keyword::Postfix, TokenizerContextAll},
         {L"precedence",     R, Keyword::Precedence, TokenizerContextOperator},
         {L"prefix",         R, Keyword::Prefix, TokenizerContextAll},

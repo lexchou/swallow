@@ -51,6 +51,8 @@ SET(SEMANTICS_SRC
     semantics/TestProperties.cpp
     semantics/TestMethods.cpp
     semantics/TestDeclarationOrder.cpp
+    semantics/TestSubscripts.cpp
+    semantics/TestInheritance.cpp
     )
 
 ADD_EXECUTABLE(TestTokenizer

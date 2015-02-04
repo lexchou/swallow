@@ -517,14 +517,61 @@ void SemanticAnalyzer::declarationFinished(const std::wstring& name, const Symbo
                 return;
             }
             //check if there's the same signature exists
-            std::vector<SymbolPtr> funcs;
-            getMethodsFromType(ctx.currentType, name, staticMember, funcs);
-            for(const SymbolPtr& func : funcs)
             {
-                if(Type::equals(func->getType(), decl->getType()))
+                std::vector<SymbolPtr> funcs;
+                //std::wstring typeName = ctx.currentType->getName();
+                getMethodsFromType(ctx.currentType, name, (MemberFilter)((staticMember ? FilterStaticMember : 0) | FilterLookupInExtension ), funcs);
+                for(const SymbolPtr& f : funcs)
                 {
-                    error(node, Errors::E_INVALID_REDECLARATION_1, name);
-                    return;
+                    if(f == func)
+                        continue;
+                    if(Type::equals(f->getType(), decl->getType()))
+                    {
+                        error(node, Errors::E_INVALID_REDECLARATION_1, name);
+                        return;
+                    }
+                }
+            }
+
+            //check if it override
+            if(ctx.currentType->getParentType())
+            {
+                std::vector<SymbolPtr> funcs;
+                getMethodsFromType(ctx.currentType->getParentType(), name, (MemberFilter)((staticMember ? FilterStaticMember : 0) | (FilterLookupInExtension | FilterRecursive)), funcs);
+                bool matched = false;
+                for(const SymbolPtr& func : funcs)
+                {
+                    if(Type::equals(func->getType(), decl->getType()))
+                    {
+                        matched = true;
+                        break;
+                    }
+                }
+                if(node)
+                {
+                    FunctionDefPtr func = dynamic_pointer_cast<FunctionDef>(node);
+                    assert(func != nullptr);
+                    if(ctx.currentExtension && matched)
+                    {
+                        error(node, Errors::E_DECLARATIONS_IN_EXTENSIONS_CANNOT_OVERRIDE_YET);
+                        return;
+                    }
+                    if (func->hasModifier(DeclarationModifiers::Override))
+                    {
+                        if (!matched)
+                        {
+                            error(node, Errors::E_METHOD_DOES_NOT_OVERRIDE_ANY_METHOD_FROM_ITS_SUPERCLASS);
+                            return;
+                        }
+                    }
+                    else
+                    {
+                        if (matched)
+                        {
+                            error(node, Errors::E_OVERRIDING_DECLARATION_REQUIRES_AN_OVERRIDE_KEYWORD);
+                            return;
+                        }
+                    }
                 }
             }
         }
@@ -549,7 +596,7 @@ void SemanticAnalyzer::declarationFinished(const std::wstring& name, const Symbo
         {
             FunctionSymbolPtr init = dynamic_pointer_cast<FunctionSymbol>(decl);
             assert(init != nullptr);
-            FunctionOverloadedSymbolPtr inits = builder->getInitializer();
+            FunctionOverloadedSymbolPtr inits = builder->getDeclaredInitializer();
             if(!inits)
             {
                 inits = FunctionOverloadedSymbolPtr(new FunctionOverloadedSymbol(name));
@@ -611,13 +658,13 @@ static void addCandidateMethod(std::set<FunctionSymbolWrapper>& result, const Fu
 /*!
  * This will extract all methods that has the same name in the given type(including all base types)
  */
-static void loadMethods(const TypePtr& type, const std::wstring& fieldName, bool staticMember, std::set<FunctionSymbolWrapper>& result)
+static void loadMethods(const TypePtr& type, const std::wstring& fieldName, MemberFilter filter, std::set<FunctionSymbolWrapper>& result)
 {
     SymbolPtr sym;
-    if (staticMember)
+    if (filter & FilterStaticMember)
         sym = type->getDeclaredStaticMember(fieldName);
     else
-        sym = type->getMember(fieldName);
+        sym = type->getDeclaredMember(fieldName);
     if(!sym)
         return;
     if(FunctionOverloadedSymbolPtr funcs = dynamic_pointer_cast<FunctionOverloadedSymbol>(sym))
@@ -630,26 +677,26 @@ static void loadMethods(const TypePtr& type, const std::wstring& fieldName, bool
         addCandidateMethod(result, func);
     }
     TypePtr parent = type->getParentType();
-    if(parent)
+    if(parent && (filter & FilterRecursive))
     {
-       loadMethods(parent, fieldName, staticMember, result);
+       loadMethods(parent, fieldName, filter, result);
     }
 }
 /*!
  * This implementation will try to all methods from the type, including defined in parent class or extension
  */
-void SemanticAnalyzer::getMethodsFromType(const TypePtr& type, const std::wstring& fieldName, bool staticMember, std::vector<SymbolPtr>& result)
+void SemanticAnalyzer::getMethodsFromType(const TypePtr& type, const std::wstring& fieldName, MemberFilter filter, std::vector<SymbolPtr>& result)
 {
     std::set<FunctionSymbolWrapper> functions;
-    loadMethods(type, fieldName, staticMember, functions);
+    loadMethods(type, fieldName, filter, functions);
     SymbolScope* scope = this->symbolRegistry->getFileScope();
     if(scope)
     {
         TypePtr extension = scope->getExtension(type->getName());
-        if(extension)
+        if(extension && (filter & FilterLookupInExtension))
         {
             assert(extension->getCategory() == Type::Extension);
-            loadMethods(extension, fieldName, staticMember, functions);
+            loadMethods(extension, fieldName, filter, functions);
         }
     }
     for(const FunctionSymbolWrapper& wrapper : functions)
