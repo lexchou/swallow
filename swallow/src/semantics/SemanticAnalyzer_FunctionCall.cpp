@@ -399,13 +399,8 @@ void SemanticAnalyzer::visitFunctionCall(const FunctionCallPtr& node)
                 {
                     if (type->getCategory() == Type::Class || type->getCategory() == Type::Struct)
                     {
-                        funcs.erase(funcs.begin());
-                        //getMethodsFromType(type, L"init", false, funcs);
-                        FunctionOverloadedSymbolPtr inits = type->getDeclaredInitializer();
-                        for(FunctionSymbolPtr init : *inits)
-                        {
-                            funcs.push_back(init);
-                        }
+                        funcs.clear();
+                        getMethodsFromType(type, L"init", FilterLookupInExtension, funcs);
                     }
                 }
             }
