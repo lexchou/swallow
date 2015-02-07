@@ -200,3 +200,133 @@ TEST(TestInheritance, ExtensionOverrideWithoutKeyword)
         L"}");
     ASSERT_ERROR(Errors::E_DECLARATIONS_IN_EXTENSIONS_CANNOT_OVERRIDE_YET);
 }
+
+TEST(TestInheritance, Override)
+{
+    SEMANTIC_ANALYZE(L"class Vehicle {\n"
+        L"    var currentSpeed = 0.0\n"
+        L"    var description: String {\n"
+        L"        return \"traveling at \\(currentSpeed) miles per hour\"\n"
+        L"    }\n"
+        L"    func makeNoise() {\n"
+        L"        // do nothing - an arbitrary vehicle doesn't necessarily make a noise\n"
+        L"    }\n"
+        L"}\n"
+        L"class Train: Vehicle {\n"
+        L"    override func makeNoise() {\n"
+        L"        println(\"Choo Choo\")\n"
+        L"    }\n"
+        L"}\n"
+        L"let train = Train()\n"
+        L"train.makeNoise()");
+    ASSERT_NO_ERRORS();
+}
+
+TEST(TestInheritance, Override_Property)
+{
+    SEMANTIC_ANALYZE(L"class Vehicle {\n"
+        L"    var currentSpeed = 0.0\n"
+        L"    var description: String {\n"
+        L"        return \"traveling at \\(currentSpeed) miles per hour\"\n"
+        L"    }\n"
+        L"    func makeNoise() {\n"
+        L"        // do nothing - an arbitrary vehicle doesn't necessarily make a noise\n"
+        L"    }\n"
+        L"}\n"
+        L"class Car: Vehicle {\n"
+        L"    var gear = 1\n"
+        L"    override var description: String {\n"
+        L"        return \"\\(super.description) in gear \\(gear)\"\n"
+        L"    }\n"
+        L"}\n"
+        L"let car = Car()\n"
+        L"car.currentSpeed = 25.0\n"
+        L"car.gear = 3\n"
+        L"println(\"Car: \\(car.description)\")");
+    ASSERT_NO_ERRORS();
+}
+TEST(TestInheritance, OverridePropertyWithoutKeyword)
+{
+    SEMANTIC_ANALYZE(L"class TT\n"
+        L"{\n"
+        L"    var p : String { return \"\"}\n"
+        L"}\n"
+        L"class TTT : TT\n"
+        L"{\n"
+        L"    var p : String { return \"\"}\n"
+        L"}");
+    ASSERT_ERROR(Errors::E_OVERRIDING_DECLARATION_REQUIRES_AN_OVERRIDE_KEYWORD);
+}
+
+TEST(TestInheritance, OverrideUnmatchedProperty)
+{
+    SEMANTIC_ANALYZE(L"class TT\n"
+        L"{\n"
+        L"}\n"
+        L"class TTT : TT\n"
+        L"{\n"
+        L"    override var p : String { return \"\"}\n"
+        L"}");
+    ASSERT_ERROR(Errors::E_PROPERTY_DOES_NOT_OVERRIDE_ANY_PROPERTY_FROM_ITS_SUPERCLASS);
+}
+
+TEST(TestInheritance, OverrideUnmatchedPropertyDifferentType)
+{
+    SEMANTIC_ANALYZE(L"class TT\n"
+        L"{\n"
+        L"    var p : Int { return 3}\n"
+        L"}\n"
+        L"class TTT : TT\n"
+        L"{\n"
+        L"    override var p : String { return \"\"}\n"
+        L"}");
+    ASSERT_ERROR(Errors::E_PROPERTY_A_WITH_TYPE_B_CANNOT_OVERRIDE_A_PROPERTY_WITH_TYPE_C_3);
+    ASSERT_EQ(L"p", error->items[0]);
+    ASSERT_EQ(L"String", error->items[1]);
+    ASSERT_EQ(L"Int", error->items[2]);
+}
+
+
+TEST(TestInheritance, OverrideNonmutatingPropertyByMutating)
+{
+    SEMANTIC_ANALYZE(L"\n"
+        L"class TT\n"
+        L"{\n"
+        L"    var p : String { return \"\"}\n"
+        L"}\n"
+        L"class TTT : TT\n"
+        L"{\n"
+        L"    override var p : String {\n"
+        L"        get{\n"
+        L"            return \"\"\n"
+        L"        }\n"
+        L"        set{\n"
+        L"            \n"
+        L"        }\n"
+        L"    }\n"
+        L"}");
+    ASSERT_NO_ERRORS();
+}
+
+TEST(TestInheritance, OverrideMutatingPropertyByNonmutating)
+{
+    SEMANTIC_ANALYZE(L"class TT\n"
+        "{\n"
+        "    var p : String {\n"
+        "        get{return \"\"}\n"
+        "        set{}\n"
+        "    }\n"
+        "}\n"
+        "class TTT : TT\n"
+        "{\n"
+        "    override var p : String {\n"
+        "        get{\n"
+        "            return \"\"\n"
+        "        }\n"
+        "\n"
+        "    }\n"
+        "}");
+    ASSERT_ERROR(Errors::E_CANNOT_OVERRIDE_MUTABLE_PROPERTY_WITH_READONLY_PROPERTY_A_1);
+}
+
+

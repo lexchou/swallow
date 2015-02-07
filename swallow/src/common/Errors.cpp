@@ -194,6 +194,9 @@ std::wstring Errors::getErrorTemplate(int errorCode)
         case Errors::E_METHOD_DOES_NOT_OVERRIDE_ANY_METHOD_FROM_ITS_SUPERCLASS: return L"Method does not override any method from its superclass";
         case Errors::E_OVERRIDING_DECLARATION_REQUIRES_AN_OVERRIDE_KEYWORD: return L"Overriding declaration requires an 'override' keyword";
         case Errors::E_DECLARATIONS_IN_EXTENSIONS_CANNOT_OVERRIDE_YET: return L"Declarations in extensions cannot override yet";
+        case Errors::E_PROPERTY_DOES_NOT_OVERRIDE_ANY_PROPERTY_FROM_ITS_SUPERCLASS: return L"Property does not override any property from its superclass";
+        case Errors::E_PROPERTY_A_WITH_TYPE_B_CANNOT_OVERRIDE_A_PROPERTY_WITH_TYPE_C_3: return L"Property '%0' with type '%1' cannot override a property with type '%2'";
+        case Errors::E_CANNOT_OVERRIDE_MUTABLE_PROPERTY_WITH_READONLY_PROPERTY_A_1: return L"Cannot override mutable property with read-only property '%0'";
 
 
         case Errors::W_PARAM_CAN_BE_EXPRESSED_MORE_SUCCINCTLY_1: return L"'%0 %0' can be expressed more succinctly as '#%0'";

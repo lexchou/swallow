@@ -193,6 +193,10 @@ struct SWALLOW_EXPORT Errors
         E_METHOD_DOES_NOT_OVERRIDE_ANY_METHOD_FROM_ITS_SUPERCLASS,//Method does not override any method from its superclass
         E_OVERRIDING_DECLARATION_REQUIRES_AN_OVERRIDE_KEYWORD,// Overriding declaration requires an 'override' keyword
         E_DECLARATIONS_IN_EXTENSIONS_CANNOT_OVERRIDE_YET,//Declarations in extensions cannot override yet
+        E_PROPERTY_DOES_NOT_OVERRIDE_ANY_PROPERTY_FROM_ITS_SUPERCLASS,//Property does not override any property from its superclass
+        E_PROPERTY_A_WITH_TYPE_B_CANNOT_OVERRIDE_A_PROPERTY_WITH_TYPE_C_3,//Property '%0' with type '%1' cannot override a property with type '%2'
+        E_CANNOT_OVERRIDE_MUTABLE_PROPERTY_WITH_READONLY_PROPERTY_A_1,//Cannot override mutable property with read-only property '%0'
+
 
         W_PARAM_CAN_BE_EXPRESSED_MORE_SUCCINCTLY_1, // '%0 %0' can be expressed more succinctly as '#%0'
         W_EXTRANEOUS_SHARTP_IN_PARAMETER_1 //Extraneous '#' in parameter: '%0' is already the keyword argument name

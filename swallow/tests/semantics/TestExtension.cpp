@@ -230,9 +230,7 @@ TEST(TestExtension, Redeclaration_Func)
             L"{\n"
             L"    func a() {}\n"
             L"}");
-    ASSERT_EQ(1, compilerResults.numResults());
-    auto res = compilerResults.getResult(0);
-    ASSERT_EQ(Errors::E_INVALID_REDECLARATION_1, res.code);
+    ASSERT_ERROR(Errors::E_INVALID_REDECLARATION_1);
 }
 
 TEST(TestExtension, Redeclaration_Func2)
@@ -278,7 +276,5 @@ TEST(TestExtension, Redeclaration_Init)
             L"{\n"
             L"    init(a : Int) {}\n"
             L"}");
-    ASSERT_EQ(1, compilerResults.numResults());
-    auto res = compilerResults.getResult(0);
-    ASSERT_EQ(Errors::E_INVALID_REDECLARATION_1, res.code);
+    ASSERT_ERROR(Errors::E_INVALID_REDECLARATION_1);
 }

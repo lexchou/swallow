@@ -98,3 +98,7 @@ void SemanticAnalyzer::visitCodeBlock(const CodeBlockPtr &node)
 }
 
 
+void SemanticAnalyzer::visitComputedProperty(const ComputedPropertyPtr& node)
+{
+    node->accept(declarationAnalyzer);
+}

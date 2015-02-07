@@ -505,8 +505,11 @@ void SemanticAnalyzer::declarationFinished(const std::wstring& name, const Symbo
     //verify if this has been declared in the type or its extension
     if(ctx.currentType)
     {
-        bool staticMember = decl->hasFlags(SymbolFlagStatic);
-        SymbolPtr m = getMemberFromType(ctx.currentType, name, staticMember);
+        int filter = FilterRecursive | FilterLookupInExtension;
+        if(decl->hasFlags(SymbolFlagStatic))
+            filter |= FilterStaticMember;
+
+        SymbolPtr m = getMemberFromType(ctx.currentType, name, (MemberFilter)filter);
 
         if(FunctionSymbolPtr func = dynamic_pointer_cast<FunctionSymbol>(decl))
         {
@@ -516,64 +519,10 @@ void SemanticAnalyzer::declarationFinished(const std::wstring& name, const Symbo
                 error(node, Errors::E_INVALID_REDECLARATION_1, name);
                 return;
             }
-            //check if there's the same signature exists
-            {
-                std::vector<SymbolPtr> funcs;
-                //std::wstring typeName = ctx.currentType->getName();
-                getMethodsFromType(ctx.currentType, name, (MemberFilter)((staticMember ? FilterStaticMember : 0) | FilterLookupInExtension ), funcs);
-                for(const SymbolPtr& f : funcs)
-                {
-                    if(f == func)
-                        continue;
-                    if(Type::equals(f->getType(), decl->getType()))
-                    {
-                        error(node, Errors::E_INVALID_REDECLARATION_1, name);
-                        return;
-                    }
-                }
-            }
+        }
+        else if(dynamic_pointer_cast<ComputedProperty>(node))
+        {
 
-            //check if it override
-            if(ctx.currentType->getParentType())
-            {
-                std::vector<SymbolPtr> funcs;
-                getMethodsFromType(ctx.currentType->getParentType(), name, (MemberFilter)((staticMember ? FilterStaticMember : 0) | (FilterLookupInExtension | FilterRecursive)), funcs);
-                bool matched = false;
-                for(const SymbolPtr& func : funcs)
-                {
-                    if(Type::equals(func->getType(), decl->getType()))
-                    {
-                        matched = true;
-                        break;
-                    }
-                }
-                if(node)
-                {
-                    FunctionDefPtr func = dynamic_pointer_cast<FunctionDef>(node);
-                    assert(func != nullptr);
-                    if(ctx.currentExtension && matched)
-                    {
-                        error(node, Errors::E_DECLARATIONS_IN_EXTENSIONS_CANNOT_OVERRIDE_YET);
-                        return;
-                    }
-                    if (func->hasModifier(DeclarationModifiers::Override))
-                    {
-                        if (!matched)
-                        {
-                            error(node, Errors::E_METHOD_DOES_NOT_OVERRIDE_ANY_METHOD_FROM_ITS_SUPERCLASS);
-                            return;
-                        }
-                    }
-                    else
-                    {
-                        if (matched)
-                        {
-                            error(node, Errors::E_OVERRIDING_DECLARATION_REQUIRES_AN_OVERRIDE_KEYWORD);
-                            return;
-                        }
-                    }
-                }
-            }
         }
         else if (m)
         {
@@ -611,9 +560,9 @@ void SemanticAnalyzer::declarationFinished(const std::wstring& name, const Symbo
     }
 }
 
-static SymbolPtr getMember(const TypePtr& type, const std::wstring& fieldName, bool staticMember)
+static SymbolPtr getMember(const TypePtr& type, const std::wstring& fieldName, MemberFilter filter)
 {
-    if (staticMember)
+    if (filter & FilterStaticMember)
         return type->getDeclaredStaticMember(fieldName);
     else
         return type->getMember(fieldName);
@@ -621,18 +570,25 @@ static SymbolPtr getMember(const TypePtr& type, const std::wstring& fieldName, b
 /*!
  * This implementation will try to find the member from the type, and look up from extension as a fallback.
  */
-SymbolPtr SemanticAnalyzer::getMemberFromType(const TypePtr& type, const std::wstring& fieldName, bool staticMember)
+SymbolPtr SemanticAnalyzer::getMemberFromType(const TypePtr& type, const std::wstring& fieldName, MemberFilter filter)
 {
-    SymbolPtr ret = getMember(type, fieldName, staticMember);
+    SymbolPtr ret = getMember(type, fieldName, filter);
     SymbolScope* scope = this->symbolRegistry->getFileScope();
     if(!ret && scope)
     {
-        TypePtr extension = scope->getExtension(type->getName());
-        if(extension)
+        if(filter & FilterLookupInExtension)
         {
-            assert(extension->getCategory() == Type::Extension);
-            ret = getMember(extension, fieldName, staticMember);
+            TypePtr extension = scope->getExtension(type->getName());
+            if (extension)
+            {
+                assert(extension->getCategory() == Type::Extension);
+                ret = getMember(extension, fieldName, filter);
+            }
         }
+    }
+    if(!ret && (filter & FilterRecursive) && type->getParentType())
+    {
+        ret = getMemberFromType(type->getParentType(), fieldName, filter);
     }
     return ret;
 }

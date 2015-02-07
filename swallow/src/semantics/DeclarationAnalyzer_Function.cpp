@@ -212,6 +212,164 @@ void DeclarationAnalyzer::visitClosure(const ClosurePtr& node)
 
 }
 
+
+/*!
+ * This will register a self symbol to getter/setter/willSet/didSet of a computed property
+ */
+static void registerSelfToAccessor(const TypePtr& currentType, const CodeBlockPtr& accessor)
+{
+
+    if(currentType && accessor)
+    {
+        ScopedCodeBlockPtr cb = static_pointer_cast<ScopedCodeBlock>(accessor);
+        SymbolScope* scope = cb->getScope();
+        SymbolPlaceHolderPtr self(new SymbolPlaceHolder(L"self", currentType, SymbolPlaceHolder::R_PARAMETER, SymbolFlagReadable | SymbolFlagInitialized));
+        scope->addSymbol(self);
+        SymbolPlaceHolderPtr super(new SymbolPlaceHolder(L"super", currentType, SymbolPlaceHolder::R_PARAMETER, SymbolFlagReadable | SymbolFlagInitialized));
+        scope->addSymbol(super);
+    }
+}
+void DeclarationAnalyzer::checkForPropertyOverriding(const std::wstring& name, const SymbolPlaceHolderPtr& decl, const ComputedPropertyPtr& node)
+{
+    TypePtr type = ctx->currentType;
+    MemberFilter filter = (MemberFilter)(FilterLookupInExtension | (decl->hasFlags(SymbolFlagStatic) ? FilterStaticMember : 0));
+    SymbolPtr member = semanticAnalyzer->getMemberFromType(type, name, filter);
+    if(member && member != decl)
+    {
+        error(node, Errors::E_INVALID_REDECLARATION_1, name);
+        return;
+    }
+    bool hasOverride = node->hasModifier(DeclarationModifiers::Override);
+    //look for ancestors
+    type = type->getParentType();
+    TypePtr matchedType = nullptr;
+    SymbolPtr matchedMember = nullptr;
+    for(; type; type = type->getParentType())
+    {
+        SymbolPtr member = semanticAnalyzer->getMemberFromType(type, name, filter);
+        if(member && member != decl)
+        {
+            matchedType = type;
+            matchedMember = member;
+            break;
+        }
+    }
+    if(!hasOverride && matchedType)
+    {
+        error(node, Errors::E_OVERRIDING_DECLARATION_REQUIRES_AN_OVERRIDE_KEYWORD);
+        return;
+    }
+    if(hasOverride && !matchedType)
+    {
+        error(node, Errors::E_PROPERTY_DOES_NOT_OVERRIDE_ANY_PROPERTY_FROM_ITS_SUPERCLASS);
+        return;
+    }
+    if(hasOverride && matchedType)
+    {
+        if(!Type::equals(decl->getType(), matchedMember->getType()))
+        {
+            error(node, Errors::E_PROPERTY_A_WITH_TYPE_B_CANNOT_OVERRIDE_A_PROPERTY_WITH_TYPE_C_3, name, decl->getType()->toString(), matchedMember->getType()->toString());
+            return;
+        }
+        if(matchedMember->hasFlags(SymbolFlagWritable) && !decl->hasFlags(SymbolFlagWritable))
+        {
+            error(node, Errors::E_CANNOT_OVERRIDE_MUTABLE_PROPERTY_WITH_READONLY_PROPERTY_A_1, name);
+            return;
+        }
+    }
+
+}
+void DeclarationAnalyzer::visitComputedProperty(const ComputedPropertyPtr& node)
+{
+    CodeBlockPtr didSet = node->getDidSet();
+    CodeBlockPtr willSet = node->getWillSet();
+    CodeBlockPtr getter = node->getGetter();
+    CodeBlockPtr setter = node->getSetter();
+    TypePtr type = lookupType(node->getDeclaredType());
+    assert(type != nullptr);
+
+
+
+    if(ctx->flags & SemanticContext::FLAG_PROCESS_DECLARATION)
+    {
+        node->setType(type);
+
+        //register symbol
+        int flags = SymbolFlagInitialized;
+        if (didSet || willSet)
+            flags |= SymbolFlagReadable | SymbolFlagWritable;
+        if (setter)
+            flags |= SymbolFlagWritable;
+        if (getter)
+            flags |= SymbolFlagReadable;
+        if (node->hasModifier(DeclarationModifiers::Static) || node->hasModifier(DeclarationModifiers::Class))
+            flags |= SymbolFlagStatic;
+        flags |= SymbolFlagComputedProperty;
+        if(ctx->currentType)
+            flags |= SymbolFlagMember;
+
+        SymbolPlaceHolderPtr symbol(new SymbolPlaceHolder(node->getName(), type, SymbolPlaceHolder::R_PROPERTY, flags));
+        SymbolScope* scope = symbolRegistry->getCurrentScope();
+        scope->addSymbol(symbol);
+        declarationFinished(symbol->getName(), symbol, node);
+        checkForPropertyOverriding(node->getName(), symbol, node);
+        validateDeclarationModifiers(node);
+    }
+    //prepare and visit each accessors
+    if(ctx->flags & SemanticContext::FLAG_PROCESS_IMPLEMENTATION)
+    {
+        //prepare type for getter/setter
+        std::vector<Type::Parameter> params;
+        TypePtr getterType = Type::newFunction(params, type, nullptr);
+        params.push_back(Type::Parameter(type));
+        TypePtr setterType = Type::newFunction(params, symbolRegistry->getGlobalScope()->Void(), false);
+
+
+        if (getter)
+        {
+            getter->setType(getterType);
+            SCOPED_SET(ctx->currentFunction, getterType);
+            registerSelfToAccessor(ctx->currentType, getter);
+            getter->accept(this);
+        }
+        if (setter)
+        {
+            registerSelfToAccessor(ctx->currentType, setter);
+            std::wstring name = node->getSetterName().empty() ? L"newValue" : node->getSetterName();
+            //TODO: replace the symbol to internal value
+            ScopedCodeBlockPtr cb = std::static_pointer_cast<ScopedCodeBlock>(setter);
+            cb->setType(setterType);
+            cb->getScope()->addSymbol(SymbolPtr(new SymbolPlaceHolder(name, type, SymbolPlaceHolder::R_PARAMETER, SymbolFlagInitialized)));
+
+            SCOPED_SET(ctx->currentFunction, setterType);
+            cb->accept(this);
+        }
+        if (willSet)
+        {
+            std::wstring setter = node->getWillSetSetter().empty() ? L"newValue" : node->getWillSetSetter();
+            //TODO: replace the symbol to internal value
+            ScopedCodeBlockPtr cb = std::static_pointer_cast<ScopedCodeBlock>(willSet);
+            cb->setType(setterType);
+            cb->getScope()->addSymbol(SymbolPtr(new SymbolPlaceHolder(setter, type, SymbolPlaceHolder::R_PARAMETER, SymbolFlagInitialized)));
+
+            SCOPED_SET(ctx->currentFunction, setterType);
+            registerSelfToAccessor(ctx->currentType, willSet);
+            cb->accept(this);
+        }
+        if (didSet)
+        {
+            std::wstring setter = node->getDidSetSetter().empty() ? L"oldValue" : node->getDidSetSetter();
+            //TODO: replace the symbol to internal value
+            ScopedCodeBlockPtr cb = std::static_pointer_cast<ScopedCodeBlock>(didSet);
+            cb->setType(setterType);
+            cb->getScope()->addSymbol(SymbolPtr(new SymbolPlaceHolder(setter, type, SymbolPlaceHolder::R_PARAMETER, SymbolFlagInitialized)));
+
+            SCOPED_SET(ctx->currentFunction, setterType);
+            registerSelfToAccessor(ctx->currentType, didSet);
+            cb->accept(this);
+        }
+    }
+}
 void DeclarationAnalyzer::visitAccessor(const CodeBlockPtr& accessor, const ParametersPtr& params, const SymbolPtr& setter)
 {
     if(!accessor)
@@ -233,6 +391,10 @@ void DeclarationAnalyzer::visitAccessor(const CodeBlockPtr& accessor, const Para
 
     accessor->accept(semanticAnalyzer);
 }
+void DeclarationAnalyzer::checkForSubscriptOverride(const SubscriptDefPtr& node)
+{
+
+}
 void DeclarationAnalyzer::visitSubscript(const SubscriptDefPtr &node)
 {
     assert(ctx->currentType != nullptr);
@@ -247,6 +409,7 @@ void DeclarationAnalyzer::visitSubscript(const SubscriptDefPtr &node)
 
     if(ctx->flags & SemanticContext::FLAG_PROCESS_DECLARATION)
     {
+        checkForSubscriptOverride(node);
 
         if (node->getGetter())
         {
@@ -425,8 +588,71 @@ void DeclarationAnalyzer::visitFunctionDeclaration(const FunctionDefPtr& node)
     static_pointer_cast<SymboledFunction>(node)->symbol = func;
     //validate it and mark it declared
     validateDeclarationModifiers(node);
+    checkForFunctionOverriding(sym->getName(), func, node);
     declarationFinished(sym->getName(), func, node);
 
+}
+void DeclarationAnalyzer::checkForFunctionOverriding(const std::wstring& name, const FunctionSymbolPtr& decl, const DeclarationPtr& node)
+{
+    if(!ctx->currentType)
+        return;//not for global function
+    bool staticMember = decl->hasFlags(SymbolFlagStatic);
+    //check if there's the same signature exists
+    {
+        std::vector<SymbolPtr> funcs;
+        //std::wstring typeName = ctx.currentType->getName();
+        semanticAnalyzer->getMethodsFromType(ctx->currentType, name, (MemberFilter)((staticMember ? FilterStaticMember : 0) | FilterLookupInExtension ), funcs);
+        for(const SymbolPtr& f : funcs)
+        {
+            if(f == decl)
+                continue;
+            if(Type::equals(f->getType(), decl->getType()))
+            {
+                error(node, Errors::E_INVALID_REDECLARATION_1, name);
+                return;
+            }
+        }
+    }
+
+    //check if it override
+    if(ctx->currentType->getParentType())
+    {
+        std::vector<SymbolPtr> funcs;
+        semanticAnalyzer->getMethodsFromType(ctx->currentType->getParentType(), name, (MemberFilter)((staticMember ? FilterStaticMember : 0) | (FilterLookupInExtension | FilterRecursive)), funcs);
+        bool matched = false;
+        for(const SymbolPtr& func : funcs)
+        {
+            if(Type::equals(func->getType(), decl->getType()))
+            {
+                matched = true;
+                break;
+            }
+        }
+        assert(node != nullptr);
+        {
+            if(ctx->currentExtension && matched)
+            {
+                error(node, Errors::E_DECLARATIONS_IN_EXTENSIONS_CANNOT_OVERRIDE_YET);
+                return;
+            }
+            if (node->hasModifier(DeclarationModifiers::Override))
+            {
+                if (!matched)
+                {
+                    error(node, Errors::E_METHOD_DOES_NOT_OVERRIDE_ANY_METHOD_FROM_ITS_SUPERCLASS);
+                    return;
+                }
+            }
+            else
+            {
+                if (matched)
+                {
+                    error(node, Errors::E_OVERRIDING_DECLARATION_REQUIRES_AN_OVERRIDE_KEYWORD);
+                    return;
+                }
+            }
+        }
+    }
 }
 
 void DeclarationAnalyzer::visitFunction(const FunctionDefPtr& node)
@@ -485,6 +711,7 @@ void DeclarationAnalyzer::visitInit(const InitializerDefPtr& node)
         funcType->setFlags(SymbolFlagInit, true);
 
         FunctionSymbolPtr init(new FunctionSymbol(type->getName(), funcType, nullptr));
+        checkForFunctionOverriding(L"init", init, node);
         declarationFinished(L"init", init, node);
         node->getBody()->setType(funcType);
         static_pointer_cast<SymboledInit>(node)->symbol = init;

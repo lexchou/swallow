@@ -32,6 +32,7 @@
 #include "SemanticPass.h"
 #include "Type.h"
 #include <list>
+#include <ast/SubscriptDef.h>
 
 SWALLOW_NS_BEGIN
 
@@ -67,6 +68,7 @@ public:
     virtual void visitInit(const InitializerDefPtr& node) override;
     virtual void visitCodeBlock(const CodeBlockPtr &node) override;
     void visitAccessor(const CodeBlockPtr& accessor, const ParametersPtr& params, const SymbolPtr& setter);
+    virtual void visitComputedProperty(const ComputedPropertyPtr& node) override;
 
     /*!
      * Only visits the implementation of members of given type definition
@@ -116,6 +118,10 @@ private:
     void declarationFinished(const std::wstring& name, const SymbolPtr& decl, const NodePtr& node);
 
     TypePtr defineType(const TypeDeclarationPtr& decl, Type::Category category);
+private:
+    void checkForFunctionOverriding(const std::wstring& name, const FunctionSymbolPtr& decl, const DeclarationPtr& node);
+    void checkForPropertyOverriding(const std::wstring& name, const SymbolPlaceHolderPtr& decl, const ComputedPropertyPtr& node);
+    void checkForSubscriptOverride(const SubscriptDefPtr& node);
 protected:
     SemanticAnalyzer* semanticAnalyzer;
 

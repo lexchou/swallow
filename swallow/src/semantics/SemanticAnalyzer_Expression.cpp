@@ -137,7 +137,7 @@ void SemanticAnalyzer::visitMemberAccess(const MemberAccessPtr& node)
 
     if(node->getField())
     {
-        SymbolPtr member = getMemberFromType(selfType, fieldName, staticAccess);
+        SymbolPtr member = getMemberFromType(selfType, fieldName, (MemberFilter)((staticAccess ? FilterStaticMember : 0) | FilterLookupInExtension | FilterRecursive));
 
         if (member == nullptr)
         {
@@ -153,7 +153,7 @@ void SemanticAnalyzer::visitMemberAccess(const MemberAccessPtr& node)
             GlobalScope* global = symbolRegistry->getGlobalScope();
             if(node->getSelf()->getNodeType() == NodeType::IntegerLiteral && selfType == global->Int() && !staticAccess)
             {
-                member = getMemberFromType(global->Double(), fieldName, staticAccess);
+                member = getMemberFromType(global->Double(), fieldName, (MemberFilter)((staticAccess ? FilterStaticMember : 0) | (FilterLookupInExtension | FilterRecursive)));
                 if(member)
                 {
                     //now we're sure it's Double, make it double

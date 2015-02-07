@@ -271,7 +271,7 @@ void SemanticAnalyzer::visitAssignment(const AssignmentPtr& node)
                 bool isSelf = self->getIdentifier() == L"self";
                 SymbolPtr member = nullptr;
                 if(ma->getField())
-                    member = getMemberFromType(selfType, ma->getField()->getIdentifier(), staticAccess);
+                    member = getMemberFromType(selfType, ma->getField()->getIdentifier(), (MemberFilter)((staticAccess ? FilterStaticMember : 0) | FilterLookupInExtension | FilterRecursive));
 
                 if(ma->getField() && !isSelf)
                 {

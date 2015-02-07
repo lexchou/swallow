@@ -142,7 +142,7 @@ public:
     /*!
      * This implementation will try to find the member from the type, and look up from extension as a fallback.
      */
-    SymbolPtr getMemberFromType(const TypePtr& type, const std::wstring& fieldName, bool staticMember);
+    SymbolPtr getMemberFromType(const TypePtr& type, const std::wstring& fieldName, MemberFilter filter);
 
     /*!
      * This implementation will try to all methods from the type, including defined in parent class or extension
