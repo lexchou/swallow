@@ -78,3 +78,4 @@ enable_testing()
 add_test(NAME test-tokenizer COMMAND TestTokenizer)
 add_test(NAME test-parser COMMAND TestParser)
 add_test(NAME test-semantics COMMAND TestSemantics)
+

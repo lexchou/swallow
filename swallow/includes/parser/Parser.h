@@ -109,18 +109,18 @@ private://declaration
     std::pair<std::wstring, CodeBlockPtr> parseSetterClause();
     std::pair<CodeBlockPtr, CodeBlockPtr> parseGetterSetterKeywordBlock();
     
-    DeclarationPtr parseTypealias(const std::vector<AttributePtr>& attrs);
+    DeclarationPtr parseTypealias(const std::vector<AttributePtr>& attrs, int modifiers);
     DeclarationPtr parseFunc(const std::vector<AttributePtr>& attrs, int modifiers);
-    ParametersPtr parseParameterClause();
+    ParametersNodePtr parseParameterClause();
 
     DeclarationPtr parseEnum(const std::vector<AttributePtr>& attrs, int modifiers);
     DeclarationPtr parseStruct(const std::vector<AttributePtr>& attrs, int modifiers);
     DeclarationPtr parseClass(const std::vector<AttributePtr>& attrs, int modifiers);
     DeclarationPtr parseProtocol(const std::vector<AttributePtr>& attrs, int modifiers);
     DeclarationPtr parseInit(const std::vector<AttributePtr>& attrs, int modifiers);
-    DeclarationPtr parseDeinit(const std::vector<AttributePtr>& attrs);
-    DeclarationPtr parseExtension(const std::vector<AttributePtr>& attrs);
-    DeclarationPtr parseSubscript(const std::vector<AttributePtr>& attrs);
+    DeclarationPtr parseDeinit(const std::vector<AttributePtr>& attrs, int modifiers);
+    DeclarationPtr parseExtension(const std::vector<AttributePtr>& attrs, int modifiers);
+    DeclarationPtr parseSubscript(const std::vector<AttributePtr>& attrs, int modifiers);
     DeclarationPtr parseOperator(const std::vector<AttributePtr>& attrs, int modifiers);
 private://expression
     ExpressionPtr parseFloat();

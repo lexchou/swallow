@@ -167,14 +167,14 @@ void NodeVisitor::visitCodeBlock(const CodeBlockPtr& node)
     }
 }
 
-void NodeVisitor::visitParameter(const ParameterPtr& node)
+void NodeVisitor::visitParameter(const ParameterNodePtr& node)
 {
 
 }
 
-void NodeVisitor::visitParameters(const ParametersPtr& node)
+void NodeVisitor::visitParameters(const ParametersNodePtr& node)
 {
-    for(ParameterPtr p : *node)
+    for(ParameterNodePtr p : *node)
     {
         ACCEPT(p);
     }
@@ -263,7 +263,7 @@ void NodeVisitor::visitExtension(const ExtensionDefPtr& node)
 
 void NodeVisitor::visitFunction(const FunctionDefPtr& node)
 {
-    for(ParametersPtr params : node->getParametersList())
+    for(ParametersNodePtr params : node->getParametersList())
     {
         ACCEPT(params);
     }

@@ -92,7 +92,7 @@ TypePtr SemanticAnalyzer::getExpressionType(const ExpressionPtr& expr, const Typ
  * \param score
  * \param supressErrors
 */
-bool SemanticAnalyzer::checkArgument(const TypePtr& funcType, const Type::Parameter& parameter, const std::pair<std::wstring, ExpressionPtr>& argument, bool variadic, float& score, bool supressErrors, map<wstring, TypePtr>& genericTypes)
+bool SemanticAnalyzer::checkArgument(const TypePtr& funcType, const Parameter& parameter, const std::pair<std::wstring, ExpressionPtr>& argument, bool variadic, float& score, bool supressErrors, map<wstring, TypePtr>& genericTypes)
 {
 
     const std::wstring& name = argument.first;
@@ -155,7 +155,7 @@ float SemanticAnalyzer::calculateFitScore(bool mutatingSelf, SymbolPtr& func, co
     float score = 0;
     TypePtr type = func->getType();
     assert(type != nullptr);
-    const std::vector<Type::Parameter>& parameters = type->getParameters();
+    const std::vector<Parameter>& parameters = type->getParameters();
     bool variadic = type->hasVariadicParameters();
 
     //TODO: check trailing closure
@@ -175,13 +175,13 @@ float SemanticAnalyzer::calculateFitScore(bool mutatingSelf, SymbolPtr& func, co
     }
 
 
-    std::vector<Type::Parameter>::const_iterator paramIter = parameters.begin();
+    std::vector<Parameter>::const_iterator paramIter = parameters.begin();
     std::vector<ParenthesizedExpression::Term>::iterator argumentIter = arguments->begin();
-    std::vector<Type::Parameter>::const_iterator paramEnd = variadic ? parameters.end() - 1 : parameters.end();
+    std::vector<Parameter>::const_iterator paramEnd = variadic ? parameters.end() - 1 : parameters.end();
     map<wstring, TypePtr> genericTypes;
     for(;argumentIter != arguments->end() && paramIter != paramEnd; argumentIter++, paramIter++)
     {
-        const Type::Parameter& parameter = *paramIter;
+        const Parameter& parameter = *paramIter;
         ParenthesizedExpression::Term& argument = *argumentIter;
         SCOPED_SET(ctx.contextualType, parameter.type);
         argument.transformedExpression = this->transformExpression(parameter.type, argument.expression);
@@ -216,7 +216,7 @@ float SemanticAnalyzer::calculateFitScore(bool mutatingSelf, SymbolPtr& func, co
             }
             return -1;
         }
-        const Type::Parameter& parameter = *paramIter;
+        const Parameter& parameter = *paramIter;
         //the first variadic argument must have a label if the parameter got a label
         if(!parameter.name.empty())
         {

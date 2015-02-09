@@ -623,8 +623,8 @@ TEST(TestClass, testSubscriptOptions)
                        L"}\n");
 
     StructDefPtr s;
-    ParameterPtr p;
-    ParametersPtr args;
+    ParameterNodePtr p;
+    ParametersNodePtr args;
     ASSERT_NOT_NULL(s = std::dynamic_pointer_cast<StructDef>(root));
     ASSERT_EQ(1, s->numDeclarations());
     SubscriptDefPtr sub;
@@ -821,7 +821,7 @@ TEST(TestClass, testInit)
     StructDefPtr s;
     ValueBindingsPtr let;
     InitializerDefPtr init;
-    ParametersPtr params;
+    ParametersNodePtr params;
 
     ASSERT_NOT_NULL(s = std::dynamic_pointer_cast<StructDef>(root));
     ASSERT_EQ(2, s->numDeclarations());
@@ -829,7 +829,7 @@ TEST(TestClass, testInit)
     ASSERT_NOT_NULL(let = std::dynamic_pointer_cast<ValueBindings>(s->getDeclaration(0)));
     ASSERT_NOT_NULL(init = std::dynamic_pointer_cast<InitializerDef>(s->getDeclaration(1)));
     ASSERT_EQ(0, init->getModifiers());
-    ASSERT_NOT_NULL(params = std::dynamic_pointer_cast<Parameters>(init->getParameters()));
+    ASSERT_NOT_NULL(params = std::dynamic_pointer_cast<ParametersNode>(init->getParameters()));
     ASSERT_EQ(3, params->numParameters());
 
 
@@ -852,14 +852,14 @@ TEST(TestClass, testConvenienceInitializer)
     ClassDefPtr s;
 
     InitializerDefPtr init;
-    ParametersPtr params;
+    ParametersNodePtr params;
 
     ASSERT_NOT_NULL(s = std::dynamic_pointer_cast<ClassDef>(root));
     ASSERT_EQ(3, s->numDeclarations());
 
     ASSERT_NOT_NULL(init = std::dynamic_pointer_cast<InitializerDef>(s->getDeclaration(2)));
     ASSERT_EQ(DeclarationModifiers::Convenience, init->getModifiers());
-    ASSERT_NOT_NULL(params = std::dynamic_pointer_cast<Parameters>(init->getParameters()));
+    ASSERT_NOT_NULL(params = std::dynamic_pointer_cast<ParametersNode>(init->getParameters()));
     ASSERT_EQ(0, params->numParameters());
 }
 

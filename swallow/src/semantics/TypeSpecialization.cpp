@@ -62,12 +62,12 @@ static TypePtr specialize(const TypePtr& type, const GenericArgumentPtr& argumen
         }
         case Type::Function:
         {
-            std::vector<Type::Parameter> params;
+            std::vector<Parameter> params;
             TypePtr returnType = specialize(type->getReturnType(), arguments);
             for(auto param : type->getParameters())
             {
                 TypePtr paramType = specialize(param.type, arguments);
-                params.push_back(Type::Parameter(param.name, param.inout, paramType));
+                params.push_back(Parameter(param.name, param.inout, paramType));
             }
             TypePtr ret = Type::newFunction(params, returnType, type->hasVariadicParameters(), type->getGenericDefinition());
             static_pointer_cast<TypeBuilder>(type)->addSpecializedType(arguments, ret);

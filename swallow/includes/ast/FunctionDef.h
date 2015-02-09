@@ -61,10 +61,10 @@ public:
     
     
     
-    void addParameters(const ParametersPtr&);
-    int numParameters();
-    ParametersPtr getParameters(int i);
-    const std::vector<ParametersPtr>&  getParametersList()const{return parametersList;}
+    void addParameters(const ParametersNodePtr&);
+    int numParameters() const;
+    ParametersNodePtr getParameters(int i);
+    const std::vector<ParametersNodePtr>&  getParametersList()const{return parametersList;}
 
     
     void setReturnType(const TypeNodePtr&);
@@ -88,7 +88,7 @@ protected:
     FunctionKind kind;
     std::wstring name;
     Attributes returnAttributes;
-    std::vector<ParametersPtr> parametersList;
+    std::vector<ParametersNodePtr> parametersList;
     TypeNodePtr returnType;
     CodeBlockPtr body;
     TypePtr type;

@@ -38,6 +38,22 @@
 USE_SWALLOW_NS
 
 using namespace std;
+Subscript::Subscript()
+{
+
+}
+
+Subscript::Subscript(const Subscript& rhs)
+:parameters(rhs.parameters), returnType(rhs.returnType), getter(rhs.getter), setter(rhs.setter)
+{
+
+}
+Subscript::Subscript(const std::vector<Parameter>& parameters, const TypePtr& returnType, const FunctionSymbolPtr& getter, const FunctionSymbolPtr& setter)
+:parameters(parameters), returnType(returnType), getter(getter), setter(setter)
+{
+
+}
+
 
 Type::Type(Category category)
 :category(category)
@@ -244,7 +260,7 @@ TypePtr Type::getReturnType() const
 }
 
 
-const std::vector<Type::Parameter>& Type::getParameters() const
+const std::vector<Parameter>& Type::getParameters() const
 {
     return parameters;
 }
@@ -273,6 +289,10 @@ FunctionOverloadedSymbolPtr Type::getDeclaredInitializer()
     SymbolPtr s = getDeclaredMember(L"init");
     FunctionOverloadedSymbolPtr ret = dynamic_pointer_cast<FunctionOverloadedSymbol>(s);
     return ret;
+}
+const std::vector<Subscript>& Type::getSubscripts() const
+{
+    return subscripts;
 }
 
 

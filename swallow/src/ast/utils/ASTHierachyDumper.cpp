@@ -187,12 +187,12 @@ void ASTHierachyDumper::visitCodeBlock(const CodeBlockPtr& node)
     endIndent();
 }
 
-void ASTHierachyDumper::visitParameter(const ParameterPtr& node)
+void ASTHierachyDumper::visitParameter(const ParameterNodePtr& node)
 {
 
 }
 
-void ASTHierachyDumper::visitParameters(const ParametersPtr& node)
+void ASTHierachyDumper::visitParameters(const ParametersNodePtr& node)
 {
 
 }

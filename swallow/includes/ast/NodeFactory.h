@@ -57,7 +57,7 @@ public:
     virtual TypedPatternPtr createTypedPattern(const SourceInfo& state);
     virtual IdentifierPtr createIdentifier(const SourceInfo& state);
     virtual GenericArgumentDefPtr createGenericArgumentDef(const SourceInfo& state);
-    virtual InOutParameterPtr createInOutParameter(const SourceInfo& state);
+    virtual InOutParameterNode createInOutParameter(const SourceInfo& state);
 
     virtual ArrayLiteralPtr createArrayLiteral(const SourceInfo& state);
     virtual DictionaryLiteralPtr createDictionaryLiteral(const SourceInfo& state);
@@ -114,8 +114,8 @@ public:
     virtual ComputedPropertyPtr createComputedProperty(const SourceInfo& state);
     virtual TypeAliasPtr createTypealias(const SourceInfo& state);
     virtual FunctionDefPtr createFunction(const SourceInfo& state);
-    virtual ParametersPtr createParameters(const SourceInfo& state);
-    virtual ParameterPtr createParameter(const SourceInfo& state);
+    virtual ParametersNodePtr createParameters(const SourceInfo& state);
+    virtual ParameterNodePtr createParameter(const SourceInfo& state);
     virtual EnumDefPtr createEnum(const SourceInfo& state);
     virtual StructDefPtr createStruct(const SourceInfo& state);
     virtual ClassDefPtr createClass(const SourceInfo& state);

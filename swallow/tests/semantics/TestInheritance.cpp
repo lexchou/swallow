@@ -327,6 +327,254 @@ TEST(TestInheritance, OverrideMutatingPropertyByNonmutating)
         "    }\n"
         "}");
     ASSERT_ERROR(Errors::E_CANNOT_OVERRIDE_MUTABLE_PROPERTY_WITH_READONLY_PROPERTY_A_1);
+    ASSERT_EQ(L"p", error->items[0]);
+}
+
+TEST(TestInheritance, OverrideMutatingPropertyWithDidSet)
+{
+    SEMANTIC_ANALYZE(L"\n"
+        L"class TT\n"
+        L"{\n"
+        L"    var p : String {\n"
+        L"        get{return \"\"}\n"
+        L"        set{}\n"
+        L"    }\n"
+        L"}\n"
+        L"class TTT : TT\n"
+        L"{\n"
+        L"    override var p : String {\n"
+        L"        didSet\n"
+        L"        {\n"
+        L"            \n"
+        L"        }\n"
+        L"    }\n"
+        L"}");
+    ASSERT_NO_ERRORS();
+}
+
+TEST(TestInheritance, OverrideMutatingPropertyWithWillSet)
+{
+    SEMANTIC_ANALYZE(L"\n"
+        L"class TT\n"
+        L"{\n"
+        L"    var p : String {\n"
+        L"        get{return \"\"}\n"
+        L"        set{}\n"
+        L"    }\n"
+        L"}\n"
+        L"class TTT : TT\n"
+        L"{\n"
+        L"    override var p : String {\n"
+        L"        willSet\n"
+        L"        {\n"
+        L"            \n"
+        L"        }\n"
+        L"    }\n"
+        L"}");
+    ASSERT_NO_ERRORS();
+}
+TEST(TestInheritance, OverrideObserverWithGet)
+{
+    SEMANTIC_ANALYZE(L"class TT\n"
+        L"{\n"
+        L"    var p : String = \"\" {\n"
+        L"        didSet{}\n"
+        L"        willSet{}\n"
+        L"    }\n"
+        L"}\n"
+        L"class TTT : TT\n"
+        L"{\n"
+        L"    override var p : String {\n"
+        L"        get\n"
+        L"        {\n"
+        L"            return \"\"\n"
+        L"        }\n"
+        L"    }\n"
+        L"}");
+    ASSERT_ERROR(Errors::E_CANNOT_OVERRIDE_MUTABLE_PROPERTY_WITH_READONLY_PROPERTY_A_1);
+    ASSERT_EQ(L"p", error->items[0]);
+}
+
+TEST(TestInheritance, OverrideSubscript)
+{
+    SEMANTIC_ANALYZE(L"\n"
+        L"class Base\n"
+        L"{\n"
+        L"    subscript(idx : Int) -> Int\n"
+        L"    {\n"
+        L"        return 3\n"
+        L"    }\n"
+        L"}\n"
+        L"class Child : Base\n"
+        L"{\n"
+        L"    override subscript(idx : Int) -> Int\n"
+        L"    {\n"
+        L"        return 4\n"
+        L"    }\n"
+        L"}");
+    ASSERT_NO_ERRORS();
 }
 
 
+TEST(TestInheritance, OverrideSubscript_WithoutOverride)
+{
+    SEMANTIC_ANALYZE(L"\n"
+        L"class Base\n"
+        L"{\n"
+        L"    subscript(idx : Int) -> Int\n"
+        L"    {\n"
+        L"        return 3\n"
+        L"    }\n"
+        L"}\n"
+        L"class Child : Base\n"
+        L"{\n"
+        L"    subscript(idx : Int) -> Int\n"
+        L"    {\n"
+        L"        return 4\n"
+        L"    }\n"
+        L"}");
+    ASSERT_ERROR(Errors::E_OVERRIDING_DECLARATION_REQUIRES_AN_OVERRIDE_KEYWORD);
+}
+TEST(TestInheritance, OverloadingSubscript)
+{
+    SEMANTIC_ANALYZE(L"\n"
+            L"class Base\n"
+            L"{\n"
+            L"    subscript(idx : Int) -> Int\n"
+            L"    {\n"
+            L"        return 3\n"
+            L"    }\n"
+            L"}\n"
+            L"class Child : Base\n"
+            L"{\n"
+            L"    subscript(idx : Int) -> String\n"
+            L"    {\n"
+            L"        return \"\"\n"
+            L"    }\n"
+            L"}");
+    ASSERT_NO_ERRORS();
+}
+TEST(TestInheritance, OverloadingSubscript2)
+{
+    SEMANTIC_ANALYZE(L"\n"
+            L"class Base\n"
+            L"{\n"
+            L"    subscript(idx : Int) -> Int\n"
+            L"    {\n"
+            L"        return 3\n"
+            L"    }\n"
+            L"}\n"
+            L"class Child : Base\n"
+            L"{\n"
+            L"    subscript(idx : Int, idx2 : Int) -> Int\n"
+            L"    {\n"
+            L"        return 3\n"
+            L"    }\n"
+            L"}");
+    ASSERT_NO_ERRORS();
+}
+TEST(TestInheritance, OverloadingSubscript3)
+{
+    SEMANTIC_ANALYZE(L"\n"
+            L"class Base\n"
+            L"{\n"
+            L"    subscript(idx : Int) -> Int\n"
+            L"    {\n"
+            L"        return 3\n"
+            L"    }\n"
+            L"}\n"
+            L"class Child : Base\n"
+            L"{\n"
+            L"    subscript(# idx : Int) -> Int\n"
+            L"    {\n"
+            L"        return 3\n"
+            L"    }\n"
+            L"}");
+    ASSERT_NO_ERRORS();
+}
+TEST(TestInheritance, OverrideUnmatchedSubscript)
+{
+    SEMANTIC_ANALYZE(L"\n"
+            L"class Base\n"
+            L"{\n"
+            L"}\n"
+            L"class Child : Base\n"
+            L"{\n"
+            L"    override subscript(idx : Int) -> String\n"
+            L"    {\n"
+            L"        return \"\"\n"
+            L"    }\n"
+            L"}");
+    ASSERT_ERROR(Errors::E_SUBSCRIPT_DOES_NOT_OVERRIDE_ANY_SUBSCRIPT_FROM_ITS_SUPERCLASS);
+}
+TEST(TestInheritance, OverrideUnmatchedSubscript2)
+{
+    SEMANTIC_ANALYZE(L"\n"
+            L"class Base\n"
+            L"{\n"
+            L"    override subscript(idx : Int) -> String\n"
+            L"    {\n"
+            L"        return \"\"\n"
+            L"    }\n"
+            L"}");
+    ASSERT_ERROR(Errors::E_SUBSCRIPT_DOES_NOT_OVERRIDE_ANY_SUBSCRIPT_FROM_ITS_SUPERCLASS);
+}
+TEST(TestInheritance, OverrideUnmatchedSubscript3)
+{
+    SEMANTIC_ANALYZE(L"\n"
+            L"class Base\n"
+            L"{\n"
+            L"    subscript(idx : Int) -> String\n"
+            L"    {\n"
+            L"        return \"\"\n"
+            L"    }\n"
+            L"}\n"
+            L"class Child : Base\n"
+            L"{\n"
+            L"    override subscript(#idx : Int) -> String\n"
+            L"    {\n"
+            L"        return \"\"\n"
+            L"    }\n"
+            L"}");
+    ASSERT_ERROR(Errors::E_SUBSCRIPT_DOES_NOT_OVERRIDE_ANY_SUBSCRIPT_FROM_ITS_SUPERCLASS);
+}
+
+TEST(TestInheritance, OverrideMutatingSubscriptWithUnmutating)
+{
+    SEMANTIC_ANALYZE(L"class Base\n"
+            L"{\n"
+            L"    subscript(idx : Int) -> Int\n"
+            L"    {\n"
+            L"        get { return 3}\n"
+            L"        set{}\n"
+            L"    }\n"
+            L"}\n"
+            L"class Child : Base\n"
+            L"{\n"
+            L"    override subscript(idx : Int) -> Int\n"
+            L"    {\n"
+            L"        return 3\n"
+            L"    }\n"
+            L"}");
+    ASSERT_ERROR(Errors::E_CANNOT_OVERRIDE_MUTABLE_PROPERTY_WITH_READONLY_PROPERTY_A_1);
+    ASSERT_EQ(L"subscript", error->items[0]);
+}
+TEST(TestInheritance, OverrideMUnmtatingSubscriptWithMutating)
+{
+    SEMANTIC_ANALYZE(L"class Base\n"
+            L"{\n"
+            L"    subscript(idx : Int) -> Int\n"
+            L"    {\n"
+            L"        get { return 3}\n"
+            L"    }\n"
+            L"}\n"
+            L"class Child : Base\n"
+            L"{\n"
+            L"    override subscript(idx : Int) -> Int\n"
+            L"    {\n"
+            L"        get { return 3}\n"
+            L"        set{}\n"
+            L"    }\n"
+            L"}");
+    ASSERT_NO_ERRORS();
+}

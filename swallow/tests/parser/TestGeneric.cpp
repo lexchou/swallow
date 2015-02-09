@@ -41,8 +41,8 @@ TEST(TestGeneric, testFunc)
     FunctionDefPtr f;
     GenericParametersDefPtr gp;
     TypeIdentifierPtr type;
-    ParametersPtr params;
-    ParameterPtr param;
+    ParametersNodePtr params;
+    ParameterNodePtr param;
     ASSERT_NOT_NULL(f = std::dynamic_pointer_cast<FunctionDef>(root));
     ASSERT_NOT_NULL(gp = std::dynamic_pointer_cast<GenericParametersDef>(f->getGenericParametersDef()));
     ASSERT_EQ(1, gp->numGenericTypes());

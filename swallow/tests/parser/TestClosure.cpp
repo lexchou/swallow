@@ -39,7 +39,7 @@ TEST(TestClosure, testClosure)
     FunctionCallPtr f = NULL;
     ClosurePtr c = NULL;
     TypeIdentifierPtr type = NULL;
-    ParameterPtr param = NULL;
+    ParameterNodePtr param = NULL;
     ReturnStatementPtr ret = NULL;
     ASSERT_NOT_NULL(f = std::dynamic_pointer_cast<FunctionCall>(root));
     ASSERT_NOT_NULL(c = std::dynamic_pointer_cast<Closure>(f->getArguments()->get(1)));
@@ -69,7 +69,7 @@ TEST(TestClosure, testInferringType)
 
     FunctionCallPtr f;
     ClosurePtr c;
-    ParameterPtr param;
+    ParameterNodePtr param;
     ReturnStatementPtr ret;
     ASSERT_NOT_NULL(f = std::dynamic_pointer_cast<FunctionCall>(root));
     ASSERT_NOT_NULL(c = std::dynamic_pointer_cast<Closure>(f->getArguments()->get(1)));
@@ -97,7 +97,7 @@ TEST(TestClosure, testImplicitReturn)
 
     FunctionCallPtr f;
     ClosurePtr c;
-    ParameterPtr param;
+    ParameterNodePtr param;
     ASSERT_NOT_NULL(f = std::dynamic_pointer_cast<FunctionCall>(root));
     ASSERT_NOT_NULL(c = std::dynamic_pointer_cast<Closure>(f->getArguments()->get(1)));
     ASSERT_NULL(c->getReturnType());
@@ -177,7 +177,7 @@ TEST(TestClosure, testCaptureList)
 
     FunctionCallPtr f;
     ClosurePtr c;
-    ParameterPtr param;
+    ParameterNodePtr param;
     IdentifierPtr id;
     ASSERT_NOT_NULL(f = std::dynamic_pointer_cast<FunctionCall>(root));
     ASSERT_NOT_NULL(c = std::dynamic_pointer_cast<Closure>(f->getArguments()->get(1)));

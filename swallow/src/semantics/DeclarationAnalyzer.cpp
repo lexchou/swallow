@@ -60,11 +60,11 @@ DeclarationAnalyzer::DeclarationAnalyzer(SemanticAnalyzer* analyzer, SemanticCon
 
 
 
-void DeclarationAnalyzer::prepareParameters(SymbolScope* scope, const ParametersPtr& params)
+void DeclarationAnalyzer::prepareParameters(SymbolScope* scope, const ParametersNodePtr& params)
 {
     //check and prepare for parameters
 
-    for(const ParameterPtr& param : *params)
+    for(const ParameterNodePtr& param : *params)
     {
         assert(param->getType() != nullptr);
         SymbolPtr sym = scope->lookup(param->getLocalName());
@@ -74,7 +74,7 @@ void DeclarationAnalyzer::prepareParameters(SymbolScope* scope, const Parameters
             return;
         }
         int flags = SymbolFlagInitialized | SymbolFlagReadable;
-        if(param->getAccessibility() == Parameter::Variable || param->isInout())
+        if(param->getAccessibility() == ParameterNode::Variable || param->isInout())
             flags |= SymbolFlagWritable;
         sym = SymbolPtr(new SymbolPlaceHolder(param->getLocalName(), param->getType(), SymbolPlaceHolder::R_PARAMETER, flags));
         scope->addSymbol(sym);

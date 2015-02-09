@@ -131,7 +131,7 @@ void NodeSerializer::visitFunction(const FunctionDefPtr& node)
 {
     append(L"func ");
     append(node->getName());
-    for(const ParametersPtr& params : node->getParametersList())
+    for(const ParametersNodePtr& params : node->getParametersList())
     {
         params->accept(this);
     }
@@ -242,7 +242,7 @@ void NodeSerializer::visitCodeBlock(const CodeBlockPtr& node)
     }
     append(L"}");
 }
-void NodeSerializer::visitParameter(const ParameterPtr& node)
+void NodeSerializer::visitParameter(const ParameterNodePtr& node)
 {
     if(node->isInout())
         append(L"inout ");
@@ -258,7 +258,7 @@ void NodeSerializer::visitParameter(const ParameterPtr& node)
     append(L" : ");
     node->getDeclaredType()->accept(this);
 }
-void NodeSerializer::visitParameters(const ParametersPtr& node)
+void NodeSerializer::visitParameters(const ParametersNodePtr& node)
 {
     append(L"(");
     bool first = true;

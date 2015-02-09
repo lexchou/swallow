@@ -80,7 +80,7 @@ DeclarationPtr Parser::parseDeclaration()
         case Keyword::Var://declaration → variable-declaration
             return parseVar(attrs, modifiers);
         case Keyword::Typealias://declaration → typealias-declaration    ‌
-            return parseTypealias(attrs);
+            return parseTypealias(attrs, modifiers);
         case Keyword::Func://declaration → function-declaration
             return parseFunc(attrs, modifiers);
         case Keyword::Enum://declaration → enum-declaration
@@ -95,11 +95,11 @@ DeclarationPtr Parser::parseDeclaration()
         case Keyword::Convenience:
             return parseInit(attrs, modifiers);
         case Keyword::Deinit://declaration → deinitializer-declaration
-            return parseDeinit(attrs);
+            return parseDeinit(attrs, modifiers);
         case Keyword::Extension://declaration → extension-declaration
-            return parseExtension(attrs);
+            return parseExtension(attrs, modifiers);
         case Keyword::Subscript://declaration → subscript-declaration
-            return parseSubscript(attrs);
+            return parseSubscript(attrs, modifiers);
         case Keyword::Operator://declaration → operator-declaration
             return parseOperator(attrs, modifiers);
         default:
@@ -666,7 +666,7 @@ std::pair<CodeBlockPtr, CodeBlockPtr> Parser::parseGetterSetterKeywordBlock()
  ‌ typealias-name → identifier
  ‌ typealias-assignment → =type
 */
-DeclarationPtr Parser::parseTypealias(const Attributes& attrs)
+DeclarationPtr Parser::parseTypealias(const Attributes& attrs, int modifiers)
 {
     Token token;
     expect(Keyword::Typealias, token);
@@ -689,6 +689,7 @@ DeclarationPtr Parser::parseTypealias(const Attributes& attrs)
     ret->setAttributes(attrs);
     ret->setName(token.token);
     ret->setType(type);
+    ret->setModifiers(modifiers);
     return ret;
 }
 /*
@@ -726,7 +727,7 @@ DeclarationPtr Parser::parseFunc(const std::vector<AttributePtr>& attrs, int mod
         ENTER_CONTEXT(TokenizerContextFunctionSignature);
         do
         {
-            ParametersPtr parameters = parseParameterClause();
+            ParametersNodePtr parameters = parseParameterClause();
             ret->addParameters(parameters);
         } while (predicate(L"("));
     }
@@ -763,29 +764,31 @@ DeclarationPtr Parser::parseFunc(const std::vector<AttributePtr>& attrs, int mod
  ‌ local-parameter-name → identifier | _
  ‌ default-argument-clause → =expression
 */
-ParametersPtr Parser::parseParameterClause()
+ParametersNodePtr Parser::parseParameterClause()
 {
     Token token;
     expect(L"(", token);
-    ParametersPtr ret = nodeFactory->createParameters(token.state);
+    ParametersNodePtr ret = nodeFactory->createParameters(token.state);
     if(match(L")"))
         return ret;
+    ENTER_CONTEXT(TokenizerContextFunctionSignature);
     do
     {
         bool inout = match(Keyword::Inout);
-        Parameter::Accessibility accessibility = Parameter::None;
+        ParameterNode::Accessibility accessibility = ParameterNode::None;
         expect_next(token);
+        ParameterNodePtr param = nodeFactory->createParameter(token.state);
         if(token.type == TokenType::Identifier)
         {
             if(token.identifier.keyword == Keyword::Var)
             {
                 expect_next(token);
-                accessibility = Parameter::Variable;
+                accessibility = ParameterNode::Variable;
             }
             else if(token.identifier.keyword == Keyword::Let)
             {
                 expect_next(token);
-                accessibility = Parameter::Constant;
+                accessibility = ParameterNode::Constant;
             }
         }
         bool shorthandExternalName = false;
@@ -806,7 +809,6 @@ ParametersPtr Parser::parseParameterClause()
             localName = name;
             name.clear();
         }
-        ParameterPtr param = nodeFactory->createParameter(token.state);
         expect(L":");
         Attributes attrs;
         parseAttributes(attrs);
@@ -1099,7 +1101,7 @@ DeclarationPtr Parser::parseInit(const std::vector<AttributePtr>& attrs, int mod
         GenericParametersDefPtr params = this->parseGenericParametersDef();
         ret->setGenericParametersDef(params);
     }
-    ParametersPtr parameters = parseParameterClause();
+    ParametersNodePtr parameters = parseParameterClause();
     CodeBlockPtr body = parseCodeBlock();
     ret->setParameters(parameters);
     ret->setBody(body);
@@ -1110,12 +1112,13 @@ DeclarationPtr Parser::parseInit(const std::vector<AttributePtr>& attrs, int mod
  
  ‌ deinitializer-declaration → attributes opt deinit code-block
 */
-DeclarationPtr Parser::parseDeinit(const std::vector<AttributePtr>& attrs)
+DeclarationPtr Parser::parseDeinit(const std::vector<AttributePtr>& attrs, int modifiers)
 {
     Token token;
     expect(Keyword::Deinit, token);
     DeinitializerDefPtr ret = nodeFactory->createDeinitializer(token.state);
     ret->setAttributes(attrs);
+    ret->setModifiers(modifiers);
     CodeBlockPtr body = parseCodeBlock();
     ret->setBody(body);
     return ret;
@@ -1126,7 +1129,7 @@ DeclarationPtr Parser::parseDeinit(const std::vector<AttributePtr>& attrs)
  ‌ extension-declaration → extension type-identifier type-inheritance-clause opt extension-body
  ‌ extension-body → {declarationsopt}”
 */
-DeclarationPtr Parser::parseExtension(const std::vector<AttributePtr>& attrs)
+DeclarationPtr Parser::parseExtension(const std::vector<AttributePtr>& attrs, int modifiers)
 {
     Token token;
     Flags flags(this, UNDER_EXTENSION);
@@ -1135,6 +1138,7 @@ DeclarationPtr Parser::parseExtension(const std::vector<AttributePtr>& attrs)
     ExtensionDefPtr ret = nodeFactory->createExtension(token.state);
     ret->setAttributes(attrs);
     ret->setIdentifier(id);
+    ret->setModifiers(modifiers);
     if(match(L":"))
     {
         // type-inheritance-list → type-identifier  type-identifier,type-inheritance-list
@@ -1166,11 +1170,11 @@ DeclarationPtr Parser::parseExtension(const std::vector<AttributePtr>& attrs)
  ‌ subscript-result → ->attributes opt type
  ”
 */
-DeclarationPtr Parser::parseSubscript(const std::vector<AttributePtr>& attrs)
+DeclarationPtr Parser::parseSubscript(const std::vector<AttributePtr>& attrs, int modifiers)
 {
     Token token;
     expect(Keyword::Subscript, token);
-    ParametersPtr params = parseParameterClause();
+    ParametersNodePtr params = parseParameterClause();
     expect(L"->");
     Attributes typeAttrs;
     parseAttributes(typeAttrs);
@@ -1180,6 +1184,7 @@ DeclarationPtr Parser::parseSubscript(const std::vector<AttributePtr>& attrs)
     ret->setParameters(params);
     ret->setReturnType(retType);
     ret->setReturnTypeAttributes(typeAttrs);
+    ret->setModifiers(modifiers);
     
     if(flags & UNDER_PROTOCOL)
     {

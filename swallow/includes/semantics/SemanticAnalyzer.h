@@ -149,7 +149,7 @@ public:
      */
     void getMethodsFromType(const TypePtr& type, const std::wstring& fieldName, MemberFilter filter, std::vector<SymbolPtr>& result);
 private:
-    void visitAccessor(const CodeBlockPtr& accessor, const ParametersPtr& params, const SymbolPtr& setter);
+    void visitAccessor(const CodeBlockPtr& accessor, const ParametersNodePtr& params, const SymbolPtr& setter);
     //Verify each symbol in the tuple is initialized and writable
     void verifyTuplePatternForAssignment(const PatternPtr& pattern);
 
@@ -170,7 +170,7 @@ private:
      */
     float calculateFitScore(bool mutatingSelf, SymbolPtr& func, const ParenthesizedExpressionPtr& arguments, bool supressErrors);
 
-    bool checkArgument(const TypePtr& funcType, const Type::Parameter& parameter, const std::pair<std::wstring, ExpressionPtr>& argument, bool variadic, float& score, bool supressErrors, std::map<std::wstring, TypePtr>& genericTypes);
+    bool checkArgument(const TypePtr& funcType, const Parameter& parameter, const std::pair<std::wstring, ExpressionPtr>& argument, bool variadic, float& score, bool supressErrors, std::map<std::wstring, TypePtr>& genericTypes);
     TypePtr getExpressionType(const ExpressionPtr& expr, const TypePtr& hint, float& score);
 
     /*!

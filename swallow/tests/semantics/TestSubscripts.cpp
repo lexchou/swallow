@@ -50,6 +50,33 @@ TEST(TestSubscripts, Subscript)
     ASSERT_NO_ERRORS();
 }
 
+TEST(TestSubscripts, InoutParam)
+{
+
+    SEMANTIC_ANALYZE(L"struct TimesTable {\n"
+            L"    let multiplier: Int\n"
+            L"    subscript(inout index: Int) -> Int {\n"
+            L"        return multiplier * index\n"
+            L"    }\n"
+            L"}\n");
+    ASSERT_ERROR(Errors::E_INOUT_IS_ONLY_VALID_IN_PARAMTER_LISTS);
+}
+TEST(TestSubscripts, Redeclaration)
+{
+
+    SEMANTIC_ANALYZE(L"struct TimesTable {\n"
+        L"    let multiplier: Int\n"
+        L"    subscript(index: Int) -> Int {\n"
+        L"        return multiplier * index\n"
+        L"    }\n"
+        L"    subscript(index: Int) -> Int {\n"
+        L"        return multiplier * index\n"
+        L"    }\n"
+        L"}\n");
+    ASSERT_ERROR(Errors::E_INVALID_REDECLARATION_1);
+    ASSERT_EQ(L"subscript", error->items[0]);
+}
+
 TEST(TestSubscripts, SubscriptOptions)
 {
     SEMANTIC_ANALYZE(L"struct Matrix {\n"

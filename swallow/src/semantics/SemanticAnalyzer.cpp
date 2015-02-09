@@ -307,11 +307,11 @@ TypePtr SemanticAnalyzer::lookupTypeImpl(const TypeNodePtr &type, bool supressEr
         {
             retType = lookupType(func->getReturnType());
         }
-        vector<Type::Parameter> params;
+        vector<Parameter> params;
         for(auto p : *func->getArgumentsType())
         {
             TypePtr paramType = lookupType(p.type);
-            params.push_back(Type::Parameter(p.name, p.inout, paramType));
+            params.push_back(Parameter(p.name, p.inout, paramType));
         }
         TypePtr ret = Type::newFunction(params, retType, false, nullptr);
         return ret;

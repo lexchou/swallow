@@ -91,7 +91,7 @@ GenericArgumentDefPtr NodeFactory::createGenericArgumentDef(const SourceInfo& st
 {
     return _(state, new GenericArgumentDef());
 }
-InOutParameterPtr NodeFactory::createInOutParameter(const SourceInfo&state)
+InOutParameterNode NodeFactory::createInOutParameter(const SourceInfo&state)
 {
     return _(state, new InOutParameter());
 }
@@ -304,13 +304,13 @@ FunctionDefPtr NodeFactory::createFunction(const SourceInfo&state)
 {
     return _(state, new FunctionDef());
 }
-ParametersPtr NodeFactory::createParameters(const SourceInfo& state)
+ParametersNodePtr NodeFactory::createParameters(const SourceInfo& state)
 {
-    return _(state, new Parameters());
+    return _(state, new ParametersNode());
 }
-ParameterPtr NodeFactory::createParameter(const SourceInfo& state)
+ParameterNodePtr NodeFactory::createParameter(const SourceInfo& state)
 {
-    return _(state, new Parameter());
+    return _(state, new ParameterNode());
 }
 EnumDefPtr NodeFactory::createEnum(const SourceInfo&state)
 {

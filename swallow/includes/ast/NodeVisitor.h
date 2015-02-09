@@ -77,8 +77,8 @@ public://statement
     virtual void visitSwitchCase(const SwitchCasePtr& node);
     virtual void visitCase(const CaseStatementPtr& node);
     virtual void visitCodeBlock(const CodeBlockPtr& node);
-    virtual void visitParameter(const ParameterPtr& node);
-    virtual void visitParameters(const ParametersPtr& node);
+    virtual void visitParameter(const ParameterNodePtr& node);
+    virtual void visitParameters(const ParametersNodePtr& node);
     virtual void visitProgram(const ProgramPtr& node);
     virtual void visitValueBindingPattern(const ValueBindingPatternPtr& node);
 public:

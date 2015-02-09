@@ -197,7 +197,8 @@ std::wstring Errors::getErrorTemplate(int errorCode)
         case Errors::E_PROPERTY_DOES_NOT_OVERRIDE_ANY_PROPERTY_FROM_ITS_SUPERCLASS: return L"Property does not override any property from its superclass";
         case Errors::E_PROPERTY_A_WITH_TYPE_B_CANNOT_OVERRIDE_A_PROPERTY_WITH_TYPE_C_3: return L"Property '%0' with type '%1' cannot override a property with type '%2'";
         case Errors::E_CANNOT_OVERRIDE_MUTABLE_PROPERTY_WITH_READONLY_PROPERTY_A_1: return L"Cannot override mutable property with read-only property '%0'";
-
+        case Errors::E_SUBSCRIPT_DOES_NOT_OVERRIDE_ANY_SUBSCRIPT_FROM_ITS_SUPERCLASS: return L"Subscript does not override any subscript from its superclass";
+        case Errors::E_INOUT_IS_ONLY_VALID_IN_PARAMTER_LISTS: return L"'inout' is only valid in parameter lists";
 
         case Errors::W_PARAM_CAN_BE_EXPRESSED_MORE_SUCCINCTLY_1: return L"'%0 %0' can be expressed more succinctly as '#%0'";
         case Errors::W_EXTRANEOUS_SHARTP_IN_PARAMETER_1: return L"Extraneous '#' in parameter: '%0' is already the keyword argument name";

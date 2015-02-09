@@ -45,15 +45,15 @@ public:
     using Declaration::setGenericParametersDef;
     using Declaration::getGenericParametersDef;
 
-    void setParameters(const ParametersPtr& parameters);
-    ParametersPtr getParameters();
+    void setParameters(const ParametersNodePtr& parameters);
+    ParametersNodePtr getParameters();
     
     void setBody(const CodeBlockPtr& body);
     CodeBlockPtr getBody();
 public:
     virtual void accept(NodeVisitor* visitor);
 private:
-    ParametersPtr parameters;
+    ParametersNodePtr parameters;
     CodeBlockPtr body;
 };
 

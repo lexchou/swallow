@@ -196,7 +196,9 @@ struct SWALLOW_EXPORT Errors
         E_PROPERTY_DOES_NOT_OVERRIDE_ANY_PROPERTY_FROM_ITS_SUPERCLASS,//Property does not override any property from its superclass
         E_PROPERTY_A_WITH_TYPE_B_CANNOT_OVERRIDE_A_PROPERTY_WITH_TYPE_C_3,//Property '%0' with type '%1' cannot override a property with type '%2'
         E_CANNOT_OVERRIDE_MUTABLE_PROPERTY_WITH_READONLY_PROPERTY_A_1,//Cannot override mutable property with read-only property '%0'
-
+        E_SUBSCRIPT_DECLARATIONS_MUST_HAVE_A_GETTER,//Subscript declarations must have a getter
+        E_SUBSCRIPT_DOES_NOT_OVERRIDE_ANY_SUBSCRIPT_FROM_ITS_SUPERCLASS,//Subscript does not override any subscript from its superclass
+        E_INOUT_IS_ONLY_VALID_IN_PARAMTER_LISTS,//'inout' is only valid in parameter lists
 
         W_PARAM_CAN_BE_EXPRESSED_MORE_SUCCINCTLY_1, // '%0 %0' can be expressed more succinctly as '#%0'
         W_EXTRANEOUS_SHARTP_IN_PARAMETER_1 //Extraneous '#' in parameter: '%0' is already the keyword argument name

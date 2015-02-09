@@ -74,8 +74,8 @@ SWALLOW_NS_BEGIN
         virtual void visitSwitchCase(const SwitchCasePtr& node) override;
         virtual void visitCase(const CaseStatementPtr& node) override;
         virtual void visitCodeBlock(const CodeBlockPtr& node) override;
-        virtual void visitParameter(const ParameterPtr& node) override;
-        virtual void visitParameters(const ParametersPtr& node) override;
+        virtual void visitParameter(const ParameterNodePtr& node) override;
+        virtual void visitParameters(const ParametersNodePtr& node) override;
         virtual void visitProgram(const ProgramPtr& node) override;
         virtual void visitValueBindingPattern(const ValueBindingPatternPtr& node) override;
     public:

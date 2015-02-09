@@ -104,7 +104,7 @@ ExpressionPtr Parser::parsePrefixExpression()
         expect_identifier(token);
         IdentifierPtr identifier = nodeFactory->createIdentifier(token.state);
         identifier->setIdentifier(token.token);
-        InOutParameterPtr ret = nodeFactory->createInOutParameter(token.state);
+        InOutParameterNode ret = nodeFactory->createInOutParameter(token.state);
         ret->setOperand(identifier);
         return ret;
     }
@@ -968,16 +968,16 @@ ClosurePtr Parser::parseClosureExpression()
         }
         if(predicate(L"("))
         {
-            ParametersPtr params = parseParameterClause();
+            ParametersNodePtr params = parseParameterClause();
             ret->setParameters(params);
         }
         else
         {
-            ParametersPtr params = nodeFactory->createParameters(tokenizer->save());
+            ParametersNodePtr params = nodeFactory->createParameters(tokenizer->save());
             do
             {
                 expect_identifier(token);
-                ParameterPtr param = nodeFactory->createParameter(token.state);
+                ParameterNodePtr param = nodeFactory->createParameter(token.state);
                 param->setLocalName(token.token);
                 params->addParameter(param);
             } while (match(L","));

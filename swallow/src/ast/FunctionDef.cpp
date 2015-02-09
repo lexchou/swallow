@@ -59,15 +59,15 @@ const std::wstring& FunctionDef::getName()const
 
 
 
-void FunctionDef::addParameters(const ParametersPtr& parameters)
+void FunctionDef::addParameters(const ParametersNodePtr& parameters)
 {
     parametersList.push_back(parameters);
 }
-int FunctionDef::numParameters()
+int FunctionDef::numParameters() const
 {
     return parametersList.size();
 }
-ParametersPtr FunctionDef::getParameters(int i)
+ParametersNodePtr FunctionDef::getParameters(int i)
 {
     return parametersList[i];
 }

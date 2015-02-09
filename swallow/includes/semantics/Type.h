@@ -55,7 +55,7 @@ struct SWALLOW_EXPORT EnumCase
 /*!
  * The container class for GenericArgumentPtr, allow a GenericArgument container to be used as key in specialization cache
  */
-struct GenericArgumentKey
+struct SWALLOW_EXPORT GenericArgumentKey
 {
     GenericArgumentPtr arguments;
     GenericArgumentKey(const GenericArgumentPtr& args);
@@ -64,24 +64,44 @@ struct GenericArgumentKey
 };
 
 
+/*!
+ * Parameter used by function/closure/subscript
+ */
+struct SWALLOW_EXPORT Parameter
+{
+    std::wstring name;
+    bool inout;
+    TypePtr type;
+    Parameter(const std::wstring&name, bool inout, const TypePtr& type)
+            :name(name), inout(inout), type(type)
+    {}
+    Parameter(const TypePtr& type)
+            :inout(false), type(type)
+    {}
+};
+
+/*!
+ *  This encapsulates a subscript definition in Type
+ */
+struct SWALLOW_EXPORT Subscript
+{
+    std::vector<Parameter> parameters;
+    TypePtr returnType;
+    FunctionSymbolPtr getter;
+    FunctionSymbolPtr setter;
+    Subscript();
+    Subscript(const Subscript& rhs);
+    Subscript(const std::vector<Parameter>& parameters, const TypePtr& returnType, const FunctionSymbolPtr& getter, const FunctionSymbolPtr& setter);
+};
+
+
+
 class SWALLOW_EXPORT Type : public Symbol, public  std::enable_shared_from_this<Symbol>
 {
     friend class TypeBuilder;
 public:
     typedef std::map<std::wstring, SymbolPtr> SymbolMap;
     typedef std::map<std::wstring, EnumCase> EnumCaseMap;
-    struct Parameter
-    {
-        std::wstring name;
-        bool inout;
-        TypePtr type;
-        Parameter(const std::wstring&name, bool inout, const TypePtr& type)
-                :name(name), inout(inout), type(type)
-        {}
-        Parameter(const TypePtr& type)
-                :inout(false), type(type)
-        {}
-    };
     enum Category
     {
         Aggregate,
@@ -296,6 +316,7 @@ public://member access
     const std::map<std::wstring, TypePtr> getAssociatedTypes() const;
     const std::vector<SymbolPtr>& getDeclaredStoredProperties() const;
     const std::vector<FunctionOverloadedSymbolPtr>& getDeclaredFunctions() const;
+    const std::vector<Subscript>& getSubscripts() const;
 
     /*!
      * Check if current type can be specialized to given type
@@ -374,6 +395,7 @@ protected:
     std::map<std::wstring, TypePtr> associatedTypes;
     std::vector<FunctionOverloadedSymbolPtr> functions;
     int inheritantDepth;
+    std::vector<Subscript> subscripts;
 
     //for protocol
     mutable short _containsSelfType;

@@ -48,11 +48,11 @@ void InitializerDef::accept(NodeVisitor* visitor)
     accept2(visitor, &NodeVisitor::visitInit);
 }
 
-void InitializerDef::setParameters(const ParametersPtr& parameters)
+void InitializerDef::setParameters(const ParametersNodePtr& parameters)
 {
     this->parameters = parameters;
 }
-ParametersPtr InitializerDef::getParameters()
+ParametersNodePtr InitializerDef::getParameters()
 {
     return parameters;
 }

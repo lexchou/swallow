@@ -66,11 +66,11 @@ ExpressionPtr Closure::getCapture()
     return capture;
 }
 
-void Closure::setParameters(const ParametersPtr& val)
+void Closure::setParameters(const ParametersNodePtr& val)
 {
     parameters = val;
 }
-ParametersPtr Closure::getParameters()
+ParametersNodePtr Closure::getParameters()
 {
     return parameters;
 }

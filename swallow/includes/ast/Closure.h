@@ -34,7 +34,7 @@
 
 SWALLOW_NS_BEGIN
 
-class Parameters;
+class ParametersNode;
 class TypeNode;
 class Statement;
 class SWALLOW_EXPORT Closure : public Expression
@@ -60,8 +60,8 @@ public:
     void setCapture(const ExpressionPtr& capture);
     ExpressionPtr getCapture();
     
-    void setParameters(const ParametersPtr& val);
-    ParametersPtr getParameters();
+    void setParameters(const ParametersNodePtr& val);
+    ParametersNodePtr getParameters();
     
     void setReturnType(const TypeNodePtr& val);
     TypeNodePtr getReturnType();
@@ -75,7 +75,7 @@ public:
 public:
     CaptureSpecifier captureSpecifier;
     ExpressionPtr capture;
-    ParametersPtr parameters;
+    ParametersNodePtr parameters;
     TypeNodePtr returnType;
     std::vector<StatementPtr> statements;
     

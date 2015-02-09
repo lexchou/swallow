@@ -1,4 +1,4 @@
-/* Parameter.h --
+/* ParametersNode.h --
  *
  * Copyright (c) 2014, Lex Chou <lex at chou dot it>
  * All rights reserved.
@@ -27,74 +27,38 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef PARAMETER_H
-#define PARAMETER_H
+#ifndef PARAMETERS_NODE_H
+#define PARAMETERS_NODE_H
 #include "Node.h"
 #include <string>
-#include "Attribute.h"
 #include "ast-decl.h"
 
 SWALLOW_NS_BEGIN
 
-class TypeNode;
-class Expression;
-class Type;
-typedef std::shared_ptr<Type> TypePtr;
-class SWALLOW_EXPORT Parameter : public Node
+class ParameterNode;
+class SWALLOW_EXPORT ParametersNode : public Node
 {
 public:
-    enum Accessibility
-    {
-        None,
-        Constant,
-        Variable
-    };
-public:
-    Parameter();
-    ~Parameter();
+    ParametersNode();
+    ~ParametersNode();
 public:
     virtual void accept(NodeVisitor* visitor);
 public:
-    void setInout(bool inout);
-    bool isInout()const;
+    void setVariadicParameters(bool val);
+    bool isVariadicParameters()const;
     
-    void setAccessibility(Accessibility accessibility);
-    Accessibility getAccessibility() const;
-    
-    void setExternalName(const std::wstring& name);
-    const std::wstring& getExternalName()const;
-    
-    void setLocalName(const std::wstring& name);
-    const std::wstring& getLocalName()const;
-    
-    void setShorthandExternalName(bool shorthandExternalName);
-    bool isShorthandExternalName()const;
-    
-    void setTypeAttributes(const Attributes& attrs);
-    const Attributes& getTypeAttributes()const;
-    
-    void setDeclaredType(const TypeNodePtr& type);
-    TypeNodePtr getDeclaredType();
+    void addParameter(const ParameterNodePtr& parameter);
+    int numParameters()const;
+    ParameterNodePtr getParameter(int i);
 
+    std::vector<ParameterNodePtr>::iterator begin() { return parameters.begin();}
+    std::vector<ParameterNodePtr>::iterator end() { return parameters.end();}
 
-    void setType(const TypePtr& type);
-    TypePtr getType();
-
-    void setDefaultValue(const ExpressionPtr& def);
-    ExpressionPtr getDefaultValue();
-    
 private:
-    bool inout;
-    bool shorthandExternalName;
-    Accessibility accessibility;
-    std::wstring externalName;
-    std::wstring localName;
-    Attributes typeAttributes;
-    TypeNodePtr declaredType;
-    TypePtr type;
-    ExpressionPtr defaultValue;
+    bool variadicParameters;
+    std::vector<ParameterNodePtr> parameters;
 };
 
 SWALLOW_NS_END
 
-#endif//PARAMETER_H
+#endif//PARAMETERS_NODE_H

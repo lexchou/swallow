@@ -1,4 +1,4 @@
-/* Parameter.cpp --
+/* ParameterNode.cpp --
  *
  * Copyright (c) 2014, Lex Chou <lex at chou dot it>
  * All rights reserved.
@@ -27,12 +27,12 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "ast/Parameter.h"
+#include "ast/ParameterNode.h"
 #include "ast/NodeVisitor.h"
 USE_SWALLOW_NS
 
 
-Parameter::Parameter()
+ParameterNode::ParameterNode()
 :Node(NodeType::Parameter)
 {
     inout = false;
@@ -41,92 +41,92 @@ Parameter::Parameter()
     type = NULL;
     defaultValue = NULL;
 }
-Parameter::~Parameter()
+ParameterNode::~ParameterNode()
 {
 
 }
 
-void Parameter::accept(NodeVisitor* visitor)
+void ParameterNode::accept(NodeVisitor* visitor)
 {
     accept2(visitor, &NodeVisitor::visitParameter);
 
 }
 
-void Parameter::setInout(bool inout)
+void ParameterNode::setInout(bool inout)
 {
     this->inout = inout;
 }
-bool Parameter::isInout()const
+bool ParameterNode::isInout()const
 {
     return inout;
 }
 
-void Parameter::setAccessibility(Accessibility accessibility)
+void ParameterNode::setAccessibility(Accessibility accessibility)
 {
     this->accessibility = accessibility;
 }
-Parameter::Accessibility Parameter::getAccessibility() const
+ParameterNode::Accessibility ParameterNode::getAccessibility() const
 {
     return accessibility;
 }
 
-void Parameter::setExternalName(const std::wstring& name)
+void ParameterNode::setExternalName(const std::wstring& name)
 {
     this->externalName = name;
 }
-const std::wstring& Parameter::getExternalName()const
+const std::wstring& ParameterNode::getExternalName()const
 {
     return externalName;
 }
 
-void Parameter::setLocalName(const std::wstring& name)
+void ParameterNode::setLocalName(const std::wstring& name)
 {
     localName = name;
 }
-const std::wstring& Parameter::getLocalName()const
+const std::wstring& ParameterNode::getLocalName()const
 {
     return localName;
 }
 
-void Parameter::setShorthandExternalName(bool shorthandExternalName)
+void ParameterNode::setShorthandExternalName(bool shorthandExternalName)
 {
     this->shorthandExternalName = shorthandExternalName;
 }
-bool Parameter::isShorthandExternalName()const
+bool ParameterNode::isShorthandExternalName()const
 {
     return shorthandExternalName;
 }
 
-void Parameter::setTypeAttributes(const Attributes& attrs)
+void ParameterNode::setTypeAttributes(const Attributes& attrs)
 {
     typeAttributes = attrs;
 }
-const Attributes& Parameter::getTypeAttributes()const
+const Attributes& ParameterNode::getTypeAttributes()const
 {
     return typeAttributes;
 }
 
-void Parameter::setType(const TypePtr& type)
+void ParameterNode::setType(const TypePtr& type)
 {
     this->type = type;
 }
-TypePtr Parameter::getType()
+TypePtr ParameterNode::getType()
 {
     return type;
 }
-void Parameter::setDeclaredType(const TypeNodePtr& type)
+void ParameterNode::setDeclaredType(const TypeNodePtr& type)
 {
     this->declaredType = type;
 }
-TypeNodePtr Parameter::getDeclaredType()
+TypeNodePtr ParameterNode::getDeclaredType()
 {
     return declaredType;
 }
-void Parameter::setDefaultValue(const ExpressionPtr& def)
+void ParameterNode::setDefaultValue(const ExpressionPtr& def)
 {
     this->defaultValue = def;
 }
-ExpressionPtr Parameter::getDefaultValue()
+ExpressionPtr ParameterNode::getDefaultValue()
 {
     return defaultValue;
 }

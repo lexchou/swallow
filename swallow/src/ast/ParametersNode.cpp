@@ -1,4 +1,4 @@
-/* Parameters.cpp --
+/* ParametersNode.cpp --
  *
  * Copyright (c) 2014, Lex Chou <lex at chou dot it>
  * All rights reserved.
@@ -27,44 +27,44 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "ast/Parameters.h"
+#include "ast/ParametersNode.h"
 #include "ast/NodeVisitor.h"
 USE_SWALLOW_NS
 
 
-Parameters::Parameters()
+ParametersNode::ParametersNode()
 :Node(NodeType::Parameters)
 {
     variadicParameters = false;
 }
-Parameters::~Parameters()
+ParametersNode::~ParametersNode()
 {
 
 }
 
-void Parameters::accept(NodeVisitor* visitor)
+void ParametersNode::accept(NodeVisitor* visitor)
 {
     accept2(visitor, &NodeVisitor::visitParameters);
 }
 
-void Parameters::setVariadicParameters(bool val)
+void ParametersNode::setVariadicParameters(bool val)
 {
     variadicParameters = val;
 }
-bool Parameters::isVariadicParameters()const
+bool ParametersNode::isVariadicParameters()const
 {
     return variadicParameters;
 }
 
-void Parameters::addParameter(const ParameterPtr& parameter)
+void ParametersNode::addParameter(const ParameterNodePtr& parameter)
 {
     parameters.push_back(parameter);
 }
-int Parameters::numParameters()const
+int ParametersNode::numParameters()const
 {
     return parameters.size();
 }
-ParameterPtr Parameters::getParameter(int i)
+ParameterNodePtr ParametersNode::getParameter(int i)
 {
     return parameters[i];
 }

@@ -49,7 +49,7 @@
 USE_SWALLOW_NS
 using namespace std;
 
-void DeclarationAnalyzer::visitParameter(const ParameterPtr& node)
+void DeclarationAnalyzer::visitParameter(const ParameterNodePtr& node)
 {
     TypePtr type = lookupType(node->getDeclaredType());
     node->setType(type);
@@ -75,13 +75,13 @@ void DeclarationAnalyzer::visitParameter(const ParameterPtr& node)
 
 
 }
-void DeclarationAnalyzer::visitParameters(const ParametersPtr& node)
+void DeclarationAnalyzer::visitParameters(const ParametersNodePtr& node)
 {
     NodeVisitor::visitParameters(node);
     //check variadic parameter, the last parameter cannot be marked as inout parameter
     if(node->isVariadicParameters())
     {
-        ParameterPtr param = node->getParameter(node->numParameters() - 1);
+        ParameterNodePtr param = node->getParameter(node->numParameters() - 1);
         if(param->isInout())
         {
             error(param, Errors::E_INOUT_ARGUMENTS_CANNOT_BE_VARIADIC);
@@ -90,12 +90,12 @@ void DeclarationAnalyzer::visitParameters(const ParametersPtr& node)
     }
     std::set<std::wstring> externalNames;
     //check extraneous shorthand external names
-    for(const ParameterPtr& param : *node)
+    for(const ParameterNodePtr& param : *node)
     {
         if(!param->getExternalName().empty())
             externalNames.insert(param->getExternalName());
     }
-    for(const ParameterPtr& param : *node)
+    for(const ParameterNodePtr& param : *node)
     {
         if(param->isShorthandExternalName())
         {
@@ -109,17 +109,17 @@ void DeclarationAnalyzer::visitParameters(const ParametersPtr& node)
 
 
 
-TypePtr DeclarationAnalyzer::createFunctionType(const std::vector<ParametersPtr>::const_iterator& begin, const std::vector<ParametersPtr>::const_iterator& end, const TypePtr& retType, const GenericDefinitionPtr& generic)
+TypePtr DeclarationAnalyzer::createFunctionType(const std::vector<ParametersNodePtr>::const_iterator& begin, const std::vector<ParametersNodePtr>::const_iterator& end, const TypePtr& retType, const GenericDefinitionPtr& generic)
 {
     if(begin == end)
         return retType;
 
     TypePtr returnType = createFunctionType(begin + 1, end, retType, generic);
 
-    std::vector<Type::Parameter> parameterTypes;
-    ParametersPtr params = *begin;
+    std::vector<Parameter> parameterTypes;
+    ParametersNodePtr params = *begin;
     {
-        for (const ParameterPtr &param : *params)
+        for (const ParameterNodePtr &param : *params)
         {
             TypePtr paramType = param->getType();
             if(!paramType)
@@ -130,7 +130,7 @@ TypePtr DeclarationAnalyzer::createFunctionType(const std::vector<ParametersPtr>
             }
             assert(paramType != nullptr);
             std::wstring externalName = param->isShorthandExternalName() ? param->getLocalName() : param->getExternalName();
-            parameterTypes.push_back(Type::Parameter(externalName, param->isInout(), paramType));
+            parameterTypes.push_back(Parameter(externalName, param->isInout(), paramType));
         }
     }
 
@@ -173,19 +173,19 @@ void DeclarationAnalyzer::visitClosure(const ClosurePtr& node)
     }
 
     TypePtr returnedType = this->lookupType(node->getReturnType());
-    std::vector<Type::Parameter> params;
+    std::vector<Parameter> params;
     if(node->getParameters())
     {
         node->getParameters()->accept(this);
         prepareParameters(closure->getScope(), node->getParameters());
 
         //create a function type for this
-        for(const ParameterPtr& param : *node->getParameters())
+        for(const ParameterNodePtr& param : *node->getParameters())
         {
             TypePtr type = lookupType(param->getDeclaredType());
             assert(type != nullptr);
             const std::wstring& name = param->isShorthandExternalName() ? param->getLocalName() : param->getExternalName();
-            params.push_back(Type::Parameter(name, param->isInout(), type));
+            params.push_back(Parameter(name, param->isInout(), type));
         }
     }
     if(ctx->contextualType)
@@ -319,9 +319,9 @@ void DeclarationAnalyzer::visitComputedProperty(const ComputedPropertyPtr& node)
     if(ctx->flags & SemanticContext::FLAG_PROCESS_IMPLEMENTATION)
     {
         //prepare type for getter/setter
-        std::vector<Type::Parameter> params;
+        std::vector<Parameter> params;
         TypePtr getterType = Type::newFunction(params, type, nullptr);
-        params.push_back(Type::Parameter(type));
+        params.push_back(Parameter(type));
         TypePtr setterType = Type::newFunction(params, symbolRegistry->getGlobalScope()->Void(), false);
 
 
@@ -370,7 +370,7 @@ void DeclarationAnalyzer::visitComputedProperty(const ComputedPropertyPtr& node)
         }
     }
 }
-void DeclarationAnalyzer::visitAccessor(const CodeBlockPtr& accessor, const ParametersPtr& params, const SymbolPtr& setter)
+void DeclarationAnalyzer::visitAccessor(const CodeBlockPtr& accessor, const ParametersNodePtr& params, const SymbolPtr& setter)
 {
     if(!accessor)
         return;
@@ -391,42 +391,130 @@ void DeclarationAnalyzer::visitAccessor(const CodeBlockPtr& accessor, const Para
 
     accessor->accept(semanticAnalyzer);
 }
-void DeclarationAnalyzer::checkForSubscriptOverride(const SubscriptDefPtr& node)
+
+
+/*!
+ * Find a subscript definition from given type with the same signature to given reference
+ */
+static const Subscript* getSubscriptFromType(const TypePtr& type, const Subscript& reference)
 {
+    for(const Subscript& s : type->getSubscripts())
+    {
+        if(s.parameters.size() != reference.parameters.size())
+            continue;
+        if(!Type::equals(s.returnType, reference.returnType))
+            continue;
+        auto iter = s.parameters.begin();
+        bool matched = true;
+        for(auto param : reference.parameters)
+        {
+            const Parameter& param2 = *iter++;
+            if(param.name != param2.name || !Type::equals(param.type, param2.type))
+            {
+                matched = false;
+                continue;
+            }
+        }
+        if(matched)
+            return &s;
+    }
+    return nullptr;
+}
+void DeclarationAnalyzer::checkForSubscriptOverride(const Subscript& subscript, const SubscriptDefPtr& node)
+{
+    //check for duplication
+    TypePtr type = ctx->currentType;
+    if(getSubscriptFromType(type, subscript))
+    {
+        error(node, Errors::E_INVALID_REDECLARATION_1, L"subscript");
+        return;
+    }
+    type = type->getParentType();
+    TypePtr matchedType = nullptr;
+    const Subscript* matchedSubscript = nullptr;
+    for(; type; type = type->getParentType())
+    {
+        matchedSubscript = getSubscriptFromType(type, subscript);
+        if(matchedSubscript)
+        {
+            matchedType = type;
+            break;
+        }
+    }
+    bool hasOverride = node->hasModifier(DeclarationModifiers::Override);
+    if(matchedSubscript && !hasOverride)
+    {
+        error(node, Errors::E_OVERRIDING_DECLARATION_REQUIRES_AN_OVERRIDE_KEYWORD);
+        return;
+    }
+    if(!matchedSubscript && hasOverride)
+    {
+        error(node, Errors::E_SUBSCRIPT_DOES_NOT_OVERRIDE_ANY_SUBSCRIPT_FROM_ITS_SUPERCLASS);
+        return;
+    }
+    if(matchedSubscript)
+    {
+        if(matchedSubscript->setter && !subscript.setter)
+        {
+            error(node, Errors::E_CANNOT_OVERRIDE_MUTABLE_PROPERTY_WITH_READONLY_PROPERTY_A_1, L"subscript");
+            return;
+        }
+    }
 
 }
 void DeclarationAnalyzer::visitSubscript(const SubscriptDefPtr &node)
 {
     assert(ctx->currentType != nullptr);
 
-    ParametersPtr parameters = node->getParameters();
+    ParametersNodePtr parameters = node->getParameters();
 
     // Register subscript as functions to type
-    std::vector<ParametersPtr> paramsList = {parameters};
+    std::vector<ParametersNodePtr> paramsList = {parameters};
     TypePtr retType = lookupType(node->getReturnType());
     if (!node->getGetter() && !node->getSetter())
         return;
 
     if(ctx->flags & SemanticContext::FLAG_PROCESS_DECLARATION)
     {
-        checkForSubscriptOverride(node);
-
-        if (node->getGetter())
+        FunctionSymbolPtr getter, setter;
+        TypePtr getterType;
+        if(!node->getGetter())
         {
-            TypePtr funcType = this->createFunctionType(paramsList.begin(), paramsList.end(), retType, nullptr);
-            node->getGetter()->setType(funcType);
-            FunctionSymbolPtr func(new FunctionSymbol(L"subscript", funcType, node->getGetter()));
-            declarationFinished(func->getName(), func, node->getGetter());
+            error(node, Errors::E_SUBSCRIPT_DECLARATIONS_MUST_HAVE_A_GETTER);
+            return;
+        }
+        //check for inout in parameter list
+        for(auto param : *parameters)
+        {
+            if(param->isInout())
+            {
+                error(param, Errors::E_INOUT_IS_ONLY_VALID_IN_PARAMTER_LISTS);
+                return;
+            }
+
+        }
+
+        //if (node->getGetter())
+        {
+            getterType = this->createFunctionType(paramsList.begin(), paramsList.end(), retType, nullptr);
+            node->getGetter()->setType(getterType);
+            getter = FunctionSymbolPtr(new FunctionSymbol(L"subscript", getterType, node->getGetter()));
+            declarationFinished(getter->getName(), getter, node->getGetter());
         }
         if (node->getSetter())
         {
             //TODO: replace nullptr to void
             TypePtr funcType = this->createFunctionType(paramsList.begin(), paramsList.end(), symbolRegistry->getGlobalScope()->Void(), nullptr);
             node->getSetter()->setType(funcType);
-            static_pointer_cast<TypeBuilder>(funcType)->addParameter(Type::Parameter(retType));
-            FunctionSymbolPtr func(new FunctionSymbol(L"subscript", funcType, node->getSetter()));
-            declarationFinished(func->getName(), func, node->getSetter());
+            static_pointer_cast<TypeBuilder>(funcType)->addParameter(Parameter(retType));
+            setter = FunctionSymbolPtr(new FunctionSymbol(L"subscript", funcType, node->getSetter()));
+            declarationFinished(setter->getName(), setter, node->getSetter());
         }
+        assert(getter != nullptr);
+        TypeBuilderPtr t = static_pointer_cast<TypeBuilder>(ctx->currentType);
+        Subscript subscript(getterType->getParameters(), getterType->getReturnType(), getter, setter);
+        checkForSubscriptOverride(subscript, node);
+        t->addSubscript(subscript);
     }
     if(ctx->flags & SemanticContext::FLAG_PROCESS_IMPLEMENTATION)
     {
@@ -434,12 +522,12 @@ void DeclarationAnalyzer::visitSubscript(const SubscriptDefPtr &node)
 
         TypePtr type = lookupType(node->getReturnType());
         assert(type != nullptr);
-        std::vector<Type::Parameter> params;
-        for (const ParameterPtr &param : *node->getParameters())
+        std::vector<Parameter> params;
+        for (const ParameterNodePtr &param : *node->getParameters())
         {
             wstring name = param->isShorthandExternalName() ? param->getLocalName() : param->getExternalName();
             TypePtr paramType = lookupType(param->getDeclaredType());
-            params.push_back(Type::Parameter(name, param->isInout(), paramType));
+            params.push_back(Parameter(name, param->isInout(), paramType));
         }
 
 
@@ -530,7 +618,7 @@ void DeclarationAnalyzer::visitFunctionDeclaration(const FunctionDefPtr& node)
         }
 
 
-        for (const ParametersPtr &params : node->getParametersList())
+        for (const ParametersNodePtr &params : node->getParametersList())
         {
             params->accept(this);
             prepareParameters(scope, params);
@@ -698,13 +786,13 @@ void DeclarationAnalyzer::visitInit(const InitializerDefPtr& node)
         SymbolPlaceHolderPtr self(new SymbolPlaceHolder(L"self", ctx->currentType, SymbolPlaceHolder::R_PARAMETER, SymbolFlagReadable | SymbolFlagInitialized));
         body->getScope()->addSymbol(self);
 
-        std::vector<Type::Parameter> params;
-        for (const ParameterPtr &param : *node->getParameters())
+        std::vector<Parameter> params;
+        for (const ParameterNodePtr &param : *node->getParameters())
         {
             //init's parameter always has an external name
             //local name will be used if external name is undeclared
             const std::wstring &externalName = param->getExternalName().empty() ? param->getLocalName() : param->getExternalName();
-            params.push_back(Type::Parameter(externalName, param->isInout(), param->getType()));
+            params.push_back(Parameter(externalName, param->isInout(), param->getType()));
         }
 
         TypePtr funcType = Type::newFunction(params, type, node->getParameters()->isVariadicParameters());

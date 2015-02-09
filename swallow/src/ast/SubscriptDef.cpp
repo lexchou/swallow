@@ -47,11 +47,11 @@ void SubscriptDef::accept(NodeVisitor* visitor)
     accept2(visitor, &NodeVisitor::visitSubscript);
 }
 
-void SubscriptDef::setParameters(const ParametersPtr& params)
+void SubscriptDef::setParameters(const ParametersNodePtr& params)
 {
     this->parameters = params;
 }
-ParametersPtr SubscriptDef::getParameters()
+ParametersNodePtr SubscriptDef::getParameters()
 {
     return parameters;
 }

@@ -67,6 +67,10 @@ public:
     void addMember(const SymbolPtr& symbol);
     void addParentTypesFrom(const TypePtr& type);
     void addParentType(const TypePtr& type, int distance = 1);
+    /*!
+     * Add a subscript to this type
+     */
+    void addSubscript(const Subscript& subscript);
 
     /*!
      * add a new enum case

@@ -60,14 +60,14 @@ public:
     virtual void visitExtension(const ExtensionDefPtr& node) override;
     virtual void visitFunction(const FunctionDefPtr& node) override;
     void visitFunctionDeclaration(const FunctionDefPtr& node);
-    virtual void visitParameter(const ParameterPtr& node) override;
-    virtual void visitParameters(const ParametersPtr& node) override;
+    virtual void visitParameter(const ParameterNodePtr& node) override;
+    virtual void visitParameters(const ParametersNodePtr& node) override;
     virtual void visitClosure(const ClosurePtr& node) override;
     virtual void visitSubscript(const SubscriptDefPtr &node) override;
     virtual void visitDeinit(const DeinitializerDefPtr& node) override;
     virtual void visitInit(const InitializerDefPtr& node) override;
     virtual void visitCodeBlock(const CodeBlockPtr &node) override;
-    void visitAccessor(const CodeBlockPtr& accessor, const ParametersPtr& params, const SymbolPtr& setter);
+    void visitAccessor(const CodeBlockPtr& accessor, const ParametersNodePtr& params, const SymbolPtr& setter);
     virtual void visitComputedProperty(const ComputedPropertyPtr& node) override;
 
     /*!
@@ -88,12 +88,12 @@ private:
     TypePtr defineType(const std::shared_ptr<TypeDeclaration>& node);
     void prepareDefaultInitializers(const TypePtr& type);
     FunctionSymbolPtr createFunctionSymbol(const FunctionDefPtr& func, const GenericDefinitionPtr& generic);
-    TypePtr createFunctionType(const std::vector<ParametersPtr>::const_iterator& begin, const std::vector<ParametersPtr>::const_iterator& end, const TypePtr& retType, const GenericDefinitionPtr& generic);
+    TypePtr createFunctionType(const std::vector<ParametersNodePtr>::const_iterator& begin, const std::vector<ParametersNodePtr>::const_iterator& end, const TypePtr& retType, const GenericDefinitionPtr& generic);
 
     /*!
      * Prepare parameters as symbols in given code block
      */
-    void prepareParameters(SymbolScope* scope, const ParametersPtr& params);
+    void prepareParameters(SymbolScope* scope, const ParametersNodePtr& params);
 
     /*!
      * Verify if the specified type conform to the given protocol
@@ -121,7 +121,7 @@ private:
 private:
     void checkForFunctionOverriding(const std::wstring& name, const FunctionSymbolPtr& decl, const DeclarationPtr& node);
     void checkForPropertyOverriding(const std::wstring& name, const SymbolPlaceHolderPtr& decl, const ComputedPropertyPtr& node);
-    void checkForSubscriptOverride(const SubscriptDefPtr& node);
+    void checkForSubscriptOverride(const Subscript& subscript, const SubscriptDefPtr& node);
 protected:
     SemanticAnalyzer* semanticAnalyzer;
 

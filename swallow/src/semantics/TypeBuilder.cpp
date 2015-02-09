@@ -46,7 +46,7 @@ void TypeBuilder::setInitializer(const FunctionOverloadedSymbolPtr& initializer)
     members[L"init"] = initializer;
 }
 
-void TypeBuilder::addParameter(const Type::Parameter& param)
+void TypeBuilder::addParameter(const Parameter& param)
 {
     assert(param.type != nullptr);
     parameters.push_back(param);
@@ -195,11 +195,11 @@ void TypeBuilder::addEnumCase(const std::wstring &name, const TypePtr &associate
     {
         //create a constructor for it
         assert(associatedType != nullptr && associatedType->getCategory() == Type::Tuple);
-        vector<Type::Parameter> params;
+        vector<Parameter> params;
         for(int i = 0; i < associatedType->numElementTypes(); i++)
         {
             TypePtr t = associatedType->getElementType(i);
-            params.push_back(Type::Parameter(t));
+            params.push_back(Parameter(t));
         }
         TypePtr initializerType = Type::newFunction(params, self(), false, nullptr);
         constructor = FunctionSymbolPtr(new FunctionSymbol(name, initializerType, nullptr));
@@ -207,4 +207,11 @@ void TypeBuilder::addEnumCase(const std::wstring &name, const TypePtr &associate
     }
     EnumCase c = {name, associatedType, constructor};
     enumCases.insert(make_pair(name, c));
+}
+/*!
+ * Add a subscript to this type
+ */
+void TypeBuilder::addSubscript(const Subscript& subscript)
+{
+    subscripts.push_back(subscript);
 }

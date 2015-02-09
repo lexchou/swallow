@@ -37,8 +37,8 @@ TEST(TestFunc, testFunc)
                        L"return input + 1"
                        L"}");
     FunctionDefPtr func;
-    ParametersPtr params;
-    ParameterPtr param;
+    ParametersNodePtr params;
+    ParameterNodePtr param;
     TypeIdentifierPtr type;
     CodeBlockPtr cb;
     ReturnStatementPtr ret;
@@ -51,7 +51,7 @@ TEST(TestFunc, testFunc)
     ASSERT_NOT_NULL(params = func->getParameters(0));
     ASSERT_EQ(1, params->numParameters());
     ASSERT_NOT_NULL(param = params->getParameter(0));
-    ASSERT_EQ(Parameter::None, param->getAccessibility());
+    ASSERT_EQ(ParameterNode::None, param->getAccessibility());
     ASSERT_FALSE(param->isShorthandExternalName());
     ASSERT_FALSE(param->isInout());
     ASSERT_NULL(param->getDefaultValue());
@@ -85,8 +85,8 @@ TEST(TestFunc, testFunc_ReturnFunc)
                        L"}");
 
     FunctionDefPtr func;
-    ParametersPtr params;
-    ParameterPtr param;
+    ParametersNodePtr params;
+    ParameterNodePtr param;
     TypeIdentifierPtr type;
     FunctionTypePtr rettype;
     TupleTypePtr tupleType;
@@ -99,7 +99,7 @@ TEST(TestFunc, testFunc_ReturnFunc)
     ASSERT_FALSE(params->isVariadicParameters());
 
     ASSERT_NOT_NULL(param = params->getParameter(0));
-    ASSERT_EQ(Parameter::None, param->getAccessibility());
+    ASSERT_EQ(ParameterNode::None, param->getAccessibility());
     ASSERT_FALSE(param->isShorthandExternalName());
     ASSERT_FALSE(param->isInout());
     ASSERT_NULL(param->getDefaultValue());
@@ -127,8 +127,8 @@ TEST(TestFunc, testFunc_MultipleParameters)
                       L"}");
 
     FunctionDefPtr func;
-    ParametersPtr params;
-    ParameterPtr param;
+    ParametersNodePtr params;
+    ParameterNodePtr param;
     TypeIdentifierPtr type;
 
     ASSERT_NOT_NULL(func = std::dynamic_pointer_cast<FunctionDef>(root));
@@ -139,7 +139,7 @@ TEST(TestFunc, testFunc_MultipleParameters)
     ASSERT_FALSE(params->isVariadicParameters());
 
     ASSERT_NOT_NULL(param = params->getParameter(0));
-    ASSERT_EQ(Parameter::None, param->getAccessibility());
+    ASSERT_EQ(ParameterNode::None, param->getAccessibility());
     ASSERT_FALSE(param->isShorthandExternalName());
     ASSERT_FALSE(param->isInout());
     ASSERT_NULL(param->getDefaultValue());
@@ -150,7 +150,7 @@ TEST(TestFunc, testFunc_MultipleParameters)
 
 
     ASSERT_NOT_NULL(param = params->getParameter(1));
-    ASSERT_EQ(Parameter::None, param->getAccessibility());
+    ASSERT_EQ(ParameterNode::None, param->getAccessibility());
     ASSERT_FALSE(param->isShorthandExternalName());
     ASSERT_FALSE(param->isInout());
     ASSERT_NULL(param->getDefaultValue());
@@ -169,7 +169,7 @@ TEST(TestFunc, testFunc_NoParameters)
                        L"}");
 
     FunctionDefPtr func;
-    ParametersPtr params;
+    ParametersNodePtr params;
 
     ASSERT_NOT_NULL(func = std::dynamic_pointer_cast<FunctionDef>(root));
     ASSERT_EQ(L"sayHelloWorld", func->getName());
@@ -185,7 +185,7 @@ TEST(TestFunc, testFunc_NoReturn)
                        L"println(\"Goodbye, \(personName)!\")"
                        L"}");
     FunctionDefPtr func;
-    ParametersPtr params;
+    ParametersNodePtr params;
 
     ASSERT_NOT_NULL(func = std::dynamic_pointer_cast<FunctionDef>(root));
     ASSERT_EQ(L"sayGoodbye", func->getName());
@@ -203,7 +203,7 @@ TEST(TestFunc, testFunc_ReturnTuple)
                        L"return (vowels, consonants, others)"
                        L"}");
     FunctionDefPtr func;
-    ParametersPtr params;
+    ParametersNodePtr params;
     TupleTypePtr rettype;
     TypeIdentifierPtr id;
 
@@ -238,8 +238,8 @@ TEST(TestFunc, testFunc_ExtParamNam)
     PARSE_STATEMENT(L"func someFunction(externalParameterName localParameterName: Int) {"
                        L"}");
     FunctionDefPtr func;
-    ParametersPtr params;
-    ParameterPtr param;
+    ParametersNodePtr params;
+    ParameterNodePtr param;
     TypeIdentifierPtr type;
 
     ASSERT_NOT_NULL(func = std::dynamic_pointer_cast<FunctionDef>(root));
@@ -250,7 +250,7 @@ TEST(TestFunc, testFunc_ExtParamNam)
     ASSERT_FALSE(params->isVariadicParameters());
 
     ASSERT_NOT_NULL(param = params->getParameter(0));
-    ASSERT_EQ(Parameter::None, param->getAccessibility());
+    ASSERT_EQ(ParameterNode::None, param->getAccessibility());
     ASSERT_FALSE(param->isShorthandExternalName());
     ASSERT_FALSE(param->isInout());
     ASSERT_NULL(param->getDefaultValue());
@@ -266,8 +266,8 @@ TEST(TestFunc, testFunc_ShorthandExtParamName)
                        L"return false"
                        L"}");
     FunctionDefPtr func;
-    ParametersPtr params;
-    ParameterPtr param;
+    ParametersNodePtr params;
+    ParameterNodePtr param;
     TypeIdentifierPtr type;
 
     ASSERT_NOT_NULL(func = std::dynamic_pointer_cast<FunctionDef>(root));
@@ -278,7 +278,7 @@ TEST(TestFunc, testFunc_ShorthandExtParamName)
     ASSERT_FALSE(params->isVariadicParameters());
 
     ASSERT_NOT_NULL(param = params->getParameter(0));
-    ASSERT_EQ(Parameter::None, param->getAccessibility());
+    ASSERT_EQ(ParameterNode::None, param->getAccessibility());
     ASSERT_TRUE(param->isShorthandExternalName());
     ASSERT_FALSE(param->isInout());
     ASSERT_NULL(param->getDefaultValue());
@@ -288,7 +288,7 @@ TEST(TestFunc, testFunc_ShorthandExtParamName)
     ASSERT_EQ(L"String", type->getName());
 
     ASSERT_NOT_NULL(param = params->getParameter(1));
-    ASSERT_EQ(Parameter::None, param->getAccessibility());
+    ASSERT_EQ(ParameterNode::None, param->getAccessibility());
     ASSERT_TRUE(param->isShorthandExternalName());
     ASSERT_FALSE(param->isInout());
     ASSERT_NULL(param->getDefaultValue());
@@ -306,8 +306,8 @@ TEST(TestFunc, testFunc_DefParam)
                        L"}");
 
     FunctionDefPtr func;
-    ParametersPtr params;
-    ParameterPtr param;
+    ParametersNodePtr params;
+    ParameterNodePtr param;
     TypeIdentifierPtr type;
     StringLiteralPtr str;
 
@@ -319,7 +319,7 @@ TEST(TestFunc, testFunc_DefParam)
     ASSERT_FALSE(params->isVariadicParameters());
 
     ASSERT_NOT_NULL(param = params->getParameter(2));
-    ASSERT_EQ(Parameter::None, param->getAccessibility());
+    ASSERT_EQ(ParameterNode::None, param->getAccessibility());
     ASSERT_FALSE(param->isShorthandExternalName());
     ASSERT_FALSE(param->isInout());
     ASSERT_EQ(L"withJoiner", param->getExternalName());
@@ -336,8 +336,8 @@ TEST(TestFunc, testFunc_VariadicParams)
                        L"}");
 
     FunctionDefPtr func;
-    ParametersPtr params;
-    ParameterPtr param;
+    ParametersNodePtr params;
+    ParameterNodePtr param;
     TypeIdentifierPtr type;
 
     ASSERT_NOT_NULL(func = std::dynamic_pointer_cast<FunctionDef>(root));
@@ -348,7 +348,7 @@ TEST(TestFunc, testFunc_VariadicParams)
     ASSERT_TRUE(params->isVariadicParameters());
 
     ASSERT_NOT_NULL(param = params->getParameter(0));
-    ASSERT_EQ(Parameter::None, param->getAccessibility());
+    ASSERT_EQ(ParameterNode::None, param->getAccessibility());
     ASSERT_FALSE(param->isShorthandExternalName());
     ASSERT_FALSE(param->isInout());
     ASSERT_EQ(L"", param->getExternalName());
@@ -363,8 +363,8 @@ TEST(TestFunc, testFunc_VariableParam)
     PARSE_STATEMENT(L"func alignRight(var string: String, count: Int, pad: Character) -> String {"
                        L"}");
     FunctionDefPtr func;
-    ParametersPtr params;
-    ParameterPtr param;
+    ParametersNodePtr params;
+    ParameterNodePtr param;
     TypeIdentifierPtr type;
 
     ASSERT_NOT_NULL(func = std::dynamic_pointer_cast<FunctionDef>(root));
@@ -375,7 +375,7 @@ TEST(TestFunc, testFunc_VariableParam)
     ASSERT_FALSE(params->isVariadicParameters());
 
     ASSERT_NOT_NULL(param = params->getParameter(0));
-    ASSERT_EQ(Parameter::Variable, param->getAccessibility());
+    ASSERT_EQ(ParameterNode::Variable, param->getAccessibility());
     ASSERT_FALSE(param->isShorthandExternalName());
     ASSERT_FALSE(param->isInout());
     ASSERT_EQ(L"", param->getExternalName());
@@ -390,8 +390,8 @@ TEST(TestFunc, testFunc_Inout)
                        L"}");
 
     FunctionDefPtr func;
-    ParametersPtr params;
-    ParameterPtr param;
+    ParametersNodePtr params;
+    ParameterNodePtr param;
     TypeIdentifierPtr type;
 
     ASSERT_NOT_NULL(func = std::dynamic_pointer_cast<FunctionDef>(root));
@@ -402,7 +402,7 @@ TEST(TestFunc, testFunc_Inout)
     ASSERT_FALSE(params->isVariadicParameters());
 
     ASSERT_NOT_NULL(param = params->getParameter(0));
-    ASSERT_EQ(Parameter::None, param->getAccessibility());
+    ASSERT_EQ(ParameterNode::None, param->getAccessibility());
     ASSERT_FALSE(param->isShorthandExternalName());
     ASSERT_TRUE(param->isInout());
     ASSERT_EQ(L"", param->getExternalName());
@@ -413,7 +413,7 @@ TEST(TestFunc, testFunc_Inout)
 
 
     ASSERT_NOT_NULL(param = params->getParameter(1));
-    ASSERT_EQ(Parameter::None, param->getAccessibility());
+    ASSERT_EQ(ParameterNode::None, param->getAccessibility());
     ASSERT_FALSE(param->isShorthandExternalName());
     ASSERT_TRUE(param->isInout());
     ASSERT_EQ(L"", param->getExternalName());
@@ -429,8 +429,8 @@ TEST(TestFunc, testFunc_FuncType)
                        L"}");
 
     FunctionDefPtr func;
-    ParametersPtr params;
-    ParameterPtr param;
+    ParametersNodePtr params;
+    ParameterNodePtr param;
     FunctionTypePtr type;
     TupleTypePtr args;
     TypeIdentifierPtr t;
@@ -443,7 +443,7 @@ TEST(TestFunc, testFunc_FuncType)
     ASSERT_FALSE(params->isVariadicParameters());
 
     ASSERT_NOT_NULL(param = params->getParameter(0));
-    ASSERT_EQ(Parameter::None, param->getAccessibility());
+    ASSERT_EQ(ParameterNode::None, param->getAccessibility());
     ASSERT_FALSE(param->isShorthandExternalName());
     ASSERT_FALSE(param->isInout());
     ASSERT_EQ(L"", param->getExternalName());
@@ -495,8 +495,8 @@ TEST(TestFunc, testFunc_CurriedFunc)
                        L"return a + b"
                        L"}");
     FunctionDefPtr func;
-    ParametersPtr params;
-    ParameterPtr param;
+    ParametersNodePtr params;
+    ParameterNodePtr param;
     TypeIdentifierPtr t;
 
     ASSERT_NOT_NULL(func = std::dynamic_pointer_cast<FunctionDef>(root));
@@ -508,7 +508,7 @@ TEST(TestFunc, testFunc_CurriedFunc)
     ASSERT_FALSE(params->isVariadicParameters());
 
     ASSERT_NOT_NULL(param = params->getParameter(0));
-    ASSERT_EQ(Parameter::None, param->getAccessibility());
+    ASSERT_EQ(ParameterNode::None, param->getAccessibility());
     ASSERT_FALSE(param->isShorthandExternalName());
     ASSERT_FALSE(param->isInout());
     ASSERT_EQ(L"", param->getExternalName());
@@ -522,7 +522,7 @@ TEST(TestFunc, testFunc_CurriedFunc)
     ASSERT_FALSE(params->isVariadicParameters());
 
     ASSERT_NOT_NULL(param = params->getParameter(0));
-    ASSERT_EQ(Parameter::None, param->getAccessibility());
+    ASSERT_EQ(ParameterNode::None, param->getAccessibility());
     ASSERT_FALSE(param->isShorthandExternalName());
     ASSERT_FALSE(param->isInout());
     ASSERT_EQ(L"", param->getExternalName());

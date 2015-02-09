@@ -158,8 +158,8 @@ SET(SWALLOW_SRC
     src/ast/ComputedProperty.cpp
     src/ast/Identifier.cpp
     src/ast/GenericArgumentDef.cpp
-    src/ast/Parameters.cpp
-    src/ast/Parameter.cpp
+    src/ast/ParametersNode.cpp
+    src/ast/ParameterNode.cpp
     src/ast/TypeDeclaration.cpp
     src/ast/GenericParametersDef.cpp
     src/ast/GenericConstraintDef.cpp
@@ -207,7 +207,4 @@ add_library(swallow SHARED ${SWALLOW_SRC})
 #target_link_libraries(TestSemantics ${GTEST_LIBS})
 
 
-#ADD_TEST(NAME TestTokenizer COMMAND TestTokenizer)
-#ADD_TEST(NAME TestSemantics COMMAND TestSemantics)
-#ADD_TEST(NAME TestParser COMMAND TestParser)
 

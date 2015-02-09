@@ -270,7 +270,7 @@ void GlobalScope::initPrimitiveTypes()
     IMPLEMENTS(StringInterpolationConvertible);
     {
         {
-            std::vector<Type::Parameter> params = {Type::Parameter(_String)};
+            std::vector<Parameter> params = {Parameter(_String)};
             TypePtr t_hasPrefix = Type::newFunction(params, _Bool, false, nullptr);
 
             FunctionSymbolPtr hasPrefix(new FunctionSymbol(L"hasPrefix", t_hasPrefix, nullptr));
@@ -310,14 +310,14 @@ void GlobalScope::initPrimitiveTypes()
         TypeBuilderPtr builder = static_pointer_cast<TypeBuilder>(_Array);
         builder->addProtocol(_CollectionType);
         {
-            std::vector<Type::Parameter> params = {Type::Parameter(T)};
+            std::vector<Parameter> params = {Parameter(T)};
             TypePtr t_append = Type::newFunction(params, _Void, false, nullptr);
 
             FunctionSymbolPtr append(new FunctionSymbol(L"append", t_append, nullptr));
             builder->addMember(append);
         }
         {
-            std::vector<Type::Parameter> params = {};
+            std::vector<Parameter> params = {};
             TypePtr t_append = Type::newFunction(params, T, false, nullptr);
 
             FunctionSymbolPtr append(new FunctionSymbol(L"removeLast", t_append, nullptr));
@@ -328,9 +328,9 @@ void GlobalScope::initPrimitiveTypes()
             builder->addMember(count);
         }
         {
-            std::vector<Type::Parameter> getterParams = {Type::Parameter(_Int)};
+            std::vector<Parameter> getterParams = {Parameter(_Int)};
             TypePtr getterType = Type::newFunction(getterParams, T, false, nullptr);
-            std::vector<Type::Parameter> setterParams = {Type::Parameter(_Int), Type::Parameter(T)};
+            std::vector<Parameter> setterParams = {Parameter(_Int), Parameter(T)};
             TypePtr setterType = Type::newFunction(setterParams, _Void, false, nullptr);
 
             FunctionSymbolPtr getter(new FunctionSymbol(L"subscript", getterType, nullptr));
@@ -362,10 +362,10 @@ void GlobalScope::initPrimitiveTypes()
             builder->addMember(isEmpty);
         }
         {
-            std::vector<Type::Parameter> getterParams = {Type::Parameter(Key)};
+            std::vector<Parameter> getterParams = {Parameter(Key)};
             TypePtr getter = Type::newFunction(getterParams, makeOptional(Value), false, nullptr);
 
-            std::vector<Type::Parameter> setterParams = {Type::Parameter(Key), Type::Parameter(makeOptional(Value))};
+            std::vector<Parameter> setterParams = {Parameter(Key), Parameter(makeOptional(Value))};
             TypePtr setter = Type::newFunction(setterParams, _Void, false, nullptr);
 
             FunctionSymbolPtr subscriptGet(new FunctionSymbol(L"subscript", getter, nullptr));
@@ -426,7 +426,7 @@ FunctionSymbolPtr GlobalScope::createFunction(const std::wstring&name, int flags
 
 FunctionSymbolPtr GlobalScope::vcreateFunction(const std::wstring&name, int flags, const wchar_t* returnType, va_list va)
 {
-    std::vector<Type::Parameter> params;
+    std::vector<Parameter> params;
     TypePtr retType = dynamic_pointer_cast<Type>(lookup(returnType));
     bool variadicParams = false;
     assert(retType != nullptr);
@@ -443,7 +443,7 @@ FunctionSymbolPtr GlobalScope::vcreateFunction(const std::wstring&name, int flag
         }
         TypePtr paramType = dynamic_pointer_cast<Type>(lookup(typeName));
         assert(paramType != nullptr);
-        params.push_back(Type::Parameter(L"", inout, paramType));
+        params.push_back(Parameter(L"", inout, paramType));
     }
     TypePtr funcType = Type::newFunction(params, retType, variadicParams, nullptr);
     FunctionSymbolPtr ret(new FunctionSymbol(name, funcType, nullptr));
@@ -535,7 +535,7 @@ void GlobalScope::initOperators(SymbolRegistry* registry)
     {
         for(const TypePtr& type : numbers)
         {
-            std::vector<Type::Parameter> params = {Type::Parameter(type)};
+            std::vector<Parameter> params = {Parameter(type)};
             TypePtr funcType = Type::newFunction(params, type, false, nullptr);
             FunctionSymbolPtr func(new FunctionSymbol(unary, funcType, nullptr));
             func->setFlags(SymbolFlagPostfix, true);
@@ -556,7 +556,7 @@ void GlobalScope::initOperators(SymbolRegistry* registry)
         TypePtr optionalT = makeOptional(Type::newType(L"T", Type::Alias));
         GenericDefinitionPtr def(new GenericDefinition());
         def->add(L"T", T);
-        vector<Type::Parameter> parameterTypes = {optionalT, __OptionalNilComparisonType};
+        vector<Parameter> parameterTypes = {optionalT, __OptionalNilComparisonType};
         TypePtr funcType = Type::newFunction(parameterTypes, _Bool, false, def);
         FunctionSymbolPtr func(new FunctionSymbol(L"==", funcType, nullptr));
         func->setFlags(SymbolFlagInfix);
@@ -570,7 +570,7 @@ void GlobalScope::initOperators(SymbolRegistry* registry)
         TypePtr optionalT = makeOptional(Type::newType(L"T", Type::Alias));
         GenericDefinitionPtr def(new GenericDefinition());
         def->add(L"T", T);
-        vector<Type::Parameter> parameterTypes = {optionalT, __OptionalNilComparisonType};
+        vector<Parameter> parameterTypes = {optionalT, __OptionalNilComparisonType};
         TypePtr funcType = Type::newFunction(parameterTypes, _Bool, false, def);
         FunctionSymbolPtr func(new FunctionSymbol(L"!=", funcType, nullptr));
         func->setFlags(SymbolFlagInfix);
@@ -671,7 +671,7 @@ bool GlobalScope::registerFunction(const std::wstring& name, const FunctionSymbo
 }
 bool GlobalScope::registerOperatorFunction(const std::wstring& name, const TypePtr& returnType, const TypePtr& operand, OperatorType::T operatorType)
 {
-    std::vector<Type::Parameter> parameterTypes = {operand};
+    std::vector<Parameter> parameterTypes = {operand};
     TypePtr funcType = Type::newFunction(parameterTypes, returnType, false);
     FunctionSymbolPtr func(new FunctionSymbol(name, funcType, nullptr));
     switch(operatorType)
@@ -692,7 +692,7 @@ bool GlobalScope::registerOperatorFunction(const std::wstring& name, const TypeP
 bool GlobalScope::registerOperatorFunction(const std::wstring& name, const TypePtr& returnType, const TypePtr& lhs, const TypePtr& rhs)
 {
 
-    std::vector<Type::Parameter> parameterTypes = {lhs, rhs};
+    std::vector<Parameter> parameterTypes = {lhs, rhs};
     TypePtr funcType = Type::newFunction(parameterTypes, returnType, false);
     FunctionSymbolPtr func(new FunctionSymbol(name, funcType, nullptr));
     func->setFlags(SymbolFlagInfix);

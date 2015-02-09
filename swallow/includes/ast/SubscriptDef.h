@@ -43,8 +43,8 @@ public:
     SubscriptDef();
     ~SubscriptDef();
 public:
-    void setParameters(const ParametersPtr& params);
-    ParametersPtr getParameters();
+    void setParameters(const ParametersNodePtr& params);
+    ParametersNodePtr getParameters();
     
     void setReturnType(const TypeNodePtr& type);
     TypeNodePtr getReturnType();
@@ -66,7 +66,7 @@ public:
 private:
     std::wstring setterName;
     Attributes returnTypeAttributes;
-    ParametersPtr parameters;
+    ParametersNodePtr parameters;
     TypeNodePtr returnType;
     CodeBlockPtr getter;
     CodeBlockPtr setter;

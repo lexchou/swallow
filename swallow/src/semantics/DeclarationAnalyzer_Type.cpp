@@ -225,7 +225,7 @@ void DeclarationAnalyzer::prepareDefaultInitializers(const TypePtr& type)
         return;
 
     bool createDefaultInit = true;
-    vector<Type::Parameter> initParams;
+    vector<Parameter> initParams;
     if(type->getCategory() == Type::Struct)
     {
         //check all fields if they all have initializer
@@ -234,7 +234,7 @@ void DeclarationAnalyzer::prepareDefaultInitializers(const TypePtr& type)
             SymbolPlaceHolderPtr s = dynamic_pointer_cast<SymbolPlaceHolder>(sym);
             if(!s || sym->hasFlags(SymbolFlagTemporary))
                 continue;
-            initParams.push_back(Type::Parameter(sym->getName(), false, sym->getType()));
+            initParams.push_back(Parameter(sym->getName(), false, sym->getType()));
             //do not create default init if there's a variable has no initializer
             if (!s->hasFlags(SymbolFlagHasInitializer))
                 createDefaultInit = false;
@@ -243,7 +243,7 @@ void DeclarationAnalyzer::prepareDefaultInitializers(const TypePtr& type)
     if(createDefaultInit)
     {
         //apply rule 1
-        std::vector<Type::Parameter> params;
+        std::vector<Parameter> params;
         TypePtr initType = Type::newFunction(params, type, false);
         std::wstring s = initType->toString();
         FunctionSymbolPtr initializer(new FunctionSymbol(L"init", initType, nullptr));
