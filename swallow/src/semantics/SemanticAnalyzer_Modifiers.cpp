@@ -121,6 +121,27 @@ static bool validateGeneralModifiers(SemanticAnalyzer* analyzer, const Declarati
                 return analyzer->error(decl, Errors::E_A_MAY_ONLY_BE_USED_ON_B_DECLARATION_2, L"nonmutating", L"func");
         }
     }
+    if(modifiers & DeclarationModifiers::Final)
+    {
+        //final only applies to class or member definition
+        NodeType::T nodeType = decl->getNodeType();
+        switch(nodeType)
+        {
+            case NodeType::Struct:
+            case NodeType::Enum:
+            case NodeType::Protocol:
+            case NodeType::TypeAlias:
+                return analyzer->error(decl, Errors::E_A_MODIFIER_CANNOT_BE_APPLIED_TO_THIS_DECLARATION_1, L"final");
+            case NodeType::ValueBinding:
+            case NodeType::ValueBindings:
+            case NodeType::ComputedProperty:
+            case NodeType::Function:
+                if(!ctx->currentType || ctx->currentFunction || ctx->currentType->getCategory() != Type::Class)
+                    return analyzer->error(decl, Errors::E_ONLY_CLASSES_AND_CLASS_MEMBERS_MAY_BE_MARKED_WITH_FINAL);
+            default:
+                break;
+        }
+    }
     return true;
 }
 
@@ -261,6 +282,11 @@ void SemanticAnalyzer::validateDeclarationModifiers(const DeclarationPtr& declar
         {
             TypeDeclarationPtr decl = static_pointer_cast<TypeDeclaration>(declaration);
             validateGeneralModifiers(this, decl);
+            break;
+        };
+        case NodeType::TypeAlias:
+        {
+            validateGeneralModifiers(this, declaration);
             break;
         };
         default:

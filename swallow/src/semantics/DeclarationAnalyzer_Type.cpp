@@ -158,6 +158,11 @@ TypePtr DeclarationAnalyzer::defineType(const std::shared_ptr<TypeDeclaration>& 
                 return nullptr;
             }
             parent = ptr;
+            if(parent->hasFlags(SymbolFlagFinal))
+            {
+                error(parentType, Errors::E_INHERITANCE_FROM_A_FINAL_CLASS_A_1, parentType->getName());
+                return nullptr;
+            }
         }
         else if(category == Type::Enum && ptr->getCategory() != Type::Protocol)
         {
@@ -204,6 +209,8 @@ TypePtr DeclarationAnalyzer::defineType(const std::shared_ptr<TypeDeclaration>& 
     type = Type::newType(node->getIdentifier()->getName(), category, node, parent, protocols, generic);
     node->setType(type);
     currentScope->addSymbol(type);
+    if(node->hasModifier(DeclarationModifiers::Final))
+        type->setFlags(SymbolFlagFinal, true);
 
     declarationFinished(type->getName(), type, node);
     return type;
@@ -284,6 +291,7 @@ void DeclarationAnalyzer::visitTypeAlias(const TypeAliasPtr& node)
         //static_pointer_cast<TypeBuilder>(type)->setInnerType(innerType);
     }
     currentScope->addSymbol(node->getName(), type);
+    validateDeclarationModifiers(node);
     declarationFinished(node->getName(), type, node);
 }
 

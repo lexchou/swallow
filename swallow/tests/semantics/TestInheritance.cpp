@@ -578,3 +578,75 @@ TEST(TestInheritance, OverrideMUnmtatingSubscriptWithMutating)
             L"}");
     ASSERT_NO_ERRORS();
 }
+
+TEST(TestInheritance, FinalClass)
+{
+    SEMANTIC_ANALYZE(L"final class Base\n"
+       L"{\n"
+       L"}\n"
+       L"class Child : Base\n"
+       L"{\n"
+       L"}");
+    ASSERT_ERROR(Errors::E_INHERITANCE_FROM_A_FINAL_CLASS_A_1);
+    ASSERT_EQ(L"Base", error->items[0]);
+}
+TEST(TestInheritance, FinalStruct)
+{
+    SEMANTIC_ANALYZE(L"final struct BB\n"
+        L"{\n"
+        L"    \n"
+        L"}");
+    ASSERT_ERROR(Errors::E_A_MODIFIER_CANNOT_BE_APPLIED_TO_THIS_DECLARATION_1);
+    ASSERT_EQ(L"final", error->items[0]);
+}
+TEST(TestInheritance, FinalEnum)
+{
+    SEMANTIC_ANALYZE(L"final enum BB\n"
+        L"{\n"
+        L"    \n"
+        L"}");
+    ASSERT_ERROR(Errors::E_A_MODIFIER_CANNOT_BE_APPLIED_TO_THIS_DECLARATION_1);
+    ASSERT_EQ(L"final", error->items[0]);
+}
+TEST(TestInheritance, FinalProtocol)
+{
+    SEMANTIC_ANALYZE(L"final protocol BB\n"
+        L"{\n"
+        L"    \n"
+        L"}");
+    ASSERT_ERROR(Errors::E_A_MODIFIER_CANNOT_BE_APPLIED_TO_THIS_DECLARATION_1);
+    ASSERT_EQ(L"final", error->items[0]);
+}
+TEST(TestInheritance, FinalTypeAlias)
+{
+    SEMANTIC_ANALYZE(L"final typealias BB = Int");
+    ASSERT_ERROR(Errors::E_A_MODIFIER_CANNOT_BE_APPLIED_TO_THIS_DECLARATION_1);
+    ASSERT_EQ(L"final", error->items[0]);
+}
+TEST(TestInheritance, FinalGlobalLet)
+{
+    SEMANTIC_ANALYZE(L"final let BB = 3");
+    ASSERT_ERROR(Errors::E_ONLY_CLASSES_AND_CLASS_MEMBERS_MAY_BE_MARKED_WITH_FINAL);
+}
+TEST(TestInheritance, FinalGlobalVar)
+{
+    SEMANTIC_ANALYZE(L"final var BB = 3");
+    ASSERT_ERROR(Errors::E_ONLY_CLASSES_AND_CLASS_MEMBERS_MAY_BE_MARKED_WITH_FINAL);
+}
+TEST(TestInheritance, FinalLocalVar)
+{
+    SEMANTIC_ANALYZE(L"func test() {\n"
+        L"final var BB = 3\n"
+        L"}");
+    ASSERT_ERROR(Errors::E_ONLY_CLASSES_AND_CLASS_MEMBERS_MAY_BE_MARKED_WITH_FINAL);
+}
+TEST(TestInheritance, FinalGlobalProp)
+{
+    SEMANTIC_ANALYZE(L"final var BB : Int {return 3}");
+    ASSERT_ERROR(Errors::E_ONLY_CLASSES_AND_CLASS_MEMBERS_MAY_BE_MARKED_WITH_FINAL);
+}
+TEST(TestInheritance, FinalGlobalFunc)
+{
+    SEMANTIC_ANALYZE(L"final func foo() {}");
+    ASSERT_ERROR(Errors::E_ONLY_CLASSES_AND_CLASS_MEMBERS_MAY_BE_MARKED_WITH_FINAL);
+}

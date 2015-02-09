@@ -69,7 +69,9 @@ enum SymbolFlags
     //This is a stored property declared on a type
     SymbolFlagStoredProperty = 0x10000,
     //This is a computed property declared on a type
-    SymbolFlagComputedProperty = 0x20000
+    SymbolFlagComputedProperty = 0x20000,
+    //This is a final symbol, not allowed to be overridden
+    SymbolFlagFinal = 0x40000
 };
 
 class SWALLOW_EXPORT Symbol

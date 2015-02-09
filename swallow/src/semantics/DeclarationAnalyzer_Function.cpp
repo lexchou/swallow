@@ -232,6 +232,8 @@ static void registerSelfToAccessor(const TypePtr& currentType, const CodeBlockPt
 void DeclarationAnalyzer::checkForPropertyOverriding(const std::wstring& name, const SymbolPlaceHolderPtr& decl, const ComputedPropertyPtr& node)
 {
     TypePtr type = ctx->currentType;
+    if(!type)
+        return;
     MemberFilter filter = (MemberFilter)(FilterLookupInExtension | (decl->hasFlags(SymbolFlagStatic) ? FilterStaticMember : 0));
     SymbolPtr member = semanticAnalyzer->getMemberFromType(type, name, filter);
     if(member && member != decl)

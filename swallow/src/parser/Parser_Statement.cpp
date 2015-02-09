@@ -95,6 +95,7 @@ StatementPtr Parser::parseStatement()
                 case Keyword::Mutating:
                 case Keyword::Nonmutating:
                 case Keyword::Override:
+                case Keyword::Final:
                     return parseDeclaration();
                 case Keyword::_:
                     expect_next(token);

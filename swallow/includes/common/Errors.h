@@ -199,6 +199,10 @@ struct SWALLOW_EXPORT Errors
         E_SUBSCRIPT_DECLARATIONS_MUST_HAVE_A_GETTER,//Subscript declarations must have a getter
         E_SUBSCRIPT_DOES_NOT_OVERRIDE_ANY_SUBSCRIPT_FROM_ITS_SUPERCLASS,//Subscript does not override any subscript from its superclass
         E_INOUT_IS_ONLY_VALID_IN_PARAMTER_LISTS,//'inout' is only valid in parameter lists
+        E_INHERITANCE_FROM_A_FINAL_CLASS_A_1,//Inheritance from a final class '%0'
+        E_A_MODIFIER_CANNOT_BE_APPLIED_TO_THIS_DECLARATION_1,//'%0' modifier cannot be applied to this declaration
+        E_ONLY_CLASSES_AND_CLASS_MEMBERS_MAY_BE_MARKED_WITH_FINAL,//Only classes and class members may be marked with 'final'
+
 
         W_PARAM_CAN_BE_EXPRESSED_MORE_SUCCINCTLY_1, // '%0 %0' can be expressed more succinctly as '#%0'
         W_EXTRANEOUS_SHARTP_IN_PARAMETER_1 //Extraneous '#' in parameter: '%0' is already the keyword argument name

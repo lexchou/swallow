@@ -199,6 +199,9 @@ std::wstring Errors::getErrorTemplate(int errorCode)
         case Errors::E_CANNOT_OVERRIDE_MUTABLE_PROPERTY_WITH_READONLY_PROPERTY_A_1: return L"Cannot override mutable property with read-only property '%0'";
         case Errors::E_SUBSCRIPT_DOES_NOT_OVERRIDE_ANY_SUBSCRIPT_FROM_ITS_SUPERCLASS: return L"Subscript does not override any subscript from its superclass";
         case Errors::E_INOUT_IS_ONLY_VALID_IN_PARAMTER_LISTS: return L"'inout' is only valid in parameter lists";
+        case Errors::E_INHERITANCE_FROM_A_FINAL_CLASS_A_1: return L"Inheritance from a final class '%0'";
+        case Errors::E_A_MODIFIER_CANNOT_BE_APPLIED_TO_THIS_DECLARATION_1: return L"'%0' modifier cannot be applied to this declaration";
+        case Errors::E_ONLY_CLASSES_AND_CLASS_MEMBERS_MAY_BE_MARKED_WITH_FINAL: return L"Only classes and class members may be marked with 'final'";
 
         case Errors::W_PARAM_CAN_BE_EXPRESSED_MORE_SUCCINCTLY_1: return L"'%0 %0' can be expressed more succinctly as '#%0'";
         case Errors::W_EXTRANEOUS_SHARTP_IN_PARAMETER_1: return L"Extraneous '#' in parameter: '%0' is already the keyword argument name";
