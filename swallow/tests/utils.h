@@ -40,9 +40,9 @@
 #include "semantics/semantic-types.h"
 #include "semantics/SymbolRegistry.h"
 #include "semantics/GlobalScope.h"
+#include "semantics/ScopedNodes.h"
 
 
-#define ASSERT_EQUALS(E, A) wcs_assertEquals((E), (A), __FILE__, __LINE__)
 #define ASSERT_NOT_NULL(condition) GTEST_TEST_BOOLEAN_((condition) != NULL, #condition, false, true, GTEST_FATAL_FAILURE_)
 #define ASSERT_NULL(condition) GTEST_TEST_BOOLEAN_((condition) == NULL, #condition, false, true, GTEST_FATAL_FAILURE_)
 

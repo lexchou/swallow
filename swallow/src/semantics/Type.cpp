@@ -39,17 +39,18 @@ USE_SWALLOW_NS
 
 using namespace std;
 Subscript::Subscript()
+:flags(0)
 {
 
 }
 
 Subscript::Subscript(const Subscript& rhs)
-:parameters(rhs.parameters), returnType(rhs.returnType), getter(rhs.getter), setter(rhs.setter)
+:parameters(rhs.parameters), returnType(rhs.returnType), getter(rhs.getter), setter(rhs.setter), flags(rhs.flags)
 {
 
 }
-Subscript::Subscript(const std::vector<Parameter>& parameters, const TypePtr& returnType, const FunctionSymbolPtr& getter, const FunctionSymbolPtr& setter)
-:parameters(parameters), returnType(returnType), getter(getter), setter(setter)
+Subscript::Subscript(const std::vector<Parameter>& parameters, const TypePtr& returnType, const FunctionSymbolPtr& getter, const FunctionSymbolPtr& setter, int flags)
+:parameters(parameters), returnType(returnType), getter(getter), setter(setter), flags(flags)
 {
 
 }

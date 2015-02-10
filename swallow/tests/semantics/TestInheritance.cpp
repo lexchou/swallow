@@ -29,7 +29,6 @@
  */
 #include "../utils.h"
 #include "semantics/Symbol.h"
-#include "semantics/ScopedNodes.h"
 #include "semantics/Type.h"
 #include "common/Errors.h"
 #include "semantics/GenericArgument.h"
@@ -649,4 +648,65 @@ TEST(TestInheritance, FinalGlobalFunc)
 {
     SEMANTIC_ANALYZE(L"final func foo() {}");
     ASSERT_ERROR(Errors::E_ONLY_CLASSES_AND_CLASS_MEMBERS_MAY_BE_MARKED_WITH_FINAL);
+}
+
+TEST(TestInheritance, OverrideStoredProperty)
+{
+    SEMANTIC_ANALYZE(L"class Base\n"
+        "{\n"
+        "    let a = 3\n"
+        "}\n"
+        "\n"
+        "class Child : Base\n"
+        "{\n"
+        "    override let a = 3\n"
+        "}");
+    ASSERT_ERROR(Errors::E_CANNOT_OVERRIDE_WITH_A_STORED_PROPERTY_A_1);
+    ASSERT_EQ(L"a", error->items[0]);
+}
+
+
+
+TEST(TestInheritance, OverrideFinalVar)
+{
+    SEMANTIC_ANALYZE(L"class Base\n"
+        L"{\n"
+        L"    final var a : Int {return 3}\n"
+        L"    final func test() {}\n"
+        L"    final subscript (a : Int) -> Int{ return 3}\n"
+        L"}\n"
+        L"\n"
+        L"class Child : Base\n"
+        L"{\n"
+        L"    override var a : Int {return 5}\n"
+        L"//    override func test(){}\n"
+        L"//    override subscript(a : Int) -> Int { return 3}\n"
+        L"}");
+    ASSERT_ERROR(Errors::E_VAR_OVERRIDES_A_FINAL_VAR);
+}
+TEST(TestInheritance, OverrideFinalFunc)
+{
+    SEMANTIC_ANALYZE(L"class Base\n"
+        L"{\n"
+        L"    final func test() {}\n"
+        L"}\n"
+        L"\n"
+        L"class Child : Base\n"
+        L"{\n"
+        L"    override func test(){}\n"
+        L"}");
+    ASSERT_ERROR(Errors::E_INSTANCE_METHOD_OVERRIDES_A_FINAL_INSTANCE_METHOD);
+}
+TEST(TestInheritance, OverrideFinalSubscript)
+{
+    SEMANTIC_ANALYZE(L"class Base\n"
+        L"{\n"
+        L"    final subscript (a : Int) -> Int{ return 3}\n"
+        L"}\n"
+        L"\n"
+        L"class Child : Base\n"
+        L"{\n"
+        L"    override subscript(a : Int) -> Int { return 3}\n"
+        L"}");
+    ASSERT_ERROR(Errors::E_SUBSCRIPT_OVERRIDES_A_FINAL_SUBSCRIPT);
 }

@@ -381,11 +381,14 @@ void SemanticAnalyzer::visitValueBindings(const ValueBindingsPtr& node)
         flags |= SymbolFlagWritable;
     if(node->hasModifier(DeclarationModifiers::Static) || node->hasModifier(DeclarationModifiers::Class))
         flags |= SymbolFlagStatic;
+    if(node->hasModifier(DeclarationModifiers::Lazy))
+        flags |= SymbolFlagLazy;
 
     SymbolPlaceHolder::Role role = (!ctx.currentFunction && ctx.currentType) ? SymbolPlaceHolder::R_PROPERTY : SymbolPlaceHolder::R_LOCAL_VARIABLE;
     if(role == SymbolPlaceHolder::R_PROPERTY)
         flags |= SymbolFlagStoredProperty;
 
+    validateDeclarationModifiers(node);
     for(const ValueBindingPtr& var : *node)
     {
         PatternPtr name = var->getName();
@@ -427,5 +430,4 @@ void SemanticAnalyzer::visitValueBindings(const ValueBindingsPtr& node)
         placeholder->setFlags(SymbolFlagInitialized, true);
         placeholder->setFlags(SymbolFlagInitializing, false);
     }
-    validateDeclarationModifiers(node);
 }

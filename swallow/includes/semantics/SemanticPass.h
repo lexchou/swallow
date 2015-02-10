@@ -43,7 +43,7 @@ SWALLOW_NS_BEGIN
     public:
         SemanticPass(SymbolRegistry* symbolRegistry, CompilerResults* compilerResults);
         SemanticPass(SemanticPass* pass);
-    protected://general utilities
+    public://general utilities
         std::wstring toString(const NodePtr& node) const;
         std::wstring toString(int i) const;
     public:

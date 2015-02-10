@@ -89,9 +89,10 @@ struct SWALLOW_EXPORT Subscript
     TypePtr returnType;
     FunctionSymbolPtr getter;
     FunctionSymbolPtr setter;
+    int flags;
     Subscript();
     Subscript(const Subscript& rhs);
-    Subscript(const std::vector<Parameter>& parameters, const TypePtr& returnType, const FunctionSymbolPtr& getter, const FunctionSymbolPtr& setter);
+    Subscript(const std::vector<Parameter>& parameters, const TypePtr& returnType, const FunctionSymbolPtr& getter, const FunctionSymbolPtr& setter, int flags);
 };
 
 

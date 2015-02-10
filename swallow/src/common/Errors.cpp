@@ -202,6 +202,10 @@ std::wstring Errors::getErrorTemplate(int errorCode)
         case Errors::E_INHERITANCE_FROM_A_FINAL_CLASS_A_1: return L"Inheritance from a final class '%0'";
         case Errors::E_A_MODIFIER_CANNOT_BE_APPLIED_TO_THIS_DECLARATION_1: return L"'%0' modifier cannot be applied to this declaration";
         case Errors::E_ONLY_CLASSES_AND_CLASS_MEMBERS_MAY_BE_MARKED_WITH_FINAL: return L"Only classes and class members may be marked with 'final'";
+        case Errors::E_CANNOT_OVERRIDE_WITH_A_STORED_PROPERTY_A_1: return L"Cannot override with a stored property '%0'";
+        case Errors::E_VAR_OVERRIDES_A_FINAL_VAR: return L"Var overrides a 'final' var";
+        case Errors::E_INSTANCE_METHOD_OVERRIDES_A_FINAL_INSTANCE_METHOD: return L"Instance method overrides a 'final' instance method";
+        case Errors::E_SUBSCRIPT_OVERRIDES_A_FINAL_SUBSCRIPT: return L"Subscript overrides a 'final' subscript";
 
         case Errors::W_PARAM_CAN_BE_EXPRESSED_MORE_SUCCINCTLY_1: return L"'%0 %0' can be expressed more succinctly as '#%0'";
         case Errors::W_EXTRANEOUS_SHARTP_IN_PARAMETER_1: return L"Extraneous '#' in parameter: '%0' is already the keyword argument name";

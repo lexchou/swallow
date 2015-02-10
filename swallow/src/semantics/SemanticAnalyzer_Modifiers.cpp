@@ -146,36 +146,12 @@ static bool validateGeneralModifiers(SemanticAnalyzer* analyzer, const Declarati
 }
 
 /*!
- * Add flags to symbols identified by identifier/tuples
- */
-static void addFlags(SymbolRegistry* symbolRegistry, const PatternPtr& pattern, SymbolFlags flags)
-{
-    if(IdentifierPtr id = dynamic_pointer_cast<Identifier>(pattern))
-    {
-        SymbolPtr sym = symbolRegistry->getCurrentScope()->lookup(id->getIdentifier());
-        assert(sym != nullptr);
-        sym->setFlags(flags, true);
-    }
-    else if(TuplePtr tuple = dynamic_pointer_cast<Tuple>(pattern))
-    {
-        for(const PatternPtr& p : *tuple)
-        {
-            addFlags(symbolRegistry, p, flags);
-        }
-    }
-    else
-    {
-        assert(0 && "Cannot add flags to unsupported pattern type");
-    }
-}
-/*!
  * Validate declaration modifiers for value bindings
  */
 static bool validateDeclarationModifiers(SemanticAnalyzer* analyzer, const ValueBindingsPtr& bindings)
 {
     if(!validateGeneralModifiers(analyzer, bindings))
         return false;
-    SymbolRegistry* symbolRegistry = analyzer->getSymbolRegistry();
     SemanticContext* ctx = analyzer->getContext();
     TypePtr currentType = ctx->currentType;
     for(const ValueBindingPtr binding : *bindings)
@@ -190,12 +166,10 @@ static bool validateDeclarationModifiers(SemanticAnalyzer* analyzer, const Value
                 return analyzer->error(binding, Errors::E_LAZY_CANNOT_DESTRUCTURE_AN_INITIALIZER);
             if (ctx->currentFunction || !currentType || (currentType->getCategory() != Type::Struct && currentType->getCategory() != Type::Class))
                 return analyzer->error(binding, Errors::E_LAZY_IS_ONLY_VALID_FOR_MEMBERS_OF_A_STRUCT_OR_CLASS);
-
-            addFlags(symbolRegistry, binding->getName(), SymbolFlagLazy);
         }
-        if(bindings->hasModifier(DeclarationModifiers::Class) || bindings->hasModifier(DeclarationModifiers::Static))
+        if(bindings->hasModifier(DeclarationModifiers::Override))
         {
-            addFlags(symbolRegistry, binding->getName(), SymbolFlagStatic);
+            return analyzer->error(binding, Errors::E_CANNOT_OVERRIDE_WITH_A_STORED_PROPERTY_A_1, analyzer->toString(binding->getName()));
         }
     }
     return true;

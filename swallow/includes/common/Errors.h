@@ -160,7 +160,7 @@ struct SWALLOW_EXPORT Errors
         E_OPERATORS_MUST_HAVE_ONE_OR_TWO_ARGUMENTS,//Operators must have one or two arguments
         E_OPERATOR_MUST_BE_DECLARED_AS_PREFIX_POSTFIX_OR_INFIX,//Operator must be declared as 'prefix', 'postfix', or 'infix'
         E_A_MAY_ONLY_BE_DECLARED_AT_FILE_SCOPE_1, //'%0' may only be declared at file scope
-
+        E_CANNOT_OVERRIDE_WITH_A_STORED_PROPERTY_A_1,//Cannot override with a stored property 'a'
 
 
         E_GENERIC_ARGUMENTS_ARE_NOT_ALLOWED_ON_AN_EXTENSION,//Generic arguments are not allowed on an extension
@@ -202,6 +202,10 @@ struct SWALLOW_EXPORT Errors
         E_INHERITANCE_FROM_A_FINAL_CLASS_A_1,//Inheritance from a final class '%0'
         E_A_MODIFIER_CANNOT_BE_APPLIED_TO_THIS_DECLARATION_1,//'%0' modifier cannot be applied to this declaration
         E_ONLY_CLASSES_AND_CLASS_MEMBERS_MAY_BE_MARKED_WITH_FINAL,//Only classes and class members may be marked with 'final'
+        E_VAR_OVERRIDES_A_FINAL_VAR,//Var overrides a 'final' var
+        E_INSTANCE_METHOD_OVERRIDES_A_FINAL_INSTANCE_METHOD,//Instance method overrides a 'final' instance method
+        E_SUBSCRIPT_OVERRIDES_A_FINAL_SUBSCRIPT,//Subscript overrides a 'final' subscript
+
 
 
         W_PARAM_CAN_BE_EXPRESSED_MORE_SUCCINCTLY_1, // '%0 %0' can be expressed more succinctly as '#%0'

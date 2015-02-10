@@ -278,6 +278,11 @@ void DeclarationAnalyzer::checkForPropertyOverriding(const std::wstring& name, c
             error(node, Errors::E_CANNOT_OVERRIDE_MUTABLE_PROPERTY_WITH_READONLY_PROPERTY_A_1, name);
             return;
         }
+        if(matchedMember->hasFlags(SymbolFlagFinal))
+        {
+            error(node, Errors::E_VAR_OVERRIDES_A_FINAL_VAR);
+            return;
+        }
     }
 
 }
@@ -309,6 +314,8 @@ void DeclarationAnalyzer::visitComputedProperty(const ComputedPropertyPtr& node)
         flags |= SymbolFlagComputedProperty;
         if(ctx->currentType)
             flags |= SymbolFlagMember;
+        if(node->hasModifier(DeclarationModifiers::Final))
+            flags |= SymbolFlagFinal;
 
         SymbolPlaceHolderPtr symbol(new SymbolPlaceHolder(node->getName(), type, SymbolPlaceHolder::R_PROPERTY, flags));
         SymbolScope* scope = symbolRegistry->getCurrentScope();
@@ -461,6 +468,11 @@ void DeclarationAnalyzer::checkForSubscriptOverride(const Subscript& subscript, 
             error(node, Errors::E_CANNOT_OVERRIDE_MUTABLE_PROPERTY_WITH_READONLY_PROPERTY_A_1, L"subscript");
             return;
         }
+        if(matchedSubscript->flags & SymbolFlagFinal)
+        {
+            error(node, Errors::E_SUBSCRIPT_OVERRIDES_A_FINAL_SUBSCRIPT);
+            return;
+        }
     }
 
 }
@@ -498,6 +510,7 @@ void DeclarationAnalyzer::visitSubscript(const SubscriptDefPtr &node)
 
         //if (node->getGetter())
         {
+            ScopeGuard scope(static_cast<ScopedCodeBlock*>(node->getGetter().get()), semanticAnalyzer);
             getterType = this->createFunctionType(paramsList.begin(), paramsList.end(), retType, nullptr);
             node->getGetter()->setType(getterType);
             getter = FunctionSymbolPtr(new FunctionSymbol(L"subscript", getterType, node->getGetter()));
@@ -506,6 +519,7 @@ void DeclarationAnalyzer::visitSubscript(const SubscriptDefPtr &node)
         if (node->getSetter())
         {
             //TODO: replace nullptr to void
+            ScopeGuard scope(static_cast<ScopedCodeBlock*>(node->getSetter().get()), semanticAnalyzer);
             TypePtr funcType = this->createFunctionType(paramsList.begin(), paramsList.end(), symbolRegistry->getGlobalScope()->Void(), nullptr);
             node->getSetter()->setType(funcType);
             static_pointer_cast<TypeBuilder>(funcType)->addParameter(Parameter(retType));
@@ -514,7 +528,10 @@ void DeclarationAnalyzer::visitSubscript(const SubscriptDefPtr &node)
         }
         assert(getter != nullptr);
         TypeBuilderPtr t = static_pointer_cast<TypeBuilder>(ctx->currentType);
-        Subscript subscript(getterType->getParameters(), getterType->getReturnType(), getter, setter);
+        int flags = 0;
+        if(node->hasModifier(DeclarationModifiers::Final))
+            flags |= SymbolFlagFinal;
+        Subscript subscript(getterType->getParameters(), getterType->getReturnType(), getter, setter, flags);
         checkForSubscriptOverride(subscript, node);
         t->addSubscript(subscript);
     }
@@ -640,6 +657,8 @@ void DeclarationAnalyzer::visitFunctionDeclaration(const FunctionDefPtr& node)
 
         if(node->getModifiers() & (DeclarationModifiers::Class | DeclarationModifiers::Static))
             func->setFlags(SymbolFlagStatic, true);
+        if(node->hasModifier(DeclarationModifiers::Final))
+            func->setFlags(SymbolFlagFinal, true);
     }
 
 
@@ -709,12 +728,12 @@ void DeclarationAnalyzer::checkForFunctionOverriding(const std::wstring& name, c
     {
         std::vector<SymbolPtr> funcs;
         semanticAnalyzer->getMethodsFromType(ctx->currentType->getParentType(), name, (MemberFilter)((staticMember ? FilterStaticMember : 0) | (FilterLookupInExtension | FilterRecursive)), funcs);
-        bool matched = false;
+        SymbolPtr matched = nullptr;
         for(const SymbolPtr& func : funcs)
         {
             if(Type::equals(func->getType(), decl->getType()))
             {
-                matched = true;
+                matched = func;
                 break;
             }
         }
@@ -730,6 +749,11 @@ void DeclarationAnalyzer::checkForFunctionOverriding(const std::wstring& name, c
                 if (!matched)
                 {
                     error(node, Errors::E_METHOD_DOES_NOT_OVERRIDE_ANY_METHOD_FROM_ITS_SUPERCLASS);
+                    return;
+                }
+                if(matched->hasFlags(SymbolFlagFinal))
+                {
+                    error(node, Errors::E_INSTANCE_METHOD_OVERRIDES_A_FINAL_INSTANCE_METHOD);
                     return;
                 }
             }
