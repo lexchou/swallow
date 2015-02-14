@@ -57,6 +57,8 @@ class SWALLOW_EXPORT ValueBindings : public Declaration
 
         Iterator begin() {return valueBindings.begin();}
         Iterator end() {return valueBindings.end();}
+        std::list<ValueBindingPtr>::reverse_iterator rbegin() {return valueBindings.rbegin();}
+        std::list<ValueBindingPtr>::reverse_iterator rend() {return valueBindings.rend();}
 
         void insertAfter(const ValueBindingPtr& binding, const Iterator& iter);
     public://Node

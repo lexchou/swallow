@@ -142,7 +142,7 @@ public:
     /*!
      * This implementation will try to find the member from the type, and look up from extension as a fallback.
      */
-    SymbolPtr getMemberFromType(const TypePtr& type, const std::wstring& fieldName, MemberFilter filter);
+    SymbolPtr getMemberFromType(const TypePtr& type, const std::wstring& fieldName, MemberFilter filter, TypePtr* declaringType = nullptr);
 
     /*!
      * This implementation will try to all methods from the type, including defined in parent class or extension
@@ -155,7 +155,7 @@ private:
 
     void registerSymbol(const SymbolPlaceHolderPtr& symbol, const NodePtr& node);
 
-    SymbolPtr visitFunctionCall(bool mutatingSelf, const std::vector<SymbolPtr>& func, const ParenthesizedExpressionPtr& args, const PatternPtr& node);
+    SymbolPtr visitFunctionCall(bool mutatingSelf, std::vector<SymbolPtr>& func, const ParenthesizedExpressionPtr& args, const PatternPtr& node);
 private:
     void checkTupleDefinition(const TuplePtr& tuple, const ExpressionPtr& initializer);
     TypePtr evaluateType(const ExpressionPtr& expr);

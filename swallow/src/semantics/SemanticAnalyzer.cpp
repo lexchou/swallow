@@ -565,12 +565,12 @@ static SymbolPtr getMember(const TypePtr& type, const std::wstring& fieldName, M
     if (filter & FilterStaticMember)
         return type->getDeclaredStaticMember(fieldName);
     else
-        return type->getMember(fieldName);
+        return type->getDeclaredMember(fieldName);
 }
 /*!
  * This implementation will try to find the member from the type, and look up from extension as a fallback.
  */
-SymbolPtr SemanticAnalyzer::getMemberFromType(const TypePtr& type, const std::wstring& fieldName, MemberFilter filter)
+SymbolPtr SemanticAnalyzer::getMemberFromType(const TypePtr& type, const std::wstring& fieldName, MemberFilter filter, TypePtr* declaringType)
 {
     SymbolPtr ret = getMember(type, fieldName, filter);
     SymbolScope* scope = this->symbolRegistry->getFileScope();
@@ -586,9 +586,11 @@ SymbolPtr SemanticAnalyzer::getMemberFromType(const TypePtr& type, const std::ws
             }
         }
     }
+    if(ret && declaringType)
+        *declaringType = type;
     if(!ret && (filter & FilterRecursive) && type->getParentType())
     {
-        ret = getMemberFromType(type->getParentType(), fieldName, filter);
+        ret = getMemberFromType(type->getParentType(), fieldName, filter, declaringType);
     }
     return ret;
 }

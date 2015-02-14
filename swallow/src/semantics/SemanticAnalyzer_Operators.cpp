@@ -270,8 +270,11 @@ void SemanticAnalyzer::visitAssignment(const AssignmentPtr& node)
                 }
                 bool isSelf = self->getIdentifier() == L"self";
                 SymbolPtr member = nullptr;
+                TypePtr memberDeclaringType = nullptr;//which type declared this member
                 if(ma->getField())
-                    member = getMemberFromType(selfType, ma->getField()->getIdentifier(), (MemberFilter)((staticAccess ? FilterStaticMember : 0) | FilterLookupInExtension | FilterRecursive));
+                {
+                    member = getMemberFromType(selfType, ma->getField()->getIdentifier(), (MemberFilter) ((staticAccess ? FilterStaticMember : 0) | FilterLookupInExtension | FilterRecursive), &memberDeclaringType);
+                }
 
                 if(ma->getField() && !isSelf)
                 {
@@ -284,8 +287,12 @@ void SemanticAnalyzer::visitAssignment(const AssignmentPtr& node)
                 }
                 bool supressError = false;
                 if(isSelf && member && ctx.currentFunction && ctx.currentFunction->hasFlags(SymbolFlagInit) && member->hasFlags(SymbolFlagStoredProperty))
-                    supressError = true;//it's allowed to modify 'let' variable inside an initializer
-                if(!supressError && !staticAccess && selfType->getCategory() == Type::Struct && !selfSymbol->hasFlags(SymbolFlagWritable))
+                {
+                    //check if the member is defined in current type and not the super type
+                    if(Type::equals(memberDeclaringType, ctx.currentType))
+                        supressError = true;//it's allowed to modify 'let' variable inside an initializer
+                }
+                if(!supressError && !staticAccess && /*selfType->getCategory() == Type::Struct && */ !selfSymbol->hasFlags(SymbolFlagWritable))
                 {
                     error(self, Errors::E_CANNOT_ASSIGN_TO_A_IN_B_2, index, self->getIdentifier());
                     return;

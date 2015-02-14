@@ -304,8 +304,24 @@ SymbolPtr SemanticAnalyzer::getOverloadedFunction(bool mutatingSelf, const NodeP
     return matched;
 }
 
-SymbolPtr SemanticAnalyzer::visitFunctionCall(bool mutatingSelf, const std::vector<SymbolPtr>& funcs, const ParenthesizedExpressionPtr& args, const PatternPtr& node)
+SymbolPtr SemanticAnalyzer::visitFunctionCall(bool mutatingSelf, std::vector<SymbolPtr>& funcs, const ParenthesizedExpressionPtr& args, const PatternPtr& node)
 {
+    //filter out impossible candidates by argument count
+    {
+        vector<SymbolPtr> funcs2;
+        size_t argc = args->numExpressions();
+        for(const SymbolPtr& func : funcs)
+        {
+            TypePtr funcType = func->getType();
+            if(!funcType->hasVariadicParameters() && funcType->getParameters().size() < argc)
+                continue;
+            funcs2.push_back(func);
+        }
+        if(!funcs2.empty())
+            std::swap(funcs, funcs2);
+
+    }
+
     if(funcs.size() == 1)
     {
         SymbolPtr sym = funcs.front();
@@ -447,6 +463,7 @@ void SemanticAnalyzer::visitFunctionCall(const FunctionCallPtr& node)
             }
             else
                 getMethodsFromType(selfType, identifier,  (MemberFilter)(FilterLookupInExtension | FilterRecursive), funcs);
+
             if(funcs.empty())
             {
                 error(ma, Errors::E_DOES_NOT_HAVE_A_MEMBER_2, selfType->toString(), identifier);

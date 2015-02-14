@@ -129,7 +129,18 @@ TypePtr DeclarationAnalyzer::createFunctionType(const std::vector<ParametersNode
                 assert(paramType != nullptr);
             }
             assert(paramType != nullptr);
-            std::wstring externalName = param->isShorthandExternalName() ? param->getLocalName() : param->getExternalName();
+            std::wstring externalName;
+            if(param->isShorthandExternalName())
+            {
+                externalName = param->getLocalName();
+            }
+            else
+            {
+                if(param->getExternalName() != L"_")
+                    externalName = param->getExternalName();
+                else
+                    externalName = L"";
+            }
             parameterTypes.push_back(Parameter(externalName, param->isInout(), paramType));
         }
     }
@@ -815,9 +826,16 @@ void DeclarationAnalyzer::visitInit(const InitializerDefPtr& node)
         std::vector<Parameter> params;
         for (const ParameterNodePtr &param : *node->getParameters())
         {
-            //init's parameter always has an external name
+            //init's parameter always has an external name unless it's marked by _
             //local name will be used if external name is undeclared
-            const std::wstring &externalName = param->getExternalName().empty() ? param->getLocalName() : param->getExternalName();
+            std::wstring externalName;
+            if(param->getExternalName() != L"_")
+            {
+                if(param->getExternalName().empty())
+                    externalName = param->getLocalName();
+                else
+                    externalName = param->getExternalName();
+            }
             params.push_back(Parameter(externalName, param->isInout(), param->getType()));
         }
 

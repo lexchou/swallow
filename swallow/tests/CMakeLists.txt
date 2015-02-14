@@ -11,7 +11,7 @@ INCLUDE_DIRECTORIES(
 )
 SET( CMAKE_BUILD_TYPE Debug )
 SET(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/../../bin)
-SET(CMAKE_CXX_FLAGS "$ENV{CXXFLAGS} -O0 -Wall -g -ggdb -std=c++0x")
+SET(CMAKE_CXX_FLAGS "$ENV{CXXFLAGS} -O0 -Wall -g -std=c++0x")
 
 add_definitions(-DTRACE_NODE)
 
@@ -53,6 +53,7 @@ SET(SEMANTICS_SRC
     semantics/TestDeclarationOrder.cpp
     semantics/TestSubscripts.cpp
     semantics/TestInheritance.cpp
+    semantics/TestInitialization.cpp
     )
 
 ADD_EXECUTABLE(TestTokenizer

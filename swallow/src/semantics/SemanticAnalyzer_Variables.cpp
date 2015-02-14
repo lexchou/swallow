@@ -367,6 +367,19 @@ void SemanticAnalyzer::visitValueBindings(const ValueBindingsPtr& node)
 
     explodeValueBindings(node);
 
+    //this will make untyped bindings has the type in following forms:
+    //let a, b, c : Int
+    //a and b will both be Int
+    TypeNodePtr lastType = nullptr;
+    for(auto iter = node->rbegin(); iter != node->rend(); iter++)
+    {
+        ValueBindingPtr binding = *iter;
+        if(binding->getDeclaredType())
+            lastType = binding->getDeclaredType();
+        else
+            binding->setDeclaredType(lastType);
+
+    }
 
     if(node->isReadOnly() && ctx.currentType && ctx.currentType->getCategory() == Type::Protocol)
     {
