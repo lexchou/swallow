@@ -183,3 +183,21 @@ TEST(TestInitialization, ModifyConstantPropertiesDuringSubClassInitialization)
     ASSERT_EQ(L"a", error->items[0]);
     ASSERT_EQ(L"self", error->items[1]);
 }
+
+TEST(TestInitialization, ModifyConstantPropertiesDuringSubClassInitialization2)
+{
+    SEMANTIC_ANALYZE(L"class Base\n"
+            L"{\n"
+            L"    let a = 3\n"
+            L"}\n"
+            L"class Child : Base\n"
+            L"{\n"
+            L"    init()\n"
+            L"    {\n"
+            L"         a = 4\n"
+            L"    }\n"
+            L"}");
+    ASSERT_ERROR(Errors::E_CANNOT_ASSIGN_TO_A_IN_B_2);
+    ASSERT_EQ(L"a", error->items[0]);
+    ASSERT_EQ(L"self", error->items[1]);
+}

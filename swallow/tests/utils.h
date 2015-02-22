@@ -78,7 +78,7 @@ struct Tracer
     std::wstring content = s; \
     Swallow::GlobalScope* global = symbolRegistry.getGlobalScope(); (void)global; \
     Swallow::CompilerResults compilerResults; \
-    ScopedProgramPtr root = analyzeStatement(symbolRegistry, compilerResults, __FUNCTION__, content.c_str()); \
+    std::shared_ptr<Swallow::ScopedProgram> root = analyzeStatement(symbolRegistry, compilerResults, __FUNCTION__, content.c_str()); \
     Swallow::SymbolScope* scope = root ? root->getScope() : (Swallow::SymbolScope*)nullptr; \
     (void)scope; \
     const CompilerResult* error = nullptr; \
@@ -94,8 +94,11 @@ struct Tracer
 #define ASSERT_ERROR(e) error = getCompilerResultByError(compilerResults, e); \
     if(!error) { \
         dumpCompilerResults(compilerResults, content); \
-        GTEST_FATAL_FAILURE_("Expect compiler result " #e); \
-    }
+        if(compilerResults.numResults()) \
+            GTEST_FATAL_FAILURE_("Expect compiler result " #e); \
+        else \
+            GTEST_FATAL_FAILURE_("No error detected, expect compiler result " #e); \
+        }
 
 
 

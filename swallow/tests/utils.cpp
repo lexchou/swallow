@@ -128,9 +128,6 @@ Swallow::ScopedProgramPtr analyzeStatement(Swallow::SymbolRegistry& registry, Sw
     Parser parser(&nodeFactory, &compilerResults);
     parser.setFileName(L"<file>");
     ScopedProgramPtr ret = std::dynamic_pointer_cast<ScopedProgram>(parser.parse(str));
-//ScopedProgram* f;
-    //cdumpCompilerResults(compilerResults);
-//d.g();
     if(!ret)
         return ret;
     try

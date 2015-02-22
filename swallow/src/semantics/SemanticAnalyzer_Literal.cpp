@@ -376,6 +376,19 @@ void SemanticAnalyzer::visitIdentifier(const IdentifierPtr& id)
     SymbolScope* scope = NULL;
     declareImmediately(id->getIdentifier());
     symbolRegistry->lookupSymbol(id->getIdentifier(), &scope, &sym);
+    //not found by accesing from scope
+    //look up again if it belongs to a super class
+    if(!sym && ctx.currentType)
+    {
+        bool staticLookup = ctx.currentFunction && ctx.currentFunction->hasFlags(SymbolFlagStatic);
+        TypePtr type = ctx.currentType->getParentType();
+        for(; type; type = type->getParentType())
+        {
+            sym = staticLookup ? type->getDeclaredStaticMember(id->getIdentifier()) : type->getDeclaredMember(id->getIdentifier());
+            if(sym)
+                break;
+        }
+    }
     if(!sym)
     {
         error(id, Errors::E_USE_OF_UNRESOLVED_IDENTIFIER_1, id->getIdentifier());

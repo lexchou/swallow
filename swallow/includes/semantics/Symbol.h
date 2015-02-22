@@ -71,7 +71,10 @@ enum SymbolFlags
     //This is a computed property declared on a type
     SymbolFlagComputedProperty = 0x20000,
     //This is a final symbol, not allowed to be overridden
-    SymbolFlagFinal = 0x40000
+    SymbolFlagFinal = 0x40000,
+    //This symbol is nonmutating, different to SymbolFlagWritable, it means all its member are also not changable.
+    //e.g. self in a class has no SymbolFlagWritable and no SymbolFlagNonmutating, self in a struct has no SymbolFlagWritable but has SymbolFlagNonmutating
+    SymbolFlagNonmutating = 0x80000,
 };
 
 class SWALLOW_EXPORT Symbol

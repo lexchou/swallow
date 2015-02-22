@@ -217,6 +217,11 @@ private:
     bool expandOptional(const TypePtr& optionalType, ExpressionPtr& expr);
 
     /*!
+     * Expand variable access into self.XXXX if XXXX is defined in type hierachy
+     */
+    ExpressionPtr expandSelfAccess(const ExpressionPtr& expr);
+
+    /*!
      * Returns the final actual type of Optional in a sequence of Optional type chain.
      * e.g. T?????? will return T
      */

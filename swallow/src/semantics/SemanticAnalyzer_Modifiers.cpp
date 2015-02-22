@@ -228,6 +228,8 @@ static bool validateDeclarationModifiers(SemanticAnalyzer* analyzer, const Funct
  */
 void SemanticAnalyzer::validateDeclarationModifiers(const DeclarationPtr& declaration)
 {
+    if(declaration->hasModifier(DeclarationModifiers::_Generated))
+        return;// no checking for generated declarations
     NodeType::T nodeType = declaration->getNodeType();
     switch(nodeType)
     {

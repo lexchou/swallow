@@ -427,6 +427,54 @@ TypePtr SemanticAnalyzer::finalTypeOfOptional(const TypePtr& optionalType)
     TypePtr inner = optionalType->getGenericArguments()->get(0);
     return finalTypeOfOptional(inner);
 }
+/*!
+ * Expand variable access into self.XXXX if XXXX is defined in type hierachy
+ */
+ExpressionPtr SemanticAnalyzer::expandSelfAccess(const ExpressionPtr& expr)
+{
+    NodeType::T nodeType = expr->getNodeType();
+    switch(nodeType)
+    {
+        case NodeType::Identifier:
+        {
+            IdentifierPtr id = static_pointer_cast<Identifier>(expr);
+            const std::wstring& name = id->getIdentifier();
+            SymbolPtr sym = symbolRegistry->lookupSymbol(name);
+            if(sym && !sym->hasFlags(SymbolFlagMember))
+                return expr;// it refers to a non-member symbol
+            if(!ctx.currentFunction || ctx.currentFunction->hasFlags(SymbolFlagStatic))
+                return expr;// self access will not be expanded within a static/class method
+            if(!sym)
+            {
+                //check if it's defined in super class
+                TypePtr type = ctx.currentType;
+                bool found = false;
+                for(; type; type = type->getParentType())
+                {
+                    if(type->getDeclaredMember(name))
+                    {
+                        found = true;
+                        break;
+                    }
+                }
+                if(!found)//it's not a member, do not wrap it
+                    return expr;
+                //it's a member or defined in super class, wrap it as member access
+                NodeFactory* factory = expr->getNodeFactory();
+                IdentifierPtr self = factory->createIdentifier(*expr->getSourceInfo());
+                self->setIdentifier(L"self");
+                MemberAccessPtr ma = factory->createMemberAccess(*expr->getSourceInfo());
+                ma->setSelf(self);
+                ma->setField(id);
+                return ma;
+            }
+            return expr;
+        }
+        default:
+            //TODO other expressions is not supported yet.
+            return expr;
+    }
+}
 
 
 /*!
@@ -435,6 +483,7 @@ TypePtr SemanticAnalyzer::finalTypeOfOptional(const TypePtr& optionalType)
 ExpressionPtr SemanticAnalyzer::transformExpression(const TypePtr& contextualType, ExpressionPtr expr)
 {
     SCOPED_SET(ctx.contextualType, contextualType);
+    expr = expandSelfAccess(expr);
     expr->accept(this);
     if(!contextualType)
         return expr;

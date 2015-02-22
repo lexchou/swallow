@@ -230,8 +230,7 @@ TEST(TestProtocol, PropertyRequirement3)
         L"class MyClass : MyProtocol {"
         L"var a : Int {get { return 0 } set {}}\n"
         L"}");
-    ASSERT_EQ(0, compilerResults.numResults());
-
+    ASSERT_NO_ERRORS();
 }
 
 TEST(TestProtocol, PropertyRequirement4)
@@ -242,8 +241,7 @@ TEST(TestProtocol, PropertyRequirement4)
         L"class MyClass : MyProtocol {\n"
         L"var a : Int\n"
         L"}");
-    ASSERT_EQ(0, compilerResults.numResults());
-
+    ASSERT_NO_ERRORS();
 }
 
 TEST(TestProtocol, PropertyRequirement5)

@@ -40,6 +40,7 @@
 #include "ast/Closure.h"
 #include "ScopeOwner.h"
 #include "ast/FunctionDef.h"
+#include "ast/ComputedProperty.h"
 #include "Symbol.h"
 
 SWALLOW_NS_BEGIN
@@ -110,6 +111,19 @@ public:
 };
 typedef SymboledNode<FunctionDef, class FunctionSymbol> SymboledFunction;
 typedef SymboledNode<InitializerDef, class FunctionSymbol> SymboledInit;
+typedef std::shared_ptr<SymboledFunction> SymboledFunctionPtr;
+class SWALLOW_EXPORT ComposedComputedProperty : public ComputedProperty
+{
+public:
+    struct
+    {
+        SymboledFunctionPtr getter;
+        SymboledFunctionPtr setter;
+        SymboledFunctionPtr didSet;
+        SymboledFunctionPtr willSet;
+    } functions;
+
+};
 
 
 

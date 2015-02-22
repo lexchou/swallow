@@ -33,6 +33,7 @@
 #include "ast/ast.h"
 #include "common/CompilerResults.h"
 #include "common/Errors.h"
+#include <memory>
 using namespace Swallow;
 
 

@@ -50,8 +50,8 @@ void SemanticAnalyzer::registerSymbol(const SymbolPlaceHolderPtr& symbol, const 
 {
     SymbolScope* scope = symbolRegistry->getCurrentScope();
     NodeType::T nodeType = scope->getOwner()->getNodeType();
-    if(nodeType != NodeType::Program)
-        symbol->setFlags(SymbolFlagMember, true);
+    //if(nodeType != NodeType::Program)
+    //    symbol->setFlags(SymbolFlagMember, true);
     scope->addSymbol(symbol);
     switch(nodeType)
     {
@@ -390,7 +390,9 @@ void SemanticAnalyzer::visitValueBindings(const ValueBindingsPtr& node)
     int flags = SymbolFlagInitializing | SymbolFlagReadable;
     if(dynamic_cast<TypeDeclaration*>(symbolRegistry->getCurrentScope()->getOwner()))
         flags |= SymbolFlagMember;
-    if(!node->isReadOnly())
+    if(node->isReadOnly())
+        flags |= SymbolFlagNonmutating;
+    else
         flags |= SymbolFlagWritable;
     if(node->hasModifier(DeclarationModifiers::Static) || node->hasModifier(DeclarationModifiers::Class))
         flags |= SymbolFlagStatic;

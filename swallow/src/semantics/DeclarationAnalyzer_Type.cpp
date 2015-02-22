@@ -538,8 +538,7 @@ void DeclarationAnalyzer::visitProtocol(const ProtocolDefPtr& node)
     TypePtr type = defineType(node);
 
     SCOPED_SET(ctx->currentType, type);
-    for(auto decl : *node)
-        decl->accept(semanticAnalyzer);
+    visitDeclaration(node);
     validateDeclarationModifiers(node);
 }
 void DeclarationAnalyzer::visitExtension(const ExtensionDefPtr& node)

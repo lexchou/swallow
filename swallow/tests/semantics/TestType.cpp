@@ -135,8 +135,7 @@ TEST(TestType, InitializeClass)
 {
     SEMANTIC_ANALYZE(L"class cobject{var fd = -1}\n"
             L"let b = cobject()");
-    ASSERT_EQ(0, compilerResults.numResults());
-
+    ASSERT_NO_ERRORS();
 }
 
 TEST(TestType, InitsWithStoredProperties)
@@ -153,8 +152,7 @@ TEST(TestType, InitsWithStoredProperties)
             L"\n"
             L"var a = foo(_a : 3, _b : 4)\n"
             L"\n");
-    dumpCompilerResults(compilerResults);
-    ASSERT_EQ(0, compilerResults.numResults());
+    ASSERT_NO_ERRORS();
 }
 
 
@@ -164,5 +162,5 @@ TEST(TestType, LetWithoutInitializer)
             L"{"
             L"    let a : Int"
             L"}");
-    ASSERT_EQ(0, compilerResults.numResults());
+    ASSERT_NO_ERRORS();
 }

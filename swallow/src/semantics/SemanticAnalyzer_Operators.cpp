@@ -203,6 +203,12 @@ void SemanticAnalyzer::visitAssignment(const AssignmentPtr& node)
     declareImmediately(node->getOperator());
     node->setType(symbolRegistry->getGlobalScope()->Void());
     PatternPtr destination = node->getLHS();
+    if(ExpressionPtr expr = std::dynamic_pointer_cast<Expression>(destination))
+    {
+        expr = transformExpression(nullptr, expr);
+        node->setLHS(expr);
+        destination = expr;
+    }
     destination->accept(this);
     switch(destination->getNodeType())
     {
@@ -273,6 +279,7 @@ void SemanticAnalyzer::visitAssignment(const AssignmentPtr& node)
                 TypePtr memberDeclaringType = nullptr;//which type declared this member
                 if(ma->getField())
                 {
+
                     member = getMemberFromType(selfType, ma->getField()->getIdentifier(), (MemberFilter) ((staticAccess ? FilterStaticMember : 0) | FilterLookupInExtension | FilterRecursive), &memberDeclaringType);
                 }
 
@@ -289,13 +296,31 @@ void SemanticAnalyzer::visitAssignment(const AssignmentPtr& node)
                 if(isSelf && member && ctx.currentFunction && ctx.currentFunction->hasFlags(SymbolFlagInit) && member->hasFlags(SymbolFlagStoredProperty))
                 {
                     //check if the member is defined in current type and not the super type
-                    if(Type::equals(memberDeclaringType, ctx.currentType))
-                        supressError = true;//it's allowed to modify 'let' variable inside an initializer
+                    supressError = true;//it's allowed to modify 'let' variable inside an initializer
                 }
-                if(!supressError && !staticAccess && /*selfType->getCategory() == Type::Struct && */ !selfSymbol->hasFlags(SymbolFlagWritable))
+                //Write on a field of a non-mutating symbol
+                bool insideInit = ctx.currentFunction && ctx.currentFunction->hasFlags(SymbolFlagInit);
+                if(selfSymbol->hasFlags(SymbolFlagNonmutating) && !staticAccess)
                 {
-                    error(self, Errors::E_CANNOT_ASSIGN_TO_A_IN_B_2, index, self->getIdentifier());
-                    return;
+                    //assigning on constant variable
+                    if (selfType->getCategory() == Type::Struct)
+                    {
+                        if (!isSelf || !insideInit)
+                        {
+                            error(self, Errors::E_CANNOT_ASSIGN_TO_A_IN_B_2, index, self->getIdentifier());
+                            return;
+                        }
+                    }
+                }
+                if(isSelf && insideInit)
+                {
+                    //assigning on constant member inside an init function
+                    if(!Type::equals(memberDeclaringType, ctx.currentType))
+                    {
+                        //changing constant member that belongs to a super class is not allowed
+                        error(self, Errors::E_CANNOT_ASSIGN_TO_A_IN_B_2, index, self->getIdentifier());
+                        return;
+                    }
                 }
             }
             else

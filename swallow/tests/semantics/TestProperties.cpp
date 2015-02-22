@@ -433,6 +433,5 @@ TEST(TestProperties, TypeProperty2)
                     L"// prints \"10\"\n"
                     L"println(AudioChannel.maxInputLevelForAllChannels)"
     );
-    dumpCompilerResults(compilerResults, content);
-    ASSERT_EQ(0, compilerResults.numResults());
+    ASSERT_NO_ERRORS();
 }

@@ -81,3 +81,7 @@ DeinitializerDefPtr ScopedNodeFactory::createDeinitializer(const SourceInfo& sta
 {
     return NodeFactory::createDeinitializer(state);
 }
+ComputedPropertyPtr ScopedNodeFactory::createComputedProperty(const SourceInfo& state)
+{
+    return _(state, new ComposedComputedProperty());
+}

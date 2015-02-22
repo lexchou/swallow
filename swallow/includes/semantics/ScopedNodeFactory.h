@@ -47,8 +47,9 @@ public:
     virtual ClosurePtr createClosure(const SourceInfo& state) override;
 
     virtual FunctionDefPtr createFunction(const SourceInfo& state) override;
-    virtual InitializerDefPtr createInitializer(const SourceInfo& state);
-    virtual DeinitializerDefPtr createDeinitializer(const SourceInfo& state);
+    virtual InitializerDefPtr createInitializer(const SourceInfo& state) override;
+    virtual DeinitializerDefPtr createDeinitializer(const SourceInfo& state) override;
+    virtual ComputedPropertyPtr createComputedProperty(const SourceInfo& state) override;
 
 };
 

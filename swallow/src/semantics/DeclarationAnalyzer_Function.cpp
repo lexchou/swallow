@@ -45,6 +45,7 @@
 #include "semantics/SemanticContext.h"
 #include <set>
 #include <cassert>
+#include <ast/NodeFactory.h>
 
 USE_SWALLOW_NS
 using namespace std;
@@ -227,6 +228,7 @@ void DeclarationAnalyzer::visitClosure(const ClosurePtr& node)
 /*!
  * This will register a self symbol to getter/setter/willSet/didSet of a computed property
  */
+/*
 static void registerSelfToAccessor(const TypePtr& currentType, const CodeBlockPtr& accessor)
 {
 
@@ -240,6 +242,7 @@ static void registerSelfToAccessor(const TypePtr& currentType, const CodeBlockPt
         scope->addSymbol(super);
     }
 }
+*/
 void DeclarationAnalyzer::checkForPropertyOverriding(const std::wstring& name, const SymbolPlaceHolderPtr& decl, const ComputedPropertyPtr& node)
 {
     TypePtr type = ctx->currentType;
@@ -297,6 +300,33 @@ void DeclarationAnalyzer::checkForPropertyOverriding(const std::wstring& name, c
     }
 
 }
+/*!
+ * Create property accessor
+ */
+static SymboledFunctionPtr createPropertyAccessor(const ComputedPropertyPtr& node, bool mutating, const CodeBlockPtr& body, const std::wstring& suffix, const std::wstring& argName)
+{
+    NodeFactory* nodeFactory = node->getNodeFactory();
+    const SourceInfo* si = body ? body->getSourceInfo() : node->getSourceInfo();
+    SymboledFunctionPtr func =  static_pointer_cast<SymboledFunction>(nodeFactory->createFunction(*si));
+    func->setBody(body);
+    func->setKind(FunctionKind::FunctionKindNormal);
+    int modifiers = node->getModifiers() | DeclarationModifiers::_Generated;
+    if(mutating)
+        modifiers |= DeclarationModifiers::Mutating;
+    func->setModifiers(modifiers);
+    func->setName(node->getName() + suffix);
+    func->setReturnType(node->getDeclaredType());
+    ParametersNodePtr params = nodeFactory->createParameters(*si);
+    if(!argName.empty())
+    {
+        ParameterNodePtr param = nodeFactory->createParameter(*si);
+        param->setLocalName(argName);
+        param->setDeclaredType(node->getDeclaredType());
+        params->addParameter(param);
+    }
+    func->addParameters(params);
+    return func;
+}
 void DeclarationAnalyzer::visitComputedProperty(const ComputedPropertyPtr& node)
 {
     CodeBlockPtr didSet = node->getDidSet();
@@ -306,6 +336,7 @@ void DeclarationAnalyzer::visitComputedProperty(const ComputedPropertyPtr& node)
     TypePtr type = lookupType(node->getDeclaredType());
     assert(type != nullptr);
 
+    shared_ptr<ComposedComputedProperty> property = static_pointer_cast<ComposedComputedProperty>(node);
 
 
     if(ctx->flags & SemanticContext::FLAG_PROCESS_DECLARATION)
@@ -334,6 +365,49 @@ void DeclarationAnalyzer::visitComputedProperty(const ComputedPropertyPtr& node)
         declarationFinished(symbol->getName(), symbol, node);
         checkForPropertyOverriding(node->getName(), symbol, node);
         validateDeclarationModifiers(node);
+
+        SCOPED_SET(ctx->flags, (ctx->flags & (~SemanticContext::FLAG_PROCESS_IMPLEMENTATION)) | SemanticContext::FLAG_PROCESS_DECLARATION);
+        Type::Category currentCategory = ctx->currentType->getCategory();
+        bool isProtocol = currentCategory == Type::Protocol;
+        //create function for setter/getter/willSet/didSet
+        if(!isProtocol)
+        {
+            bool valueType = currentCategory == Type::Enum || currentCategory == Type::Struct;
+            if (getter)
+            {
+                property->functions.getter = createPropertyAccessor(node, !valueType, getter, L".getter", L"");
+                property->functions.getter->accept(semanticAnalyzer);
+            }
+
+
+            if (setter)// || didSet || willSet)
+            {
+                std::wstring arg = L"newValue";
+                if (!node->getSetterName().empty())
+                    arg = node->getSetterName();
+                property->functions.setter = createPropertyAccessor(node, true, setter, L".setter", arg);
+                property->functions.setter->accept(semanticAnalyzer);
+            }
+
+            if (didSet)
+            {
+                std::wstring arg = L"oldValue";
+                if (!node->getDidSetSetter().empty())
+                    arg = node->getDidSetSetter();
+                property->functions.didSet = createPropertyAccessor(node, true, didSet, L".didSet", arg);
+                property->functions.didSet->accept(semanticAnalyzer);
+            }
+
+            if (willSet)
+            {
+                std::wstring arg = L"newValue";
+                if (!node->getWillSetSetter().empty())
+                    arg = node->getWillSetSetter();
+                property->functions.willSet = createPropertyAccessor(node, true, willSet, L".willSet", arg);
+                property->functions.willSet->accept(semanticAnalyzer);
+            }
+        }
+
     }
     //prepare and visit each accessors
     if(ctx->flags & SemanticContext::FLAG_PROCESS_IMPLEMENTATION)
@@ -344,7 +418,16 @@ void DeclarationAnalyzer::visitComputedProperty(const ComputedPropertyPtr& node)
         params.push_back(Parameter(type));
         TypePtr setterType = Type::newFunction(params, symbolRegistry->getGlobalScope()->Void(), false);
 
-
+        SCOPED_SET(ctx->flags, (ctx->flags & (~SemanticContext::FLAG_PROCESS_DECLARATION)) | SemanticContext::FLAG_PROCESS_IMPLEMENTATION);
+        if(property->functions.getter)
+            property->functions.getter->accept(semanticAnalyzer);
+        if(property->functions.setter)
+            property->functions.setter->accept(semanticAnalyzer);
+        if(property->functions.willSet)
+            property->functions.willSet->accept(semanticAnalyzer);
+        if(property->functions.didSet)
+            property->functions.didSet->accept(semanticAnalyzer);
+        /*
         if (getter)
         {
             getter->setType(getterType);
@@ -388,6 +471,7 @@ void DeclarationAnalyzer::visitComputedProperty(const ComputedPropertyPtr& node)
             registerSelfToAccessor(ctx->currentType, didSet);
             cb->accept(this);
         }
+        */
     }
 }
 void DeclarationAnalyzer::visitAccessor(const CodeBlockPtr& accessor, const ParametersNodePtr& params, const SymbolPtr& setter)
@@ -638,11 +722,21 @@ void DeclarationAnalyzer::visitFunctionDeclaration(const FunctionDefPtr& node)
         if(ctx->currentType && (node->getModifiers() & (DeclarationModifiers::Class | DeclarationModifiers::Static)) == 0)
         {
             int flags = SymbolFlagReadable | SymbolFlagInitialized;
-            bool readonly = ctx->currentType->getCategory() == Type::Enum || ctx->currentType->getCategory() == Type::Struct;
-            if(readonly && node->hasModifier(DeclarationModifiers::Mutating))
-                readonly = false;
-            if(!readonly)
+            bool valueType = ctx->currentType->getCategory() == Type::Enum || ctx->currentType->getCategory() == Type::Struct;
+            if(valueType && node->hasModifier(DeclarationModifiers::Mutating))
+            {
+                //mutating function inside enum/struct
                 flags |= SymbolFlagWritable;
+            }
+            else if(valueType)
+            {
+                //fields are not-modifiable in value type without mutating keyword
+                flags |= SymbolFlagNonmutating;
+            }
+            else
+            {
+                //ref-type self symbol is read only but mutating
+            }
             SymbolPlaceHolderPtr self(new SymbolPlaceHolder(L"self", ctx->currentType, SymbolPlaceHolder::R_PARAMETER, flags));
             scope->addSymbol(self);
         }
@@ -656,8 +750,9 @@ void DeclarationAnalyzer::visitFunctionDeclaration(const FunctionDefPtr& node)
 
         //prepare function's type
         func = createFunctionSymbol(node, generic);
-        node->setType(func->getType());
-        node->getBody()->setType(func->getType());
+        TypePtr funcType = func->getType();
+        node->setType(funcType);
+        node->getBody()->setType(funcType);
 
         lookupType(node->getReturnType());
 
@@ -667,9 +762,15 @@ void DeclarationAnalyzer::visitFunctionDeclaration(const FunctionDefPtr& node)
             func->setFlags(SymbolFlagPostfix, true);
 
         if(node->getModifiers() & (DeclarationModifiers::Class | DeclarationModifiers::Static))
+        {
             func->setFlags(SymbolFlagStatic, true);
+            funcType->setFlags(SymbolFlagStatic, true);
+        }
         if(node->hasModifier(DeclarationModifiers::Final))
+        {
             func->setFlags(SymbolFlagFinal, true);
+            funcType->setFlags(SymbolFlagFinal, true);
+        }
     }
 
 
@@ -716,6 +817,8 @@ void DeclarationAnalyzer::checkForFunctionOverriding(const std::wstring& name, c
 {
     if(!ctx->currentType)
         return;//not for global function
+    if(node->hasModifier(DeclarationModifiers::_Generated))
+        return;//do not check for generated functions
     bool staticMember = decl->hasFlags(SymbolFlagStatic);
     //check if there's the same signature exists
     {
