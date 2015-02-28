@@ -29,6 +29,7 @@
  */
 #include "semantics/FunctionOverloadedSymbol.h"
 #include "semantics/FunctionSymbol.h"
+#include "semantics/Type.h"
 USE_SWALLOW_NS
 
 FunctionOverloadedSymbol::FunctionOverloadedSymbol(const std::wstring& name)
@@ -47,6 +48,18 @@ const std::wstring& FunctionOverloadedSymbol::getName() const
 int FunctionOverloadedSymbol::numOverloads()const
 {
     return functions.size();
+}
+FunctionSymbolPtr FunctionOverloadedSymbol::lookupByType(const TypePtr& type) const
+{
+    for(const FunctionSymbolPtr& func : functions)
+    {
+        TypePtr funcType = func->getType();
+        if(Type::equals(funcType, type))
+        {
+            return func;
+        }
+    }
+    return nullptr;
 }
 
 

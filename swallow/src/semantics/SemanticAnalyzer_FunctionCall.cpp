@@ -304,6 +304,22 @@ SymbolPtr SemanticAnalyzer::getOverloadedFunction(bool mutatingSelf, const NodeP
     return matched;
 }
 
+static void updateNodeType(const PatternPtr& node, const SymbolPtr& func)
+{
+    TypePtr type = func->getType();
+    if(type->hasFlags(SymbolFlagInit))
+    {
+        //it's an initializer, type is its declaring type
+        assert(func->getDeclaringType() != nullptr);
+        node->setType(func->getDeclaringType());
+    }
+    else
+    {
+        assert(type->getReturnType() != nullptr);
+        node->setType(type->getReturnType());
+    }
+}
+
 SymbolPtr SemanticAnalyzer::visitFunctionCall(bool mutatingSelf, std::vector<SymbolPtr>& funcs, const ParenthesizedExpressionPtr& args, const PatternPtr& node)
 {
     //filter out impossible candidates by argument count
@@ -332,8 +348,8 @@ SymbolPtr SemanticAnalyzer::visitFunctionCall(bool mutatingSelf, std::vector<Sym
             calculateFitScore(mutatingSelf, func, args, false);
             TypePtr type = func->getType();
             //check mutating function
-
-            node->setType(type->getReturnType());
+            updateNodeType(node, func);
+            //node->setType(type->getReturnType());
             return func;
         }
         else if(SymbolPtr symbol = std::dynamic_pointer_cast<SymbolPlaceHolder>(sym))
@@ -348,7 +364,8 @@ SymbolPtr SemanticAnalyzer::visitFunctionCall(bool mutatingSelf, std::vector<Sym
                 return nullptr;
             }
             calculateFitScore(mutatingSelf, symbol, args, false);
-            node->setType(symbol->getType()->getReturnType());
+            //node->setType(symbol->getType()->getReturnType());
+            updateNodeType(node, symbol);
             return symbol;
         }
         else
@@ -361,7 +378,8 @@ SymbolPtr SemanticAnalyzer::visitFunctionCall(bool mutatingSelf, std::vector<Sym
     {
         SymbolPtr matched = getOverloadedFunction(mutatingSelf, node, funcs, args);
         assert(matched != nullptr && matched->getType()->getCategory() == Type::Function);
-        node->setType(matched->getType()->getReturnType());
+        //node->setType(matched->getType()->getReturnType());
+        updateNodeType(node, matched);
         return matched;
     }
 
@@ -436,19 +454,25 @@ void SemanticAnalyzer::visitFunctionCall(const FunctionCallPtr& node)
 
             if(identifier == L"init")
             {
-                if(ma->getSelf()->getNodeType() == NodeType::Identifier && static_pointer_cast<Identifier>(ma->getSelf())->getIdentifier() == L"self")
+                if(ma->getSelf()->getNodeType() == NodeType::Identifier)
                 {
-                    //it must be inside a init
-                    if(!ctx.currentFunction || !ctx.currentFunction->hasFlags(SymbolFlagInit))
+                    const wstring& name = static_pointer_cast<Identifier>(ma->getSelf())->getIdentifier();
+                    bool insideInit = ctx.currentFunction && ctx.currentFunction->hasFlags(SymbolFlagInit);
+                    if(!insideInit)
                     {
-                        error(ma, Errors::E_INITIALIZER_DELEGATION_CAN_ONLY_OCCUR_WITHIN_AN_INITIALIZER);
+                        if(name == L"self")
+                        {
+                            error(ma, Errors::E_INITIALIZER_DELEGATION_CAN_ONLY_OCCUR_WITHIN_AN_INITIALIZER);
+                            return;
+                        }
+                        if(name == L"super")
+                        {
+                            error(ma, Errors::E_SUPER_INIT_CANNOT_BE_CALLED_OUTSIDE_OF_AN_INITIALIZER);
+                            return;
+                        }
+                        error(ma, Errors::E_INIT_CAN_ONLY_REFER_TO_THE_INITIALIZERS_OF_SELF);
                         return;
                     }
-                }
-                else
-                {
-                    error(ma, Errors::E_INIT_CAN_ONLY_REFER_TO_THE_INITIALIZERS_OF_SELF);
-                    return;
                 }
             }
             vector<SymbolPtr> funcs;

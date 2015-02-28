@@ -38,43 +38,46 @@ typedef std::shared_ptr<class Type> TypePtr;
 enum SymbolFlags
 {
     //The symbol is still being initialized, used to detect uninitialized symbol used by another symbol's initialization
-    SymbolFlagInitializing = 1,
+    SymbolFlagInitializing = 1 << 0,
     //The symbol is already initialized
-    SymbolFlagInitialized = 2,
+    SymbolFlagInitialized = 1 << 1,
     //The symbol is a member symbol, which belongs to a type or an instance
-    SymbolFlagMember = 4,
+    SymbolFlagMember = 1 << 2,
     //The symbol is writable, e.g. computed property declared with a setter, or variable declared by *var*
-    SymbolFlagWritable = 8,
-    //The symbol is readable
-    SymbolFlagReadable = 0x10,
-    //A temporary variable used for some intermediate works.
-    SymbolFlagTemporary = 0x20,
-    //The symbol is declared with a initializer
-    SymbolFlagHasInitializer = 0x40,
-    //Static members can be accessed directly from type
-    SymbolFlagStatic = 0x80,
-    //The symbol is a type's init, init function cannot be hold by a value binding, and cannot have return value
-    SymbolFlagInit = 0x100,
-    //The symbol is a type's deinit, deinit cannot have return value
-    SymbolFlagDeinit = 0x200,
-    SymbolFlagPrefix = 0x400,
-    SymbolFlagInfix = 0x800,
-    SymbolFlagPostfix = 0x1000,
-    //The symbol is declared through extension
-    SymbolFlagExtension = 0x2000,
-    //The variable is lazy
-    SymbolFlagLazy = 0x4000,
-    //The function is mutating
-    SymbolFlagMutating = 0x8000,
-    //This is a stored property declared on a type
-    SymbolFlagStoredProperty = 0x10000,
-    //This is a computed property declared on a type
-    SymbolFlagComputedProperty = 0x20000,
-    //This is a final symbol, not allowed to be overridden
-    SymbolFlagFinal = 0x40000,
+    SymbolFlagWritable = 1 << 3,
     //This symbol is nonmutating, different to SymbolFlagWritable, it means all its member are also not changable.
     //e.g. self in a class has no SymbolFlagWritable and no SymbolFlagNonmutating, self in a struct has no SymbolFlagWritable but has SymbolFlagNonmutating
-    SymbolFlagNonmutating = 0x80000,
+    SymbolFlagNonmutating = 1 << 4,
+    //The function is mutating
+    SymbolFlagMutating = 1 << 5,
+    //The symbol is readable
+    SymbolFlagReadable = 1 << 6,
+    //A temporary variable used for some intermediate works.
+    SymbolFlagTemporary = 1 << 7,
+    //The symbol is declared with a initializer
+    SymbolFlagHasInitializer = 1 << 8,
+    //Static members can be accessed directly from type
+    SymbolFlagStatic = 1 << 9,
+    //The symbol is a type's init, init function cannot be hold by a value binding, and cannot have return value
+    SymbolFlagInit = 1 << 10,
+    //The symbol is a type's convenience init, it's not allowed to call another convenience init inside a convenience initializer
+    //A convenience initializer can have SymbolFlagInit and SymbolFlagConvenienceInit both.
+    SymbolFlagConvenienceInit = 1 << 11,
+    //The symbol is a type's deinit, deinit cannot have return value
+    SymbolFlagDeinit = 1 << 12,
+    SymbolFlagPrefix = 1 << 13,
+    SymbolFlagInfix = 1 << 14,
+    SymbolFlagPostfix = 1 << 15,
+    //The symbol is declared through extension
+    SymbolFlagExtension = 1 << 16,
+    //The variable is lazy
+    SymbolFlagLazy = 1 << 17,
+    //This is a stored property declared on a type
+    SymbolFlagStoredProperty = 1 << 18,
+    //This is a computed property declared on a type
+    SymbolFlagComputedProperty = 1 << 19,
+    //This is a final symbol, not allowed to be overridden
+    SymbolFlagFinal = 1 << 20,
 };
 
 class SWALLOW_EXPORT Symbol

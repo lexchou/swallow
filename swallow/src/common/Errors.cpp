@@ -206,6 +206,13 @@ std::wstring Errors::getErrorTemplate(int errorCode)
         case Errors::E_VAR_OVERRIDES_A_FINAL_VAR: return L"Var overrides a 'final' var";
         case Errors::E_INSTANCE_METHOD_OVERRIDES_A_FINAL_INSTANCE_METHOD: return L"Instance method overrides a 'final' instance method";
         case Errors::E_SUBSCRIPT_OVERRIDES_A_FINAL_SUBSCRIPT: return L"Subscript overrides a 'final' subscript";
+        case Errors::E_SUPER_INIT_CANNOT_BE_CALLED_OUTSIDE_OF_AN_INITIALIZER: return L"'super.init' cannot be called outside of an initializer";
+        case Errors::E_SUPER_INIT_ISNT_CALLED_BEFORE_RETURNING_FROM_INITIALIZER: return L"Super.init isn't called before returning from initializer";
+        case Errors::E_SELF_INIT_ISNT_CALLED_ON_ALL_PATHS_IN_DELEGATING_INITIALIZER: return L"Self.init isn't called on all paths in delegating initializer";
+        case Errors::E_SELF_INIT_CALLED_MULTIPLE_TIMES_IN_INITIALIZER: return L"Self.init called multiple times in initializer";
+        case Errors::E_INITIALIZER_DELEGATION_CAN_ONLY_OCCUR_WITHIN_AN_INITIALIZER: return L"Initializer delegation can only occur within an initializer";
+        case Errors::E_DESIGNATED_INITIALIZER_FOR_A_CANNOT_DELEGATE_1: return L"Designated initializer for 'Base' cannot delegate(with 'self.init'); did you mean this to be a convenience initializer?";
+        case Errors::E_SUPER_INIT_CALLED_MULTIPLE_TIMES_IN_INITIALIZER: return L"Self.init called multiple times in initializer";
 
         case Errors::W_PARAM_CAN_BE_EXPRESSED_MORE_SUCCINCTLY_1: return L"'%0 %0' can be expressed more succinctly as '#%0'";
         case Errors::W_EXTRANEOUS_SHARTP_IN_PARAMETER_1: return L"Extraneous '#' in parameter: '%0' is already the keyword argument name";

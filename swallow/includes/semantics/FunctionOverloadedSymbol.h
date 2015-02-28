@@ -47,6 +47,11 @@ public:
     void add(const FunctionSymbolPtr& func);
     void add(const FunctionOverloadedSymbolPtr& funcs);
 
+    /*!
+     * Lookup a inner function symbol that has given type
+     */
+    FunctionSymbolPtr lookupByType(const TypePtr& type) const;
+
     int numOverloads()const;
 
     std::vector<FunctionSymbolPtr>::iterator begin() { return functions.begin();}

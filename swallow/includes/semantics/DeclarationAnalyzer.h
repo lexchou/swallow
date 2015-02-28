@@ -67,7 +67,7 @@ public:
     virtual void visitDeinit(const DeinitializerDefPtr& node) override;
     virtual void visitInit(const InitializerDefPtr& node) override;
     virtual void visitCodeBlock(const CodeBlockPtr &node) override;
-    void visitAccessor(const CodeBlockPtr& accessor, const ParametersNodePtr& params, const SymbolPtr& setter);
+    void visitAccessor(const CodeBlockPtr& accessor, const ParametersNodePtr& params, const SymbolPtr& setter, int modifiers);
     virtual void visitComputedProperty(const ComputedPropertyPtr& node) override;
 
     /*!

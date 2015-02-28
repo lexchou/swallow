@@ -216,6 +216,24 @@ TypePtr DeclarationAnalyzer::defineType(const std::shared_ptr<TypeDeclaration>& 
     return type;
 }
 
+/*!
+ * Calculates the number of designated initializers
+ */
+static int numDesignatedInitializers(const FunctionOverloadedSymbolPtr& initializers)
+{
+    if(!initializers)
+        return 0;
+    int total = 0;
+    for(const FunctionSymbolPtr& init : *initializers)
+    {
+        if(!init->getType()->hasFlags(SymbolFlagConvenienceInit))
+        {
+            total++;
+        }
+    }
+    return total;
+}
+
 void DeclarationAnalyzer::prepareDefaultInitializers(const TypePtr& type)
 {
 
@@ -226,41 +244,75 @@ void DeclarationAnalyzer::prepareDefaultInitializers(const TypePtr& type)
         1.2) Skip this rule if it's a class. A default initializer with all let/var fields as initializer's parameters with the same external name,
             the order of the parameters are the exactly the same as them defined in structure
     2) Compiler will not generate initializers if there's custom initializers
+    3) Convenience initializers will not be counted
      */
     FunctionOverloadedSymbolPtr initializers = type->getDeclaredInitializer();
-    if(initializers && initializers->numOverloads() > 0)
-        return;
-
-    bool createDefaultInit = true;
-    vector<Parameter> initParams;
-    if(type->getCategory() == Type::Struct)
+    int designatedInitializers = numDesignatedInitializers(initializers);
+    if(designatedInitializers == 0)
     {
-        //check all fields if they all have initializer
-        for (auto sym : type->getDeclaredStoredProperties())
+        bool createDefaultInit = true;
+        vector<Parameter> initParams;
+        if (type->getCategory() == Type::Struct)
         {
-            SymbolPlaceHolderPtr s = dynamic_pointer_cast<SymbolPlaceHolder>(sym);
-            if(!s || sym->hasFlags(SymbolFlagTemporary))
-                continue;
-            initParams.push_back(Parameter(sym->getName(), false, sym->getType()));
-            //do not create default init if there's a variable has no initializer
-            if (!s->hasFlags(SymbolFlagHasInitializer))
-                createDefaultInit = false;
+            //check all fields if they all have initializer
+            for (auto sym : type->getDeclaredStoredProperties())
+            {
+                SymbolPlaceHolderPtr s = dynamic_pointer_cast<SymbolPlaceHolder>(sym);
+                if (!s || sym->hasFlags(SymbolFlagTemporary))
+                    continue;
+                initParams.push_back(Parameter(sym->getName(), false, sym->getType()));
+                //do not create default init if there's a variable has no initializer
+                if (!s->hasFlags(SymbolFlagHasInitializer))
+                    createDefaultInit = false;
+            }
+        }
+        GlobalScope* global = symbolRegistry->getGlobalScope();
+        if (createDefaultInit)
+        {
+            //apply rule 1
+            std::vector<Parameter> params;
+            TypePtr initType = Type::newFunction(params, global->Void(), false);
+            initType->setFlags(SymbolFlagInit, true);
+            FunctionSymbolPtr initializer(new FunctionSymbol(L"init", initType, nullptr));
+            declarationFinished(initializer->getName(), initializer, nullptr);
+        }
+        if (type->getCategory() == Type::Struct && !initParams.empty())
+        {
+            TypePtr initType = Type::newFunction(initParams, global->Void(), false);
+            initType->setFlags(SymbolFlagInit, true);
+            FunctionSymbolPtr initializer(new FunctionSymbol(L"init", initType, nullptr));
+            declarationFinished(initializer->getName(), initializer, nullptr);
         }
     }
-    if(createDefaultInit)
+    //inherit designated initializers from parent type
+    if(type->getParentType() && type->getCategory() == Type::Class)
     {
-        //apply rule 1
-        std::vector<Parameter> params;
-        TypePtr initType = Type::newFunction(params, type, false);
-        std::wstring s = initType->toString();
-        FunctionSymbolPtr initializer(new FunctionSymbol(L"init", initType, nullptr));
-        declarationFinished(initializer->getName(), initializer, nullptr);
-    }
-    if(type->getCategory() == Type::Struct && !initParams.empty())
-    {
-        TypePtr initType = Type::newFunction(initParams, type, false);
-        FunctionSymbolPtr initializer(new FunctionSymbol(L"init", initType, nullptr));
-        declarationFinished(initializer->getName(), initializer, nullptr);
+        TypeBuilderPtr builder = static_pointer_cast<TypeBuilder>(type);
+        if(!initializers)
+        {
+            initializers = FunctionOverloadedSymbolPtr(new FunctionOverloadedSymbol(L"init"));
+            builder->setInitializer(initializers);
+        }
+        TypePtr parent = type->getParentType();
+        FunctionOverloadedSymbolPtr baseInitializers = parent->getDeclaredInitializer();
+        for(const FunctionSymbolPtr& baseInitializer : *baseInitializers)
+        {
+            //skip convenience initializer
+            if(baseInitializer->hasFlags(SymbolFlagConvenienceInit))
+                continue;
+            //check if it's defined in current type
+            TypePtr initType = baseInitializer->getType();
+            FunctionSymbolPtr initializer = initializers->lookupByType(initType);
+            if(!initializer)
+            {
+                //this initializer exists in base type, but not in current type
+                //so we need to create it in current type
+                initializer = FunctionSymbolPtr(new FunctionSymbol(L"init", initType, nullptr));
+                //initializers->add(initializer);
+                builder->addMember(initializer);
+            }
+
+        }
     }
 }
 

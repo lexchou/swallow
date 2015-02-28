@@ -315,11 +315,15 @@ void SemanticAnalyzer::visitAssignment(const AssignmentPtr& node)
                 if(isSelf && insideInit)
                 {
                     //assigning on constant member inside an init function
-                    if(!Type::equals(memberDeclaringType, ctx.currentType))
+                    bool constantMember = member && !member->hasFlags(SymbolFlagWritable);
+                    if(constantMember)
                     {
-                        //changing constant member that belongs to a super class is not allowed
-                        error(self, Errors::E_CANNOT_ASSIGN_TO_A_IN_B_2, index, self->getIdentifier());
-                        return;
+                        if (!Type::equals(memberDeclaringType, ctx.currentType))
+                        {
+                            //changing constant member that belongs to a super class is not allowed
+                            error(self, Errors::E_CANNOT_ASSIGN_TO_A_IN_B_2, index, self->getIdentifier());
+                            return;
+                        }
                     }
                 }
             }

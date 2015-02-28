@@ -205,6 +205,13 @@ struct SWALLOW_EXPORT Errors
         E_VAR_OVERRIDES_A_FINAL_VAR,//Var overrides a 'final' var
         E_INSTANCE_METHOD_OVERRIDES_A_FINAL_INSTANCE_METHOD,//Instance method overrides a 'final' instance method
         E_SUBSCRIPT_OVERRIDES_A_FINAL_SUBSCRIPT,//Subscript overrides a 'final' subscript
+        E_SUPER_INIT_CANNOT_BE_CALLED_OUTSIDE_OF_AN_INITIALIZER,//'super.init' cannot be called outside of an initializer
+        E_SUPER_INIT_ISNT_CALLED_BEFORE_RETURNING_FROM_INITIALIZER,//Super.init isn't called before returning from initializer
+        E_SELF_INIT_ISNT_CALLED_ON_ALL_PATHS_IN_DELEGATING_INITIALIZER,//Self.init isn't called on all paths in delegating initializer
+        E_SELF_INIT_CALLED_MULTIPLE_TIMES_IN_INITIALIZER,//Self.init called multiple times in initializer
+        E_DESIGNATED_INITIALIZER_FOR_A_CANNOT_DELEGATE_1,//Designated initializer for 'Base' cannot delegate(with 'self.init'); did you mean this to be a convenience initializer?
+        E_SUPER_INIT_CALLED_MULTIPLE_TIMES_IN_INITIALIZER,//Self.init called multiple times in initializer
+
 
 
 

@@ -174,7 +174,7 @@ TEST(TestInitialization, ModifyConstantPropertiesDuringSubClassInitialization)
         L"}\n"
         L"class Child : Base\n"
         L"{\n"
-        L"    init()\n"
+        L"    override init()\n"
         L"    {\n"
         L"         self.a = 4\n"
         L"    }\n"
@@ -192,7 +192,7 @@ TEST(TestInitialization, ModifyConstantPropertiesDuringSubClassInitialization2)
             L"}\n"
             L"class Child : Base\n"
             L"{\n"
-            L"    init()\n"
+            L"    override init()\n"
             L"    {\n"
             L"         a = 4\n"
             L"    }\n"
@@ -200,4 +200,348 @@ TEST(TestInitialization, ModifyConstantPropertiesDuringSubClassInitialization2)
     ASSERT_ERROR(Errors::E_CANNOT_ASSIGN_TO_A_IN_B_2);
     ASSERT_EQ(L"a", error->items[0]);
     ASSERT_EQ(L"self", error->items[1]);
+}
+
+TEST(TestInitialization, DefaultInitializer)
+{
+    SEMANTIC_ANALYZE(L"class ShoppingListItem {\n"
+            L"    var name: String?\n"
+            L"    var quantity = 1\n"
+            L"    var purchased = false\n"
+            L"}\n"
+            L"var item = ShoppingListItem()");
+    ASSERT_NO_ERRORS();
+}
+TEST(TestInitialization, MemberwiseInitializer)
+{
+    SEMANTIC_ANALYZE(L"struct Size {\n"
+            L"    var width = 0.0, height = 0.0\n"
+            L"}\n"
+            L"let twoByTwo = Size(width: 2.0, height: 2.0)");
+    ASSERT_NO_ERRORS();
+}
+
+TEST(TestInitialization, InitializerDelegation)
+{
+    SEMANTIC_ANALYZE(L"struct Size {\n"
+            "    var width = 0.0, height = 0.0\n"
+            "}\n"
+            "struct Point {\n"
+            "    var x = 0.0, y = 0.0\n"
+            "}\n"
+            "struct Rect {\n"
+            "    var origin = Point()\n"
+            "    var size = Size()\n"
+            "    init() {}\n"
+            "    init(origin: Point, size: Size) {\n"
+            "        self.origin = origin\n"
+            "        self.size = size\n"
+            "    }\n"
+            "    init(center: Point, size: Size) {\n"
+            "        let originX = center.x - (size.width / 2)\n"
+            "        let originY = center.y - (size.height / 2)\n"
+            "        self.init(origin: Point(x: originX, y: originY), size: size)\n"
+            "    }\n"
+            "}\n"
+            "let basicRect = Rect()\n"
+            "let originRect = Rect(origin: Point(x: 2.0, y: 2.0),\n"
+            "    size: Size(width: 5.0, height: 5.0))\n"
+            "let centerRect = Rect(center: Point(x: 4.0, y: 4.0),\n"
+            "    size: Size(width: 3.0, height: 3.0))");
+    ASSERT_NO_ERRORS();
+}
+
+TEST(TestInitialization, OverrideInit)
+{
+    SEMANTIC_ANALYZE(L"class Vehicle {\n"
+            L"    var numberOfWheels = 0\n"
+            L"    init() {\n"
+            L"    }\n"
+            L"    var description: String {\n"
+            L"        return \"\\(numberOfWheels) wheel(s)\"\n"
+            L"    }\n"
+            L"}\n"
+            L"\n"
+            L"class Bicycle: Vehicle {\n"
+            L"    override init() {\n"
+            L"        super.init()\n"
+            L"        numberOfWheels = 2\n"
+            L"    }\n"
+            L"}\n"
+            L"let bicycle = Bicycle()\n"
+            L"println(\"Bicycle: \\(bicycle.description)\")");
+    ASSERT_NO_ERRORS();
+}
+
+TEST(TestInitialization, InitializerDelegationOutsideInitializer)
+{
+    SEMANTIC_ANALYZE(L"class Vehicle {\n"
+            L"}\n"
+            L"\n"
+            L"class Bicycle: Vehicle {\n"
+            L"    func foo()\n"
+            L"    {\n"
+            L"        self.init();\n"
+            L"    }\n"
+            L"}");
+    ASSERT_ERROR(Errors::E_INITIALIZER_DELEGATION_CAN_ONLY_OCCUR_WITHIN_AN_INITIALIZER);
+}
+TEST(TestInitialization, SuperInitOutsideInitializer)
+{
+    SEMANTIC_ANALYZE(L"class Vehicle {\n"
+            L"}\n"
+            L"\n"
+            L"class Bicycle: Vehicle {\n"
+            L"    func foo()\n"
+            L"    {\n"
+            L"        super.init();\n"
+            L"    }\n"
+            L"}");
+    ASSERT_ERROR(Errors::E_SUPER_INIT_CANNOT_BE_CALLED_OUTSIDE_OF_AN_INITIALIZER);
+}
+
+TEST(TestInitialization, ConvenienceInitializer)
+{
+    SEMANTIC_ANALYZE(L"class Food {\n"
+            L"    var name: String\n"
+            L"    init(name: String) {\n"
+            L"        self.name = name\n"
+            L"    }\n"
+            L"    convenience init() {\n"
+            L"        self.init(name: \"[Unnamed]\")\n"
+            L"    }\n"
+            L"}");
+    ASSERT_NO_ERRORS();
+}
+
+TEST(TestInitialization, OverrideConvenienceInitializer)
+{
+    SEMANTIC_ANALYZE(L"class Food {\n"
+            L"    var name: String\n"
+            L"    init(name: String) {\n"
+            L"        self.name = name\n"
+            L"    }\n"
+            L"    convenience init() {\n"
+            L"        self.init(name: \"[Unnamed]\")\n"
+            L"    }\n"
+            L"}\n"
+            L"class RecipeIngredient: Food {\n"
+            L"    var quantity: Int\n"
+            L"    init(name: String, quantity: Int) {\n"
+            L"        self.quantity = quantity\n"
+            L"        super.init(name: name)\n"
+            L"    }\n"
+            L"    override convenience init(name: String) {\n"
+            L"        self.init(name: name, quantity: 1)\n"
+            L"    }\n"
+            L"}\n"
+            L"let oneMysteryItem = RecipeIngredient()\n"
+            L"let oneBacon = RecipeIngredient(name: \"Bacon\")\n"
+            L"let sixEggs = RecipeIngredient(name: \"Eggs\", quantity: 6)");
+    ASSERT_NO_ERRORS();
+}
+
+TEST(TestInitialization, SelfInitIsntCalledOnAllPaths)
+{
+    SEMANTIC_ANALYZE(L"class Base\n"
+            L"{\n"
+            L"    init(a : Int)\n"
+            L"    {\n"
+            L"    }\n"
+            L"    convenience init(a : Bool)\n"
+            L"    {\n"
+            L"        if(a)\n"
+            L"        {\n"
+            L"            self.init(a : 3);\n"
+            L"        }\n"
+            L"        else\n"
+            L"        {\n"
+            L"            \n"
+            L"        }\n"
+            L"    }\n"
+            L"}");
+    ASSERT_ERROR(Errors::E_SELF_INIT_ISNT_CALLED_ON_ALL_PATHS_IN_DELEGATING_INITIALIZER);
+}
+TEST(TestInitialization, SelfInitIsntCalledOnAllPaths2)
+{
+    SEMANTIC_ANALYZE(L"class Base\n"
+            L"{\n"
+            L"    init(a : Int)\n"
+            L"    {\n"
+            L"    }\n"
+            L"    convenience init(a : Bool)\n"
+            L"    {\n"
+            L"        if(a)\n"
+            L"        {\n"
+            L"            self.init(a : 3);\n"
+            L"        }\n"
+            L"    }\n"
+            L"}");
+    ASSERT_ERROR(Errors::E_SELF_INIT_ISNT_CALLED_ON_ALL_PATHS_IN_DELEGATING_INITIALIZER);
+}
+TEST(TestInitialization, SelfInitIsntCalledOnAllPaths3)
+{
+    SEMANTIC_ANALYZE(L"class Base\n"
+            L"{\n"
+            L"    init(a : Int)\n"
+            L"    {\n"
+            L"    }\n"
+            L"    convenience init(a : Bool)\n"
+            L"    {\n"
+            L"    }\n"
+            L"}");
+    ASSERT_ERROR(Errors::E_SELF_INIT_ISNT_CALLED_ON_ALL_PATHS_IN_DELEGATING_INITIALIZER);
+}
+TEST(TestInitialization, SelfInitIsntCalledOnAllPaths4)
+{
+    SEMANTIC_ANALYZE(L"class Base\n"
+            L"{\n"
+            L"    convenience init(a : Bool)\n"
+            L"    {\n"
+            L"        self.init();\n"
+            L"    }\n"
+            L"}");
+    ASSERT_NO_ERRORS();
+}
+TEST(TestInitialization, SelfInitIsntCalledOnAllPaths5)
+{
+    SEMANTIC_ANALYZE(L"class Base\n"
+            L"{\n"
+            L"    init(a : Int)\n"
+            L"    {\n"
+            L"    }\n"
+            L"    convenience init(a : Bool)\n"
+            L"    {\n"
+            L"        if(a)\n"
+            L"        {\n"
+            L"            self.init(a : 3);\n"
+            L"        }\n"
+            L"        self.init(a : 3);\n"
+            L"    }\n"
+            L"}");
+    ASSERT_ERROR(Errors::E_SELF_INIT_CALLED_MULTIPLE_TIMES_IN_INITIALIZER);
+}
+
+TEST(TestInitialization, SelfInitIsntCalledOnAllPaths6)
+{
+    SEMANTIC_ANALYZE(L"class Base\n"
+            L"{\n"
+            L"    init(a : Int)\n"
+            L"    {\n"
+            L"    }\n"
+            L"    convenience init(a : Bool)\n"
+            L"    {\n"
+            L"        if(a)\n"
+            L"        {\n"
+            L"            self.init(a : 3);\n"
+            L"        }\n"
+            L"        else\n"
+            L"        {\n"
+            L"            self.init(a : 3);\n"
+            L"        }\n"
+            L"    }\n"
+            L"}");
+    ASSERT_NO_ERRORS();
+}
+/*
+TEST(TestInitialization, InvalidRedeclarationOfInit)
+{
+    SEMANTIC_ANALYZE(L"class Base\n"
+            L"{\n"
+            L"    convenience init()\n"
+            L"    {\n"
+            L"    }\n"
+            L"}");
+    ASSERT_ERROR(Errors::E_INVALID_REDECLARATION_1);
+}
+*/
+TEST(TestInitialization, SuperInitIsntCalled)
+{
+    SEMANTIC_ANALYZE(L"class Base\n"
+            L"{\n"
+            L"    init(a : Int)\n"
+            L"    {\n"
+            L"    }\n"
+            L"}\n"
+            L"\n"
+            L"\n"
+            L"class Child : Base\n"
+            L"{\n"
+            L"    init(a : Bool)\n"
+            L"    {\n"
+            L"    }\n"
+            L"}");
+    ASSERT_ERROR(Errors::E_SUPER_INIT_ISNT_CALLED_BEFORE_RETURNING_FROM_INITIALIZER);
+}
+
+TEST(TestInitialization, SuperInitIsntCalledOnAllPaths)
+{
+    SEMANTIC_ANALYZE(L"class Base\n"
+            L"{\n"
+            L"    init(a : Int)\n"
+            L"    {\n"
+            L"    }\n"
+            L"}\n"
+            L"\n"
+            L"\n"
+            L"class Child : Base\n"
+            L"{\n"
+            L"    init(a : Bool)\n"
+            L"    {\n"
+            L"        if(a)\n"
+            L"        {\n"
+            L"            super.init(a : 5);\n"
+            L"        }\n"
+            L"        else\n"
+            L"        {\n"
+            L"            super.init(a : 0);\n"
+            L"        }\n"
+            L"    }\n"
+            L"}");
+    ASSERT_NO_ERRORS();
+}
+TEST(TestInitialization, SuperInitIsCalledOnAllPaths)
+{
+    SEMANTIC_ANALYZE(L"class Base\n"
+            L"{\n"
+            L"    init(a : Int)\n"
+            L"    {\n"
+            L"    }\n"
+            L"}\n"
+            L"\n"
+            L"\n"
+            L"class Child : Base\n"
+            L"{\n"
+            L"    init(a : Bool)\n"
+            L"    {\n"
+            L"        if(a)\n"
+            L"        {\n"
+            L"            super.init(a : 5);\n"
+            L"        }\n"
+            L"    }\n"
+            L"}");
+    ASSERT_ERROR(Errors::E_SUPER_INIT_ISNT_CALLED_BEFORE_RETURNING_FROM_INITIALIZER);
+}
+TEST(TestInitialization, SuperInitCalledMultipleTimes)
+{
+    SEMANTIC_ANALYZE(L"class Base\n"
+            L"{\n"
+            L"    init(a : Int)\n"
+            L"    {\n"
+            L"    }\n"
+            L"}\n"
+            L"\n"
+            L"\n"
+            L"class Child : Base\n"
+            L"{\n"
+            L"    init(a : Bool)\n"
+            L"    {\n"
+            L"        if(a)\n"
+            L"        {\n"
+            L"            super.init(a : 5);\n"
+            L"        }\n"
+            L"        super.init(a : 5);\n"
+            L"    }\n"
+            L"}");
+    ASSERT_ERROR(Errors::E_SUPER_INIT_CALLED_MULTIPLE_TIMES_IN_INITIALIZER);
 }

@@ -55,10 +55,6 @@ void SemanticAnalyzer::visitClosure(const ClosurePtr& node)
     node->accept(declarationAnalyzer);
 }
 
-void SemanticAnalyzer::visitAccessor(const CodeBlockPtr& accessor, const ParametersNodePtr& params, const SymbolPtr& setter)
-{
-    declarationAnalyzer->visitAccessor(accessor, params, setter);
-}
 void SemanticAnalyzer::visitSubscript(const SubscriptDefPtr &node)
 {
     node->accept(declarationAnalyzer);

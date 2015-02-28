@@ -149,7 +149,6 @@ public:
      */
     void getMethodsFromType(const TypePtr& type, const std::wstring& fieldName, MemberFilter filter, std::vector<SymbolPtr>& result);
 private:
-    void visitAccessor(const CodeBlockPtr& accessor, const ParametersNodePtr& params, const SymbolPtr& setter);
     //Verify each symbol in the tuple is initialized and writable
     void verifyTuplePatternForAssignment(const PatternPtr& pattern);
 

@@ -602,7 +602,7 @@ void SemanticAnalyzer::declarationFinished(const std::wstring& name, const Symbo
             }
             inits->add(init);
         }
-        else
+        //else
         {
             builder->addMember(name, decl);
         }

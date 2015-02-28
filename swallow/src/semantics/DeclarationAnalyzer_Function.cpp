@@ -43,6 +43,7 @@
 #include "semantics/ScopedNodes.h"
 #include "common/ScopedValue.h"
 #include "semantics/SemanticContext.h"
+#include "semantics/WorkflowBranchValidator.h"
 #include <set>
 #include <cassert>
 #include <ast/NodeFactory.h>
@@ -224,25 +225,43 @@ void DeclarationAnalyzer::visitClosure(const ClosurePtr& node)
 
 }
 
-
 /*!
- * This will register a self symbol to getter/setter/willSet/didSet of a computed property
+ * Register symbol self/super to given code block
  */
-/*
-static void registerSelfToAccessor(const TypePtr& currentType, const CodeBlockPtr& accessor)
+static void registerSelfSuper(const TypePtr& currentType, const CodeBlockPtr& cb, int modifiers)
 {
-
-    if(currentType && accessor)
+    SymbolScope* scope = static_pointer_cast<ScopedCodeBlock>(cb)->getScope();
+    if (!currentType)
+        return;
     {
-        ScopedCodeBlockPtr cb = static_pointer_cast<ScopedCodeBlock>(accessor);
-        SymbolScope* scope = cb->getScope();
-        SymbolPlaceHolderPtr self(new SymbolPlaceHolder(L"self", currentType, SymbolPlaceHolder::R_PARAMETER, SymbolFlagReadable | SymbolFlagInitialized));
+        int flags = SymbolFlagReadable | SymbolFlagInitialized;
+        bool valueType = currentType->getCategory() == Type::Enum || currentType->getCategory() == Type::Struct;
+        if (valueType && (modifiers & DeclarationModifiers::Mutating))
+        {
+            //mutating function inside enum/struct
+            flags |= SymbolFlagWritable;
+        }
+        else if (valueType)
+        {
+            //fields are not-modifiable in value type without mutating keyword
+            flags |= SymbolFlagNonmutating;
+        }
+        else
+        {
+            //ref-type self symbol is read only but mutating
+        }
+        SymbolPlaceHolderPtr self(new SymbolPlaceHolder(L"self", currentType, SymbolPlaceHolder::R_PARAMETER, flags));
         scope->addSymbol(self);
-        SymbolPlaceHolderPtr super(new SymbolPlaceHolder(L"super", currentType, SymbolPlaceHolder::R_PARAMETER, SymbolFlagReadable | SymbolFlagInitialized));
+    }
+    if(currentType->getParentType())
+    {
+        TypePtr type = currentType->getParentType();
+        int flags = SymbolFlagReadable | SymbolFlagInitialized;
+        SymbolPlaceHolderPtr super(new SymbolPlaceHolder(L"super", type, SymbolPlaceHolder::R_PARAMETER, flags));
         scope->addSymbol(super);
     }
 }
-*/
+
 void DeclarationAnalyzer::checkForPropertyOverriding(const std::wstring& name, const SymbolPlaceHolderPtr& decl, const ComputedPropertyPtr& node)
 {
     TypePtr type = ctx->currentType;
@@ -474,7 +493,7 @@ void DeclarationAnalyzer::visitComputedProperty(const ComputedPropertyPtr& node)
         */
     }
 }
-void DeclarationAnalyzer::visitAccessor(const CodeBlockPtr& accessor, const ParametersNodePtr& params, const SymbolPtr& setter)
+void DeclarationAnalyzer::visitAccessor(const CodeBlockPtr& accessor, const ParametersNodePtr& params, const SymbolPtr& setter, int modifiers)
 {
     if(!accessor)
         return;
@@ -482,9 +501,7 @@ void DeclarationAnalyzer::visitAccessor(const CodeBlockPtr& accessor, const Para
     SymbolScope *scope = codeBlock->getScope();
     ScopeGuard scopeGuard(codeBlock.get(), this);
     (void) scopeGuard;
-
-    SymbolPlaceHolderPtr self(new SymbolPlaceHolder(L"self", ctx->currentType, SymbolPlaceHolder::R_PARAMETER, SymbolFlagReadable | SymbolFlagInitialized));
-    scope->addSymbol(self);
+    registerSelfSuper(ctx->currentType, accessor, modifiers);
     if(setter)
         scope->addSymbol(setter);
 
@@ -646,13 +663,13 @@ void DeclarationAnalyzer::visitSubscript(const SubscriptDefPtr &node)
 
 
         //process getter
-        visitAccessor(node->getGetter(), parameters, nullptr);
+        visitAccessor(node->getGetter(), parameters, nullptr, node->getModifiers());
         //process setter
         wstring setterName = L"newValue";
         if (!node->getSetterName().empty())
             setterName = node->getSetterName();
         SymbolPlaceHolderPtr setter(new SymbolPlaceHolder(setterName, retType, SymbolPlaceHolder::R_PARAMETER, SymbolFlagReadable | SymbolFlagInitialized));
-        visitAccessor(node->getSetter(), parameters, setter);
+        visitAccessor(node->getSetter(), parameters, setter, node->getModifiers());
     }
 }
 void DeclarationAnalyzer::visitFunctionDeclaration(const FunctionDefPtr& node)
@@ -721,24 +738,7 @@ void DeclarationAnalyzer::visitFunctionDeclaration(const FunctionDefPtr& node)
             generic->registerTo(scope);
         if(ctx->currentType && (node->getModifiers() & (DeclarationModifiers::Class | DeclarationModifiers::Static)) == 0)
         {
-            int flags = SymbolFlagReadable | SymbolFlagInitialized;
-            bool valueType = ctx->currentType->getCategory() == Type::Enum || ctx->currentType->getCategory() == Type::Struct;
-            if(valueType && node->hasModifier(DeclarationModifiers::Mutating))
-            {
-                //mutating function inside enum/struct
-                flags |= SymbolFlagWritable;
-            }
-            else if(valueType)
-            {
-                //fields are not-modifiable in value type without mutating keyword
-                flags |= SymbolFlagNonmutating;
-            }
-            else
-            {
-                //ref-type self symbol is read only but mutating
-            }
-            SymbolPlaceHolderPtr self(new SymbolPlaceHolder(L"self", ctx->currentType, SymbolPlaceHolder::R_PARAMETER, flags));
-            scope->addSymbol(self);
+            registerSelfSuper(ctx->currentType, codeBlock, node->getModifiers());
         }
 
 
@@ -923,8 +923,7 @@ void DeclarationAnalyzer::visitInit(const InitializerDefPtr& node)
 
         prepareParameters(body->getScope(), node->getParameters());
         //prepare implicit self
-        SymbolPlaceHolderPtr self(new SymbolPlaceHolder(L"self", ctx->currentType, SymbolPlaceHolder::R_PARAMETER, SymbolFlagReadable | SymbolFlagInitialized));
-        body->getScope()->addSymbol(self);
+        registerSelfSuper(ctx->currentType, body, node->getModifiers());
 
         std::vector<Parameter> params;
         for (const ParameterNodePtr &param : *node->getParameters())
@@ -942,12 +941,15 @@ void DeclarationAnalyzer::visitInit(const InitializerDefPtr& node)
             params.push_back(Parameter(externalName, param->isInout(), param->getType()));
         }
 
-        TypePtr funcType = Type::newFunction(params, type, node->getParameters()->isVariadicParameters());
+        TypePtr funcType = Type::newFunction(params, symbolRegistry->getGlobalScope()->Void(), node->getParameters()->isVariadicParameters());
+        if(node->hasModifier(DeclarationModifiers::Convenience))
+            funcType->setFlags(SymbolFlagConvenienceInit, true);
         funcType->setFlags(SymbolFlagInit, true);
 
-        FunctionSymbolPtr init(new FunctionSymbol(type->getName(), funcType, nullptr));
-        checkForFunctionOverriding(L"init", init, node);
-        declarationFinished(L"init", init, node);
+        std::wstring name(L"init");
+        FunctionSymbolPtr init(new FunctionSymbol(name, funcType, nullptr));
+        checkForFunctionOverriding(name, init, node);
+        declarationFinished(name, init, node);
         node->getBody()->setType(funcType);
         static_pointer_cast<SymboledInit>(node)->symbol = init;
     }
@@ -958,6 +960,72 @@ void DeclarationAnalyzer::visitInit(const InitializerDefPtr& node)
         TypePtr funcType = init->getType();
         SCOPED_SET(ctx->currentFunction, funcType);
         node->getBody()->accept(semanticAnalyzer);
+
+        if(node->hasModifier(DeclarationModifiers::Convenience))
+        {
+            //convenience initializer must call designated initializer in all paths
+            WorkflowBranchValidator validator(ctx, WorkflowBranchValidator::VALIDATE_INIT_CALL);
+            node->getBody()->accept(&validator);
+            NodePtr refNode = validator.getRefNode() ? validator.getRefNode() : node;
+            if(validator.getResult() & BranchCoverMultiple)
+            {
+                error(refNode, Errors::E_SELF_INIT_CALLED_MULTIPLE_TIMES_IN_INITIALIZER);
+                return;
+            }
+            switch(validator.getResult())
+            {
+                case BranchCoverNoResult:
+                case BranchCoverUnmatched:
+                case BranchCoverPartial:
+                    error(refNode, Errors::E_SELF_INIT_ISNT_CALLED_ON_ALL_PATHS_IN_DELEGATING_INITIALIZER);
+                    return;
+                default:
+                    break;
+            }
+
+        }
+        else
+        {
+            //designated initializer must call designated initializer if parent type has customized initializer
+            bool hasCustomizedInitializer = false;
+            if(ctx->currentType->getParentType())
+            {
+                FunctionOverloadedSymbolPtr inits = ctx->currentType->getDeclaredInitializer();
+                if(inits)
+                {
+                    for(const FunctionSymbolPtr& init : *inits)
+                    {
+                        if(!init->getType()->getParameters().empty())
+                        {
+                            hasCustomizedInitializer = true;
+                            break;
+                        }
+                    }
+                }
+            }
+            if(hasCustomizedInitializer)
+            {
+                WorkflowBranchValidator validator(ctx, WorkflowBranchValidator::VALIDATE_INIT_CALL);
+                node->getBody()->accept(&validator);
+                NodePtr refNode = validator.getRefNode() ? validator.getRefNode() : node;
+                if(validator.getResult() & BranchCoverMultiple)
+                {
+                    error(refNode, Errors::E_SUPER_INIT_CALLED_MULTIPLE_TIMES_IN_INITIALIZER);
+                    return;
+                }
+                switch(validator.getResult())
+                {
+                    case BranchCoverNoResult:
+                    case BranchCoverUnmatched:
+                    case BranchCoverPartial:
+                        error(refNode, Errors::E_SUPER_INIT_ISNT_CALLED_BEFORE_RETURNING_FROM_INITIALIZER);
+                        return;
+                    default:
+                        break;
+                }
+            }
+
+        }
     }
 }
 
