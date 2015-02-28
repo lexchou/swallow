@@ -211,6 +211,9 @@ struct SWALLOW_EXPORT Errors
         E_SELF_INIT_CALLED_MULTIPLE_TIMES_IN_INITIALIZER,//Self.init called multiple times in initializer
         E_DESIGNATED_INITIALIZER_FOR_A_CANNOT_DELEGATE_1,//Designated initializer for 'Base' cannot delegate(with 'self.init'); did you mean this to be a convenience initializer?
         E_SUPER_INIT_CALLED_MULTIPLE_TIMES_IN_INITIALIZER,//Self.init called multiple times in initializer
+        E_MUST_CALL_A_DESIGNATED_INITIALIZER_OF_THE_SUPER_CLASS_A_1,//Must call a designated initializer of the superclass '%0'
+        E_CONVENIENCE_INITIALIZER_FOR_A_MUST_DELEGATE_WITH_SELF_INIT_1,//Convenience initializer for '%0' must delegate(with 'self.init') rather than chaining to a superclass initializer(with 'super.init')
+
 
 
 

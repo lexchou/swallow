@@ -545,3 +545,64 @@ TEST(TestInitialization, SuperInitCalledMultipleTimes)
             L"}");
     ASSERT_ERROR(Errors::E_SUPER_INIT_CALLED_MULTIPLE_TIMES_IN_INITIALIZER);
 }
+
+TEST(TestInitialization, MustCallDesignatedInitializer)
+{
+    SEMANTIC_ANALYZE(L"class Base\n"
+            L"{\n"
+            L"    init()\n"
+            L"    {\n"
+            L"    }\n"
+            L"    convenience init(a : Int)\n"
+            L"    {\n"
+            L"        self.init()\n"
+            L"    }\n"
+            L"}\n"
+            L"\n"
+            L"\n"
+            L"class Child : Base\n"
+            L"{\n"
+            L"    init(a : Bool)\n"
+            L"    {\n"
+            L"        super.init(a: 3);\n"
+            L"    }\n"
+            L"}");
+    ASSERT_ERROR(Errors::E_MUST_CALL_A_DESIGNATED_INITIALIZER_OF_THE_SUPER_CLASS_A_1);
+    ASSERT_EQ(L"Base", error->items[0]);
+}
+
+TEST(TestInitialization, DesignatedInitializerCannotDelegateSelfInit)
+{
+    SEMANTIC_ANALYZE(L"class Base\n"
+            L"{\n"
+            L"    init()\n"
+            L"    {\n"
+            L"        \n"
+            L"    }\n"
+            L"    init(a : Int)\n"
+            L"    {\n"
+            L"        self.init();\n"
+            L"    }\n"
+            L"}");
+    ASSERT_ERROR(Errors::E_DESIGNATED_INITIALIZER_FOR_A_CANNOT_DELEGATE_1);
+    ASSERT_EQ(L"Base", error->items[0]);
+}
+TEST(TestInitialization, ConvenienceInitializerMustDelegateWithSelfInit)
+{
+    SEMANTIC_ANALYZE(L"class Base\n"
+            L"{\n"
+            L"    init(a : Int)\n"
+            L"    {\n"
+            L"    }\n"
+            L"}\n"
+            L"class Child : Base\n"
+            L"{\n"
+            L"    \n"
+            L"    convenience init(a : Bool)\n"
+            L"    {\n"
+            L"        super.init(a: 3);\n"
+            L"    }\n"
+            L"}")
+    ASSERT_ERROR(Errors::E_CONVENIENCE_INITIALIZER_FOR_A_MUST_DELEGATE_WITH_SELF_INIT_1);
+    ASSERT_EQ(L"Child", error->items[0]);
+}

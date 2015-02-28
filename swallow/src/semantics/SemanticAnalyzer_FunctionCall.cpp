@@ -304,13 +304,53 @@ SymbolPtr SemanticAnalyzer::getOverloadedFunction(bool mutatingSelf, const NodeP
     return matched;
 }
 
-static void updateNodeType(const PatternPtr& node, const SymbolPtr& func)
+static void updateNodeType(SemanticAnalyzer* semanticAnalyzer, const PatternPtr& node, const SymbolPtr& func)
 {
     TypePtr type = func->getType();
     if(type->hasFlags(SymbolFlagInit))
     {
         //it's an initializer, type is its declaring type
         assert(func->getDeclaringType() != nullptr);
+        SemanticContext* ctx = semanticAnalyzer->getContext();
+        if(node->getNodeType() == NodeType::FunctionCall && ctx->currentFunction && ctx->currentFunction->hasFlags(SymbolFlagInit))
+        {
+            FunctionCallPtr functionCall = static_pointer_cast<FunctionCall>(node);
+            if (functionCall->getFunction()->getNodeType() == NodeType::MemberAccess)
+            {
+                MemberAccessPtr memberAccess = static_pointer_cast<MemberAccess>(functionCall->getFunction());
+                bool self = false, super = false;
+                bool init = memberAccess->getField() && memberAccess->getField()->getIdentifier() == L"init";
+                bool insideConvenienceInit = ctx->currentFunction->hasFlags(SymbolFlagConvenienceInit);
+                bool insideClass = ctx->currentType && ctx->currentType->getCategory() == Type::Class;
+                if(memberAccess->getSelf() && memberAccess->getSelf()->getNodeType() == NodeType::Identifier)
+                {
+                    IdentifierPtr id = static_pointer_cast<Identifier>(memberAccess->getSelf());
+                    self = id->getIdentifier() == L"self";
+                    super = id->getIdentifier() == L"super";
+                }
+                if (type->hasFlags(SymbolFlagConvenienceInit))
+                {
+                    //call initializer delegation, the callee must be a designated initializer
+                    semanticAnalyzer->error(node, Errors::E_MUST_CALL_A_DESIGNATED_INITIALIZER_OF_THE_SUPER_CLASS_A_1, func->getDeclaringType()->getName());
+                    return;
+                }
+                else
+                {
+                    //call a designated init with self.init, then the current function must be a convenience initializer
+                    //NOTE: this rule seems only applies for class, not sure if it's swift's bug
+                    if(insideClass && self && init && !insideConvenienceInit)
+                    {
+                        semanticAnalyzer->error(node, Errors::E_DESIGNATED_INITIALIZER_FOR_A_CANNOT_DELEGATE_1, func->getDeclaringType()->getName());
+                        return;
+                    }
+                }
+                if(insideClass && insideConvenienceInit && super && init)
+                {
+                    semanticAnalyzer->error(node, Errors::E_CONVENIENCE_INITIALIZER_FOR_A_MUST_DELEGATE_WITH_SELF_INIT_1, ctx->currentType->getName());
+                    return;
+                }
+            }
+        }
         node->setType(func->getDeclaringType());
     }
     else
@@ -348,7 +388,7 @@ SymbolPtr SemanticAnalyzer::visitFunctionCall(bool mutatingSelf, std::vector<Sym
             calculateFitScore(mutatingSelf, func, args, false);
             TypePtr type = func->getType();
             //check mutating function
-            updateNodeType(node, func);
+            updateNodeType(this, node, func);
             //node->setType(type->getReturnType());
             return func;
         }
@@ -365,7 +405,7 @@ SymbolPtr SemanticAnalyzer::visitFunctionCall(bool mutatingSelf, std::vector<Sym
             }
             calculateFitScore(mutatingSelf, symbol, args, false);
             //node->setType(symbol->getType()->getReturnType());
-            updateNodeType(node, symbol);
+            updateNodeType(this, node, symbol);
             return symbol;
         }
         else
@@ -379,7 +419,7 @@ SymbolPtr SemanticAnalyzer::visitFunctionCall(bool mutatingSelf, std::vector<Sym
         SymbolPtr matched = getOverloadedFunction(mutatingSelf, node, funcs, args);
         assert(matched != nullptr && matched->getType()->getCategory() == Type::Function);
         //node->setType(matched->getType()->getReturnType());
-        updateNodeType(node, matched);
+        updateNodeType(this, node, matched);
         return matched;
     }
 
