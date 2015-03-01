@@ -334,7 +334,17 @@ static SymboledFunctionPtr createPropertyAccessor(const ComputedPropertyPtr& nod
         modifiers |= DeclarationModifiers::Mutating;
     func->setModifiers(modifiers);
     func->setName(node->getName() + suffix);
-    func->setReturnType(node->getDeclaredType());
+    if(!argName.empty())
+    {
+        //it's a setter, no return value
+        TypeIdentifierPtr Void = nodeFactory->createTypeIdentifier(*body->getSourceInfo());
+        Void->setName(L"Void");
+        func->setReturnType(Void);
+    }
+    else
+    {
+        func->setReturnType(node->getDeclaredType());
+    }
     ParametersNodePtr params = nodeFactory->createParameters(*si);
     if(!argName.empty())
     {
@@ -896,6 +906,30 @@ void DeclarationAnalyzer::visitFunction(const FunctionDefPtr& node)
         assert(func != nullptr);
         SCOPED_SET(ctx->currentFunction, func->getType());
         node->getBody()->accept(semanticAnalyzer);
+
+        if(!Type::equals(func->getType()->getReturnType(), symbolRegistry->getGlobalScope()->Void()))
+        {
+            //check return in all branches
+            WorkflowBranchValidator validator(ctx, WorkflowBranchValidator::VALIDATE_RETURN);
+            node->getBody()->accept(&validator);
+            NodePtr refNode = validator.getRefNode() ? validator.getRefNode() : node;
+            BranchCoverResult  result = validator.getResult();
+            if (result & BranchCoverMultiple)
+            {
+                this->warning(refNode, Errors::W_CODE_AFTER_A_WILL_NEVER_BE_EXECUTED_1, L"return");
+                return;
+            }
+            switch (result)
+            {
+                case BranchCoverNoResult:
+                case BranchCoverUnmatched:
+                case BranchCoverPartial:
+                    error(refNode, Errors::E_MISSING_RETURN_IN_A_FUNCTION_EXPECTED_TO_RETURN_A_1, func->getType()->getReturnType()->toString());
+                    return;
+                default:
+                    break;
+            }
+        }
     }
 }
 

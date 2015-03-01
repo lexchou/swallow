@@ -406,3 +406,81 @@ TEST(TestMethods, StructInitSelfLet)
         L"}");
     ASSERT_NO_ERRORS();
 }
+
+
+TEST(TestMethods, MissingReturn)
+{
+    SEMANTIC_ANALYZE(L"func a() -> Int\n"
+            L"{\n"
+            L"    \n"
+            L"}");
+    ASSERT_ERROR(Errors::E_MISSING_RETURN_IN_A_FUNCTION_EXPECTED_TO_RETURN_A_1);
+    ASSERT_EQ(L"Int", error->items[0]);
+}
+TEST(TestMethods, MissingReturn2)
+{
+    SEMANTIC_ANALYZE(L"func a(f : Bool) -> Int\n"
+            L"{\n"
+            L"    if(f)\n"
+            L"    {\n"
+            L"        return 3\n"
+            L"    }\n"
+            L"}");
+    ASSERT_ERROR(Errors::E_MISSING_RETURN_IN_A_FUNCTION_EXPECTED_TO_RETURN_A_1);
+    ASSERT_EQ(L"Int", error->items[0]);
+}
+TEST(TestMethods, MissingReturn3)
+{
+    SEMANTIC_ANALYZE(L"func a(f : Bool) -> Int\n"
+            L"{\n"
+            L"    if(f)\n"
+            L"    {\n"
+            L"        return 3\n"
+            L"    }\n"
+            L"    else\n"
+            L"    {\n"
+            L"        return 3\n"
+            L"    }\n"
+            L"}");
+    ASSERT_NO_ERRORS();
+}
+TEST(TestMethods, MissingReturn4)
+{
+    SEMANTIC_ANALYZE(L"func a(f : Bool) -> Int\n"
+            L"{\n"
+            L"    if(f)\n"
+            L"    {\n"
+            L"        return 1\n"
+            L"    }\n"
+            L"    else\n"
+            L"    {\n"
+            L"        return 2\n"
+            L"    }\n"
+            L"    return 3\n"
+            L"}");
+    ASSERT_ERROR(Errors::W_CODE_AFTER_A_WILL_NEVER_BE_EXECUTED_1);
+}
+TEST(TestMethods, MissingReturn5)
+{
+    SEMANTIC_ANALYZE(L"func a(f : Bool) -> Int\n"
+            L"{\n"
+            L"    if(f)\n"
+            L"    {\n"
+            L"      return 1\n"
+            L"    }\n"
+            L"    return 3\n"
+            L"}");
+    ASSERT_NO_ERRORS();
+}
+TEST(TestMethods, MissingReturn6)
+{
+    SEMANTIC_ANALYZE(L"func a(f : Bool) -> Int\n"
+            L"{\n"
+            L"    return 1\n"
+            L"    var b = 3\n"
+            L"    b = 5\n"
+            L"    return b\n"
+            L"}");
+    ASSERT_ERROR(Errors::W_CODE_AFTER_A_WILL_NEVER_BE_EXECUTED_1);
+    ASSERT_EQ(4, error->line);
+}

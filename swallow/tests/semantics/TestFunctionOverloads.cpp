@@ -40,7 +40,7 @@ using namespace Swallow;
 
 TEST(TestFunctionOverloads, testFunc)
 {
-    SEMANTIC_ANALYZE(L"func test() -> String {}\n"
+    SEMANTIC_ANALYZE(L"func test() -> String {return \"\"}\n"
         L"let a = test()");
     dumpCompilerResults(compilerResults);
     SymbolPtr a;
@@ -53,8 +53,8 @@ TEST(TestFunctionOverloads, testFunc)
 
 TEST(TestFunctionOverloads, testOverloadedFunc)
 {
-    SEMANTIC_ANALYZE(L"func test(a : Int) -> String {}\n"
-            L"func test(a : String) -> Bool {}\n"
+    SEMANTIC_ANALYZE(L"func test(a : Int) -> String {return \"\"}\n"
+            L"func test(a : String) -> Bool {return true}\n"
             L"let a = test(56), b = test(\"str\")");
 
     dumpCompilerResults(compilerResults);
@@ -74,9 +74,9 @@ TEST(TestFunctionOverloads, testOverloadedFunc)
 }
 TEST(TestFunctionOverloads, testNamedParameterOverload)
 {
-    SEMANTIC_ANALYZE(L"func test(a : Int) -> String {}\n"
-            L"func test(# a : Int) -> Bool {}\n"
-            L"func test(ExternalName a : String) -> Double {}\n"
+    SEMANTIC_ANALYZE(L"func test(a : Int) -> String {return \"\"}\n"
+            L"func test(# a : Int) -> Bool {return true}\n"
+            L"func test(ExternalName a : String) -> Double {return 3.0}\n"
             L"let a = test(56), b = test(a : 33), c = test(ExternalName : \"str\")");
     dumpCompilerResults(compilerResults);
     SymbolPtr a, b, c;
@@ -102,8 +102,8 @@ TEST(TestFunctionOverloads, testNamedParameterOverload)
 }
 TEST(TestFunctionOverloads, testVariadicParametersOverload)
 {
-    SEMANTIC_ANALYZE(L"func test(a : Int, b : Int) -> String {}\n"
-    L"func test(a : Int...) -> Int {}\n"
+    SEMANTIC_ANALYZE(L"func test(a : Int, b : Int) -> String {return \"\"}\n"
+    L"func test(a : Int...) -> Int {return 3}\n"
     L"let a = test(0, 1)");
 
     ASSERT_EQ(1, compilerResults.numResults());
@@ -235,8 +235,8 @@ TEST(TestFunctionOverloads, testStructFuncOverload)
 {
 
     SEMANTIC_ANALYZE(L"struct Test {"
-            L"func a(a : Int) -> String {}\n"
-            L"func a(a : Bool) -> Float {}\n"
+            L"func a(a : Int) -> String {return \"\"}\n"
+            L"func a(a : Bool) -> Float {return 3}\n"
             L"}\n"
             L"let t = Test()\n"
             L"let a = t.a(3)"

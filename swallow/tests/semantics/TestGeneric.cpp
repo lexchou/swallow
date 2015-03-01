@@ -60,6 +60,7 @@ TEST(TestGeneric, Struct_GenericParameter)
         L"    }\n"
         L"    mutating func pop() -> T {\n"
         L"        //return items.removeLast()\n"
+        L"        return items\n"
         L"    }\n"
         L"}");
     dumpCompilerResults(compilerResults);
@@ -92,7 +93,7 @@ TEST(TestGeneric, GenericConstraint)
             //"            return index\n"
             //"        }\n"
             //"    }\n"
-            //"    return nil\n"
+            L"    return nil\n"
             L"}\n");
     dumpCompilerResults(compilerResults);
     ASSERT_EQ(0, compilerResults.numResults());

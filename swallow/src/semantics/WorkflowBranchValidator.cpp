@@ -19,8 +19,19 @@ void WorkflowBranchValidator::merge(WorkflowBranchValidator& validator, MergeTyp
         validatorResult = BranchCoverUnmatched;
     if(mergeType == MergeSequence)
     {
-        if((result & BranchCoverFull) && (validator.result & BranchCoverFull))
-            result = (BranchCoverResult) (result | BranchCoverMultiple);
+        if(validateType == VALIDATE_INIT_CALL)
+        {
+            //this check only applies for super.init/self.init because calling initializer delegation
+            //will not interrupt the workflow
+            if ((result & BranchCoverFull) && (validator.result & BranchCoverFull))
+                result = (BranchCoverResult) (result | BranchCoverMultiple);
+        }
+        else
+        {
+            //in sequence return validation mode, the full cover result will override previous result
+            if(validatorResult == BranchCoverFull)
+                result = validatorResult;
+        }
     }
     result = (BranchCoverResult) (result | validatorResult);
     if(result & BranchCoverMultiple && !refNode)
@@ -31,6 +42,7 @@ void WorkflowBranchValidator::visitReturn(const ReturnStatementPtr& node)
     if(validateType != VALIDATE_RETURN)
         return;
     result = (BranchCoverResult)(result | BranchCoverFull);
+    refNode = node;
 }
 void WorkflowBranchValidator::visitFunctionCall(const FunctionCallPtr& node)
 {
@@ -42,6 +54,7 @@ void WorkflowBranchValidator::visitFunctionCall(const FunctionCallPtr& node)
     if(ma->getField() && ma->getField()->getIdentifier() == L"init")
     {
         result = (BranchCoverResult)(result | BranchCoverFull);
+        refNode = node;
     }
 }
 
@@ -121,6 +134,15 @@ void WorkflowBranchValidator::visitCodeBlock(const CodeBlockPtr& node)
 {
     for(const StatementPtr& st : * node)
     {
+        if(validateType == VALIDATE_RETURN)
+        {
+            if (result == BranchCoverFull)
+            {
+                result = BranchCoverMultiple;
+                refNode = st;
+                return;
+            }
+        }
         WorkflowBranchValidator validator(ctx, validateType);
         st->accept(&validator);
         merge(validator, MergeSequence);
