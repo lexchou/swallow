@@ -1,4 +1,4 @@
-/* WorkflowBranchValidator.h --
+/* ReturnStatementValidator.h --
  *
  * Copyright (c) 2014, Lex Chou <lex at chou dot it>
  * All rights reserved.
@@ -27,38 +27,38 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef WORKFLOW_BRANCH_VALIDATOR_H
-#define WORKFLOW_BRANCH_VALIDATOR_H
+#ifndef RETURN_STATEMENT_VALIDATOR_H
+#define RETURN_STATEMENT_VALIDATOR_H
 #include "ast/NodeVisitor.h"
 #include <experimental/optional>
 
 SWALLOW_NS_BEGIN
 
     struct SemanticContext;
-    enum BranchCoverResult
+    enum ReturnCoverResult
     {
-        BranchCoverNoResult = 0,
+        ReturnCoverNoResult = 0,
         /*!
          * No branch matched
          */
-        BranchCoverUnmatched = 1,
+        ReturnCoverUnmatched = 1,
         /*!
          * Partially matched
          */
-        BranchCoverPartial = 3,
+        ReturnCoverPartial = 3,
         /*!
          * All possible paths are covered
          */
-        BranchCoverFull = 2,
+        ReturnCoverFull = 2,
         /*!
          * Exists more than once
          */
-        BranchCoverMultiple = 4
+        ReturnCoverDeadcode = 4
     };
 /*!
- * Validate return/init in all branches
+ * Validate return in all branches
  */
-    class SWALLOW_EXPORT WorkflowBranchValidator : public NodeVisitor
+    class SWALLOW_EXPORT ReturnStatementValidator : public NodeVisitor
     {
     private:
         enum MergeType
@@ -67,19 +67,7 @@ SWALLOW_NS_BEGIN
             MergeBranch
         };
     public:
-        enum ValidateType
-        {
-            /*!
-             * Validate super.init or self.init, make sure it exists in all possible branches
-             */
-            VALIDATE_INIT_CALL,
-            /*!
-             * Validate return statement, make sure return exists in all possible branches
-             */
-            VALIDATE_RETURN
-        };
-    public:
-        WorkflowBranchValidator(SemanticContext* ctx, ValidateType validateType);
+        ReturnStatementValidator(SemanticContext* ctx);
     public:
         virtual void visitWhileLoop(const WhileLoopPtr& node) override;
         virtual void visitForIn(const ForInLoopPtr& node) override;
@@ -96,20 +84,19 @@ SWALLOW_NS_BEGIN
         virtual void visitCodeBlock(const CodeBlockPtr& node) override;
         virtual void visitFunctionCall(const FunctionCallPtr& node) override;
     public:
-        BranchCoverResult getResult() const {return result;}
+        ReturnCoverResult getResult() const {return result;}
         NodePtr getRefNode() const { return refNode;}
     private:
         /*!
          * Merge the validator result to current instance.
          */
-        void merge(WorkflowBranchValidator& validator, MergeType mergeType);
+        void merge(ReturnStatementValidator& validator, MergeType mergeType);
     private:
         SemanticContext* ctx;
-        ValidateType validateType;
-        BranchCoverResult result;
+        ReturnCoverResult result;
         NodePtr refNode;
     };
 
 SWALLOW_NS_END
 
-#endif//WORKFLOW_BRANCH_VALIDATOR_H
+#endif//RETURN_STATEMENT_VALIDATOR_H

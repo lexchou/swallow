@@ -75,7 +75,8 @@ SET(SWALLOW_SRC
     src/semantics/OperatorResolver.cpp
     src/semantics/CompilerResultEmitter.cpp
     src/semantics/SemanticPass.cpp
-    src/semantics/WorkflowBranchValidator.cpp
+    src/semantics/ReturnStatementValidator.cpp
+    src/semantics/InitializerValidator.cpp
 
     src/ast/Node.cpp
     src/ast/Program.cpp

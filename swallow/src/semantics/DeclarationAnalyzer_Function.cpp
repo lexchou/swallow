@@ -43,7 +43,8 @@
 #include "semantics/ScopedNodes.h"
 #include "common/ScopedValue.h"
 #include "semantics/SemanticContext.h"
-#include "semantics/WorkflowBranchValidator.h"
+#include "semantics/ReturnStatementValidator.h"
+#include "semantics/InitializerValidator.h"
 #include <set>
 #include <cassert>
 #include <ast/NodeFactory.h>
@@ -910,20 +911,20 @@ void DeclarationAnalyzer::visitFunction(const FunctionDefPtr& node)
         if(!Type::equals(func->getType()->getReturnType(), symbolRegistry->getGlobalScope()->Void()))
         {
             //check return in all branches
-            WorkflowBranchValidator validator(ctx, WorkflowBranchValidator::VALIDATE_RETURN);
+            ReturnStatementValidator validator(ctx);
             node->getBody()->accept(&validator);
             NodePtr refNode = validator.getRefNode() ? validator.getRefNode() : node;
-            BranchCoverResult  result = validator.getResult();
-            if (result & BranchCoverMultiple)
+            ReturnCoverResult  result = validator.getResult();
+            if (result & ReturnCoverDeadcode)
             {
                 this->warning(refNode, Errors::W_CODE_AFTER_A_WILL_NEVER_BE_EXECUTED_1, L"return");
                 return;
             }
             switch (result)
             {
-                case BranchCoverNoResult:
-                case BranchCoverUnmatched:
-                case BranchCoverPartial:
+                case ReturnCoverNoResult:
+                case ReturnCoverUnmatched:
+                case ReturnCoverPartial:
                     error(refNode, Errors::E_MISSING_RETURN_IN_A_FUNCTION_EXPECTED_TO_RETURN_A_1, func->getType()->getReturnType()->toString());
                     return;
                 default:
@@ -998,19 +999,19 @@ void DeclarationAnalyzer::visitInit(const InitializerDefPtr& node)
         if(node->hasModifier(DeclarationModifiers::Convenience))
         {
             //convenience initializer must call designated initializer in all paths
-            WorkflowBranchValidator validator(ctx, WorkflowBranchValidator::VALIDATE_INIT_CALL);
+            InitializerValidator validator(ctx);
             node->getBody()->accept(&validator);
             NodePtr refNode = validator.getRefNode() ? validator.getRefNode() : node;
-            if(validator.getResult() & BranchCoverMultiple)
+            if(validator.getResult() & InitializerCoverMultiple)
             {
                 error(refNode, Errors::E_SELF_INIT_CALLED_MULTIPLE_TIMES_IN_INITIALIZER);
                 return;
             }
             switch(validator.getResult())
             {
-                case BranchCoverNoResult:
-                case BranchCoverUnmatched:
-                case BranchCoverPartial:
+                case InitializerCoverNoResult:
+                case InitializerCoverUnmatched:
+                case InitializerCoverPartial:
                     error(refNode, Errors::E_SELF_INIT_ISNT_CALLED_ON_ALL_PATHS_IN_DELEGATING_INITIALIZER);
                     return;
                 default:
@@ -1039,19 +1040,19 @@ void DeclarationAnalyzer::visitInit(const InitializerDefPtr& node)
             }
             if(hasCustomizedInitializer)
             {
-                WorkflowBranchValidator validator(ctx, WorkflowBranchValidator::VALIDATE_INIT_CALL);
+                InitializerValidator validator(ctx);
                 node->getBody()->accept(&validator);
                 NodePtr refNode = validator.getRefNode() ? validator.getRefNode() : node;
-                if(validator.getResult() & BranchCoverMultiple)
+                if(validator.getResult() & InitializerCoverMultiple)
                 {
                     error(refNode, Errors::E_SUPER_INIT_CALLED_MULTIPLE_TIMES_IN_INITIALIZER);
                     return;
                 }
                 switch(validator.getResult())
                 {
-                    case BranchCoverNoResult:
-                    case BranchCoverUnmatched:
-                    case BranchCoverPartial:
+                    case InitializerCoverNoResult:
+                    case InitializerCoverUnmatched:
+                    case InitializerCoverPartial:
                         error(refNode, Errors::E_SUPER_INIT_ISNT_CALLED_BEFORE_RETURNING_FROM_INITIALIZER);
                         return;
                     default:
