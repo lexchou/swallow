@@ -92,3 +92,45 @@ void TypeDeclaration::setType(const TypePtr& type)
 {
     this->type = type;
 }
+
+static int getDeclarationPriority(const DeclarationPtr& decl)
+{
+    NodeType::T t = decl->getNodeType();
+    switch(t)
+    {
+        case NodeType::ValueBindings:
+            return 0;
+        case NodeType::Init:
+            if(!decl->hasModifier(DeclarationModifiers::Convenience))
+                return 1;
+            else
+                return 2;
+        case NodeType::ComputedProperty:
+            return 3;
+        case NodeType::Subscript:
+            return 4;
+        case NodeType::Function:
+            return 5;
+        case NodeType::Deinit:
+            return 6;
+        case NodeType::TypeAlias:
+            return 7;
+        default:
+            return 8;
+    }
+}
+static bool comparePriority(const DeclarationPtr& lhs, const DeclarationPtr& rhs)
+{
+    int pl = getDeclarationPriority(lhs);
+    int pr = getDeclarationPriority(rhs);
+    return pl < pr;
+}
+
+/*!
+ * Sort member declaration by priority
+ * Priority order: stored property > initializer > convenience initializer -> computed property > subscript > func > deinit
+ */
+void TypeDeclaration::sortByPriority()
+{
+    std::sort(declarations.begin(), declarations.end(), comparePriority);
+}

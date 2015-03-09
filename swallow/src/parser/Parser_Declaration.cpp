@@ -908,7 +908,7 @@ DeclarationPtr Parser::parseEnum(const std::vector<AttributePtr>& attrs, int mod
         }while(match(L","));
     }
     expect(L"}");
-
+    ret->sortByPriority();
     return ret;
 }
 
@@ -960,6 +960,7 @@ DeclarationPtr Parser::parseStruct(const std::vector<AttributePtr>& attrs, int m
         ret->addDeclaration(decl);
     }
     expect(L"}");
+    ret->sortByPriority();
     return ret;
 }
 /*
@@ -1007,6 +1008,8 @@ DeclarationPtr Parser::parseClass(const std::vector<AttributePtr>& attrs, int mo
         ret->addDeclaration(decl);
     }
     expect(L"}");
+    //sort member declarations by priority
+    ret->sortByPriority();
     return ret;
 }
 /*

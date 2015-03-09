@@ -267,6 +267,7 @@ void DeclarationAnalyzer::prepareDefaultInitializers(const TypePtr& type)
             }
         }
         GlobalScope* global = symbolRegistry->getGlobalScope();
+        bool initCreated = false;
         if (createDefaultInit)
         {
             //apply rule 1
@@ -275,6 +276,7 @@ void DeclarationAnalyzer::prepareDefaultInitializers(const TypePtr& type)
             initType->setFlags(SymbolFlagInit, true);
             FunctionSymbolPtr initializer(new FunctionSymbol(L"init", initType, nullptr));
             declarationFinished(initializer->getName(), initializer, nullptr);
+            initCreated = true;
         }
         if (type->getCategory() == Type::Struct && !initParams.empty())
         {
@@ -282,7 +284,17 @@ void DeclarationAnalyzer::prepareDefaultInitializers(const TypePtr& type)
             initType->setFlags(SymbolFlagInit, true);
             FunctionSymbolPtr initializer(new FunctionSymbol(L"init", initType, nullptr));
             declarationFinished(initializer->getName(), initializer, nullptr);
+            initCreated = true;
         }
+        //make all stored properties initialized after the default initializer created
+        if(initCreated)
+        {
+            for(const SymbolPtr& s : type->getDeclaredStoredProperties())
+            {
+                s->setFlags(SymbolFlagInitialized, true);
+            }
+        }
+
     }
     //inherit designated initializers from parent type
     if(type->getParentType() && type->getCategory() == Type::Class)

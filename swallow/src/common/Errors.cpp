@@ -216,6 +216,8 @@ std::wstring Errors::getErrorTemplate(int errorCode)
         case Errors::E_MUST_CALL_A_DESIGNATED_INITIALIZER_OF_THE_SUPER_CLASS_A_1: return L"Must call a designated initializer of the superclass '%0'";
         case Errors::E_CONVENIENCE_INITIALIZER_FOR_A_MUST_DELEGATE_WITH_SELF_INIT_1: return L"Convenience initializer for '%0' must delegate(with 'self.init') rather than chaining to a superclass initializer(with 'super.init')";
         case Errors::E_MISSING_RETURN_IN_A_FUNCTION_EXPECTED_TO_RETURN_A_1: return L"Missing return in a function expected to return '%0'";
+        case Errors::E_PROPERTY_A_NOT_INITIALIZED_AT_SUPER_INIT_CALL_1: return L"Property '%0' not initialized at super.init call";
+        case Errors::E_VARIABLE_A_USED_BEFORE_BEING_INITIALIZED_1: return L"Variable '%0' used before being initialized";
 
 
         case Errors::W_CODE_AFTER_A_WILL_NEVER_BE_EXECUTED_1: return L"Code after 'return' will never be executed";

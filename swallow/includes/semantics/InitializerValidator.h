@@ -55,6 +55,7 @@ SWALLOW_NS_BEGIN
          */
         InitializerCoverMultiple = 4
     };
+    class CompilerResultEmitter;
 /*!
  * Validate init in all branches
  */
@@ -67,7 +68,8 @@ SWALLOW_NS_BEGIN
             MergeBranch
         };
     public:
-        InitializerValidator(SemanticContext* ctx);
+        InitializerValidator(SemanticContext* ctx, CompilerResultEmitter* compilerResults);
+        InitializerValidator(InitializerValidator* validator);
     public:
         virtual void visitWhileLoop(const WhileLoopPtr& node) override;
         virtual void visitForIn(const ForInLoopPtr& node) override;
@@ -90,9 +92,11 @@ SWALLOW_NS_BEGIN
          * Merge the validator result to current instance.
          */
         void merge(InitializerValidator& validator, MergeType mergeType);
+        void merge(MergeType mergeType, InitializerCoverResult newResult, const NodePtr& newRefNode);
     private:
         SemanticContext* ctx;
         InitializerCoverResult result;
+        CompilerResultEmitter* compilerResults;
         NodePtr refNode;
     };
 

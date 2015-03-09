@@ -39,8 +39,18 @@ struct SemanticContext
 
     enum
     {
+        /*!
+         * Visiting the node in declaration mode
+         */
         FLAG_PROCESS_DECLARATION = 1,
-        FLAG_PROCESS_IMPLEMENTATION = 2
+        /*!
+         * Visiting the node in implementation mode
+         */
+        FLAG_PROCESS_IMPLEMENTATION = 2,
+        /*!
+         * Visiting the node in write context, will not check if the variable is not initialized
+         */
+        FLAG_WRITE_CONTEXT = 4
     };
     TypePtr contextualType;
     TypePtr currentType;

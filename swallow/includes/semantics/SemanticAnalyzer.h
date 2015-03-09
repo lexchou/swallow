@@ -205,7 +205,7 @@ private:
      * Need to explode a tuple variable definition into a sequence of single variable definitions
      */
     void explodeValueBindings(const ValueBindingsPtr& node);
-    void explodeValueBinding(const ValueBindingsPtr& valueBindings, const std::list<ValueBindingPtr>::iterator& iter);
+    void explodeValueBinding(const ValueBindingsPtr& valueBindings, std::list<ValueBindingPtr>::iterator& iter);
     MemberAccessPtr makeAccess(SourceInfo* info, NodeFactory* nodeFactory, const std::wstring& tempName, const std::vector<int>& indices);
     void expandTuple(std::vector<TupleExtractionResult>& results, std::vector<int>& indices, const PatternPtr& name, const std::wstring& tempName, const TypePtr& type, PatternAccessibility accessibility);
 

@@ -53,6 +53,22 @@ void ValueBindings::add(const ValueBindingPtr& var)
     valueBindings.push_back(var);
     var->owner = std::static_pointer_cast<ValueBindings>(shared_from_this());
 }
+ValueBindings::Iterator ValueBindings::insertBefore(const ValueBindingPtr& binding, const Iterator& iter)
+{
+    binding->owner = std::static_pointer_cast<ValueBindings>(shared_from_this());
+    if(iter == valueBindings.end())
+    {
+        valueBindings.push_back(binding);
+        Iterator ret = valueBindings.end();
+        return ret;
+    }
+    else
+    {
+        Iterator it = iter;
+        it--;
+        return ++valueBindings.insert(it, binding);
+    }
+}
 void ValueBindings::insertAfter(const ValueBindingPtr& binding, const Iterator& iter)
 {
     if(iter == valueBindings.end())

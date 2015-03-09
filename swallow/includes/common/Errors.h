@@ -214,7 +214,8 @@ struct SWALLOW_EXPORT Errors
         E_MUST_CALL_A_DESIGNATED_INITIALIZER_OF_THE_SUPER_CLASS_A_1,//Must call a designated initializer of the superclass '%0'
         E_CONVENIENCE_INITIALIZER_FOR_A_MUST_DELEGATE_WITH_SELF_INIT_1,//Convenience initializer for '%0' must delegate(with 'self.init') rather than chaining to a superclass initializer(with 'super.init')
         E_MISSING_RETURN_IN_A_FUNCTION_EXPECTED_TO_RETURN_A_1,//Missing return in a function expected to return '%0'
-
+        E_PROPERTY_A_NOT_INITIALIZED_AT_SUPER_INIT_CALL_1,//Property 'self.a' not initialized at super.init call
+        E_VARIABLE_A_USED_BEFORE_BEING_INITIALIZED_1,//Variable 'a' used before being initialized
 
 
 

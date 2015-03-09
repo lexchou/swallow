@@ -167,9 +167,11 @@ void SemanticAnalyzer::verifyTuplePatternForAssignment(const PatternPtr& pattern
         }
         if(!sym->hasFlags(SymbolFlagWritable))
         {
+            //write on a constant variable
             if(id->getIdentifier() == L"self")
             {
                 error(id, Errors::E_CANNOT_ASSIGN_TO_A_IN_A_METHOD_1, id->getIdentifier());
+                return;
             }
             else
             {
@@ -177,9 +179,15 @@ void SemanticAnalyzer::verifyTuplePatternForAssignment(const PatternPtr& pattern
                 bool init = ctx.currentFunction && ctx.currentFunction->hasFlags(SymbolFlagInit);
                 bool storedProperty = sym->hasFlags(SymbolFlagStoredProperty);
                 if(!(init && storedProperty))
+                {
                     error(id, Errors::E_CANNOT_ASSIGN_TO_LET_VALUE_A_1, id->getIdentifier());
+                    return;
+                }
             }
-
+        }
+        if(sym)
+        {
+            sym->setFlags(SymbolFlagInitialized, true);
         }
     }
     else if(pattern->getNodeType() == NodeType::Tuple)
@@ -203,13 +211,19 @@ void SemanticAnalyzer::visitAssignment(const AssignmentPtr& node)
     declareImmediately(node->getOperator());
     node->setType(symbolRegistry->getGlobalScope()->Void());
     PatternPtr destination = node->getLHS();
-    if(ExpressionPtr expr = std::dynamic_pointer_cast<Expression>(destination))
     {
-        expr = transformExpression(nullptr, expr);
-        node->setLHS(expr);
-        destination = expr;
+        SCOPED_SET(ctx.flags, ctx.flags | SemanticContext::FLAG_WRITE_CONTEXT);
+        if (ExpressionPtr expr = std::dynamic_pointer_cast<Expression>(destination))
+        {
+            expr = transformExpression(nullptr, expr);
+            node->setLHS(expr);
+            destination = expr;
+        }
+        else
+        {
+            destination->accept(this);
+        }
     }
-    destination->accept(this);
     switch(destination->getNodeType())
     {
         case NodeType::Identifier:
@@ -324,6 +338,11 @@ void SemanticAnalyzer::visitAssignment(const AssignmentPtr& node)
                             error(self, Errors::E_CANNOT_ASSIGN_TO_A_IN_B_2, index, self->getIdentifier());
                             return;
                         }
+                    }
+                    //mark it initialized
+                    if(member)
+                    {
+                        member->setFlags(SymbolFlagInitialized, true);
                     }
                 }
             }

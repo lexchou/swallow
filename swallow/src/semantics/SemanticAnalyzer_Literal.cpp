@@ -399,10 +399,12 @@ void SemanticAnalyzer::visitIdentifier(const IdentifierPtr& id)
         if(placeholder->hasFlags(SymbolFlagInitializing))
         {
             error(id, Errors::E_USE_OF_INITIALIZING_VARIABLE, placeholder->getName());
+            return;
         }
-        else if(!placeholder->hasFlags(SymbolFlagInitialized))
+        if(!placeholder->hasFlags(SymbolFlagInitialized) && (ctx.flags & SemanticContext::FLAG_WRITE_CONTEXT) == 0)
         {
-            error(id, Errors::E_USE_OF_UNINITIALIZED_VARIABLE_1, placeholder->getName());
+            error(id, Errors::E_VARIABLE_A_USED_BEFORE_BEING_INITIALIZED_1, placeholder->getName());
+            return;
         }
         //check if this identifier is accessed inside a class/protocol/extension/struct/enum but defined not in program
         if(dynamic_cast<TypeDeclaration*>(symbolRegistry->getCurrentScope()->getOwner()) && symbolRegistry->getCurrentScope() != scope)

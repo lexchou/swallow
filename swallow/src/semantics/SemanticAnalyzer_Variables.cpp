@@ -150,6 +150,7 @@ void SemanticAnalyzer::visitValueBinding(const ValueBindingPtr& node)
         }
         if(node->getInitializer())
         {
+            placeholder->setFlags(SymbolFlagInitializing, true);
             ExpressionPtr initializer = transformExpression(declaredType, node->getInitializer());
             node->setInitializer(initializer);
             TypePtr actualType = initializer->getType();
@@ -167,6 +168,7 @@ void SemanticAnalyzer::visitValueBinding(const ValueBindingPtr& node)
                 placeholder->setType(actualType);
         }
         assert(placeholder->getType() != nullptr);
+        placeholder->setFlags(SymbolFlagInitializing, false);
     }
     else if(TuplePtr id = std::dynamic_pointer_cast<Tuple>(node->getName()))
     {
@@ -198,7 +200,7 @@ void SemanticAnalyzer::explodeValueBindings(const ValueBindingsPtr& node)
         explodeValueBinding(node, iter);
     }
 }
-void SemanticAnalyzer::explodeValueBinding(const ValueBindingsPtr& valueBindings, const ValueBindings::Iterator& iter)
+void SemanticAnalyzer::explodeValueBinding(const ValueBindingsPtr& valueBindings, ValueBindings::Iterator& iter)
 {
     ValueBindingPtr var = *iter;
     TuplePtr name = dynamic_pointer_cast<Tuple>(var->getName());
@@ -232,7 +234,7 @@ void SemanticAnalyzer::explodeValueBinding(const ValueBindingsPtr& valueBindings
     tempVar->setInitializer(var->getInitializer());
     tempVar->setType(declaredType ? declaredType : initializerType);
     tempVar->setTemporary(true);
-    valueBindings->insertAfter(tempVar, iter);
+    valueBindings->insertBefore(tempVar, iter);
     //now expand tuples
     vector<TupleExtractionResult> result;
     vector<int> indices;
@@ -387,7 +389,7 @@ void SemanticAnalyzer::visitValueBindings(const ValueBindingsPtr& node)
         return;
     }
 
-    int flags = SymbolFlagInitializing | SymbolFlagReadable;
+    int flags = SymbolFlagReadable;
     if(dynamic_cast<TypeDeclaration*>(symbolRegistry->getCurrentScope()->getOwner()))
         flags |= SymbolFlagMember;
     if(node->isReadOnly())
@@ -427,7 +429,7 @@ void SemanticAnalyzer::visitValueBindings(const ValueBindingsPtr& node)
     for(const ValueBindingPtr& v : *node)
     {
         PatternPtr name = v->getName();
-        if(name->getNodeType() != NodeType::Identifier)
+        if (name->getNodeType() != NodeType::Identifier)
             continue;
         //skip placeholder
         IdentifierPtr id = std::static_pointer_cast<Identifier>(name);
@@ -436,13 +438,16 @@ void SemanticAnalyzer::visitValueBindings(const ValueBindingsPtr& node)
         ExpressionPtr initializer = v->getInitializer();
         SymbolPlaceHolderPtr placeholder = std::dynamic_pointer_cast<SymbolPlaceHolder>(s);
         assert(placeholder != nullptr);
-        if(initializer)
+        if (initializer)
             placeholder->setFlags(SymbolFlagHasInitializer, true);
         if(v->isTemporary())
+        {
             placeholder->setFlags(SymbolFlagTemporary, true);
+            placeholder->setFlags(SymbolFlagInitialized, true);
+        }
         v->accept(this);
 
-        placeholder->setFlags(SymbolFlagInitialized, true);
-        placeholder->setFlags(SymbolFlagInitializing, false);
+        if(initializer)
+            placeholder->setFlags(SymbolFlagInitialized, true);
     }
 }

@@ -999,7 +999,7 @@ void DeclarationAnalyzer::visitInit(const InitializerDefPtr& node)
         if(node->hasModifier(DeclarationModifiers::Convenience))
         {
             //convenience initializer must call designated initializer in all paths
-            InitializerValidator validator(ctx);
+            InitializerValidator validator(ctx, this);
             node->getBody()->accept(&validator);
             NodePtr refNode = validator.getRefNode() ? validator.getRefNode() : node;
             if(validator.getResult() & InitializerCoverMultiple)
@@ -1040,7 +1040,7 @@ void DeclarationAnalyzer::visitInit(const InitializerDefPtr& node)
             }
             if(hasCustomizedInitializer)
             {
-                InitializerValidator validator(ctx);
+                InitializerValidator validator(ctx, this);
                 node->getBody()->accept(&validator);
                 NodePtr refNode = validator.getRefNode() ? validator.getRefNode() : node;
                 if(validator.getResult() & InitializerCoverMultiple)

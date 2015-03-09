@@ -606,3 +606,38 @@ TEST(TestInitialization, ConvenienceInitializerMustDelegateWithSelfInit)
     ASSERT_ERROR(Errors::E_CONVENIENCE_INITIALIZER_FOR_A_MUST_DELEGATE_WITH_SELF_INIT_1);
     ASSERT_EQ(L"Child", error->items[0]);
 }
+TEST(TestInitialization, DelegateAfterFieldInitialized)
+{
+    SEMANTIC_ANALYZE(L"class Base\n"
+            L"{\n"
+            L"}\n"
+            L"\n"
+            L"class Child : Base\n"
+            L"{\n"
+            L"  var a : Int\n"
+            L"  init(a : Int)\n"
+            L"  {\n"
+            L"    super.init();\n"
+            L"  }\n"
+            L"}");
+    ASSERT_ERROR(Errors::E_PROPERTY_A_NOT_INITIALIZED_AT_SUPER_INIT_CALL_1);
+    ASSERT_EQ(L"self.a", error->items[0]);
+}
+
+TEST(TestInitialization, VariableInitializedInInitializer)
+
+{
+   SEMANTIC_ANALYZE(L"class Test\n"
+           L"{\n"
+           L"    var a : String\n"
+           L"    init()\n"
+           L"    {\n"
+           L"        a = \"\"\n"
+           L"    }\n"
+           L"    func foo()\n"
+           L"    {\n"
+           L"        println(a);\n"
+           L"    }\n"
+           L"}");
+    ASSERT_NO_ERRORS();
+}

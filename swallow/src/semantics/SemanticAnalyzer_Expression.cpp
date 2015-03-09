@@ -113,6 +113,7 @@ void SemanticAnalyzer::visitMemberAccess(const MemberAccessPtr& node)
     bool staticAccess = false;
     if(node->getSelf())
     {
+        SCOPED_SET(ctx.flags, ctx.flags & ~SemanticContext::FLAG_WRITE_CONTEXT);
         node->getSelf()->accept(this);
         selfType = node->getSelf()->getType();
         assert(selfType != nullptr);
