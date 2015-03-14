@@ -106,18 +106,19 @@ void SwallowUtils::dumpCompilerResults(const std::wstring& src, const CompilerRe
         switch (res.level)
         {
             case ErrorLevel::Fatal:
-                out << L"Fatal:";
+                out << L"Fatal";
                 break;
             case ErrorLevel::Error:
-                out << L"Error:";
+                out << L"Error";
                 break;
             case ErrorLevel::Warning:
-                out << L"Warning:";
+                out << L"Warning";
                 break;
             case ErrorLevel::Note:
-                out << L"Note:";
+                out << L"Note";
                 break;
         }
+        out << L" " << res.code << L" :";
         out << L"(" << res.line << L", " << res.column << ") ";
         std::wstring msg = Errors::format(res.code, res.items);
         out << msg << std::endl;

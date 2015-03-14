@@ -95,7 +95,6 @@ class SWALLOW_EXPORT ScopedCodeBlock : public CodeBlock, public ScopeOwner
 {
 public:
     virtual void accept(NodeVisitor* visitor) override;
-
 };
 class SWALLOW_EXPORT ScopedClosure : public Closure, public ScopeOwner
 {

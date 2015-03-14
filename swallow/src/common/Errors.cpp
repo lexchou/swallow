@@ -218,6 +218,7 @@ std::wstring Errors::getErrorTemplate(int errorCode)
         case Errors::E_MISSING_RETURN_IN_A_FUNCTION_EXPECTED_TO_RETURN_A_1: return L"Missing return in a function expected to return '%0'";
         case Errors::E_PROPERTY_A_NOT_INITIALIZED_AT_SUPER_INIT_CALL_1: return L"Property '%0' not initialized at super.init call";
         case Errors::E_VARIABLE_A_USED_BEFORE_BEING_INITIALIZED_1: return L"Variable '%0' used before being initialized";
+        case Errors::E_USE_OF_PROPERTY_A_IN_BASE_OBJECT_BEFORE_SUPER_INIT_INITIALIZES_IT: return L"Use of property '%0' in base object before super.init initializes it";
 
 
         case Errors::W_CODE_AFTER_A_WILL_NEVER_BE_EXECUTED_1: return L"Code after 'return' will never be executed";

@@ -29,6 +29,8 @@
  */
 #include "semantics/ScopedNodes.h"
 #include "semantics/SymbolScope.h"
+#include "semantics/SemanticAnalyzer.h"
+#include "semantics/SemanticContext.h"
 #include "semantics/SymbolRegistry.h"
 #include "ast/TypeIdentifier.h"
 #include <cassert>
@@ -108,7 +110,23 @@ const std::wstring& ScopedExtension::getName()const
 void ScopedCodeBlock::accept(NodeVisitor* visitor)
 {
     ScopeGuard scope(this, visitor);
-    accept2(visitor, &NodeVisitor::visitCodeBlock);
+    SemanticAnalyzer* sa = dynamic_cast<SemanticAnalyzer*>(visitor);
+    SemanticContext* ctx = sa ? sa->getContext() : nullptr;
+    ScopedCodeBlock* old = ctx ? ctx->currentCodeBlock : nullptr;
+    if(ctx)
+        ctx->currentCodeBlock = this;
+    try
+    {
+        accept2(visitor, &NodeVisitor::visitCodeBlock);
+        if(ctx)
+            ctx->currentCodeBlock = old;
+    }
+    catch(...)
+    {
+        if(ctx)
+            ctx->currentCodeBlock = old;
+        throw;
+    }
 }
 
 void ScopedClosure::accept(NodeVisitor* visitor)

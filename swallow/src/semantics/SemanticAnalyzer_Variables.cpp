@@ -443,11 +443,11 @@ void SemanticAnalyzer::visitValueBindings(const ValueBindingsPtr& node)
         if(v->isTemporary())
         {
             placeholder->setFlags(SymbolFlagTemporary, true);
-            placeholder->setFlags(SymbolFlagInitialized, true);
+            markInitialized(placeholder);
         }
         v->accept(this);
 
         if(initializer)
-            placeholder->setFlags(SymbolFlagInitialized, true);
+            markInitialized(placeholder);
     }
 }

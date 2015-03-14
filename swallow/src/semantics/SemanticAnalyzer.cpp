@@ -28,6 +28,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "semantics/SemanticAnalyzer.h"
+#include "semantics/InitializationTracer.h"
 #include <cassert>
 #include "semantics/SymbolScope.h"
 #include "ast/ast.h"
@@ -141,6 +142,9 @@ void SemanticAnalyzer::declareImmediately(const std::wstring& name)
 }
 void SemanticAnalyzer::visitProgram(const ProgramPtr& node)
 {
+    InitializationTracer tracer(nullptr, InitializationTracer::Sequence);
+    SCOPED_SET(ctx.currentInitializationTracer, &tracer);
+
     SemanticPass::visitProgram(node);
     //now we'll deal with the lazy declaration of functions and classes
     lazyDeclaration = false;
@@ -712,3 +716,14 @@ void SemanticAnalyzer::getMethodsFromType(const TypePtr& type, const std::wstrin
     }
 }
 
+/*!
+ * Mark specified symbol initialized.
+ */
+void SemanticAnalyzer::markInitialized(const SymbolPtr& sym)
+{
+    if(sym->hasFlags(SymbolFlagInitialized))
+        return;
+    sym->setFlags(SymbolFlagInitialized, true);
+    assert(ctx.currentInitializationTracer != nullptr);
+    ctx.currentInitializationTracer->add(sym);
+}

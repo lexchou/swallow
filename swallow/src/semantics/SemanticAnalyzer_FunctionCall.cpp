@@ -43,6 +43,7 @@
 #include "semantics/CollectionTypeAnalyzer.h"
 #include <iostream>
 #include "common/ScopedValue.h"
+#include "semantics/InitializationTracer.h"
 
 USE_SWALLOW_NS
 using namespace std;
@@ -496,23 +497,7 @@ void SemanticAnalyzer::visitFunctionCall(const FunctionCallPtr& node)
             {
                 if(ma->getSelf()->getNodeType() == NodeType::Identifier)
                 {
-                    const wstring& name = static_pointer_cast<Identifier>(ma->getSelf())->getIdentifier();
-                    bool insideInit = ctx.currentFunction && ctx.currentFunction->hasFlags(SymbolFlagInit);
-                    if(!insideInit)
-                    {
-                        if(name == L"self")
-                        {
-                            error(ma, Errors::E_INITIALIZER_DELEGATION_CAN_ONLY_OCCUR_WITHIN_AN_INITIALIZER);
-                            return;
-                        }
-                        if(name == L"super")
-                        {
-                            error(ma, Errors::E_SUPER_INIT_CANNOT_BE_CALLED_OUTSIDE_OF_AN_INITIALIZER);
-                            return;
-                        }
-                        error(ma, Errors::E_INIT_CAN_ONLY_REFER_TO_THE_INITIALIZERS_OF_SELF);
-                        return;
-                    }
+                    validateInitializerDelegation(node);
                 }
             }
             vector<SymbolPtr> funcs;
@@ -627,4 +612,58 @@ void SemanticAnalyzer::visitReturn(const ReturnStatementPtr& node)
     {
         error(node->getExpression(), Errors::E_CANNOT_CONVERT_EXPRESSION_TYPE_2, retType->toString(), expectedType->toString());
     }
+}
+/*!
+ * Validate initializer delegation
+ */
+void SemanticAnalyzer::validateInitializerDelegation(const FunctionCallPtr& node)
+{
+    MemberAccessPtr ma = static_pointer_cast<MemberAccess>(node->getFunction());
+    const wstring& name = static_pointer_cast<Identifier>(ma->getSelf())->getIdentifier();
+    bool self_init = name == L"self";
+    bool super_init = name == L"super";
+    bool insideInit = ctx.currentFunction && ctx.currentFunction->hasFlags(SymbolFlagInit);
+    //calling a super.init or super.init outside the initializer
+    if(!insideInit)
+    {
+        if(self_init)
+        {
+            error(ma, Errors::E_INITIALIZER_DELEGATION_CAN_ONLY_OCCUR_WITHIN_AN_INITIALIZER);
+            return;
+        }
+        if(super_init)
+        {
+            error(ma, Errors::E_SUPER_INIT_CANNOT_BE_CALLED_OUTSIDE_OF_AN_INITIALIZER);
+            return;
+        }
+        error(ma, Errors::E_INIT_CAN_ONLY_REFER_TO_THE_INITIALIZERS_OF_SELF);
+        return;
+    }
+    //inside initializer, apply delegation's safe check
+
+    //Initializer Delegation Safety check 1: A designated initializer must
+    //ensure that all of the properties introduced by its class are
+    //initialized before it delegates up to a superclass initializer.
+    assert(ctx.currentType != nullptr);
+    if(super_init)
+    {
+        for (const SymbolPtr &prop : ctx.currentType->getDeclaredStoredProperties())
+        {
+            if (!prop->hasFlags(SymbolFlagInitialized))
+            {
+                error(node, Errors::E_PROPERTY_A_NOT_INITIALIZED_AT_SUPER_INIT_CALL_1, L"self." + prop->getName());
+                return;
+            }
+        }
+    }
+
+    if(ctx.currentInitializationTracer)
+    {
+        if(self_init)
+            ctx.currentInitializationTracer->selfInit = true;
+        if(super_init)
+            ctx.currentInitializationTracer->superInit = true;
+    }
+
+
 }

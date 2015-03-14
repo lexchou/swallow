@@ -52,3 +52,81 @@ TEST(TestBasic, VariableUseBeforeInitialized2)
             L"println(a)");
     ASSERT_NO_ERRORS();
 }
+TEST(TestBasic, VariableUseBeforeInitialized3)
+{
+    SEMANTIC_ANALYZE(L"var a : Int\n"
+            L"if(true)\n"
+            L"{\n"
+            L"    a = 3\n"
+            L"}\n"
+            L"println(a)");
+    ASSERT_ERROR(Errors::E_VARIABLE_A_USED_BEFORE_BEING_INITIALIZED_1);
+}
+TEST(TestBasic, VariableUseBeforeInitialized4)
+{
+    SEMANTIC_ANALYZE(L"var a : Int\n"
+            L"if(true)\n"
+            L"{\n"
+            L"    a = 3\n"
+            L"}\n"
+            L"else\n"
+            L"{\n"
+            L"    a = 3\n"
+            L"}\n"
+            L"println(a)");
+    ASSERT_NO_ERRORS();
+}
+TEST(TestBasic, VariableUseBeforeInitialized5)
+{
+    SEMANTIC_ANALYZE(L"var a : Int\n"
+            L"if(true)\n"
+            L"{\n"
+            L"    if(true)\n"
+            L"    {\n"
+            L"        a = 3\n"
+            L"    }\n"
+            L"}\n"
+            L"else\n"
+            L"{\n"
+            L"    a = 5;\n"
+            L"}\n"
+            L"println(a)");
+    ASSERT_ERROR(Errors::E_VARIABLE_A_USED_BEFORE_BEING_INITIALIZED_1);
+}
+TEST(TestBasic, VariableUseBeforeInitialized6)
+{
+    SEMANTIC_ANALYZE(L"var cond1 = true;\n"
+            L"var cond2 = false;\n"
+            L"var cond3 = 4;\n"
+            L"\n"
+            L"var a : Int\n"
+            L"if(cond1)\n"
+            L"{\n"
+            L"    if(cond2)\n"
+            L"    {\n"
+            L"        a = 3\n"
+            L"    }\n"
+            L"    else\n"
+            L"    {\n"
+            L"        switch(cond3)\n"
+            L"        {\n"
+            L"        case 1:\n"
+            L"            a=1\n"
+            L"        case 2:\n"
+            L"            a=2\n"
+            L"        case 3:\n"
+            L"            a=3\n"
+            L"        case 4:\n"
+            L"            a=4\n"
+            L"        default:\n"
+            L"            break;\n"
+            L"        }\n"
+            L"    }\n"
+            L"}\n"
+            L"else\n"
+            L"{\n"
+            L"    a = 5;\n"
+            L"}\n"
+            L"println(a)");
+    ASSERT_ERROR(Errors::E_VARIABLE_A_USED_BEFORE_BEING_INITIALIZED_1);
+}

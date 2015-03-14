@@ -466,6 +466,8 @@ void Parser::parseSwitchStatements(const CaseStatementPtr& case_)
     while(true)
     {
         expect_next(token);
+        if(token.type == TokenType::Semicolon)
+            continue;
         restore(token);
         Keyword::T k = token.getKeyword();
         if(token.type == TokenType::CloseBrace || (k == Keyword::Case || k == Keyword::Default))

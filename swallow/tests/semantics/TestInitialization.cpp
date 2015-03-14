@@ -623,9 +623,41 @@ TEST(TestInitialization, DelegateAfterFieldInitialized)
     ASSERT_ERROR(Errors::E_PROPERTY_A_NOT_INITIALIZED_AT_SUPER_INIT_CALL_1);
     ASSERT_EQ(L"self.a", error->items[0]);
 }
+TEST(TestInitialization, DelegateAfterFieldInitialized2)
+{
+    SEMANTIC_ANALYZE(L"class Base\n"
+            L"{\n"
+            L"}\n"
+            L"\n"
+            L"class Child : Base\n"
+            L"{\n"
+            L"  var a : Int\n"
+            L"  init(a : Int)\n"
+            L"  {\n"
+            L"    self.a = 3;\n"
+            L"    super.init();\n"
+            L"  }\n"
+            L"}");
+    ASSERT_NO_ERRORS();
+}
+TEST(TestInitialization, DelegateAfterFieldInitialized3)
+{
+    SEMANTIC_ANALYZE(L"class Base\n"
+            L"{\n"
+            L"}\n"
+            L"\n"
+            L"class Child : Base\n"
+            L"{\n"
+            L"  var a : Int = 3\n"
+            L"  init(a : Int)\n"
+            L"  {\n"
+            L"    super.init();\n"
+            L"  }\n"
+            L"}");
+    ASSERT_NO_ERRORS();
+}
 
 TEST(TestInitialization, VariableInitializedInInitializer)
-
 {
    SEMANTIC_ANALYZE(L"class Test\n"
            L"{\n"
@@ -639,5 +671,92 @@ TEST(TestInitialization, VariableInitializedInInitializer)
            L"        println(a);\n"
            L"    }\n"
            L"}");
+    ASSERT_NO_ERRORS();
+}
+
+TEST(TestInitialization, ChangeParentPropertyBeforeSuperInit)
+{
+    SEMANTIC_ANALYZE(L"class Base\n"
+            L"{\n"
+            L"    var a : Int = 5\n"
+            L"}\n"
+            L"\n"
+            L"class Child : Base\n"
+            L"{\n"
+            L"    init(b : Int)\n"
+            L"    {\n"
+            L"        a = 3\n"
+            L"        super.init();\n"
+            L"    }\n"
+            L"}");
+    ASSERT_ERROR(Errors::E_USE_OF_PROPERTY_A_IN_BASE_OBJECT_BEFORE_SUPER_INIT_INITIALIZES_IT);
+}
+TEST(TestInitialization, ChangeParentPropertyBeforeSuperInit2)
+{
+   SEMANTIC_ANALYZE(L"class Base\n"
+           L"{\n"
+           L"    var a : Int = 5\n"
+           L"}\n"
+           L"\n"
+           L"\n"
+           L"class Child : Base\n"
+           L"{\n"
+           L"    \n"
+           L"    init(b : Int)\n"
+           L"    {\n"
+           L"        if(b == 0)\n"
+           L"        {\n"
+           L"          super.init()\n"
+           L"        }\n"
+           L"        \n"
+           L"        a = 5\n"
+           L"    }\n"
+           L"}");
+    ASSERT_ERROR(Errors::E_USE_OF_PROPERTY_A_IN_BASE_OBJECT_BEFORE_SUPER_INIT_INITIALIZES_IT);
+}
+TEST(TestInitialization, ChangeParentPropertyBeforeSuperInit3)
+{
+    SEMANTIC_ANALYZE(L"class Base\n"
+            L"{\n"
+            L"    var a : Int = 5\n"
+            L"}\n"
+            L"\n"
+            L"\n"
+            L"class Child : Base\n"
+            L"{\n"
+            L"    \n"
+            L"    init(b : Int)\n"
+            L"    {\n"
+            L"        if(b == 0)\n"
+            L"        {\n"
+            L"          super.init()\n"
+            L"        }\n"
+            L"        else\n"
+            L"        {\n"
+            L"          super.init()\n"
+            L"        }\n"
+            L"        \n"
+            L"        a = 5\n"
+            L"    }\n"
+            L"}");
+    ASSERT_NO_ERRORS();
+}
+TEST(TestInitialization, ChangeParentPropertyBeforeSuperInit4)
+{
+    SEMANTIC_ANALYZE(L"class Base\n"
+            L"{\n"
+            L"    var a : Int = 5\n"
+            L"}\n"
+            L"\n"
+            L"\n"
+            L"class Child : Base\n"
+            L"{\n"
+            L"    \n"
+            L"    init(b : Int)\n"
+            L"    {\n"
+            L"        super.init()\n"
+            L"        a = 5\n"
+            L"    }\n"
+            L"}");
     ASSERT_NO_ERRORS();
 }

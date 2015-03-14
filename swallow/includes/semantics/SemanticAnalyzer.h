@@ -270,6 +270,16 @@ private:
     */
     bool containsReadonlyNode(const ExpressionPtr& node);
 
+    /*!
+     * Mark specified symbol initialized.
+     */
+    void markInitialized(const SymbolPtr& sym);
+
+    /*!
+     * Validate initializer delegation
+     */
+    void validateInitializerDelegation(const FunctionCallPtr& node);
+
 protected:
     SemanticContext ctx;
     DeclarationAnalyzer* declarationAnalyzer;

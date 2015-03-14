@@ -33,6 +33,9 @@
 
 SWALLOW_NS_BEGIN
 
+class ScopedCodeBlock;
+class InitializationTracer;
+
 
 struct SemanticContext
 {
@@ -56,11 +59,13 @@ struct SemanticContext
     TypePtr currentType;
     TypePtr currentExtension;
     TypePtr currentFunction;
+    ScopedCodeBlock* currentCodeBlock;
+    InitializationTracer* currentInitializationTracer;
     int numTemporaryNames;
     int flags;
 
     SemanticContext()
-        :numTemporaryNames(0), flags(FLAG_PROCESS_DECLARATION | FLAG_PROCESS_IMPLEMENTATION)
+        :currentCodeBlock(nullptr), currentInitializationTracer(nullptr), numTemporaryNames(0), flags(FLAG_PROCESS_DECLARATION | FLAG_PROCESS_IMPLEMENTATION)
     {}
 };
 

@@ -44,6 +44,7 @@
 #include "ast/utils/ASTHierachyDumper.h"
 #include "common/ScopedValue.h"
 #include "semantics/ScopeGuard.h"
+#include "semantics/InitializationTracer.h"
 
 USE_SWALLOW_NS
 using namespace std;
@@ -137,9 +138,21 @@ void SemanticAnalyzer::visitIf(const IfStatementPtr& node)
         }
     }
 
-    node->getThen()->accept(this);
-    if(node->getElse())
-        node->getElse()->accept(this);
+    InitializationTracer tracer(ctx.currentInitializationTracer, InitializationTracer::Sequence);
+
+    SCOPED_SET(ctx.currentInitializationTracer, &tracer);
+
+    {
+        InitializationTracer ifTracer(&tracer, InitializationTracer::Branch);
+        SCOPED_SET(ctx.currentInitializationTracer, &ifTracer);
+        node->getThen()->accept(this);
+    }
+    {
+        InitializationTracer elseTracer(&tracer, InitializationTracer::Branch);
+        SCOPED_SET(ctx.currentInitializationTracer, &elseTracer);
+        if (node->getElse())
+            node->getElse()->accept(this);
+    }
 }
 
 static void checkExhausiveSwitch(SemanticAnalyzer* sa, const SwitchCasePtr& node)
@@ -177,9 +190,13 @@ void SemanticAnalyzer::visitSwitchCase(const SwitchCasePtr& node)
 
     checkExhausiveSwitch(this, node);
 
+    InitializationTracer tracer(ctx.currentInitializationTracer, InitializationTracer::Sequence);
     for(const CaseStatementPtr& c : *node)
     {
         CodeBlockPtr statements = c->getCodeBlock();
+
+        InitializationTracer caseTracer(&tracer, InitializationTracer::Branch);
+        SCOPED_SET(ctx.currentInitializationTracer, &caseTracer);
         if(statements->numStatements() == 0)
         {
             error(node, Errors::E_A_LABEL_IN_SWITCH_SHOULD_HAVE_AT_LEAST_ONE_STATEMENT_0, L"case");
@@ -187,15 +204,18 @@ void SemanticAnalyzer::visitSwitchCase(const SwitchCasePtr& node)
         }
         c->accept(this);
     }
-    if(node->getDefaultCase())
     {
-
-        if(node->getDefaultCase()->getCodeBlock()->numStatements() == 0)
+        InitializationTracer caseTracer(&tracer, InitializationTracer::Branch);
+        SCOPED_SET(ctx.currentInitializationTracer, &caseTracer);
+        if (node->getDefaultCase())
         {
-            error(node, Errors::E_A_LABEL_IN_SWITCH_SHOULD_HAVE_AT_LEAST_ONE_STATEMENT_0, L"default");
-            return;
+            if (node->getDefaultCase()->getCodeBlock()->numStatements() == 0)
+            {
+                error(node, Errors::E_A_LABEL_IN_SWITCH_SHOULD_HAVE_AT_LEAST_ONE_STATEMENT_0, L"default");
+                return;
+            }
+            node->getDefaultCase()->accept(this);
         }
-        node->getDefaultCase()->accept(this);
     }
 }
 

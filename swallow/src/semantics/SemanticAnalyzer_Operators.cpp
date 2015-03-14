@@ -43,6 +43,7 @@
 #include "semantics/CollectionTypeAnalyzer.h"
 #include <iostream>
 #include "common/ScopedValue.h"
+#include "semantics/InitializationTracer.h"
 
 USE_SWALLOW_NS
 using namespace std;
@@ -187,7 +188,7 @@ void SemanticAnalyzer::verifyTuplePatternForAssignment(const PatternPtr& pattern
         }
         if(sym)
         {
-            sym->setFlags(SymbolFlagInitialized, true);
+            markInitialized(sym);
         }
     }
     else if(pattern->getNodeType() == NodeType::Tuple)
@@ -330,19 +331,36 @@ void SemanticAnalyzer::visitAssignment(const AssignmentPtr& node)
                 {
                     //assigning on constant member inside an init function
                     bool constantMember = member && !member->hasFlags(SymbolFlagWritable);
+                    bool declaredBySuperClass = !Type::equals(memberDeclaringType, ctx.currentType);
                     if(constantMember)
                     {
-                        if (!Type::equals(memberDeclaringType, ctx.currentType))
+                        if (declaredBySuperClass)
                         {
                             //changing constant member that belongs to a super class is not allowed
                             error(self, Errors::E_CANNOT_ASSIGN_TO_A_IN_B_2, index, self->getIdentifier());
                             return;
                         }
                     }
+                    //assigning it on a field declared by base class but not yet called super.init
+                    if(declaredBySuperClass && ctx.currentInitializationTracer && !ctx.currentInitializationTracer->superInit)
+                    {
+                        //Initializer Delegation Safety Check 2
+                        //A designated initializer must delegate up to a superclass initializer
+                        //before assigning a value to an inherited property. If it doesn’t, the
+                        //new value the designated initializer assigns will be overwritten by
+                        //the superclass as part of its own initialization.
+                        error(self, Errors::E_USE_OF_PROPERTY_A_IN_BASE_OBJECT_BEFORE_SUPER_INIT_INITIALIZES_IT, index);
+                        return;
+                    }
+
+
+
+
+
                     //mark it initialized
                     if(member)
                     {
-                        member->setFlags(SymbolFlagInitialized, true);
+                        markInitialized(member);
                     }
                 }
             }

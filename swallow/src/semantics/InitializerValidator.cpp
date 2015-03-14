@@ -54,21 +54,6 @@ void InitializerValidator::visitFunctionCall(const FunctionCallPtr& node)
     }
     if(ma->getField() && ma->getField()->getIdentifier() == L"init")
     {
-        //Safety check 1
-        //A designated initializer must ensure that all of the properties introduced by its class
-        //are initialized before it delegates up to a superclass initializer.
-        if(isSuper)
-        {
-            const vector<SymbolPtr>& props = this->ctx->currentType->getDeclaredStoredProperties();
-            for(const SymbolPtr& prop : props)
-            {
-                if(!prop->hasFlags(SymbolFlagInitialized))
-                {
-                    compilerResults->error(node, Errors::E_PROPERTY_A_NOT_INITIALIZED_AT_SUPER_INIT_CALL_1, L"self." + prop->getName());
-                    return;
-                }
-            }
-        }
         merge(MergeSequence, InitializerCoverFull, node);
     }
 }

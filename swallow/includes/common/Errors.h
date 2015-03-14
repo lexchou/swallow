@@ -216,6 +216,7 @@ struct SWALLOW_EXPORT Errors
         E_MISSING_RETURN_IN_A_FUNCTION_EXPECTED_TO_RETURN_A_1,//Missing return in a function expected to return '%0'
         E_PROPERTY_A_NOT_INITIALIZED_AT_SUPER_INIT_CALL_1,//Property 'self.a' not initialized at super.init call
         E_VARIABLE_A_USED_BEFORE_BEING_INITIALIZED_1,//Variable 'a' used before being initialized
+        E_USE_OF_PROPERTY_A_IN_BASE_OBJECT_BEFORE_SUPER_INIT_INITIALIZES_IT,//Use of property '%0' in base object before super.init initializes it
 
 
 
