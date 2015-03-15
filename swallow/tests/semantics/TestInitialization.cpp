@@ -796,3 +796,23 @@ TEST(TestInitialization, UseOfSelfBeforeSelfInitCalled2)
             L"}");
     ASSERT_NO_ERRORS();
 }
+TEST(TestInitialization, UseOfSelfBeforeSelfInitCalled3)
+{
+    SEMANTIC_ANALYZER(L"class Base\n"
+            L"{\n"
+            L"    var a : Int = 5\n"
+            L"}\n"
+            L"class Child : Base\n"
+            L"{\n"
+            L"    override init()\n"
+            L"    {\n"
+            L"        \n"
+            L"    }\n"
+            L"    convenience init(b : Int)\n"
+            L"    {\n"
+            L"        a = 3\n"
+            L"        self.init()\n"
+            L"    }\n"
+            L"}");
+    ASSERT_ERROR(Errors::E_USE_OF_SELF_IN_DELEGATING_INITIALIZER_BEFORE_SELF_INIT_IS_CALLED);
+}
