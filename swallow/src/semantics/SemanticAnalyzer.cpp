@@ -448,7 +448,7 @@ ExpressionPtr SemanticAnalyzer::expandSelfAccess(const ExpressionPtr& expr)
                 return expr;// it refers to a non-member symbol
             if(!ctx.currentFunction || ctx.currentFunction->hasFlags(SymbolFlagStatic))
                 return expr;// self access will not be expanded within a static/class method
-            if(!sym)
+            if(!sym || sym->hasFlags(SymbolFlagMember))
             {
                 //check if it's defined in super class
                 TypePtr type = ctx.currentType;
