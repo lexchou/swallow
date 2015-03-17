@@ -45,6 +45,7 @@
 #include "semantics/SemanticContext.h"
 #include "semantics/ReturnStatementValidator.h"
 #include "semantics/InitializerValidator.h"
+#include "semantics/InitializationTracer.h"
 #include <set>
 #include <cassert>
 #include <ast/NodeFactory.h>
@@ -994,6 +995,8 @@ void DeclarationAnalyzer::visitInit(const InitializerDefPtr& node)
         FunctionSymbolPtr init = static_pointer_cast<SymboledInit>(node)->symbol;
         TypePtr funcType = init->getType();
         SCOPED_SET(ctx->currentFunction, funcType);
+        InitializationTracer tracer(nullptr, InitializationTracer::Sequence);
+        SCOPED_SET(ctx->currentInitializationTracer, &tracer);
         node->getBody()->accept(semanticAnalyzer);
 
         if(node->hasModifier(DeclarationModifiers::Convenience))

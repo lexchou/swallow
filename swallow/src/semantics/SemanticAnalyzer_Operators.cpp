@@ -341,32 +341,6 @@ void SemanticAnalyzer::visitAssignment(const AssignmentPtr& node)
                             return;
                         }
                     }
-                    //assigning it on a field declared by base class but not yet called super.init
-                    if(declaredBySuperClass && ctx.currentInitializationTracer && !ctx.currentInitializationTracer->superInit)
-                    {
-                        //Initializer Delegation Safety Check 2
-                        //A designated initializer must delegate up to a superclass initializer
-                        //before assigning a value to an inherited property. If it doesn’t, the
-                        //new value the designated initializer assigns will be overwritten by
-                        //the superclass as part of its own initialization.
-                        error(self, Errors::E_USE_OF_PROPERTY_A_IN_BASE_OBJECT_BEFORE_SUPER_INIT_INITIALIZES_IT, index);
-                        return;
-                    }
-                    if(ctx.currentFunction->hasFlags(SymbolFlagConvenienceInit) && ctx.currentInitializationTracer && !ctx.currentInitializationTracer->selfInit)
-                    {
-                        //Initializer Delegation Safety check 3
-                        //A convenience initializer must delegate to another initializer before
-                        //assigning a value to any property (including properties defined by
-                        //the same class). If it doesn’t, the new value the convenience initializer
-                        //assigns will be overwritten by its own class’s designated initializer.
-                        error(self, Errors::E_USE_OF_SELF_IN_DELEGATING_INITIALIZER_BEFORE_SELF_INIT_IS_CALLED);
-                        return;
-                    }
-
-
-
-
-
                     //mark it initialized
                     if(member)
                     {

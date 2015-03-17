@@ -43,6 +43,7 @@
 #include "semantics/CollectionTypeAnalyzer.h"
 #include <iostream>
 #include "common/ScopedValue.h"
+#include "semantics/InitializationTracer.h"
 
 USE_SWALLOW_NS
 using namespace std;
@@ -375,7 +376,8 @@ void SemanticAnalyzer::visitIdentifier(const IdentifierPtr& id)
     SymbolPtr sym = NULL;
     SymbolScope* scope = NULL;
     declareImmediately(id->getIdentifier());
-    symbolRegistry->lookupSymbol(id->getIdentifier(), &scope, &sym);
+    const wstring& name = id->getIdentifier();
+    symbolRegistry->lookupSymbol(name, &scope, &sym);
     //not found by accesing from scope
     //look up again if it belongs to a super class
     if(!sym && ctx.currentType)

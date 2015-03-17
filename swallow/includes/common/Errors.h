@@ -218,6 +218,8 @@ struct SWALLOW_EXPORT Errors
         E_VARIABLE_A_USED_BEFORE_BEING_INITIALIZED_1,//Variable 'a' used before being initialized
         E_USE_OF_PROPERTY_A_IN_BASE_OBJECT_BEFORE_SUPER_INIT_INITIALIZES_IT,//Use of property '%0' in base object before super.init initializes it
         E_USE_OF_SELF_IN_DELEGATING_INITIALIZER_BEFORE_SELF_INIT_IS_CALLED,//Use of 'self' in delegating initializer before self.init is called
+        E_SELF_USED_BEFORE_SUPER_INIT_CALL,//'self' used before super.init call
+
 
 
 

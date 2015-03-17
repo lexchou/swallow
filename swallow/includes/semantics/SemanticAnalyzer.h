@@ -276,9 +276,13 @@ private:
     void markInitialized(const SymbolPtr& sym);
 
     /*!
-     * Validate initializer delegation
+     * Validate initializer delegation safety check
      */
     void validateInitializerDelegation(const FunctionCallPtr& node);
+    /*!
+     * Validate initializer delegation safety check
+     */
+    void validateInitializerDelegation(const MemberAccessPtr& node);
 
 protected:
     SemanticContext ctx;

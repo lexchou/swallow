@@ -57,3 +57,16 @@ void Identifier::setGenericArgumentDef(const GenericArgumentDefPtr& val)
 {
     genericArgumentDef = val;
 }
+/*!
+ * Check if given node is an identifier with specified name
+ */
+bool Identifier::is(const NodePtr& node, const wchar_t* name)
+{
+    if(node == nullptr)
+        return false;
+    if(node->getNodeType() != NodeType::Identifier)
+        return false;
+    IdentifierPtr id = std::static_pointer_cast<Identifier>(node);
+    bool ret = id->getIdentifier() == name;
+    return ret;
+}

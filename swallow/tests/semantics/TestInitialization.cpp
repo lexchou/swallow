@@ -179,9 +179,8 @@ TEST(TestInitialization, ModifyConstantPropertiesDuringSubClassInitialization)
         L"         self.a = 4\n"
         L"    }\n"
         L"}");
-    ASSERT_ERROR(Errors::E_CANNOT_ASSIGN_TO_A_IN_B_2);
+    ASSERT_ERROR(Errors::E_USE_OF_PROPERTY_A_IN_BASE_OBJECT_BEFORE_SUPER_INIT_INITIALIZES_IT);
     ASSERT_EQ(L"a", error->items[0]);
-    ASSERT_EQ(L"self", error->items[1]);
 }
 
 TEST(TestInitialization, ModifyConstantPropertiesDuringSubClassInitialization2)
@@ -194,6 +193,7 @@ TEST(TestInitialization, ModifyConstantPropertiesDuringSubClassInitialization2)
             L"{\n"
             L"    override init()\n"
             L"    {\n"
+            L"         super.init()\n"
             L"         a = 4\n"
             L"    }\n"
             L"}");
@@ -798,7 +798,7 @@ TEST(TestInitialization, UseOfSelfBeforeSelfInitCalled2)
 }
 TEST(TestInitialization, UseOfSelfBeforeSelfInitCalled3)
 {
-    SEMANTIC_ANALYZER(L"class Base\n"
+    SEMANTIC_ANALYZE(L"class Base\n"
             L"{\n"
             L"    var a : Int = 5\n"
             L"}\n"
@@ -806,12 +806,84 @@ TEST(TestInitialization, UseOfSelfBeforeSelfInitCalled3)
             L"{\n"
             L"    override init()\n"
             L"    {\n"
-            L"        \n"
+            L"        super.init()\n"
             L"    }\n"
             L"    convenience init(b : Int)\n"
             L"    {\n"
             L"        a = 3\n"
             L"        self.init()\n"
+            L"    }\n"
+            L"}");
+    ASSERT_ERROR(Errors::E_USE_OF_SELF_IN_DELEGATING_INITIALIZER_BEFORE_SELF_INIT_IS_CALLED);
+}
+TEST(TestInitialization, UseOfSelfBeforeSelfInitCalled4)
+{
+    SEMANTIC_ANALYZE(L"class Base\n"
+            L"{\n"
+            L"    var a : Int = 5\n"
+            L"}\n"
+            L"class Child : Base\n"
+            L"{\n"
+            L"    override init()\n"
+            L"    {\n"
+            L"        super.init()\n"
+            L"    }\n"
+            L"    convenience init(b : Int)\n"
+            L"    {\n"
+            L"        self.init()\n"
+            L"        a = 3\n"
+            L"    }\n"
+            L"}");
+    ASSERT_NO_ERRORS();
+}
+
+TEST(TestInitialization, UseOfSelfBeforeFirstPhraseInitialization)
+{
+    SEMANTIC_ANALYZE(L"class T\n"
+            L"{\n"
+            L"}\n"
+            L"\n"
+            L"class Base : T\n"
+            L"{\n"
+            L"    var a : Int = 5\n"
+            L"    override init()\n"
+            L"    {\n"
+            L"        self.foo()\n"
+            L"        super.init()\n"
+            L"    }\n"
+            L"    convenience init(b : Int)\n"
+            L"    {\n"
+            L"    }\n"
+            L"    \n"
+            L"    func foo()\n"
+            L"    {\n"
+            L"        \n"
+            L"    }\n"
+            L"}");
+    ASSERT_ERROR(Errors::E_SELF_USED_BEFORE_SUPER_INIT_CALL);
+}
+TEST(TestInitialization, UseOfSelfBeforeFirstPhraseInitialization2)
+{
+    SEMANTIC_ANALYZE(L"class T\n"
+            L"{\n"
+            L"}\n"
+            L"\n"
+            L"class Base : T\n"
+            L"{\n"
+            L"    var a : Int = 5\n"
+            L"    override init()\n"
+            L"    {\n"
+            L"        super.init()\n"
+            L"    }\n"
+            L"    convenience init(b : Int)\n"
+            L"    {\n"
+            L"        self.foo()\n"
+            L"        self.init()\n"
+            L"    }\n"
+            L"    \n"
+            L"    func foo()\n"
+            L"    {\n"
+            L"        \n"
             L"    }\n"
             L"}");
     ASSERT_ERROR(Errors::E_USE_OF_SELF_IN_DELEGATING_INITIALIZER_BEFORE_SELF_INIT_IS_CALLED);

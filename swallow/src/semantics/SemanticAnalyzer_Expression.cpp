@@ -43,6 +43,7 @@
 #include "semantics/CollectionTypeAnalyzer.h"
 #include <iostream>
 #include "common/ScopedValue.h"
+#include "semantics/InitializationTracer.h"
 
 USE_SWALLOW_NS
 using namespace std;
@@ -113,6 +114,7 @@ void SemanticAnalyzer::visitMemberAccess(const MemberAccessPtr& node)
     bool staticAccess = false;
     if(node->getSelf())
     {
+        validateInitializerDelegation(node);
         SCOPED_SET(ctx.flags, ctx.flags & ~SemanticContext::FLAG_WRITE_CONTEXT);
         node->getSelf()->accept(this);
         selfType = node->getSelf()->getType();

@@ -52,6 +52,11 @@ public:
     
     GenericArgumentDefPtr getGenericArgumentDef() const;
     void setGenericArgumentDef(const GenericArgumentDefPtr& val);
+
+    /*!
+     * Check if given node is an identifier with specified name
+     */
+    static bool is(const NodePtr& node, const wchar_t* name);
 protected:
     std::wstring identifier;
     TypeNodePtr declaredType;
