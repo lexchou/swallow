@@ -220,6 +220,8 @@ struct SWALLOW_EXPORT Errors
         E_USE_OF_SELF_IN_DELEGATING_INITIALIZER_BEFORE_SELF_INIT_IS_CALLED,//Use of 'self' in delegating initializer before self.init is called
         E_SELF_USED_BEFORE_SUPER_INIT_CALL,//'self' used before super.init call
         E_PROPERTY_A_NOT_INITIALIZED,//Property '%0' not initialized
+        E_NIL_IS_THE_ONLY_RETURN_VALUE_PERMITTED_IN_AN_INITIALIZER,//'nil' is the only return value permitted in an initializer
+        E_ONLY_A_FAILABLE_INITIALIZER_CAN_RETURN_NIL,//Only a failable initializer can return 'nil'
 
 
 

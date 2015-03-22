@@ -981,6 +981,8 @@ void DeclarationAnalyzer::visitInit(const InitializerDefPtr& node)
         if(node->hasModifier(DeclarationModifiers::Convenience))
             funcType->setFlags(SymbolFlagConvenienceInit, true);
         funcType->setFlags(SymbolFlagInit, true);
+        if(node->isFailable())
+            funcType->setFlags(SymbolFlagFailableInitializer, true);
 
         std::wstring name(L"init");
         FunctionSymbolPtr init(new FunctionSymbol(name, funcType, nullptr));

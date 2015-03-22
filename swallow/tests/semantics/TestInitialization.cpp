@@ -934,3 +934,60 @@ TEST(TestInitialization, MultipleInitializers2)
             L"}");
     ASSERT_NO_ERRORS();
 }
+
+TEST(TestInitialization, FailableInitializer)
+{
+    SEMANTIC_ANALYZE(L"class Base\n"
+            L"{\n"
+            L"    var a : Int\n"
+            L"    init?()\n"
+            L"    {\n"
+            L"        a = 4\n"
+            L"    }\n"
+            L"}");
+    ASSERT_NO_ERRORS();
+}
+TEST(TestInitialization, FailableInitializer2)
+{
+    SEMANTIC_ANALYZE(L"class Base\n"
+            L"{\n"
+            L"    init?()\n"
+            L"    {\n"
+            L"        return nil\n"
+            L"    }\n"
+            L"}");
+    ASSERT_NO_ERRORS();
+}
+TEST(TestInitialization, FailableInitializer3)
+{
+    SEMANTIC_ANALYZE(L"class Base\n"
+            L"{\n"
+            L"    init()\n"
+            L"    {\n"
+            L"        return nil\n"
+            L"    }\n"
+            L"}");
+    ASSERT_ERROR(Errors::E_ONLY_A_FAILABLE_INITIALIZER_CAN_RETURN_NIL);
+}
+TEST(TestInitialization, FailableInitializer4)
+{
+    SEMANTIC_ANALYZE(L"class Base\n"
+            L"{\n"
+            L"    init?()\n"
+            L"    {\n"
+            L"        return 3\n"
+            L"    }\n"
+            L"}");
+    ASSERT_ERROR(Errors::E_NIL_IS_THE_ONLY_RETURN_VALUE_PERMITTED_IN_AN_INITIALIZER);
+}
+TEST(TestInitialization, FailableInitializer5)
+{
+    SEMANTIC_ANALYZE(L"class Base\n"
+            L"{\n"
+            L"    init()\n"
+            L"    {\n"
+            L"        return 3\n"
+            L"    }\n"
+            L"}");
+    ASSERT_ERROR(Errors::E_NIL_IS_THE_ONLY_RETURN_VALUE_PERMITTED_IN_AN_INITIALIZER);
+}

@@ -79,7 +79,7 @@ enum SymbolFlags
     //This is a final symbol, not allowed to be overridden
     SymbolFlagFinal = 1 << 20,
     //It's a failable initializer, allowed to return nil
-    SymbolFailableInitializer = 1 << 21,
+    SymbolFlagFailableInitializer = 1 << 21,
 };
 
 class SWALLOW_EXPORT Symbol

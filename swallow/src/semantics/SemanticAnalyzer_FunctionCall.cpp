@@ -605,6 +605,21 @@ void SemanticAnalyzer::visitReturn(const ReturnStatementPtr& node)
         error(node, Errors::E_RETURN_INVALID_OUTSIDE_OF_A_FUNC);
         return;
     }
+    if(ctx.currentFunction->hasFlags(SymbolFlagInit) && node->getExpression())
+    {
+        if(node->getExpression()->getNodeType() != NodeType::NilLiteral)
+        {
+            error(node->getExpression(), Errors::E_NIL_IS_THE_ONLY_RETURN_VALUE_PERMITTED_IN_AN_INITIALIZER);
+            return;
+        }
+        if(!ctx.currentFunction->hasFlags(SymbolFlagFailableInitializer))
+        {
+            error(node, Errors::E_ONLY_A_FAILABLE_INITIALIZER_CAN_RETURN_NIL);
+            return;
+        }
+        //nil is permitted in failable initializer, no more checking
+        return;
+    }
     TypePtr funcType = ctx.currentFunction;
 
     SCOPED_SET(ctx.contextualType, funcType->getReturnType());
