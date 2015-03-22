@@ -888,3 +888,49 @@ TEST(TestInitialization, UseOfSelfBeforeFirstPhraseInitialization2)
             L"}");
     ASSERT_ERROR(Errors::E_USE_OF_SELF_IN_DELEGATING_INITIALIZER_BEFORE_SELF_INIT_IS_CALLED);
 }
+
+TEST(TestInitialization, MultipleInitializers)
+{
+    SEMANTIC_ANALYZE(L"\n"
+            L"class Base\n"
+            L"{\n"
+            L"    var a : Int\n"
+            L"    init(a : Bool)\n"
+            L"    {\n"
+            L"        self.a = 3;\n"
+            L"    }\n"
+            L"    \n"
+            L"    init(a : String)\n"
+            L"    {\n"
+            L"    }\n"
+            L"\n"
+            L"    func foo()\n"
+            L"    {\n"
+            L"        println(a);\n"
+            L"    }\n"
+            L"}");
+    ASSERT_ERROR(Errors::E_PROPERTY_A_NOT_INITIALIZED)
+}
+TEST(TestInitialization, MultipleInitializers2)
+{
+    SEMANTIC_ANALYZE(L"\n"
+            L"class Base\n"
+            L"{\n"
+            L"    var a : Int\n"
+            L"    init(a : Bool)\n"
+            L"    {\n"
+            L"        self.a = 3;\n"
+            L"    }\n"
+            L"    \n"
+            L"    init(a : String)\n"
+            L"    {\n"
+            L"        self.a = 4;\n"
+            L"    }\n"
+            L"\n"
+            L"    func foo()\n"
+            L"    {\n"
+            L"        println(a);\n"
+            L"    }\n"
+            L"}");
+    ASSERT_NO_ERRORS();
+}

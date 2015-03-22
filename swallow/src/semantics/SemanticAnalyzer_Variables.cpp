@@ -447,7 +447,8 @@ void SemanticAnalyzer::visitValueBindings(const ValueBindingsPtr& node)
         }
         v->accept(this);
 
-        if(initializer)
+        //optional type always considered initialized, compiler will make it has a default value nil
+        if(initializer || symbolRegistry->getGlobalScope()->isOptional(s->getType()))
             markInitialized(placeholder);
     }
 }

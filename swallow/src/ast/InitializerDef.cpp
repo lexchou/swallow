@@ -33,7 +33,7 @@ USE_SWALLOW_NS
 
 
 InitializerDef::InitializerDef()
-    :Declaration(NodeType::Init), parameters(NULL), body(NULL)
+    :Declaration(NodeType::Init), failable(false), parameters(NULL), body(NULL)
 {
 }
 

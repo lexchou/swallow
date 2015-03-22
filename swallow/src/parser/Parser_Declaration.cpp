@@ -1096,9 +1096,13 @@ DeclarationPtr Parser::parseInit(const std::vector<AttributePtr>& attrs, int mod
 {
     Token token;
     expect(Keyword::Init, token);
+    bool failable = false;
+    if(match(L"?"))
+        failable = true;
     InitializerDefPtr ret = nodeFactory->createInitializer(token.state);
     ret->setAttributes(attrs);
     ret->setModifiers(modifiers);
+    ret->setFailable(failable);
     if(predicate(L"<"))
     {
         GenericParametersDefPtr params = this->parseGenericParametersDef();

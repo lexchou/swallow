@@ -995,9 +995,20 @@ void DeclarationAnalyzer::visitInit(const InitializerDefPtr& node)
         FunctionSymbolPtr init = static_pointer_cast<SymboledInit>(node)->symbol;
         TypePtr funcType = init->getType();
         SCOPED_SET(ctx->currentFunction, funcType);
-        InitializationTracer tracer(nullptr, InitializationTracer::Sequence);
-        SCOPED_SET(ctx->currentInitializationTracer, &tracer);
-        node->getBody()->accept(semanticAnalyzer);
+        {
+            InitializationTracer tracer(nullptr, InitializationTracer::Sequence);
+            SCOPED_SET(ctx->currentInitializationTracer, &tracer);
+            node->getBody()->accept(semanticAnalyzer);
+            //check if some stored property is not initialized
+            for(const SymbolPtr& storedProp : ctx->currentType->getDeclaredStoredProperties())
+            {
+                if(!storedProp->hasFlags(SymbolFlagInitialized))
+                {
+                    error(node, Errors::E_PROPERTY_A_NOT_INITIALIZED, L"self." + storedProp->getName());
+                    return;
+                }
+            }
+        }
 
         if(node->hasModifier(DeclarationModifiers::Convenience))
         {

@@ -221,6 +221,7 @@ std::wstring Errors::getErrorTemplate(int errorCode)
         case Errors::E_USE_OF_PROPERTY_A_IN_BASE_OBJECT_BEFORE_SUPER_INIT_INITIALIZES_IT: return L"Use of property '%0' in base object before super.init initializes it";
         case Errors::E_USE_OF_SELF_IN_DELEGATING_INITIALIZER_BEFORE_SELF_INIT_IS_CALLED: return L"Use of 'self' in delegating initializer before self.init is called";
         case Errors::E_SELF_USED_BEFORE_SUPER_INIT_CALL: return L"'self' used before super.init call";
+        case Errors::E_PROPERTY_A_NOT_INITIALIZED: return L"Property '%0' not initialized";
 
         case Errors::W_CODE_AFTER_A_WILL_NEVER_BE_EXECUTED_1: return L"Code after 'return' will never be executed";
         case Errors::W_PARAM_CAN_BE_EXPRESSED_MORE_SUCCINCTLY_1: return L"'%0 %0' can be expressed more succinctly as '#%0'";

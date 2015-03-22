@@ -391,6 +391,20 @@ void DeclarationAnalyzer::visitImplementation(const TypeDeclarationPtr &node)
             case NodeType::TypeAlias:
             case NodeType::EnumCasePattern:
                 break;
+            case NodeType::Init:
+                decl->accept(semanticAnalyzer);
+                break;
+            case NodeType::ComputedProperty:
+            case NodeType::Function:
+            case NodeType::Subscript:
+            case NodeType::Deinit:
+                //mark all stored properties initialized
+                for(const SymbolPtr& prop : ctx->currentType->getDeclaredStoredProperties())
+                {
+                    prop->setFlags(SymbolFlagInitialized, true);
+                }
+                decl->accept(semanticAnalyzer);
+                break;
             default:
                 decl->accept(semanticAnalyzer);
                 break;

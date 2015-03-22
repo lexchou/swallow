@@ -50,9 +50,13 @@ public:
     
     void setBody(const CodeBlockPtr& body);
     CodeBlockPtr getBody();
+
+    bool isFailable() const { return failable;}
+    void setFailable(bool v) {failable = v;}
 public:
     virtual void accept(NodeVisitor* visitor);
 private:
+    bool failable;
     ParametersNodePtr parameters;
     CodeBlockPtr body;
 };

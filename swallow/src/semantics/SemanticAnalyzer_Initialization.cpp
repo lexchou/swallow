@@ -90,6 +90,14 @@ void SemanticAnalyzer::validateInitializerDelegation(const FunctionCallPtr& node
             }
         }
     }
+    else if(self_init && ctx.currentFunction->hasFlags(SymbolFlagConvenienceInit))
+    {
+        //calling self.init inside a convenience initializer will treat all stored property initialized
+        for (const SymbolPtr &prop : ctx.currentType->getDeclaredStoredProperties())
+        {
+            markInitialized(prop);
+        }
+    }
 
     if(ctx.currentInitializationTracer)
     {

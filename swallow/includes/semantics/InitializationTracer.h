@@ -65,8 +65,15 @@ SWALLOW_NS_BEGIN
         }
         ~InitializationTracer()
         {
-            if(!parent)
+            if (!parent)
+            {
+                //reset all symbol to uninitialized when branch tracer left the initializer scope
+                for(const SymbolPtr& sym : set)
+                {
+                    sym->setFlags(SymbolFlagInitialized, false);
+                }
                 return;
+            }
             if(type == Branch)
             {
                 if(parent->mergeCount == 0)
