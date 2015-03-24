@@ -121,6 +121,14 @@ static bool validateGeneralModifiers(SemanticAnalyzer* analyzer, const Declarati
                 return analyzer->error(decl, Errors::E_A_MAY_ONLY_BE_USED_ON_B_DECLARATION_2, L"nonmutating", L"func");
         }
     }
+    if(modifiers & DeclarationModifiers::Required)
+    {
+        //only applies to init of class
+        if(decl->getNodeType() != NodeType::Init)
+            return analyzer->error(decl, Errors::E_A_MAY_ONLY_BE_USED_ON_B_DECLARATION_2, L"required", L"init");
+        if(ctx->currentType->getCategory() != Type::Class)
+            return analyzer->error(decl, Errors::E_REQUIRED_INITIALIZER_IN_NON_CLASS_TYPE_A_1, ctx->currentType->getName());
+    }
     if(modifiers & DeclarationModifiers::Final)
     {
         //final only applies to class or member definition
@@ -259,6 +267,11 @@ void SemanticAnalyzer::validateDeclarationModifiers(const DeclarationPtr& declar
             TypeDeclarationPtr decl = static_pointer_cast<TypeDeclaration>(declaration);
             validateGeneralModifiers(this, decl);
             break;
+        };
+        case NodeType::Init:
+        {
+            InitializerDefPtr init = static_pointer_cast<InitializerDef>(declaration);
+            validateGeneralModifiers(this, init);
         };
         case NodeType::TypeAlias:
         {

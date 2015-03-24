@@ -607,6 +607,14 @@ void DeclarationAnalyzer::visitEnum(const EnumDefPtr& node)
             }
             decl->accept(semanticAnalyzer);
         }
+        //add a default initializer for raw value enum
+        {
+            vector<Parameter> params = {Parameter(L"rawValue", false, type->getParentType())};
+            TypePtr initType = Type::newFunction(params, global->Void(), false, nullptr);
+            initType->setFlags(SymbolFlagInit | SymbolFlagFailableInitializer | SymbolFlagMember);
+            FunctionSymbolPtr init(new FunctionSymbol(L"init", initType, nullptr));
+            declarationFinished(init->getName(), init, nullptr);
+        }
     }
     validateDeclarationModifiers(node);
     visitImplementation(node);

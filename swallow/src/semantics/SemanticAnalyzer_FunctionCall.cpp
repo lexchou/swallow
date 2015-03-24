@@ -44,6 +44,7 @@
 #include <iostream>
 #include "common/ScopedValue.h"
 #include "semantics/InitializationTracer.h"
+#include "semantics/TypeUtils.h"
 
 USE_SWALLOW_NS
 using namespace std;
@@ -284,6 +285,7 @@ SymbolPtr SemanticAnalyzer::getOverloadedFunction(bool mutatingSelf, const NodeP
     }
     if(candidates.empty())
     {
+        wprintf(L"type = %S\n", arguments->get(0)->getType()->toString().c_str());
         error(node, Errors::E_NO_MATCHED_OVERLOAD_FOR_A_1, funcs[0]->getName());
         abort();
         return nullptr;
@@ -352,7 +354,16 @@ static void updateNodeType(SemanticAnalyzer* semanticAnalyzer, const PatternPtr&
                 }
             }
         }
-        node->setType(func->getDeclaringType());
+        GlobalScope* g = semanticAnalyzer->getSymbolRegistry()->getGlobalScope();
+        if(type->hasFlags(SymbolFlagFailableInitializer))//failable initialize always return an optional type
+        {
+            if(type->hasFlags(SymbolFlagImplicitFailableInitializer))
+                node->setType(g->makeImplicitlyUnwrappedOptional(func->getDeclaringType()));
+            else
+                node->setType(g->makeOptional(func->getDeclaringType()));
+        }
+        else
+            node->setType(func->getDeclaringType());
     }
     else
     {
@@ -472,7 +483,8 @@ void SemanticAnalyzer::visitFunctionCall(const FunctionCallPtr& node)
                 SymbolPtr sym = funcs[0];
                 if (TypePtr type = std::dynamic_pointer_cast<Type>(sym))
                 {
-                    if (type->getCategory() == Type::Class || type->getCategory() == Type::Struct)
+                    Type::Category  category = type->getCategory();
+                    if (category == Type::Class || category == Type::Struct || category == Type::Enum)
                     {
                         funcs.clear();
                         getMethodsFromType(type, L"init", FilterLookupInExtension, funcs);
@@ -485,12 +497,18 @@ void SemanticAnalyzer::visitFunctionCall(const FunctionCallPtr& node)
         case NodeType::MemberAccess:
         {
             MemberAccessPtr ma = std::static_pointer_cast<MemberAccess>(func);
+            TypePtr selfType;
+            if(ma->getSelf() != nullptr)//e.g.   var a : String? = .Some("fff")
             {
                 SCOPED_SET(currentNode, ma);
                 validateInitializerDelegation(ma);
                 ma->getSelf()->accept(this);
+                selfType = ma->getSelf()->getType();
             }
-            TypePtr selfType = ma->getSelf()->getType();
+            else
+            {
+                selfType = Type::newTypeReference(ctx.contextualType);
+            }
             bool mutatingSelf = !containsReadonlyNode(ma->getSelf());
             assert(selfType != nullptr);
             const wstring& identifier = ma->getField()->getIdentifier();
@@ -508,7 +526,8 @@ void SemanticAnalyzer::visitFunctionCall(const FunctionCallPtr& node)
             if(selfType->getCategory() == Type::MetaType)
             {
                 selfType = selfType->getInnerType();
-                if(selfType->getCategory() == Type::Enum && (c = selfType->getEnumCase(identifier)) && c->constructor)
+                bool isEnum = selfType->getCategory() == Type::Enum || (selfType->getCategory() == Type::Specialized && selfType->getInnerType()->getCategory() == Type::Enum);
+                if(isEnum && (c = selfType->getEnumCase(identifier)) && c->constructor)
                     //constructing an enum
                     funcs.push_back(c->constructor);
                 else
@@ -525,7 +544,22 @@ void SemanticAnalyzer::visitFunctionCall(const FunctionCallPtr& node)
             }
             SymbolPtr func = visitFunctionCall(mutatingSelf, funcs, node->getArguments(), node);
             assert(func != nullptr);
-            ma->setType(func->getType());
+            TypePtr funcType = func->getType();
+
+            //failable initializer chaining check.
+            if(funcType->hasFlags(SymbolFlagFailableInitializer) && !ctx.currentFunction->hasFlags(SymbolFlagFailableInitializer))
+            {
+                wstringstream ss;
+                ss<<L"init(";
+                for(const Parameter& p : funcType->getParameters())
+                {
+                    ss<<p.name<<L":";
+                }
+                ss<<L")";
+                error(node, Errors::E_A_NON_FAILABLE_INITIALIZER_CANNOT_CHAINING_TO_FAILABLE_INITIALIZER_A_WRITTEN_WITH_INIT_1, ss.str());
+                return;
+            }
+            ma->setType(funcType);
             if(hasOptionalChaining(ma->getSelf()) && !isParentInOptionalChain(node->getParentNode()))
             {
                 TypePtr type = symbolRegistry->getGlobalScope()->makeOptional(node->getType());
@@ -616,6 +650,24 @@ void SemanticAnalyzer::visitReturn(const ReturnStatementPtr& node)
         {
             error(node, Errors::E_ONLY_A_FAILABLE_INITIALIZER_CAN_RETURN_NIL);
             return;
+        }
+        if(ctx.currentType->getCategory() == Type::Class)
+        {
+            //all stored properties must be initialized before returning nil
+            //this rule only applies to class
+            if(!TypeUtils::allInitialized(ctx.currentType->getDeclaredStoredProperties()))
+            {
+                error(node, Errors::E_ALL_STORED_PROPERTIES_OF_A_CLASS_MUST_BE_INITIALIZED_BEFORE_RETURNING_NIL);
+                return;
+            }
+        }
+        else
+        {
+            //for value types, mark all stored properties initialized while returning nil
+            for(const SymbolPtr& prop : ctx.currentType->getDeclaredStoredProperties())
+            {
+                markInitialized(prop);
+            }
         }
         //nil is permitted in failable initializer, no more checking
         return;

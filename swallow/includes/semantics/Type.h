@@ -220,6 +220,11 @@ public://properties
     const EnumCase* getEnumCase(const std::wstring& name)const;
 
     /*!
+     * Gets all enum cases defined in current type
+     */
+    const EnumCaseMap& getEnumCases() const;
+
+    /*!
      * Gets which declaration this type referenced to
      */
     TypeDeclarationPtr getReference()const;

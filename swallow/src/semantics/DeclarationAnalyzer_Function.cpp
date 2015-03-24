@@ -230,7 +230,7 @@ void DeclarationAnalyzer::visitClosure(const ClosurePtr& node)
 /*!
  * Register symbol self/super to given code block
  */
-static void registerSelfSuper(const TypePtr& currentType, const CodeBlockPtr& cb, int modifiers)
+static void registerSelfSuper(const TypePtr& currentType, const TypePtr& currentFunction, const CodeBlockPtr& cb, int modifiers)
 {
     SymbolScope* scope = static_pointer_cast<ScopedCodeBlock>(cb)->getScope();
     if (!currentType)
@@ -241,6 +241,11 @@ static void registerSelfSuper(const TypePtr& currentType, const CodeBlockPtr& cb
         if (valueType && (modifiers & DeclarationModifiers::Mutating))
         {
             //mutating function inside enum/struct
+            flags |= SymbolFlagWritable;
+        }
+        else if (valueType && currentFunction && (currentFunction->hasFlags(SymbolFlagInit)))
+        {
+            //initializer inside enum/struct
             flags |= SymbolFlagWritable;
         }
         else if (valueType)
@@ -513,7 +518,7 @@ void DeclarationAnalyzer::visitAccessor(const CodeBlockPtr& accessor, const Para
     SymbolScope *scope = codeBlock->getScope();
     ScopeGuard scopeGuard(codeBlock.get(), this);
     (void) scopeGuard;
-    registerSelfSuper(ctx->currentType, accessor, modifiers);
+    registerSelfSuper(ctx->currentType, nullptr, accessor, modifiers);
     if(setter)
         scope->addSymbol(setter);
 
@@ -748,10 +753,6 @@ void DeclarationAnalyzer::visitFunctionDeclaration(const FunctionDefPtr& node)
 
         if(generic)
             generic->registerTo(scope);
-        if(ctx->currentType && (node->getModifiers() & (DeclarationModifiers::Class | DeclarationModifiers::Static)) == 0)
-        {
-            registerSelfSuper(ctx->currentType, codeBlock, node->getModifiers());
-        }
 
 
         for (const ParametersNodePtr &params : node->getParametersList())
@@ -782,6 +783,10 @@ void DeclarationAnalyzer::visitFunctionDeclaration(const FunctionDefPtr& node)
         {
             func->setFlags(SymbolFlagFinal, true);
             funcType->setFlags(SymbolFlagFinal, true);
+        }
+        if(ctx->currentType && (node->getModifiers() & (DeclarationModifiers::Class | DeclarationModifiers::Static)) == 0)
+        {
+            registerSelfSuper(ctx->currentType, nullptr, codeBlock, node->getModifiers());
         }
     }
 
@@ -885,9 +890,16 @@ void DeclarationAnalyzer::checkForFunctionOverriding(const std::wstring& name, c
             }
             else
             {
-                if (matched)
+                bool supress = false;
+                //it's ok to use keyword 'required' without 'override' on an initializer
+                if(decl->getType()->hasFlags(SymbolFlagRequired) && matched && matched->getType()->hasFlags(SymbolFlagRequired))
+                    supress = true;
+                if (matched && !supress)
                 {
-                    error(node, Errors::E_OVERRIDING_DECLARATION_REQUIRES_AN_OVERRIDE_KEYWORD);
+                    if(matched->getType()->hasFlags(SymbolFlagRequired))
+                        error(node, Errors::E_REQUIRED_MODIFIER_MUST_BE_PRESENT_ON_ALL_OVERRIDES_OF_A_REQUIRED_INITIALIZER);
+                    else
+                        error(node, Errors::E_OVERRIDING_DECLARATION_REQUIRES_AN_OVERRIDE_KEYWORD);
                     return;
                 }
             }
@@ -958,8 +970,6 @@ void DeclarationAnalyzer::visitInit(const InitializerDefPtr& node)
         node->getParameters()->accept(this);
 
         prepareParameters(body->getScope(), node->getParameters());
-        //prepare implicit self
-        registerSelfSuper(ctx->currentType, body, node->getModifiers());
 
         std::vector<Parameter> params;
         for (const ParameterNodePtr &param : *node->getParameters())
@@ -983,7 +993,15 @@ void DeclarationAnalyzer::visitInit(const InitializerDefPtr& node)
         funcType->setFlags(SymbolFlagInit, true);
         if(node->isFailable())
             funcType->setFlags(SymbolFlagFailableInitializer, true);
+        if(node->isImplicitFailable())
+            funcType->setFlags(SymbolFlagImplicitFailableInitializer, true);
+        if(node->hasModifier(DeclarationModifiers::Required))
+            funcType->setFlags(SymbolFlagRequired, true);
 
+        //prepare implicit self
+        registerSelfSuper(ctx->currentType,funcType, body, node->getModifiers());
+
+        validateDeclarationModifiers(node);
         std::wstring name(L"init");
         FunctionSymbolPtr init(new FunctionSymbol(name, funcType, nullptr));
         checkForFunctionOverriding(name, init, node);

@@ -426,6 +426,7 @@ void SemanticAnalyzer::visitValueBindings(const ValueBindingsPtr& node)
             registerSymbol(pattern, id);
         }
     }
+    GlobalScope* global = symbolRegistry->getGlobalScope();
     for(const ValueBindingPtr& v : *node)
     {
         PatternPtr name = v->getName();
@@ -448,7 +449,8 @@ void SemanticAnalyzer::visitValueBindings(const ValueBindingsPtr& node)
         v->accept(this);
 
         //optional type always considered initialized, compiler will make it has a default value nil
-        if(initializer || symbolRegistry->getGlobalScope()->isOptional(s->getType()))
+        TypePtr symbolType = s->getType();
+        if(initializer || global->isOptional(symbolType) || global->isImplicitlyUnwrappedOptional(symbolType))
             markInitialized(placeholder);
     }
 }

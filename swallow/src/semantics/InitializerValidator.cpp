@@ -34,8 +34,12 @@ void InitializerValidator::merge(MergeType mergeType, InitializerCoverResult new
         //will not interrupt the workflow
         if ((result & InitializerCoverFull) && (newResult & InitializerCoverFull))
             result = (InitializerCoverResult) (result | InitializerCoverMultiple);
+        result = max(result, newResult);
     }
-    result = (InitializerCoverResult) (result | newResult);
+    else
+    {
+        result = (InitializerCoverResult) (result | newResult);
+    }
     if(result & InitializerCoverMultiple && !refNode)
         refNode = newRefNode;
 

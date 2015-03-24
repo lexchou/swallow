@@ -222,6 +222,12 @@ struct SWALLOW_EXPORT Errors
         E_PROPERTY_A_NOT_INITIALIZED,//Property '%0' not initialized
         E_NIL_IS_THE_ONLY_RETURN_VALUE_PERMITTED_IN_AN_INITIALIZER,//'nil' is the only return value permitted in an initializer
         E_ONLY_A_FAILABLE_INITIALIZER_CAN_RETURN_NIL,//Only a failable initializer can return 'nil'
+        E_ALL_STORED_PROPERTIES_OF_A_CLASS_MUST_BE_INITIALIZED_BEFORE_RETURNING_NIL,//All stored properties of a class instance must be initialized before returning nil from an initializer
+        E_A_NON_FAILABLE_INITIALIZER_CANNOT_CHAINING_TO_FAILABLE_INITIALIZER_A_WRITTEN_WITH_INIT_1,//A non-failable initializer cannot chaining to failable initializer 'init(name:)' written with 'init?'
+        E_REQUIRED_INITIALIZER_IN_NON_CLASS_TYPE_A_1,//'required' initializer in non-class type '%0'
+        E_REQUIRED_MODIFIER_MUST_BE_PRESENT_ON_ALL_OVERRIDES_OF_A_REQUIRED_INITIALIZER,//'required' modifier must be present on all overrides of a required initializer
+
+
 
 
 

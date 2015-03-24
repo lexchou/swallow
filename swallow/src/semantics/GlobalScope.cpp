@@ -276,6 +276,11 @@ void GlobalScope::initPrimitiveTypes()
             FunctionSymbolPtr hasPrefix(new FunctionSymbol(L"hasPrefix", t_hasPrefix, nullptr));
             type->addMember(hasPrefix);
         }
+
+        {
+            SymbolPlaceHolderPtr isEmpty(new SymbolPlaceHolder(L"isEmpty", _Bool, SymbolPlaceHolder::R_PROPERTY, SymbolFlagMember | SymbolFlagComputedProperty));
+            type->addMember(isEmpty);
+        }
     }
 
 
@@ -288,6 +293,20 @@ void GlobalScope::initPrimitiveTypes()
 
 
     addSymbol(L"Void", _Void = Type::newTuple(vector<TypePtr>()));
+
+    {
+        TypePtr T = Type::newType(L"T", Type::GenericParameter);
+        GenericDefinitionPtr generic(new GenericDefinition());
+        generic->add(L"T", T);
+        _ImplicitlyUnwrappedOptional = Type::newType(L"ImplicitlyUnwrappedOptional", Type::Enum, nullptr, nullptr, std::vector<TypePtr>(), generic);
+        type = static_pointer_cast<TypeBuilder>(_ImplicitlyUnwrappedOptional);
+        type->addProtocol(_NilLiteralConvertible);
+
+        type->addEnumCase(L"None", _Void);
+        std::vector<TypePtr> SomeArgs = {T};
+        type->addEnumCase(L"Some", Type::newTuple(SomeArgs));
+        addSymbol(type);
+    }
 
     {
         TypePtr T = Type::newType(L"T", Type::GenericParameter);
@@ -467,6 +486,16 @@ TypePtr GlobalScope::makeOptional(const TypePtr& elementType) const
     GenericArgumentPtr ga(new GenericArgument(_Optional->getGenericDefinition()));
     ga->add(elementType);
     return Type::newSpecializedType(_Optional, ga);
+}
+/*!
+ * A short-hand way to create an implicitly unwrapped Optional type
+ */
+TypePtr GlobalScope::makeImplicitlyUnwrappedOptional(const TypePtr& elementType) const
+{
+    assert(elementType != nullptr);
+    GenericArgumentPtr ga(new GenericArgument(_Optional->getGenericDefinition()));
+    ga->add(elementType);
+    return Type::newSpecializedType(_ImplicitlyUnwrappedOptional, ga);
 }
 
 /*!
@@ -716,6 +745,10 @@ bool GlobalScope::isOptional(const TypePtr& type) const
 {
     return innerType(type) == _Optional;
 }
+bool GlobalScope::isImplicitlyUnwrappedOptional(const TypePtr& type) const
+{
+    return innerType(type) == _ImplicitlyUnwrappedOptional;
+}
 bool GlobalScope::isDictionary(const TypePtr& type) const
 {
     return innerType(type) == _Dictionary;
@@ -752,6 +785,7 @@ IMPLEMENT_GETTER(Double);
 IMPLEMENT_GETTER(Array);
 IMPLEMENT_GETTER(Dictionary);
 IMPLEMENT_GETTER(Optional);
+IMPLEMENT_GETTER(ImplicitlyUnwrappedOptional);
 IMPLEMENT_GETTER(BooleanType);
 IMPLEMENT_GETTER(Equatable);
 IMPLEMENT_GETTER(Comparable);

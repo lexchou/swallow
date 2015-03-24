@@ -118,6 +118,8 @@ void SemanticAnalyzer::visitUnaryOperator(const UnaryOperatorPtr& node)
  */
 bool SemanticAnalyzer::containsReadonlyNode(const ExpressionPtr& node)
 {
+    if(node == nullptr)
+        return false;
     NodeType::T nodeType = node->getNodeType();
     if(nodeType == NodeType::Identifier)
     {
@@ -168,7 +170,6 @@ void SemanticAnalyzer::verifyTuplePatternForAssignment(const PatternPtr& pattern
         }
         if(!sym->hasFlags(SymbolFlagWritable))
         {
-            //write on a constant variable
             if(id->getIdentifier() == L"self")
             {
                 error(id, Errors::E_CANNOT_ASSIGN_TO_A_IN_A_METHOD_1, id->getIdentifier());

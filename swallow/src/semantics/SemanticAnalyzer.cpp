@@ -177,151 +177,174 @@ TypePtr SemanticAnalyzer::lookupType(const TypeNodePtr& type, bool supressErrors
 }
 TypePtr SemanticAnalyzer::lookupTypeImpl(const TypeNodePtr &type, bool supressErrors)
 {
-    if(TypeIdentifierPtr id = std::dynamic_pointer_cast<TypeIdentifier>(type))
+    NodeType::T nodeType = type->getNodeType();
+    switch(nodeType)
     {
-        declareImmediately(id->getName());
-        //TODO: make a generic type if possible
-        TypePtr ret = symbolRegistry->lookupType(id->getName());
-        if(!ret)
-        {
-            if(!supressErrors)
-            {
-                std::wstring str = toString(type);
-                error(type, Errors::E_USE_OF_UNDECLARED_TYPE_1, str);
-                abort();
-            }
-            return nullptr;
-        }
-        GenericDefinitionPtr generic = ret->getGenericDefinition();
-        if(generic == nullptr && id->numGenericArguments() == 0)
-            return ret;
-        if(generic == nullptr && id->numGenericArguments() > 0)
-        {
-            if(!supressErrors)
-            {
-                std::wstring str = toString(type);
-                error(id, Errors::E_CANNOT_SPECIALIZE_NON_GENERIC_TYPE_1, str);
-            }
-            return nullptr;
-        }
-        if(generic != nullptr && id->numGenericArguments() == 0)
-        {
-            if(!supressErrors)
-            {
-                std::wstring str = toString(type);
-                error(id, Errors::E_GENERIC_TYPE_ARGUMENT_REQUIRED, str);
-            }
-            return nullptr;
-        }
-        if(id->numGenericArguments() > generic->numParameters())
-        {
-            if(!supressErrors)
-            {
-                std::wstring str = toString(type);
-                std::wstring got = toString(id->numGenericArguments());
-                std::wstring expected = toString(generic->numParameters());
-                error(id, Errors::E_GENERIC_TYPE_SPECIALIZED_WITH_TOO_MANY_TYPE_PARAMETERS_3, str, got, expected);
-            }
-            return nullptr;
-        }
-        if(id->numGenericArguments() < generic->numParameters())
-        {
-            if(!supressErrors)
-            {
-                std::wstring str = toString(type);
-                std::wstring got = toString(id->numGenericArguments());
-                std::wstring expected = toString(generic->numParameters());
-                error(id, Errors::E_GENERIC_TYPE_SPECIALIZED_WITH_INSUFFICIENT_TYPE_PARAMETERS_3, str, got, expected);
-            }
-            return nullptr;
-        }
-        //check type
-        GenericArgumentPtr genericArgument(new GenericArgument(generic));
-        for(auto arg : *id)
-        {
-            TypePtr argType = lookupType(arg);
-            if(!argType)
-                return nullptr;
-            genericArgument->add(argType);
-        }
-        TypePtr base = Type::newSpecializedType(ret, genericArgument);
-        ret = base;
-        //access rest nested types
-        for(TypeIdentifierPtr n = id->getNestedType(); n != nullptr; n = n->getNestedType())
-        {
-            TypePtr childType = ret->getAssociatedType(n->getName());
-            if(!childType)
-            {
-                if(!supressErrors)
-                    error(n, Errors::E_A_IS_NOT_A_MEMBER_TYPE_OF_B_2, n->getName(), ret->toString());
-                return nullptr;
-            }
-            if(n->numGenericArguments())
-            {
-                //nested type is always a non-generic type
-                if(!supressErrors)
-                    error(n, Errors::E_CANNOT_SPECIALIZE_NON_GENERIC_TYPE_1, childType->toString());
-                return nullptr;
-            }
-            ret = childType;
-        }
 
-        return ret;
-    }
-    if(TupleTypePtr tuple = std::dynamic_pointer_cast<TupleType>(type))
-    {
-        std::vector<TypePtr> elementTypes;
-        for(const TupleType::TupleElement& e : *tuple)
+        case NodeType::TypeIdentifier:
         {
-            TypePtr t = lookupType(e.type);
-            elementTypes.push_back(t);
+            TypeIdentifierPtr id = std::static_pointer_cast<TypeIdentifier>(type);
+            declareImmediately(id->getName());
+            //TODO: make a generic type if possible
+            TypePtr ret = symbolRegistry->lookupType(id->getName());
+            if (!ret)
+            {
+                if (!supressErrors)
+                {
+                    std::wstring str = toString(type);
+                    error(type, Errors::E_USE_OF_UNDECLARED_TYPE_1, str);
+                    abort();
+                }
+                return nullptr;
+            }
+            GenericDefinitionPtr generic = ret->getGenericDefinition();
+            if (generic == nullptr && id->numGenericArguments() == 0)
+                return ret;
+            if (generic == nullptr && id->numGenericArguments() > 0)
+            {
+                if (!supressErrors)
+                {
+                    std::wstring str = toString(type);
+                    error(id, Errors::E_CANNOT_SPECIALIZE_NON_GENERIC_TYPE_1, str);
+                }
+                return nullptr;
+            }
+            if (generic != nullptr && id->numGenericArguments() == 0)
+            {
+                if (!supressErrors)
+                {
+                    std::wstring str = toString(type);
+                    error(id, Errors::E_GENERIC_TYPE_ARGUMENT_REQUIRED, str);
+                }
+                return nullptr;
+            }
+            if (id->numGenericArguments() > generic->numParameters())
+            {
+                if (!supressErrors)
+                {
+                    std::wstring str = toString(type);
+                    std::wstring got = toString(id->numGenericArguments());
+                    std::wstring expected = toString(generic->numParameters());
+                    error(id, Errors::E_GENERIC_TYPE_SPECIALIZED_WITH_TOO_MANY_TYPE_PARAMETERS_3, str, got, expected);
+                }
+                return nullptr;
+            }
+            if (id->numGenericArguments() < generic->numParameters())
+            {
+                if (!supressErrors)
+                {
+                    std::wstring str = toString(type);
+                    std::wstring got = toString(id->numGenericArguments());
+                    std::wstring expected = toString(generic->numParameters());
+                    error(id, Errors::E_GENERIC_TYPE_SPECIALIZED_WITH_INSUFFICIENT_TYPE_PARAMETERS_3, str, got, expected);
+                }
+                return nullptr;
+            }
+            //check type
+            GenericArgumentPtr genericArgument(new GenericArgument(generic));
+            for (auto arg : *id)
+            {
+                TypePtr argType = lookupType(arg);
+                if (!argType)
+                    return nullptr;
+                genericArgument->add(argType);
+            }
+            TypePtr base = Type::newSpecializedType(ret, genericArgument);
+            ret = base;
+            //access rest nested types
+            for (TypeIdentifierPtr n = id->getNestedType(); n != nullptr; n = n->getNestedType())
+            {
+                TypePtr childType = ret->getAssociatedType(n->getName());
+                if (!childType)
+                {
+                    if (!supressErrors)
+                        error(n, Errors::E_A_IS_NOT_A_MEMBER_TYPE_OF_B_2, n->getName(), ret->toString());
+                    return nullptr;
+                }
+                if (n->numGenericArguments())
+                {
+                    //nested type is always a non-generic type
+                    if (!supressErrors)
+                        error(n, Errors::E_CANNOT_SPECIALIZE_NON_GENERIC_TYPE_1, childType->toString());
+                    return nullptr;
+                }
+                ret = childType;
+            }
+
+            return ret;
         }
-        return Type::newTuple(elementTypes);
-    }
-    if(ArrayTypePtr array = std::dynamic_pointer_cast<ArrayType>(type))
-    {
-        GlobalScope* global = symbolRegistry->getGlobalScope();
-        TypePtr innerType = lookupType(array->getInnerType());
-        assert(innerType != nullptr);
-        TypePtr ret = global->makeArray(innerType);
-        return ret;
-    }
-    if(DictionaryTypePtr array = std::dynamic_pointer_cast<DictionaryType>(type))
-    {
-        GlobalScope* scope = symbolRegistry->getGlobalScope();
-        TypePtr keyType = lookupType(array->getKeyType());
-        TypePtr valueType = lookupType(array->getValueType());
-        assert(keyType != nullptr);
-        assert(valueType != nullptr);
-        TypePtr ret = scope->makeDictionary(keyType, valueType);
-        return ret;
-    }
-    if(OptionalTypePtr opt = std::dynamic_pointer_cast<OptionalType>(type))
-    {
-        GlobalScope* global = symbolRegistry->getGlobalScope();
-        TypePtr innerType = lookupType(opt->getInnerType());
-        assert(innerType != nullptr);
-        TypePtr ret = global->makeOptional(innerType);
-        return ret;
-    }
-    if(FunctionTypePtr func = std::dynamic_pointer_cast<FunctionType>(type))
-    {
-        TypePtr retType = nullptr;
-        if(func->getReturnType())
+        case NodeType::TupleType:
         {
-            retType = lookupType(func->getReturnType());
+            TupleTypePtr tuple = std::static_pointer_cast<TupleType>(type);
+            std::vector<TypePtr> elementTypes;
+            for (const TupleType::TupleElement &e : *tuple)
+            {
+                TypePtr t = lookupType(e.type);
+                elementTypes.push_back(t);
+            }
+            return Type::newTuple(elementTypes);
         }
-        vector<Parameter> params;
-        for(auto p : *func->getArgumentsType())
+        case NodeType::ArrayType:
         {
-            TypePtr paramType = lookupType(p.type);
-            params.push_back(Parameter(p.name, p.inout, paramType));
+            ArrayTypePtr array = std::static_pointer_cast<ArrayType>(type);
+            GlobalScope *global = symbolRegistry->getGlobalScope();
+            TypePtr innerType = lookupType(array->getInnerType());
+            assert(innerType != nullptr);
+            TypePtr ret = global->makeArray(innerType);
+            return ret;
         }
-        TypePtr ret = Type::newFunction(params, retType, false, nullptr);
-        return ret;
+        case NodeType::DictionaryType:
+        {
+            DictionaryTypePtr array = std::static_pointer_cast<DictionaryType>(type);
+            GlobalScope *scope = symbolRegistry->getGlobalScope();
+            TypePtr keyType = lookupType(array->getKeyType());
+            TypePtr valueType = lookupType(array->getValueType());
+            assert(keyType != nullptr);
+            assert(valueType != nullptr);
+            TypePtr ret = scope->makeDictionary(keyType, valueType);
+            return ret;
+        }
+        case NodeType::OptionalType:
+        {
+            OptionalTypePtr opt = std::static_pointer_cast<OptionalType>(type);
+            GlobalScope *global = symbolRegistry->getGlobalScope();
+            TypePtr innerType = lookupType(opt->getInnerType());
+            assert(innerType != nullptr);
+            TypePtr ret = global->makeOptional(innerType);
+            return ret;
+        }
+        case NodeType::ImplicitlyUnwrappedOptional:
+        {
+            ImplicitlyUnwrappedOptionalPtr opt = std::static_pointer_cast<ImplicitlyUnwrappedOptional>(type);
+            GlobalScope *global = symbolRegistry->getGlobalScope();
+            TypePtr innerType = lookupType(opt->getInnerType());
+            assert(innerType != nullptr);
+            TypePtr ret = global->makeImplicitlyUnwrappedOptional(innerType);
+            return ret;
+        };
+        case NodeType::FunctionType:
+        {
+            FunctionTypePtr func = std::static_pointer_cast<FunctionType>(type);
+            TypePtr retType = nullptr;
+            if (func->getReturnType())
+            {
+                retType = lookupType(func->getReturnType());
+            }
+            vector<Parameter> params;
+            for (auto p : *func->getArgumentsType())
+            {
+                TypePtr paramType = lookupType(p.type);
+                params.push_back(Parameter(p.name, p.inout, paramType));
+            }
+            TypePtr ret = Type::newFunction(params, retType, false, nullptr);
+            return ret;
+        }
+        default:
+        {
+            assert(0 && "Unsupported type");
+            return nullptr;
+        }
     }
-    assert(0 && "Unsupported type");
-    return nullptr;
 }
 /*!
  * Convert expression node to type node
@@ -393,7 +416,7 @@ bool SemanticAnalyzer::expandOptional(const TypePtr& optionalType, ExpressionPtr
     assert(exprType != nullptr);
     if(exprType->canAssignTo(optionalType))
         return true;
-    if(optionalType->getCategory() == Type::Specialized && optionalType->getInnerType() == global->Optional())
+    if(optionalType->getCategory() == Type::Specialized && (optionalType->getInnerType() == global->Optional() || optionalType->getInnerType() == global->ImplicitlyUnwrappedOptional()))
     {
         TypePtr innerType = optionalType->getGenericArguments()->get(0);
         bool ret = expandOptional(innerType, expr);
@@ -426,8 +449,13 @@ bool SemanticAnalyzer::expandOptional(const TypePtr& optionalType, ExpressionPtr
  */
 TypePtr SemanticAnalyzer::finalTypeOfOptional(const TypePtr& optionalType)
 {
-    if(optionalType->getCategory() == Type::Specialized && optionalType->getInnerType() != symbolRegistry->getGlobalScope()->Optional())
-        return optionalType;
+    if(optionalType->getCategory() == Type::Specialized)
+    {
+        TypePtr innerType = optionalType->getInnerType();
+        GlobalScope* g = symbolRegistry->getGlobalScope();
+        if(innerType != g->Optional() && innerType != g->ImplicitlyUnwrappedOptional())
+            return optionalType;
+    }
     TypePtr inner = optionalType->getGenericArguments()->get(0);
     return finalTypeOfOptional(inner);
 }
@@ -491,7 +519,8 @@ ExpressionPtr SemanticAnalyzer::transformExpression(const TypePtr& contextualTyp
     expr->accept(this);
     if(!contextualType)
         return expr;
-    if(symbolRegistry->getGlobalScope()->isOptional(contextualType))
+    GlobalScope* global = symbolRegistry->getGlobalScope();
+    if(global->isOptional(contextualType) || global->isImplicitlyUnwrappedOptional(contextualType))
     {
         ExpressionPtr transformed = expr;
         bool ret = expandOptional(contextualType, transformed);

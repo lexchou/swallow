@@ -241,6 +241,13 @@ const EnumCase* Type::getEnumCase(const std::wstring &name) const
         return nullptr;
     return &iter->second;
 }
+/*!
+ * Gets all enum cases defined in current type
+ */
+const Type::EnumCaseMap& Type::getEnumCases() const
+{
+    return enumCases;
+}
 
 TypeDeclarationPtr Type::getReference()const
 {
@@ -462,6 +469,11 @@ bool Type::containsGenericParameters() const
     for(const Parameter& param : parameters)
     {
         if(param.type->containsGenericParameters())
+            return true;
+    }
+    for(const TypePtr& t : elementTypes)
+    {
+        if(t->containsGenericParameters())
             return true;
     }
     if(returnType && returnType->containsGenericParameters())

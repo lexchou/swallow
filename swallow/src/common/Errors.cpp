@@ -224,6 +224,10 @@ std::wstring Errors::getErrorTemplate(int errorCode)
         case Errors::E_PROPERTY_A_NOT_INITIALIZED: return L"Property '%0' not initialized";
         case Errors::E_NIL_IS_THE_ONLY_RETURN_VALUE_PERMITTED_IN_AN_INITIALIZER: return L"'nil' is the only return value permitted in an initializer";
         case Errors::E_ONLY_A_FAILABLE_INITIALIZER_CAN_RETURN_NIL: return L"Only a failable initializer can return 'nil'";
+        case Errors::E_ALL_STORED_PROPERTIES_OF_A_CLASS_MUST_BE_INITIALIZED_BEFORE_RETURNING_NIL: return L"All stored properties of a class instance must be initialized before returning nil from an initializer";
+        case Errors::E_A_NON_FAILABLE_INITIALIZER_CANNOT_CHAINING_TO_FAILABLE_INITIALIZER_A_WRITTEN_WITH_INIT_1: return L"A non-failable initializer cannot chaining to failable initializer '%0' written with 'init?'";
+        case Errors::E_REQUIRED_INITIALIZER_IN_NON_CLASS_TYPE_A_1: return L"'required' initializer in non-class type '%0'";
+        case Errors::E_REQUIRED_MODIFIER_MUST_BE_PRESENT_ON_ALL_OVERRIDES_OF_A_REQUIRED_INITIALIZER: return L"'required' modifier must be present on all overrides of a required initializer";
 
         case Errors::W_CODE_AFTER_A_WILL_NEVER_BE_EXECUTED_1: return L"Code after 'return' will never be executed";
         case Errors::W_PARAM_CAN_BE_EXPRESSED_MORE_SUCCINCTLY_1: return L"'%0 %0' can be expressed more succinctly as '#%0'";

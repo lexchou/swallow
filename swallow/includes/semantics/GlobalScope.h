@@ -72,12 +72,18 @@ public:
     TypePtr makeOptional(const TypePtr& elementType) const;
 
     /*!
+     * A short-hand way to create an implicitly unwrapped Optional type
+     */
+    TypePtr makeImplicitlyUnwrappedOptional(const TypePtr& elementType) const;
+
+    /*!
      * A short-hand way to create a Dictionary type
      */
     TypePtr makeDictionary(const TypePtr& keyType, const TypePtr& valueType) const;
 public://Generic testing
     bool isArray(const TypePtr& type) const;
     bool isOptional(const TypePtr& type) const;
+    bool isImplicitlyUnwrappedOptional(const TypePtr& type) const;
     bool isDictionary(const TypePtr& type) const;
 private:
     FunctionSymbolPtr vcreateFunction(const std::wstring&name, int flags, const wchar_t* returnType, va_list va);
@@ -105,6 +111,7 @@ public:
     TypePtr Array() const;
     TypePtr Dictionary() const;
     TypePtr Optional() const;
+    TypePtr ImplicitlyUnwrappedOptional() const;
     TypePtr BooleanType() const;
     TypePtr Equatable() const;
     TypePtr Comparable() const;
@@ -148,6 +155,7 @@ private:
     TypePtr _Array;
     TypePtr _Dictionary;
     TypePtr _Optional;
+    TypePtr _ImplicitlyUnwrappedOptional;
     //Common used protocols
     TypePtr _BooleanType;
     TypePtr _Equatable;

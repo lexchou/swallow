@@ -958,6 +958,7 @@ DeclarationPtr Parser::parseStruct(const std::vector<AttributePtr>& attrs, int m
     {
         DeclarationPtr decl = parseDeclaration();
         ret->addDeclaration(decl);
+        match(L";");
     }
     expect(L"}");
     ret->sortByPriority();
@@ -1096,13 +1097,20 @@ DeclarationPtr Parser::parseInit(const std::vector<AttributePtr>& attrs, int mod
 {
     Token token;
     expect(Keyword::Init, token);
-    bool failable = false;
-    if(match(L"?"))
+    bool failable = false, implicitFailable = false;
+    next(token);
+    if(token == L"?" || token == L"!")
+    {
         failable = true;
+        implicitFailable = token == L"!";
+    }
+    else
+        restore(token);
     InitializerDefPtr ret = nodeFactory->createInitializer(token.state);
     ret->setAttributes(attrs);
     ret->setModifiers(modifiers);
     ret->setFailable(failable);
+    ret->setImplicitFailable(implicitFailable);
     if(predicate(L"<"))
     {
         GenericParametersDefPtr params = this->parseGenericParametersDef();

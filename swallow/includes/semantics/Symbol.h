@@ -80,6 +80,10 @@ enum SymbolFlags
     SymbolFlagFinal = 1 << 20,
     //It's a failable initializer, allowed to return nil
     SymbolFlagFailableInitializer = 1 << 21,
+    //It's a failable initializer, but it returns an ImplicitlyUnwrappedOptional<T>
+    SymbolFlagImplicitFailableInitializer = 1 << 22,
+    //It's required for a sub-class to implement the initializer
+    SymbolFlagRequired = 1 << 23,
 };
 
 class SWALLOW_EXPORT Symbol

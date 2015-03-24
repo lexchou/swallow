@@ -53,10 +53,14 @@ public:
 
     bool isFailable() const { return failable;}
     void setFailable(bool v) {failable = v;}
+
+    bool isImplicitFailable() const { return implicitFailable;}
+    void setImplicitFailable(bool v) {implicitFailable = v;}
 public:
     virtual void accept(NodeVisitor* visitor);
 private:
     bool failable;
+    bool implicitFailable;
     ParametersNodePtr parameters;
     CodeBlockPtr body;
 };

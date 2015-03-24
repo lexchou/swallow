@@ -991,3 +991,230 @@ TEST(TestInitialization, FailableInitializer5)
             L"}");
     ASSERT_ERROR(Errors::E_NIL_IS_THE_ONLY_RETURN_VALUE_PERMITTED_IN_AN_INITIALIZER);
 }
+TEST(TestInitialization, FailableInitializer6)
+{
+    SEMANTIC_ANALYZE(L"struct Animal {\n"
+            L"    let species: String\n"
+            L"    init?(species: String) {\n"
+            L"        if species.isEmpty { return nil }\n"
+            L"        self.species = species\n"
+            L"    }\n"
+            L"}\n"
+            L"let anonymousCreature = Animal(species: \"\")\n"
+            L"\n"
+            L"if anonymousCreature == nil {\n"
+            L"    println(\"The anonymous creature could not be initialized\")\n"
+            L"}");
+    ASSERT_NO_ERRORS();
+}
+TEST(TestInitialization, FailableInitializer7)
+{
+    SEMANTIC_ANALYZE(L"enum TemperatureUnit {\n"
+            L"    case Kelvin, Celsius, Fahrenheit\n"
+            L"    init?(symbol: Character) {\n"
+            L"        switch symbol {\n"
+            L"        case \"K\":\n"
+            L"            self = .Kelvin\n"
+            L"        case \"C\":\n"
+            L"            self = .Celsius\n"
+            L"        case \"F\":\n"
+            L"            self = .Fahrenheit\n"
+            L"        default:\n"
+            L"            return nil\n"
+            L"        }\n"
+            L"    }\n"
+            L"}\n"
+            L"let fahrenheitUnit = TemperatureUnit(symbol: \"F\")\n"
+            L"if fahrenheitUnit != nil {\n"
+            L"    println(\"This is a defined temperature unit, so initialization succeeded.\")\n"
+            L"}\n"
+            L"\n"
+            L"let unknownUnit = TemperatureUnit(symbol: \"X\")\n"
+            L"if unknownUnit == nil {\n"
+            L"    println(\"This is not a defined temperature unit, so initialization failed.\")\n"
+            L"}");
+    ASSERT_NO_ERRORS();
+}
+
+TEST(TestInitialization, FailableInitializer8)
+{
+    SEMANTIC_ANALYZE(L"enum TemperatureUnit: Character {\n"
+            L"    case Kelvin = \"K\", Celsius = \"C\", Fahrenheit = \"F\"\n"
+            L"}\n"
+            L" \n"
+            L"let fahrenheitUnit = TemperatureUnit(rawValue: \"F\")\n"
+            L"if fahrenheitUnit != nil {\n"
+            L"    println(\"This is a defined temperature unit, so initialization succeeded.\")\n"
+            L"}\n"
+            L"// prints \"This is a defined temperature unit, so initialization succeeded.\"\n"
+            L" \n"
+            L"let unknownUnit = TemperatureUnit(rawValue: \"X\")\n"
+            L"if unknownUnit == nil {\n"
+            L"    println(\"This is not a defined temperature unit, so initialization failed.\")\n"
+            L"}\n"
+            L"// prints \"This is not a defined temperature unit, so initialization failed.\"");
+    ASSERT_NO_ERRORS();
+}
+TEST(TestInitialization, FailableInitializer9)
+{
+    SEMANTIC_ANALYZE(L"class Test\n"
+            L"{\n"
+            L"    var a : Int\n"
+            L"    init?()\n"
+            L"    {\n"
+            L"        return nil;\n"
+            L"    }\n"
+            L"}");
+    ASSERT_ERROR(Errors::E_ALL_STORED_PROPERTIES_OF_A_CLASS_MUST_BE_INITIALIZED_BEFORE_RETURNING_NIL);
+}
+TEST(TestInitialization, FailableInitializer10)
+{
+    SEMANTIC_ANALYZE(L"struct Test\n"
+            L"{\n"
+            L"    var a : Int\n"
+            L"    init?()\n"
+            L"    {\n"
+            L"        return nil;\n"
+            L"    }\n"
+            L"}");
+    ASSERT_NO_ERRORS();
+}
+TEST(TestInitialization, FailableInitializer11)
+{
+    SEMANTIC_ANALYZE(L"class Test\n"
+            L"{\n"
+            L"    var a : Int?\n"
+            L"    init?()\n"
+            L"    {\n"
+            L"        return nil;\n"
+            L"    }\n"
+            L"}");
+    ASSERT_NO_ERRORS();
+}
+
+TEST(TestInitialization, FailableInitializer12)
+{
+    SEMANTIC_ANALYZE(L"class Product {\n"
+            L"    let name: String!\n"
+            L"    init?(name: String) {\n"
+            L"        if name.isEmpty { return nil }\n"
+            L"        self.name = name\n"
+            L"    }\n"
+            L"}\n"
+            L"\n"
+            L"\n"
+            L"class CartItem: Product {\n"
+            L"    let quantity: Int!\n"
+            L"    init?(name: String, quantity: Int) {\n"
+            L"        super.init(name: name)\n"
+            L"        if quantity < 1 { return nil }\n"
+            L"        self.quantity = quantity\n"
+            L"    }\n"
+            L"}\n"
+            L"");
+    ASSERT_NO_ERRORS();
+}
+TEST(TestInitialization, FailableInitializer13)
+{
+    SEMANTIC_ANALYZE(L"class Product {\n"
+            L"    let name: String!\n"
+            L"    init?(name: String) {\n"
+            L"        if name.isEmpty { return nil }\n"
+            L"        self.name = name\n"
+            L"    }\n"
+            L"}\n"
+            L"\n"
+            L"\n"
+            L"class CartItem: Product {\n"
+            L"    let quantity: Int!\n"
+            L"    init(name: String, quantity: Int) {\n"
+            L"        super.init(name: name)\n"
+            L"        if quantity < 1 { return nil }\n"
+            L"        self.quantity = quantity\n"
+            L"    }\n"
+            L"}\n"
+            L"");
+    ASSERT_ERROR(Errors::E_A_NON_FAILABLE_INITIALIZER_CANNOT_CHAINING_TO_FAILABLE_INITIALIZER_A_WRITTEN_WITH_INIT_1);
+    ASSERT_EQ(L"init(name:)", error->items[0]);
+}
+
+TEST(TestInitialization, RequiredInitializer)
+{
+    SEMANTIC_ANALYZE(L"struct SS\n"
+            L"{\n"
+            L"    required var a = 3;\n"
+            L"}");
+    ASSERT_ERROR(Errors::E_A_MAY_ONLY_BE_USED_ON_B_DECLARATION_2);
+    ASSERT_EQ(L"required", error->items[0]);
+    ASSERT_EQ(L"init", error->items[1]);
+}
+TEST(TestInitialization, RequiredInitializer2)
+{
+    SEMANTIC_ANALYZE(L"struct SS\n"
+            L"{\n"
+            L"    required init()\n"
+            L"    {\n"
+            L"        \n"
+            L"    }\n"
+            L"}");
+    ASSERT_ERROR(Errors::E_REQUIRED_INITIALIZER_IN_NON_CLASS_TYPE_A_1);
+    ASSERT_EQ(L"SS", error->items[0]);
+}
+TEST(TestInitialization, RequiredInitializer3)
+{
+    SEMANTIC_ANALYZE(L"class SS\n"
+            L"{\n"
+            L"    required init()\n"
+            L"    {\n"
+            L"        \n"
+            L"    }\n"
+            L"}");
+    ASSERT_NO_ERRORS();
+}
+TEST(TestInitialization, RequiredInitializer4)
+{
+    SEMANTIC_ANALYZE(L"class SS\n"
+            L"{\n"
+            L"    required init()\n"
+            L"    {\n"
+            L"        \n"
+            L"    }\n"
+            L"}");
+    ASSERT_NO_ERRORS();
+}
+TEST(TestInitialization, RequiredInitializer5)
+{
+    SEMANTIC_ANALYZE(L"class Base\n"
+            L"{\n"
+            L"    required init()\n"
+            L"    {\n"
+            L"        \n"
+            L"    }\n"
+            L"}\n"
+            L"class Child : Base\n"
+            L"{\n"
+            L"    required init()\n"
+            L"    {\n"
+            L"        \n"
+            L"    }\n"
+            L"}");
+    ASSERT_NO_ERRORS();
+}
+TEST(TestInitialization, RequiredInitializer6)
+{
+    SEMANTIC_ANALYZE(L"class Base\n"
+            L"{\n"
+            L"    required init()\n"
+            L"    {\n"
+            L"        \n"
+            L"    }\n"
+            L"}\n"
+            L"class Child : Base\n"
+            L"{\n"
+            L"    init()\n"
+            L"    {\n"
+            L"        \n"
+            L"    }\n"
+            L"}");
+    ASSERT_ERROR(Errors::E_REQUIRED_MODIFIER_MUST_BE_PRESENT_ON_ALL_OVERRIDES_OF_A_REQUIRED_INITIALIZER);
+}

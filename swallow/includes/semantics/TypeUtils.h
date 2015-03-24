@@ -1,4 +1,4 @@
-/* InitializerDef.cpp --
+/* TypeUtils.h --
  *
  * Copyright (c) 2014, Lex Chou <lex at chou dot it>
  * All rights reserved.
@@ -27,41 +27,45 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "ast/InitializerDef.h"
-#include "ast/NodeVisitor.h"
-USE_SWALLOW_NS
+#ifndef TYPE_UTILS_H
+#define TYPE_UTILS_H
+#include "swallow_conf.h"
+#include <memory>
+#include "Symbol.h"
+#include "swallow_types.h"
+#include "semantic-types.h"
+#include <vector>
+#include <map>
+
+SWALLOW_NS_BEGIN
+
+    struct TypeUtils
+    {
+        static bool all(const std::vector<SymbolPtr>& syms, SymbolFlags flags)
+        {
+            for(const SymbolPtr& sym : syms)
+            {
+                if(!sym->hasFlags(flags))
+                    return false;
+            }
+            return true;
+        }
+        static bool allInitialized(const std::vector<SymbolPtr>& syms)
+        {
+            return all(syms, SymbolFlagInitialized);
+        }
+        template<class SymbolsT>
+        static void setFlags(SymbolsT& container, SymbolFlags flags, bool set)
+        {
+            for(auto & sym : container)
+            {
+                sym->setFlags(flags, set);
+            }
+        }
+
+    };
+
+SWALLOW_NS_END
 
 
-InitializerDef::InitializerDef()
-    :Declaration(NodeType::Init), failable(false), implicitFailable(false), parameters(NULL), body(NULL)
-{
-}
-
-InitializerDef::~InitializerDef()
-{
-
-}
-
-
-void InitializerDef::accept(NodeVisitor* visitor)
-{
-    accept2(visitor, &NodeVisitor::visitInit);
-}
-
-void InitializerDef::setParameters(const ParametersNodePtr& parameters)
-{
-    this->parameters = parameters;
-}
-ParametersNodePtr InitializerDef::getParameters()
-{
-    return parameters;
-}
-
-void InitializerDef::setBody(const CodeBlockPtr& body)
-{
-    this->body = body;
-}
-CodeBlockPtr InitializerDef::getBody()
-{
-    return body;
-}
+#endif//TYPE_UTILS_H

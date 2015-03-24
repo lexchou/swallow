@@ -132,7 +132,16 @@ static TypePtr specialize(const TypePtr& type, const GenericArgumentPtr& argumen
                 }
                 builder->addMember(entry.first, sym);
             }
-            //replace parents and protocols to apply with the generic arguments
+            if(category == Type::Enum)
+            {
+                //for enum we'll also specialize cases
+                for(const auto& c : type->getEnumCases())
+                {
+                    TypePtr type = specialize(c.second.type, arguments);
+                    builder->addEnumCase(c.first, type);
+                }
+            }
+            //TODO: replace parents and protocols to apply with the generic arguments
             return ret;
         }
 
