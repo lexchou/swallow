@@ -951,7 +951,7 @@ void DeclarationAnalyzer::visitDeinit(const DeinitializerDefPtr& node)
 {
     if(ctx->flags & SemanticContext::FLAG_PROCESS_IMPLEMENTATION)
     {
-        node->accept(semanticAnalyzer);
+        node->getBody()->accept(this);
     }
 }
 

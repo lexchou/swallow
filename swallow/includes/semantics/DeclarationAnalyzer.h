@@ -84,6 +84,7 @@ public:
 public://properties
     const TypePtr& getCurrentFunction() const;
     const TypePtr& getCurrentType() const;
+    SemanticAnalyzer* getSemanticAnalyzer() {return semanticAnalyzer;}
 private:
     TypePtr defineType(const std::shared_ptr<TypeDeclaration>& node);
     void prepareDefaultInitializers(const TypePtr& type);
