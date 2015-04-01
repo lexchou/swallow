@@ -227,6 +227,14 @@ void Parser::unexpected(const Token& token)
     compilerResults->add(ErrorLevel::Fatal, token.state, Errors::E_UNEXPECTED_1, token.token);
     throw Abort();
 }
+void Parser::tassert(Token& token, bool cond, int errorCode)
+{
+    if(cond)
+        return;
+    //record this issue
+    compilerResults->add(ErrorLevel::Fatal, token.state, errorCode);
+    throw Abort();
+}
 void Parser::tassert(Token& token, bool cond, int errorCode, const std::wstring& s)
 {
     if(cond)

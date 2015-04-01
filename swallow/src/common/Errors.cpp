@@ -228,6 +228,10 @@ std::wstring Errors::getErrorTemplate(int errorCode)
         case Errors::E_A_NON_FAILABLE_INITIALIZER_CANNOT_CHAINING_TO_FAILABLE_INITIALIZER_A_WRITTEN_WITH_INIT_1: return L"A non-failable initializer cannot chaining to failable initializer '%0' written with 'init?'";
         case Errors::E_REQUIRED_INITIALIZER_IN_NON_CLASS_TYPE_A_1: return L"'required' initializer in non-class type '%0'";
         case Errors::E_REQUIRED_MODIFIER_MUST_BE_PRESENT_ON_ALL_OVERRIDES_OF_A_REQUIRED_INITIALIZER: return L"'required' modifier must be present on all overrides of a required initializer";
+        case Errors::E_DUPLICATE_MODIFIER: return L"Duplicate modifier";
+        case Errors::E_A_MUST_BE_DECLARED_B_BECAUSE_ITS_C_USES_A_D_TYPE_4: return L"%0 must be declared %1 because its %2 uses a %3 type";
+        case Errors::E_A_CANNOT_BE_DECLARED_B_BECAUSE_ITS_C_USES_A_D_TYPE_4: return L"%0 cannot be declared %1 because its %2 uses a %3 type";
+
 
         case Errors::W_CODE_AFTER_A_WILL_NEVER_BE_EXECUTED_1: return L"Code after 'return' will never be executed";
         case Errors::W_PARAM_CAN_BE_EXPRESSED_MORE_SUCCINCTLY_1: return L"'%0 %0' can be expressed more succinctly as '#%0'";

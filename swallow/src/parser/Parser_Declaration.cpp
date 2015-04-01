@@ -192,6 +192,7 @@ int Parser::parseDeclarationModifiers()
                 ret |= DeclarationModifiers::Weak;
                 continue;
             case Keyword::Internal:
+                tassert(token, (ret & DeclarationModifiers::AccessModifiers) == 0, Errors::E_DUPLICATE_MODIFIER);
                 ret = DeclarationModifiers::Internal;
                 if(match(L"("))
                 {
@@ -201,6 +202,7 @@ int Parser::parseDeclarationModifiers()
                 }
                 continue;
             case Keyword::Private:
+                tassert(token, (ret & DeclarationModifiers::AccessModifiers) == 0, Errors::E_DUPLICATE_MODIFIER);
                 ret = DeclarationModifiers::Private;
                 if(match(L"("))
                 {
@@ -210,6 +212,7 @@ int Parser::parseDeclarationModifiers()
                 }
                 continue;
             case Keyword::Public:
+                tassert(token, (ret & DeclarationModifiers::AccessModifiers) == 0, Errors::E_DUPLICATE_MODIFIER);
                 ret = DeclarationModifiers::Public;
                 if(match(L"("))
                 {

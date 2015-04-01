@@ -6,7 +6,7 @@ using namespace std;
 Symbol::Symbol()
 :flags(0)
 {
-
+    accessLevel = AccessLevelUndefined;
 }
 
 void Symbol::setFlags(int flags)

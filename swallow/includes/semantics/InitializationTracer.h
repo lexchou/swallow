@@ -31,7 +31,7 @@
 #define INITIALIZATION_TRACER_H
 #include "Symbol.h"
 #include <set>
-#include "TypeUtils.h"
+#include "SemanticUtils.h"
 
 SWALLOW_NS_BEGIN
     /*!
@@ -68,7 +68,7 @@ SWALLOW_NS_BEGIN
             if (!parent)
             {
                 //reset all symbol to uninitialized when branch tracer left the initializer scope
-                TypeUtils::setFlags(set, SymbolFlagInitialized, false);
+                SemanticUtils::setFlags(set, SymbolFlagInitialized, false);
                 return;
             }
             if(type == Branch)
@@ -88,7 +88,7 @@ SWALLOW_NS_BEGIN
                     parent->superInit &= superInit;
                 }
                 //reset all symbol to uninitialized when branch tracer left the scope
-                TypeUtils::setFlags(set, SymbolFlagInitialized, false);
+                SemanticUtils::setFlags(set, SymbolFlagInitialized, false);
             }
             else
             {
@@ -96,7 +96,7 @@ SWALLOW_NS_BEGIN
                 std::set_union(parent->set.begin(), parent->set.end(), set.begin(), set.end(), std::inserter(tmp, tmp.begin()));
                 parent->set = tmp;
                 //set all symbol to initialized when sequence tracer left the scope
-                TypeUtils::setFlags(set, SymbolFlagInitialized, true);
+                SemanticUtils::setFlags(set, SymbolFlagInitialized, true);
                 parent->selfInit |= selfInit;
                 parent->superInit |= superInit;
             }

@@ -756,3 +756,116 @@ void SemanticAnalyzer::markInitialized(const SymbolPtr& sym)
     assert(ctx.currentInitializationTracer != nullptr);
     ctx.currentInitializationTracer->add(sym);
 }
+/*!
+ * Make a chain of member access on a tuple variable(specified by given tempName) by a set of indices
+ */
+static MemberAccessPtr makeAccess(SourceInfo* info, NodeFactory* nodeFactory, const std::wstring& tempName, const std::vector<int>& indices)
+{
+    assert(!indices.empty());
+    IdentifierPtr self = nodeFactory->createIdentifier(*info);
+    self->setIdentifier(tempName);
+    ExpressionPtr ret = self;
+    for(int i : indices)
+    {
+        MemberAccessPtr next = nodeFactory->createMemberAccess(*info);
+        next->setSelf(ret);
+        next->setIndex(i);
+        ret = next;
+    }
+    return static_pointer_cast<MemberAccess>(ret);
+}
+
+void SemanticAnalyzer::expandTuple(vector<TupleExtractionResult>& results, vector<int>& indices, const PatternPtr& name, const std::wstring& tempName, const TypePtr& type, PatternAccessibility accessibility)
+{
+    TypeNodePtr declaredType;
+    switch (name->getNodeType())
+    {
+        case NodeType::Identifier:
+        {
+            IdentifierPtr id = static_pointer_cast<Identifier>(name);
+            if(accessibility == AccessibilityUndefined)
+            {
+                //undefined variable
+                error(name, Errors::E_USE_OF_UNRESOLVED_IDENTIFIER_1, id->getIdentifier());
+                abort();
+                return;
+            }
+            name->setType(type);
+            bool readonly = accessibility == AccessibilityConstant;
+            results.push_back(TupleExtractionResult(id, type, makeAccess(id->getSourceInfo(), id->getNodeFactory(), tempName, indices), readonly));
+            //check if the identifier already has a type definition
+            break;
+        }
+        case NodeType::TypedPattern:
+        {
+            TypedPatternPtr pat = static_pointer_cast<TypedPattern>(name);
+            assert(pat->getDeclaredType());
+            TypePtr declaredType = lookupType(pat->getDeclaredType());
+            pat->setType(declaredType);
+            if(!Type::equals(declaredType, type))
+            {
+                error(name, Errors::E_TYPE_ANNOTATION_DOES_NOT_MATCH_CONTEXTUAL_TYPE_A_1, type->toString());
+                abort();
+                return;
+            }
+            expandTuple(results, indices, pat->getPattern(), tempName, declaredType, accessibility);
+            break;
+        }
+        case NodeType::Tuple:
+        {
+            if(type->getCategory() != Type::Tuple)
+            {
+                error(name, Errors::E_TUPLE_PATTERN_CANNOT_MATCH_VALUES_OF_THE_NON_TUPLE_TYPE_A_1, type->toString());
+                return;
+            }
+            TuplePtr tuple = static_pointer_cast<Tuple>(name);
+            declaredType = tuple->getDeclaredType();
+            if((type->getCategory() != Type::Tuple) || (tuple->numElements() != type->numElementTypes()))
+            {
+                error(name, Errors::E_TYPE_ANNOTATION_DOES_NOT_MATCH_CONTEXTUAL_TYPE_A_1, type->toString());
+                abort();
+                return;
+            }
+            //check each elements
+            int elements = tuple->numElements();
+            for(int i = 0; i < elements; i++)
+            {
+                PatternPtr element = tuple->getElement(i);
+                TypePtr elementType = type->getElementType(i);
+                indices.push_back(i);
+                //validateTupleType(isReadonly, element, elementType);
+                expandTuple(results, indices, element, tempName, elementType, accessibility);
+                indices.pop_back();
+            }
+            break;
+        }
+        case NodeType::ValueBindingPattern:
+        {
+            if(accessibility != AccessibilityUndefined)
+            {
+                error(name, Errors::E_VARLET_CANNOT_APPEAR_INSIDE_ANOTHER_VAR_OR_LET_PATTERN_1, accessibility == AccessibilityConstant ? L"let" : L"var");
+                abort();
+            }
+            else
+            {
+                ValueBindingPatternPtr p = static_pointer_cast<ValueBindingPattern>(name);
+                expandTuple(results, indices, p->getBinding(), tempName, type, p->isReadOnly() ? AccessibilityConstant : AccessibilityVariable);
+            }
+            break;
+        }
+        case NodeType::EnumCasePattern:
+        {
+            EnumCasePatternPtr p(static_pointer_cast<EnumCasePattern>(name));
+            if(p->getAssociatedBinding())
+            {
+                expandTuple(results, indices, p->getAssociatedBinding(), tempName, type, accessibility);
+            }
+            break;
+        }
+        case NodeType::TypeCase:
+        case NodeType::TypeCheck:
+        default:
+            error(name, Errors::E_EXPECT_TUPLE_OR_IDENTIFIER);
+            break;
+    }
+}

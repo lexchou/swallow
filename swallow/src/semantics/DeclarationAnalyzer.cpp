@@ -57,6 +57,29 @@ DeclarationAnalyzer::DeclarationAnalyzer(SemanticAnalyzer* analyzer, SemanticCon
 {
 
 }
+/*!
+ * Parse access level from a set of declaration modifiers
+ */
+AccessLevel DeclarationAnalyzer::parseAccessLevel(int modifiers)
+{
+    if(modifiers & DeclarationModifiers::Public)
+        return AccessLevelPublic;
+    if(modifiers & DeclarationModifiers::Internal)
+        return AccessLevelInternal;
+    if(modifiers & DeclarationModifiers::Private)
+        return AccessLevelPrivate;
+    // Handle default access control level
+    // The access control level of a type also affects the default access level
+    // of that type’s members (its properties, methods, initializers, and
+    // subscripts). If you define a type’s access level as private, the default
+    // access level of its members will also be private. If you define a type’s
+    // access level as internal or public (or use the default access level of
+    // internal without specifying an access level explicitly), the default
+    // access level of the type’s members will be internal.
+    if(ctx->currentType && ctx->currentType->getAccessLevel() == AccessLevelPrivate)
+        return AccessLevelPrivate;
+    return AccessLevelInternal;
+}
 
 
 
@@ -199,3 +222,43 @@ void DeclarationAnalyzer::validateDeclarationModifiers(const DeclarationPtr& dec
     semanticAnalyzer->validateDeclarationModifiers(declaration);
 }
 
+static wstring accessLevelToString(AccessLevel accessLevel)
+{
+    switch(accessLevel)
+    {
+        case AccessLevelInternal:
+            return L"internal";
+        case AccessLevelPrivate:
+            return L"private";
+        case AccessLevelPublic:
+            return L"public";
+        default:
+            break;
+    }
+    return L"<error>";
+}
+
+/*!
+ * Verify access level
+ */
+void DeclarationAnalyzer::verifyAccessLevel(const DeclarationPtr& node, const TypePtr& type, int declaration, int component)
+{
+    int modifiers = node->getModifiers();
+    AccessLevel currentLevel = parseAccessLevel(modifiers);
+    AccessLevel expectedLevel = type->getAccessLevel();
+    if(currentLevel <= expectedLevel)
+        return;
+
+    static const wchar_t* decls[] = {L"Variable", L"Property", L"Function", L"Method", L"Subscript", L"Initializer", L"Class", L"Enum"};
+    static const wchar_t* comps[] = {L"type", L"superclass", L"parameter", L"result", L"index", L"element type", L"raw type"};
+    const wchar_t* sdecl = decls[declaration];
+    const wchar_t* scomp = comps[component];
+    wstring cur = accessLevelToString(currentLevel);
+    wstring parent = accessLevelToString(expectedLevel);
+    bool implicitAccessLevel = (modifiers & DeclarationModifiers::AccessModifiers) == 0;
+
+    if(implicitAccessLevel)
+        error(node, Errors::E_A_MUST_BE_DECLARED_B_BECAUSE_ITS_C_USES_A_D_TYPE_4, sdecl, parent, scomp, parent);
+    else
+        error(node, Errors::E_A_CANNOT_BE_DECLARED_B_BECAUSE_ITS_C_USES_A_D_TYPE_4, sdecl, cur, scomp, parent);
+}

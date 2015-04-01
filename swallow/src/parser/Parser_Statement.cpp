@@ -96,6 +96,9 @@ StatementPtr Parser::parseStatement()
                 case Keyword::Nonmutating:
                 case Keyword::Override:
                 case Keyword::Final:
+                case Keyword::Public:
+                case Keyword::Internal:
+                case Keyword::Private:
                     return parseDeclaration();
                 case Keyword::_:
                     expect_next(token);

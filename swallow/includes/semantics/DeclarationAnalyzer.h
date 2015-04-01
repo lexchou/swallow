@@ -49,6 +49,25 @@ struct SemanticContext;
  */
 class SWALLOW_EXPORT DeclarationAnalyzer : public SemanticPass
 {
+    enum
+    {
+        D_VARIABLE = 0,
+        D_PROPERTY,
+        D_FUNCTION,
+        D_METHOD,
+        D_SUBSCRIPT,
+        D_INITIALIZER,
+        D_CLASS,
+        D_ENUM,
+
+        C_TYPE = 0,
+        C_SUPERCLASS,
+        C_PARAMETER,
+        C_RESULT,
+        C_INDEX,
+        C_ELEMENT_TYPE,
+        C_RAW_TYPE
+    };
 public:
     DeclarationAnalyzer(SemanticAnalyzer* semanticAnalyzer, SemanticContext* ctx);
 public:
@@ -69,6 +88,8 @@ public:
     virtual void visitCodeBlock(const CodeBlockPtr &node) override;
     void visitAccessor(const CodeBlockPtr& accessor, const ParametersNodePtr& params, const SymbolPtr& setter, int modifiers);
     virtual void visitComputedProperty(const ComputedPropertyPtr& node) override;
+    virtual void visitValueBinding(const ValueBindingPtr& node) override;
+    virtual void visitValueBindings(const ValueBindingsPtr& node) override;
 
     /*!
      * Only visits the implementation of members of given type definition
@@ -123,6 +144,27 @@ private:
     void checkForFunctionOverriding(const std::wstring& name, const FunctionSymbolPtr& decl, const DeclarationPtr& node);
     void checkForPropertyOverriding(const std::wstring& name, const SymbolPlaceHolderPtr& decl, const ComputedPropertyPtr& node);
     void checkForSubscriptOverride(const Subscript& subscript, const SubscriptDefPtr& node);
+    /*!
+     * Parse access level from a set of declaration modifiers
+     */
+    AccessLevel parseAccessLevel(int modifiers);
+    /*!
+     * Register the symbol to current scope
+     */
+    void registerSymbol(const SymbolPlaceHolderPtr& symbol, const NodePtr& node);
+    /*!
+     * Check if given initializer expression can be assigned to given tuple of variables
+     */
+    void checkTupleDefinition(const TuplePtr& tuple, const ExpressionPtr& initializer);
+    /*!
+     * Need to explode a tuple variable definition into a sequence of single variable definitions
+     */
+    void explodeValueBindings(const ValueBindingsPtr& node);
+
+    /*!
+     * Verify access level
+     */
+    void verifyAccessLevel(const DeclarationPtr& node, const TypePtr& type, int declaration, int component);
 protected:
     SemanticAnalyzer* semanticAnalyzer;
 

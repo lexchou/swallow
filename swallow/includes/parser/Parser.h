@@ -201,7 +201,8 @@ private:
     bool predicate(const wchar_t* token);
     bool predicate(const wchar_t* token, Token& t);
 
-    void tassert(Token& token, bool cond, int errorCode, const std::wstring& s = std::wstring());
+    void tassert(Token& token, bool cond, int errorCode);
+    void tassert(Token& token, bool cond, int errorCode, const std::wstring& s);
 private:
     Tokenizer* tokenizer;
     NodeFactory* nodeFactory;

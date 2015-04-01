@@ -1,4 +1,4 @@
-/* TypeUtils.h --
+/* SemanticUtils.cpp --
  *
  * Copyright (c) 2014, Lex Chou <lex at chou dot it>
  * All rights reserved.
@@ -27,45 +27,16 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef TYPE_UTILS_H
-#define TYPE_UTILS_H
-#include "swallow_conf.h"
-#include <memory>
-#include "Symbol.h"
-#include "swallow_types.h"
-#include "semantic-types.h"
-#include <vector>
-#include <map>
+#include "semantics/SemanticUtils.h"
+#include "ast/ast.h"
+#include "semantics/SymbolRegistry.h"
+#include "ast/utils/NodeSerializer.h"
+#include "semantics/Type.h"
+#include "common/Errors.h"
+#include <cassert>
+#include "ast/NodeFactory.h"
 
-SWALLOW_NS_BEGIN
-
-    struct TypeUtils
-    {
-        static bool all(const std::vector<SymbolPtr>& syms, SymbolFlags flags)
-        {
-            for(const SymbolPtr& sym : syms)
-            {
-                if(!sym->hasFlags(flags))
-                    return false;
-            }
-            return true;
-        }
-        static bool allInitialized(const std::vector<SymbolPtr>& syms)
-        {
-            return all(syms, SymbolFlagInitialized);
-        }
-        template<class SymbolsT>
-        static void setFlags(SymbolsT& container, SymbolFlags flags, bool set)
-        {
-            for(auto & sym : container)
-            {
-                sym->setFlags(flags, set);
-            }
-        }
-
-    };
-
-SWALLOW_NS_END
+USE_SWALLOW_NS
+using namespace std;
 
 
-#endif//TYPE_UTILS_H

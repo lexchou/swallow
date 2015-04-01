@@ -1,4 +1,4 @@
-/* SemanticAnalyzer_Variables.cpp --
+/* SemanticUtils.h --
  *
  * Copyright (c) 2014, Lex Chou <lex at chou dot it>
  * All rights reserved.
@@ -27,22 +27,47 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "semantics/SemanticAnalyzer.h"
-#include "ast/ast.h"
-#include <cassert>
-#include "semantics/DeclarationAnalyzer.h"
+#ifndef SEMANTIC_UTILS_H
+#define SEMANTIC_UTILS_H
+#include "swallow_conf.h"
+#include <memory>
+#include "Symbol.h"
+#include "swallow_types.h"
+#include "semantic-types.h"
+#include <vector>
+#include <map>
 
-USE_SWALLOW_NS
-using namespace std;
+SWALLOW_NS_BEGIN
+
+    typedef std::shared_ptr<class Identifier> IdentifierPtr;
+    typedef std::shared_ptr<class Pattern> PatternPtr;
+    typedef std::shared_ptr<class Expression> ExpressionPtr;
+    struct SemanticUtils
+    {
+        static bool all(const std::vector<SymbolPtr>& syms, SymbolFlags flags)
+        {
+            for(const SymbolPtr& sym : syms)
+            {
+                if(!sym->hasFlags(flags))
+                    return false;
+            }
+            return true;
+        }
+        static bool allInitialized(const std::vector<SymbolPtr>& syms)
+        {
+            return all(syms, SymbolFlagInitialized);
+        }
+        template<class SymbolsT>
+        static void setFlags(SymbolsT& container, SymbolFlags flags, bool set)
+        {
+            for(auto & sym : container)
+            {
+                sym->setFlags(flags, set);
+            }
+        }
+    };
+
+SWALLOW_NS_END
 
 
-void SemanticAnalyzer::visitValueBinding(const ValueBindingPtr& node)
-{
-    declarationAnalyzer->visitValueBinding(node);
-}
-
-
-void SemanticAnalyzer::visitValueBindings(const ValueBindingsPtr& node)
-{
-    declarationAnalyzer->visitValueBindings(node);
-}
+#endif//SEMANTIC_UTILS_H

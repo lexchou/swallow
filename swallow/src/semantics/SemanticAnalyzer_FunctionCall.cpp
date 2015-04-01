@@ -44,7 +44,7 @@
 #include <iostream>
 #include "common/ScopedValue.h"
 #include "semantics/InitializationTracer.h"
-#include "semantics/TypeUtils.h"
+#include "semantics/SemanticUtils.h"
 
 USE_SWALLOW_NS
 using namespace std;
@@ -655,7 +655,7 @@ void SemanticAnalyzer::visitReturn(const ReturnStatementPtr& node)
         {
             //all stored properties must be initialized before returning nil
             //this rule only applies to class
-            if(!TypeUtils::allInitialized(ctx.currentType->getDeclaredStoredProperties()))
+            if(!SemanticUtils::allInitialized(ctx.currentType->getDeclaredStoredProperties()))
             {
                 error(node, Errors::E_ALL_STORED_PROPERTIES_OF_A_CLASS_MUST_BE_INITIALIZED_BEFORE_RETURNING_NIL);
                 return;

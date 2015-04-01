@@ -396,51 +396,60 @@ void DeclarationAnalyzer::visitComputedProperty(const ComputedPropertyPtr& node)
             flags |= SymbolFlagFinal;
 
         SymbolPlaceHolderPtr symbol(new SymbolPlaceHolder(node->getName(), type, SymbolPlaceHolder::R_PROPERTY, flags));
+        symbol->setAccessLevel(parseAccessLevel(node->getModifiers()));
         SymbolScope* scope = symbolRegistry->getCurrentScope();
         scope->addSymbol(symbol);
+
+        //check access control level
+        int decl = ctx->currentType ? D_PROPERTY : D_VARIABLE;
+        verifyAccessLevel(node, type, decl, C_TYPE);
+
         declarationFinished(symbol->getName(), symbol, node);
         checkForPropertyOverriding(node->getName(), symbol, node);
         validateDeclarationModifiers(node);
 
         SCOPED_SET(ctx->flags, (ctx->flags & (~SemanticContext::FLAG_PROCESS_IMPLEMENTATION)) | SemanticContext::FLAG_PROCESS_DECLARATION);
-        Type::Category currentCategory = ctx->currentType->getCategory();
-        bool isProtocol = currentCategory == Type::Protocol;
-        //create function for setter/getter/willSet/didSet
-        if(!isProtocol)
+        if(ctx->currentType)
         {
-            bool valueType = currentCategory == Type::Enum || currentCategory == Type::Struct;
-            if (getter)
+            Type::Category currentCategory = ctx->currentType->getCategory();
+            bool isProtocol = currentCategory == Type::Protocol;
+            //create function for setter/getter/willSet/didSet
+            if (!isProtocol)
             {
-                property->functions.getter = createPropertyAccessor(node, !valueType, getter, L".getter", L"");
-                property->functions.getter->accept(semanticAnalyzer);
-            }
+                bool valueType = currentCategory == Type::Enum || currentCategory == Type::Struct;
+                if (getter)
+                {
+                    property->functions.getter = createPropertyAccessor(node, !valueType, getter, L".getter", L"");
+                    property->functions.getter->accept(semanticAnalyzer);
+                }
 
 
-            if (setter)// || didSet || willSet)
-            {
-                std::wstring arg = L"newValue";
-                if (!node->getSetterName().empty())
-                    arg = node->getSetterName();
-                property->functions.setter = createPropertyAccessor(node, true, setter, L".setter", arg);
-                property->functions.setter->accept(semanticAnalyzer);
-            }
+                if (setter)// || didSet || willSet)
+                {
+                    std::wstring arg = L"newValue";
+                    if (!node->getSetterName().empty())
+                        arg = node->getSetterName();
+                    property->functions.setter = createPropertyAccessor(node, true, setter, L".setter", arg);
+                    property->functions.setter->accept(semanticAnalyzer);
+                }
 
-            if (didSet)
-            {
-                std::wstring arg = L"oldValue";
-                if (!node->getDidSetSetter().empty())
-                    arg = node->getDidSetSetter();
-                property->functions.didSet = createPropertyAccessor(node, true, didSet, L".didSet", arg);
-                property->functions.didSet->accept(semanticAnalyzer);
-            }
+                if (didSet)
+                {
+                    std::wstring arg = L"oldValue";
+                    if (!node->getDidSetSetter().empty())
+                        arg = node->getDidSetSetter();
+                    property->functions.didSet = createPropertyAccessor(node, true, didSet, L".didSet", arg);
+                    property->functions.didSet->accept(semanticAnalyzer);
+                }
 
-            if (willSet)
-            {
-                std::wstring arg = L"newValue";
-                if (!node->getWillSetSetter().empty())
-                    arg = node->getWillSetSetter();
-                property->functions.willSet = createPropertyAccessor(node, true, willSet, L".willSet", arg);
-                property->functions.willSet->accept(semanticAnalyzer);
+                if (willSet)
+                {
+                    std::wstring arg = L"newValue";
+                    if (!node->getWillSetSetter().empty())
+                        arg = node->getWillSetSetter();
+                    property->functions.willSet = createPropertyAccessor(node, true, willSet, L".willSet", arg);
+                    property->functions.willSet->accept(semanticAnalyzer);
+                }
             }
         }
 
@@ -643,6 +652,7 @@ void DeclarationAnalyzer::visitSubscript(const SubscriptDefPtr &node)
             getterType = this->createFunctionType(paramsList.begin(), paramsList.end(), retType, nullptr);
             node->getGetter()->setType(getterType);
             getter = FunctionSymbolPtr(new FunctionSymbol(L"subscript", getterType, node->getGetter()));
+            getter->setAccessLevel(parseAccessLevel(node->getModifiers()));
             declarationFinished(getter->getName(), getter, node->getGetter());
         }
         if (node->getSetter())
@@ -653,6 +663,7 @@ void DeclarationAnalyzer::visitSubscript(const SubscriptDefPtr &node)
             node->getSetter()->setType(funcType);
             static_pointer_cast<TypeBuilder>(funcType)->addParameter(Parameter(retType));
             setter = FunctionSymbolPtr(new FunctionSymbol(L"subscript", funcType, node->getSetter()));
+            setter->setAccessLevel(parseAccessLevel(node->getModifiers()));
             declarationFinished(setter->getName(), setter, node->getSetter());
         }
         assert(getter != nullptr);
@@ -676,7 +687,11 @@ void DeclarationAnalyzer::visitSubscript(const SubscriptDefPtr &node)
             wstring name = param->isShorthandExternalName() ? param->getLocalName() : param->getExternalName();
             TypePtr paramType = lookupType(param->getDeclaredType());
             params.push_back(Parameter(name, param->isInout(), paramType));
+            //verify index's access level
+            verifyAccessLevel(node, paramType, D_SUBSCRIPT, C_INDEX);
         }
+        //verify element type's access level
+        verifyAccessLevel(node, type, D_SUBSCRIPT, C_ELEMENT_TYPE);
 
 
         //process getter
@@ -754,10 +769,16 @@ void DeclarationAnalyzer::visitFunctionDeclaration(const FunctionDefPtr& node)
         if(generic)
             generic->registerTo(scope);
 
+        int declarationType = ctx->currentType == nullptr ? D_FUNCTION : D_METHOD;
 
         for (const ParametersNodePtr &params : node->getParametersList())
         {
             params->accept(this);
+            for(const ParameterNodePtr& param : *params)
+            {
+                //validate access levels
+                verifyAccessLevel(node, param->getType(), declarationType, C_PARAMETER);
+            }
             prepareParameters(scope, params);
         }
 
@@ -766,6 +787,9 @@ void DeclarationAnalyzer::visitFunctionDeclaration(const FunctionDefPtr& node)
         TypePtr funcType = func->getType();
         node->setType(funcType);
         node->getBody()->setType(funcType);
+        func->setAccessLevel(parseAccessLevel(node->getModifiers()));
+        //validate return type
+        verifyAccessLevel(node, funcType->getReturnType(), declarationType, C_RESULT);
 
         lookupType(node->getReturnType());
 
@@ -985,6 +1009,8 @@ void DeclarationAnalyzer::visitInit(const InitializerDefPtr& node)
                     externalName = param->getExternalName();
             }
             params.push_back(Parameter(externalName, param->isInout(), param->getType()));
+
+            verifyAccessLevel(node, param->getType(), D_INITIALIZER, C_PARAMETER);
         }
 
         TypePtr funcType = Type::newFunction(params, symbolRegistry->getGlobalScope()->Void(), node->getParameters()->isVariadicParameters());
@@ -1004,6 +1030,7 @@ void DeclarationAnalyzer::visitInit(const InitializerDefPtr& node)
         validateDeclarationModifiers(node);
         std::wstring name(L"init");
         FunctionSymbolPtr init(new FunctionSymbol(name, funcType, nullptr));
+        init->setAccessLevel(parseAccessLevel(node->getModifiers()));
         checkForFunctionOverriding(name, init, node);
         declarationFinished(name, init, node);
         node->getBody()->setType(funcType);

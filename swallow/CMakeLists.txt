@@ -62,6 +62,7 @@ SET(SWALLOW_SRC
     src/semantics/DeclarationAnalyzer.cpp
     src/semantics/DeclarationAnalyzer_Type.cpp
     src/semantics/DeclarationAnalyzer_Function.cpp
+    src/semantics/DeclarationAnalyzer_Variables.cpp
     src/semantics/SemanticAnalyzer_Variables.cpp
     src/semantics/SemanticAnalyzer_Expression.cpp
     src/semantics/SemanticAnalyzer_Condition.cpp
@@ -78,6 +79,7 @@ SET(SWALLOW_SRC
     src/semantics/SemanticPass.cpp
     src/semantics/ReturnStatementValidator.cpp
     src/semantics/InitializerValidator.cpp
+    src/semantics/SemanticUtils.cpp
 
     src/ast/Node.cpp
     src/ast/Program.cpp

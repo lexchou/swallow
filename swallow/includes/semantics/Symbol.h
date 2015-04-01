@@ -86,6 +86,14 @@ enum SymbolFlags
     SymbolFlagRequired = 1 << 23,
 };
 
+enum AccessLevel
+{
+    AccessLevelUndefined = 0,
+    AccessLevelPrivate = 1,
+    AccessLevelInternal = 2,
+    AccessLevelPublic = 3
+};
+
 class SWALLOW_EXPORT Symbol
 {
     friend class TypeBuilder;
@@ -101,11 +109,21 @@ public:
     void setFlags(SymbolFlags flags, bool set);
 
     /*!
+     * Gets the access level of current symbol
+     */
+    AccessLevel getAccessLevel() const {return accessLevel;}
+    /*!
+     * Sets the access level of current symbol
+     */
+    void setAccessLevel(AccessLevel level) {accessLevel = level;}
+
+    /*!
      * If this symbol is defined as a member of a type, returns the type that declared this symbol.
      */
     TypePtr getDeclaringType() const;
 protected:
     int flags;
+    AccessLevel accessLevel;
     TypePtr declaringType;
 };
 class SWALLOW_EXPORT SymbolPlaceHolder : public Symbol

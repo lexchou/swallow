@@ -40,7 +40,6 @@ class TypeDeclaration;
 class Expression;
 class Pattern;
 class NodeFactory;
-typedef std::shared_ptr<class Identifier> IdentifierPtr;
 struct TupleExtractionResult
 {
     IdentifierPtr name;
@@ -49,7 +48,7 @@ struct TupleExtractionResult
     bool readonly;
 
     TupleExtractionResult(const IdentifierPtr& name, const TypePtr& type, const ExpressionPtr& initializer, bool readonly)
-         :name(name), type(type), initializer(initializer), readonly(readonly)
+            :name(name), type(type), initializer(initializer), readonly(readonly)
     {
 
     }
@@ -148,11 +147,22 @@ public:
      * This implementation will try to all methods from the type, including defined in parent class or extension
      */
     void getMethodsFromType(const TypePtr& type, const std::wstring& fieldName, MemberFilter filter, std::vector<SymbolPtr>& result);
+    /*!
+     * Convert a AST TypeNode into symboled Type
+     */
+    TypePtr lookupType(const TypeNodePtr& type, bool supressErrors = false);
+
+    /*!
+     * This will generate a unique temporary name for symbol
+     */
+    std::wstring generateTempName();
+    /*!
+     *
+     */
+    void expandTuple(std::vector<TupleExtractionResult>& results, std::vector<int>& indices, const PatternPtr& name, const std::wstring& tempName, const TypePtr& type, PatternAccessibility accessibility);
 private:
     //Verify each symbol in the tuple is initialized and writable
     void verifyTuplePatternForAssignment(const PatternPtr& pattern);
-
-    void registerSymbol(const SymbolPlaceHolderPtr& symbol, const NodePtr& node);
 
     SymbolPtr visitFunctionCall(bool mutatingSelf, std::vector<SymbolPtr>& func, const ParenthesizedExpressionPtr& args, const PatternPtr& node);
 private:
@@ -202,14 +212,6 @@ private:
 
 
     /*!
-     * Need to explode a tuple variable definition into a sequence of single variable definitions
-     */
-    void explodeValueBindings(const ValueBindingsPtr& node);
-    void explodeValueBinding(const ValueBindingsPtr& valueBindings, std::list<ValueBindingPtr>::iterator& iter);
-    MemberAccessPtr makeAccess(SourceInfo* info, NodeFactory* nodeFactory, const std::wstring& tempName, const std::vector<int>& indices);
-    void expandTuple(std::vector<TupleExtractionResult>& results, std::vector<int>& indices, const PatternPtr& name, const std::wstring& tempName, const TypePtr& type, PatternAccessibility accessibility);
-
-    /*!
      * Expand given expression to given Optional<T> type by adding implicit Optional<T>.Some calls
      * Return false if the given expression cannot be conform to given optional type
      */
@@ -230,15 +232,6 @@ private:
      * This will make implicit type conversion like expanding optional
      */
     ExpressionPtr transformExpression(const TypePtr& contextualType, ExpressionPtr expr);
-
-    /*!
-     * This will generate a unique temporary name for symbol
-     */
-    std::wstring generateTempName();
-    /*!
-     * Convert a AST TypeNode into symboled Type
-     */
-    TypePtr lookupType(const TypeNodePtr& type, bool supressErrors = false);
 
     /*!
      * Convert expression node to type node

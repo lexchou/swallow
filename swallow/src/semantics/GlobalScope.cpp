@@ -152,7 +152,7 @@ void GlobalScope::initPrimitiveTypes()
 {
     //Protocols
     TypeBuilderPtr type;
-    #define DECLARE_TYPE(T, N)  _##N = type = static_pointer_cast<TypeBuilder>(Type::newType(L###N, Type::T)); addSymbol(_##N);
+    #define DECLARE_TYPE(T, N)  _##N = type = static_pointer_cast<TypeBuilder>(Type::newType(L###N, Type::T)); addSymbol(_##N); type->setAccessLevel(AccessLevelPublic);
     #define IMPLEMENTS(P) type->addProtocol(_##P);
 
     DECLARE_TYPE(Protocol, BooleanType);

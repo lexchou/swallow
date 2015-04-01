@@ -62,6 +62,7 @@ Type::Type(Category category)
     _containsSelfType = -1;
     variadicParameters = false;
     inheritantDepth = 0;
+    accessLevel = AccessLevelInternal;
 }
 /*!
  * A type place holder for protocol's typealias

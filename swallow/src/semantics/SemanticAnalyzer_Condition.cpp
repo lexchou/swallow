@@ -45,6 +45,8 @@
 #include "common/ScopedValue.h"
 #include "semantics/ScopeGuard.h"
 #include "semantics/InitializationTracer.h"
+#include "semantics/SemanticUtils.h"
+
 
 USE_SWALLOW_NS
 using namespace std;
@@ -111,7 +113,7 @@ void SemanticAnalyzer::visitIf(const IfStatementPtr& node)
             vector<TupleExtractionResult> results;
             vector<int> indices;
             wstring tempName = generateTempName();
-            this->expandTuple(results, indices, tuple, tempName, unpackedType, binding->isReadOnly() ? AccessibilityConstant : AccessibilityVariable);
+            expandTuple(results, indices, tuple, tempName, unpackedType, binding->isReadOnly() ? AccessibilityConstant : AccessibilityVariable);
             SymbolPtr temp(new SymbolPlaceHolder(tempName, unpackedType, SymbolPlaceHolder::R_LOCAL_VARIABLE, SymbolFlagInitialized | SymbolFlagReadable | SymbolFlagTemporary));
             scope->addSymbol(temp);
             for(const TupleExtractionResult& res : results)
@@ -298,7 +300,7 @@ void SemanticAnalyzer::visitCase(const CaseStatementPtr& node)
                 vector<TupleExtractionResult> results;
                 vector<int> indices;
                 wstring tempName = generateTempName();
-                this->expandTuple(results, indices, cond.condition, L"#0", ec->type, accessibility);
+                expandTuple(results, indices, cond.condition, L"#0", ec->type, accessibility);
                 for (auto var : results)
                 {
                     //register symbol
@@ -320,7 +322,7 @@ void SemanticAnalyzer::visitCase(const CaseStatementPtr& node)
                     vector<TupleExtractionResult> results;
                     vector<int> indices;
                     wstring tempName = this->generateTempName();
-                    this->expandTuple(results, indices, binding->getBinding(), tempName, ctx.contextualType, accessibility);
+                    expandTuple(results, indices, binding->getBinding(), tempName, ctx.contextualType, accessibility);
                     for (auto var : results)
                     {
                         //register symbol

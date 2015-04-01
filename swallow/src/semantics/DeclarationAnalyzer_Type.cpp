@@ -208,6 +208,10 @@ TypePtr DeclarationAnalyzer::defineType(const std::shared_ptr<TypeDeclaration>& 
     //register this type
     type = Type::newType(node->getIdentifier()->getName(), category, node, parent, protocols, generic);
     node->setType(type);
+    if(parent && parent->getAccessLevel() == AccessLevelPublic && (node->getModifiers() & DeclarationModifiers::AccessModifiers) == 0)
+        type->setAccessLevel(AccessLevelPublic);//when access level is undefined, try to inherit base's access level
+    else
+        type->setAccessLevel(parseAccessLevel(node->getModifiers()));
     currentScope->addSymbol(type);
     if(node->hasModifier(DeclarationModifiers::Final))
         type->setFlags(SymbolFlagFinal, true);
@@ -364,6 +368,9 @@ void DeclarationAnalyzer::visitClass(const ClassDefPtr& node)
 {
     TypePtr type = defineType(node);
     SCOPED_SET(ctx->currentType, type);
+    assert(type->getAccessLevel() != AccessLevelUndefined);
+    if(type->getParentType() != nullptr)
+        verifyAccessLevel(node, type->getParentType(), D_CLASS, C_SUPERCLASS);
     visitDeclaration(node);
     verifyProtocolConform(type);
     prepareDefaultInitializers(type);
@@ -616,6 +623,8 @@ void DeclarationAnalyzer::visitEnum(const EnumDefPtr& node)
             declarationFinished(init->getName(), init, nullptr);
         }
     }
+    if(type->getParentType() != nullptr)
+        verifyAccessLevel(node, type->getParentType(), D_ENUM, C_RAW_TYPE);
     validateDeclarationModifiers(node);
     visitImplementation(node);
 }
