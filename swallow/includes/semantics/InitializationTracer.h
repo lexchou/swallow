@@ -31,6 +31,7 @@
 #define INITIALIZATION_TRACER_H
 #include "Symbol.h"
 #include <set>
+#include <algorithm>
 #include "SemanticUtils.h"
 
 SWALLOW_NS_BEGIN

@@ -29,6 +29,7 @@
  */
 #include "ast/TypeDeclaration.h"
 #include "ast/TypeIdentifier.h"
+#include <algorithm>
 USE_SWALLOW_NS
 
 

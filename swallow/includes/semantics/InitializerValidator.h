@@ -30,7 +30,6 @@
 #ifndef INITIALIZER_VALIDATOR_H
 #define INITIALIZER_VALIDATOR_H
 #include "ast/NodeVisitor.h"
-#include <experimental/optional>
 
 SWALLOW_NS_BEGIN
 

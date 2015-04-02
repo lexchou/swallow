@@ -30,7 +30,6 @@
 #ifndef RETURN_STATEMENT_VALIDATOR_H
 #define RETURN_STATEMENT_VALIDATOR_H
 #include "ast/NodeVisitor.h"
-#include <experimental/optional>
 
 SWALLOW_NS_BEGIN
 
