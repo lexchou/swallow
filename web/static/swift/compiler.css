@@ -14,6 +14,7 @@ body {
 }
 #ast .children {
 	padding-left:2em;
+    border-left: 1px dashed #aaa;
 }
 .info:before {
 	content:'(';
