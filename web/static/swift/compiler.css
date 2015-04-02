@@ -1,0 +1,49 @@
+body {
+  padding-top: 70px;
+}
+.error-gutter {
+	width:1em;
+}
+.error-line {
+	background-color:#ff0000;
+}
+#ast {
+	overflow: auto;
+	height:300px;
+	
+}
+#ast .children {
+	padding-left:2em;
+}
+.info:before {
+	content:'(';
+}
+.node:after {
+	content:')';
+}
+.info > .name {
+	color:#009eff;
+	margin-right:10px;
+}
+.info > .prop {
+	display:inline-block;
+}
+.info > .text {
+	color:#2f7f7c;
+}
+.prop {
+	margin-left:10px;
+}
+.prop-key {
+	color:#a2ae58;
+}
+.prop-value {
+	color:#da4747;
+}
+.prop-value:before {
+	content:'"';
+	color:#000;
+}.prop-value:after {
+	content:'"';
+	color:#000;
+}

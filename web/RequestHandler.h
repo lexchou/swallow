@@ -1,4 +1,4 @@
-/* SwallowUtils.h --
+/* RequestHandler.h --
  *
  * Copyright (c) 2014, Lex Chou <lex at chou dot it>
  * All rights reserved.
@@ -27,31 +27,27 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef SWALLOW_UTILS_H
-#define SWALLOW_UTILS_H
-#include "swallow_conf.h"
+#ifndef REQUEST_HANDLER_H
+#define REQUEST_HANDLER_H
+#include <map>
 #include <string>
-#include <ostream>
 
-SWALLOW_NS_BEGIN
-
-class CompilerResults;
-
-struct SwallowUtils
+struct FCGX_Request;
+class RequestHandler
 {
-    static void dumpHex(const char* s);
-    static std::wstring readFile(const char* fileName);
-    static void dumpCompilerResults(const std::wstring& src, const CompilerResults& compilerResults, std::wostream& out);
+    typedef void (RequestHandler::*Handler)(FCGX_Request* request);
+public:
+    RequestHandler();
+public:
+    void handle(FCGX_Request* request);
+private:
+    void handle404();
+    void handleAST(FCGX_Request* request);
 
-    /*!
-     * A simplified approach to convert std::string to std::wstring
-     */
-    static std::wstring toWString(const std::string& str);
-    /*!
-     * A simplified approach to convert std::wstring to std::string
-     */
-    static std::string toString(const std::wstring& str);
+private:
+    std::map<std::string, Handler> handlers;
+
+
 };
-SWALLOW_NS_END
 
-#endif//SWALLOW_UTILS_H
+#endif//NODE_VISITOR_H

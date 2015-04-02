@@ -1,4 +1,4 @@
-/* SwallowUtils.h --
+/* JSONSerializer.h --
  *
  * Copyright (c) 2014, Lex Chou <lex at chou dot it>
  * All rights reserved.
@@ -27,31 +27,42 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef SWALLOW_UTILS_H
-#define SWALLOW_UTILS_H
-#include "swallow_conf.h"
-#include <string>
-#include <ostream>
+#include <iostream>
+#include <fcgio.h>
+#include "RequestHandler.h"
 
-SWALLOW_NS_BEGIN
-
-class CompilerResults;
-
-struct SwallowUtils
+using namespace std;
+int main()
 {
-    static void dumpHex(const char* s);
-    static std::wstring readFile(const char* fileName);
-    static void dumpCompilerResults(const std::wstring& src, const CompilerResults& compilerResults, std::wostream& out);
+    streambuf* cin_buf = cin.rdbuf();
+    streambuf* cout_buf = cout.rdbuf();
+    streambuf* cerr_buf = cout.rdbuf();
+    FCGX_Request request;
+    FCGX_Init();
+    FCGX_InitRequest(&request, 0, 0);
+    RequestHandler handler;
 
-    /*!
-     * A simplified approach to convert std::string to std::wstring
-     */
-    static std::wstring toWString(const std::string& str);
-    /*!
-     * A simplified approach to convert std::wstring to std::string
-     */
-    static std::string toString(const std::wstring& str);
-};
-SWALLOW_NS_END
+    while(FCGX_Accept_r(&request) == 0)
+    {
+        fcgi_streambuf fcgi_cin(request.in);
+        fcgi_streambuf fcgi_cout(request.out);
+        fcgi_streambuf fcgi_cerr(request.err);
+        cin.rdbuf(&fcgi_cin);
+        cout.rdbuf(&fcgi_cout);
+        cerr.rdbuf(&fcgi_cerr);
 
-#endif//SWALLOW_UTILS_H
+        handler.handle(&request);
+
+        /*
+        const char * const * envp = request.envp;
+        for ( ; *envp; ++envp)
+        {
+            cout << *envp << "\n";
+        }
+        */
+    }
+    cin.rdbuf(cin_buf);
+    cout.rdbuf(cout_buf);
+    cerr.rdbuf(cerr_buf);
+    return 0;
+}

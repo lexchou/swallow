@@ -138,3 +138,22 @@ void SwallowUtils::dumpCompilerResults(const std::wstring& src, const CompilerRe
 
 
 }
+/*!
+ * A simplified approach to convert std::string to std::wstring
+ */
+std::wstring SwallowUtils::toWString(const std::string& str)
+{
+    wstring ret;
+    ret.append(str.begin(), str.end());
+    return ret;
+
+}
+/*!
+ * A simplified approach to convert std::wstring to std::string
+ */
+std::string SwallowUtils::toString(const std::wstring& str)
+{
+    string ret;
+    ret.append(str.begin(), str.end());
+    return ret;
+}
