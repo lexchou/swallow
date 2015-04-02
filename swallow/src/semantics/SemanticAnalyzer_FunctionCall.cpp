@@ -285,7 +285,6 @@ SymbolPtr SemanticAnalyzer::getOverloadedFunction(bool mutatingSelf, const NodeP
     }
     if(candidates.empty())
     {
-        wprintf(L"type = %S\n", arguments->get(0)->getType()->toString().c_str());
         error(node, Errors::E_NO_MATCHED_OVERLOAD_FOR_A_1, funcs[0]->getName());
         abort();
         return nullptr;
