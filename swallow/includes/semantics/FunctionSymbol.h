@@ -39,20 +39,74 @@ typedef std::shared_ptr<class FunctionDef> FunctionDefPtr;
 typedef std::weak_ptr<class FunctionDef> FunctionDefWeakPtr;
 typedef std::shared_ptr<class CodeBlock> CodeBlockPtr;
 typedef std::weak_ptr<class CodeBlock> CodeBlockWeakPtr;
+
+enum FunctionRole
+{
+    /*!
+     * It's a normal function
+     */
+    FunctionRoleNormal,
+    /*!
+     * It's a getter for a property
+     */
+    FunctionRoleGetter,
+    /*!
+     * It's a setter for a property
+     */
+    FunctionRoleSetter,
+    /*!
+     * It's a willSet for a property
+     */
+    FunctionRoleWillSet,
+    /*!
+     * It's a didSet for a property
+     */
+    FunctionRoleDidSet,
+    /*!
+     * It's a initializer for a type
+     */
+    FunctionRoleInit,
+    /*!
+     * It's a generated allocating initializer for a type
+     */
+    FunctionRoleAllocatingInit,
+    /*!
+     * It's a deinitializer for a type
+     */
+    FunctionRoleDeinit,
+    /*!
+     * It's a generated deallocating initializer for a type
+     */
+    FunctionRoleDeallocatingInit,
+
+    /*!
+     * It's an operator overload function.
+     */
+    FunctionRoleOperator,
+
+    /*!
+     * It's an enum case constructor function
+     */
+    FunctionRoleEnumCase,
+
+};
+
 class SWALLOW_EXPORT FunctionSymbol : public Symbol
 {
     friend class FunctionOverloadedSymbol;
     friend class SymbolRegistry;
 public:
-    FunctionSymbol(const std::wstring& name, const TypePtr& functionType, const CodeBlockPtr& definition);
+    FunctionSymbol(const std::wstring& name, const TypePtr& signature, FunctionRole role, const CodeBlockPtr& definition);
 public:
     virtual const std::wstring& getName() const;
     TypePtr getReturnType()const;
     TypePtr getType();
     CodeBlockPtr getDefinition();
+    FunctionRole getRole() const { return role;}
 private:
     std::wstring name;
     TypePtr type;
+    FunctionRole role;
     CodeBlockWeakPtr definition;
 };
 

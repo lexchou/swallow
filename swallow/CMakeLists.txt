@@ -81,6 +81,8 @@ SET(SWALLOW_SRC
     src/semantics/InitializerValidator.cpp
     src/semantics/SemanticUtils.cpp
 
+    src/codegen/NameMangling.cpp
+
     src/ast/Node.cpp
     src/ast/Program.cpp
     src/ast/NodeVisitor.cpp

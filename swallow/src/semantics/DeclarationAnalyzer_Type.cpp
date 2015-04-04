@@ -278,7 +278,7 @@ void DeclarationAnalyzer::prepareDefaultInitializers(const TypePtr& type)
             std::vector<Parameter> params;
             TypePtr initType = Type::newFunction(params, global->Void(), false);
             initType->setFlags(SymbolFlagInit, true);
-            FunctionSymbolPtr initializer(new FunctionSymbol(L"init", initType, nullptr));
+            FunctionSymbolPtr initializer(new FunctionSymbol(L"init", initType, FunctionRoleInit, nullptr));
             declarationFinished(initializer->getName(), initializer, nullptr);
             initCreated = true;
         }
@@ -286,7 +286,7 @@ void DeclarationAnalyzer::prepareDefaultInitializers(const TypePtr& type)
         {
             TypePtr initType = Type::newFunction(initParams, global->Void(), false);
             initType->setFlags(SymbolFlagInit, true);
-            FunctionSymbolPtr initializer(new FunctionSymbol(L"init", initType, nullptr));
+            FunctionSymbolPtr initializer(new FunctionSymbol(L"init", initType, FunctionRoleInit, nullptr));
             declarationFinished(initializer->getName(), initializer, nullptr);
             initCreated = true;
         }
@@ -323,7 +323,7 @@ void DeclarationAnalyzer::prepareDefaultInitializers(const TypePtr& type)
             {
                 //this initializer exists in base type, but not in current type
                 //so we need to create it in current type
-                initializer = FunctionSymbolPtr(new FunctionSymbol(L"init", initType, nullptr));
+                initializer = FunctionSymbolPtr(new FunctionSymbol(L"init", initType, FunctionRoleInit, nullptr));
                 //initializers->add(initializer);
                 builder->addMember(initializer);
             }
@@ -619,7 +619,7 @@ void DeclarationAnalyzer::visitEnum(const EnumDefPtr& node)
             vector<Parameter> params = {Parameter(L"rawValue", false, type->getParentType())};
             TypePtr initType = Type::newFunction(params, global->Void(), false, nullptr);
             initType->setFlags(SymbolFlagInit | SymbolFlagFailableInitializer | SymbolFlagMember);
-            FunctionSymbolPtr init(new FunctionSymbol(L"init", initType, nullptr));
+            FunctionSymbolPtr init(new FunctionSymbol(L"init", initType, FunctionRoleInit, nullptr));
             declarationFinished(init->getName(), init, nullptr);
         }
     }

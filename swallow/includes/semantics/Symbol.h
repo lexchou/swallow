@@ -84,6 +84,14 @@ enum SymbolFlags
     SymbolFlagImplicitFailableInitializer = 1 << 22,
     //It's required for a sub-class to implement the initializer
     SymbolFlagRequired = 1 << 23,
+    //It's a getter for a computed property
+    SymbolFlagGetter = 1 << 24,
+    //It's a setter for a computed property
+    SymbolFlagSetter = 1 << 25,
+    //It's a willSet for a computed property
+    SymbolFlagWillSet = 1 << 26,
+    //It's a didSet for a computed property
+    SymbolFlagDidSet = 1 << 27
 };
 
 enum AccessLevel

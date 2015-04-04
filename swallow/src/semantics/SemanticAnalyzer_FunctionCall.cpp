@@ -263,7 +263,9 @@ float SemanticAnalyzer::calculateFitScore(bool mutatingSelf, SymbolPtr& func, co
         //Specialization on function call depends on varying type arguments
         CodeBlockPtr definition = nullptr;
         type = type->newSpecializedType(type, genericTypes);
-        func = FunctionSymbolPtr(new FunctionSymbol(func->getName(), type, definition));
+        FunctionSymbolPtr func2 = dynamic_pointer_cast<FunctionSymbol>(func);
+        assert(func2 != nullptr);
+        func = FunctionSymbolPtr(new FunctionSymbol(func->getName(), type, func2->getRole(), definition));
     }
 
     if(!arguments->numExpressions())

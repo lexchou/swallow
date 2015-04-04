@@ -173,7 +173,7 @@ FunctionSymbolPtr DeclarationAnalyzer::createFunctionSymbol(const FunctionDefPtr
             funcType->setFlags(SymbolFlagMutating, true);
         funcType->setFlags(SymbolFlagMember, true);
     }
-    FunctionSymbolPtr ret(new FunctionSymbol(func->getName(), funcType, func->getBody()));
+    FunctionSymbolPtr ret(new FunctionSymbol(func->getName(), funcType, FunctionRoleNormal, func->getBody()));
     return ret;
 }
 void DeclarationAnalyzer::visitClosure(const ClosurePtr& node)
@@ -651,7 +651,7 @@ void DeclarationAnalyzer::visitSubscript(const SubscriptDefPtr &node)
             ScopeGuard scope(static_cast<ScopedCodeBlock*>(node->getGetter().get()), semanticAnalyzer);
             getterType = this->createFunctionType(paramsList.begin(), paramsList.end(), retType, nullptr);
             node->getGetter()->setType(getterType);
-            getter = FunctionSymbolPtr(new FunctionSymbol(L"subscript", getterType, node->getGetter()));
+            getter = FunctionSymbolPtr(new FunctionSymbol(L"subscript", getterType, FunctionRoleGetter, node->getGetter()));
             getter->setAccessLevel(parseAccessLevel(node->getModifiers()));
             declarationFinished(getter->getName(), getter, node->getGetter());
         }
@@ -662,7 +662,7 @@ void DeclarationAnalyzer::visitSubscript(const SubscriptDefPtr &node)
             TypePtr funcType = this->createFunctionType(paramsList.begin(), paramsList.end(), symbolRegistry->getGlobalScope()->Void(), nullptr);
             node->getSetter()->setType(funcType);
             static_pointer_cast<TypeBuilder>(funcType)->addParameter(Parameter(retType));
-            setter = FunctionSymbolPtr(new FunctionSymbol(L"subscript", funcType, node->getSetter()));
+            setter = FunctionSymbolPtr(new FunctionSymbol(L"subscript", funcType, FunctionRoleSetter, node->getSetter()));
             setter->setAccessLevel(parseAccessLevel(node->getModifiers()));
             declarationFinished(setter->getName(), setter, node->getSetter());
         }
@@ -1029,7 +1029,7 @@ void DeclarationAnalyzer::visitInit(const InitializerDefPtr& node)
 
         validateDeclarationModifiers(node);
         std::wstring name(L"init");
-        FunctionSymbolPtr init(new FunctionSymbol(name, funcType, nullptr));
+        FunctionSymbolPtr init(new FunctionSymbol(name, funcType, FunctionRoleInit, nullptr));
         init->setAccessLevel(parseAccessLevel(node->getModifiers()));
         checkForFunctionOverriding(name, init, node);
         declarationFinished(name, init, node);

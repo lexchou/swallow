@@ -202,7 +202,7 @@ void TypeBuilder::addEnumCase(const std::wstring &name, const TypePtr &associate
             params.push_back(Parameter(t));
         }
         TypePtr initializerType = Type::newFunction(params, self(), false, genericDefinition);
-        constructor = FunctionSymbolPtr(new FunctionSymbol(name, initializerType, nullptr));
+        constructor = FunctionSymbolPtr(new FunctionSymbol(name, initializerType, FunctionRoleEnumCase, nullptr));
         constructor->setFlags(SymbolFlagStatic, true);
     }
     EnumCase c = {name, associatedType, constructor};

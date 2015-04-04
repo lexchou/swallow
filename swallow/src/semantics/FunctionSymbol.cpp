@@ -34,11 +34,11 @@
 USE_SWALLOW_NS
 
 
-FunctionSymbol::FunctionSymbol(const std::wstring& name, const TypePtr& functionType, const CodeBlockPtr& definition)
-:name(name), type(functionType), definition(definition)
+FunctionSymbol::FunctionSymbol(const std::wstring& name, const TypePtr& signature, FunctionRole role, const CodeBlockPtr& definition)
+:name(name), type(signature), role(role), definition(definition)
 {
-    assert(functionType);
-    assert(functionType->getCategory() == Type::Function);
+    assert(signature);
+    assert(signature->getCategory() == Type::Function);
 }
 
 TypePtr FunctionSymbol::getType()

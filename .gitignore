@@ -37,3 +37,6 @@ swallow/tests/stdlib.swift
 swallow/tests/test.sil
 swallow/tests/test.swift
 swallow/tests/tests.xcodeproj/
+*.user
+*.cbp
+.DS_Store

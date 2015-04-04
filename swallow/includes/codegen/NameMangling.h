@@ -1,4 +1,4 @@
-/* main.cpp --
+/* NameMangling.h --
  *
  * Copyright (c) 2014, Lex Chou <lex at chou dot it>
  * All rights reserved.
@@ -27,34 +27,41 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include <iostream>
-#include <fcgio.h>
-#include "RequestHandler.h"
+#ifndef NAME_MANGLING_H
+#define NAME_MANGLING_H
+#include "swallow_conf.h"
+#include "swallow_types.h"
+#include <string>
 
-using namespace std;
-int main()
+SWALLOW_NS_BEGIN
+typedef std::shared_ptr<class Symbol> SymbolPtr;
+class SymbolRegistry;
+
+/*!
+ * \brief Generate mangled name for a symbol or decode a mangled name into a symbol
+ */
+class SWALLOW_EXPORT NameMangling
 {
-    streambuf* cin_buf = cin.rdbuf();
-    streambuf* cout_buf = cout.rdbuf();
-    streambuf* cerr_buf = cout.rdbuf();
-    FCGX_Request request;
-    FCGX_Init();
-    FCGX_InitRequest(&request, 0, 0);
-    RequestHandler handler;
+public:
+    NameMangling();
+    ~NameMangling();
+public:
+    /*!
+     * \brief Decode a mangled name into a symbol
+     * \param name
+     * \return nullptr if failed to decode it
+     */
+    static SymbolPtr decode(SymbolRegistry* registry, const wchar_t* name);
 
-    while(FCGX_Accept_r(&request) == 0)
-    {
-        fcgi_streambuf fcgi_cin(request.in);
-        fcgi_streambuf fcgi_cout(request.out);
-        fcgi_streambuf fcgi_cerr(request.err);
-        cin.rdbuf(&fcgi_cin);
-        cout.rdbuf(&fcgi_cout);
-        cerr.rdbuf(&fcgi_cerr);
+    /*!
+     * \brief Encode a symbol into a mangled name
+     * \param symbol
+     * \return
+     */
+    static std::wstring encode(SymbolRegistry* registry, const SymbolPtr& symbol);
+private:
+};
 
-        handler.handle(&request);
-    }
-    cin.rdbuf(cin_buf);
-    cout.rdbuf(cout_buf);
-    cerr.rdbuf(cerr_buf);
-    return 0;
-}
+SWALLOW_NS_END
+
+#endif//NAME_MANGLING_H

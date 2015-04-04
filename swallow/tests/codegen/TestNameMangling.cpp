@@ -1,4 +1,4 @@
-/* main.cpp --
+/* TestNameMangling.cpp --
  *
  * Copyright (c) 2014, Lex Chou <lex at chou dot it>
  * All rights reserved.
@@ -27,34 +27,25 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include <iostream>
-#include <fcgio.h>
-#include "RequestHandler.h"
+#include "../utils.h"
+#include "semantics/SymbolRegistry.h"
+#include "semantics/Symbol.h"
+#include "semantics/ScopedNodes.h"
+#include "semantics/Type.h"
+#include "common/Errors.h"
+#include "semantics/GlobalScope.h"
+#include "semantics/GenericArgument.h"
+#include "codegen/NameMangling.h"
 
+using namespace Swallow;
 using namespace std;
-int main()
+
+
+TEST(TestNameMangling, For)
 {
-    streambuf* cin_buf = cin.rdbuf();
-    streambuf* cout_buf = cout.rdbuf();
-    streambuf* cerr_buf = cout.rdbuf();
-    FCGX_Request request;
-    FCGX_Init();
-    FCGX_InitRequest(&request, 0, 0);
-    RequestHandler handler;
-
-    while(FCGX_Accept_r(&request) == 0)
-    {
-        fcgi_streambuf fcgi_cin(request.in);
-        fcgi_streambuf fcgi_cout(request.out);
-        fcgi_streambuf fcgi_cerr(request.err);
-        cin.rdbuf(&fcgi_cin);
-        cout.rdbuf(&fcgi_cout);
-        cerr.rdbuf(&fcgi_cerr);
-
-        handler.handle(&request);
-    }
-    cin.rdbuf(cin_buf);
-    cout.rdbuf(cout_buf);
-    cerr.rdbuf(cerr_buf);
-    return 0;
+    SEMANTIC_ANALYZE(L"public var publicVar : Int = 3");
+    SymbolPtr sym = scope->lookup(L"publicVar");
+    ASSERT_NOT_NULL(sym);
+    wstring s = NameMangling::encode(&symbolRegistry, sym);
+    ASSERT_EQ(L"_Tv4main9publicVarSi", s);
 }

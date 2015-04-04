@@ -59,6 +59,14 @@ SET(SEMANTICS_SRC
     semantics/TestAccessControl.cpp
     )
 
+SET(CODEGEN_SRC
+    codegen/TestNameMangling.cpp
+    )
+ADD_EXECUTABLE(TestCodeGen
+    utils.cpp
+    tests.cpp
+    ${CODEGEN_SRC}
+    )
 ADD_EXECUTABLE(TestTokenizer
     utils.cpp
     tests.cpp
@@ -77,9 +85,11 @@ ADD_EXECUTABLE(TestSemantics
 target_link_libraries(TestTokenizer swallow ${GTEST_LIBS})
 target_link_libraries(TestParser swallow ${GTEST_LIBS})
 target_link_libraries(TestSemantics swallow ${GTEST_LIBS})
+target_link_libraries(TestCodeGen swallow ${GTEST_LIBS})
+
 
 enable_testing()
 add_test(NAME test-tokenizer COMMAND TestTokenizer)
 add_test(NAME test-parser COMMAND TestParser)
 add_test(NAME test-semantics COMMAND TestSemantics)
-
+add_test(NAME test-codegen COMMAND TestCodeGen)
