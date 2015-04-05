@@ -126,16 +126,15 @@ void TypeBuilder::addMember(const std::wstring& name, const SymbolPtr& member)
     if(SymbolPlaceHolderPtr s = dynamic_pointer_cast<SymbolPlaceHolder>(member))
     {
         members.insert(std::make_pair(name, member));
-        if(s->hasFlags(SymbolFlagComputedProperty))
-        {
-            //computed property
-            computedProperties.push_back(s);
-        }
-        else if(s->hasFlags(SymbolFlagStoredProperty))
-        {
-            //stored property
-            storedProperties.push_back(s);
-        }
+        //stored property
+        storedProperties.push_back(s);
+        return;
+    }
+    else if(ComputedPropertySymbolPtr p = dynamic_pointer_cast<ComputedPropertySymbol>(member))
+    {
+        members.insert(std::make_pair(name, member));
+        //computed property
+        computedProperties.push_back(s);
         return;
     }
     else if(TypePtr type = dynamic_pointer_cast<Type>(member))

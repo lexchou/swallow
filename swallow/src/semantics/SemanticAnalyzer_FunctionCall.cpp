@@ -402,13 +402,12 @@ SymbolPtr SemanticAnalyzer::visitFunctionCall(bool mutatingSelf, std::vector<Sym
             TypePtr type = func->getType();
             //check mutating function
             updateNodeType(this, node, func);
-            //node->setType(type->getReturnType());
             return func;
         }
-        else if(SymbolPtr symbol = std::dynamic_pointer_cast<SymbolPlaceHolder>(sym))
+        else if(std::dynamic_pointer_cast<SymbolPlaceHolder>(sym) || std::dynamic_pointer_cast<ComputedPropertySymbol>(sym))
         {
             //it must be a function type to call
-            TypePtr type = symbol->getType();
+            TypePtr type = sym->getType();
             assert(type != nullptr);
             if(type->getCategory() != Type::Function)
             {
@@ -416,10 +415,9 @@ SymbolPtr SemanticAnalyzer::visitFunctionCall(bool mutatingSelf, std::vector<Sym
                 abort();
                 return nullptr;
             }
-            calculateFitScore(mutatingSelf, symbol, args, false);
-            //node->setType(symbol->getType()->getReturnType());
-            updateNodeType(this, node, symbol);
-            return symbol;
+            calculateFitScore(mutatingSelf, sym, args, false);
+            updateNodeType(this, node, sym);
+            return sym;
         }
         else
         {

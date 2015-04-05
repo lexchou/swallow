@@ -45,3 +45,8 @@ SymbolPlaceHolder::SymbolPlaceHolder(const std::wstring& name, const TypePtr& ty
 {
     setFlags(flags);
 }
+ComputedPropertySymbol::ComputedPropertySymbol(const std::wstring &name, const TypePtr &type, int flags)
+        :name(name), type(type)
+{
+    setFlags(flags);
+}

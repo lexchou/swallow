@@ -176,7 +176,7 @@ void GlobalScope::initPrimitiveTypes()
         TypePtr RawValue = Type::newType(L"RawValue", Type::Alias);
         type->addMember(RawValue);
 
-        SymbolPlaceHolderPtr rawValue(new SymbolPlaceHolder(L"rawValue", RawValue, SymbolPlaceHolder::R_PROPERTY, SymbolFlagMember | SymbolFlagReadable));
+        ComputedPropertySymbolPtr rawValue(new ComputedPropertySymbol(L"rawValue", RawValue, SymbolFlagMember | SymbolFlagReadable));
         type->addMember(rawValue);
     }
 
@@ -278,7 +278,7 @@ void GlobalScope::initPrimitiveTypes()
         }
 
         {
-            SymbolPlaceHolderPtr isEmpty(new SymbolPlaceHolder(L"isEmpty", _Bool, SymbolPlaceHolder::R_PROPERTY, SymbolFlagMember | SymbolFlagComputedProperty));
+            ComputedPropertySymbolPtr isEmpty(new ComputedPropertySymbol(L"isEmpty", _Bool, SymbolFlagMember | SymbolFlagReadable));
             type->addMember(isEmpty);
         }
     }
@@ -343,7 +343,7 @@ void GlobalScope::initPrimitiveTypes()
             builder->addMember(append);
         }
         {
-            SymbolPlaceHolderPtr count(new SymbolPlaceHolder(L"count", _Int, SymbolPlaceHolder::R_PROPERTY, SymbolFlagInitialized | SymbolFlagReadable | SymbolFlagMember));
+            ComputedPropertySymbolPtr count(new ComputedPropertySymbol(L"count", _Int, SymbolFlagMember | SymbolFlagReadable));
             builder->addMember(count);
         }
         {
@@ -373,11 +373,11 @@ void GlobalScope::initPrimitiveTypes()
         builder->addProtocol(_CollectionType);
         builder->addProtocol(_DictionaryLiteralConvertible);
         {
-            SymbolPlaceHolderPtr count(new SymbolPlaceHolder(L"count", _Int, SymbolPlaceHolder::R_PROPERTY, SymbolFlagInitialized | SymbolFlagReadable | SymbolFlagMember));
+            ComputedPropertySymbolPtr count(new ComputedPropertySymbol(L"count", _Int, SymbolFlagMember | SymbolFlagReadable));
             builder->addMember(count);
         }
         {
-            SymbolPlaceHolderPtr isEmpty(new SymbolPlaceHolder(L"isEmpty", _Bool, SymbolPlaceHolder::R_PROPERTY, SymbolFlagInitialized | SymbolFlagReadable | SymbolFlagMember));
+            ComputedPropertySymbolPtr isEmpty(new ComputedPropertySymbol(L"isEmpty", _Bool, SymbolFlagMember | SymbolFlagReadable));
             builder->addMember(isEmpty);
         }
         {

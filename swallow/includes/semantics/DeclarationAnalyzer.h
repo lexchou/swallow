@@ -142,7 +142,7 @@ private:
     TypePtr defineType(const TypeDeclarationPtr& decl, Type::Category category);
 private:
     void checkForFunctionOverriding(const std::wstring& name, const FunctionSymbolPtr& decl, const DeclarationPtr& node);
-    void checkForPropertyOverriding(const std::wstring& name, const SymbolPlaceHolderPtr& decl, const ComputedPropertyPtr& node);
+    void checkForPropertyOverriding(const std::wstring& name, const ComputedPropertySymbolPtr& decl, const ComputedPropertyPtr& node);
     void checkForSubscriptOverride(const Subscript& subscript, const SubscriptDefPtr& node);
     /*!
      * Parse access level from a set of declaration modifiers

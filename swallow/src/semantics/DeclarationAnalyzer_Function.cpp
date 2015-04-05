@@ -269,7 +269,7 @@ static void registerSelfSuper(const TypePtr& currentType, const TypePtr& current
     }
 }
 
-void DeclarationAnalyzer::checkForPropertyOverriding(const std::wstring& name, const SymbolPlaceHolderPtr& decl, const ComputedPropertyPtr& node)
+void DeclarationAnalyzer::checkForPropertyOverriding(const std::wstring& name, const ComputedPropertySymbolPtr& decl, const ComputedPropertyPtr& node)
 {
     TypePtr type = ctx->currentType;
     if(!type)
@@ -395,7 +395,9 @@ void DeclarationAnalyzer::visitComputedProperty(const ComputedPropertyPtr& node)
         if(node->hasModifier(DeclarationModifiers::Final))
             flags |= SymbolFlagFinal;
 
-        SymbolPlaceHolderPtr symbol(new SymbolPlaceHolder(node->getName(), type, SymbolPlaceHolder::R_PROPERTY, flags));
+        //SymbolPlaceHolderPtr symbol(new SymbolPlaceHolder(node->getName(), type, SymbolPlaceHolder::R_PROPERTY, flags));
+        ComputedPropertySymbolPtr symbol(new ComputedPropertySymbol(node->getName(), type, flags));
+
         symbol->setAccessLevel(parseAccessLevel(node->getModifiers()));
         SymbolScope* scope = symbolRegistry->getCurrentScope();
         scope->addSymbol(symbol);
@@ -421,6 +423,8 @@ void DeclarationAnalyzer::visitComputedProperty(const ComputedPropertyPtr& node)
                 {
                     property->functions.getter = createPropertyAccessor(node, !valueType, getter, L".getter", L"");
                     property->functions.getter->accept(semanticAnalyzer);
+                    assert(property->functions.getter->symbol);
+                    symbol->setGetter(property->functions.getter->symbol);
                 }
 
 
@@ -431,6 +435,8 @@ void DeclarationAnalyzer::visitComputedProperty(const ComputedPropertyPtr& node)
                         arg = node->getSetterName();
                     property->functions.setter = createPropertyAccessor(node, true, setter, L".setter", arg);
                     property->functions.setter->accept(semanticAnalyzer);
+                    assert(property->functions.setter->symbol);
+                    symbol->setSetter(property->functions.setter->symbol);
                 }
 
                 if (didSet)
@@ -440,6 +446,8 @@ void DeclarationAnalyzer::visitComputedProperty(const ComputedPropertyPtr& node)
                         arg = node->getDidSetSetter();
                     property->functions.didSet = createPropertyAccessor(node, true, didSet, L".didSet", arg);
                     property->functions.didSet->accept(semanticAnalyzer);
+                    assert(property->functions.didSet->symbol);
+                    symbol->setDidSet(property->functions.didSet->symbol);
                 }
 
                 if (willSet)
@@ -449,6 +457,8 @@ void DeclarationAnalyzer::visitComputedProperty(const ComputedPropertyPtr& node)
                         arg = node->getWillSetSetter();
                     property->functions.willSet = createPropertyAccessor(node, true, willSet, L".willSet", arg);
                     property->functions.willSet->accept(semanticAnalyzer);
+                    assert(property->functions.willSet->symbol);
+                    symbol->setWillSet(property->functions.willSet->symbol);
                 }
             }
         }

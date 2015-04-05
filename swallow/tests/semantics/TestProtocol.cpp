@@ -184,12 +184,13 @@ TEST(TestProtocol, ReadOnlyComputedProperty)
     TypePtr RandomNumberGenerator;
     ASSERT_NOT_NULL(RandomNumberGenerator = std::dynamic_pointer_cast<Type>(scope->lookup(L"MyProtocol")));
     SymbolPtr sym = RandomNumberGenerator->getDeclaredMember(L"a");
-    SymbolPlaceHolderPtr a;
+    ComputedPropertySymbolPtr a;
 
-    ASSERT_NOT_NULL(a = std::dynamic_pointer_cast<SymbolPlaceHolder>(sym));
+    ASSERT_NOT_NULL(a = std::dynamic_pointer_cast<ComputedPropertySymbol>(sym));
     ASSERT_TRUE(a->hasFlags(SymbolFlagMember));
     ASSERT_TRUE(a->hasFlags(SymbolFlagReadable));
     ASSERT_TRUE(!a->hasFlags(SymbolFlagWritable));
+    ASSERT_NULL(a->getSetter());
 
 }
 TEST(TestProtocol, PropertyRequirement)

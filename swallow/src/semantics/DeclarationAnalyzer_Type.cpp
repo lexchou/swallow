@@ -724,18 +724,17 @@ void DeclarationAnalyzer::verifyProtocolConform(const TypePtr& type, const TypeP
         {
             //type can be ignored
         }
-        else if(SymbolPlaceHolderPtr prop = std::dynamic_pointer_cast<SymbolPlaceHolder>(requirement))
+        else if(dynamic_pointer_cast<ComputedPropertySymbol>(requirement) || dynamic_pointer_cast<SymbolPlaceHolder>(requirement))
         {
             //verify computed properties
-            assert(prop->hasFlags(SymbolFlagMember) && prop->getRole() == SymbolPlaceHolder::R_PROPERTY);
             SymbolPtr sym = type->getMember(entry.first);
-            SymbolPlaceHolderPtr sp = std::dynamic_pointer_cast<SymbolPlaceHolder>(sym);
-            if(!sp)
+            //ComputedPropertySymbolPtr sp = std::dynamic_pointer_cast<ComputedPropertySymbol>(sym);
+            if(!sym)
             {
                 error(type->getReference(), Errors::E_TYPE_DOES_NOT_CONFORM_TO_PROTOCOL_UNIMPLEMENTED_PROPERTY_3, type->getName(), protocol->getName(), entry.first);
             }
-            bool expectedSetter = prop->hasFlags(SymbolFlagWritable);
-            bool actualSetter = sp->hasFlags(SymbolFlagWritable);
+            bool expectedSetter = requirement->hasFlags(SymbolFlagWritable);
+            bool actualSetter = sym->hasFlags(SymbolFlagWritable);
             if(expectedSetter && !actualSetter)
             {
                 error(type->getReference(), Errors::E_TYPE_DOES_NOT_CONFORM_TO_PROTOCOL_UNWRITABLE_PROPERTY_3, type->getName(), protocol->getName(), entry.first);

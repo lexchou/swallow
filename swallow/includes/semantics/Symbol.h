@@ -157,6 +157,44 @@ private:
     Role role;
 };
 
+
+
+typedef std::shared_ptr<SymbolPlaceHolder> SymbolPlaceHolderPtr;
+typedef std::shared_ptr<class FunctionSymbol> FunctionSymbolPtr;
+
+/*!
+ * Represent a symbol that points to a computed property
+ * Actually a computed property may expanded to atmost 5 symbols.
+ */
+class SWALLOW_EXPORT ComputedPropertySymbol : public Symbol
+{
+public:
+    ComputedPropertySymbol(const std::wstring& name, const TypePtr& type, int flags);
+public:
+    virtual const std::wstring& getName() const override {return name;}
+    virtual TypePtr getType() override {return type;}
+
+    const SymbolPlaceHolderPtr& getVariable() const { return variable;}
+    void setVariable(const SymbolPlaceHolderPtr& v) { variable = v;}
+    const FunctionSymbolPtr& getGetter() const { return getter;}
+    void setGetter(const FunctionSymbolPtr& v) { getter = v;}
+    const FunctionSymbolPtr& getSetter() const { return setter;}
+    void setSetter(const FunctionSymbolPtr& v) { setter = v;}
+    const FunctionSymbolPtr& getWillSet() const { return willSet;}
+    void setWillSet(const FunctionSymbolPtr& v) { willSet = v;}
+    const FunctionSymbolPtr& getDidSet() const { return didSet;}
+    void setDidSet(const FunctionSymbolPtr& v) { didSet = v;}
+
+private:
+    std::wstring name;
+    TypePtr type;
+    SymbolPlaceHolderPtr variable;
+    FunctionSymbolPtr getter;
+    FunctionSymbolPtr setter;
+    FunctionSymbolPtr willSet;
+    FunctionSymbolPtr didSet;
+};
+
 SWALLOW_NS_END
 
 
