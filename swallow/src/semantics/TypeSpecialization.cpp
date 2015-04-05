@@ -298,6 +298,9 @@ bool Type::canSpecializeTo(const TypePtr& type, std::map<std::wstring, TypePtr>&
         case GenericParameter://Placeholder for generic type
             assert(0);
             return false;
+        case ProtocolComposition:
+            assert(0);
+            return false;
         case Self:
             auto iter = typeMap.find(L"Self");
             if(iter == typeMap.end())

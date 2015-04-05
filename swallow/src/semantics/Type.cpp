@@ -713,6 +713,9 @@ int Type::compare(const TypePtr &lhs, const TypePtr &rhs)
         case GenericParameter:
             ::compare(lhs->name, rhs->name, result);
             return result;
+        case ProtocolComposition:
+            assert(0 && "Not implemented");
+            return 0;
         case Self:
             return 0;
     }
@@ -792,6 +795,20 @@ std::wstring Type::toString() const
             s<<returnType->toString();
             return s.str();
         }
+        case ProtocolComposition:
+        {
+            wstringstream s;
+            s<<L"protocol<";
+            bool first = true;
+            for(const TypePtr& t : protocols)
+            {
+                if(!first)
+                    s << L", ";
+                first = false;
+                s<<t->toString();
+            }
+            s<<L">";
+        };
         case Self:// A fake place holder, protocol use this type to present the final type that conform to the protocol
             return L"Self";
     }

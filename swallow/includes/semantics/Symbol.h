@@ -139,9 +139,25 @@ class SWALLOW_EXPORT SymbolPlaceHolder : public Symbol
 public:
     enum Role
     {
+        /*!
+         * Local variable declared within a function
+         */
         R_LOCAL_VARIABLE,
+        /*!
+         * Top-level variable, which is declared outside of type/function
+         */
+        R_TOP_LEVEL_VARIABLE,
+        /*!
+         * Variable declared implicitly as self or explicitly in parameter list
+         */
         R_PARAMETER,
+        /*!
+         * Variable accessed across closure environment.
+         */
         R_UPVALUE,
+        /*!
+         * Stored property of a type
+         */
         R_PROPERTY
     };
 public:

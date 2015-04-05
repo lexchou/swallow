@@ -32,9 +32,13 @@
 #include "swallow_conf.h"
 #include "swallow_types.h"
 #include <string>
+#include <sstream>
+#include <map>
 
 SWALLOW_NS_BEGIN
 typedef std::shared_ptr<class Symbol> SymbolPtr;
+typedef std::shared_ptr<class SymbolPlaceHolder> SymbolPlaceHolderPtr;
+typedef std::shared_ptr<class Type> TypePtr;
 class SymbolRegistry;
 
 /*!
@@ -43,7 +47,7 @@ class SymbolRegistry;
 class SWALLOW_EXPORT NameMangling
 {
 public:
-    NameMangling();
+    NameMangling(SymbolRegistry* registry);
     ~NameMangling();
 public:
     /*!
@@ -51,15 +55,25 @@ public:
      * \param name
      * \return nullptr if failed to decode it
      */
-    static SymbolPtr decode(SymbolRegistry* registry, const wchar_t* name);
+    SymbolPtr decode(const wchar_t* name);
 
     /*!
      * \brief Encode a symbol into a mangled name
      * \param symbol
      * \return
      */
-    static std::wstring encode(SymbolRegistry* registry, const SymbolPtr& symbol);
+    std::wstring encode(const SymbolPtr& symbol);
 private:
+    void encodeName(std::wstringstream& out, const wchar_t* name);
+    void encodeName(std::wstringstream& out, const std::wstring& name);
+    void encodeType(std::wstringstream& out, const std::wstring& moduleName, const std::wstring& typeName);
+    void encodeType(std::wstringstream& out, const TypePtr& type);
+    void defineAbbreviation(const TypePtr&, const std::wstring& abbrev);
+    std::wstring encodeVariable(const SymbolPlaceHolderPtr& symbol);
+
+private:
+    std::map<TypePtr, std::wstring> typeToName;
+    std::map<std::wstring, TypePtr> nameToType;
 };
 
 SWALLOW_NS_END

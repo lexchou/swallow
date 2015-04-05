@@ -294,7 +294,15 @@ void DeclarationAnalyzer::visitValueBindings(const ValueBindingsPtr& node)
     if(node->hasModifier(DeclarationModifiers::Lazy))
         flags |= SymbolFlagLazy;
 
-    SymbolPlaceHolder::Role role = (!ctx->currentFunction && ctx->currentType) ? SymbolPlaceHolder::R_PROPERTY : SymbolPlaceHolder::R_LOCAL_VARIABLE;
+    SymbolPlaceHolder::Role role = SymbolPlaceHolder::R_LOCAL_VARIABLE;
+    if(!ctx->currentFunction)
+    {
+        if (ctx->currentType)
+            role = SymbolPlaceHolder::R_PROPERTY;
+        else
+            role = SymbolPlaceHolder::R_TOP_LEVEL_VARIABLE;
+    }
+
     if(role == SymbolPlaceHolder::R_PROPERTY)
         flags |= SymbolFlagStoredProperty;
 

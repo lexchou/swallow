@@ -34,6 +34,8 @@ SET(SWALLOW_SRC
 
     src/tokenizer/Tokenizer.cpp
 
+    src/3rdparty/md5.cpp
+
     src/parser/Parser.cpp
     src/parser/Parser_Expression.cpp
     src/parser/Parser_Statement.cpp

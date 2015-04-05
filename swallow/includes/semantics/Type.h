@@ -112,6 +112,7 @@ public:
         Specialized,
         Enum,
         Protocol,
+        ProtocolComposition,
         Extension,
         Function,
         MetaType,

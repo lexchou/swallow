@@ -41,11 +41,12 @@ using namespace Swallow;
 using namespace std;
 
 
-TEST(TestNameMangling, For)
+TEST(TestNameMangling, Variable)
 {
     SEMANTIC_ANALYZE(L"public var publicVar : Int = 3");
+    NameMangling mangling(&symbolRegistry);
     SymbolPtr sym = scope->lookup(L"publicVar");
     ASSERT_NOT_NULL(sym);
-    wstring s = NameMangling::encode(&symbolRegistry, sym);
+    wstring s = mangling.encode(sym);
     ASSERT_EQ(L"_Tv4main9publicVarSi", s);
 }
