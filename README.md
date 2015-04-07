@@ -3,13 +3,13 @@
 ## Introduction & Disclaimer
 Swallow is an open-sourced implementation of swift compiler, but the current version is only a 'pre-pre-alpha' version which is still undergoing heavy development and testing before its official release, and I can only develop this within my spare time.
 
-I don't garantee the development progress since I need to take care of my pregnant wife and have my own full-time job.
+I don't garantee the development progress since I need to take care of my new born baby and have my own full-time job.
 
-The current version only implemented a rough REPL that even has no code generation, you can see what it can do from the REPL, only some syntax checking and see the result of symbol's type inference.
+The semantic analysis is almost done, swallow provides same syntax checking, type inference and symbol processing like official implementation can do.
 
-The grammar used by the parser based on the earliest official document(released in Jun 2th, 2014), so the syntax sugars after that are not supported, the grammar changes are minor enough so I plan to lower down its priority and mainly work on semantic analysis.
+The current version only implemented a rough REPL that even has no code generation, you can see what it can do from the REPL or a [online demo](https://chou.it/swift/), only some syntax checking and see the result of symbol's type inference.
 
-The current version in semantic analysis can handle function's overloading, operator customization and overloading, customized types(type alias/class/struct/protocol), geneirc and constraint, type inference, variable/constant declaration(including tuple) etcs, it still cannot handle control flow, extension, pattern matching, they'll be done in the following days.
+I'm working on name mangling these days, the related study result are published in [my blog](http://chou.it/2015/04/swift-name-mangling/), an english version will be provided and committed to this repository when it's done. The working on reverse engineering of SIL will be started after name mangling done(including test cases and a full documentation), the documentation of SIL reverse engineering will also be commited to my blog and this repository.
 
 The code generation will be based on LLVM, then we can make use of LLVM's toolchain to build a full ecosystem.
 
@@ -20,19 +20,18 @@ If you want to see the code, you will find I used some simple hacking trick to h
 
 
 # 介绍与免责声明
-Swallow 是一个开源的swift编译器实现，不过目前还没完工，只能当做一个体验版，好多东西都还需要大量的时间去开发，我只能在业余的时间去开发，加之要照顾怀孕的妻子以及有自身的全职工作，因此我不能保证开发进度能很快。
+Swallow 是一个开源的swift编译器实现，不过目前还没完工，只能当做一个体验版，好多东西都还需要大量的时间去开发，我只能在业余的时间去开发，加之要照顾刚出生的小孩，因此我不能保证开发进度能很快。
 
-现在连代码生成都还没来得及弄，现在的版本只提供了一个粗糙仿制的REPL，可以看到现在的进展情况。暂时自带的REPL只能查看一些语法和语义错误，以及查看符号的类型推导的结果。
+语义分析基本完工，能提供和官方编译器一致的语法检查、类型推导和符号处理能力。
 
-目前语法分析参考的是官方文档最早的版本（2014年6月2号发布的版本），因此好多新语法尚不被支持，后来几次的版本，语法改动相对较小，所以我现在的开发重心一直放在语义分析这块，等做得差不多了，我再来回过头增加新的语法糖支持。
+现在连代码生成都还没来得及弄，现在的版本只提供了一个粗糙仿制的REPL，以及一个[在线版的演示](https://chou.it/swift/)，可以看到现在的进展情况。暂时自带的REPL只能查看一些语法和语义错误，以及查看符号的类型推导的结果。
 
-语义分析这块目前的版本能处理函数重载，操作符重载，自定义操作符，类型定义（class/struct/protocol），泛型，泛型约束，类型推导以及变量声明（包括以元组的方式）等，目前的版本还没有处理控制流，extension，模式匹配等，这些将在接下来的日子里陆续完工。
+更新README.md的这段时间，在做Name Mangling，相关研究结果目前放在我[博客上](http://chou.it/2015/04/swift-name-mangling/)，后期会整理并提供双语版提交到这个repository里。Name Mangling弄完后就要开始弄SIL代码生成了，关于SIL的分析文档我也会整理发到博客以及这个repo里。
 
 代码生成这块打算使用LLVM来完成，这样方便利用LLVM的工具链来提供完整的生态系统。
 
 编译器代码本身尽量用测试用例覆盖，但是在做REPL的时候发现好多情况都没考虑到，那些会引起REPL崩溃的代码 将会陆续放入到测试用例中的，后期也打算将[swift-compiler-crashes](https://github.com/practicalswift/swift-compiler-crashes)的代码也集成到测试用例中去。
 
-需要注意的是目前的版本为了方便用单元测试，内建类型（比如Builtin.Word）在语法分析里做了简单的hack来处理，这个错误的做法将在整个编译器能完整的支持标准库的时候再进行修正。
 
 
 # Build instructions
@@ -40,16 +39,9 @@ Clone this repository to your drive:
 ```
 $ git clone https://github.com/lexchou/swallow/
 ```
-Build google-test:
-```
-$ cd swallow/gtest-1.7.0/
-$ ./configure
-$ cmake -G 'Unix Makefiles' .
-$ make
-```
 Build the swallow/repl/test cases:
 ```
-$ cd ..
+$ cd swallow
 $ cmake .
 $ make
 ```
@@ -64,16 +56,9 @@ $ repl/repl
 ```
 $ git clone https://github.com/lexchou/swallow/
 ```
-然后编译： google-test:
-```
-$ cd swallow/gtest-1.7.0/
-$ ./configure
-$ cmake -G 'Unix Makefiles' .
-$ make
-```
 然后编译 swallow/repl/test cases:
 ```
-$ cd ..
+$ cd swallow
 $ cmake .
 $ make
 ```
