@@ -39,6 +39,8 @@ class SWALLOW_EXPORT TypeBuilder : public Type
 public://Constructors
     TypeBuilder(Category category);
 public:
+    void setModuleName(const std::wstring& name);
+
     void setInitializer(const FunctionOverloadedSymbolPtr& initializer);
 
     void setParentType(const TypePtr& type);

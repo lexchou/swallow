@@ -90,7 +90,7 @@ enum FunctionRole
     FunctionRoleEnumCase,
 
 };
-
+typedef std::shared_ptr<class ComputedPropertySymbol> ComputedPropertySymbolPtr;
 class SWALLOW_EXPORT FunctionSymbol : public Symbol
 {
     friend class FunctionOverloadedSymbol;
@@ -103,11 +103,16 @@ public:
     TypePtr getType();
     CodeBlockPtr getDefinition();
     FunctionRole getRole() const { return role;}
+    void setRole(FunctionRole role) { this->role = role;}
+    ComputedPropertySymbolPtr getOwnerProperty() { return ownerProperty;}
+    void setOwnerProperty(const ComputedPropertySymbolPtr& v) { ownerProperty = v;}
+
 private:
     std::wstring name;
     TypePtr type;
     FunctionRole role;
     CodeBlockWeakPtr definition;
+    ComputedPropertySymbolPtr ownerProperty;
 };
 
 

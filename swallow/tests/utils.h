@@ -41,6 +41,7 @@
 #include "semantics/SymbolRegistry.h"
 #include "semantics/GlobalScope.h"
 #include "semantics/ScopedNodes.h"
+#include "codegen/NameMangling.h"
 
 
 #define ASSERT_NOT_NULL(condition) GTEST_TEST_BOOLEAN_((condition) != NULL, #condition, false, true, GTEST_FATAL_FAILURE_)
@@ -78,9 +79,11 @@ struct Tracer
     std::wstring content = s; \
     Swallow::GlobalScope* global = symbolRegistry.getGlobalScope(); (void)global; \
     Swallow::CompilerResults compilerResults; \
+    NameMangling mangling(&symbolRegistry); \
     std::shared_ptr<Swallow::ScopedProgram> root = analyzeStatement(symbolRegistry, compilerResults, __FUNCTION__, content.c_str()); \
     Swallow::SymbolScope* scope = root ? root->getScope() : (Swallow::SymbolScope*)nullptr; \
     (void)scope; \
+    (void)mangling; \
     const CompilerResult* error = nullptr; \
     (void)error;
 

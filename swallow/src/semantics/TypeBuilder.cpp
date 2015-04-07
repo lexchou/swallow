@@ -41,6 +41,10 @@ TypeBuilder::TypeBuilder(Category category)
 :Type(category)
 {
 }
+void TypeBuilder::setModuleName(const std::wstring& name)
+{
+    this->moduleName = name;
+}
 void TypeBuilder::setInitializer(const FunctionOverloadedSymbolPtr& initializer)
 {
     members[L"init"] = initializer;

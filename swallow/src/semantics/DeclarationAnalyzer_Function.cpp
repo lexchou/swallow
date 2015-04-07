@@ -411,55 +411,90 @@ void DeclarationAnalyzer::visitComputedProperty(const ComputedPropertyPtr& node)
         validateDeclarationModifiers(node);
 
         SCOPED_SET(ctx->flags, (ctx->flags & (~SemanticContext::FLAG_PROCESS_IMPLEMENTATION)) | SemanticContext::FLAG_PROCESS_DECLARATION);
+        bool isProtocol = false, valueType = false;
         if(ctx->currentType)
         {
             Type::Category currentCategory = ctx->currentType->getCategory();
-            bool isProtocol = currentCategory == Type::Protocol;
-            //create function for setter/getter/willSet/didSet
-            if (!isProtocol)
+            isProtocol = currentCategory == Type::Protocol;
+            valueType = currentCategory == Type::Enum || currentCategory == Type::Struct;
+        }
+        //create function for setter/getter/willSet/didSet
+        if (!isProtocol)
+        {
+            bool observer = didSet || willSet;
+            if(observer)
             {
-                bool valueType = currentCategory == Type::Enum || currentCategory == Type::Struct;
-                if (getter)
-                {
-                    property->functions.getter = createPropertyAccessor(node, !valueType, getter, L".getter", L"");
-                    property->functions.getter->accept(semanticAnalyzer);
-                    assert(property->functions.getter->symbol);
-                    symbol->setGetter(property->functions.getter->symbol);
-                }
+                NodeFactory* factory = node->getNodeFactory();
+                getter = factory->createCodeBlock(*node->getSourceInfo());
+                setter = factory->createCodeBlock(*node->getSourceInfo());
+                node->setGetter(getter);
+                node->setSetter(setter);
+                //TODO: make implementation for getter/setter
+                IdentifierPtr id = factory->createIdentifier(*node->getSourceInfo());
+                id->setIdentifier(symbol->getName());//TODO: make it points to internal generated field
+                id->setType(symbol->getType());
+                ReturnStatementPtr ret = factory->createReturn(*node->getSourceInfo());
+                ret->setExpression(id);
+                getter->addStatement(ret);
+            }
+            if (getter)
+            {
+                property->functions.getter = createPropertyAccessor(node, !valueType, getter, L".getter", L"");
+                property->functions.getter->accept(semanticAnalyzer);
+                FunctionSymbolPtr func;
+                assert(func = property->functions.getter->symbol);
+                symbol->setGetter(func);
+                func->setFlags(SymbolFlagAccessor);
+                func->setOwnerProperty(symbol);
+                func->setRole(FunctionRoleGetter);
+            }
 
 
-                if (setter)// || didSet || willSet)
-                {
-                    std::wstring arg = L"newValue";
-                    if (!node->getSetterName().empty())
-                        arg = node->getSetterName();
-                    property->functions.setter = createPropertyAccessor(node, true, setter, L".setter", arg);
-                    property->functions.setter->accept(semanticAnalyzer);
-                    assert(property->functions.setter->symbol);
-                    symbol->setSetter(property->functions.setter->symbol);
-                }
+            if (setter)
+            {
+                std::wstring arg = L"newValue";
+                if (!node->getSetterName().empty())
+                    arg = node->getSetterName();
+                property->functions.setter = createPropertyAccessor(node, true, setter, L".setter", arg);
+                property->functions.setter->accept(semanticAnalyzer);
 
-                if (didSet)
-                {
-                    std::wstring arg = L"oldValue";
-                    if (!node->getDidSetSetter().empty())
-                        arg = node->getDidSetSetter();
-                    property->functions.didSet = createPropertyAccessor(node, true, didSet, L".didSet", arg);
-                    property->functions.didSet->accept(semanticAnalyzer);
-                    assert(property->functions.didSet->symbol);
-                    symbol->setDidSet(property->functions.didSet->symbol);
-                }
+                FunctionSymbolPtr func;
+                assert(func = property->functions.setter->symbol);
+                symbol->setSetter(func);
+                func->setFlags(SymbolFlagAccessor);
+                func->setOwnerProperty(symbol);
+                func->setRole(FunctionRoleSetter);
+            }
 
-                if (willSet)
-                {
-                    std::wstring arg = L"newValue";
-                    if (!node->getWillSetSetter().empty())
-                        arg = node->getWillSetSetter();
-                    property->functions.willSet = createPropertyAccessor(node, true, willSet, L".willSet", arg);
-                    property->functions.willSet->accept(semanticAnalyzer);
-                    assert(property->functions.willSet->symbol);
-                    symbol->setWillSet(property->functions.willSet->symbol);
-                }
+            if (didSet)
+            {
+                std::wstring arg = L"oldValue";
+                if (!node->getDidSetSetter().empty())
+                    arg = node->getDidSetSetter();
+                property->functions.didSet = createPropertyAccessor(node, true, didSet, L".didSet", arg);
+                property->functions.didSet->accept(semanticAnalyzer);
+
+                FunctionSymbolPtr func;
+                assert(func = property->functions.didSet->symbol);
+                symbol->setDidSet(func);
+                func->setFlags(SymbolFlagAccessor);
+                func->setOwnerProperty(symbol);
+                func->setRole(FunctionRoleDidSet);
+            }
+
+            if (willSet)
+            {
+                std::wstring arg = L"newValue";
+                if (!node->getWillSetSetter().empty())
+                    arg = node->getWillSetSetter();
+                property->functions.willSet = createPropertyAccessor(node, true, willSet, L".willSet", arg);
+                property->functions.willSet->accept(semanticAnalyzer);
+                FunctionSymbolPtr func;
+                assert(func = property->functions.willSet->symbol);
+                symbol->setWillSet(func);
+                func->setFlags(SymbolFlagAccessor);
+                func->setOwnerProperty(symbol);
+                func->setRole(FunctionRoleWillSet);
             }
         }
 

@@ -152,7 +152,9 @@ void GlobalScope::initPrimitiveTypes()
 {
     //Protocols
     TypeBuilderPtr type;
-    #define DECLARE_TYPE(T, N)  _##N = type = static_pointer_cast<TypeBuilder>(Type::newType(L###N, Type::T)); addSymbol(_##N); type->setAccessLevel(AccessLevelPublic);
+    std::wstring moduleName = L"Swift";
+    #define DECLARE_TYPE(T, N)  _##N = type = static_pointer_cast<TypeBuilder>(Type::newType(L###N, Type::T)); addSymbol(_##N); type->setAccessLevel(AccessLevelPublic); type->setModuleName(moduleName);
+    #define ALIAS(NewType, OldType) addSymbol(L###NewType, _##OldType);
     #define IMPLEMENTS(P) type->addProtocol(_##P);
 
     DECLARE_TYPE(Protocol, BooleanType);
@@ -256,10 +258,19 @@ void GlobalScope::initPrimitiveTypes()
     IMPLEMENTS(IntegerLiteralConvertible);
     IMPLEMENTS(FloatLiteralConvertible);
 
+    DECLARE_TYPE(Struct, Float80);
+    IMPLEMENTS(FloatingPointType);
+    IMPLEMENTS(IntegerLiteralConvertible);
+    IMPLEMENTS(FloatLiteralConvertible);
+
     DECLARE_TYPE(Struct, Double);
     IMPLEMENTS(FloatingPointType);
     IMPLEMENTS(IntegerLiteralConvertible);
     IMPLEMENTS(FloatLiteralConvertible);
+
+    ALIAS(Float32, Float);
+    ALIAS(Float64, Double);
+
 
     DECLARE_TYPE(Struct, String);
     IMPLEMENTS(StringLiteralConvertible);
@@ -285,7 +296,7 @@ void GlobalScope::initPrimitiveTypes()
 
 
 
-    DECLARE_TYPE(Struct, Character);
+    DECLARE_TYPE(Enum, Character);
     IMPLEMENTS(ExtendedGraphemeClusterLiteralConvertible);
     IMPLEMENTS(Equatable);
     IMPLEMENTS(Hashable);
@@ -781,6 +792,7 @@ IMPLEMENT_GETTER(UInt32);
 IMPLEMENT_GETTER(Int64);
 IMPLEMENT_GETTER(UInt64);
 IMPLEMENT_GETTER(Float);
+IMPLEMENT_GETTER(Float80);
 IMPLEMENT_GETTER(Double);
 IMPLEMENT_GETTER(Array);
 IMPLEMENT_GETTER(Dictionary);

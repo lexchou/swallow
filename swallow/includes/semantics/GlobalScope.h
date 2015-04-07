@@ -107,6 +107,7 @@ public:
     TypePtr Int64() const;
     TypePtr UInt64() const;
     TypePtr Float() const;
+    TypePtr Float80() const;
     TypePtr Double() const;
     TypePtr Array() const;
     TypePtr Dictionary() const;
@@ -151,6 +152,7 @@ private:
     TypePtr _Int64;
     TypePtr _UInt64;
     TypePtr _Float;
+    TypePtr _Float80;
     TypePtr _Double;
     TypePtr _Array;
     TypePtr _Dictionary;

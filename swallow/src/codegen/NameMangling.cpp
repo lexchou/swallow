@@ -11,6 +11,25 @@
 
 USE_SWALLOW_NS
 using namespace std;
+
+/*!
+ * Context data used during encoding/decoding
+ */
+struct ManglingContext
+{
+    wstring currentModule;
+    vector<wstring> types;
+
+    ManglingContext(const wstring& module)
+            :currentModule(module)
+    {
+
+    }
+};
+
+
+
+
 NameMangling::NameMangling(SymbolRegistry *registry)
 {
     GlobalScope* g = registry->getGlobalScope();
@@ -123,6 +142,7 @@ void NameMangling::encodeType(wstringstream& out, const TypePtr& type)
         case Type::Protocol:
             out<<L"P";
             encodeType(out, type->getModuleName(), type->getName());
+            out<<L"_";
             break;
         case Type::Struct:
             out<<L"V";
@@ -145,6 +165,7 @@ void NameMangling::encodeType(wstringstream& out, const TypePtr& type)
                 encodeType(out, param.type);
             }
             out<<L"_";
+            encodeType(out, type->getReturnType());
             break;
         case Type::ProtocolComposition:
             out<<L"P";
@@ -164,22 +185,28 @@ void NameMangling::encodeType(wstringstream& out, const TypePtr& type)
  */
 std::wstring NameMangling::encodeVariable(const SymbolPlaceHolderPtr& symbol)
 {
-    if(symbol->getRole() != SymbolPlaceHolder::R_TOP_LEVEL_VARIABLE)
-        return L"";//Non top-level variable will not be encoded.
-    wstringstream out;
-    out<<L"_T";//mark for swift symbol
-    out<<L"v";//mark for variable
-    wstring moduleName = L"main";
-    encodeName(out, moduleName);
-    if(symbol->getAccessLevel() == AccessLevelPrivate)
+    return L"";
+}
+
+static void encodeTypeKind(wostream& out, const TypePtr& type)
+{
+    switch(type->getCategory())
     {
-        out<<L"P33_";
-        string s = md5(SwallowUtils::toString(moduleName));
-        out<<SwallowUtils::toWString(s);
+        case Type::Enum:
+            out<<L"O";
+            break;
+        case Type::Struct:
+            out<<L"V";
+            break;
+        case Type::Protocol:
+            out<<L"P";
+            break;
+        case Type::Class:
+            out<<L"C";
+            break;
+        default:
+            break;
     }
-    encodeName(out, symbol->getName());
-    encodeType(out, symbol->getType());
-    return out.str();
 }
 
 /*!
@@ -189,10 +216,66 @@ std::wstring NameMangling::encodeVariable(const SymbolPlaceHolderPtr& symbol)
  */
 std::wstring NameMangling::encode(const SymbolPtr& symbol)
 {
+    wstring moduleName = L"main";
+    wstringstream out;
+    ManglingContext context(moduleName);
+    out<<L"_T";//mark for swift symbol
     if(SymbolPlaceHolderPtr sym = dynamic_pointer_cast<SymbolPlaceHolder>(symbol))
     {
-        return encodeVariable(sym);
+        if(!sym->hasFlags(SymbolFlagStatic) && sym->getRole() != SymbolPlaceHolder::R_TOP_LEVEL_VARIABLE)
+            return L"";//Non top-level variable will not be encoded.
+        out<<L"v";//mark for variable
+    }
+    else if(FunctionSymbolPtr func = dynamic_pointer_cast<FunctionSymbol>(symbol))
+    {
+        out<<L"F";//mark for function
+    }
+    else
+        return L"";//unsupported symbol type
+    if(symbol->getDeclaringType())
+        encodeTypeKind(out, symbol->getDeclaringType());
+
+    encodeName(out, moduleName);
+    if(symbol->getDeclaringType())
+        encodeName(out, symbol->getDeclaringType()->getName());
+
+    wstring symbolName = symbol->getName();
+    TypePtr symbolType = symbol->getType();
+    if(symbol->hasFlags(SymbolFlagAccessor))
+    {
+        //it's an accessor of a computed property
+        FunctionSymbolPtr accessor = dynamic_pointer_cast<FunctionSymbol>(symbol);
+        assert(accessor != nullptr && accessor->getOwnerProperty() != nullptr);
+        symbolName = accessor->getOwnerProperty()->getName();
+        FunctionRole role = accessor->getRole();
+        symbolType = accessor->getOwnerProperty()->getType();
+        if(role == FunctionRoleGetter)
+            out << L"g";
+        else if(role == FunctionRoleSetter)
+            out << L"s";
+        else if(role == FunctionRoleWillSet)
+            out << L"w";
+        else if(role == FunctionRoleDidSet)
+            out << L"W";
+        else
+            assert(0 && "Invalid role for a property accessor");
     }
 
-    return L"";
+    if(symbol->getAccessLevel() == AccessLevelPrivate)
+    {
+        out<<L"P33_";
+        string s = md5(SwallowUtils::toString(moduleName));
+        out<<SwallowUtils::toWString(s);
+    }
+    encodeName(out, symbolName);
+    if(!symbol->hasFlags(SymbolFlagAccessor) && symbol->getDeclaringType() && dynamic_pointer_cast<FunctionSymbol>(symbol))
+    {
+        //generate self for instance method
+        if(symbol->hasFlags(SymbolFlagStatic))
+            out<<L"fMS0";
+        else
+            out<<L"fS0";
+    }
+    encodeType(out, symbolType);
+    return out.str();
 }
