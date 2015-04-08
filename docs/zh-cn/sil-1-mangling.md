@@ -112,6 +112,26 @@ func composition(a : protocol<Printable, DebugPrintable>)
 {
     //_TF4main11compositionFPSs14DebugPrintableSs9Printable_T_
 }
+
+class OuterClass
+{
+    class Nested
+    {
+        class Inner
+        {
+            func innerFunc() //_TFCCC4main10OuterClass6Nested5Inner9innerFuncfS2_FT_T_
+            {
+                
+            }
+        }
+    }
+}
+
+func constraint<A : protocol<MyProtocol, Reflectable>, B : RawRepresentable where B.RawValue == Int>(arg : (A, B)) // _TF4main10constraintUSs11ReflectableS_10MyProtocol_Ss16RawRepresentable__FTQ_Q0__T_
+{
+    
+}
+
 ```
 从中不难看出，自带的几个『基本』类型极其对应的缩写形式为：
 
@@ -133,7 +153,7 @@ ImplicitlyUnwrappedOptional | SQ
 
 对比之前的规律，不难总结：
 
-- O 表示Enum, V表示Struct， C表示Class， P表示Protocol
+- O 表示Enum, V表示Struct， C表示Class， P表示Protocol，重复多次用来表明嵌套类型，比如 _TFCCC4main10OuterClass6Nested5Inner9innerFuncfS2_FT_T_ 出现了三次C，表示 OuterClass/Nested/Inner 都是Class
 - S如果后面跟了_ 表示后面是当前模块内的类型
 - Ss表示后面的一个类型名是来自Swift模块内的，即标准库类型
 - S后面跟其他字母则按上面的表来反查
@@ -143,7 +163,7 @@ ImplicitlyUnwrappedOptional | SQ
 - F 表示函数类型，后面跟一个类型Tuple，然后一个返回值，这个没有_结尾标志
 - P 表示Protocol Composition, 后面跟protocol列表，然后以_结尾
 - 对于单个的protocol类型，也是当做Protocol Composition处理的。即 `var a : MyProtocol` 完全等价于 `var a : protocol<MyProtocol>`，因此单个Protocol在编码的时候也会有_结尾
-- U 表示定义泛型参数，后面跟n+1个下划线_，表示有n个泛型参数
+- U 表示定义泛型参数，后面跟n+1个下划线_，表示有n个泛型参数，下划线前面有一个可选的constraint，接一组Protocol名列表
 - Q 后面用来引用泛型参数，用Q_表示第0个，Qn_表示第n+1个
 - 缩写以外的类型则按符号的编码规则进行编码
 
@@ -232,11 +252,6 @@ func dec(a : Int) -> Int //_TF4main3decFSiSi
     return a - 1;
 }
 
-func constraint<A : protocol<MyProtocol, Reflectable>, B : RawRepresentable where B.RawValue == Int>(arg : (A, B)) // _TF4main10constraintUSs11ReflectableS_10MyProtocol_Ss16RawRepresentable__FTQ_Q0__T_
-{
-    
-}
-
 func 他们为什么不说中文(a : Int) -> Int //_TF4mainX24ihqwcrbEcvIaIdqgAFGpqjyeFSiSi
 {
     return a - 1;
@@ -260,7 +275,6 @@ func 他们为什么不说中文(a : Int) -> Int //_TF4mainX24ihqwcrbEcvIaIdqgAF
 - conveniene 只是语义阶段有意义，不影响符号名生成
 - d 表示 deinit, D 表示deallocating init
 - X 表示进行了punycode编码的名字，详细描述参考 [RFC 3492](http://www.ietf.org/rfc/rfc3492.txt)。Apple在这个基础之上进行了修改，比如上面例子中的『他们为什么不说中文』编码后是ihqwcrbEcvIaIdqgAFGpqjye，而按照RFC 3492标准编码后应该是ihqwcrb4cv8a8dqg056pqjye，有一些差异还需后续研究。
-- 这里可以发现关于泛型参数定义比前面的更加复杂了一点，U后面每个泛型参数的定义不再是一个简单的_，而是 『Protocol名列表_』了，
 
 关于M和R需要注明的是，对于静态函数而言，M出现在第一个Curried Function的第一个参数上，参考代码：
 ```
