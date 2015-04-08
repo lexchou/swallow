@@ -55,6 +55,7 @@ func foo()
 
 
 # 类型的Mangling 规则
+
 测试代码与其对应的符号名：
 ```
 func test(a : UInt8, b : UInt16, c : UInt32, d : UInt64, e: UInt)
@@ -142,7 +143,7 @@ ImplicitlyUnwrappedOptional | SQ
 - F 表示函数类型，后面跟一个类型Tuple，然后一个返回值，这个没有_结尾标志
 - P 表示Protocol Composition, 后面跟protocol列表，然后以_结尾
 - 对于单个的protocol类型，也是当做Protocol Composition处理的。即 `var a : MyProtocol` 完全等价于 `var a : protocol<MyProtocol>`，因此单个Protocol在编码的时候也会有_结尾
-- U 表示定义泛型参数，后面跟n+1个下划线_，表示有n个泛型参数，泛型引用参考类型Mangling规则
+- U 表示定义泛型参数，后面跟n+1个下划线_，表示有n个泛型参数
 - Q 后面用来引用泛型参数，用Q_表示第0个，Qn_表示第n+1个
 - 缩写以外的类型则按符号的编码规则进行编码
 
@@ -152,6 +153,7 @@ ImplicitlyUnwrappedOptional | SQ
 按照以上规则，可以很容易的看出 `_Tv4main1bGOS_1aSiGOS_2acSiSi__` 可以分解为 `_Tv 4main 1b GOS_1a<Si, GOS_2ac<Si,Si>_>_` 即 `var b : a<Int, ac<Int, Int>>`。
 
 ## Method 的 Mangling 规则
+
 测试代码与对应的SIL符号：
 ```
 struct SSSS
@@ -230,6 +232,10 @@ func dec(a : Int) -> Int //_TF4main3decFSiSi
     return a - 1;
 }
 
+func constraint<A : protocol<MyProtocol, Reflectable>, B : RawRepresentable where B.RawValue == Int>(arg : (A, B)) // _TF4main10constraintUSs11ReflectableS_10MyProtocol_Ss16RawRepresentable__FTQ_Q0__T_
+{
+    
+}
 
 func 他们为什么不说中文(a : Int) -> Int //_TF4mainX24ihqwcrbEcvIaIdqgAFGpqjyeFSiSi
 {
@@ -250,11 +256,11 @@ func 他们为什么不说中文(a : Int) -> Int //_TF4mainX24ihqwcrbEcvIaIdqgAF
 - R 表示参数是一个reference
 - C 表示是class的成员
 - 类名后的c 表示是init， C 表示是allocating init
-- GSq 表示返回Optional的Failable Initializer, GSQ 表示ImplicitlyUnwrappedOptional的Failable initializer
+- GSqS0 表示返回Optional<Self>的Failable Initializer, GSQS0 表示ImplicitlyUnwrappedOptional<Self>的Failable initializer，这个在类型一节已经说了。
 - conveniene 只是语义阶段有意义，不影响符号名生成
 - d 表示 deinit, D 表示deallocating init
 - X 表示进行了punycode编码的名字，详细描述参考 [RFC 3492](http://www.ietf.org/rfc/rfc3492.txt)。Apple在这个基础之上进行了修改，比如上面例子中的『他们为什么不说中文』编码后是ihqwcrbEcvIaIdqgAFGpqjye，而按照RFC 3492标准编码后应该是ihqwcrb4cv8a8dqg056pqjye，有一些差异还需后续研究。
-
+- 这里可以发现关于泛型参数定义比前面的更加复杂了一点，U后面每个泛型参数的定义不再是一个简单的_，而是 『Protocol名列表_』了，
 
 关于M和R需要注明的是，对于静态函数而言，M出现在第一个Curried Function的第一个参数上，参考代码：
 ```
@@ -371,6 +377,7 @@ postfix func !%^&*|~/<>?(a : Int) -> Int // _TF4mainoP11nrxamotdlgqFSiSi
 - P 表示后缀函数
 
 操作符编码关系表：
+
 操作符| 缩写
 ---|---
 + | p
@@ -407,10 +414,16 @@ extension Int : MyProtocol
 }
 ```
 SIL结果中得知可以看到这个函数生成的签名里有个E和之前说到的标志都不一样，那明显就是Extension的缩写了。除此之外签名的其他地方编码都是之前描述过的。
-除了这个以外，编译器还额外的生成了一个protocol witness，关于protocol witness，我后面会在深入SIL系列中单独开篇细讲，这里就只做符合主题的事情，即描述name mangling规则。从名字可以看到，_T后面有个TW，W很容易猜到是Witness缩写，T还不太清楚，不符合之前描述的规则。后面就是extension所扩展的具体的类型，再后面接的Protocol名，FS0_5asInt 这个说这个函数是Int的 MyProtocol.asInt的witness，S0指向的第0个类型引用。US0___ 这是一个泛型定义，第一个S0_ 表示第一个泛型参数必须符合S0这个protocol，最后的fRQPS0_FT_Si则是这个函数的类型签名。 R即之前提到的reference，说明这是个inout参数，Q这里是表示泛型类型，不过表示的是.Self类型，后面接了S0表示是第0个类型引用的.Self类型，即这个参数可以描述为 inout a : MyProtocol.Self， P表示什么还不太清楚，通过实验发现去掉P不影响swift-demangle的解码结果。
-疑点1： _T后面的T不太清楚表示什么
-疑点2：这里的泛型函数只有一个泛型参数，但是却有三个下划线，按照之前的分析应该只有2个的，可能是和generic constraint有关，需要进一步分析
-疑点3：curried function参数列表里的P不知道表示什么意思。
+
+除了这个以外，编译器还额外的生成了一个protocol witness，关于protocol witness，我后面会在深入SIL系列中单独开篇细讲，这里就只做符合主题的事情，即描述name mangling规则。
+
+从名字可以看到，_T后面有个TW，W很容易猜到是Witness缩写，T还不太清楚，不符合之前描述的规则。后面就是extension所扩展的具体的类型，再后面接的Protocol名，FS0_5asInt 这个说这个函数是Int的 MyProtocol.asInt的witness，S0指向的第0个类型引用。US0___ 这是一个泛型定义，第一个S0_ 表示第一个泛型参数必须符合S0这个protocol，最后的fRQPS0_FT_Si则是这个函数的类型签名。 R即之前提到的reference，说明这是个inout参数，Q这里是表示泛型类型，不过表示的是.Self类型，后面接了S0表示是第0个类型引用的.Self类型，即这个参数可以描述为 inout a : MyProtocol.Self， P表示什么还不太清楚，通过实验发现去掉P不影响swift-demangle的解码结果。
+
+有这里有三条疑点，但不妨碍我在swallow里做test case：
+
+1. _T后面的T不太清楚表示什么
+2. 这里的泛型函数只有一个泛型参数，但是却有三个下划线，按照之前的分析应该只有2个的，可能是和generic constraint有关，需要进一步分析
+3. curried function参数列表里的P不知道表示什么意思。
 
 # 最终总结
 从上面的分析，可以总结出符号构成规则：  
