@@ -1,3 +1,5 @@
+# Swift SIL Internal - Name Mangling
+
 Gwynne Raskind did a same research just after swift released：[Friday Q&A 2014-08-08: Swift Name Mangling](https://mikeash.com/pyblog/friday-qa-2014-08-15-swift-name-mangling.html), since Gwynne's research was based on a beta version of swift, swift got some minor updates later, I decided to make a same research for my open source project swallow and will cover the aspects that Gwynne was missing(e.g. generic specialization, operator overloading).
 
 ## Mangling rule for Property
@@ -47,7 +49,7 @@ And we can infer the rules from these symbols:
 - Full qualified name was encoded by each part, each part has a prefix of its length, no \0 as terminator
 - g means it is a property getter, and s is a setter
 - w means its a willSet accessor, W represents a didSet accessor
-- Access modifier *Public* and *Internal* only make sense in semantic stage, but *Private* will be encoded with as 'P'
+- Access modifier *Public* and *Internal* only make sense in semantic stage, but *Private* will be encoded as 'P'
 - Private property will generatea a '_' with the hash of module name
 - a means its a mutable addressor, the both two static properties in the sample code exists an addressor, according to SIL, it's a function which will return the variable'
 s address, I'll analysis it in the following SIL research reports.
@@ -55,7 +57,7 @@ s address, I'll analysis it in the following SIL research reports.
 
 
 
-# Rules for type mangling
+## Rules for type mangling
 
 Test code and their symbol names:
 ```
@@ -360,7 +362,7 @@ static func B(arg : Int) -> ENUM
 
 
 
-# Rules for operator overloadings
+## Rules for operator overloadings
 Code:
 ```
 
@@ -409,7 +411,7 @@ Operator | Abbreviation
 ? | q
 
 
-# Mangling rules for Protocol Witness table
+## Mangling rules for Protocol Witness table
 Extension is a quite sweet feature in swift, though it's not invented by swift, there'are similar concepts in other languages like trait in scala and extension in C#, but swift allows to implement a protocol for an existing type which C#'s extension doesn't, interface in golang is much more like extension in swift in this way, only an explicit declaration is needed. 
 
 Let's see this:
@@ -439,10 +441,13 @@ There's 3 questions here, but it won't stop me from writing test cases for my ow
 2. There's only one generic parameter, but there's 3 underscores, there should be two generic parameters according to previous research.
 3. Not sure what the Q and P means in the curried function parameter list.
 
-# Summary
+## Summary
 According to the previous researches, we know a symbol is usually composed by:
+
 **_T** *symbol type (F/v)*  **Owner type(C/O/P/V/E)?**  *Module name* **Type name?**  *Accessor type(g getter,s setter, w willSet W didSet)?*  **(P _ module hash)?**  *Symbol name* **Symbol type**
+
 Pseudocode for encoding:
+
 ```
 print "_T";
 print symbol.kind;
@@ -455,7 +460,7 @@ print encode(symbol.name);
 print encodeType(symbol.type);
 ```
 
-# Questions
+## Questions
 There's two places I can't make it exactly the same like official implementation.
 
 1. The hash calculation for private symbol, I thought the hash function should be something like `h(x)=md5(f(x))`, then I can know what f(x) is only when decrypted the md5 result by brute force, then I tried to use GPU to decrypt it, finally failed after two day's of calculating, so I think the hash function could be something like `h(x)=g(md5(f(x)))`.
