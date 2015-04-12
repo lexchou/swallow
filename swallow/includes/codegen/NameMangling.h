@@ -38,6 +38,7 @@
 SWALLOW_NS_BEGIN
 typedef std::shared_ptr<class Symbol> SymbolPtr;
 typedef std::shared_ptr<class SymbolPlaceHolder> SymbolPlaceHolderPtr;
+typedef std::shared_ptr<class GenericDefinition> GenericDefinitionPtr;
 typedef std::shared_ptr<class Type> TypePtr;
 class SymbolRegistry;
 struct ManglingContext;
@@ -65,16 +66,16 @@ public:
      */
     std::wstring encode(const SymbolPtr& symbol);
 private:
-    void encodeName(std::wstringstream& out, const wchar_t* name);
-    void encodeName(std::wstringstream& out, const std::wstring& name);
     void encodeType(std::wstringstream& out, const std::wstring& moduleName, const std::wstring& typeName);
-    void encodeType(ManglingContext& out, const TypePtr& type);
+    void encodeType(ManglingContext& out, const TypePtr& type, bool wrapCollections = true);
     void defineAbbreviation(const TypePtr&, const std::wstring& abbrev);
     std::wstring encodeVariable(const SymbolPlaceHolderPtr& symbol);
 
 private:
     std::map<TypePtr, std::wstring> typeToName;
     std::map<std::wstring, TypePtr> nameToType;
+
+    void encodeGeneric(ManglingContext &context, const GenericDefinitionPtr &def);
 };
 
 SWALLOW_NS_END

@@ -228,6 +228,8 @@ struct SWALLOW_EXPORT Errors
         E_REQUIRED_MODIFIER_MUST_BE_PRESENT_ON_ALL_OVERRIDES_OF_A_REQUIRED_INITIALIZER,//'required' modifier must be present on all overrides of a required initializer
 
         E_DUPLICATE_MODIFIER,//Duplicate modifier
+        E_NON_PROTOCOL_TYPE_A_CANNOT_BE_USED_WITHIN_PROTOCOL_COMPOSITION_1,//Non-protocol type '%0' cannot be used within 'protocol<...>'
+
 
         E_A_MUST_BE_DECLARED_B_BECAUSE_ITS_C_USES_A_D_TYPE_4,//Method must be declared private because its result uses a private type
         E_A_CANNOT_BE_DECLARED_B_BECAUSE_ITS_C_USES_A_D_TYPE_4,//Property cannot be declared public because its type uses a private type

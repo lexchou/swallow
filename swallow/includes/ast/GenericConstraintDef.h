@@ -41,7 +41,7 @@ public:
     enum ConstraintType
     {
         EqualsTo,
-        DerivedFrom
+        AssignableTo
     };
 public:
     GenericConstraintDef();
@@ -53,13 +53,13 @@ public:
     void setConstraintType(ConstraintType constraint);
     ConstraintType getConstraintType()const;
     
-    void setExpectedType(const TypeIdentifierPtr& expectedIdentifier);
-    TypeIdentifierPtr getExpectedType()const;
+    void setExpectedType(const TypeNodePtr& expectedIdentifier);
+    TypeNodePtr getExpectedType()const;
     
 private:
     ConstraintType type;
     TypeIdentifierPtr identifier;
-    TypeIdentifierPtr expectedType;
+    TypeNodePtr expectedType;
 };
 
 SWALLOW_NS_END

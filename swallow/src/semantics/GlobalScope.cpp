@@ -271,6 +271,8 @@ void GlobalScope::initPrimitiveTypes()
     ALIAS(Float32, Float);
     ALIAS(Float64, Double);
 
+    DECLARE_TYPE(Protocol, Printable);
+    DECLARE_TYPE(Protocol, DebugPrintable);
 
     DECLARE_TYPE(Struct, String);
     IMPLEMENTS(StringLiteralConvertible);
@@ -311,6 +313,7 @@ void GlobalScope::initPrimitiveTypes()
         generic->add(L"T", T);
         _ImplicitlyUnwrappedOptional = Type::newType(L"ImplicitlyUnwrappedOptional", Type::Enum, nullptr, nullptr, std::vector<TypePtr>(), generic);
         type = static_pointer_cast<TypeBuilder>(_ImplicitlyUnwrappedOptional);
+        type->setModuleName(moduleName);
         type->addProtocol(_NilLiteralConvertible);
 
         type->addEnumCase(L"None", _Void);
@@ -325,6 +328,7 @@ void GlobalScope::initPrimitiveTypes()
         generic->add(L"T", T);
         _Optional = Type::newType(L"Optional", Type::Enum, nullptr, nullptr, std::vector<TypePtr>(), generic);
         type = static_pointer_cast<TypeBuilder>(_Optional);
+        type->setModuleName(moduleName);
         type->addProtocol(_NilLiteralConvertible);
 
         type->addEnumCase(L"None", _Void);
@@ -338,6 +342,7 @@ void GlobalScope::initPrimitiveTypes()
         generic->add(L"T", T);
         _Array = Type::newType(L"Array", Type::Struct, nullptr, nullptr, std::vector<TypePtr>(), generic);
         TypeBuilderPtr builder = static_pointer_cast<TypeBuilder>(_Array);
+        builder->setModuleName(moduleName);
         builder->addProtocol(_CollectionType);
         {
             std::vector<Parameter> params = {Parameter(T)};
@@ -381,6 +386,7 @@ void GlobalScope::initPrimitiveTypes()
         generic->add(L"Value", Value);
         _Dictionary = Type::newType(L"Dictionary", Type::Struct, nullptr, nullptr, std::vector<TypePtr>(), generic);
         TypeBuilderPtr builder = static_pointer_cast<TypeBuilder>(_Dictionary);
+        builder->setModuleName(moduleName);
         builder->addProtocol(_CollectionType);
         builder->addProtocol(_DictionaryLiteralConvertible);
         {
@@ -820,3 +826,5 @@ IMPLEMENT_GETTER(UnicodeScalarLiteralConvertible);
 IMPLEMENT_GETTER(ExtendedGraphemeClusterLiteralConvertible);
 IMPLEMENT_GETTER(SequenceType);
 IMPLEMENT_GETTER(CollectionType);
+IMPLEMENT_GETTER(Printable);
+IMPLEMENT_GETTER(DebugPrintable);

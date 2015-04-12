@@ -51,7 +51,7 @@ public:
     enum ConstraintType
     {
         EqualsTo,
-        DerivedFrom
+        AssignableTo
     };
     struct Constraint
     {
@@ -83,6 +83,7 @@ public:
     void addConstraint(const std::list<std::wstring>& type, ConstraintType constraint, const TypePtr& referenceType);
     void registerTo(SymbolScope* scope);
     TypePtr get(const std::wstring& alias);
+    NodeDefPtr getConstraint(const std::wstring& name);
     size_t numParameters() const;
     bool equals(const GenericDefinitionPtr& rhs) const;
     int validate(const std::wstring& typeName, const TypePtr& typeToTest, TypePtr& expectedType) const;

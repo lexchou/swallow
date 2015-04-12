@@ -7,7 +7,10 @@
 #include "semantics/GlobalScope.h"
 #include "common/SwallowUtils.h"
 #include "semantics/GenericArgument.h"
+#include "semantics/GenericDefinition.h"
 #include "3rdparty/md5.h"
+#include <algorithm>
+#include <semantics/CollectionTypeAnalyzer.h>
 
 USE_SWALLOW_NS
 using namespace std;
@@ -21,11 +24,37 @@ struct ManglingContext
     wstring currentModule;
     wstringstream& out;
     vector<TypePtr> types;
+    vector<wstring> genericParameters;
 
     ManglingContext(const wstring& module, wstringstream& out)
             :currentModule(module), out(out)
     {
 
+    }
+    void saveTypeReference(const TypePtr& type)
+    {
+        Type::Category c = type->getCategory();
+        switch(c)
+        {
+            case Type::Enum:
+            case Type::Protocol:
+            case Type::Struct:
+            case Type::Class:
+                if(getTypeReference(type) == -1)
+                    types.push_back(type);
+                break;
+            default:
+                break;
+        }
+    }
+    int getGenericReference(const wstring& name)
+    {
+        for(size_t i = 0; i < genericParameters.size(); i++)
+        {
+            if(genericParameters[i] == name)
+                return i;
+        }
+        return -1;
     }
     int getTypeReference(const TypePtr& t)
     {
@@ -80,7 +109,7 @@ SymbolPtr NameMangling::decode(const wchar_t* name)
 }
 
 
-void NameMangling::encodeName(wstringstream& out, const wchar_t* name)
+static void encodeName(wstringstream& out, const wchar_t* name)
 {
     const wchar_t* p = name;
     while(p && *p)
@@ -99,7 +128,7 @@ void NameMangling::encodeName(wstringstream& out, const wchar_t* name)
         p = next;
     }
 }
-void NameMangling::encodeName(wstringstream& out, const wstring& name)
+static void encodeName(wstringstream& out, const wstring& name)
 {
     encodeName(out, name.c_str());
 }
@@ -116,7 +145,35 @@ void NameMangling::encodeType(wstringstream& out, const wstring& moduleName, con
     }
     encodeName(out, typeName);
 }
-void NameMangling::encodeType(ManglingContext& ctx, const TypePtr& type)
+
+/*!
+ * Sort protocol by :
+ * 1) Module Name, 'Swift' module has higher priority
+ * 2) Type name
+ */
+static bool sortProtocol(const TypePtr& lhs, const TypePtr& rhs)
+{
+    bool ls = lhs->getModuleName() == L"Swift";
+    bool rs = rhs->getModuleName() == L"Swift";
+    if(ls != rs)
+    {
+        if(ls)
+            return true;
+        return false;
+    }
+    int n = lhs->getModuleName().compare(rhs->getModuleName());
+    if(n < 0)
+        return true;
+    else if(n > 0)
+        return false;
+    return lhs->getName() < rhs->getName();
+}
+static vector<TypePtr> sortTypes(vector<TypePtr> types)
+{
+    sort(types.begin(), types.end(), sortProtocol);
+    return types;
+}
+void NameMangling::encodeType(ManglingContext& ctx, const TypePtr& type, bool wrapCollections)
 {
     //check for abbreviation
     auto iter = typeToName.find(type);
@@ -134,8 +191,7 @@ void NameMangling::encodeType(ManglingContext& ctx, const TypePtr& type)
         out <<L"S" <<idx << L"_";
         return;
     }
-    if(category != Type::Specialized && category != Type::Function && category != Type::Tuple)
-        ctx.types.push_back(type);
+    ctx.saveTypeReference(type);
 
 
 
@@ -151,23 +207,37 @@ void NameMangling::encodeType(ManglingContext& ctx, const TypePtr& type)
             }
             out<<L"_";
             break;
+        case Type::Alias:
+        {
+            int n = ctx.getGenericReference(type->getName());
+            assert(n != -1);
+            if(n == 0)
+                out<<L"Q_";
+            else
+                out<<L"Q" << (n - 1) <<L"_";
+            break;
+        }
         case Type::Tuple:
-            out<<L"T";
+            if(wrapCollections)
+                out<<L"T";
             for(int i = 0; i < type->numElementTypes(); i++)
             {
                 TypePtr element = type->getElementType(i);
                 encodeType(ctx, element);
             }
-            out<<L"_";
+            if(wrapCollections)
+                out<<L"_";
             break;
         case Type::Enum:
             out<<L"O";
             encodeType(out, type->getModuleName(), type->getName());
             break;
         case Type::Protocol:
-            out<<L"P";
+            if(wrapCollections)
+                out<<L"P";
             encodeType(out, type->getModuleName(), type->getName());
-            out<<L"_";
+            if(wrapCollections)
+                out<<L"_";
             break;
         case Type::Struct:
             out<<L"V";
@@ -178,7 +248,9 @@ void NameMangling::encodeType(ManglingContext& ctx, const TypePtr& type)
             encodeType(out, type->getModuleName(), type->getName());
             break;
         case Type::Function:
-            out<<L"FT";
+            out<<L"F";
+            if(type->getParameters().size() != 1)
+                out<<L"T";
             for(const Parameter& param : type->getParameters())
             {
                 if(!param.name.empty())
@@ -189,16 +261,23 @@ void NameMangling::encodeType(ManglingContext& ctx, const TypePtr& type)
                     out<<L"R";
                 encodeType(ctx, param.type);
             }
-            out<<L"_";
+            if(type->getParameters().size() != 1)
+                out<<L"_";
             encodeType(ctx, type->getReturnType());
             break;
         case Type::ProtocolComposition:
-            out<<L"P";
-            for(const TypePtr& protocol : type->getProtocols())
             {
-                encodeType(ctx, protocol);
+                if(wrapCollections)
+                    out<<L"P";
+                vector<TypePtr> protocols = sortTypes(type->getProtocols());
+                for (const TypePtr &protocol : protocols)
+                {
+                    encodeType(out, protocol->getModuleName(), protocol->getName());
+                }
+                if(wrapCollections)
+                    out << L"_";
             }
-            out<<L"_";
+            break;
         default:
             assert(0 && "Unsupported type to encode");
             break;
@@ -213,8 +292,20 @@ std::wstring NameMangling::encodeVariable(const SymbolPlaceHolderPtr& symbol)
     return L"";
 }
 
+/*!
+ * Encode type's declaring type, all ancestor names will be encoded.
+ */
+static void encodeDeclaringType(ManglingContext& ctx, const TypePtr& type)
+{
+    if(type->getDeclaringType())
+        encodeDeclaringType(ctx, type->getDeclaringType());
+    ctx.saveTypeReference(type);
+    encodeName(ctx.out, type->getName());
+}
 static void encodeTypeKind(wostream& out, const TypePtr& type)
 {
+    if(type->getDeclaringType())
+        encodeTypeKind(out, type->getDeclaringType());
     switch(type->getCategory())
     {
         case Type::Enum:
@@ -262,7 +353,7 @@ std::wstring NameMangling::encode(const SymbolPtr& symbol)
 
     encodeName(out, moduleName);
     if(symbol->getDeclaringType())
-        encodeName(out, symbol->getDeclaringType()->getName());
+        encodeDeclaringType(context, symbol->getDeclaringType());
 
     wstring symbolName = symbol->getName();
     TypePtr symbolType = symbol->getType();
@@ -293,13 +384,22 @@ std::wstring NameMangling::encode(const SymbolPtr& symbol)
         out<<SwallowUtils::toWString(s);
     }
     encodeName(out, symbolName);
+    if(FunctionSymbolPtr func = dynamic_pointer_cast<FunctionSymbol>(symbol))
+    {
+        GenericDefinitionPtr generic = func->getType()->getGenericDefinition();
+        if(generic)
+        {
+            encodeGeneric(context, generic);
+        }
+    }
     if(!symbol->hasFlags(SymbolFlagAccessor) && symbol->getDeclaringType() && dynamic_pointer_cast<FunctionSymbol>(symbol))
     {
         //generate self for instance method
         if(symbol->hasFlags(SymbolFlagStatic))
-            out<<L"fMS0";
+            out<<L"fM";
         else
-            out<<L"fS0";
+            out<<L"f";
+        encodeType(context, symbol->getDeclaringType());
     }
     encodeType(context, symbolType);
     //dump references
@@ -312,4 +412,44 @@ std::wstring NameMangling::encode(const SymbolPtr& symbol)
     }
     #endif
     return out.str();
+}
+
+void NameMangling::encodeGeneric(ManglingContext &context, const GenericDefinitionPtr &def)
+{
+    context.out<<L"U";
+    for(const GenericDefinition::Parameter& param : def->getParameters())
+    {
+        GenericDefinition::NodeDefPtr node = def->getConstraint(param.name);
+        if(node)
+        {
+            vector<TypePtr> types;
+            //collect all constraints for generic parameter
+            for(const GenericDefinition::Constraint& constraint : node->constraints)
+            {
+                if(constraint.type != GenericDefinition::AssignableTo)
+                    continue;
+                //unpack protocol composition
+                if(constraint.reference->getCategory() == Type::ProtocolComposition)
+                {
+                    for(const TypePtr& protocol : constraint.reference->getProtocols())
+                    {
+                        types.push_back(protocol);
+                    }
+                }
+                else
+                {
+                    types.push_back(constraint.reference);
+                }
+                context.genericParameters.push_back(param.name);
+            }
+            //then encode them to result stream
+            for(const TypePtr& type : sortTypes(types))
+            {
+                encodeType(context, type, false);
+            }
+        }
+        context.out<<L"_";
+    }
+
+    context.out<<L"_";
 }

@@ -46,6 +46,13 @@ int GenericDefinition::validate(const std::wstring& typeName, const TypePtr& typ
     NodeDefPtr node = iter->second;
     return validate(node, typeToTest, expectedType);
 }
+GenericDefinition::NodeDefPtr GenericDefinition::getConstraint(const std::wstring& name)
+{
+    auto iter = constraints.find(name);
+    if(iter == constraints.end())
+        return nullptr;
+    return iter->second;
+}
 int GenericDefinition::validate(const NodeDefPtr& node, const TypePtr& typeToTest, TypePtr& expectedType) const
 {
     for(const Constraint& constraint : node->constraints)
@@ -60,7 +67,7 @@ int GenericDefinition::validate(const NodeDefPtr& node, const TypePtr& typeToTes
                     return 0;//not equal to specified file
                 }
                 break;
-            case DerivedFrom:
+            case AssignableTo:
                 if(!typeToTest->isKindOf(constraint.reference))
                 {
                     expectedType = constraint.reference;

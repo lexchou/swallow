@@ -30,6 +30,7 @@
 #include "../utils.h"
 
 using namespace Swallow;
+using namespace std;
 
 TEST(TestGeneric, testFunc)
 {
@@ -123,17 +124,17 @@ TEST(TestGeneric, testTypeConstraint)
     ASSERT_EQ(L"U", type->getName());
 
     ASSERT_NOT_NULL(constraint = params->getConstraint(0));
-    ASSERT_EQ(GenericConstraintDef::DerivedFrom, constraint->getConstraintType());
+    ASSERT_EQ(GenericConstraintDef::AssignableTo, constraint->getConstraintType());
     ASSERT_NOT_NULL(type = constraint->getIdentifier());
     ASSERT_EQ(L"T", type->getName());
-    ASSERT_NOT_NULL(type = constraint->getExpectedType());
+    ASSERT_NOT_NULL(type = dynamic_pointer_cast<TypeIdentifier>(constraint->getExpectedType()));
     ASSERT_EQ(L"SomeClass", type->getName());
 
     ASSERT_NOT_NULL(constraint = params->getConstraint(1));
-    ASSERT_EQ(GenericConstraintDef::DerivedFrom, constraint->getConstraintType());
+    ASSERT_EQ(GenericConstraintDef::AssignableTo, constraint->getConstraintType());
     ASSERT_NOT_NULL(type = constraint->getIdentifier());
     ASSERT_EQ(L"U", type->getName());
-    ASSERT_NOT_NULL(type = constraint->getExpectedType());
+    ASSERT_NOT_NULL(type = dynamic_pointer_cast<TypeIdentifier>(constraint->getExpectedType()));
     ASSERT_EQ(L"SomeProtocol", type->getName());
 
 }
@@ -164,10 +165,10 @@ TEST(TestGeneric, testTypeConstraint2)
 
 
     ASSERT_NOT_NULL(constraint = params->getConstraint(0));
-    ASSERT_EQ(GenericConstraintDef::DerivedFrom, constraint->getConstraintType());
+    ASSERT_EQ(GenericConstraintDef::AssignableTo, constraint->getConstraintType());
     ASSERT_NOT_NULL(type = constraint->getIdentifier());
     ASSERT_EQ(L"T", type->getName());
-    ASSERT_NOT_NULL(type = constraint->getExpectedType());
+    ASSERT_NOT_NULL(type = dynamic_pointer_cast<TypeIdentifier>(constraint->getExpectedType()));
     ASSERT_EQ(L"Equatable", type->getName());
 }
 
@@ -201,17 +202,17 @@ TEST(TestGeneric, testWhereClause)
     ASSERT_EQ(L"C2", type->getName());
 
     ASSERT_NOT_NULL(constraint = params->getConstraint(0));
-    ASSERT_EQ(GenericConstraintDef::DerivedFrom, constraint->getConstraintType());
+    ASSERT_EQ(GenericConstraintDef::AssignableTo, constraint->getConstraintType());
     ASSERT_NOT_NULL(type = constraint->getIdentifier());
     ASSERT_EQ(L"C1", type->getName());
-    ASSERT_NOT_NULL(type = constraint->getExpectedType());
+    ASSERT_NOT_NULL(type = dynamic_pointer_cast<TypeIdentifier>(constraint->getExpectedType()));
     ASSERT_EQ(L"Container", type->getName());
 
     ASSERT_NOT_NULL(constraint = params->getConstraint(1));
-    ASSERT_EQ(GenericConstraintDef::DerivedFrom, constraint->getConstraintType());
+    ASSERT_EQ(GenericConstraintDef::AssignableTo, constraint->getConstraintType());
     ASSERT_NOT_NULL(type = constraint->getIdentifier());
     ASSERT_EQ(L"C2", type->getName());
-    ASSERT_NOT_NULL(type = constraint->getExpectedType());
+    ASSERT_NOT_NULL(type = dynamic_pointer_cast<TypeIdentifier>(constraint->getExpectedType()));
     ASSERT_EQ(L"Container", type->getName());
 
     ASSERT_NOT_NULL(constraint = params->getConstraint(2));
@@ -220,18 +221,18 @@ TEST(TestGeneric, testWhereClause)
     ASSERT_EQ(L"C1", type->getName());
     ASSERT_NOT_NULL(type = type->getNestedType());
     ASSERT_EQ(L"ItemType", type->getName());
-    ASSERT_NOT_NULL(type = constraint->getExpectedType());
+    ASSERT_NOT_NULL(type = dynamic_pointer_cast<TypeIdentifier>(constraint->getExpectedType()));
     ASSERT_EQ(L"C2", type->getName());
     ASSERT_NOT_NULL(type = type->getNestedType());
     ASSERT_EQ(L"ItemType", type->getName());
 
     ASSERT_NOT_NULL(constraint = params->getConstraint(3));
-    ASSERT_EQ(GenericConstraintDef::DerivedFrom, constraint->getConstraintType());
+    ASSERT_EQ(GenericConstraintDef::AssignableTo, constraint->getConstraintType());
     ASSERT_NOT_NULL(type = constraint->getIdentifier());
     ASSERT_EQ(L"C1", type->getName());
     ASSERT_NOT_NULL(type = type->getNestedType());
     ASSERT_EQ(L"ItemType", type->getName());
-    ASSERT_NOT_NULL(type = constraint->getExpectedType());
+    ASSERT_NOT_NULL(type = dynamic_pointer_cast<TypeIdentifier>(constraint->getExpectedType()));
     ASSERT_EQ(L"Equatable", type->getName());
 
 }

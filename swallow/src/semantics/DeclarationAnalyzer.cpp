@@ -192,7 +192,7 @@ GenericDefinitionPtr DeclarationAnalyzer::prepareGenericTypes(const GenericParam
         }
 
         //ret->addConstraint(types);
-        GenericDefinition::ConstraintType ct = constraint->getConstraintType() == GenericConstraintDef::DerivedFrom ? GenericDefinition::DerivedFrom : GenericDefinition::EqualsTo;
+        GenericDefinition::ConstraintType ct = constraint->getConstraintType() == GenericConstraintDef::AssignableTo ? GenericDefinition::AssignableTo : GenericDefinition::EqualsTo;
         ret->addConstraint(types, ct, expectedType);
     }
 

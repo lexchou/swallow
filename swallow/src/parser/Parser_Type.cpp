@@ -302,14 +302,17 @@ GenericParametersDefPtr Parser::parseGenericParametersDef()
         ret->addGenericType(typeId);
         if(match(L":"))
         {
-            TypeIdentifierPtr expectedType = parseTypeIdentifier();
-            
+            TypeNodePtr expected;
+            if(predicate(L"protocol"))
+                expected = parseProtocolComposition();
+            else
+                expected = parseTypeIdentifier();
             GenericConstraintDefPtr c = nodeFactory->createGenericConstraintDef(token.state);
             typeId = nodeFactory->createTypeIdentifier(token.state);
             typeId->setName(typeName);
             c->setIdentifier(typeId);
-            c->setConstraintType(GenericConstraintDef::DerivedFrom);
-            c->setExpectedType(expectedType);
+            c->setConstraintType(GenericConstraintDef::AssignableTo);
+            c->setExpectedType(expected);
             ret->addConstraint(c);
         }
     } while (match(L","));
@@ -325,33 +328,16 @@ GenericParametersDefPtr Parser::parseGenericParametersDef()
             {
                 // conformance-requirement → type-identifier:type-identifier
                 // conformance-requirement → type-identifier:protocol-composition-type
-
+                TypeNodePtr expected;
                 if (predicate(L"protocol"))
-                {
-                    ProtocolCompositionPtr protocols = this->parseProtocolComposition();
-
-                    for(const TypeNodePtr& protocol: *protocols)
-                    {
-                        (void)protocol;
-                        GenericConstraintDefPtr c = nodeFactory->createGenericConstraintDef(*type->getSourceInfo());
-                        c->setIdentifier(type);
-                        //TypeIdentifierPtr expectedType = parseTypeIdentifier();
-                        //TODO:
-                        assert(0);
-                        //c->setExpectedType(protocol);
-                        c->setConstraintType(GenericConstraintDef::DerivedFrom);
-                        ret->addConstraint(c);
-                    }
-                }
+                    expected = this->parseProtocolComposition();
                 else
-                {
-                    GenericConstraintDefPtr c = nodeFactory->createGenericConstraintDef(*type->getSourceInfo());
-                    c->setConstraintType(GenericConstraintDef::DerivedFrom);
-                    c->setIdentifier(type);
-                    TypeIdentifierPtr expectedType = parseTypeIdentifier();
-                    c->setExpectedType(expectedType);
-                    ret->addConstraint(c);
-                }
+                    expected = parseTypeIdentifier();
+                GenericConstraintDefPtr c = nodeFactory->createGenericConstraintDef(*type->getSourceInfo());
+                c->setConstraintType(GenericConstraintDef::AssignableTo);
+                c->setIdentifier(type);
+                c->setExpectedType(expected);
+                ret->addConstraint(c);
             }
             else if(match(L"=="))
             {

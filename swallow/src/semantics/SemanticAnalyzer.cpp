@@ -339,6 +339,25 @@ TypePtr SemanticAnalyzer::lookupTypeImpl(const TypeNodePtr &type, bool supressEr
             TypePtr ret = Type::newFunction(params, retType, false, nullptr);
             return ret;
         }
+        case NodeType::ProtocolComposition:
+        {
+            ProtocolCompositionPtr composition = static_pointer_cast<ProtocolComposition>(type);
+            vector<TypePtr> protocols;
+            for(const TypeIdentifierPtr& p : *composition)
+            {
+                TypePtr protocol = lookupType(p);
+                //it must be a protocol type
+                assert(protocol != nullptr);
+                if(protocol->getCategory() != Type::Protocol)
+                {
+                    error(p, Errors::E_NON_PROTOCOL_TYPE_A_CANNOT_BE_USED_WITHIN_PROTOCOL_COMPOSITION_1, p->getName());
+                    return nullptr;
+                }
+                protocols.push_back(protocol);
+            }
+            TypePtr ret = Type::newProtocolComposition(protocols);
+            return ret;
+        };
         default:
         {
             assert(0 && "Unsupported type");

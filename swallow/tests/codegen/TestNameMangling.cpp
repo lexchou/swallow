@@ -36,6 +36,7 @@
 #include "common/Errors.h"
 #include "semantics/GlobalScope.h"
 #include "semantics/GenericArgument.h"
+#include "semantics/FunctionOverloadedSymbol.h"
 #include "codegen/NameMangling.h"
 
 using namespace Swallow;
@@ -268,4 +269,64 @@ TEST(TestNameMangling, Func6)
     SymbolPtr s;
     ASSERT_NOT_NULL(s = scope->lookup(L"test6"));
     ASSERT_EQ(L"_TF4main5test6FTSiGOS_5MaybeCS_7MyClass_GOS_5MAYBESi_GS2_S1__GS2_GS0_S1____T_", mangling.encode(s));
+}
+
+TEST(TestNameMangling, Func7)
+{
+    SEMANTIC_ANALYZE(L"func test7(a : [Int], b : Bool?, c : Bool!, d : [String : Int], e : (Int, Double))\n"
+            L"{\n"
+            L"}");
+    ASSERT_NO_ERRORS();
+    SymbolPtr s;
+    ASSERT_NOT_NULL(s = scope->lookup(L"test7"));
+    ASSERT_EQ(L"_TF4main5test7FTGSaSi_GSqSb_GSQSb_GVSs10DictionarySSSi_TSiSd__T_", mangling.encode(s));
+}
+
+TEST(TestNameMangling, Func8)
+{
+    SEMANTIC_ANALYZE(L"func composition(a : protocol<Printable, DebugPrintable>)\n"
+            L"{\n"
+            L"}");
+    ASSERT_NO_ERRORS();
+    SymbolPtr s;
+    ASSERT_NOT_NULL(s = scope->lookup(L"composition"));
+    ASSERT_EQ(L"_TF4main11compositionFPSs14DebugPrintableSs9Printable_T_", mangling.encode(s));
+}
+
+TEST(TestNameMangling, Func9)
+{
+    SEMANTIC_ANALYZE(L"class OuterClass\n"
+            L"{\n"
+            L"    class Nested\n"
+            L"    {\n"
+            L"        class Inner\n"
+            L"        {\n"
+            L"            func innerFunc() //_TFCCC4main10OuterClass6Nested5Inner9innerFuncfS2_FT_T_\n"
+            L"            {\n"
+            L"\n"
+            L"            }\n"
+            L"        }\n"
+            L"    }\n"
+            L"}");
+    ASSERT_NO_ERRORS();
+    SymbolPtr s1, s2, s3, s4, s5;
+    ASSERT_NOT_NULL(s1 = scope->lookup(L"OuterClass"));
+    ASSERT_NOT_NULL(s2 = dynamic_pointer_cast<Type>(s1)->getMember(L"Nested"));
+    ASSERT_NOT_NULL(s3 = dynamic_pointer_cast<Type>(s2)->getMember(L"Inner"));
+    ASSERT_NOT_NULL(s4 = dynamic_pointer_cast<Type>(s3)->getMember(L"innerFunc"));
+    ASSERT_NOT_NULL(s5 = *dynamic_pointer_cast<FunctionOverloadedSymbol>(s4)->begin());
+    ASSERT_EQ(L"_TFCCC4main10OuterClass6Nested5Inner9innerFuncfS2_FT_T_", mangling.encode(s5));
+}
+
+TEST(TestNameMangling, Func10)
+{
+    SEMANTIC_ANALYZE(L"protocol MyProtocol{}\n"
+            L"func constraint<A : protocol<MyProtocol, Printable>, B : RawRepresentable where B.RawValue == Int>(arg : (A, B)) // _TF4main10constraintUSs11ReflectableS_10MyProtocol_Ss16RawRepresentable__FTQ_Q0__T_\n"
+            L"{\n"
+            L"\n"
+            L"}");
+    ASSERT_NO_ERRORS();
+    SymbolPtr s;
+    ASSERT_NOT_NULL(s = scope->lookup(L"constraint"));
+    ASSERT_EQ(L"_TF4main10constraintUSs9PrintableS_10MyProtocol_Ss16RawRepresentable__FTQ_Q0__T_", mangling.encode(s));
 }

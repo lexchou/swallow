@@ -121,6 +121,7 @@ private:
 public:
     static TypePtr newType(const std::wstring& name, Category category, const TypeDeclarationPtr& reference = nullptr, const TypePtr& parentType = nullptr, const std::vector<TypePtr>& protocols = std::vector<TypePtr>(), const GenericDefinitionPtr& generic = nullptr);
     static TypePtr newTuple(const std::vector<TypePtr>& types);
+    static TypePtr newProtocolComposition(const std::vector<TypePtr>& types);
     static TypePtr newTypeReference(const TypePtr& innerType);
     static TypePtr newFunction(const std::vector<Parameter>& parameters, const TypePtr& returnType, bool hasVariadicParameters, const GenericDefinitionPtr& generic = nullptr);
     static TypePtr newSpecializedType(const TypePtr& innerType, const GenericArgumentPtr& arguments);

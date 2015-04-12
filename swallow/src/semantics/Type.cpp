@@ -118,6 +118,13 @@ TypePtr Type::newExtension(const TypePtr& innerType)
     ret->innerType = innerType;
     return ret;
 }
+TypePtr Type::newProtocolComposition(const std::vector<TypePtr>& types)
+{
+    Type* ret = new TypeBuilder(ProtocolComposition);
+    ret->protocols = types;
+    return TypePtr(ret);
+
+}
 
 TypePtr Type::newTuple(const std::vector<TypePtr>& types)
 {

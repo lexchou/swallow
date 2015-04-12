@@ -133,6 +133,8 @@ public:
     TypePtr DictionaryLiteralConvertible() const;
     TypePtr UnicodeScalarLiteralConvertible() const;
     TypePtr ExtendedGraphemeClusterLiteralConvertible() const;
+    TypePtr Printable() const;
+    TypePtr DebugPrintable() const;
     TypePtr SequenceType() const;
     TypePtr CollectionType() const;
 private:
@@ -179,6 +181,8 @@ private:
     TypePtr _DictionaryLiteralConvertible;
     TypePtr _UnicodeScalarLiteralConvertible;
     TypePtr _ExtendedGraphemeClusterLiteralConvertible;
+    TypePtr _Printable;
+    TypePtr _DebugPrintable;
 
     TypePtr _SequenceType;
     TypePtr _CollectionType;

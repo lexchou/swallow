@@ -231,6 +231,7 @@ std::wstring Errors::getErrorTemplate(int errorCode)
         case Errors::E_DUPLICATE_MODIFIER: return L"Duplicate modifier";
         case Errors::E_A_MUST_BE_DECLARED_B_BECAUSE_ITS_C_USES_A_D_TYPE_4: return L"%0 must be declared %1 because its %2 uses a %3 type";
         case Errors::E_A_CANNOT_BE_DECLARED_B_BECAUSE_ITS_C_USES_A_D_TYPE_4: return L"%0 cannot be declared %1 because its %2 uses a %3 type";
+        case Errors::E_NON_PROTOCOL_TYPE_A_CANNOT_BE_USED_WITHIN_PROTOCOL_COMPOSITION_1: return L"Non-protocol type '%0' cannot be used within 'protocol<...>'";
 
 
         case Errors::W_CODE_AFTER_A_WILL_NEVER_BE_EXECUTED_1: return L"Code after 'return' will never be executed";

@@ -60,12 +60,12 @@ GenericConstraintDef::ConstraintType GenericConstraintDef::getConstraintType()co
     return type;
 }
 
-void GenericConstraintDef::setExpectedType(const TypeIdentifierPtr& expectedIdentifier)
+void GenericConstraintDef::setExpectedType(const TypeNodePtr& expectedIdentifier)
 {
     this->expectedType = expectedIdentifier;
 }
 
-TypeIdentifierPtr GenericConstraintDef::getExpectedType()const
+TypeNodePtr GenericConstraintDef::getExpectedType()const
 {
     return expectedType;
 }
