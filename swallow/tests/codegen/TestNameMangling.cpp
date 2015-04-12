@@ -330,3 +330,31 @@ TEST(TestNameMangling, Func10)
     ASSERT_NOT_NULL(s = scope->lookup(L"constraint"));
     ASSERT_EQ(L"_TF4main10constraintUSs9PrintableS_10MyProtocol_Ss16RawRepresentable__FTQ_Q0__T_", mangling.encode(s));
 }
+
+TEST(TestNameMangling, Func11)
+{
+    SEMANTIC_ANALYZE(L"struct SSSS\n"
+            L"{\n"
+            L"    func method() // _TFV4main4SSSS6methodfS0_FT_T_\n"
+            L"    {\n"
+            L"    }\n"
+            L"    static func smethod() -> Int // _TFV4main4SSSS7smethodfMS0_FT_Si\n"
+            L"    {\n"
+            L"        return 0\n"
+            L"    }\n"
+            L"    mutating func mmethod() // _TFV4main4SSSS7mmethodfRS0_FT_T_\n"
+            L"    {\n"
+            L"\n"
+            L"    }\n"
+            L"}")
+    ASSERT_NO_ERRORS();
+    TypePtr SSSS;
+    SymbolPtr m;
+    ASSERT_NOT_NULL(SSSS = dynamic_pointer_cast<Type>(scope->lookup(L"SSSS")));
+    ASSERT_NOT_NULL(m = SSSS->getMember(L"method"));
+    ASSERT_EQ(L"_TFV4main4SSSS6methodfS0_FT_T_", mangling.encode(m));
+    ASSERT_NOT_NULL(m = SSSS->getMember(L"smethod"));
+    ASSERT_EQ(L"_TFV4main4SSSS7smethodfMS0_FT_Si", mangling.encode(m));
+    ASSERT_NOT_NULL(m = SSSS->getMember(L"mmethod"));
+    ASSERT_EQ(L"_TFV4main4SSSS7mmethodfRS0_FT_T_", mangling.encode(m));
+}
