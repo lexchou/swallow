@@ -40,6 +40,7 @@ typedef std::shared_ptr<class Symbol> SymbolPtr;
 typedef std::shared_ptr<class SymbolPlaceHolder> SymbolPlaceHolderPtr;
 typedef std::shared_ptr<class Type> TypePtr;
 class SymbolRegistry;
+struct ManglingContext;
 
 /*!
  * \brief Generate mangled name for a symbol or decode a mangled name into a symbol
@@ -67,7 +68,7 @@ private:
     void encodeName(std::wstringstream& out, const wchar_t* name);
     void encodeName(std::wstringstream& out, const std::wstring& name);
     void encodeType(std::wstringstream& out, const std::wstring& moduleName, const std::wstring& typeName);
-    void encodeType(std::wstringstream& out, const TypePtr& type);
+    void encodeType(ManglingContext& out, const TypePtr& type);
     void defineAbbreviation(const TypePtr&, const std::wstring& abbrev);
     std::wstring encodeVariable(const SymbolPlaceHolderPtr& symbol);
 

@@ -281,19 +281,17 @@ void SemanticAnalyzer::visitCase(const CaseStatementPtr& node)
                 IdentifierPtr id = static_pointer_cast<Identifier>(cond.condition);
                 ec = ctx.contextualType->getEnumCase(id->getIdentifier());
             }
-            else
+            else if(EnumCasePatternPtr enumCase = dynamic_pointer_cast<EnumCasePattern>(cond.condition))
             {
-                EnumCasePatternPtr enumCase = dynamic_pointer_cast<EnumCasePattern>(cond.condition);
-                if (!enumCase)
-                {
-                    if (ValueBindingPatternPtr binding = dynamic_pointer_cast<ValueBindingPattern>(cond.condition))
-                    {
-                        enumCase = dynamic_pointer_cast<EnumCasePattern>(binding->getBinding());
-                        accessibility = binding->isReadOnly() ? AccessibilityConstant : AccessibilityVariable;
-                    }
-                }
-                assert(enumCase != nullptr);
                 ec = ctx.contextualType->getEnumCase(enumCase->getName());
+            }
+            else if (ValueBindingPatternPtr binding = dynamic_pointer_cast<ValueBindingPattern>(cond.condition))
+            {
+                EnumCasePatternPtr enumCase = dynamic_pointer_cast<EnumCasePattern>(binding->getBinding());
+                assert(enumCase != nullptr);
+                accessibility = binding->isReadOnly() ? AccessibilityConstant : AccessibilityVariable;
+                ec = ctx.contextualType->getEnumCase(enumCase->getName());
+
             }
             if(ec && ec->type != symbolRegistry->getGlobalScope()->Void())
             {

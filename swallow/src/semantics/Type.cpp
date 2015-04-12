@@ -55,6 +55,16 @@ Subscript::Subscript(const std::vector<Parameter>& parameters, const TypePtr& re
 
 }
 
+Parameter::Parameter(const std::wstring&name, bool inout, const TypePtr& type)
+        :name(name), inout(inout), type(type)
+{
+    assert(type != nullptr);
+}
+Parameter::Parameter(const TypePtr& type)
+        :inout(false), type(type)
+{
+    assert(type != nullptr);
+}
 
 Type::Type(Category category)
 :category(category)

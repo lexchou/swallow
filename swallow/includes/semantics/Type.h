@@ -72,12 +72,8 @@ struct SWALLOW_EXPORT Parameter
     std::wstring name;
     bool inout;
     TypePtr type;
-    Parameter(const std::wstring&name, bool inout, const TypePtr& type)
-            :name(name), inout(inout), type(type)
-    {}
-    Parameter(const TypePtr& type)
-            :inout(false), type(type)
-    {}
+    Parameter(const std::wstring&name, bool inout, const TypePtr& type);
+    Parameter(const TypePtr& type);
 };
 
 /*!

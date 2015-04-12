@@ -15,17 +15,29 @@ using namespace std;
 /*!
  * Context data used during encoding/decoding
  */
+SWALLOW_NS_BEGIN
 struct ManglingContext
 {
     wstring currentModule;
-    vector<wstring> types;
+    wstringstream& out;
+    vector<TypePtr> types;
 
-    ManglingContext(const wstring& module)
-            :currentModule(module)
+    ManglingContext(const wstring& module, wstringstream& out)
+            :currentModule(module), out(out)
     {
 
     }
+    int getTypeReference(const TypePtr& t)
+    {
+        for(size_t i = 0; i < types.size(); i++)
+        {
+            if(Type::equals(types[i], t))
+                return i;
+        }
+        return -1;
+    }
 };
+SWALLOW_NS_END
 
 
 
@@ -104,25 +116,38 @@ void NameMangling::encodeType(wstringstream& out, const wstring& moduleName, con
     }
     encodeName(out, typeName);
 }
-void NameMangling::encodeType(wstringstream& out, const TypePtr& type)
+void NameMangling::encodeType(ManglingContext& ctx, const TypePtr& type)
 {
     //check for abbreviation
     auto iter = typeToName.find(type);
+    wstringstream& out = ctx.out;
     if(iter != typeToName.end())
     {
         out << iter->second;
         return;
     }
-    //no abbreviation
     Type::Category category = type->getCategory();
+    int idx = ctx.getTypeReference(type);
+    //use short syntax to make a reference
+    if(idx != -1)
+    {
+        out <<L"S" <<idx << L"_";
+        return;
+    }
+    if(category != Type::Specialized && category != Type::Function && category != Type::Tuple)
+        ctx.types.push_back(type);
+
+
+
+    //no abbreviation
     switch(category)
     {
         case Type::Specialized:
             out<<L"G";
-            encodeType(out, type->getInnerType());
+            encodeType(ctx, type->getInnerType());
             for(const TypePtr& arg : *type->getGenericArguments())
             {
-                encodeType(out, arg);
+                encodeType(ctx, arg);
             }
             out<<L"_";
             break;
@@ -131,7 +156,7 @@ void NameMangling::encodeType(wstringstream& out, const TypePtr& type)
             for(int i = 0; i < type->numElementTypes(); i++)
             {
                 TypePtr element = type->getElementType(i);
-                encodeType(out, element);
+                encodeType(ctx, element);
             }
             out<<L"_";
             break;
@@ -162,16 +187,16 @@ void NameMangling::encodeType(wstringstream& out, const TypePtr& type)
                     out<<L"M";
                 if(param.inout)
                     out<<L"R";
-                encodeType(out, param.type);
+                encodeType(ctx, param.type);
             }
             out<<L"_";
-            encodeType(out, type->getReturnType());
+            encodeType(ctx, type->getReturnType());
             break;
         case Type::ProtocolComposition:
             out<<L"P";
             for(const TypePtr& protocol : type->getProtocols())
             {
-                encodeType(out, protocol);
+                encodeType(ctx, protocol);
             }
             out<<L"_";
         default:
@@ -218,7 +243,7 @@ std::wstring NameMangling::encode(const SymbolPtr& symbol)
 {
     wstring moduleName = L"main";
     wstringstream out;
-    ManglingContext context(moduleName);
+    ManglingContext context(moduleName, out);
     out<<L"_T";//mark for swift symbol
     if(SymbolPlaceHolderPtr sym = dynamic_pointer_cast<SymbolPlaceHolder>(symbol))
     {
@@ -276,6 +301,15 @@ std::wstring NameMangling::encode(const SymbolPtr& symbol)
         else
             out<<L"fS0";
     }
-    encodeType(out, symbolType);
+    encodeType(context, symbolType);
+    //dump references
+    #if 0
+    int i = 0;
+    for(TypePtr t : context.types)
+    {
+        wcout<<L"S" << (i++) << L"\t" << t->toString() << endl;
+
+    }
+    #endif
     return out.str();
 }

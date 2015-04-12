@@ -166,7 +166,6 @@ static TypePtr specialize(const TypePtr& type, const GenericArgumentPtr& argumen
 
 static FunctionSymbolPtr specialize(const FunctionSymbolPtr& func, const GenericArgumentPtr& arguments)
 {
-    std::wstring s = func->getType()->toString();
 
     TypePtr funcType = specialize(func->getType(), arguments);
     FunctionSymbolPtr ret(new FunctionSymbol(func->getName(), funcType, func->getRole(), func->getDefinition()));

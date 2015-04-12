@@ -521,6 +521,8 @@ void DeclarationAnalyzer::visitEnum(const EnumDefPtr& node)
         {
             Type::Category  category = firstParent->getCategory();
             isRawValues = category == Type::Struct || category == Type::Enum || category == Type::Aggregate || category == Type::Class;
+            if(isRawValues)
+                type->setParentType(firstParent);
         }
     }
 
@@ -615,6 +617,7 @@ void DeclarationAnalyzer::visitEnum(const EnumDefPtr& node)
             decl->accept(semanticAnalyzer);
         }
         //add a default initializer for raw value enum
+        if(isRawValues)
         {
             vector<Parameter> params = {Parameter(L"rawValue", false, type->getParentType())};
             TypePtr initType = Type::newFunction(params, global->Void(), false, nullptr);

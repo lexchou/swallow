@@ -160,7 +160,7 @@ Now compares with the rules in the previous chapter, it's easy to guess:
 - S_ will follow a type name which defined in current module.
 - Ss will follow a type name which defined in module 'Swift', the types from swift standard library.
 - S follows a letter means a type that can be looked up in the table above.
-- S follows a digit is used as a type reference that exists in the encoding, the index starts from 0, usually the member symbol will use S0 as the current type.
+- S follows a digit and ends with a understore is used as a type reference that exists in the encoding, the index starts from 0, usually the member symbol will use S0 as the current type, specialized/function/tuple type will not be referenced.
 - G means a specialized generic type, a generic type is followed after G while the rest type arguments are followed next, and ended with _
 - T means a tuple type, like the rule for specialized types, the element types are just after the T and ended with _
 - F means it's a function type, parameter types(encoded by a tuple) and return type are next to it, no _ is required for function type.

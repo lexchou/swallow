@@ -246,7 +246,7 @@ TEST(TestNameMangling, Func5)
     ASSERT_NOT_NULL(s = scope->lookup(L"test5"));
     ASSERT_EQ(L"_TF4main5test5FTOS_6MyEnumPS_10MyProtocol_CS_7MyClassVS_8MyStruct_T_", mangling.encode(s));
 }
-/*
+
 TEST(TestNameMangling, Func6)
 {
     SEMANTIC_ANALYZE(L"enum Maybe<T>\n"
@@ -269,4 +269,3 @@ TEST(TestNameMangling, Func6)
     ASSERT_NOT_NULL(s = scope->lookup(L"test6"));
     ASSERT_EQ(L"_TF4main5test6FTSiGOS_5MaybeCS_7MyClass_GOS_5MAYBESi_GS2_S1__GS2_GS0_S1____T_", mangling.encode(s));
 }
-*/
