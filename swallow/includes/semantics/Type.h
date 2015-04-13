@@ -322,6 +322,8 @@ public://member access
     const std::vector<FunctionOverloadedSymbolPtr>& getDeclaredFunctions() const;
     const std::vector<Subscript>& getSubscripts() const;
 
+    FunctionSymbolPtr getDeinit() const;
+
     /*!
      * Check if current type can be specialized to given type
      */
@@ -400,6 +402,7 @@ protected:
     std::vector<FunctionOverloadedSymbolPtr> functions;
     int inheritantDepth;
     std::vector<Subscript> subscripts;
+    FunctionSymbolPtr deinit;
 
     //for protocol
     mutable short _containsSelfType;

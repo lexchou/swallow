@@ -172,6 +172,7 @@ FunctionSymbolPtr DeclarationAnalyzer::createFunctionSymbol(const FunctionDefPtr
         if(!prototype && (!valueType || mutating))
             funcType->setFlags(SymbolFlagMutating, true);
         funcType->setFlags(SymbolFlagMember, true);
+        static_pointer_cast<TypeBuilder>(funcType)->setDeclaringType(ctx->currentType);
     }
     FunctionSymbolPtr ret(new FunctionSymbol(func->getName(), funcType, FunctionRoleNormal, func->getBody()));
     return ret;
@@ -838,10 +839,16 @@ void DeclarationAnalyzer::visitFunctionDeclaration(const FunctionDefPtr& node)
 
         lookupType(node->getReturnType());
 
-        if(node->getModifiers() & DeclarationModifiers::Prefix)
-            func->setFlags(SymbolFlagPrefix, true);
-        else if(node->getModifiers() & DeclarationModifiers::Postfix)
-            func->setFlags(SymbolFlagPostfix, true);
+        if(node->getKind() == FunctionKindOperator)
+        {
+            if (node->getModifiers() & DeclarationModifiers::Prefix)
+                func->setFlags(SymbolFlagPrefix, true);
+            else if (node->getModifiers() & DeclarationModifiers::Postfix)
+                func->setFlags(SymbolFlagPostfix, true);
+            else if (funcType->getParameters().size() == 2)
+                func->setFlags(SymbolFlagInfix, true);
+            func->setFlags(SymbolFlagOperator, true);
+        }
 
         if(node->getModifiers() & (DeclarationModifiers::Class | DeclarationModifiers::Static))
         {
@@ -1018,8 +1025,22 @@ void DeclarationAnalyzer::visitFunction(const FunctionDefPtr& node)
 
 void DeclarationAnalyzer::visitDeinit(const DeinitializerDefPtr& node)
 {
+    if(ctx->flags & SemanticContext::FLAG_PROCESS_DECLARATION)
+    {
+        std::vector<Parameter> params;
+        TypePtr funcType = Type::newFunction(params, symbolRegistry->getGlobalScope()->Void(), false);
+        funcType->setFlags(SymbolFlagDeinit, true);
+        funcType->setFlags(SymbolFlagMember, true);
+        static_pointer_cast<TypeBuilder>(funcType)->setDeclaringType(ctx->currentType);
+        FunctionSymbolPtr deinit(new FunctionSymbol(L"deinit", funcType, FunctionRoleDeinit, nullptr));
+        node->getBody()->setType(funcType);
+        registerSelfSuper(ctx->currentType, funcType, node->getBody(), node->getModifiers());
+        static_pointer_cast<TypeBuilder>(ctx->currentType)->setDeinit(deinit);
+    }
     if(ctx->flags & SemanticContext::FLAG_PROCESS_IMPLEMENTATION)
     {
+        TypePtr funcType = ctx->currentType->getDeinit()->getType();
+        SCOPED_SET(ctx->currentFunction, funcType);
         node->getBody()->accept(this);
     }
 }
@@ -1059,9 +1080,13 @@ void DeclarationAnalyzer::visitInit(const InitializerDefPtr& node)
         }
 
         TypePtr funcType = Type::newFunction(params, symbolRegistry->getGlobalScope()->Void(), node->getParameters()->isVariadicParameters());
+        funcType->setFlags(SymbolFlagMember, true);
+        static_pointer_cast<TypeBuilder>(funcType)->setDeclaringType(ctx->currentType);
         if(node->hasModifier(DeclarationModifiers::Convenience))
             funcType->setFlags(SymbolFlagConvenienceInit, true);
         funcType->setFlags(SymbolFlagInit, true);
+        if(ctx->currentType->getCategory() == Type::Enum)
+            funcType->setFlags(SymbolFlagAllocatingInit, true);
         if(node->isFailable())
             funcType->setFlags(SymbolFlagFailableInitializer, true);
         if(node->isImplicitFailable())

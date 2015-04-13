@@ -49,11 +49,24 @@ void TypeBuilder::setInitializer(const FunctionOverloadedSymbolPtr& initializer)
 {
     members[L"init"] = initializer;
 }
+void TypeBuilder::setDeinit(const FunctionSymbolPtr& deinit)
+{
+    this->deinit = deinit;
+    if(deinit)
+        deinit->declaringType = self();
+}
 
 void TypeBuilder::addParameter(const Parameter& param)
 {
     assert(param.type != nullptr);
     parameters.push_back(param);
+}
+/*!
+ * Which type declared this
+ */
+void TypeBuilder::setDeclaringType(const TypePtr& type)
+{
+    this->declaringType = type;
 }
 
 void TypeBuilder::setParentType(const TypePtr &type)
@@ -187,6 +200,7 @@ void TypeBuilder::addEnumCase(const std::wstring &name, const TypePtr &associate
     assert(!name.empty());
     assert(associatedType != nullptr);
     FunctionSymbolPtr constructor;
+    /*
     if(associatedType->isNil())
     {
         //create a symbol for it and save it as member
@@ -195,6 +209,7 @@ void TypeBuilder::addEnumCase(const std::wstring &name, const TypePtr &associate
         this->addMember(symb);
     }
     else
+    */
     {
         //create a constructor for it
         assert(associatedType != nullptr && associatedType->getCategory() == Type::Tuple);
@@ -207,6 +222,14 @@ void TypeBuilder::addEnumCase(const std::wstring &name, const TypePtr &associate
         TypePtr initializerType = Type::newFunction(params, self(), false, genericDefinition);
         constructor = FunctionSymbolPtr(new FunctionSymbol(name, initializerType, FunctionRoleEnumCase, nullptr));
         constructor->setFlags(SymbolFlagStatic, true);
+        constructor->setFlags(SymbolFlagMember, true);
+        constructor->setFlags(SymbolFlagEnumCase, true);
+        static_pointer_cast<TypeBuilder>(initializerType)->setDeclaringType(self());
+        constructor->declaringType = self();
+        initializerType->setFlags(SymbolFlagStatic, true);
+        initializerType->setFlags(SymbolFlagMember, true);
+        initializerType->setFlags(SymbolFlagEnumCase, true);
+
     }
     EnumCase c = {name, associatedType, constructor};
     enumCases.insert(make_pair(name, c));

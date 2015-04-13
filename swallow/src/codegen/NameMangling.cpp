@@ -40,6 +40,7 @@ struct ManglingContext
             case Type::Protocol:
             case Type::Struct:
             case Type::Class:
+            case Type::Extension:
                 if(getTypeReference(type) == -1)
                     types.push_back(type);
                 break;
@@ -114,6 +115,7 @@ static void encodeName(wstringstream& out, const wchar_t* name)
     const wchar_t* p = name;
     while(p && *p)
     {
+        //TODO: Add punycode encoding
         const wchar_t* next = std::wcschr(p, (wchar_t)'.');
         int len = 0;
         if(next)
@@ -123,7 +125,25 @@ static void encodeName(wstringstream& out, const wchar_t* name)
         out<<len;
         for(int i = 0; i < len; i++)
         {
-            out<<p[i];
+            wchar_t c = p[i];
+            switch (c)
+            {
+                case '+': c = 'p'; break;
+                case '=': c = 'e'; break;
+                case '-': c = 's'; break;
+                case '!': c = 'n'; break;
+                case '%': c = 'r'; break;
+                case '^': c = 'x'; break;
+                case '&': c = 'a'; break;
+                case '*': c = 'm'; break;
+                case '|': c = 'o'; break;
+                case '~': c = 't'; break;
+                case '/': c = 'd'; break;
+                case '<': c = 'l'; break;
+                case '>': c = 'g'; break;
+                case '?': c = 'q'; break;
+            }
+            out<<c;
         }
         p = next;
     }
@@ -247,24 +267,59 @@ void NameMangling::encodeType(ManglingContext& ctx, const TypePtr& type, bool wr
             out<<L"C";
             encodeType(out, type->getModuleName(), type->getName());
             break;
-        case Type::Function:
-            out<<L"F";
-            if(type->getParameters().size() != 1)
-                out<<L"T";
-            for(const Parameter& param : type->getParameters())
-            {
-                if(!param.name.empty())
-                    encodeName(out, param.name);
-                if(type->hasFlags(SymbolFlagMutating))
-                    out<<L"M";
-                if(param.inout)
-                    out<<L"R";
-                encodeType(ctx, param.type);
-            }
-            if(type->getParameters().size() != 1)
-                out<<L"_";
-            encodeType(ctx, type->getReturnType());
+        case Type::MetaType:
+            out<<L"M";
+            encodeType(ctx, type->getInnerType());
             break;
+        case Type::Function:
+        {
+            //There's no need to encode parameters for enum case constructor without associated data
+            bool encodeParameters = !(type->hasFlags(SymbolFlagEnumCase) && type->getParameters().empty());
+            if (type->hasFlags(SymbolFlagMember))
+            {
+                if(!encodeParameters)
+                    out << L"F";
+                else
+                    out << L"f";
+                if (type->hasFlags(SymbolFlagStatic) || type->hasFlags(SymbolFlagInit))
+                    out << L"M";
+                if (type->hasFlags(SymbolFlagMutating) && type->getDeclaringType() && type->getDeclaringType()->isValueType())
+                    out << L"R";
+                encodeType(ctx, type->getDeclaringType());
+            }
+            if(encodeParameters)
+            {
+                out << L"F";
+                bool ignoreTuple = type->getParameters().size() == 1 && !type->hasFlags(SymbolFlagInit);
+                if (!ignoreTuple)
+                    out << L"T";
+                for (const Parameter &param : type->getParameters())
+                {
+                    if (!param.name.empty())
+                        encodeName(out, param.name);
+                    if (type->hasFlags(SymbolFlagMutating))
+                        out << L"M";
+                    if (param.inout)
+                        out << L"R";
+                    encodeType(ctx, param.type);
+                }
+                if (!ignoreTuple)
+                    out << L"_";
+            }
+            if (type->hasFlags(SymbolFlagInit))
+            {
+                if(type->hasFlags(SymbolFlagImplicitFailableInitializer))
+                    out << L"GSQ";
+                else if(type->hasFlags(SymbolFlagFailableInitializer))
+                    out << L"GSq";
+                encodeType(ctx, type->getDeclaringType());
+                if(type->hasFlags(SymbolFlagFailableInitializer))
+                    out << L"_";
+            }
+            else
+                encodeType(ctx, type->getReturnType());
+            break;
+        }
         case Type::ProtocolComposition:
             {
                 if(wrapCollections)
@@ -320,6 +375,9 @@ static void encodeTypeKind(wostream& out, const TypePtr& type)
         case Type::Class:
             out<<L"C";
             break;
+        case Type::Extension:
+            out<<L"E";
+            break;
         default:
             break;
     }
@@ -353,7 +411,12 @@ std::wstring NameMangling::encode(const SymbolPtr& symbol)
 
     encodeName(out, moduleName);
     if(symbol->getDeclaringType())
-        encodeDeclaringType(context, symbol->getDeclaringType());
+    {
+        if(symbol->getDeclaringType()->getCategory() == Type::Extension)
+            encodeType(context, symbol->getDeclaringType()->getInnerType());
+        else
+            encodeDeclaringType(context, symbol->getDeclaringType());
+    }
 
     wstring symbolName = symbol->getName();
     TypePtr symbolType = symbol->getType();
@@ -376,6 +439,16 @@ std::wstring NameMangling::encode(const SymbolPtr& symbol)
         else
             assert(0 && "Invalid role for a property accessor");
     }
+    if(symbol->hasFlags(SymbolFlagOperator))
+    {
+        out << L"o";
+        if(symbol->hasFlags(SymbolFlagInfix))
+            out << L"i";
+        else if(symbol->hasFlags(SymbolFlagPrefix))
+            out << L"p";
+        else if(symbol->hasFlags(SymbolFlagPostfix))
+            out << L"P";
+    }
 
     if(symbol->getAccessLevel() == AccessLevelPrivate)
     {
@@ -383,7 +456,16 @@ std::wstring NameMangling::encode(const SymbolPtr& symbol)
         string s = md5(SwallowUtils::toString(moduleName));
         out<<SwallowUtils::toWString(s);
     }
-    encodeName(out, symbolName);
+    if(symbolType->hasFlags(SymbolFlagAllocatingInit))
+        out<<L"C";
+    else if(symbolType->hasFlags(SymbolFlagInit))
+        out<<L"c";
+    else if(symbolType->hasFlags(SymbolFlagDeallocatingInit))
+        out << L"D";
+    else if(symbolType->hasFlags(SymbolFlagDeinit))
+        out << L"d";
+    else
+        encodeName(out, symbolName);
     if(FunctionSymbolPtr func = dynamic_pointer_cast<FunctionSymbol>(symbol))
     {
         GenericDefinitionPtr generic = func->getType()->getGenericDefinition();
@@ -392,16 +474,9 @@ std::wstring NameMangling::encode(const SymbolPtr& symbol)
             encodeGeneric(context, generic);
         }
     }
-    if(!symbol->hasFlags(SymbolFlagAccessor) && symbol->getDeclaringType() && dynamic_pointer_cast<FunctionSymbol>(symbol))
-    {
-        //generate self for instance method
-        if(symbol->hasFlags(SymbolFlagStatic))
-            out<<L"fM";
-        else
-            out<<L"f";
-        encodeType(context, symbol->getDeclaringType());
-    }
-    encodeType(context, symbolType);
+
+    if(!symbolType->hasFlags(SymbolFlagDeinit))//no symbol type for deinit
+        encodeType(context, symbolType);
     //dump references
     #if 0
     int i = 0;
@@ -440,8 +515,8 @@ void NameMangling::encodeGeneric(ManglingContext &context, const GenericDefiniti
                 {
                     types.push_back(constraint.reference);
                 }
-                context.genericParameters.push_back(param.name);
             }
+            context.genericParameters.push_back(param.name);
             //then encode them to result stream
             for(const TypePtr& type : sortTypes(types))
             {

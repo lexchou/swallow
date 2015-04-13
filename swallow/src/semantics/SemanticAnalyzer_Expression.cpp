@@ -147,9 +147,17 @@ void SemanticAnalyzer::visitMemberAccess(const MemberAccessPtr& node)
             //diagnose why it's not found
             if(staticAccess && selfType->getCategory() == Type::Enum && selfType->getEnumCase(fieldName))
             {
-                //it's a enum's case access, it's not allowed to be accessed directly
-                error(node, Errors::E_PARTIAL_APPLICATION_OF_ENUM_CONSTRUCTOR_IS_NOT_ALLOWED);
-                abort();
+                const EnumCase* ec = selfType->getEnumCase(fieldName);
+                if(ec && !ec->type->isNil())
+                {
+                    //it's a enum's case access, a case with associated data is not allowed to be accessed directly
+
+                    error(node, Errors::E_PARTIAL_APPLICATION_OF_ENUM_CONSTRUCTOR_IS_NOT_ALLOWED);
+                    abort();
+                    return;
+                }
+                node->setType(selfType);
+                return;
             }
             //if it's a int litertal, we can try to look it up in double type
             //this is not defined in official's document, but infered from official's example

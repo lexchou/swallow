@@ -60,32 +60,38 @@ enum SymbolFlags
     SymbolFlagStatic = 1 << 9,
     //The symbol is a type's init, init function cannot be hold by a value binding, and cannot have return value
     SymbolFlagInit = 1 << 10,
+    SymbolFlagAllocatingInit = 1 << 11,
     //The symbol is a type's convenience init, it's not allowed to call another convenience init inside a convenience initializer
     //A convenience initializer can have SymbolFlagInit and SymbolFlagConvenienceInit both.
-    SymbolFlagConvenienceInit = 1 << 11,
+    SymbolFlagConvenienceInit = 1 << 12,
     //The symbol is a type's deinit, deinit cannot have return value
-    SymbolFlagDeinit = 1 << 12,
-    SymbolFlagPrefix = 1 << 13,
-    SymbolFlagInfix = 1 << 14,
-    SymbolFlagPostfix = 1 << 15,
+    SymbolFlagDeinit = 1 << 13,
+    SymbolFlagDeallocatingInit = 1 << 14,
+    SymbolFlagPrefix = 1 << 15,
+    SymbolFlagInfix = 1 << 16,
+    SymbolFlagPostfix = 1 << 17,
     //The symbol is declared through extension
-    SymbolFlagExtension = 1 << 16,
+    SymbolFlagExtension = 1 << 18,
     //The variable is lazy
-    SymbolFlagLazy = 1 << 17,
+    SymbolFlagLazy = 1 << 19,
     //This is a stored property declared on a type
-    SymbolFlagStoredProperty = 1 << 18,
+    SymbolFlagStoredProperty = 1 << 20,
     //This is a computed property declared on a type
-    SymbolFlagComputedProperty = 1 << 19,
+    SymbolFlagComputedProperty = 1 << 21,
     //This is a final symbol, not allowed to be overridden
-    SymbolFlagFinal = 1 << 20,
+    SymbolFlagFinal = 1 << 22,
     //It's a failable initializer, allowed to return nil
-    SymbolFlagFailableInitializer = 1 << 21,
+    SymbolFlagFailableInitializer = 1 << 23,
     //It's a failable initializer, but it returns an ImplicitlyUnwrappedOptional<T>
-    SymbolFlagImplicitFailableInitializer = 1 << 22,
+    SymbolFlagImplicitFailableInitializer = 1 << 24,
     //It's required for a sub-class to implement the initializer
-    SymbolFlagRequired = 1 << 23,
+    SymbolFlagRequired = 1 << 25,
     //It's an accessor for a computed property
-    SymbolFlagAccessor = 1 << 24
+    SymbolFlagAccessor = 1 << 26,
+    //It's an enum case constructor
+    SymbolFlagEnumCase = 1 << 27,
+    //It's an operator overloading function
+    SymbolFlagOperator = 1 << 28,
 };
 
 enum AccessLevel

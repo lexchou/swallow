@@ -116,6 +116,7 @@ TypePtr Type::newExtension(const TypePtr& innerType)
     TypePtr ret(new TypeBuilder(Extension));
     ret->name = innerType->getName();
     ret->innerType = innerType;
+    ret->moduleName = innerType->moduleName;
     return ret;
 }
 TypePtr Type::newProtocolComposition(const std::vector<TypePtr>& types)
@@ -192,7 +193,7 @@ bool Type::isValueType()const
     {
         case Tuple:
         case Struct:
-            //TODO: String is not value type
+        case Enum:
             return true;
         case Aggregate:
             if(name == L"String")
@@ -221,6 +222,10 @@ const std::wstring& Type::getFullName() const
 TypePtr Type::getParentType()const
 {
     return parentType;
+}
+FunctionSymbolPtr Type::getDeinit() const
+{
+    return deinit;
 }
 
 const std::vector<TypePtr>& Type::getProtocols() const

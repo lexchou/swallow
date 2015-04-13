@@ -98,6 +98,7 @@ inline static bool isOperatorHead(wchar_t ch)
         case '|':
         case '^':
         case '~':
+        case '?':
         case 0x00A9:
         case 0x00AB:
         case 0x00AC:

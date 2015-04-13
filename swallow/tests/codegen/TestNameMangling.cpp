@@ -331,7 +331,22 @@ TEST(TestNameMangling, Func10)
     ASSERT_EQ(L"_TF4main10constraintUSs9PrintableS_10MyProtocol_Ss16RawRepresentable__FTQ_Q0__T_", mangling.encode(s));
 }
 
-TEST(TestNameMangling, Func11)
+static FunctionSymbolPtr getMethod(const TypePtr& type, const wstring& name)
+{
+    SymbolPtr s = type->getMember(name);
+    if(!s)
+        s = type->getDeclaredStaticMember(name);
+    if(!s)
+        return nullptr;
+    if(FunctionSymbolPtr func = dynamic_pointer_cast<FunctionSymbol>(s))
+        return func;
+    FunctionOverloadedSymbolPtr funcs = dynamic_pointer_cast<FunctionOverloadedSymbol>(s);
+    if(!funcs || funcs->numOverloads() == 0)
+        return nullptr;
+    return *funcs->begin();
+}
+
+TEST(TestNameMangling, Func_Struct)
 {
     SEMANTIC_ANALYZE(L"struct SSSS\n"
             L"{\n"
@@ -351,10 +366,290 @@ TEST(TestNameMangling, Func11)
     TypePtr SSSS;
     SymbolPtr m;
     ASSERT_NOT_NULL(SSSS = dynamic_pointer_cast<Type>(scope->lookup(L"SSSS")));
-    ASSERT_NOT_NULL(m = SSSS->getMember(L"method"));
+    ASSERT_NOT_NULL(m = getMethod(SSSS, L"method"));
     ASSERT_EQ(L"_TFV4main4SSSS6methodfS0_FT_T_", mangling.encode(m));
-    ASSERT_NOT_NULL(m = SSSS->getMember(L"smethod"));
+    ASSERT_NOT_NULL(m = getMethod(SSSS, L"smethod"));
     ASSERT_EQ(L"_TFV4main4SSSS7smethodfMS0_FT_Si", mangling.encode(m));
-    ASSERT_NOT_NULL(m = SSSS->getMember(L"mmethod"));
+    ASSERT_NOT_NULL(m = getMethod(SSSS, L"mmethod"));
     ASSERT_EQ(L"_TFV4main4SSSS7mmethodfRS0_FT_T_", mangling.encode(m));
+}
+TEST(TestNameMangling, Func_Class)
+{
+    SEMANTIC_ANALYZE(L"class CCCC\n"
+            L"{\n"
+            L"    init() // _TFC4main4CCCCcfMS0_FT_S0_  allocating_init:_TFC4main4CCCCCfMS0_FT_S0_\n"
+            L"    {\n"
+            L"    }\n"
+            L"    init?(a : Int) // _TFC4main4CCCCcfMS0_FT1aSi_GSqS0__ allocating_init:_TFC4main4CCCCCfMS0_FT1aSi_GSqS0__\n"
+            L"    { \n"
+            L"    }\n"
+            L"    init!(a : Int, b : Int) // _TFC4main4CCCCcfMS0_FT1aSi1bSi_GSQS0__ allocating_init:_TFC4main4CCCCCfMS0_FT1aSi1bSi_GSQS0__\n"
+            L"    {\n"
+            L"    }\n"
+            L"    convenience init(a : Bool) // _TFC4main4CCCCcfMS0_FT1aSb_S0_ allocating_init:_TFC4main4CCCCCfMS0_FT1aSb_S0_\n"
+            L"    {\n"
+            L"        self.init();\n"
+            L"    }\n"
+            L"    deinit // _TFC4main4CCCCd deallocating_init: _TFC4main4CCCCD\n"
+            L"    {\n"
+            L"    }\n"
+            L"    func method() //_TFC4main4CCCC6methodfS0_FT_T_\n"
+            L"    {\n"
+            L"    }\n"
+            L"    class func classFunc() // _TFC4main4CCCC9classFuncfMS0_FT_T_\n"
+            L"    {\n"
+            L"    }\n"
+            L"}");
+    ASSERT_NO_ERRORS();
+    TypePtr CCCC;
+    ASSERT_NOT_NULL(CCCC = dynamic_pointer_cast<Type>(scope->lookup(L"CCCC")));
+    ASSERT_EQ(4, CCCC->getDeclaredInitializer()->numOverloads());
+    SymbolPtr m;
+    auto iter = CCCC->getDeclaredInitializer()->begin();
+    ASSERT_NOT_NULL(m = *iter++);
+    ASSERT_EQ(L"_TFC4main4CCCCcfMS0_FT_S0_", mangling.encode(m));
+    ASSERT_NOT_NULL(m = *iter++);
+    ASSERT_EQ(L"_TFC4main4CCCCcfMS0_FT1aSi_GSqS0__", mangling.encode(m));
+    ASSERT_NOT_NULL(m = *iter++);
+    ASSERT_EQ(L"_TFC4main4CCCCcfMS0_FT1aSi1bSi_GSQS0__", mangling.encode(m));
+    ASSERT_NOT_NULL(m = *iter++);
+    ASSERT_EQ(L"_TFC4main4CCCCcfMS0_FT1aSb_S0_", mangling.encode(m));
+
+    ASSERT_EQ(L"_TFC4main4CCCCd", mangling.encode(CCCC->getDeinit()));
+
+    ASSERT_NOT_NULL(m = getMethod(CCCC, L"method"));
+    ASSERT_EQ(L"_TFC4main4CCCC6methodfS0_FT_T_", mangling.encode(m));
+
+    ASSERT_NOT_NULL(m = getMethod(CCCC, L"classFunc"));
+    ASSERT_EQ(L"_TFC4main4CCCC9classFuncfMS0_FT_T_", mangling.encode(m));
+    //TODO: test allocating/deallocating initializer mangling
+}
+
+TEST(TestNameMangling, Func11)
+{
+    SEMANTIC_ANALYZE(L"func add(a : Int, b : Int) -> Int //_TF4main3addFTSiSi_Si\n"
+            L"{\n"
+            L"    return a + b\n"
+            L"}");
+    ASSERT_NO_ERRORS();
+    SymbolPtr s;
+    ASSERT_NOT_NULL(s = scope->lookup(L"add"));
+    ASSERT_EQ(L"_TF4main3addFTSiSi_Si", mangling.encode(s));
+}
+
+#if 0
+TEST(TestNameMangling, Func12)
+{
+    SEMANTIC_ANALYZE(L"func add2(a : Int) (c : Bool) (b : Int) -> Int // _TF4main4add2fSifT1cSb_FT1bSi_Si\n"
+            L"{\n"
+            L"    return a + b\n"
+            L"}");
+    ASSERT_NO_ERRORS();
+    SymbolPtr s;
+    ASSERT_NOT_NULL(s = scope->lookup(L"add"));
+    ASSERT_EQ(L"_TF4main4add2fSifT1cSb_FT1bSi_Si", mangling.encode(s));
+}
+#endif
+
+TEST(TestNameMangling, Func13)
+{
+    SEMANTIC_ANALYZE(L"func makeOpt(inout a : Int) -> Int? // _TF4main7makeOptFRSiGSqSi_\n"
+            L"{\n"
+            L"    return nil\n"
+            L"}");
+    ASSERT_NO_ERRORS();
+    SymbolPtr s;
+    ASSERT_NOT_NULL(s = scope->lookup(L"makeOpt"));
+    ASSERT_EQ(L"_TF4main7makeOptFRSiGSqSi_", mangling.encode(s));
+}
+
+TEST(TestNameMangling, Func14)
+{
+    SEMANTIC_ANALYZE(L"func highOrder(a : (Int, Int) -> Bool) -> Int    //_TF4main9highOrderFFTSiSi_SbSi\n"
+            L"{\n"
+            L"    return 0;\n"
+            L"}");
+    ASSERT_NO_ERRORS();
+    SymbolPtr s;
+    ASSERT_NOT_NULL(s = scope->lookup(L"highOrder"));
+    ASSERT_EQ(L"_TF4main9highOrderFFTSiSi_SbSi", mangling.encode(s));
+}
+
+TEST(TestNameMangling, Func15)
+{
+    SEMANTIC_ANALYZE(L"func makeTuple<T1, T2, T3>(t1 : T1, t2 : T2, t3 : T3) -> (T1, T2, T3) //_TF4main9makeTupleU____FTQ_Q0_Q1__TQ_Q0_Q1__\n"
+            L"{\n"
+            L"    return (t1, t2, t3);\n"
+            L"}");
+    ASSERT_NO_ERRORS();
+    SymbolPtr s;
+    ASSERT_NOT_NULL(s = scope->lookup(L"makeTuple"));
+    ASSERT_EQ(L"_TF4main9makeTupleU____FTQ_Q0_Q1__TQ_Q0_Q1__", mangling.encode(s));
+}
+
+TEST(TestNameMangling, Func16)
+{
+    SEMANTIC_ANALYZE(L"func dec(a : Int) -> Int //_TF4main3decFSiSi\n"
+            L"{\n"
+            L"    return a - 1;\n"
+            L"}");
+    ASSERT_NO_ERRORS();
+    SymbolPtr s;
+    ASSERT_NOT_NULL(s = scope->lookup(L"dec"));
+    ASSERT_EQ(L"_TF4main3decFSiSi", mangling.encode(s));
+}
+
+#if 0
+//TODO: Add punycode encoding
+TEST(TestNameMangling, Func17)
+{
+    SEMANTIC_ANALYZE(L"func 他们为什么不说中文(a : Int) -> Int //_TF4mainX24ihqwcrbEcvIaIdqgAFGpqjyeFSiSi\n"
+            "{\n"
+            "    return a - 1;\n"
+            "}");
+    ASSERT_NO_ERRORS();
+    SymbolPtr s;
+    ASSERT_NOT_NULL(s = scope->lookup(L"他们为什么不说中文"));
+    ASSERT_EQ(L"_TF4mainX24ihqwcrbEcvIaIdqgAFGpqjyeFSiSi", mangling.encode(s));
+}
+#endif
+
+TEST(TestNameMangling, Enum)
+{
+    SEMANTIC_ANALYZE(L"enum ENUM\n"
+            L"{\n"
+            L"    case A // _TFO4main4ENUM1AFMS0_S0_\n"
+            L"    case B(Int) // _TFO4main4ENUM1BfMS0_FSiS0_\n"
+            L"    func foo() // _TFO4main4ENUM3foofS0_FT_T_\n"
+            L"    {\n"
+            L"    }\n"
+            L"    init(a : Int) // _TFO4main4ENUMCfMS0_FT1aSi_S0_\n"
+            L"    {\n"
+            L"        self = .A\n"
+            L"    }\n"
+            L"    static func sfoo() // _TFO4main4ENUM4sfoofMS0_FT_T_\n"
+            L"    {\n"
+            L"    }\n"
+            L"}")
+    ASSERT_NO_ERRORS();
+    TypePtr ENUM;
+    FunctionSymbolPtr c;
+    ASSERT_NOT_NULL(ENUM = dynamic_pointer_cast<Type>(scope->lookup(L"ENUM")));
+    ASSERT_NOT_NULL(c = ENUM->getEnumCase(L"B")->constructor);
+    ASSERT_EQ(L"_TFO4main4ENUM1BfMS0_FSiS0_", mangling.encode(c));
+
+    ASSERT_NOT_NULL(c = ENUM->getEnumCase(L"A")->constructor);
+    ASSERT_EQ(L"_TFO4main4ENUM1AFMS0_S0_", mangling.encode(c));
+
+    ASSERT_NOT_NULL(c = getMethod(ENUM, L"foo"));
+    ASSERT_EQ(L"_TFO4main4ENUM3foofS0_FT_T_", mangling.encode(c));
+
+    ASSERT_NOT_NULL(c = getMethod(ENUM, L"sfoo"));
+    ASSERT_EQ(L"_TFO4main4ENUM4sfoofMS0_FT_T_", mangling.encode(c));
+
+    ASSERT_NOT_NULL(c = getMethod(ENUM, L"init"));
+    ASSERT_EQ(L"_TFO4main4ENUMCfMS0_FT1aSi_S0_", mangling.encode(c));
+
+}
+
+TEST(TestNameMangling, Enum2)
+{
+    SEMANTIC_ANALYZE(L"enum RAW_VALUE : String\n"
+            L"{\n"
+            L"    case A = \"A\" // _TFO4main9RAW_VALUE1AFMS0_S0_\n"
+            L"    case B = \"B\" // _TFO4main9RAW_VALUE1BFMS0_S0_\n"
+            L"    func foo() // _TFO4main9RAW_VALUE3foofS0_FT_T_\n"
+            L"    {\n"
+            L"\n"
+            L"    }\n"
+            L"    // main.RAW_VALUE.init (main.RAW_VALUE.Type)(rawValue : Swift.String) -> Swift.Optional<main.RAW_VALUE>\n"
+            L"    // sil @_TFO4main9RAW_VALUECfMS0_FT8rawValueSS_GSqS0__ : $@thin (@owned String, @thin RAW_VALUE.Type) -> Optional<RAW_VALUE>\n"
+            L"    mutating func mfoo()  //_TFO4main9RAW_VALUE4mfoofRS0_FT_T_\n"
+            L"    {\n"
+            L"\n"
+            L"    }\n"
+            L"}");
+    ASSERT_NO_ERRORS();
+    TypePtr RAW_VALUE;
+    FunctionSymbolPtr c;
+    ASSERT_NOT_NULL(RAW_VALUE = dynamic_pointer_cast<Type>(scope->lookup(L"RAW_VALUE")));
+    ASSERT_NOT_NULL(c = RAW_VALUE->getEnumCase(L"A")->constructor);
+    ASSERT_EQ(L"_TFO4main9RAW_VALUE1AFMS0_S0_", mangling.encode(c));
+
+    ASSERT_NOT_NULL(c = RAW_VALUE->getEnumCase(L"B")->constructor);
+    ASSERT_EQ(L"_TFO4main9RAW_VALUE1BFMS0_S0_", mangling.encode(c));
+
+    ASSERT_NOT_NULL(c = getMethod(RAW_VALUE, L"foo"));
+    ASSERT_EQ(L"_TFO4main9RAW_VALUE3foofS0_FT_T_", mangling.encode(c));
+
+    ASSERT_NOT_NULL(c = getMethod(RAW_VALUE, L"init"));
+    ASSERT_EQ(L"_TFO4main9RAW_VALUECfMS0_FT8rawValueSS_GSqS0__", mangling.encode(c));
+
+    ASSERT_NOT_NULL(c = getMethod(RAW_VALUE, L"mfoo"));
+    ASSERT_EQ(L"_TFO4main9RAW_VALUE4mfoofRS0_FT_T_", mangling.encode(c));
+
+}
+
+TEST(TestNameMangling, Operators)
+{
+    SEMANTIC_ANALYZE(L"infix operator +++{}\n"
+            L"infix operator +=+{}\n"
+            L"prefix operator ---{}\n"
+            L"postfix operator !%^&*|~/<>?{}\n"
+            L"func +++(a : Int, b : Bool) // _TF4mainoi3pppFTSiSb_T_\n"
+            L"{\n"
+            L"\n"
+            L"}\n"
+            L"func +=+(a : Int, b : Bool) -> Bool // _TF4mainoi3pepFTSiSb_Sb\n"
+            L"{\n"
+            L"    return true\n"
+            L"}\n"
+            L"prefix func ---(a : String) -> String // _TF4mainop3sssFSSSS\n"
+            L"{\n"
+            L"    return \"\"\n"
+            L"}\n"
+            L"postfix func !%^&*|~/<>?(a : Int) -> Int // _TF4mainoP11nrxamotdlgqFSiSi\n"
+            L"{\n"
+            L"    return 0\n"
+            L"}");
+    ASSERT_NO_ERRORS();
+    SymbolPtr f;
+
+    ASSERT_NOT_NULL(f = scope->lookup(L"+++"));
+    ASSERT_EQ(L"_TF4mainoi3pppFTSiSb_T_", mangling.encode(f));
+
+    ASSERT_NOT_NULL(f = scope->lookup(L"+=+"));
+    ASSERT_EQ(L"_TF4mainoi3pepFTSiSb_Sb", mangling.encode(f));
+
+    ASSERT_NOT_NULL(f = scope->lookup(L"---"));
+    ASSERT_EQ(L"_TF4mainop3sssFSSSS", mangling.encode(f));
+
+    ASSERT_NOT_NULL(f = scope->lookup(L"!%^&*|~/<>?"));
+    ASSERT_EQ(L"_TF4mainoP11nrxamotdlgqFSiSi", mangling.encode(f));
+
+
+}
+TEST(TestNameMangling, Extension)
+{
+    SEMANTIC_ANALYZE(L"protocol MyProtocol\n"
+            L"{\n"
+            L"    func asInt() -> Int\n"
+            L"}\n"
+            L"\n"
+            L"extension Int : MyProtocol\n"
+            L"{\n"
+            L"    func asInt() -> Int //_TFE4mainSi5asIntfSiFT_Si,  witness: _TTWSi4main10MyProtocolFS0_5asIntUS0___fRQPS0_FT_Si\n"
+            L"    {\n"
+            L"        return self\n"
+            L"    }\n"
+            L"}");
+    ASSERT_NO_ERRORS();
+    TypePtr Int = scope->getExtension(L"Int");
+    FunctionSymbolPtr asInt;
+    ASSERT_NOT_NULL(asInt = getMethod(Int, L"asInt"));
+
+    ASSERT_EQ(L"_TFE4mainSi5asIntfSiFT_Si", mangling.encode(asInt));
+
+    //TODO: test witness function encoding
+
 }

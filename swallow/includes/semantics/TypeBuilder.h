@@ -45,6 +45,13 @@ public:
 
     void setParentType(const TypePtr& type);
 
+    /*!
+     * Which type declared this
+     */
+    void setDeclaringType(const TypePtr& type);
+
+    void setDeinit(const FunctionSymbolPtr& deinit);
+
     void setInnerType(const TypePtr& type);
 
     void setGenericArguments(const GenericArgumentPtr& arguments);

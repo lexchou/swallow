@@ -621,7 +621,9 @@ void DeclarationAnalyzer::visitEnum(const EnumDefPtr& node)
         {
             vector<Parameter> params = {Parameter(L"rawValue", false, type->getParentType())};
             TypePtr initType = Type::newFunction(params, global->Void(), false, nullptr);
-            initType->setFlags(SymbolFlagInit | SymbolFlagFailableInitializer | SymbolFlagMember);
+            initType->setFlags(SymbolFlagAllocatingInit, true);
+            static_pointer_cast<TypeBuilder>(initType)->setDeclaringType(type);
+            initType->setFlags(SymbolFlagInit | SymbolFlagFailableInitializer | SymbolFlagMember | SymbolFlagAllocatingInit);
             FunctionSymbolPtr init(new FunctionSymbol(L"init", initType, FunctionRoleInit, nullptr));
             declarationFinished(init->getName(), init, nullptr);
         }

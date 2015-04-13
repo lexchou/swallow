@@ -652,7 +652,7 @@ void SemanticAnalyzer::declarationFinished(const std::wstring& name, const Symbo
                 inits = FunctionOverloadedSymbolPtr(new FunctionOverloadedSymbol(name));
                 builder->setInitializer(inits);
             }
-            inits->add(init);
+            //inits->add(init);
         }
         //else
         {
