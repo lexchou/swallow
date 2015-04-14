@@ -40,3 +40,4 @@ swallow/tests/tests.xcodeproj/
 *.user
 *.cbp
 .DS_Store
+*~

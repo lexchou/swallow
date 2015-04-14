@@ -1,0 +1,515 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <title></title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <link rel="stylesheet" href="../../markdown.css" type="text/css" />
+</head>
+<body>
+<h1 id="swift-sil-internal---name-mangling">Swift SIL Internal - Name Mangling</h1>
+<p>Gwynne Raskind did a same research just after swift released：<a href="https://mikeash.com/pyblog/friday-qa-2014-08-15-swift-name-mangling.html">Friday Q&amp;A 2014-08-08: Swift Name Mangling</a>, since Gwynne's research was based on a beta version of swift, swift got some minor updates later, I decided to make a same research for my open source project swallow and will cover the aspects that Gwynne was missing(e.g. generic specialization, operator overloading).</p>
+<h2 id="mangling-rule-for-property">Mangling rule for Property</h2>
+<p>Test code, the symbols extracted from SIL was added in the comment:</p>
+<pre><code>public var publicVar : Int = 3     // _Tv4main9publicVarSi
+public var publicVar2 : Int { return 3} //_TF4maing10publicVar2Si
+internal var internalVar : Int = 4  //_Tv4main11internalVarSi
+internal var internalVar2 : Int { return 4}  //_TF4maing12internalVar2Si
+private var privateVar : Int = 5 //_Tv4mainP33_10900790B424C44FA87F9D97B329E27810privateVarSi
+private var privateVar2 : Int { return 5} //_TF4maingP33_10900790B424C44FA87F9D97B329E27811privateVar2Si
+
+
+public let publicLet : Int = 3 // _Tv4main9publicLetSi
+internal let internalLet : Int = 4 //_Tv4main11internalLetSi
+private let privateLet : Int = 5 //_Tv4mainP33_10900790B424C44FA87F9D97B329E27810privateLetSi
+
+
+struct STRUCT
+{
+    var a : Int = 3
+    let b : Int = 4
+    var c : Int { return 5} // getter: _TFV4main6STRUCTg1cSi
+    static var d : Int = 6 // _TvV4main6STRUCT1dSi (mutable addressor: _TFV4main6STRUCTa1dSi)
+    static let e : Int = 7 //_TvV4main6STRUCT1eSi  (mutable addressor: _TFV4main6STRUCTa1eSi)
+    var f : Int { get { return 8} set{}} // getter: _TFV4main6STRUCTg1fSi setter:_TFV4main6STRUCTs1fSi
+    var g : Int = 9 {  // getter: _TFV4main6STRUCTg1gSi, setter:_TFV4main6STRUCTs1gSi
+        willSet {} //_TFV4main6STRUCTw1gSi
+        didSet{} // _TFV4main6STRUCTW1gSi
+    }
+    private var h : Int { return 5} //_TFV4main4SSSSgP33_10900790B424C44FA87F9D97B329E2781hSi
+}
+func foo()
+{
+    var a : Int = 5
+    
+}</code></pre>
+<p>According to the generated SIL code, we can find out stored property within a struct was optimized as offset access, and no symbol name generated for local variable, this make sense, because these stuffs don't invoves into symbol linking, only the size and offset matters.<br />And we can infer the rules from these symbols:</p>
+<ul>
+<li>_T is a must prefix, marks it a swift symbol</li>
+<li>v means it's a symbol for variable</li>
+<li>V Not sure, but we'll find out in the later analysis</li>
+<li>F means it's a function symbol</li>
+<li>Full qualified name was encoded by each part, each part has a prefix of its length, no \0 as terminator</li>
+<li>g means it is a property getter, and s is a setter</li>
+<li>w means its a willSet accessor, W represents a didSet accessor</li>
+<li>Access modifier <em>Public</em> and <em>Internal</em> only make sense in semantic stage, but <em>Private</em> will be encoded as 'P'</li>
+<li>Private property will generatea a '_' with the hash of module name</li>
+<li>a means its a mutable addressor, the both two static properties in the sample code exists an addressor, according to SIL, it's a function which will return the variable'<br />s address, I'll analysis it in the following SIL research reports.</li>
+<li>Si here represents an integer type, an abbreviation for Swift.Int, more details about the type's encoding rules is in the next chapter.</li>
+</ul>
+<h2 id="rules-for-type-mangling">Rules for type mangling</h2>
+<p>Test code and their symbol names:</p>
+<pre><code>func test(a : UInt8, b : UInt16, c : UInt32, d : UInt64, e: UInt)
+{
+    // main.test (Swift.UInt8, Swift.UInt16, Swift.UInt32, Swift.UInt64, Swift.UInt) -&gt; ()
+    // sil @_TF4main4testFTVSs5UInt8VSs6UInt16VSs6UInt32VSs6UInt64Su_T_ : $@thin (UInt8, UInt16, UInt32, UInt64, UInt) -&gt; ()
+}
+
+
+func test2(a : Int8, b : Int16, c : Int32, d : Int64, e: Int)
+{
+    // main.test2 (Swift.Int8, Swift.Int16, Swift.Int32, Swift.Int64, Swift.Int) -&gt; ()
+    // sil @_TF4main5test2FTVSs4Int8VSs5Int16VSs5Int32VSs5Int64Si_T_ : $@thin (Int8, Int16, Int32, Int64, Int) -&gt; ()
+}
+func test3(a : Float32, b : Float64, c : Float80, d : Float, e : Double)
+{
+    // main.test3 (Swift.Float, Swift.Double, Swift.Float80, Swift.Float, Swift.Double) -&gt; ()
+    // sil @_TF4main5test3FTSfSdVSs7Float80SfSd_T_ : $@thin (Float, Double, Float80, Float, Double) -&gt; ()
+}
+func test4(a : String, b : Bool, c : Character)
+{
+    // main.test4 (Swift.String, Swift.Bool, Swift.Character) -&gt; ()
+    // sil @_TF4main5test4FTSSSbOSs9Character_T_ : $@thin (@owned String, Bool, @owned Character) -&gt; ()
+}
+enum MyEnum{case A}
+protocol MyProtocol{}
+class MyClass{}
+struct MyStruct{}
+
+func test5(a : MyEnum, b : MyProtocol, c : MyClass, d : MyStruct){
+//_TF4main5test5FTOS_6MyEnumPS_10MyProtocol_CS_7MyClassVS_8MyStruct_T_
+}
+enum Maybe&lt;T&gt;
+{
+    case Nothing, Just(T)
+}
+
+enum MAYBE&lt;T&gt;
+{
+    case Nothing, Just(T)
+}
+
+func test6(c : Int, b : Maybe&lt;MyClass&gt;, a : MAYBE&lt;Int&gt;, d : MAYBE&lt;MyClass&gt;, e : MAYBE&lt;Maybe&lt;MyClass&gt;&gt;)
+{
+    //_TF4main5test6FTSiGOS_5MaybeCS_7MyClass_GOS_5MAYBESi_GS2_S1__GS2_GS0_S1____T_
+}
+
+func test7(a : [Int], b : Bool?, c : Bool!, d : [String : Int], e : (Int, Double))
+{
+    //_TF4main5test7FTGSaSi_GSqSb_GSQSb_GVSs10DictionarySSSi_TSiSd__T_
+
+}
+func composition(a : protocol&lt;Printable, DebugPrintable&gt;) 
+{
+    //_TF4main11compositionFPSs14DebugPrintableSs9Printable_T_
+}
+
+class OuterClass
+{
+    class Nested
+    {
+        class Inner
+        {
+            func innerFunc() //_TFCCC4main10OuterClass6Nested5Inner9innerFuncfS2_FT_T_
+            {
+                
+            }
+        }
+    }
+}
+
+func constraint&lt;A : protocol&lt;MyProtocol, Reflectable&gt;, B : RawRepresentable where B.RawValue == Int&gt;(arg : (A, B)) // _TF4main10constraintUSs11ReflectableS_10MyProtocol_Ss16RawRepresentable__FTQ_Q0__T_
+{
+    
+}
+</code></pre>
+<p>It's not too hard to find out the &quot;basic&quot; types and their abbreviations:</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Type name</th>
+<th align="left">Abbreviation</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Swift.UInt</td>
+<td align="left">Su</td>
+</tr>
+<tr class="even">
+<td align="left">Swift.Int</td>
+<td align="left">Si</td>
+</tr>
+<tr class="odd">
+<td align="left">Swift.Float32</td>
+<td align="left">Sf</td>
+</tr>
+<tr class="even">
+<td align="left">Swift.Float64</td>
+<td align="left">Sd</td>
+</tr>
+<tr class="odd">
+<td align="left">Swift.Float</td>
+<td align="left">Sf</td>
+</tr>
+<tr class="even">
+<td align="left">Swift.Double</td>
+<td align="left">Sd</td>
+</tr>
+<tr class="odd">
+<td align="left">Swift.String</td>
+<td align="left">SS</td>
+</tr>
+<tr class="even">
+<td align="left">Swift.Bool</td>
+<td align="left">Sb</td>
+</tr>
+<tr class="odd">
+<td align="left">Swift.Array</td>
+<td align="left">Sa</td>
+</tr>
+<tr class="even">
+<td align="left">Swift.UnicodeScalar</td>
+<td align="left">Sc</td>
+</tr>
+<tr class="odd">
+<td align="left">ObjectiveC</td>
+<td align="left">So</td>
+</tr>
+<tr class="even">
+<td align="left">Optional</td>
+<td align="left">Sq</td>
+</tr>
+<tr class="odd">
+<td align="left">ImplicitlyUnwrappedOptional</td>
+<td align="left">SQ</td>
+</tr>
+</tbody>
+</table>
+<p>Now compares with the rules in the previous chapter, it's easy to guess:</p>
+<ul>
+<li>O is an Enum type, V represents Struct， C represents Class， and P represents Protocol，the type flags can exists multiple times to represent a nested type, like <em>TFCCC4main10OuterClass6Nested5Inner9innerFuncfS2_FT_T</em> has C appeared for 3 times, means OuterClass/Nested/Inner are all Class</li>
+<li>S_ will follow a type name which defined in current module.</li>
+<li>Ss will follow a type name which defined in module 'Swift', the types from swift standard library.</li>
+<li>S follows a letter means a type that can be looked up in the table above.</li>
+<li>S follows a digit and ends with a understore is used as a type reference that exists in the encoding, the index starts from 0, usually the member symbol will use S0 as the current type, specialized/function/tuple type will not be referenced.</li>
+<li>G means a specialized generic type, a generic type is followed after G while the rest type arguments are followed next, and ended with _</li>
+<li>T means a tuple type, like the rule for specialized types, the element types are just after the T and ended with _</li>
+<li>F means it's a function type, parameter types(encoded by a tuple) and return type are next to it, no _ is required for function type.</li>
+<li>P means Protocol Composition, followed by all protocol type names, and ended with _</li>
+<li>Single protocol type also treated as protocol composition, declaration <code>var a : MyProtocol</code> is totally equivalent to <code>var a : protocol&lt;MyProtocol&gt;</code>, that means for a single protocol there will also be a _</li>
+<li>U defines n generic parameters with n+1 underscores, there's an optional generic constraint for each underscore, with a set of protocol name list.</li>
+<li>Q used to refer the generic parameter, Q_ means the 1st generic argument type, and Qn_ means the (n+1)th argument type</li>
+<li>The type names beyond the abbreviations are encoded with the rule used in symbol name encoding.</li>
+</ul>
+<p>So we know OSs9Character represents an <em>Enum</em> type named <em>Character</em> which defined in module <em>Swift</em>, and VSs5Int64 represents a <em>struct</em> defined in <em>Swift</em> named Int64.</p>
+<p>Let's see a more complicated example <code>_Tv4main1bGOS_1aSiGOS_2acSiSi__</code>, it can be deconstructed into <code>_Tv 4main 1b GOS_1a&lt;Si, GOS_2ac&lt;Si,Si&gt;_&gt;_</code> which means <code>var b : a&lt;Int, ac&lt;Int, Int&gt;&gt;</code></p>
+<h2 id="mangling-rules-for-methods">Mangling rules for methods</h2>
+<p>Test code and the SIL symbols:</p>
+<pre><code>struct SSSS
+{
+    func method() // _TFV4main4SSSS6methodfS0_FT_T_
+    {
+        
+    }
+    static func smethod() -&gt; Int // _TFV4main4SSSS7smethodfMS0_FT_Si
+    {
+        return 0
+    }
+    mutating func mmethod() // _TFV4main4SSSS7mmethodfRS0_FT_T_
+    {
+        
+    }
+}
+
+class CCCC
+{
+    init() // _TFC4main4CCCCcfMS0_FT_S0_  allocating_init:_TFC4main4CCCCCfMS0_FT_S0_
+    {
+        
+    }
+    init?(a : Int) // _TFC4main4CCCCcfMS0_FT1aSi_GSqS0__ allocating_init:_TFC4main4CCCCCfMS0_FT1aSi_GSqS0__
+    { 
+        
+    }
+    init!(a : Int, b : Int) // _TFC4main4CCCCcfMS0_FT1aSi1bSi_GSQS0__ allocating_init:_TFC4main4CCCCCfMS0_FT1aSi1bSi_GSQS0__
+    {
+        
+    }
+    convenience init(a : Bool) // _TFC4main4CCCCcfMS0_FT1aSb_S0_ allocating_init:_TFC4main4CCCCCfMS0_FT1aSb_S0_
+    {
+        self.init();
+    }
+    deinit // _TFC4main4CCCCd deallocating_init: _TFC4main4CCCCD
+    {
+        
+    }
+    func method() //_TFC4main4CCCC6methodfS0_FT_T_
+    {
+        
+    }
+    class func classFunc() // _TFC4main4CCCC9classFuncfMS0_FT_T_
+    {
+        
+    }
+}
+
+func add(a : Int, b : Int) -&gt; Int //_TF4main3addFTSiSi_Si
+{
+    return a + b
+}
+
+func add2(a : Int) (c : Bool) (b : Int) -&gt; Int // _TF4main4add2fSifT1cSb_FT1bSi_Si
+{
+    return a + b
+}
+func makeOpt(inout a : Int) -&gt; Int? // _TF4main7makeOptFRSiGSqSi_
+{
+    return a
+}
+func highOrder(a : (Int, Int) -&gt; Bool) -&gt; Int    //_TF4main9highOrderFFTSiSi_SbSi
+{
+    return 0;
+}
+
+func makeTuple&lt;T1, T2, T3&gt;(t1 : T1, t2 : T2, t3 : T3) -&gt; (T1, T2, T3) //_TF4main9makeTupleU____FTQ_Q0_Q1__TQ_Q0_Q1__
+{
+    return (t1, t2, t3);
+}
+
+func dec(a : Int) -&gt; Int //_TF4main3decFSiSi
+{
+    return a - 1;
+}
+
+func 他们为什么不说中文(a : Int) -&gt; Int //_TF4mainX24ihqwcrbEcvIaIdqgAFGpqjyeFSiSi
+{
+    return a - 1;
+}
+</code></pre>
+<p>According to SIL code, compiler will generate a <code>__allocating_init</code> for each initializer with the same function signature, and the other rules:</p>
+<ul>
+<li>V means it's a member of struct, described in previous chapter.</li>
+<li>F means it's a function type</li>
+<li>S0 here represents the Self type which was already discussed.</li>
+<li>The 'F' after the function name marks the beginning of parameter list, whereas the 'f' marks the beginning of a curried function parameter list.</li>
+<li>T represents a tuple followed by each parameter's type, each parameter are composed by <em>External Name</em> : <em>function flags</em> : <em>parameter type</em>, e.g. 1aRSi represents <code>inout a a : Swift.Int</code></li>
+<li>Tuple can be ignored if there's only one parameter</li>
+<li>M means it's a meta type</li>
+<li>R means it's a reference(in Swift, it's <em>inout</em> keyword)</li>
+<li>'c' after a type name means it's an initializer, and 'C' means it is an allocating initializer.</li>
+<li>GSqS0 Here means the failable initializer has a return type of Optional<Self>, GSQS0 means a return type of ImplicitlyUnwrappedOptional<Self> for a failable initializer, this was discussed in previous chapter.</li>
+<li>conveniene only make sens in semantic stage, won't make any differences in name manling.</li>
+<li>d represents deinit, D represents deallocating init</li>
+<li>X means the name was encoded by <a href="http://www.ietf.org/rfc/rfc3492.txt">Punycode RFC 3492</a>, Apple made some changes on the punycode encoding/decoding, In the above code, the &quot;他们为什么不说中文&quot; after encoded is ihqwcrbEcvIaIdqgAFGpqjye, but it should be ihqwcrb4cv8a8dqg056pqjye according by RFC 3492.</li>
+</ul>
+<p>Some notes for flag <strong>M</strong> and <strong>R</strong>, M appears in the first parameter of the first curried function parameter list, check this:</p>
+<pre><code>struct Foo
+{
+    static func bar(args : Int){}
+}</code></pre>
+<p>Compiler will treat it as:</p>
+<pre><code>func bar(self : Foo.Type)(args : Int){}</code></pre>
+<p>That means the self exists in a static function, but the self's type is a meta type <strong>Self</strong>.</p>
+<p>And for flag <strong>R</strong>, it means it's a reference type, there's two way to make it appear in the signature, mutating function and inout parameter, compiler will make the implicit parameter self mutable by make it passed by reference, so for a mutating function:</p>
+<pre><code>struct Foo
+{
+    mutating func bar(args : Int) {}
+}</code></pre>
+<p>Compiler treat it as:</p>
+<pre><code>func bar(inout self : Foo)(args : Int) {}</code></pre>
+<p>And for initializer:</p>
+<pre><code>init(a : Int)</code></pre>
+<p>Compiler treat it as:</p>
+<pre><code>func init(class : Self.Type) ( a : Int) -&gt; Self</code></pre>
+<p>That's why there's always a fS0_ in the initializer's parameter list.</p>
+<h1 id="mangling-rules-for-enum">Mangling rules for Enum</h1>
+<p>There's two Enum kinds, union enum and raw-values enum, the members for them and the symbols generated:</p>
+<pre><code>enum ENUM
+{
+    case A // _TFO4main4ENUM1AFMS0_S0_
+    case B(Int) // _TFO4main4ENUM1BfMS0_FSiS0_
+    func foo() // _TFO4main4ENUM3foofS0_FT_T_
+    {
+        
+    }
+    init(a : Int) // _TFO4main4ENUMCfMS0_FT1aSi_S0_
+    {
+        self = .A
+    }
+    static func sfoo() // _TFO4main4ENUM4sfoofMS0_FT_T_
+    {
+        
+    }
+}
+enum RAW_VALUE : String
+{
+    case A = &quot;A&quot; // _TFO4main9RAW_VALUE1AFMS0_S0_
+    case B = &quot;B&quot; // _TFO4main9RAW_VALUE1BFMS0_S0_
+    func foo() // _TFO4main9RAW_VALUE3foofS0_FT_T_
+    {
+        
+    }
+    // main.RAW_VALUE.init (main.RAW_VALUE.Type)(rawValue : Swift.String) -&gt; Swift.Optional&lt;main.RAW_VALUE&gt;
+    // sil @_TFO4main9RAW_VALUECfMS0_FT8rawValueSS_GSqS0__ : $@thin (@owned String, @thin RAW_VALUE.Type) -&gt; Optional&lt;RAW_VALUE&gt;
+    mutating func mfoo()  //_TFO4main9RAW_VALUE4mfoofRS0_FT_T_
+    {
+        
+    }
+}</code></pre>
+<p>We can know normal cases in a union enum(with no associated data) are generated just like the cases in raw-values enum:</p>
+<pre><code>static func A() -&gt; ENUM</code></pre>
+<p>The cases with associated data are just translated to parameters:</p>
+<pre><code>static func B(arg : Int) -&gt; ENUM</code></pre>
+<h2 id="rules-for-operator-overloadings">Rules for operator overloadings</h2>
+<p>Code:</p>
+<pre><code>
+infix operator +++{}
+infix operator +=+{}
+prefix operator ---{}
+postfix operator !%^&amp;*|~/&lt;&gt;?{}
+func +++(a : Int, b : Bool) // _TF4mainoi3pppFTSiSb_T_
+{
+    
+}
+func +=+(a : Int, b : Bool) -&gt; Bool // _TF4mainoi3pepFTSiSb_Sb
+{
+    return true
+}
+prefix func ---(a : String) -&gt; String // _TF4mainop3sssFSSSS
+{
+    return &quot;&quot;
+}
+postfix func !%^&amp;*|~/&lt;&gt;?(a : Int) -&gt; Int // _TF4mainoP11nrxamotdlgqFSiSi
+{
+    return 0
+}</code></pre>
+<ul>
+<li>o Means it's an operator overloading</li>
+<li>i Means it's an infix operator</li>
+<li>p Means it's a prefix operator</li>
+<li>P Means it's a postfix operator</li>
+</ul>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Operator</th>
+<th align="left">Abbreviation</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">+</td>
+<td align="left">p</td>
+</tr>
+<tr class="even">
+<td align="left">=</td>
+<td align="left">e</td>
+</tr>
+<tr class="odd">
+<td align="left">-</td>
+<td align="left">s</td>
+</tr>
+<tr class="even">
+<td align="left">!</td>
+<td align="left">n</td>
+</tr>
+<tr class="odd">
+<td align="left">%</td>
+<td align="left">r</td>
+</tr>
+<tr class="even">
+<td align="left">^</td>
+<td align="left">x</td>
+</tr>
+<tr class="odd">
+<td align="left">&amp;</td>
+<td align="left">a</td>
+</tr>
+<tr class="even">
+<td align="left">*</td>
+<td align="left">m</td>
+</tr>
+<tr class="odd">
+<td align="left">\</td>
+<td align="left"></td>
+</tr>
+<tr class="even">
+<td align="left">~</td>
+<td align="left">t</td>
+</tr>
+<tr class="odd">
+<td align="left">/</td>
+<td align="left">d</td>
+</tr>
+<tr class="even">
+<td align="left">&lt;</td>
+<td align="left">l</td>
+</tr>
+<tr class="odd">
+<td align="left">&gt;</td>
+<td align="left">g</td>
+</tr>
+<tr class="even">
+<td align="left">?</td>
+<td align="left">q</td>
+</tr>
+</tbody>
+</table>
+<h2 id="mangling-rules-for-protocol-witness-table">Mangling rules for Protocol Witness table</h2>
+<p>Extension is a quite sweet feature in swift, though it's not invented by swift, there'are similar concepts in other languages like trait in scala and extension in C#, but swift allows to implement a protocol for an existing type which C#'s extension doesn't, interface in golang is much more like extension in swift in this way, only an explicit declaration is needed.</p>
+<p>Let's see this:</p>
+<pre><code>protocol MyProtocol
+{
+    func asInt() -&gt; Int
+}
+
+extension Int : MyProtocol
+{
+    func asInt() -&gt; Int //_TFE4mainSi5asIntfSiFT_Si,  witness: _TTWSi4main10MyProtocolFS0_5asIntUS0___fRQPS0_FT_Si
+    {
+        return self
+    }
+}</code></pre>
+<p>Now we found a new flag <strong>E</strong> in **_TFE4mainSi5asIntfSiFT_Si<strong>, it's the first letter of </strong>e**xtension, the rest parts are already described before.</p>
+<p>We found another extra symbol, this is called witness function, I'll write about it in different articles, but here we will only discuss name mangling.<br />There's a TW after the **<em>T<strong>, W is an abbreviation of witness, I don't know what the T means here, the extended type's name comes next and the protocol's name, FS0_5asInt can be expanded to MyProtocol.asInt, </strong>US0</em>__** is a generic definition, the S0_ means the first generic parameter must conform to protocol <em>MyProtocol</em>, the <em>fRQPS0_FT_Si</em> is the signature of the function, <strong>R</strong> is reference, means it's an inout parameter, I'm not quite sure about the Q and P here, according to my experience, removal of P won't affects the decoding result of swift-demangle.</p>
+<p>There's 3 questions here, but it won't stop me from writing test cases for my own compiler:</p>
+<ol>
+<li>Don't know what the T after _T works.</li>
+<li>There's only one generic parameter, but there's 3 underscores, there should be two generic parameters according to previous research.</li>
+<li>Not sure what the Q and P means in the curried function parameter list.</li>
+</ol>
+<h2 id="summary">Summary</h2>
+<p>According to the previous researches, we know a symbol is usually composed by:</p>
+<p>**_T** <em>symbol type (F/v)</em> <strong>Owner type(C/O/P/V/E)?</strong> <em>Module name</em> <strong>Type name?</strong> <em>Accessor type(g getter,s setter, w willSet W didSet)?</em> <strong>(P _ module hash)?</strong> <em>Symbol name</em> <strong>Symbol type</strong></p>
+<p>Pseudocode for encoding:</p>
+<pre><code>print &quot;_T&quot;;
+print symbol.kind;
+print symbol.ownerType.kind if defined(symbol.ownerType);
+print encode(symbol.moduleName);
+print encode(symbol.ownerType.name) if defined(symbol.ownerType);
+print symbol.accessorType if defined(symbol.accessorType);
+print &quot;P&quot;.encode(&quot;_&quot;.hash(symbol.module)) if symbol.accessLevel eq &#39;private&#39;;
+print encode(symbol.name);
+print encodeType(symbol.type);</code></pre>
+<h2 id="questions">Questions</h2>
+<p>There's two places I can't make it exactly the same like official implementation.</p>
+<ol>
+<li>The hash calculation for private symbol, I thought the hash function should be something like <code>h(x)=md5(f(x))</code>, then I can know what f(x) is only when decrypted the md5 result by brute force, then I tried to use GPU to decrypt it, finally failed after two day's of calculating, so I think the hash function could be something like <code>h(x)=g(md5(f(x)))</code>.</li>
+<li>Another question is about the punycode encoding, I'll use a simple implementation of punycode in my test cases.</li>
+</ol>
+<p>I'll change the implementation of my compiler when someone figured it out these questions, or do some assembly-level debugging to trace it if I have time.</p>
+</body>
+</html>

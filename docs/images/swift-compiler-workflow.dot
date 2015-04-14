@@ -1,0 +1,11 @@
+digraph "Swift Compiler Workflow" {
+    rankdir=LR
+    node [shape=box]
+    "Source\nCode" -> "Token\nStream"
+    "Token\nStream" -> "AST Tree"
+    "AST Tree" -> "Transformed\nAST Tree"
+    "Transformed\nAST Tree" -> "SIL"
+    "SIL" -> "LLVM\nIR"
+    "LLVM\nIR" -> "Assembly\nlanguage"
+
+}

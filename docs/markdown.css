@@ -1,0 +1,17 @@
+code {
+    background-color:#ccc;
+    display:inline-block;
+    padding:5px;
+
+}
+
+h1, h2, h3 {
+    border-bottom:2px solid #ccc;
+
+}
+
+body {
+    padding:20px 10px;
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+
+}
