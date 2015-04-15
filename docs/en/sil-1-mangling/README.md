@@ -153,6 +153,11 @@ Swift.UnicodeScalar | Sc
 ObjectiveC | So
 Optional | Sq
 ImplicitlyUnwrappedOptional | SQ
+Builtin.RawPointer | Bp
+Builtin.Int*XXX* | Bi*XXX*_
+Builtin.NativeObject | Bo
+Builtin.Word | Bw
+Builtin.UnknownObject | BO
 
 Now compares with the rules in the previous chapter, it's easy to guess:
 
@@ -160,6 +165,7 @@ Now compares with the rules in the previous chapter, it's easy to guess:
 - S_ will follow a type name which defined in current module.
 - Ss will follow a type name which defined in module 'Swift', the types from swift standard library.
 - S follows a letter means a type that can be looked up in the table above.
+- B follows a letter means a virtual type in Builtin module and can be looked up in the type abbreviation table, Builtin module provides two kinds of integer type, Builtin.Word means a integer that has the length of CPU's word length, and Builtin.Int followed with a number can be used as customized precision integer, e.g. Bi2048_ means Builtin.Int2048 which is a 2048bits integer.
 - S follows a digit and ends with a understore is used as a type reference that exists in the encoding, the index starts from 0, usually the member symbol will use S0 as the current type, specialized/function/tuple type will not be referenced.
 - G means a specialized generic type, a generic type is followed after G while the rest type arguments are followed next, and ended with _
 - T means a tuple type, like the rule for specialized types, the element types are just after the T and ended with _

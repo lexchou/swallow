@@ -150,6 +150,12 @@ Swift.UnicodeScalar | Sc
 ObjectiveC | So
 Optional | Sq
 ImplicitlyUnwrappedOptional | SQ
+Builtin.RawPointer | Bp
+Builtin.Int*XXX* | Bi*XXX*_
+Builtin.NativeObject | Bo
+Builtin.Word | Bw
+Builtin.UnknownObject | BO
+
 
 对比之前的规律，不难总结：
 
@@ -157,6 +163,7 @@ ImplicitlyUnwrappedOptional | SQ
 - S如果后面跟了_ 表示后面是当前模块内的类型
 - Ss表示后面的一个类型名是来自Swift模块内的，即标准库类型
 - S后面跟其他字母则按上面的表来反查
+- B 后面跟一个字母表示是Builtin模块内的虚拟类型，具体表示什么可以参考上面的表进行查找，对于整数而言Builtin提供了Word即机器的字长大小的整数，还提供了任意精度的整数类型，使用 Builtin.Int后面接精度，比如 Bi2048_ 表示 Builtin.Int2048 即 2048位精度的整数
 - S后面跟一个数字n以及下划线则表示引用编码规则中第n次出现的非缩写类型，n下标以0开始算，如果是序列化的成员符号，则成员所属的类型属于第0个， 例如 S5_ 表示第5个出现过的类型，泛型特化/函数/元组类型则不会被引用。
 - G表示泛型特化，G后面第一个类型表示泛型类型，之后接着出现的类型都为泛型参数，然后以_结尾
 - T表示Tuple，与泛型特化类似，后面接的都是元素类型，然后以_结尾
