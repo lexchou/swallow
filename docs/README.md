@@ -13,3 +13,4 @@ Apple doesn't provide details about swift compiler's internals, neither can be f
 ## English version
 * [SIL Name Mangling rules](en/sil-1-mangling)
 * [SIL Introduction](en/sil-2-introduction)
+* [SIL Instruction Reference](en/sil-3-instruction-references)
