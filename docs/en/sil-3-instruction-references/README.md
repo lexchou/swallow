@@ -31,7 +31,9 @@ Like LLVM IR, SIL also provides [unlimited-register based RISC instruction set](
 
 
 ## Top-level Keywords:
+
 - **sil_stage**
+
 Description:
 Declare which stage the sil was generated
 Syntax:
@@ -43,7 +45,9 @@ Example:
 sil_stage canonical
 ```
 
+
 - **sil_global**
+
 Description:
 Define a global variable symbol for exporting
 Syntax:
@@ -55,7 +59,9 @@ Example:
 sil_global @_Tv4test3ONESi : $Int
 ```
 
+
 - **sil**
+
 Description:
 Define a function symbol
 Syntax:
@@ -75,7 +81,9 @@ bb0(%0 : $Adder):
 }
 ```
 
+
 - **sil_vtable**
+
 Description:
 Define virtual function table for class.
 Syntax:
@@ -91,7 +99,9 @@ sil_vtable Adder {
 }
 ```
 
+
 - **sil_witness_table**
+
 Description:
 Define type's witness table for given protocol
 Syntax:
@@ -110,8 +120,11 @@ sil_witness_table XXX: Hashable module test {
 ```
 
 
+
 ## Address calculation
+
 - **address_to_pointer**
+
 Description:
 Convert a native type pointer to wrapped pointer type like Builtin.RawPointer
 Syntax:
@@ -123,7 +136,9 @@ Example:
 %5 = address_to_pointer %4 : $*Int to $Builtin.RawPointer // user: %7
 ```
 
+
 - **pointer_to_address**
+
 Description:
 Convert a wrapped pointer value to native type
 Syntax:
@@ -135,7 +150,9 @@ Example:
 %8 = pointer_to_address %0 : $Builtin.RawPointer to $*Optional<A> // user: %9
 ```
 
+
 - **sil_global_addr**
+
 Description:
 Load a global symbol's address
 Syntax:
@@ -147,7 +164,9 @@ Example:
 %0 = sil_global_addr @_Tv4test3ONESi : $*Int    // user: %4
 ```
 
+
 - **ref_element_addr**
+
 Description:
 Get object's field address, the object is a class type.
 Syntax:
@@ -159,7 +178,9 @@ Example:
 %4 = ref_element_addr %1 : $Adder, #Adder.i     // user: %5
 ```
 
+
 - **index_addr**
+
 Description:
 Get array element's address by given index, index is specified by another register
 Syntax:
@@ -171,7 +192,9 @@ Example:
 %44 = index_addr %41#1 : $*String, %43 : $Builtin.Word // user: %45
 ```
 
+
 - **tuple_element_addr**
+
 Description:
 Get tuple element's address by element index, index is an immediate number.
 Syntax:
@@ -186,7 +209,9 @@ Example:
 
 
 ## Memory Access
+
 - **store**
+
 Description:
 Store value to target addressed by a pointer.
 Syntax:
@@ -202,7 +227,9 @@ Equivalent C Code:
 *((int*)%69) = %72;
 ```
 
+
 - **assign**
+
 Description:
 Store value to target addressed by a pointer.
 TODO: Find the differences between *assign* and *store*
@@ -219,7 +246,9 @@ Equivalent C Code:
 *((int*)%9) = %8;
 ```
 
+
 - **load**
+
 Description:
 Load value from given memory address
 Syntax:
@@ -235,7 +264,9 @@ Equivalent C Code:
  %3 = *((int*)%2);
 ```
 
+
 - **alloc_ref**
+
 Description:
 Allocate a reference type on heap
 Syntax:
@@ -251,7 +282,9 @@ Equivalent C++ Code:
 $Adder* %2 = new $Adder();
 ```
 
+
 - **dealloc_ref**
+
 Description:
 Destroy a reference type instance
 Syntax:
@@ -267,7 +300,9 @@ Equivalent C++ Code:
 delete %4;
 ```
 
+
 - **alloc_box**
+
 Description:
 Allocate a pointer to the reference type on stack, this will not allocate the instance but only a pointer to it.
 Syntax:
@@ -283,7 +318,9 @@ Equivalent C Code:
 $Adder* %1;
 ```
 
+
 - **alloc_stack**
+
 Description:
 Allocate a value type on stack and return its address
 Syntax:
@@ -299,7 +336,9 @@ Equivalent C Code:
 $String %8;
 ```
 
+
 - **dealloc_stack**
+
 Description:
 Deallocate a value from the stack.
 Syntax:
@@ -311,7 +350,9 @@ Example:
 dealloc_stack %166#0 : $*@local_storage Int     // id: %172
 ```
 
+
 - **alloc_array**
+
 Description:
 Allocate a typed array with given size specified by a register.
 Syntax:
@@ -327,7 +368,9 @@ Equivalent C Code:
 $String $41[$40];
 ```
 
+
 - **struct_extract**
+
 Description:
 Load struct's field value
 Syntax:
@@ -343,7 +386,9 @@ Equivalent C Code:
 %3 = $0.value;
 ```
 
+
 - **tuple_extract**
+
 Description:
 Get tuple element's value by element index, index is an immediate number.
 Syntax:
@@ -355,7 +400,9 @@ Example:
 %7 = tuple_extract %6 : $(Builtin.Word, Builtin.Int1), 0 // user: %10
 ```
 
+
 - **copy_addr**
+
 Description:
 Copy data in source address to target address
 
@@ -373,7 +420,9 @@ Equivalent C Code:
 *%71 = *%9;
 ```
 
+
 - **inject_enum_addr**
+
 Description:
 Update enum's case value
 Syntax:
@@ -385,7 +434,9 @@ Example:
 inject_enum_addr %0 : $*Optional<T>, #Optional.Some!enumelt.1 // id: %5
 ```
 
+
 - **destroy_addr**
+
 Description:
 Mark the address register destroyed, will not be able to use in the following context.
 Syntax:
@@ -399,7 +450,9 @@ destroy_addr %1 : $*T                           // id: %8
 
 
 ## ARC
+
 - **strong_release**
+
 Description:
 Decrease an instance's reference counter, when it reaches zero, destroy the instance.
 Syntax:
@@ -411,7 +464,9 @@ Example:
 strong_release %1 : $Adder                      // id: %9
 ```
 
+
 - **strong_retain**
+
 Description:
 Increase an instance's reference counter.
 Syntax:
@@ -423,7 +478,9 @@ Example:
 strong_retain %22 : $Adder                      // id: %23
 ```
 
+
 - **retain_value**
+
 Description:
 Increase the reference counter of the instance stored in an optional variable.
 Syntax:
@@ -435,7 +492,9 @@ Example:
 retain_value %0 : $Optional<A>                  // id: %4
 ```
 
+
 - **release_value**
+
 Description:
 Decrease the reference counter of the instance stored in an optional variable.
 Example:
@@ -447,7 +506,9 @@ Example:
 release_value %0 : $Optional<A>                 // id: %10
 ```
 
+
 - **load_weak**
+
 Description:
 Load a weak variable from an address register.
 Syntax:
@@ -459,7 +520,9 @@ Example:
 %3 = load_weak %2 : $*@sil_weak Optional<A>     // user: %5
 ```
 
+
 - **store_weak**
+
 Description:
 Store a weak reference(referenced by optional type) to an address.
 Syntax:
@@ -474,7 +537,9 @@ store_weak %0 to %4 : $*@sil_weak Optional<A>   // id: %5
 
 
 ## Function access
+
 - **function_ref**
+
 Description:
 Return a function's address
 Syntax:
@@ -486,7 +551,9 @@ Example:
 %25 = function_ref @_TFSiCfMSiFT22_builtinIntegerLiteralBi2048__Si : $@thin (Builtin.Int2048, @thin Int.Type) -> Int // user: %28
 ```
 
+
 - **builtin_function_ref**
+
 Description:
 Look up for a built-in function's address, the built-in function was a ["LLVM IR" intrinsic function](http://llvm.org/docs/LangRef.html#intrinsic-functions) to perform low-level operations such as primitive arithmetics.
 Syntax:
@@ -498,7 +565,9 @@ Example:
 %19 = builtin_function_ref "cmp_slt_Word" : $@thin (Builtin.Word, Builtin.Word) -> Builtin.Int1 // user: %21
 ```
 
+
 - **witness_method**
+
 Description:
 Look up for a class's witness method by it's witness method offset.
 Syntax:
@@ -512,6 +581,7 @@ Example:
 
 
 - **class_method**
+
 Description:
 Look up for a class's method from virtual table by its offset
 Syntax:
@@ -525,6 +595,7 @@ Example:
 
 
 - **apply**
+
 Description:
 Call a function by its address
 Syntax:
@@ -543,7 +614,9 @@ Equivalent C Code:
 
 
 ## Value Construction
+
 - **integer_literal**
+
 Description:
 Construct an integer literal
 Syntax:
@@ -561,6 +634,7 @@ int32_t %182 = -1;
 
 
 - **float_literal**
+
 Description:
 Construct a float literal
 Syntax:
@@ -576,7 +650,9 @@ Equivalent C Code:
 double %31 = 0.300000000000000000011;
 ```
 
+
 - **string_literal**
+
 Description:
 Construct a string literal from a specified encoding
 Syntax:
@@ -592,7 +668,9 @@ Equivalent C Code:
 const char* %180 = "fallthrough";
 ```
 
+
 - **metatype**
+
 Description:
 Get the meta type of given type
 Syntax:
@@ -610,6 +688,7 @@ Type %179 = typeof(String);
 
 
 - **tuple**
+
 Description:
 Construct a tuple
 Syntax:
@@ -621,7 +700,9 @@ Example:
 %4 = tuple (%0 : $XXX, %1 : $XXX)               // users: %5, %6
 ```
 
+
 - **struct**
+
 Description:
 Construct a struct instance with initial data
 Syntax:
@@ -640,6 +721,7 @@ MyStruct %10 = {%7};
 
 
 - **init_enum_data_addr**
+
 Description:
 Initialize enum's associated data and return associated data address for writing.
 *NOTE*: This will not change the enum variable's case, so it's usually used together with *inject_enum_addr*.
@@ -652,7 +734,9 @@ Example:
 %3 = init_enum_data_addr %0 : $*Optional<T>, #Optional.Some!enumelt.1 // user: %4
 ```
 
+
 - **unchecked_take_enum_data_addr**
+
 Description:
 Return enum's associated data address for reading
 Syntax:
@@ -664,7 +748,9 @@ Example:
 %6 = unchecked_take_enum_data_addr %3#1 : $*Optional<T>, #Optional.Some!enumelt.1 // user: %7
 ```
 
+
 - **enum**
+
 Description:
 Construct a raw-value enum
 Syntax:
@@ -681,7 +767,9 @@ Example:
 
 
 ## Control flow
+
 - **return**
+
 Description:
 Abort current control flow and return to caller with a return value
 Syntax:
@@ -697,7 +785,9 @@ Equivalent C Code:
 return %6
 ```
 
+
 - **br**
+
 Description:
 Abort current control flow and jump to specified label
 Syntax:
@@ -709,7 +799,9 @@ Example:
 br bb1                                          // id: %16
 ```
 
+
 - **cond_br**
+
 Description:
 Jump to *then label* if condition is non-zero otherwise jump to *else label*.
 Syntax:
@@ -721,7 +813,9 @@ Example:
 cond_br %23, bb2, bb6                           // id: %24
 ```
 
+
 - **cond_fail**
+
 Description:
 Raise an exception if condition is non-zero.
 Syntax:
@@ -737,7 +831,9 @@ Equivalent C Code:
   assert(!%63);
 ```
 
+
 - **switch_enum**
+
 Description:
 Compare an enum register, and jump to branch if the register equals to the corresponding case, if no branch matched, jump to the default branch.  
 Syntax:
@@ -750,7 +846,9 @@ Example:
 switch_enum %80 : $XXX, case #XXX.A!enumelt: bb7, case #XXX.B!enumelt: bb9 // id: %81
 ```
 
+
 - **switch_enum_addr**
+
 Description:
 Same as *switch_enum*, but the condition parameter is a pointer to the real value.
 Syntax:
@@ -763,7 +861,9 @@ Example:
 switch_enum_addr %3#1 : $*Optional<T>, case #Optional.Some!enumelt.1: bb1, case #Optional.None!enumelt: bb2 // id: %5
 ```
 
+
 - **unreachable**
+
 Description:
 Mark the compiler the workflow will never reach this line.
 Syntax:
@@ -780,7 +880,9 @@ unreachable                                     // id: %148
 
 
 ## Meta
+
 - **debug_value**
+
 Description:
 Generate a meta data for debugging this value
 Syntax:
@@ -792,7 +894,9 @@ Example:
 debug_value %129 : $Int  // let f               // id: %149
 ```
 
+
 - **mark_uninitialized**
+
 Description:
   Mark the input as uninitialized, and return the input.
 Syntax:
@@ -804,7 +908,9 @@ Example:
 %4 = mark_uninitialized [rootself] %1 : $Adder  // users: %9, %11, %13
 ```
 
+
 - **mark_function_escape**
+
 Description:
 TODO: what is this used for?
 Syntax:
@@ -820,7 +926,9 @@ mark_function_escape %0 : $*Int                 // id: %6
 
 
 ## Type cast
+
 - **unchecked_ref_cast**
+
 Description:
 Cast value from source type to target type without checking.
 Syntax:
@@ -838,27 +946,35 @@ Equivalent C++ Code:
 
 
 ## Annotations
+
 - **initialization**
+
 Description:
 Mark the target register as initialized, used in IR-level optimization.
 ```
 copy_addr %9 to [initialization] %71 : $*Float  // id: %76
 ```
 
+
 - **transparent**
+
 Mark the function can be inlined.
 ```
 sil public_external [transparent] @_TFSiCfMSiFT22_builtinIntegerLiteralBi2048__Si : $@thin (Builtin.Int2048, @thin Int.Type) -> Int {
 ```
 
+
 - **semantics**
+
 Description:
 **NOTE: I think it's some kinds of alias, need more evidences.**
 ```
 sil [readonly] [semantics "string.makeUTF8"] @_TFSSCfMSSFT21_builtinStringLiteralBp8byteSizeBw7isASCIIBi1__SS : $@thin (Builtin.RawPointer, Builtin.Word, Builtin.Int1, @thin String.Type) -> @owned String
 ```
 
+
 - **take**
+
 Description:
 **NOTE: I think it's used to mark the target will be read, could be used to place some memory fences here, need more evidences.**
 Example:
@@ -866,14 +982,18 @@ Example:
 copy_addr [take] %6 to [initialization] %2#1 : $*T // id: %7
 ```
 
+
 - **readonly**
+
 Description:
 **NOTE: Base on my guess, it's used to mark returned value will has readonly semantic, used for further optimization in linking stage.**
 ```
 sil [readonly] @_TFSa20convertFromHeapArrayU__fMGSaQ__FTBp5ownerBo5countBw_GSaQ__ : $@thin <τ_0_0> (Builtin.RawPointer, @owned Builtin.NativeObject, Builtin.Word, @thin Array<τ_0_0>.Type) -> @owned Array<τ_0_0>
 ```
 
+
 - **noinline**
+
 Description:
 Disable function inlining when calling the function.
 Example:
@@ -881,7 +1001,9 @@ Example:
 sil [noinline] @_TFSs18_fatalErrorMessageFTVSs12StaticStringS_S_Su_T_ : $@thin @noreturn (StaticString, StaticString, StaticString, UInt) -> ()
 ```
 
+
 - **cc**
+
 Description:
 Define function type's a**cc**ess type, the type could be witness_method/method, the function's access type also decides how to address the actual function address at runtime.
 Syntax:
@@ -893,7 +1015,9 @@ Example:
 %165 = witness_method $Int, #Equatable."=="!1 : $@cc(witness_method) @thin <τ_0_0 where τ_0_0 : Equatable> (@in τ_0_0, @in τ_0_0, @thick τ_0_0.Type) -> Bool // user: %170
 ```
 
+
 - **thin**
+
 Description:
 **NOTE: the usage of this annotation is not quite clear. I thought it's used to mark it should be as thin as possible, reduce swift-related meta data"
 Example:
@@ -901,7 +1025,9 @@ Example:
 %15 = function_ref @_TFSig9hashValueSi : $@cc(method) @thin (Int) -> Int // user: %16
 ```
 
+
 - **thick**
+
 Description:
 **NOTE: If my guess on @thin is right, then @thick should means it will carry more meta data on given type.**
 Example:
@@ -909,7 +1035,9 @@ Example:
 sil @_TFC4main1ACfMS0_FT_S0_ : $@thin (@thick A.Type) -> @owned A 
 ```
 
+
 - **out**
+
 Description:
 Parameter semantic annotation, used to tell IR-level optimization that this parameter is used for *writing*, the corresponding type must be a pointer type. 
 Example:
@@ -917,7 +1045,9 @@ Example:
 @thin <T> (@out Optional<T>, @in T) -> ()
 ```
 
+
 - **in**
+
 Description:
 Mark the parameter is used for *reading*.
 Example:
@@ -925,7 +1055,9 @@ Example:
 @thin <T> (@out Optional<T>, @in T) -> ()
 ```
 
+
 - **inout**
+
 Description:
 Mark the parameter is used for both *reading* and *writing*.
 Example:
@@ -933,7 +1065,9 @@ Example:
 $@thin <T> (@inout Optional<T>) -> Builtin.Int1 
 ```
 
+
 - **local_storage**
+
 Description:
 Mark the type is used by a stack variable.
 Example:
@@ -941,7 +1075,9 @@ Example:
   dealloc_stack %2#0 : $*@local_storage T         // id: %12
 ```
 
+
 - **owned**
+
 Description:
 **NOTE: According to my analysis on SIL code, I think it means the value is owned by caller, callee must manually release its reference.** 
 Example:
@@ -949,9 +1085,17 @@ Example:
 sil @_TFSS37convertFromStringInterpolationSegmentfMSSFSiSS : $@thin (Int, @thin String.Type) -> @owned String
 ```
 
+
 - **sil_weak**
+
 Exists in weak optional type declaration, to represent it's a weak reference.
 ```
 %3 = load_weak %2 : $*@sil_weak Optional<A> 
 ```
 
+
+
+
+
+# End of this reference
+It's not done yet, there could be many more instructions that were not found, I'll add them up once I found them.
