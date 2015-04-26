@@ -41,6 +41,7 @@
 #include "CompileConstant.h"
 #include "NilLiteral.h"
 #include "BooleanLiteral.h"
+#include "DefaultValue.h"
 
 #include "ArrayLiteral.h"
 #include "DictionaryLiteral.h"

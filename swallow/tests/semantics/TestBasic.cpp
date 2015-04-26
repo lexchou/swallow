@@ -39,6 +39,11 @@
 using namespace Swallow;
 using namespace std;
 
+TEST(TestBasic, UseModule)
+{
+    SEMANTIC_ANALYZE(L"var a = Builtin");
+    ASSERT_ERROR(Errors::E_EXPECT_MODULE_MEMBER_NAME_AFTER_MODULE_NAME);
+}
 TEST(TestBasic, VariableUseBeforeInitialized)
 {
     SEMANTIC_ANALYZE(L"var a : String\n"

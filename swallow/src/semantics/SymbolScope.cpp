@@ -38,6 +38,7 @@ USE_SWALLOW_NS
 SymbolScope::SymbolScope()
     :owner(NULL), parent(NULL)
 {
+    lazySymbolResolver = nullptr;
 }
 SymbolScope::~SymbolScope()
 {
@@ -72,6 +73,17 @@ SymbolPtr SymbolScope::lookup(const std::wstring& name)
     SymbolMap::iterator iter = symbols.find(name);
     if(iter != symbols.end())
         return iter->second;
+    //check it in LazySymbolResolver
+    if(lazySymbolResolver)
+    {
+        bool success = lazySymbolResolver->resolveLazySymbol(name);
+        if(success)
+        {
+            iter = symbols.find(name);
+            if(iter != symbols.end())
+                return iter->second;
+        }
+    }
     return nullptr;
 }
 

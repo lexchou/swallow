@@ -45,6 +45,7 @@ typedef std::shared_ptr<class FloatLiteral> FloatLiteralPtr;
 typedef std::shared_ptr<class StringLiteral> StringLiteralPtr;
 typedef std::shared_ptr<class NilLiteral> NilLiteralPtr;
 typedef std::shared_ptr<class BooleanLiteral> BooleanLiteralPtr;
+typedef std::shared_ptr<class DefaultValue> DefaultValuePtr;
 
 typedef std::shared_ptr<class CommentNode> CommentNodePtr;
 typedef std::shared_ptr<class UnaryOperator> UnaryOperatorPtr;

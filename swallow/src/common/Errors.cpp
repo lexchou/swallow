@@ -49,10 +49,10 @@ std::wstring Errors::getErrorTemplate(int errorCode)
     switch(errorCode)
     {
         case Errors::E_UNEXPECTED_EOF: return L"Unexpected end-of-file";
-        case Errors::E_EXPECT_1: return L"%0 is expected";
+        case Errors::E_EXPECT_2: return L"%0 is expected, but %1 found.";
         case Errors::E_UNEXPECTED_1: return L"Unexpected %0";
         case Errors::E_EXPECT_IDENTIFIER_1: return L"Identifier expected, but %0 found.";
-        case Errors::E_EXPECT_KEYWORD_1: return L"Keyword %0 expected";
+        case Errors::E_EXPECT_KEYWORD_2: return L"Keyword %0 expected, but %1 found.";
         case Errors::E_EXPECT_EXPRESSION_1: return L"Expression expected but %0 found.";
         case Errors::E_EXPECT_OPERATOR_1: return L"Operator expected but %0 found.";
         case Errors::E_EXPECT_INTEGER_PRECEDENCE: return L"Operator's precedence must be an integer";
@@ -232,6 +232,8 @@ std::wstring Errors::getErrorTemplate(int errorCode)
         case Errors::E_A_MUST_BE_DECLARED_B_BECAUSE_ITS_C_USES_A_D_TYPE_4: return L"%0 must be declared %1 because its %2 uses a %3 type";
         case Errors::E_A_CANNOT_BE_DECLARED_B_BECAUSE_ITS_C_USES_A_D_TYPE_4: return L"%0 cannot be declared %1 because its %2 uses a %3 type";
         case Errors::E_NON_PROTOCOL_TYPE_A_CANNOT_BE_USED_WITHIN_PROTOCOL_COMPOSITION_1: return L"Non-protocol type '%0' cannot be used within 'protocol<...>'";
+        case Errors::E_EXPECT_MODULE_MEMBER_NAME_AFTER_MODULE_NAME: return L"expected module member name after module name";
+        case Errors::E_NO_TYPE_NAMED_A_IN_MODULE_B_2: return L"No type named '%0' in module '%1'";
 
 
         case Errors::W_CODE_AFTER_A_WILL_NEVER_BE_EXECUTED_1: return L"Code after 'return' will never be executed";

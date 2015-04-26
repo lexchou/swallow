@@ -408,6 +408,10 @@ void NodeVisitor::visitBooleanLiteral(const BooleanLiteralPtr& node)
 {
 
 }
+void NodeVisitor::visitDefaultValue(const DefaultValuePtr& node)
+{
+
+}
 
 void NodeVisitor::visitArrayType(const ArrayTypePtr& node)
 {

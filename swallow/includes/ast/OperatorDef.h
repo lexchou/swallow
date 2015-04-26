@@ -51,6 +51,9 @@ public:
     
     void setAssociativity(Associativity::T val);
     Associativity::T getAssociativity();
+
+    bool isAssignment() const { return assignment;}
+    void setAssignment(bool v) { assignment = v;}
     
 public:
     virtual void accept(NodeVisitor* visitor);
@@ -58,6 +61,7 @@ private:
     std::wstring name;
     OperatorType::T type;
     int precedence;
+    bool assignment;
     Associativity::T associativity;
 };
 

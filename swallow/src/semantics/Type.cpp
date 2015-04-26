@@ -67,7 +67,7 @@ Parameter::Parameter(const TypePtr& type)
 }
 
 Type::Type(Category category)
-:category(category)
+:Symbol(SymbolKindType), category(category)
 {
     _containsSelfType = -1;
     variadicParameters = false;
@@ -694,6 +694,8 @@ int Type::compare(const TypePtr &lhs, const TypePtr &rhs)
         }
         case MetaType:
             return compare(lhs->innerType, rhs->innerType);
+        case Module:
+            return true;
         case Function:
         {
             auto iter = lhs->parameters.begin(), iter2 = rhs->parameters.begin();
@@ -766,6 +768,8 @@ std::wstring Type::toString() const
         case MetaType:
         case Alias:
             return name;
+        case Module:
+            return L"<Module>";
         case Tuple:
         {
             wstringstream s;

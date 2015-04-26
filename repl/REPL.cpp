@@ -50,7 +50,7 @@ void REPL::repl()
 void REPL::eval(CompilerResults& compilerResults, const wstring& line)
 {
     Parser parser(&nodeFactory, &compilerResults);
-    parser.setFileName(L"<file>");
+    parser.setSourceFile(SourceFilePtr(new SourceFile(L"<eval>", line)));
     //remove parsed nodes in last eval
     program->clearStatements();
 

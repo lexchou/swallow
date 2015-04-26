@@ -644,11 +644,6 @@ void DeclarationAnalyzer::visitProtocol(const ProtocolDefPtr& node)
 void DeclarationAnalyzer::visitExtension(const ExtensionDefPtr& node)
 {
     //if(parentNode && parentNode->getNodeType() != NodeType::Program)
-    if(ctx->currentFunction || ctx->currentType)
-    {
-        error(node, Errors::E_A_MAY_ONLY_BE_DECLARED_AT_FILE_SCOPE_1, node->getIdentifier()->getName());
-        return;
-    }
     if(node->getGenericParametersDef())
     {
         error(node, Errors::E_GENERIC_ARGUMENTS_ARE_NOT_ALLOWED_ON_AN_EXTENSION);

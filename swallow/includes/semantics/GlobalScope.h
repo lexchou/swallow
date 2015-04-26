@@ -91,6 +91,8 @@ public:
     SymbolPtr True;
     SymbolPtr False;
 
+    TypePtr getModuleType() const;
+
 
     TypePtr Bool() const;
     TypePtr Void() const;
@@ -186,6 +188,7 @@ private:
 
     TypePtr _SequenceType;
     TypePtr _CollectionType;
+    TypePtr module;
     std::vector<TypePtr> t_Numbers;
     std::vector<TypePtr> t_Ints;
 

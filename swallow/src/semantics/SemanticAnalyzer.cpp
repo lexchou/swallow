@@ -103,11 +103,11 @@ void SemanticAnalyzer::delayDeclare(const DeclarationPtr& node)
     auto iter = lazyDeclarations.find(name);
     if(iter == lazyDeclarations.end())
     {
-        list<DeclarationPtr> decls = {node};
+        list<pair<SymbolScope*, DeclarationPtr>> decls = {make_pair(symbolRegistry->getCurrentScope(), node)};
         lazyDeclarations.insert(make_pair(name, decls));
         return;
     }
-    iter->second.push_back(node);
+    iter->second.push_back(make_pair(symbolRegistry->getCurrentScope(), node));
 }
 /*!
  * The declarations that marked as lazy will be declared immediately
@@ -117,20 +117,27 @@ void SemanticAnalyzer::declareImmediately(const std::wstring& name)
     auto entry = lazyDeclarations.find(name);
     if(entry == lazyDeclarations.end())
         return;
-    list<DeclarationPtr> decls;
+    list<pair<SymbolScope*, DeclarationPtr>> decls;
     std::swap(decls, entry->second);
     if(lazyDeclaration)
         lazyDeclarations.erase(entry);
     SymbolScope* currentScope = symbolRegistry->getCurrentScope();
-    symbolRegistry->setCurrentScope(symbolRegistry->getFileScope());
     try
     {
 
         while (!decls.empty())
         {
-            DeclarationPtr decl = decls.front();
+            pair<SymbolScope*, DeclarationPtr> decl = decls.front();
             decls.pop_front();
-            decl->accept(this);
+            symbolRegistry->setCurrentScope(decl.first);
+            SCOPED_SET(this->ctx.currentType, nullptr);
+            SCOPED_SET(this->ctx.currentFunction, nullptr);
+            SCOPED_SET(this->ctx.contextualType, nullptr);
+            SCOPED_SET(this->ctx.currentExtension, nullptr);
+            SCOPED_SET(this->ctx.currentCodeBlock, nullptr);
+            SCOPED_SET(this->ctx.currentInitializationTracer, nullptr);
+            SCOPED_SET(this->ctx.flags, SemanticContext::FLAG_PROCESS_DECLARATION | SemanticContext::FLAG_PROCESS_IMPLEMENTATION);
+            decl.second->accept(this);
         }
     }
     catch(...)
@@ -140,6 +147,14 @@ void SemanticAnalyzer::declareImmediately(const std::wstring& name)
     }
     symbolRegistry->setCurrentScope(currentScope);
 }
+bool SemanticAnalyzer::resolveLazySymbol(const std::wstring& name)
+{
+    auto entry = lazyDeclarations.find(name);
+    if(entry == lazyDeclarations.end())
+        return false;
+    declareImmediately(name);
+    return true;
+}
 void SemanticAnalyzer::visitProgram(const ProgramPtr& node)
 {
     InitializationTracer tracer(nullptr, InitializationTracer::Sequence);
@@ -147,21 +162,28 @@ void SemanticAnalyzer::visitProgram(const ProgramPtr& node)
 
     SemanticPass::visitProgram(node);
     //now we'll deal with the lazy declaration of functions and classes
+    finalizeLazyDeclaration();
+}
+
+void SemanticAnalyzer::finalizeLazyDeclaration()
+{
     lazyDeclaration = false;
+    SymbolScope* scope = symbolRegistry->getCurrentScope();
     while(!lazyDeclarations.empty())
     {
         auto entry = lazyDeclarations.begin();
-        list<DeclarationPtr>& decls = entry->second;
+        list<pair<SymbolScope*, DeclarationPtr>>& decls = entry->second;
         while(!decls.empty())
         {
-            DeclarationPtr decl = decls.front();
+            pair<SymbolScope*, DeclarationPtr> decl = decls.front();
             decls.pop_front();
-            decl->accept(this);
+            symbolRegistry->setCurrentScope(decl.first);
+            decl.second->accept(this);
         }
         lazyDeclarations.erase(entry);
     }
+    symbolRegistry->setCurrentScope(scope);
 }
-
 
 TypePtr SemanticAnalyzer::lookupType(const TypeNodePtr& type, bool supressErrors)
 {
@@ -184,9 +206,58 @@ TypePtr SemanticAnalyzer::lookupTypeImpl(const TypeNodePtr &type, bool supressEr
         case NodeType::TypeIdentifier:
         {
             TypeIdentifierPtr id = std::static_pointer_cast<TypeIdentifier>(type);
-            declareImmediately(id->getName());
+            const wstring& name = id->getName();
+            declareImmediately(name);
+            SymbolPtr s = symbolRegistry->lookupSymbol(name);
+            if(s && s->getKind() == SymbolKindModule)//type declared inside a module
+            {
+                //it's a module, access it's type
+                if(id->getNestedType() == nullptr)
+                {
+                    error(type, Errors::E_USE_OF_UNDECLARED_TYPE_1, name);
+                    return nullptr;
+                }
+                ModulePtr module = static_pointer_cast<Module>(s);
+                id = id->getNestedType();
+                TypePtr ret = dynamic_pointer_cast<Type>(module->getSymbol(id->getName()));
+                if(!ret)
+                {
+                    error(type, Errors::E_NO_TYPE_NAMED_A_IN_MODULE_B_2, id->getName(), name);
+                    return nullptr;
+                }
+                for (TypeIdentifierPtr n = id->getNestedType(); n != nullptr; n = n->getNestedType())
+                {
+                    TypePtr childType = ret->getAssociatedType(n->getName());
+                    if (!childType)
+                    {
+                        if (!supressErrors)
+                            error(n, Errors::E_A_IS_NOT_A_MEMBER_TYPE_OF_B_2, n->getName(), ret->toString());
+                        return nullptr;
+                    }
+                    if (n->numGenericArguments())
+                    {
+                        //nested type is always a non-generic type
+                        if (!supressErrors)
+                            error(n, Errors::E_CANNOT_SPECIALIZE_NON_GENERIC_TYPE_1, childType->toString());
+                        return nullptr;
+                    }
+                    ret = childType;
+                }
+                return ret;
+            }
+            //Self type
+            if(name == L"Self")
+            {
+                if(!ctx.currentType)
+                {
+                    error(type, Errors::E_USE_OF_UNDECLARED_TYPE_1, name);
+                    return nullptr;
+                }
+                return ctx.currentType;
+            }
+
             //TODO: make a generic type if possible
-            TypePtr ret = symbolRegistry->lookupType(id->getName());
+            TypePtr ret = symbolRegistry->lookupType(name);
             if (!ret)
             {
                 if (!supressErrors)
@@ -772,8 +843,10 @@ void SemanticAnalyzer::markInitialized(const SymbolPtr& sym)
     if(sym->hasFlags(SymbolFlagInitialized))
         return;
     sym->setFlags(SymbolFlagInitialized, true);
-    assert(ctx.currentInitializationTracer != nullptr);
-    ctx.currentInitializationTracer->add(sym);
+    if(ctx.currentInitializationTracer)
+    {
+        ctx.currentInitializationTracer->add(sym);
+    }
 }
 /*!
  * Make a chain of member access on a tuple variable(specified by given tempName) by a set of indices

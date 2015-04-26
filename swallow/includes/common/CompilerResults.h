@@ -57,7 +57,7 @@ struct CompilerResult : SourceInfo
     CompilerResult(ErrorLevel::T level, const SourceInfo& sourceInfo, int code, const ResultItems& items)
     :level(level), code(code), items(items)
     {
-        this->fileHash = sourceInfo.fileHash;
+        this->sourceFile = sourceInfo.sourceFile;
         this->line = sourceInfo.line;
         this->column = sourceInfo.column;
     }

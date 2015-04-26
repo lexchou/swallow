@@ -30,6 +30,8 @@
 #ifndef SWALLOW_TYPES_H
 #define SWALLOW_TYPES_H
 #include "swallow_conf.h"
+#include <string>
+#include <memory>
 
 SWALLOW_NS_BEGIN
 
@@ -120,7 +122,7 @@ struct Keyword
         New,
         Super,
         Self,
-        SelfU,
+        SelfType,
         True,
         Type,
         Column, // __COLUMN__
@@ -130,6 +132,7 @@ struct Keyword
         
         //Keywords reserved in particular contexts, Outside the context in which they appear in the grammar, they can be used as identifiers.
         Associativity,
+        Assignment,
         Convenience,
         Dynamic,
         DidSet,
@@ -155,7 +158,17 @@ struct Keyword
         Unowned_safe,
         Unowned_unsafe,
         Weak,
-        WillSet
+        WillSet,
+
+        //SIL keywords
+        SIL,
+        SIL_Global,
+        SIL_VTable,
+        SIL_Witness_Table,
+        SIL_Stage,
+        Method,
+        Base_Protocol,
+        Module
     };
 };
 struct KeywordType
@@ -166,7 +179,8 @@ struct KeywordType
         Declaration,
         Statement,
         Expression,
-        Reserved
+        Reserved,
+        SIL
     };
 };
 struct OperatorType
@@ -228,14 +242,24 @@ struct DeclarationModifiers
     };
 };
 
+struct SourceFile
+{
+    std::wstring fileName;
+    std::wstring code;
+    SourceFile(){}
+    SourceFile(const std::wstring& fileName, const std::wstring& code)
+            :fileName(fileName), code(code)
+    {}
+};
+typedef std::shared_ptr<SourceFile> SourceFilePtr;
 
 struct SourceInfo
 {
-    int fileHash;
+    SourceFilePtr sourceFile;
     int line;
     int column;
     SourceInfo()
-    :fileHash(0), line(0), column(0)
+    :sourceFile(nullptr), line(0), column(0)
     {}
 };
 

@@ -33,6 +33,7 @@
 #include "Type.h"
 #include <list>
 #include "SemanticContext.h"
+#include "SymbolScope.h"
 
 SWALLOW_NS_BEGIN
 
@@ -70,7 +71,7 @@ enum MemberFilter
     FilterLookupInExtension = 4
 };
 class DeclarationAnalyzer;
-class SWALLOW_EXPORT SemanticAnalyzer : public SemanticPass
+class SWALLOW_EXPORT SemanticAnalyzer : public SemanticPass, public LazySymbolResolver
 {
     friend class DeclarationAnalyzer;
 public:
@@ -138,6 +139,7 @@ public://Syntax sugar for type
 public:
     SemanticContext* getContext() {return &ctx;}
 
+    virtual bool resolveLazySymbol(const std::wstring& name) override;
     /*!
      * This implementation will try to find the member from the type, and look up from extension as a fallback.
      */
@@ -276,11 +278,17 @@ private:
      * Validate initializer delegation safety check
      */
     void validateInitializerDelegation(const MemberAccessPtr& node);
+protected:
+
+    /*!
+     * Declare the rest lazy declaration immediately
+     */
+    void finalizeLazyDeclaration();
 
 protected:
     SemanticContext ctx;
     DeclarationAnalyzer* declarationAnalyzer;
-    std::map<std::wstring, std::list<DeclarationPtr>> lazyDeclarations;
+    std::map<std::wstring, std::list<std::pair<SymbolScope*,DeclarationPtr>>> lazyDeclarations;
     bool lazyDeclaration;
 };
 

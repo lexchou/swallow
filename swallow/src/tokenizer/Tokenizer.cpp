@@ -46,7 +46,8 @@ Tokenizer::Tokenizer(const wchar_t* data)
     KeywordType::T S = KeywordType::Statement;
     KeywordType::T E = KeywordType::Expression;
     KeywordType::T R = KeywordType::Reserved;
-    
+    KeywordType::T I = KeywordType::SIL;
+
     struct {
         const wchar_t* name;
         KeywordType::T type;
@@ -97,7 +98,7 @@ Tokenizer::Tokenizer(const wchar_t* data)
         {L"nil",            E, Keyword::Nil},
         {L"new",            E, Keyword::New},
         {L"self",           E, Keyword::Self},
-        {L"Self",           E, Keyword::SelfU},
+        {L"Self",           E, Keyword::SelfType},
         {L"super",          E, Keyword::Super},
         {L"true",           E, Keyword::True},
 
@@ -107,6 +108,7 @@ Tokenizer::Tokenizer(const wchar_t* data)
         {L"__LINE__",       E, Keyword::Line},
         //Reserved keywords
         {L"associativity",  R, Keyword::Associativity, TokenizerContextOperator},
+        {L"assignment",     R, Keyword::Assignment, TokenizerContextOperator},
         {L"convenience",    R, Keyword::Convenience, TokenizerContextClass},
         {L"dynamic",        R, Keyword::Dynamic, TokenizerContextClass},
         {L"didSet",         R, Keyword::DidSet, TokenizerContextComputedProperty},
@@ -116,9 +118,9 @@ Tokenizer::Tokenizer(const wchar_t* data)
         {L"inout",          R, Keyword::Inout, TokenizerContextFunctionSignature},
         {L"lazy",           R, Keyword::Lazy, TokenizerContextDeclaration},
         {L"left",           R, Keyword::Left, TokenizerContextOperator},
-        {L"mutating",       R, Keyword::Mutating, TokenizerContextDeclaration},
+        {L"mutating",       R, Keyword::Mutating, (TokenizerContext)(TokenizerContextDeclaration | TokenizerContextComputedProperty)},
         {L"none",           R, Keyword::None, TokenizerContextOperator},
-        {L"nonmutating",    R, Keyword::Nonmutating, TokenizerContextDeclaration},
+        {L"nonmutating",    R, Keyword::Nonmutating, (TokenizerContext)(TokenizerContextDeclaration | TokenizerContextComputedProperty)},
         {L"optional",       R, Keyword::Optional, TokenizerContextClass},
         {L"override",       R, Keyword::Override, (TokenizerContext)(TokenizerContextClass | TokenizerContextFile)},
         {L"postfix",        R, Keyword::Postfix, TokenizerContextAll},
@@ -131,7 +133,16 @@ Tokenizer::Tokenizer(const wchar_t* data)
         {L"Type",           R, Keyword::Type, TokenizerContextUnknown}, //TODO: update the context according to its usage.
         {L"unowned",        R, Keyword::Unowned, (TokenizerContext)(TokenizerContextCaptureList | TokenizerContextClass)},
         {L"weak",           R, Keyword::Weak, (TokenizerContext)(TokenizerContextCaptureList | TokenizerContextClass)},
-        {L"willSet",        R, Keyword::WillSet, TokenizerContextComputedProperty}
+        {L"willSet",        R, Keyword::WillSet, TokenizerContextComputedProperty},
+        //SIL keywords
+        {L"sil",               I, Keyword::SIL, TokenizerContextSIL},
+        {L"sil_stage",         I, Keyword::SIL_Stage, TokenizerContextSIL},
+        {L"sil_vtable",        I, Keyword::SIL_VTable, TokenizerContextSIL},
+        {L"sil_witness_table", I, Keyword::SIL_Witness_Table, TokenizerContextSIL},
+        {L"module",            I, Keyword::Module, TokenizerContextSIL},
+        {L"method",            I, Keyword::Method, TokenizerContextSIL},
+        {L"base_protocol",     I, Keyword::Base_Protocol, TokenizerContextSIL},
+        {L"sil_global",        I, Keyword::SIL_Global, TokenizerContextSIL}
     };
     
     for(unsigned i = 0; i < sizeof(keywords) / sizeof(keywords[0]); i++)
@@ -181,6 +192,13 @@ Tokenizer::~Tokenizer()
     set(NULL);
 }
 
+/*!
+ * Tells the tokenizer the current file
+ */
+void Tokenizer::setSourceFile(const SourceFilePtr& file)
+{
+    state.sourceFile = file;
+}
 /*!
  * Save current state for restoring later
  */
@@ -321,8 +339,23 @@ bool Tokenizer::readOperator(Token& token, bool dotOperator, int max)
             //no white before, ?! will be used as syntax sugar operator, only one character
             break;
         }
+
+        //only read one character when in type context
+        if((ch == '<' || ch == '>') && state.context == TokenizerContextType)
+            break;
+    }
+    if(state.context == TokenizerContextFunctionSignature && token.token.size() > 1 && token.token.back() == '<')
+    {
+        wchar_t c;
+        if(!peek(c) || c != '(')
+        {
+            unget();
+            token.token.erase(token.token.end() - 1);
+        }
     }
     token.operators.type = calculateOperatorType(begin, begin + token.token.size());
+    if(token.token == L"?")
+        token.type = TokenType::Optional;
     return true;
 }
 OperatorType::T Tokenizer::calculateOperatorType(const wchar_t* begin, const wchar_t* end)
@@ -749,7 +782,7 @@ bool Tokenizer::peek(Token& token)
 bool Tokenizer::next(Token& token)
 {
     resetToken(token);
-    skipSpaces();
+    state.hasSpace = skipSpaces();
     bool ret = nextImpl(token);
     return ret;
 }
@@ -817,12 +850,14 @@ bool Tokenizer::nextImpl(Token& token)
             return readSymbol(token, TokenType::Attribute);
         case '#':
             return readSymbol(token, TokenType::Sharp);
+        /*
         case '?':
         {
             bool whiteLeft = hasWhiteLeft(data + state.cursor);
             token.operators.type = whiteLeft ? OperatorType::InfixBinary : OperatorType::PostfixUnary;
             return readSymbol(token, TokenType::Optional);
         }
+        */
         case ',':
             return readSymbol(token, TokenType::Comma);
         case ';':

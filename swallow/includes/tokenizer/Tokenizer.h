@@ -83,6 +83,11 @@ public:
      * Tells the tokenizer which context it is in
      */
     void setContext(TokenizerContext context);
+
+    /*!
+     * Tells the tokenizer the current file
+     */
+    void setSourceFile(const SourceFilePtr& file);
 private:
     bool nextImpl(Token& token);
     void resetToken(Token& token);

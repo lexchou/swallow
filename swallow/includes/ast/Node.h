@@ -65,6 +65,7 @@ struct NodeType
         ComputedProperty,
         Continue,
         Deinit,
+        DefaultValue,
         DictionaryLiteral,
         DictionaryType,
         Do,

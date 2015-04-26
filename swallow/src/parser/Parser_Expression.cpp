@@ -424,6 +424,7 @@ bool Parser::isGenericArgument()
 GenericArgumentDefPtr Parser::parseGenericArgumentDef()
 {
     Token token;
+    ENTER_CONTEXT(TokenizerContextType);
     expect(L"<", token);
     GenericArgumentDefPtr ret = nodeFactory->createGenericArgumentDef(token.state);
     do
@@ -680,7 +681,7 @@ ExpressionPtr Parser::parseLiteralExpression()
             {
                 CompileConstantPtr c = nodeFactory->createCompilecConstant(token.state);
                 c->setName(L"__FILE__");
-                c->setValue(fileName);
+                c->setValue(sourceFile->fileName);
                 return c;
             }
             case Keyword::Line:

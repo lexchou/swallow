@@ -67,6 +67,10 @@ BooleanLiteralPtr NodeFactory::createBooleanLiteral(const SourceInfo& state)
 {
     return _(state, new BooleanLiteral());
 }
+DefaultValuePtr NodeFactory::createDefaultValue(const SourceInfo& state)
+{
+    return _(state, new DefaultValue());
+}
 StringInterpolationPtr NodeFactory::createStringInterpolation(const SourceInfo &state)
 {
     return _(state, new StringInterpolation());

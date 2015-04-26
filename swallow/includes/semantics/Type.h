@@ -112,6 +112,7 @@ public:
         Extension,
         Function,
         MetaType,
+        Module,
         GenericParameter,//Placeholder for generic type
         Alias,// Alias for another type
         Self// A fake place holder, protocol use this type to present the final type that conform to the protocol

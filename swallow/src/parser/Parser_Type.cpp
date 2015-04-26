@@ -28,9 +28,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "parser/Parser.h"
+#include "parser/Parser_Details.h"
+#include "tokenizer/Tokenizer.h"
 #include "ast/NodeFactory.h"
 #include "ast/ast.h"
+#include "common/CompilerResults.h"
 #include <cassert>
+#include <common/Errors.h>
+
 using namespace Swallow;
 
 
@@ -57,6 +62,10 @@ TypeNodePtr Parser::parseType()
         ret = parseTupleType();
     }
     else if(token.type == TokenType::Identifier && token.identifier.keyword == Keyword::_)
+    {
+        ret = parseTypeIdentifier();
+    }
+    else if(token.type == TokenType::Identifier && token.identifier.keyword == Keyword::SelfType)
     {
         ret = parseTypeIdentifier();
     }
@@ -222,9 +231,16 @@ TupleTypePtr Parser::parseTupleType()
 TypeIdentifierPtr Parser::parseTypeIdentifier()
 {
     Token token;
-    expect_identifier(token);
+    expect_next(token);
+    if(token.type != TokenType::Identifier || (token.identifier.keyword != Keyword::_ && token.identifier.keyword != Keyword::SelfType))
+    {
+        ResultItems items = {token.token};
+        error(token, Errors::E_EXPECT_IDENTIFIER_1, items);
+        return nullptr;
+    }
     TypeIdentifierPtr ret = nodeFactory->createTypeIdentifier(token.state);
     ret->setName(token.token);
+    ENTER_CONTEXT(TokenizerContextType);
     if(match(L"<"))
     {
         do
@@ -247,6 +263,7 @@ ProtocolCompositionPtr Parser::parseProtocolComposition()
 {
     Token token;
     expect(L"protocol", token);
+    ENTER_CONTEXT(TokenizerContextType);
     expect(L"<");
     ProtocolCompositionPtr ret = nodeFactory->createProtocolComposition(token.state);
     if(!predicate(L">"))
@@ -287,6 +304,7 @@ ProtocolCompositionPtr Parser::parseProtocolComposition()
 GenericParametersDefPtr Parser::parseGenericParametersDef()
 {
     Token token;
+    ENTER_CONTEXT(TokenizerContextType);
     expect(L"<", token);
     GenericParametersDefPtr ret = nodeFactory->createGenericParametersDef(token.state);
     // ‌ generic-parameter-list → generic-parameter | generic-parameter,generic-parameter-list

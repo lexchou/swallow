@@ -244,6 +244,8 @@ bool Type::canSpecializeTo(const TypePtr& type, std::map<std::wstring, TypePtr>&
             assert(0);
             return true;
         }
+        case Module:
+            return false;
         case Tuple:
         {
             if(self->elementTypes.size() != type->elementTypes.size())

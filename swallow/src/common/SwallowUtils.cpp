@@ -34,6 +34,7 @@
 #include <iostream>
 #include "common/CompilerResults.h"
 #include "common/Errors.h"
+#include <dirent.h>
 //#include <codecvt>
 
 USE_SWALLOW_NS
@@ -63,6 +64,23 @@ void SwallowUtils::dumpHex(const char* s)
         printf("%s %s\n", hex, raw);
     }
 }
+std::vector<std::string> SwallowUtils::readDirectory(const char* path)
+{
+    DIR *dir;
+    vector<string> ret;
+    dir = opendir(path);
+    if (dir)
+    {
+        struct dirent* ent;
+        while((ent = readdir(dir)) != NULL)
+        {
+            ret.push_back(ent->d_name);
+        }
+        closedir(dir);
+    }
+    return ret;
+}
+
 
 std::wstring SwallowUtils::readFile(const char* fileName)
 {
@@ -89,19 +107,19 @@ void SwallowUtils::dumpCompilerResults(const std::wstring& src, const CompilerRe
     if(!compilerResults.numResults())
         return;
 
-    //separate source code by lines
-    vector<wstring> lines;
-    wstringstream stream(src);
-    wstring line;
-    while(getline(stream, line))
-    {
-        lines.push_back(line);
-    }
 
     for(int i = 0; i < compilerResults.numResults(); i++)
     {
         const CompilerResult &res = compilerResults.getResult(i);
 
+        //separate source code by lines
+        vector<wstring> lines;
+        wstringstream stream(res.sourceFile->code);
+        wstring line;
+        while(getline(stream, line))
+        {
+            lines.push_back(line);
+        }
 
         switch (res.level)
         {
@@ -118,7 +136,10 @@ void SwallowUtils::dumpCompilerResults(const std::wstring& src, const CompilerRe
                 out << L"Note";
                 break;
         }
-        out << L" " << res.code << L" :";
+        out << L" " << res.code << L" ";
+        if(res.sourceFile)
+            out<< res.sourceFile->fileName;
+        out<<L":";
         out << L"(" << res.line << L", " << res.column << ") ";
         std::wstring msg = Errors::format(res.code, res.items);
         out << msg << std::endl;

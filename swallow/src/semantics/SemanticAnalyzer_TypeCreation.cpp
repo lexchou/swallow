@@ -92,6 +92,21 @@ void SemanticAnalyzer::visitProtocol(const ProtocolDefPtr& node)
 }
 void SemanticAnalyzer::visitExtension(const ExtensionDefPtr& node)
 {
+    if(ctx.currentFunction || ctx.currentType)
+    {
+        error(node, Errors::E_A_MAY_ONLY_BE_DECLARED_AT_FILE_SCOPE_1, node->getIdentifier()->getName());
+        return;
+    }
+    //check if this type is already registered
+    if(lazyDeclaration)
+    {
+        SymbolPtr sym = symbolRegistry->lookupSymbol(node->getIdentifier()->getName());
+        if(!sym)
+        {
+            delayDeclare(node);
+            return;
+        }
+    }
     node->accept(declarationAnalyzer);
 }
 void SemanticAnalyzer::visitOptionalType(const OptionalTypePtr& node)

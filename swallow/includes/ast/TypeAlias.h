@@ -44,14 +44,19 @@ public:
     const std::wstring& getName()const;
     void setName(const std::wstring& name);
     
-    void setType(TypeNodePtr type);
-    TypeNodePtr getType();
+    void setType(const TypeNodePtr& type);
+    TypeNodePtr getType() const;
+
+    void setConstraint(const TypeNodePtr& type);
+    const TypeNodePtr& getConstraint() const;
+
     
 public:
     virtual void accept(NodeVisitor* visitor);
 private:
     std::wstring name;
     TypeNodePtr type;
+    TypeNodePtr constraint;
 };
 
 SWALLOW_NS_END

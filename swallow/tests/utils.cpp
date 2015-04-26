@@ -89,7 +89,7 @@ Swallow::NodePtr parseStatement(Swallow::CompilerResults& compilerResults, const
     using namespace Swallow;
     NodeFactory nodeFactory;
     Parser parser(&nodeFactory, &compilerResults);
-    parser.setFileName(L"<file>");
+    parser.setSourceFile(SourceFilePtr(new SourceFile(L"<code>", str)));
     NodePtr ret = parser.parseStatement(str);
     dumpCompilerResults(compilerResults);
     return ret;
@@ -100,7 +100,7 @@ Swallow::ProgramPtr parseStatements(Swallow::CompilerResults& compilerResults, c
     using namespace Swallow;
     NodeFactory nodeFactory;
     Parser parser(&nodeFactory, &compilerResults);
-    parser.setFileName(L"<file>");
+    parser.setSourceFile(SourceFilePtr(new SourceFile(L"<code>", str)));
     ProgramPtr ret = parser.parse(str);
     dumpCompilerResults(compilerResults);
     return ret;
@@ -126,7 +126,7 @@ Swallow::ScopedProgramPtr analyzeStatement(Swallow::SymbolRegistry& registry, Sw
 
     ScopedNodeFactory nodeFactory;
     Parser parser(&nodeFactory, &compilerResults);
-    parser.setFileName(L"<file>");
+    parser.setSourceFile(SourceFilePtr(new SourceFile(L"<code>", str)));
     ScopedProgramPtr ret = std::dynamic_pointer_cast<ScopedProgram>(parser.parse(str));
     if(!ret)
         return ret;

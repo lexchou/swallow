@@ -41,3 +41,8 @@ swallow/tests/tests.xcodeproj/
 *.cbp
 .DS_Store
 *~
+GPATH
+GRTAGS
+GTAGS
+*.log
+*#

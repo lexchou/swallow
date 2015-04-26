@@ -1,4 +1,4 @@
-/* FunctionSymbol.cpp --
+/* DefaultValue.h --
  *
  * Copyright (c) 2014, Lex Chou <lex at chou dot it>
  * All rights reserved.
@@ -27,33 +27,23 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "semantics/FunctionSymbol.h"
-#include "semantics/Type.h"
-#include <cassert>
+#ifndef DEFAULT_VALUE_H
+#define DEFAULT_VALUE_H
+#include "Expression.h"
 
-USE_SWALLOW_NS
+SWALLOW_NS_BEGIN
+
+    class SWALLOW_EXPORT DefaultValue : public Expression
+    {
+    public:
+        DefaultValue();
+    public:
+        virtual void accept(NodeVisitor* visitor);
+    };
 
 
-FunctionSymbol::FunctionSymbol(const std::wstring& name, const TypePtr& signature, FunctionRole role, const CodeBlockPtr& definition)
-:Symbol(SymbolKindFunction), name(name), type(signature), role(role), definition(definition)
-{
-    assert(signature);
-    assert(signature->getCategory() == Type::Function);
-}
+SWALLOW_NS_END
 
-TypePtr FunctionSymbol::getType()
-{
-    return type;
-}
-const std::wstring& FunctionSymbol::getName() const
-{
-    return name;
-}
-TypePtr FunctionSymbol::getReturnType()const
-{
-    return type->getReturnType();
-}
-CodeBlockPtr FunctionSymbol::getDefinition()
-{
-    return definition.lock();
-}
+
+
+#endif//DEFAULT_VALUE_H

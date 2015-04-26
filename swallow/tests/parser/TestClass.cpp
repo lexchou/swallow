@@ -48,7 +48,7 @@ TEST(TestClass, StructWithEof)
     PARSE_STATEMENT(L"struct Resolution ");
     ASSERT_EQ(1, compilerResults.numResults());
     auto res = compilerResults.getResult(0);
-    ASSERT_EQ(Errors::E_EXPECT_1, res.code);
+    ASSERT_EQ(Errors::E_EXPECT_2, res.code);
 }
 TEST(TestClass, testClass)
 {

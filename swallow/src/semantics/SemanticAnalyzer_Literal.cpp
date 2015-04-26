@@ -396,7 +396,13 @@ void SemanticAnalyzer::visitIdentifier(const IdentifierPtr& id)
         error(id, Errors::E_USE_OF_UNRESOLVED_IDENTIFIER_1, id->getIdentifier());
         return;
     }
-    if(SymbolPlaceHolderPtr placeholder = std::dynamic_pointer_cast<SymbolPlaceHolder>(sym))
+
+    //access module but not within a member access context
+    if(sym->getType() && sym->getType()->getCategory() == Type::Module && id->getParentNode() && id->getParentNode()->getNodeType() != NodeType::MemberAccess)
+    {
+        error(id, Errors::E_EXPECT_MODULE_MEMBER_NAME_AFTER_MODULE_NAME);
+    }
+    else if(SymbolPlaceHolderPtr placeholder = std::dynamic_pointer_cast<SymbolPlaceHolder>(sym))
     {
         if(placeholder->hasFlags(SymbolFlagInitializing))
         {

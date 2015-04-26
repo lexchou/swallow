@@ -49,8 +49,8 @@ public:
     SymbolRegistry();
     ~SymbolRegistry();
 public:
-    bool registerOperator(const std::wstring& name, OperatorType::T type, Associativity::T associativity = Associativity::None, int precedence = 100);
-    bool registerOperator(SymbolScope* scope, const std::wstring& name, OperatorType::T type, Associativity::T associativity = Associativity::None, int precedence = 100);
+    bool registerOperator(const std::wstring& name, OperatorType::T type, Associativity::T associativity = Associativity::None, int precedence = 100, bool assignment = false);
+    bool registerOperator(SymbolScope* scope, const std::wstring& name, OperatorType::T type, Associativity::T associativity = Associativity::None, int precedence = 100, bool assignment = false);
 
     OperatorInfo* getOperator(const std::wstring& name, int typeMask);
     OperatorInfo* getOperator(SymbolScope* scope, const std::wstring& name, int typeMask);

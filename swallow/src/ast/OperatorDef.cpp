@@ -38,6 +38,7 @@ OperatorDef::OperatorDef()
     associativity = Associativity::Left;
     precedence = 100;
     type = OperatorType::_;
+    assignment = false;
 }
 
 void OperatorDef::accept(NodeVisitor* visitor)

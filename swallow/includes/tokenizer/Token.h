@@ -52,6 +52,11 @@ enum TokenizerContext
     TokenizerContextFunctionSignature = 0x10,
     TokenizerContextCaptureList = 0x20,
     TokenizerContextFunctionBody = 0x40,
+    TokenizerContextSIL = 0x80,
+    /*!
+     * In type context, '>' will not be concatenated with following operator characters
+     */
+    TokenizerContextType = 0x100,
     TokenizerContextDeclaration = TokenizerContextFile | TokenizerContextClass | TokenizerContextFunctionBody,
     TokenizerContextAll = TokenizerContextFile | TokenizerContextOperator | TokenizerContextClass | TokenizerContextComputedProperty | TokenizerContextFunctionSignature | TokenizerContextCaptureList,
 };

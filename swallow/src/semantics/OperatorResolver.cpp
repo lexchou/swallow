@@ -119,7 +119,7 @@ void OperatorResolver::visitOperator(const OperatorDefPtr& node)
         }
     }
 
-    bool r = symbolRegistry->registerOperator(node->getName(), node->getType(), node->getAssociativity(), node->getPrecedence());
+    bool r = symbolRegistry->registerOperator(node->getName(), node->getType(), node->getAssociativity(), node->getPrecedence(), node->isAssignment());
     if(!r)
     {
         error(node, Errors::E_OPERATOR_REDECLARED);

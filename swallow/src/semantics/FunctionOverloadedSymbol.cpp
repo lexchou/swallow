@@ -33,11 +33,12 @@
 USE_SWALLOW_NS
 
 FunctionOverloadedSymbol::FunctionOverloadedSymbol(const std::wstring& name)
-:name(name)
+:Symbol(SymbolKindFunctionOverloads), name(name)
 {
 
 }
 FunctionOverloadedSymbol::FunctionOverloadedSymbol()
+:Symbol(SymbolKindFunctionOverloads)
 {
 
 }

@@ -3,8 +3,8 @@
 USE_SWALLOW_NS
 using namespace std;
 
-Symbol::Symbol()
-:flags(0)
+Symbol::Symbol(SymbolKind kind)
+:flags(0), kind(kind)
 {
     accessLevel = AccessLevelUndefined;
 }
@@ -38,15 +38,32 @@ TypePtr Symbol::getDeclaringType() const
     return declaringType;
 }
 
+Module::Module(const std::wstring& name, const TypePtr& type)
+:Symbol(SymbolKindModule), name(name), type(type)
+{
+
+}
+
+SymbolPtr Module::getSymbol(const std::wstring& name)
+{
+    auto iter = symbols.find(name);
+    if(iter != symbols.end())
+        return iter->second;
+    return nullptr;
+}
+void Module::addSymbol(const std::wstring& name, const SymbolPtr& symbol)
+{
+    symbols.insert(make_pair(name, symbol));
+}
 
 
 SymbolPlaceHolder::SymbolPlaceHolder(const std::wstring& name, const TypePtr& type, Role role, int flags)
-        :name(name), type(type), role(role)
+    :Symbol(SymbolKindPlaceholder), name(name), type(type), role(role)
 {
     setFlags(flags);
 }
 ComputedPropertySymbol::ComputedPropertySymbol(const std::wstring &name, const TypePtr &type, int flags)
-        :name(name), type(type)
+    :Symbol(SymbolKindComputedProperty), name(name), type(type)
 {
     setFlags(flags);
 }

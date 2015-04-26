@@ -37,17 +37,20 @@
 #include <cstdarg>
 #include <cassert>
 #include "semantics/SymbolRegistry.h"
+#include "semantics/BuiltinModule.h"
 
 //#define USE_RUNTIME_FILE
 
 #ifdef USE_RUNTIME_FILE
 #include <iostream>
-#include "ScopedNodeFactory.h"
-#include "parser/Parser.h"
-#include "common/CompilerResults.h"
-#include "SemanticAnalyzer.h"
-#include "ScopedNodes.h"
 #include "common/SwallowUtils.h"
+#include "common/CompilerResults.h"
+#include "parser/Parser.h"
+#include "semantics/ScopedNodeFactory.h"
+#include "semantics/SemanticAnalyzer.h"
+#include "semantics/ScopedNodes.h"
+#include "semantics/InitializationTracer.h"
+#include "semantics/OperatorResolver.h"
 #endif
 
 USE_SWALLOW_NS
@@ -58,7 +61,7 @@ using namespace std;
 
 GlobalScope::GlobalScope()
 {
-
+    module = Type::newType(L"Module", Type::Module);
 
 }
 
@@ -68,29 +71,77 @@ void GlobalScope::initRuntime(SymbolRegistry* symbolRegistry)
 {
 #ifdef USE_RUNTIME_FILE
 
+    class RuntimeAnalyzer : public SemanticAnalyzer
+    {
+    public:
+        RuntimeAnalyzer(SymbolRegistry* symbolRegistry, CompilerResults* compilerResults)
+        :SemanticAnalyzer(symbolRegistry, compilerResults)
+        {
+        }
+        void visitProgram(const ProgramPtr& node)
+        {
+            InitializationTracer tracer(nullptr, InitializationTracer::Sequence);
+            SCOPED_SET(ctx.currentInitializationTracer, &tracer);
+            ScopedProgramPtr p = static_pointer_cast<ScopedProgram>(node);
+            p->getScope()->setLazySymbolResolver(this);
+            SemanticPass::visitProgram(node);
+            p->getScope()->setLazySymbolResolver(nullptr);
+        }
+        using SemanticAnalyzer::finalizeLazyDeclaration;
+    };
+
+    this->addSymbol(SymbolPtr(new BuiltinModule()));
+
+
     //cout<<"Loading runtime file"<<endl;
-    wstring str = SwallowUtils::readFile("runtime.swift");
     ScopedNodeFactory nodeFactory;
     CompilerResults compilerResults;
-    Parser parser(&nodeFactory, &compilerResults);
-    parser.setFileName(L"<file>");
-    ScopedProgramPtr ret(new ScopedProgram());
-    ret->setScope(this);
-
+    wstring code;
+    ScopedProgramPtr ret;
     try
     {
-        if(!parser.parse(str.c_str(), ret))
-            throw Abort();
-        SemanticAnalyzer analyzer(symbolRegistry, &compilerResults);
-        ret->accept(&analyzer);
+        RuntimeAnalyzer analyzer(symbolRegistry, &compilerResults);
+        symbolRegistry->setFileScope(this);
+        string dir = "../../stdlib/core/";
+
+        for(std::string file : SwallowUtils::readDirectory(dir.c_str()))
+        {
+            if(file[0] == '.')
+                continue;
+            size_t p = file.rfind('.');
+            if(p == string::npos)
+                continue;
+            const char* ext = file.c_str() + p;
+            if(strcmp(ext, ".swift"))
+                continue;
+
+            ret = ScopedProgramPtr(new ScopedProgram());
+            ret->setScope(this);
+            string path = dir + file;
+            printf("Compiling %s...\n", file.c_str());
+            code = SwallowUtils::readFile(path.c_str());
+            Parser parser(&nodeFactory, &compilerResults);
+            SourceFilePtr source(new SourceFile(SwallowUtils::toWString(file), code));
+            parser.setSourceFile(source);
+            if(!parser.parse(code.c_str(), ret))
+                throw Abort();
+            OperatorResolver operatorResolver(symbolRegistry, &compilerResults);
+            ret->accept(&operatorResolver);
+            ret->accept(&analyzer);
+            ret->setScope(nullptr);
+        }
+
+
+        this->setLazySymbolResolver(&analyzer);
+        analyzer.finalizeLazyDeclaration();
+        this->setLazySymbolResolver(nullptr);
     }
     catch(Abort&)
     {
         ret->setScope(nullptr);
-        SwallowUtils::dumpCompilerResults(str, compilerResults, std::wcout);
+        SwallowUtils::dumpCompilerResults(code, compilerResults, std::wcout);
         assert(0 && "Failed to load runtime.swift");
     }
-    ret->setScope(nullptr);
 
     #define VALIDATE_TYPE(T) assert(T() && #T " is not defined.");
 
@@ -138,6 +189,7 @@ void GlobalScope::initRuntime(SymbolRegistry* symbolRegistry)
 
     //cout<<"Runtime file loaded."<<endl;
 #else
+    this->addSymbol(SymbolPtr(new BuiltinModule(module)));
     initPrimitiveTypes();
     initOperators(symbolRegistry);
     initProtocols();
@@ -769,6 +821,10 @@ bool GlobalScope::isImplicitlyUnwrappedOptional(const TypePtr& type) const
 bool GlobalScope::isDictionary(const TypePtr& type) const
 {
     return innerType(type) == _Dictionary;
+}
+TypePtr GlobalScope::getModuleType() const
+{
+    return module;
 }
 
 #ifdef USE_RUNTIME_FILE

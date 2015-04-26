@@ -144,7 +144,7 @@ TEST(TestLiteralExpression, testCompileConstants)
     ASSERT_NOT_NULL(root);
     CompileConstantPtr c = std::dynamic_pointer_cast<CompileConstant>(root);
     ASSERT_NOT_NULL(c);
-    ASSERT_EQ(L"<file>", c->getValue());
+    ASSERT_EQ(L"<code>", c->getValue());
 
 }
 TEST(TestLiteralExpression, testCompileConstants2)

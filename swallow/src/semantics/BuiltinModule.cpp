@@ -1,4 +1,4 @@
-/* FunctionSymbol.cpp --
+/* BuiltinModule.cpp --
  *
  * Copyright (c) 2014, Lex Chou <lex at chou dot it>
  * All rights reserved.
@@ -27,33 +27,47 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "semantics/FunctionSymbol.h"
+#include "semantics/BuiltinModule.h"
 #include "semantics/Type.h"
-#include <cassert>
+#include <cwchar>
 
 USE_SWALLOW_NS
+using namespace std;
 
-
-FunctionSymbol::FunctionSymbol(const std::wstring& name, const TypePtr& signature, FunctionRole role, const CodeBlockPtr& definition)
-:Symbol(SymbolKindFunction), name(name), type(signature), role(role), definition(definition)
+BuiltinModule::BuiltinModule(const TypePtr& type)
+:Module(L"Builtin", type)
 {
-    assert(signature);
-    assert(signature->getCategory() == Type::Function);
+    //initialize for default builtin types
+    registerType(L"Word");
+    registerType(L"RawPointer");
+    registerType(L"FPIEEE64");
+    registerType(L"FPIEEE80");
+    registerType(L"FPIEEE32");
+    registerType(L"NativeObject");
 }
 
-TypePtr FunctionSymbol::getType()
+
+SymbolPtr BuiltinModule::getSymbol(const std::wstring& name)
 {
+    SymbolPtr ret = Module::getSymbol(name);
+    if(ret)
+        return ret;
+    if(name.find(L"Int") == 0)
+    {
+        int bits = wcstol(name.c_str() + 3, NULL, 0);
+        if(bits > 0)
+            return registerType(name);
+    }
+    return nullptr;
+}
+TypePtr BuiltinModule::registerType(const std::wstring& name)
+{
+    TypePtr type = Type::newType(name, Type::Aggregate);
+    addSymbol(name, type);
     return type;
 }
-const std::wstring& FunctionSymbol::getName() const
-{
-    return name;
-}
-TypePtr FunctionSymbol::getReturnType()const
-{
-    return type->getReturnType();
-}
-CodeBlockPtr FunctionSymbol::getDefinition()
-{
-    return definition.lock();
-}
+
+
+
+
+

@@ -42,6 +42,8 @@ Parser::Parser(NodeFactory* nodeFactory, CompilerResults* compilerResults)
 {
     tokenizer = new Tokenizer(NULL);
     functionName = L"<top>";
+    sourceFile = SourceFilePtr(new SourceFile());
+    sourceFile->fileName = L"<code>";
     flags = 0;
 }
 Parser::~Parser()
@@ -49,9 +51,10 @@ Parser::~Parser()
     delete tokenizer;
 }
 
-void Parser::setFileName(const wchar_t* fileName)
+void Parser::setSourceFile(const SourceFilePtr& sourceFile)
 {
-    this->fileName = fileName;
+    this->sourceFile = sourceFile;
+    tokenizer->setSourceFile(sourceFile);
 }
 void Parser::setFunctionName(const wchar_t* function)
 {
@@ -110,6 +113,7 @@ bool Parser::next(Token& token)
     {
         token.state.line = e.line;
         token.state.column = e.column;
+        token.state.sourceFile = sourceFile;
         tassert(token, false, e.errorCode, e.item);
         return false;
     }
@@ -194,7 +198,8 @@ void Parser::expect(const wchar_t* str, Token& token)
         if(token == str)
             return;
     }
-    tassert(token, false, Errors::E_EXPECT_1, str);
+    ResultItems items = {str, token.token};
+    error(token, Errors::E_EXPECT_2, items);
 }
 
 void Parser::expect(Keyword::T keyword)
@@ -206,24 +211,31 @@ void Parser::expect(Keyword::T keyword)
 void Parser::expect(Keyword::T keyword, Token& token)
 {
     const std::wstring& str = tokenizer->getKeyword(keyword);
-    tassert(token, next(token), Errors::E_EXPECT_KEYWORD_1, str);
-    if(keyword == token.getKeyword())
+    if(next(token) && token.getKeyword() == keyword)
         return;
-    tassert(token, false, Errors::E_EXPECT_KEYWORD_1, str);
+    ResultItems items = {str, token.token};
+    error(token, Errors::E_EXPECT_KEYWORD_2, items);
 }
 void Parser::expect_identifier(Token& token)
 {
-    static std::wstring eof = L"end-of-file";
-    tassert(token, next(token), Errors::E_EXPECT_IDENTIFIER_1, eof);
-    tassert(token, token.type == TokenType::Identifier, Errors::E_EXPECT_IDENTIFIER_1, token.token);
-    tassert(token, token.identifier.keyword == Keyword::_, Errors::E_EXPECT_IDENTIFIER_1, token.token);
+    if(!next(token))
+    {
+        ResultItems items = {L"end-of-file"};
+        error(token, Errors::E_EXPECT_IDENTIFIER_1, items);
+    }
+    if(token.type != TokenType::Identifier || token.identifier.keyword != Keyword::_)
+    {
+        ResultItems items = {token.token};
+        error(token, Errors::E_EXPECT_IDENTIFIER_1, items);
+    }
 }
 
 /*!
  * Throw an exception with the unexpected token
  */
-void Parser::unexpected(const Token& token)
+void Parser::unexpected(Token& token)
 {
+    token.state.sourceFile = sourceFile;
     compilerResults->add(ErrorLevel::Fatal, token.state, Errors::E_UNEXPECTED_1, token.token);
     throw Abort();
 }
@@ -231,15 +243,19 @@ void Parser::tassert(Token& token, bool cond, int errorCode)
 {
     if(cond)
         return;
-    //record this issue
-    compilerResults->add(ErrorLevel::Fatal, token.state, errorCode);
-    throw Abort();
+    ResultItems items;
+    error(token, errorCode, items);
 }
 void Parser::tassert(Token& token, bool cond, int errorCode, const std::wstring& s)
 {
     if(cond)
         return;
-    //record this issue
+    ResultItems items = {s};
+    error(token, errorCode, items);
+}
+void Parser::error(Token& token, int errorCode, const std::vector<std::wstring>& s)
+{
+    token.state.sourceFile = sourceFile;
     compilerResults->add(ErrorLevel::Fatal, token.state, errorCode, s);
     throw Abort();
 }

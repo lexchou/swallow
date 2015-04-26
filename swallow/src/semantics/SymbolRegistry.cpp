@@ -53,18 +53,18 @@ SymbolRegistry::~SymbolRegistry()
     delete globalScope;
 }
 
-bool SymbolRegistry::registerOperator(const std::wstring& name, OperatorType::T type, Associativity::T associativity, int precedence)
+bool SymbolRegistry::registerOperator(const std::wstring& name, OperatorType::T type, Associativity::T associativity, int precedence, bool assignment)
 {
     assert(fileScope != nullptr);
-    return registerOperator(fileScope, name, type, associativity, precedence);
+    return registerOperator(fileScope, name, type, associativity, precedence, assignment);
 }
-bool SymbolRegistry::registerOperator(SymbolScope* scope, const std::wstring& name, OperatorType::T type, Associativity::T associativity, int precedence)
+bool SymbolRegistry::registerOperator(SymbolScope* scope, const std::wstring& name, OperatorType::T type, Associativity::T associativity, int precedence, bool assignment)
 {
     assert(scope != nullptr && "Operator cannot be registered in an invalid scope");
     SymbolScope::OperatorMap::iterator iter = scope->operators.find(name);
     if(iter == scope->operators.end())
     {
-        auto ret = scope->operators.insert(std::make_pair(name, OperatorInfo(name, associativity)));
+        auto ret = scope->operators.insert(std::make_pair(name, OperatorInfo(name, associativity, assignment)));
         iter = ret.first;
     }
     else
@@ -74,6 +74,7 @@ bool SymbolRegistry::registerOperator(SymbolScope* scope, const std::wstring& na
     }
 
     iter->second.type = (OperatorType::T)(iter->second.type | type);
+    iter->second.assignment = iter->second.assignment || assignment;
     
     if(type & OperatorType::PrefixUnary)
         iter->second.precedence.prefix = precedence;

@@ -54,11 +54,20 @@ void TypeAlias::setName(const std::wstring& name)
     this->name = name;
 }
 
-void TypeAlias::setType(TypeNodePtr type)
+void TypeAlias::setType(const TypeNodePtr& type)
 {
     this->type = type;
 }
-TypeNodePtr TypeAlias::getType()
+TypeNodePtr TypeAlias::getType() const
 {
     return type;
+}
+
+void TypeAlias::setConstraint(const TypeNodePtr& type)
+{
+    this->constraint = type;
+ }
+const TypeNodePtr& TypeAlias::getConstraint() const
+{
+    return constraint;
 }

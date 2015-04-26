@@ -32,6 +32,7 @@
 #include "swallow_conf.h"
 #include <string>
 #include <ostream>
+#include <vector>
 
 SWALLOW_NS_BEGIN
 
@@ -41,6 +42,7 @@ struct SwallowUtils
 {
     static void dumpHex(const char* s);
     static std::wstring readFile(const char* fileName);
+    static std::vector<std::string> readDirectory(const char* path);
     static void dumpCompilerResults(const std::wstring& src, const CompilerResults& compilerResults, std::wostream& out);
 
     /*!

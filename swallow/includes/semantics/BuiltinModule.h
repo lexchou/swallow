@@ -1,4 +1,4 @@
-/* FunctionSymbol.cpp --
+/* BuiltinModule.h --
  *
  * Copyright (c) 2014, Lex Chou <lex at chou dot it>
  * All rights reserved.
@@ -27,33 +27,24 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "semantics/FunctionSymbol.h"
-#include "semantics/Type.h"
-#include <cassert>
+#ifndef BUILTIN_MODULE_H
+#define BUILTIN_MODULE_H
+#include "Symbol.h"
 
-USE_SWALLOW_NS
+SWALLOW_NS_BEGIN
+    class SWALLOW_EXPORT BuiltinModule : public Module
+    {
+    public:
+        BuiltinModule(const TypePtr& type);
+    public:
+        virtual SymbolPtr getSymbol(const std::wstring& name) override;
+    private:
+        TypePtr registerType(const std::wstring& name);
+    private:
+
+    };
+
+SWALLOW_NS_END
 
 
-FunctionSymbol::FunctionSymbol(const std::wstring& name, const TypePtr& signature, FunctionRole role, const CodeBlockPtr& definition)
-:Symbol(SymbolKindFunction), name(name), type(signature), role(role), definition(definition)
-{
-    assert(signature);
-    assert(signature->getCategory() == Type::Function);
-}
-
-TypePtr FunctionSymbol::getType()
-{
-    return type;
-}
-const std::wstring& FunctionSymbol::getName() const
-{
-    return name;
-}
-TypePtr FunctionSymbol::getReturnType()const
-{
-    return type->getReturnType();
-}
-CodeBlockPtr FunctionSymbol::getDefinition()
-{
-    return definition.lock();
-}
+#endif//BUILTIN_MODULE_H

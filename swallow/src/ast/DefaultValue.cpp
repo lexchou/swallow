@@ -1,4 +1,4 @@
-/* FunctionSymbol.cpp --
+/* DefaultValue.cpp --
  *
  * Copyright (c) 2014, Lex Chou <lex at chou dot it>
  * All rights reserved.
@@ -27,33 +27,18 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "semantics/FunctionSymbol.h"
-#include "semantics/Type.h"
-#include <cassert>
-
+#include "ast/DefaultValue.h"
+#include "ast/NodeVisitor.h"
 USE_SWALLOW_NS
 
-
-FunctionSymbol::FunctionSymbol(const std::wstring& name, const TypePtr& signature, FunctionRole role, const CodeBlockPtr& definition)
-:Symbol(SymbolKindFunction), name(name), type(signature), role(role), definition(definition)
+DefaultValue::DefaultValue()
+        :Expression(NodeType::DefaultValue)
 {
-    assert(signature);
-    assert(signature->getCategory() == Type::Function);
 }
 
-TypePtr FunctionSymbol::getType()
+void DefaultValue::accept(NodeVisitor* visitor)
 {
-    return type;
+    accept2(visitor, &NodeVisitor::visitDefaultValue);
 }
-const std::wstring& FunctionSymbol::getName() const
-{
-    return name;
-}
-TypePtr FunctionSymbol::getReturnType()const
-{
-    return type->getReturnType();
-}
-CodeBlockPtr FunctionSymbol::getDefinition()
-{
-    return definition.lock();
-}
+
+

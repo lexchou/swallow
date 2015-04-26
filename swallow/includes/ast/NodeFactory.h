@@ -51,6 +51,7 @@ public:
     virtual StringLiteralPtr createString(const SourceInfo& state);
     virtual NilLiteralPtr createNilLiteral(const SourceInfo& state);
     virtual BooleanLiteralPtr createBooleanLiteral(const SourceInfo& state);
+    virtual DefaultValuePtr createDefaultValue(const SourceInfo& state);
     virtual UnaryOperatorPtr createUnary(const SourceInfo& state);
     virtual BinaryOperatorPtr createBinary(const SourceInfo& state);
 

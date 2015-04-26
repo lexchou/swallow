@@ -1057,9 +1057,17 @@ void DeclarationAnalyzer::visitInit(const InitializerDefPtr& node)
 
         ScopeGuard scopeGuard(body.get(), this);
         (void) scopeGuard;
-        node->getParameters()->accept(this);
 
+        GenericDefinitionPtr generic;
+        if(node->getGenericParametersDef())
+        {
+            generic = prepareGenericTypes(node->getGenericParametersDef());
+            assert(generic != nullptr);
+            generic->registerTo(body->getScope());
+        }
+        node->getParameters()->accept(this);
         prepareParameters(body->getScope(), node->getParameters());
+
 
         std::vector<Parameter> params;
         for (const ParameterNodePtr &param : *node->getParameters())
@@ -1079,7 +1087,7 @@ void DeclarationAnalyzer::visitInit(const InitializerDefPtr& node)
             verifyAccessLevel(node, param->getType(), D_INITIALIZER, C_PARAMETER);
         }
 
-        TypePtr funcType = Type::newFunction(params, symbolRegistry->getGlobalScope()->Void(), node->getParameters()->isVariadicParameters());
+        TypePtr funcType = Type::newFunction(params, symbolRegistry->getGlobalScope()->Void(), node->getParameters()->isVariadicParameters(), generic);
         funcType->setFlags(SymbolFlagMember, true);
         static_pointer_cast<TypeBuilder>(funcType)->setDeclaringType(ctx->currentType);
         if(node->hasModifier(DeclarationModifiers::Convenience))

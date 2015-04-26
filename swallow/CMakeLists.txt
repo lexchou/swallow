@@ -82,6 +82,7 @@ SET(SWALLOW_SRC
     src/semantics/ReturnStatementValidator.cpp
     src/semantics/InitializerValidator.cpp
     src/semantics/SemanticUtils.cpp
+    src/semantics/BuiltinModule.cpp
 
     src/codegen/NameMangling.cpp
 
@@ -93,6 +94,7 @@ SET(SWALLOW_SRC
     src/ast/Comment.cpp
     src/ast/NodeFactory.cpp
     src/ast/BinaryOperator.cpp
+    src/ast/DefaultValue.cpp
     src/ast/TypedPattern.cpp
     src/ast/UnaryOperator.cpp
     src/ast/InOutParameter.cpp

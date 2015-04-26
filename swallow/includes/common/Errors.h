@@ -41,10 +41,10 @@ struct SWALLOW_EXPORT Errors
     {
         E_UNEXPECTED_EOF = 0x1000,
         //grammar errors
-        E_EXPECT_1,// %0 is expected
+        E_EXPECT_2,// %0 is expected, but %1 found
         E_UNEXPECTED_1,// Unexpected %0
         E_EXPECT_IDENTIFIER_1,// Identifier expected, but %0 found.
-        E_EXPECT_KEYWORD_1,// Keyword %0 expected
+        E_EXPECT_KEYWORD_2,// Keyword %0 expected, but %1 found
         E_EXPECT_EXPRESSION_1, // Expression expected but %0 found.
         E_EXPECT_OPERATOR_1, // Operator expected but %0 found.
         E_EXPECT_INTEGER_PRECEDENCE,// Operator's precedence must be an integer
@@ -229,10 +229,13 @@ struct SWALLOW_EXPORT Errors
 
         E_DUPLICATE_MODIFIER,//Duplicate modifier
         E_NON_PROTOCOL_TYPE_A_CANNOT_BE_USED_WITHIN_PROTOCOL_COMPOSITION_1,//Non-protocol type '%0' cannot be used within 'protocol<...>'
+        E_NO_TYPE_NAMED_A_IN_MODULE_B_2,//No type named '%0' in module '%1'
+
 
 
         E_A_MUST_BE_DECLARED_B_BECAUSE_ITS_C_USES_A_D_TYPE_4,//Method must be declared private because its result uses a private type
         E_A_CANNOT_BE_DECLARED_B_BECAUSE_ITS_C_USES_A_D_TYPE_4,//Property cannot be declared public because its type uses a private type
+        E_EXPECT_MODULE_MEMBER_NAME_AFTER_MODULE_NAME, //expected module member name after module name
 
 
 

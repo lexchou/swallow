@@ -31,6 +31,7 @@
 #define SYMBOL_H
 #include "swallow_conf.h"
 #include <string>
+#include <map>
 
 SWALLOW_NS_BEGIN
 typedef std::shared_ptr<class Type> TypePtr;
@@ -101,12 +102,21 @@ enum AccessLevel
     AccessLevelInternal = 2,
     AccessLevelPublic = 3
 };
+enum SymbolKind
+{
+    SymbolKindFunction,
+    SymbolKindFunctionOverloads,
+    SymbolKindType,
+    SymbolKindPlaceholder,
+    SymbolKindComputedProperty,
+    SymbolKindModule
+};
 
 class SWALLOW_EXPORT Symbol
 {
     friend class TypeBuilder;
 public:
-    Symbol();
+    Symbol(SymbolKind kind);
     virtual ~Symbol(){}
 public:
     virtual const std::wstring& getName() const = 0;
@@ -129,11 +139,46 @@ public:
      * If this symbol is defined as a member of a type, returns the type that declared this symbol.
      */
     TypePtr getDeclaringType() const;
+
+    inline SymbolKind getKind() const { return kind;}
 protected:
     int flags;
     AccessLevel accessLevel;
     TypePtr declaringType;
+    SymbolKind kind;
 };
+
+
+
+
+
+typedef std::shared_ptr<Symbol> SymbolPtr;
+class SWALLOW_EXPORT Module : public Symbol
+{
+public:
+    Module(const std::wstring& name, const TypePtr& type);
+public:
+    virtual const std::wstring& getName() const override {return name;}
+    virtual SymbolPtr getSymbol(const std::wstring& name);
+    void addSymbol(const std::wstring& name, const SymbolPtr& symbol);
+    virtual TypePtr getType() {return type;}
+private:
+    std::wstring name;
+    TypePtr type;
+    std::map<std::wstring, SymbolPtr> symbols;
+};
+typedef std::shared_ptr<Module> ModulePtr;
+
+
+
+
+
+
+
+
+
+
+
 class SWALLOW_EXPORT SymbolPlaceHolder : public Symbol
 {
 public:

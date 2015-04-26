@@ -40,6 +40,7 @@ class Tokenizer;
 class NodeFactory;
 class CompilerResults;
 
+typedef std::shared_ptr<struct SourceFile> SourceFilePtr;
 class SWALLOW_EXPORT Parser
 {
     friend struct Flags;
@@ -50,7 +51,7 @@ public:
     NodePtr parseStatement(const wchar_t* code);
     ProgramPtr parse(const wchar_t* code);
     bool parse(const wchar_t* code, const ProgramPtr& program);
-    void setFileName(const wchar_t* fileName);
+    void setSourceFile(const SourceFilePtr& sourceFile);
     void setFunctionName(const wchar_t* function);
 private:
     TypeNodePtr parseType();
@@ -96,6 +97,7 @@ private://Attribute
 private://declaration
     DeclarationPtr parseDeclaration();
     int parseDeclarationModifiers();
+    int parseAccessorModifiers();
     void verifyDeclarationSpecifiers(const Token& token, int actualSpecifiers, int expectedSpecifiers);
     DeclarationPtr parseImport(const std::vector<AttributePtr>& attrs);
     DeclarationPtr parseLet(const std::vector<AttributePtr>& attrs, int modifiers);
@@ -181,7 +183,7 @@ private:
     /*!
      * Throw an exception with the unexpected token
      */
-    void unexpected(const Token& token);
+    void unexpected(Token& token);
 
     /*!
      * Check if the following token is the specified one, consume the token and return true if matched or return false if not.
@@ -203,11 +205,12 @@ private:
 
     void tassert(Token& token, bool cond, int errorCode);
     void tassert(Token& token, bool cond, int errorCode, const std::wstring& s);
+    void error(Token& token, int errorCode, const std::vector<std::wstring>& s);
 private:
     Tokenizer* tokenizer;
     NodeFactory* nodeFactory;
     CompilerResults* compilerResults;
-    std::wstring fileName;
+    SourceFilePtr sourceFile;
     int fileHash;
     std::wstring functionName;
     int flags;

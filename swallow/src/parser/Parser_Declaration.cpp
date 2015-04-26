@@ -569,6 +569,7 @@ std::pair<CodeBlockPtr, std::pair<std::wstring, CodeBlockPtr> > Parser::parseGet
     parseAttributes(attrs);
 
     ENTER_CONTEXT(TokenizerContextComputedProperty);
+    int modifiers = parseAccessorModifiers();
 
     peek(token);
     CodeBlockPtr getter = NULL;
@@ -578,6 +579,7 @@ std::pair<CodeBlockPtr, std::pair<std::wstring, CodeBlockPtr> > Parser::parseGet
         expect_next(token);
         getter = parseCodeBlock();
         getter->setAttributes(attrs);
+        modifiers = parseAccessorModifiers();
         peek(token);
         if(token == L"@" || token.getKeyword() == Keyword::Set)
         {
@@ -589,6 +591,7 @@ std::pair<CodeBlockPtr, std::pair<std::wstring, CodeBlockPtr> > Parser::parseGet
         setter = parseSetterClause();
         setter.second->setAttributes(attrs);
         parseAttributes(attrs);
+        modifiers = parseAccessorModifiers();
         expect(Keyword::Get);
         getter = parseCodeBlock();
         getter->setAttributes(attrs);
@@ -629,13 +632,14 @@ std::pair<CodeBlockPtr, CodeBlockPtr> Parser::parseGetterSetterKeywordBlock()
     parseAttributes(attributes);
 
     ENTER_CONTEXT(TokenizerContextComputedProperty);
-
+    int modifiers = parseAccessorModifiers();
 
     if(match(Keyword::Get, token))
     {
         getter = nodeFactory->createCodeBlock(token.state);
         getter->setAttributes(attributes);
         parseAttributes(attributes);
+        modifiers = parseAccessorModifiers();
         if(match(Keyword::Set, token))
         {
             setter = nodeFactory->createCodeBlock(token.state);
@@ -654,11 +658,37 @@ std::pair<CodeBlockPtr, CodeBlockPtr> Parser::parseGetterSetterKeywordBlock()
         setter->setAttributes(attributes);
         
         parseAttributes(attributes);
+        modifiers = parseAccessorModifiers();
         expect(Keyword::Get, token);
         getter = nodeFactory->createCodeBlock(token.state);
         getter->setAttributes(attributes);
     }
     return std::make_pair(getter, setter);
+}
+/*!
+ * Parse declaration modifiers that only used by property/subscript accessors
+ */
+int Parser::parseAccessorModifiers()
+{
+    int ret = 0;
+    Token token;
+    while(next(token))
+    {
+        switch(token.getKeyword())
+        {
+            case Keyword::Nonmutating:
+                ret |= DeclarationModifiers::NonMutating;
+                break;
+            case Keyword::Mutating:
+                ret |= DeclarationModifiers::Mutating;
+                break;
+            default:
+                restore(token);
+                return ret;
+                break;
+        }
+    }
+    return ret;
 }
 
 /*
@@ -675,6 +705,22 @@ DeclarationPtr Parser::parseTypealias(const Attributes& attrs, int modifiers)
     expect(Keyword::Typealias, token);
     expect_identifier(token);
     TypeNodePtr type = nullptr;
+    TypeAliasPtr ret = nodeFactory->createTypealias(token.state);
+    ret->setAttributes(attrs);
+    ret->setName(token.token);
+    ret->setModifiers(modifiers);
+
+    if(match(L":", token))
+    {
+        //read constraint
+        ProtocolCompositionPtr constraint = nodeFactory->createProtocolComposition(token.state);
+        do
+        {
+            TypeIdentifierPtr p = this->parseTypeIdentifier();
+            constraint->addProtocol(p);
+        } while (match(L","));
+        ret->setConstraint(constraint);
+    }
 
     if(this->flags & UNDER_PROTOCOL)
     {
@@ -688,11 +734,7 @@ DeclarationPtr Parser::parseTypealias(const Attributes& attrs, int modifiers)
         expect(L"=");
         type = parseType();
     }
-    TypeAliasPtr ret = nodeFactory->createTypealias(token.state);
-    ret->setAttributes(attrs);
-    ret->setName(token.token);
     ret->setType(type);
-    ret->setModifiers(modifiers);
     return ret;
 }
 /*
@@ -712,7 +754,10 @@ DeclarationPtr Parser::parseFunc(const std::vector<AttributePtr>& attrs, int mod
     FunctionDefPtr ret = nodeFactory->createFunction(token.state);
     ret->setAttributes(attrs);
     ret->setModifiers(modifiers);
-    expect_next(token);
+    {
+        ENTER_CONTEXT(TokenizerContextFunctionSignature);
+        expect_next(token);
+    }
     if(token.type != TokenType::Identifier && token.type != TokenType::Operator)
         unexpected(token);
     ret->setName(token.token);
@@ -819,9 +864,17 @@ ParametersNodePtr Parser::parseParameterClause()
         ExpressionPtr def = NULL;
         if(match(L"="))
         {
-            peek(token);
-            def = parseExpression();
-            tassert(token, def != NULL, Errors::E_EXPECT_EXPRESSION_1, token.token);
+            if(match(L"default", token))
+            {
+                def = nodeFactory->createDefaultValue(token.state);
+            }
+            else
+            {
+                peek(token);
+                def = parseExpression();
+                tassert(token, def != NULL, Errors::E_EXPECT_EXPRESSION_1, token.token);
+            }
+
         }
         param->setInout(inout);
         param->setAccessibility(accessibility);
@@ -1120,9 +1173,18 @@ DeclarationPtr Parser::parseInit(const std::vector<AttributePtr>& attrs, int mod
         ret->setGenericParametersDef(params);
     }
     ParametersNodePtr parameters = parseParameterClause();
-    CodeBlockPtr body = parseCodeBlock();
     ret->setParameters(parameters);
-    ret->setBody(body);
+
+    if((UNDER_PROTOCOL & flags) == 0)
+    {
+        ENTER_CONTEXT(TokenizerContextFunctionBody);
+        CodeBlockPtr body = parseCodeBlock();
+        ret->setBody(body);
+    }
+    else
+    {
+        ret->setBody(nodeFactory->createCodeBlock(*ret->getSourceInfo()));
+    }
     return ret;
 }
 /*
@@ -1203,7 +1265,8 @@ DeclarationPtr Parser::parseSubscript(const std::vector<AttributePtr>& attrs, in
     ret->setReturnType(retType);
     ret->setReturnTypeAttributes(typeAttrs);
     ret->setModifiers(modifiers);
-    
+
+    ENTER_CONTEXT(TokenizerContextComputedProperty);
     if(flags & UNDER_PROTOCOL)
     {
         expect(L"{");
@@ -1218,7 +1281,6 @@ DeclarationPtr Parser::parseSubscript(const std::vector<AttributePtr>& attrs, in
         TokenizerState s = tokenizer->save();
         expect(L"{");
 
-        ENTER_CONTEXT(TokenizerContextComputedProperty);
 
         expect_next(token);
         restore(token);
@@ -1310,6 +1372,9 @@ DeclarationPtr Parser::parseOperator(const std::vector<AttributePtr>& attrs, int
                         unexpected(token);
                         break;
                 }
+                break;
+            case Keyword::Assignment:
+                op->setAssignment(true);
                 break;
             default:
                 unexpected(token);

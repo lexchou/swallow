@@ -45,20 +45,34 @@ struct OperatorInfo
     std::wstring name;
     Associativity::T associativity;
     OperatorType::T type;
+    bool assignment;
     struct
     {
         int prefix;
         int infix;
         int postfix;
     } precedence;
-    OperatorInfo(const std::wstring& name, Associativity::T associativity)
-            :name(name), associativity(associativity), type(OperatorType::_)
+    OperatorInfo(const std::wstring& name, Associativity::T associativity, bool assignment)
+            :name(name), associativity(associativity), type(OperatorType::_), assignment(assignment)
     {
         this->precedence.prefix = -1;
         this->precedence.infix = -1;
         this->precedence.postfix = -1;
     }
 };
+
+
+/*!
+ * Implement this interface to allow a SymbolScope to resolve lazy symbols
+ */
+struct SWALLOW_EXPORT LazySymbolResolver
+{
+    /*!
+     * Resolve a lazy symbol by its name, or return null if its undefined
+     */
+    virtual bool resolveLazySymbol(const std::wstring& name) = 0;
+};
+
 class SWALLOW_EXPORT SymbolScope
 {
     friend class SymbolRegistry;
@@ -80,6 +94,13 @@ public:
     const SymbolMap& getSymbols() {return symbols;}
 
     /*!
+     * If SymbolScope failed to look-up a symbol, it will try to use LazySymbolResolver to find it
+     * and cache the resolved symbol
+     */
+    void setLazySymbolResolver(LazySymbolResolver* resolver) {lazySymbolResolver = resolver;}
+    LazySymbolResolver* getLazySymbolResolver() {return lazySymbolResolver;}
+
+    /*!
      * Get an extension definition by given name
      */
     TypePtr getExtension(const std::wstring& name);
@@ -93,6 +114,7 @@ protected:
     Node* owner;
     SymbolScope* parent;
     SymbolMap symbols;
+    LazySymbolResolver* lazySymbolResolver;
     std::map<std::wstring, TypePtr> extensions;
 };
 

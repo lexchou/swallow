@@ -63,8 +63,14 @@ AttributePtr Parser::parseAttribute()
     AttributePtr ret = nodeFactory->createAttribute(token.state);
     expect_identifier(token);
     ret->setName(token.token);
-    if(match(L"("))
+    if(match(L"(", token))
     {
+        if (token.state.hasSpace)
+        {
+            //the ( is not a part of the attribute, roll back
+            restore(token);
+            return ret;
+        }
         //read
         parseBalancedTokens(ret, L")");
     }
