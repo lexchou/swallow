@@ -75,7 +75,7 @@ class SWALLOW_EXPORT SemanticAnalyzer : public SemanticPass, public LazySymbolRe
 {
     friend class DeclarationAnalyzer;
 public:
-    SemanticAnalyzer(SymbolRegistry* symbolRegistry, CompilerResults* compilerResults);
+    SemanticAnalyzer(SymbolRegistry* symbolRegistry, CompilerResults* compilerResults, const ModulePtr& module);
     ~SemanticAnalyzer();
 public:
     virtual void visitAssignment(const AssignmentPtr& node) override;
@@ -284,6 +284,11 @@ protected:
      * Declare the rest lazy declaration immediately
      */
     void finalizeLazyDeclaration();
+
+    /*!
+     * Verification of protocol confirmation in all types of current module
+     */
+    void verifyProtocolConforms();
 
 protected:
     SemanticContext ctx;

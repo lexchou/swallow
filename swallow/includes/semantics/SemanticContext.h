@@ -63,6 +63,12 @@ struct SemanticContext
     InitializationTracer* currentInitializationTracer;
     int numTemporaryNames;
     int flags;
+    ModulePtr currentModule;
+    /*!
+     * All types in current module, including nested types,
+     * used for protocol conform verification
+     */
+    std::vector<TypePtr> allTypes;
 
     SemanticContext()
         :currentCodeBlock(nullptr), currentInitializationTracer(nullptr), numTemporaryNames(0), flags(FLAG_PROCESS_DECLARATION | FLAG_PROCESS_IMPLEMENTATION)

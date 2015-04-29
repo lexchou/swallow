@@ -197,6 +197,19 @@ TypePtr SymbolRegistry::lookupType(const std::wstring& name)
         return ret;
     return NULL;
 }
+/*!
+    * Check if a symbol is defined. This will not use LazySymbolResolver to resolve it if it's undefined
+    */
+bool SymbolRegistry::isSymbolDefined(const std::wstring& name) const
+{
+    SymbolScope* s = currentScope;
+    for(; s; s = s->parent)
+    {
+        if(s->isSymbolDefined(name))
+            return true;
+    }
+    return false;
+}
 bool SymbolRegistry::lookupType(const std::wstring& name, SymbolScope** scope, TypePtr* ret)
 {
     SymbolPtr symbol = NULL;

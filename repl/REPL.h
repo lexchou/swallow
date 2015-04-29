@@ -35,6 +35,7 @@
 #include "common/CompilerResults.h"
 #include <semantics/SymbolRegistry.h>
 #include <semantics/ScopedNodeFactory.h>
+#include <semantics/Symbol.h>
 #include <ast/ast-decl.h>
 using std::wstring;
 class REPL;
@@ -63,6 +64,7 @@ private:
     Swallow::SymbolRegistry registry;
     Swallow::ScopedNodeFactory nodeFactory;
     Swallow::ProgramPtr program;
+    Swallow::ModulePtr module;
     std::map<std::wstring, CommandMethod> methods;
     ConsoleWriterPtr out;
     int resultId;

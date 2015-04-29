@@ -278,3 +278,25 @@ TEST(TestExtension, Redeclaration_Init)
             L"}");
     ASSERT_ERROR(Errors::E_INVALID_REDECLARATION_1);
 }
+
+TEST(TestExtension, ProtocolImplmentedByExtension)
+{
+    SEMANTIC_ANALYZE(L"protocol MyProtocol\n"
+            L"{\n"
+            L"    func test()\n"
+            L"}\n"
+            L"struct Test : MyProtocol\n"
+            L"{\n"
+            L"\n"
+            L"}\n"
+            L"extension Test :MyProtocol\n"
+            L"{\n"
+            L"    func test()\n"
+            L"    {\n"
+            L"        \n"
+            L"    }\n"
+            L"}\n"
+            L"var a = Test()\n"
+            L"a.test()");
+    ASSERT_NO_ERRORS();
+}

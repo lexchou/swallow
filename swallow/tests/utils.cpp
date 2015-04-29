@@ -128,13 +128,14 @@ Swallow::ScopedProgramPtr analyzeStatement(Swallow::SymbolRegistry& registry, Sw
     Parser parser(&nodeFactory, &compilerResults);
     parser.setSourceFile(SourceFilePtr(new SourceFile(L"<code>", str)));
     ScopedProgramPtr ret = std::dynamic_pointer_cast<ScopedProgram>(parser.parse(str));
+    ModulePtr module(new Module(L"test", registry.getGlobalScope()->getModuleType()));
     if(!ret)
         return ret;
     try
     {
         dumpAST(ret, L"Before transform AST:");
         OperatorResolver operatorResolver(&registry, &compilerResults);
-        SemanticAnalyzer analyzer(&registry, &compilerResults);
+        SemanticAnalyzer analyzer(&registry, &compilerResults, module);
         ret->accept(&operatorResolver);
         ret->accept(&analyzer);
 

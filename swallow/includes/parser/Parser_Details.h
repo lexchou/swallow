@@ -49,8 +49,10 @@ enum
     UNDER_WHILE_LOOP    = 0x800,
     UNDER_DO_LOOP       = 0x1000,
     SUPPRESS_TRAILING_CLOSURE = 0x2000,
-    UNDER_EXTENSION     = 0x4000
+    UNDER_EXTENSION     = 0x4000,
+    DECLARATION_ONLY    = 0x8000
 };
+class Parser;
 struct Flags
 {
     Flags(Parser* parser, int f = 0)

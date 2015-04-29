@@ -710,3 +710,19 @@ TEST(TestInheritance, OverrideFinalSubscript)
         L"}");
     ASSERT_ERROR(Errors::E_SUBSCRIPT_OVERRIDES_A_FINAL_SUBSCRIPT);
 }
+
+TEST(TestInheritance, ReverseOrderInheritance)
+{
+    SEMANTIC_ANALYZE(L"typealias A = FFF \n"
+                     L"struct FFF : MyProtocol \n"
+                     L"{ \n"
+                     L"    func f(){} \n"
+                     L"} \n"
+                     L"protocol MyProtocol \n"
+                     L"{ \n"
+                     L"    func f() \n"
+                     L"} \n"
+                     L"var a : MyProtocol = A() \n"
+                     L"a.f()");
+    ASSERT_NO_ERRORS();
+}

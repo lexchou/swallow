@@ -67,6 +67,15 @@ void SymbolScope::removeSymbol(const SymbolPtr& symbol)
         symbols.erase(iter);
 
 }
+/*!
+    * Check if symbol is defined.
+    * This will not use lazySymbolResolver to declare it
+    */
+bool SymbolScope::isSymbolDefined(const std::wstring& name)
+{
+    SymbolMap::iterator iter = symbols.find(name);
+    return iter != symbols.end();
+}
 SymbolPtr SymbolScope::lookup(const std::wstring& name)
 {
     assert(!name.empty());

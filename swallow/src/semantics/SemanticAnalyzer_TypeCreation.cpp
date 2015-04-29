@@ -48,6 +48,11 @@ using namespace std;
 
 void SemanticAnalyzer::visitTypeAlias(const TypeAliasPtr& node)
 {
+    if(lazyDeclaration)
+    {
+        delayDeclare(node);
+        return;
+    }
     node->accept(declarationAnalyzer);
 }
 void SemanticAnalyzer::visitEnum(const EnumDefPtr& node)
@@ -100,8 +105,8 @@ void SemanticAnalyzer::visitExtension(const ExtensionDefPtr& node)
     //check if this type is already registered
     if(lazyDeclaration)
     {
-        SymbolPtr sym = symbolRegistry->lookupSymbol(node->getIdentifier()->getName());
-        if(!sym)
+        bool defined = symbolRegistry->isSymbolDefined(node->getIdentifier()->getName());
+        if(!defined)
         {
             delayDeclare(node);
             return;

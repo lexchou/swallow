@@ -60,6 +60,14 @@ void Parser::setFunctionName(const wchar_t* function)
 {
     this->functionName = functionName;
 }
+int Parser::getFlags() const
+{
+    return flags;
+}
+void Parser::setFlags(int flags)
+{
+    this->flags = flags;
+}
 /*!
  * Read next token from tokenizer, throw exception if EOF reached.
  */

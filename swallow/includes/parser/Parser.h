@@ -53,6 +53,9 @@ public:
     bool parse(const wchar_t* code, const ProgramPtr& program);
     void setSourceFile(const SourceFilePtr& sourceFile);
     void setFunctionName(const wchar_t* function);
+
+    int getFlags() const;
+    void setFlags(int flags);
 private:
     TypeNodePtr parseType();
     TypeNodePtr parseTypeAnnotation();

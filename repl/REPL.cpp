@@ -29,6 +29,7 @@ void REPL::repl()
     int id = 1;
     out->printf(L"Welcome to Swallow! Type :help for assistance.\n");
     program = nodeFactory.createProgram();
+    module = ModulePtr(new Module(L"eval", registry.getGlobalScope()->getModuleType()));
     while(!canQuit && !wcin.eof())
     {
         out->printf(L"%3d> ", id);
@@ -59,7 +60,7 @@ void REPL::eval(CompilerResults& compilerResults, const wstring& line)
         return;
     try
     {
-        SemanticAnalyzer analyzer(&registry, &compilerResults);
+        SemanticAnalyzer analyzer(&registry, &compilerResults, module);
         program->accept(&analyzer);
         dumpProgram();
     }

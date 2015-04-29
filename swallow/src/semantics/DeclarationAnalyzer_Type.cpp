@@ -217,6 +217,8 @@ TypePtr DeclarationAnalyzer::defineType(const std::shared_ptr<TypeDeclaration>& 
         type->setFlags(SymbolFlagFinal, true);
 
     declarationFinished(type->getName(), type, node);
+    static_pointer_cast<TypeBuilder>(type)->setModuleName(ctx->currentModule->getName());
+    ctx->allTypes.push_back(type);
     return type;
 }
 
@@ -372,7 +374,7 @@ void DeclarationAnalyzer::visitClass(const ClassDefPtr& node)
     if(type->getParentType() != nullptr)
         verifyAccessLevel(node, type->getParentType(), D_CLASS, C_SUPERCLASS);
     visitDeclaration(node);
-    verifyProtocolConform(type);
+    //verifyProtocolConform(type);
     prepareDefaultInitializers(type);
     validateDeclarationModifiers(node);
     visitImplementation(node);
@@ -484,7 +486,7 @@ void DeclarationAnalyzer::visitStruct(const StructDefPtr& node)
         }
     }
 
-    verifyProtocolConform(type);
+    //verifyProtocolConform(type);
     validateDeclarationModifiers(node);
 
 
@@ -744,45 +746,23 @@ void DeclarationAnalyzer::verifyProtocolConform(const TypePtr& type, const TypeP
 }
 void DeclarationAnalyzer::verifyProtocolFunction(const TypePtr& type, const TypePtr& protocol, const FunctionSymbolPtr& expected)
 {
-    SymbolPtr sym = type->getMember(expected->getName());
+    std::vector<SymbolPtr> results;
+    int filter = FilterLookupInExtension | FilterRecursive;
+    if(expected->hasFlags(SymbolFlagStatic))
+        filter |= FilterStaticMember;
+    semanticAnalyzer->getMethodsFromType(type, expected->getName(), (MemberFilter)filter, results);
     TypePtr expectedType = expected->getType();
     assert(expectedType != nullptr);
-    if(!sym)
+    //verify if they're the same type
+    bool found = false;
+    for(const SymbolPtr& func : results)
     {
+        if(Type::equals(func->getType(), expectedType))
+        {
+            found = true;
+            break;
+        }
+    }
+    if(!found)
         error(type->getReference(), Errors::E_TYPE_DOES_NOT_CONFORM_TO_PROTOCOL_UNIMPLEMENTED_FUNCTION_3, type->getName(), protocol->getName(), expected->getName());
-        return;
-    }
-    else if(const FunctionSymbolPtr& func = std::dynamic_pointer_cast<FunctionSymbol>(sym))
-    {
-        //verify if they're the same type
-        TypePtr funcType = func->getType();
-        assert(funcType != nullptr);
-        if(!Type::equals(funcType, expectedType))
-        {
-            error(type->getReference(),  Errors::E_TYPE_DOES_NOT_CONFORM_TO_PROTOCOL_UNIMPLEMENTED_FUNCTION_3, type->getName(), protocol->getName(), expected->getName());
-        }
-        return;
-    }
-    else if(FunctionOverloadedSymbolPtr funcs = std::dynamic_pointer_cast<FunctionOverloadedSymbol>(sym))
-    {
-        //verify if they're the same type
-        bool found = false;
-        for(const FunctionSymbolPtr& func : *funcs)
-        {
-            if(Type::equals(func->getType(), expectedType))
-            {
-                found = true;
-                break;
-            }
-        }
-        if(!found)
-            error(type->getReference(), Errors::E_TYPE_DOES_NOT_CONFORM_TO_PROTOCOL_UNIMPLEMENTED_FUNCTION_3, type->getName(), protocol->getName(), expected->getName());
-        return;
-    }
-    else if(SymbolPlaceHolderPtr prop = std::dynamic_pointer_cast<SymbolPlaceHolder>(sym))
-    {
-
-
-    }
-    error(type->getReference(), Errors::E_TYPE_DOES_NOT_CONFORM_TO_PROTOCOL_UNIMPLEMENTED_FUNCTION_3, type->getName(), protocol->getName(), expected->getName());
 }

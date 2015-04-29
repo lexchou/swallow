@@ -38,10 +38,12 @@
 #include <cassert>
 #include "semantics/SymbolRegistry.h"
 #include "semantics/BuiltinModule.h"
+#include "parser/Parser.h"
+#include "parser/Parser_Details.h"
 
-//#define USE_RUNTIME_FILE
+#define USE_RUNTIME_FILE 0
 
-#ifdef USE_RUNTIME_FILE
+#if USE_RUNTIME_FILE
 #include <iostream>
 #include "common/SwallowUtils.h"
 #include "common/CompilerResults.h"
@@ -69,13 +71,13 @@ GlobalScope::GlobalScope()
 
 void GlobalScope::initRuntime(SymbolRegistry* symbolRegistry)
 {
-#ifdef USE_RUNTIME_FILE
+#if USE_RUNTIME_FILE
 
     class RuntimeAnalyzer : public SemanticAnalyzer
     {
     public:
-        RuntimeAnalyzer(SymbolRegistry* symbolRegistry, CompilerResults* compilerResults)
-        :SemanticAnalyzer(symbolRegistry, compilerResults)
+        RuntimeAnalyzer(SymbolRegistry* symbolRegistry, CompilerResults* compilerResults, const ModulePtr& module)
+            :SemanticAnalyzer(symbolRegistry, compilerResults, module)
         {
         }
         void visitProgram(const ProgramPtr& node)
@@ -88,9 +90,10 @@ void GlobalScope::initRuntime(SymbolRegistry* symbolRegistry)
             p->getScope()->setLazySymbolResolver(nullptr);
         }
         using SemanticAnalyzer::finalizeLazyDeclaration;
+        using SemanticAnalyzer::verifyProtocolConforms;
     };
 
-    this->addSymbol(SymbolPtr(new BuiltinModule()));
+    this->addSymbol(SymbolPtr(new BuiltinModule(getModuleType())));
 
 
     //cout<<"Loading runtime file"<<endl;
@@ -98,12 +101,14 @@ void GlobalScope::initRuntime(SymbolRegistry* symbolRegistry)
     CompilerResults compilerResults;
     wstring code;
     ScopedProgramPtr ret;
+    ModulePtr module(new Module(L"Swift", getModuleType()));
     try
     {
-        RuntimeAnalyzer analyzer(symbolRegistry, &compilerResults);
+        RuntimeAnalyzer analyzer(symbolRegistry, &compilerResults, module);
         symbolRegistry->setFileScope(this);
         string dir = "../../stdlib/core/";
 
+        /*
         for(std::string file : SwallowUtils::readDirectory(dir.c_str()))
         {
             if(file[0] == '.')
@@ -130,10 +135,27 @@ void GlobalScope::initRuntime(SymbolRegistry* symbolRegistry)
             ret->accept(&analyzer);
             ret->setScope(nullptr);
         }
+        */
+        ret = ScopedProgramPtr(new ScopedProgram());
+        ret->setScope(this);
+        string path = "../../stdlib/reference-archives/swiftCore-1.2-602.0.49.6.swift";
+        printf("Compiling %s...\n", path.c_str());
+        code = SwallowUtils::readFile(path.c_str());
+        Parser parser(&nodeFactory, &compilerResults);
+        parser.setFlags(DECLARATION_ONLY);
+        SourceFilePtr source(new SourceFile(SwallowUtils::toWString(path), code));
+        parser.setSourceFile(source);
+        if(!parser.parse(code.c_str(), ret))
+            throw Abort();
+        OperatorResolver operatorResolver(symbolRegistry, &compilerResults);
+        ret->accept(&operatorResolver);
+        ret->accept(&analyzer);
+        ret->setScope(nullptr);
 
 
         this->setLazySymbolResolver(&analyzer);
         analyzer.finalizeLazyDeclaration();
+        analyzer.verifyProtocolConforms();
         this->setLazySymbolResolver(nullptr);
     }
     catch(Abort&)
@@ -827,7 +849,7 @@ TypePtr GlobalScope::getModuleType() const
     return module;
 }
 
-#ifdef USE_RUNTIME_FILE
+#if USE_RUNTIME_FILE
 #define IMPLEMENT_GETTER(T) TypePtr GlobalScope::T() const { \
   GlobalScope* self = const_cast<GlobalScope*>(this); \
   if(!self->_##T){self->_##T = static_pointer_cast<Type>(self->lookup(L## #T ));} \

@@ -81,6 +81,11 @@ public:
     bool lookupSymbol(const std::wstring& name, SymbolScope** scope, SymbolPtr* ret);
     SymbolPtr lookupSymbol(const std::wstring& name);
 
+    /*!
+     * Check if a symbol is defined. This will not use LazySymbolResolver to resolve it if it's undefined
+     */
+    bool isSymbolDefined(const std::wstring& name) const;
+
 public:
     void enterScope(SymbolScope* scope);
     void leaveScope();

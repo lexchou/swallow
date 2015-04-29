@@ -442,7 +442,7 @@ DeclarationPtr Parser::parseVar(const std::vector<AttributePtr>& attrs, int modi
         {
             case Keyword::Get:
             case Keyword::Set:
-                if(this->flags & UNDER_PROTOCOL)
+                if(this->flags & (UNDER_PROTOCOL | DECLARATION_ONLY))
                 {
                     // variable-declaration → variable-declaration-head variable-name type-annotation getter-setter-keyword-block
                     //no code block for getter/setter for protocol
@@ -722,7 +722,7 @@ DeclarationPtr Parser::parseTypealias(const Attributes& attrs, int modifiers)
         ret->setConstraint(constraint);
     }
 
-    if(this->flags & UNDER_PROTOCOL)
+    if(this->flags & (UNDER_PROTOCOL | DECLARATION_ONLY))
     {
         if (match(L"="))
         {
@@ -788,7 +788,10 @@ DeclarationPtr Parser::parseFunc(const std::vector<AttributePtr>& attrs, int mod
         ret->setReturnTypeAttributes(retAttrs);
         ret->setReturnType(retType);
     }
-    if((UNDER_PROTOCOL & flags) == 0)
+    bool hasBody = true;
+    if(flags & (UNDER_PROTOCOL | DECLARATION_ONLY))
+        hasBody = false;
+    if(hasBody)
     {
         ENTER_CONTEXT(TokenizerContextFunctionBody);
         CodeBlockPtr body = parseCodeBlock();
@@ -979,7 +982,7 @@ DeclarationPtr Parser::parseEnum(const std::vector<AttributePtr>& attrs, int mod
 DeclarationPtr Parser::parseStruct(const std::vector<AttributePtr>& attrs, int modifiers)
 {
     Token token;
-    expect(Keyword::Struct);
+    expect(Keyword::Struct, token);
     StructDefPtr ret = nodeFactory->createStruct(token.state);
     ret->setAttributes(attrs);
     ret->setModifiers(modifiers);
@@ -1175,15 +1178,15 @@ DeclarationPtr Parser::parseInit(const std::vector<AttributePtr>& attrs, int mod
     ParametersNodePtr parameters = parseParameterClause();
     ret->setParameters(parameters);
 
-    if((UNDER_PROTOCOL & flags) == 0)
+    if((UNDER_PROTOCOL | DECLARATION_ONLY) & flags)
+    {
+        ret->setBody(nodeFactory->createCodeBlock(*ret->getSourceInfo()));
+    }
+    else
     {
         ENTER_CONTEXT(TokenizerContextFunctionBody);
         CodeBlockPtr body = parseCodeBlock();
         ret->setBody(body);
-    }
-    else
-    {
-        ret->setBody(nodeFactory->createCodeBlock(*ret->getSourceInfo()));
     }
     return ret;
 }
@@ -1199,8 +1202,15 @@ DeclarationPtr Parser::parseDeinit(const std::vector<AttributePtr>& attrs, int m
     DeinitializerDefPtr ret = nodeFactory->createDeinitializer(token.state);
     ret->setAttributes(attrs);
     ret->setModifiers(modifiers);
-    CodeBlockPtr body = parseCodeBlock();
-    ret->setBody(body);
+    if(DECLARATION_ONLY & flags)
+    {
+        ret->setBody(nodeFactory->createCodeBlock(*ret->getSourceInfo()));
+    }
+    else
+    {
+        CodeBlockPtr body = parseCodeBlock();
+        ret->setBody(body);
+    }
     return ret;
 }
 /*
@@ -1267,13 +1277,15 @@ DeclarationPtr Parser::parseSubscript(const std::vector<AttributePtr>& attrs, in
     ret->setModifiers(modifiers);
 
     ENTER_CONTEXT(TokenizerContextComputedProperty);
-    if(flags & UNDER_PROTOCOL)
+    if(flags & (UNDER_PROTOCOL | DECLARATION_ONLY))
     {
-        expect(L"{");
-        std::pair<CodeBlockPtr, CodeBlockPtr> accessors = parseGetterSetterKeywordBlock();
-        expect(L"}");
-        ret->setGetter(accessors.first);
-        ret->setSetter(accessors.second);
+        if(match(L"{"))
+        {
+            std::pair<CodeBlockPtr, CodeBlockPtr> accessors = parseGetterSetterKeywordBlock();
+            expect(L"}");
+            ret->setGetter(accessors.first);
+            ret->setSetter(accessors.second);
+        }
     }
     else
     {

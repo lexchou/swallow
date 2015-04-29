@@ -53,11 +53,12 @@ USE_SWALLOW_NS
 using namespace std;
 
 
-SemanticAnalyzer::SemanticAnalyzer(SymbolRegistry* symbolRegistry, CompilerResults* compilerResults)
+SemanticAnalyzer::SemanticAnalyzer(SymbolRegistry* symbolRegistry, CompilerResults* compilerResults, const ModulePtr& currentModule)
 :SemanticPass(symbolRegistry, compilerResults)
 {
     declarationAnalyzer = new DeclarationAnalyzer(this, &ctx);
     lazyDeclaration = true;
+    ctx.currentModule = currentModule;
 }
 SemanticAnalyzer::~SemanticAnalyzer()
 {
@@ -91,6 +92,11 @@ static std::wstring getDeclarationName(const DeclarationPtr& node)
     {
         return type->getIdentifier()->getName();
     }
+    if(TypeAliasPtr alias = dynamic_pointer_cast<TypeAlias>(node))
+    {
+        return alias->getName();
+    }
+    assert(0 && "Invalid declaration type");
     return L"";
 }
 /*!
@@ -124,6 +130,7 @@ void SemanticAnalyzer::declareImmediately(const std::wstring& name)
     SymbolScope* currentScope = symbolRegistry->getCurrentScope();
     try
     {
+        SCOPED_SET(lazyDeclaration, false);
 
         while (!decls.empty())
         {
@@ -163,6 +170,20 @@ void SemanticAnalyzer::visitProgram(const ProgramPtr& node)
     SemanticPass::visitProgram(node);
     //now we'll deal with the lazy declaration of functions and classes
     finalizeLazyDeclaration();
+    verifyProtocolConforms();
+}
+
+/*!
+    * Verification of protocol confirmation in all types of current module
+    */
+void SemanticAnalyzer::verifyProtocolConforms()
+{
+    for(const TypePtr& type : ctx.allTypes)
+    {
+        if(type->getCategory() == Type::Protocol)
+            continue;
+        declarationAnalyzer->verifyProtocolConform(type);
+    }
 }
 
 void SemanticAnalyzer::finalizeLazyDeclaration()

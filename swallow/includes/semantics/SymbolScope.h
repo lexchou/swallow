@@ -88,7 +88,18 @@ public:
     void addSymbol(const SymbolPtr& symbol);
     void addSymbol(const std::wstring& name, const SymbolPtr& symbol);
 
+    /*!
+     * Lookup for a symbol in current scope.
+     * If lazySymbolResolve is specified and symbol is not found,
+     * will try to use lazySymbolResolver to declare it
+     */
     SymbolPtr lookup(const std::wstring& name);
+    /*!
+     * Check if symbol is defined.
+     * This will not use lazySymbolResolver to declare it
+     */
+    bool isSymbolDefined(const std::wstring& name);
+
     Node* getOwner();
     SymbolScope* getParentScope() {return parent;}
     const SymbolMap& getSymbols() {return symbols;}

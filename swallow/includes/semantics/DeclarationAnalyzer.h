@@ -101,6 +101,10 @@ public:
     void visitDeclaration(const TypeDeclarationPtr& node);
 public:
 
+    /*!
+     * Verify if the specified type conform to the given protocol
+     */
+    void verifyProtocolConform(const TypePtr& type);
 
 public://properties
     const TypePtr& getCurrentFunction() const;
@@ -117,10 +121,6 @@ private:
      */
     void prepareParameters(SymbolScope* scope, const ParametersNodePtr& params);
 
-    /*!
-     * Verify if the specified type conform to the given protocol
-     */
-    void verifyProtocolConform(const TypePtr& type);
     void verifyProtocolConform(const TypePtr& type, const TypePtr& protocol);
     void verifyProtocolFunction(const TypePtr& type, const TypePtr& protocol, const FunctionSymbolPtr& expected);
 
