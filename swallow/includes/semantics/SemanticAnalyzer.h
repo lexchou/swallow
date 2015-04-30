@@ -71,6 +71,7 @@ enum MemberFilter
     FilterLookupInExtension = 4
 };
 class DeclarationAnalyzer;
+typedef std::shared_ptr<class LazyDeclaration> LazyDeclarationPtr;
 class SWALLOW_EXPORT SemanticAnalyzer : public SemanticPass, public LazySymbolResolver
 {
     friend class DeclarationAnalyzer;
@@ -293,7 +294,7 @@ protected:
 protected:
     SemanticContext ctx;
     DeclarationAnalyzer* declarationAnalyzer;
-    std::map<std::wstring, std::list<std::pair<SymbolScope*,DeclarationPtr>>> lazyDeclarations;
+    std::map<std::wstring, LazyDeclarationPtr> lazyDeclarations;
     bool lazyDeclaration;
 };
 

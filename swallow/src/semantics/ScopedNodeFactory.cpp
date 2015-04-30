@@ -39,43 +39,43 @@ IdentifierPtr ScopedNodeFactory::createIdentifier(const SourceInfo& state)
 }
 EnumDefPtr ScopedNodeFactory::createEnum(const SourceInfo& state)
 {
-    return _(state, new ScopedEnum());
+    return create<ScopedEnum>(state);
 }
 StructDefPtr ScopedNodeFactory::createStruct(const SourceInfo& state)
 {
-    return _(state, new ScopedStruct());
+    return create<ScopedStruct>(state);
 }
 ClassDefPtr ScopedNodeFactory::createClass(const SourceInfo& state)
 {
-    return _(state, new ScopedClass());
+    return create<ScopedClass>(state);
 }
 ProtocolDefPtr ScopedNodeFactory::createProtocol(const SourceInfo& state)
 {
-    return _(state, new ScopedProtocol());
+    return create<ScopedProtocol>(state);
 }
 ExtensionDefPtr ScopedNodeFactory::createExtension(const SourceInfo& state)
 {
-    return _(state, new ScopedExtension());
+    return create<ScopedExtension>(state);
 }
 ProgramPtr ScopedNodeFactory::createProgram()
 {
-    return _(SourceInfo(), new ScopedProgram());
+    return create<ScopedProgram>(SourceInfo());
 }
 CodeBlockPtr ScopedNodeFactory::createCodeBlock(const SourceInfo& state)
 {
-    return _(state, new ScopedCodeBlock());
+    return create<ScopedCodeBlock>(state);
 }
 ClosurePtr ScopedNodeFactory::createClosure(const SourceInfo& state)
 {
-    return _(state, new ScopedClosure());
+    return create<ScopedClosure>(state);
 }
 FunctionDefPtr ScopedNodeFactory::createFunction(const SourceInfo& state)
 {
-    return _(state, new SymboledFunction());
+    return create<SymboledFunction>(state);
 }
 InitializerDefPtr ScopedNodeFactory::createInitializer(const SourceInfo& state)
 {
-    return _(state, new SymboledInit);
+    return create<SymboledInit>(state);
 }
 DeinitializerDefPtr ScopedNodeFactory::createDeinitializer(const SourceInfo& state)
 {
@@ -83,5 +83,5 @@ DeinitializerDefPtr ScopedNodeFactory::createDeinitializer(const SourceInfo& sta
 }
 ComputedPropertyPtr ScopedNodeFactory::createComputedProperty(const SourceInfo& state)
 {
-    return _(state, new ComposedComputedProperty());
+    return create<ComposedComputedProperty>(state);
 }

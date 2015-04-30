@@ -48,6 +48,7 @@
 #include <set>
 #include <semantics/Symbol.h>
 #include "semantics/DeclarationAnalyzer.h"
+#include "semantics/LazyDeclaration.h"
 
 USE_SWALLOW_NS
 using namespace std;
@@ -109,11 +110,12 @@ void SemanticAnalyzer::delayDeclare(const DeclarationPtr& node)
     auto iter = lazyDeclarations.find(name);
     if(iter == lazyDeclarations.end())
     {
-        list<pair<SymbolScope*, DeclarationPtr>> decls = {make_pair(symbolRegistry->getCurrentScope(), node)};
+        LazyDeclarationPtr decls(new LazyDeclaration());
         lazyDeclarations.insert(make_pair(name, decls));
+        decls->addDeclaration(symbolRegistry, node);
         return;
     }
-    iter->second.push_back(make_pair(symbolRegistry->getCurrentScope(), node));
+    iter->second->addDeclaration(symbolRegistry, node);
 }
 /*!
  * The declarations that marked as lazy will be declared immediately
@@ -123,20 +125,19 @@ void SemanticAnalyzer::declareImmediately(const std::wstring& name)
     auto entry = lazyDeclarations.find(name);
     if(entry == lazyDeclarations.end())
         return;
-    list<pair<SymbolScope*, DeclarationPtr>> decls;
-    std::swap(decls, entry->second);
-    if(lazyDeclaration)
-        lazyDeclarations.erase(entry);
+    LazyDeclarationPtr decls = entry->second;
+    lazyDeclarations.erase(entry);
     SymbolScope* currentScope = symbolRegistry->getCurrentScope();
+    SymbolScope* fileScope = symbolRegistry->getFileScope();
     try
     {
         SCOPED_SET(lazyDeclaration, false);
 
-        while (!decls.empty())
+        //while (!decls.empty())
+        for(auto decl : *decls)
         {
-            pair<SymbolScope*, DeclarationPtr> decl = decls.front();
-            decls.pop_front();
-            symbolRegistry->setCurrentScope(decl.first);
+            symbolRegistry->setCurrentScope(decl.currentScope);
+            symbolRegistry->setFileScope(decl.fileScope);
             SCOPED_SET(this->ctx.currentType, nullptr);
             SCOPED_SET(this->ctx.currentFunction, nullptr);
             SCOPED_SET(this->ctx.contextualType, nullptr);
@@ -144,15 +145,17 @@ void SemanticAnalyzer::declareImmediately(const std::wstring& name)
             SCOPED_SET(this->ctx.currentCodeBlock, nullptr);
             SCOPED_SET(this->ctx.currentInitializationTracer, nullptr);
             SCOPED_SET(this->ctx.flags, SemanticContext::FLAG_PROCESS_DECLARATION | SemanticContext::FLAG_PROCESS_IMPLEMENTATION);
-            decl.second->accept(this);
+            decl.node->accept(this);
         }
     }
     catch(...)
     {
         symbolRegistry->setCurrentScope(currentScope);
+        symbolRegistry->setFileScope(fileScope);
         throw;
     }
     symbolRegistry->setCurrentScope(currentScope);
+    symbolRegistry->setFileScope(fileScope);
 }
 bool SemanticAnalyzer::resolveLazySymbol(const std::wstring& name)
 {
@@ -192,16 +195,9 @@ void SemanticAnalyzer::finalizeLazyDeclaration()
     SymbolScope* scope = symbolRegistry->getCurrentScope();
     while(!lazyDeclarations.empty())
     {
-        auto entry = lazyDeclarations.begin();
-        list<pair<SymbolScope*, DeclarationPtr>>& decls = entry->second;
-        while(!decls.empty())
-        {
-            pair<SymbolScope*, DeclarationPtr> decl = decls.front();
-            decls.pop_front();
-            symbolRegistry->setCurrentScope(decl.first);
-            decl.second->accept(this);
-        }
-        lazyDeclarations.erase(entry);
+        std::wstring symbolName = lazyDeclarations.begin()->first;
+        //lazyDeclarations.erase(lazyDeclarations.begin());
+        declareImmediately(symbolName);
     }
     symbolRegistry->setCurrentScope(scope);
 }

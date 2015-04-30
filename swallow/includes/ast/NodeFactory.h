@@ -134,10 +134,10 @@ protected:
     void bindNode(const SourceInfo&s, Node* n);
 
     template<class T>
-    inline std::shared_ptr<T> _(const SourceInfo& s, T* n)
+    inline std::shared_ptr<T> create(const SourceInfo& s)
     {
-        std::shared_ptr<T> ret = std::shared_ptr<T>(n);
-        bindNode(s, n);
+        std::shared_ptr<T> ret(new T());
+        bindNode(s, ret.get());
         return ret;
     }
 
