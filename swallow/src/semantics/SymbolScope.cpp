@@ -76,14 +76,14 @@ bool SymbolScope::isSymbolDefined(const std::wstring& name)
     SymbolMap::iterator iter = symbols.find(name);
     return iter != symbols.end();
 }
-SymbolPtr SymbolScope::lookup(const std::wstring& name)
+SymbolPtr SymbolScope::lookup(const std::wstring& name, bool lazyResolve)
 {
     assert(!name.empty());
     SymbolMap::iterator iter = symbols.find(name);
     if(iter != symbols.end())
         return iter->second;
     //check it in LazySymbolResolver
-    if(lazySymbolResolver)
+    if(lazySymbolResolver && lazyResolve)
     {
         bool success = lazySymbolResolver->resolveLazySymbol(name);
         if(success)
@@ -99,12 +99,15 @@ SymbolPtr SymbolScope::lookup(const std::wstring& name)
 /*!
  * Get an extension definition by given name
  */
-TypePtr SymbolScope::getExtension(const std::wstring& name)
+bool SymbolScope::getExtension(const std::wstring& name, std::vector<TypePtr>** result)
 {
+    if(result)
+        *result = nullptr;
     auto iter = extensions.find(name);
     if(iter == extensions.end())
-        return nullptr;
-    return iter->second;
+        return false;
+    *result = &iter->second;
+    return true;
 }
 
 /*!
@@ -115,6 +118,9 @@ void SymbolScope::addExtension(const TypePtr& extension)
     assert(extension != nullptr);
     assert(extension->getCategory() == Type::Extension);
     auto iter = extensions.find(extension->getName());
-    assert(iter == extensions.end());
-    extensions.insert(std::make_pair(extension->getName(), extension));
+    if(iter == extensions.end())
+    {
+        iter = extensions.insert(std::make_pair(extension->getName(), std::vector<TypePtr>())).first;
+    }
+    iter->second.push_back(extension);
 }

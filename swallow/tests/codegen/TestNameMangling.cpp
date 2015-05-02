@@ -644,7 +644,10 @@ TEST(TestNameMangling, Extension)
             L"    }\n"
             L"}");
     ASSERT_NO_ERRORS();
-    TypePtr Int = scope->getExtension(L"Int");
+    std::vector<TypePtr> *extensions = nullptr;
+    ASSERT_TRUE(scope->getExtension(L"Int", &extensions));
+    ASSERT_TRUE(!extensions->empty());
+    TypePtr Int = extensions->front();
     FunctionSymbolPtr asInt;
     ASSERT_NOT_NULL(asInt = getMethod(Int, L"asInt"));
 

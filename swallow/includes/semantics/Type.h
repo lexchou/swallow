@@ -92,6 +92,7 @@ struct SWALLOW_EXPORT Subscript
 };
 
 
+class SymbolScope;
 
 class SWALLOW_EXPORT Type : public Symbol, public  std::enable_shared_from_this<Symbol>
 {
@@ -223,6 +224,11 @@ public://properties
      */
     const EnumCaseMap& getEnumCases() const;
 
+    /*!
+     * Gets the scope of the type.
+     * Only class/struct/enum/protocol can has a scope
+     */
+    SymbolScope* getScope();
     /*!
      * Gets which declaration this type referenced to
      */
@@ -404,6 +410,7 @@ protected:
     int inheritantDepth;
     std::vector<Subscript> subscripts;
     FunctionSymbolPtr deinit;
+    SymbolScope* scope;
 
     //for protocol
     mutable short _containsSelfType;

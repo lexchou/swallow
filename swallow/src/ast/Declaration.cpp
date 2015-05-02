@@ -67,6 +67,13 @@ int Declaration::getModifiers()const
 {
     return modifiers;
 }
+void Declaration::setModifiers(int modifiers, bool set)
+{
+    if(set)
+        this->modifiers |= modifiers;
+    else
+        this->modifiers &= ~modifiers;
+}
 void Declaration::setModifiers(int modifiers)
 {
     this->modifiers = modifiers;

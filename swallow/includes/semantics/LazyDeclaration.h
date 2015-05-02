@@ -51,6 +51,7 @@ public:
     void addDeclaration(SymbolRegistry* registry, const DeclarationPtr& node);
     void clear();
 public:
+    size_t size() const { return decls.size();}
     std::vector<DeclarationEntry>::iterator begin() { return decls.begin(); }
     std::vector<DeclarationEntry>::iterator end() { return decls.end(); }
 

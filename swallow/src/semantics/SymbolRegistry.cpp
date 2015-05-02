@@ -169,16 +169,16 @@ SymbolPtr SymbolRegistry::lookupSymbol(const std::wstring& name)
     lookupSymbol(name, NULL, &ret);
     return ret;
 }
-bool SymbolRegistry::lookupSymbol(const std::wstring& name, SymbolScope** container, SymbolPtr* ret)
+bool SymbolRegistry::lookupSymbol(const std::wstring& name, SymbolScope** container, SymbolPtr* ret, bool lazyResolve)
 {
-    return lookupSymbol(currentScope, name, container, ret);
+    return lookupSymbol(currentScope, name, container, ret, lazyResolve);
 }
-bool SymbolRegistry::lookupSymbol(SymbolScope* scope, const std::wstring& name, SymbolScope** container, SymbolPtr* ret)
+bool SymbolRegistry::lookupSymbol(SymbolScope* scope, const std::wstring& name, SymbolScope** container, SymbolPtr* ret, bool lazyResolve)
 {
     SymbolScope* s = scope;
     for(; s; s = s->parent)
     {
-        SymbolPtr symbol = s->lookup(name);
+        SymbolPtr symbol = s->lookup(name, lazyResolve);
         if(symbol)
         {
             if(container)
@@ -210,10 +210,10 @@ bool SymbolRegistry::isSymbolDefined(const std::wstring& name) const
     }
     return false;
 }
-bool SymbolRegistry::lookupType(const std::wstring& name, SymbolScope** scope, TypePtr* ret)
+bool SymbolRegistry::lookupType(const std::wstring& name, SymbolScope** scope, TypePtr* ret, bool lazyResolve)
 {
     SymbolPtr symbol = NULL;
-    bool r = lookupSymbol(name, scope, &symbol);
+    bool r = lookupSymbol(name, scope, &symbol, lazyResolve);
     if(ret)
         *ret = std::dynamic_pointer_cast<Type>(symbol);
     return r;

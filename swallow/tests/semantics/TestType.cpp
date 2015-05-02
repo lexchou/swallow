@@ -164,3 +164,15 @@ TEST(TestType, LetWithoutInitializer)
             L"}");
     ASSERT_NO_ERRORS();
 }
+
+TEST(TestType, TypeAliasRecursion)
+{
+    SEMANTIC_ANALYZE(L"typealias T = Test\n"
+            L"struct Test\n"
+            L"{\n"
+            L"    func foo() -> T {\n"
+            L"        return self\n"
+            L"    }\n"
+            L"}");
+    ASSERT_NO_ERRORS();
+}

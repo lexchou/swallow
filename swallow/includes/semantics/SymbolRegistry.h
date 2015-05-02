@@ -72,13 +72,13 @@ public:
     void setFileScope(SymbolScope* scope);
 
     TypePtr lookupType(const std::wstring& name);
-    bool lookupType(const std::wstring& name, SymbolScope** container, TypePtr* ret);
+    bool lookupType(const std::wstring& name, SymbolScope** container, TypePtr* ret, bool lazyResolve = true);
 
     /*!
      * Lookup symbol in given scope by symbol name and return it's container scope and the symbol
      */
-    bool lookupSymbol(SymbolScope* scope, const std::wstring& name, SymbolScope** container, SymbolPtr* ret);
-    bool lookupSymbol(const std::wstring& name, SymbolScope** scope, SymbolPtr* ret);
+    bool lookupSymbol(SymbolScope* scope, const std::wstring& name, SymbolScope** container, SymbolPtr* ret, bool lazyResolve = true);
+    bool lookupSymbol(const std::wstring& name, SymbolScope** scope, SymbolPtr* ret, bool lazyResolve = true);
     SymbolPtr lookupSymbol(const std::wstring& name);
 
     /*!

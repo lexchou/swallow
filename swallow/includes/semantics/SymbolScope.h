@@ -35,6 +35,7 @@
 #include "semantic-types.h"
 #include "swallow_types.h"
 #include <string>
+#include <vector>
 
 SWALLOW_NS_BEGIN
 
@@ -93,7 +94,7 @@ public:
      * If lazySymbolResolve is specified and symbol is not found,
      * will try to use lazySymbolResolver to declare it
      */
-    SymbolPtr lookup(const std::wstring& name);
+    SymbolPtr lookup(const std::wstring& name, bool lazyResolve = true);
     /*!
      * Check if symbol is defined.
      * This will not use lazySymbolResolver to declare it
@@ -114,7 +115,7 @@ public:
     /*!
      * Get an extension definition by given name
      */
-    TypePtr getExtension(const std::wstring& name);
+    bool getExtension(const std::wstring& name, std::vector<TypePtr>** result);
 
     /*!
      * Register an extension to this scope.
@@ -126,7 +127,7 @@ protected:
     SymbolScope* parent;
     SymbolMap symbols;
     LazySymbolResolver* lazySymbolResolver;
-    std::map<std::wstring, TypePtr> extensions;
+    std::map<std::wstring, std::vector<TypePtr>> extensions;
 };
 
 

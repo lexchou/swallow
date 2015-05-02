@@ -56,51 +56,22 @@ void ScopedProgram::setScope(SymbolScope* scope)
     this->symbolScope = scope;
 }
 
-void ScopedClass::accept(NodeVisitor* visitor)
-{
-    ScopeGuard scope(this, visitor);
-    accept2(visitor, &NodeVisitor::visitClass);
-}
 const std::wstring& ScopedClass::getName()const
 {
     return identifier->getName();
 }
 
 
-void ScopedProtocol::accept(NodeVisitor* visitor)
-{
-    ScopeGuard scope(this, visitor);
-    accept2(visitor, &NodeVisitor::visitProtocol);
-}
 const std::wstring& ScopedProtocol::getName()const
 {
     return identifier->getName();
 }
 
-void ScopedStruct::accept(NodeVisitor* visitor)
-{
-    ScopeGuard scope(this, visitor);
-    accept2(visitor, &NodeVisitor::visitStruct);
-}
 const std::wstring& ScopedStruct::getName()const
 {
     return identifier->getName();
 }
-void ScopedEnum::accept(NodeVisitor* visitor)
-{
-    ScopeGuard scope(this, visitor);
-    accept2(visitor, &NodeVisitor::visitEnum);
-}
 const std::wstring& ScopedEnum::getName()const
-{
-    return identifier->getName();
-}
-void ScopedExtension::accept(NodeVisitor* visitor)
-{
-    ScopeGuard scope(this, visitor);
-    accept2(visitor, &NodeVisitor::visitExtension);
-}
-const std::wstring& ScopedExtension::getName()const
 {
     return identifier->getName();
 }

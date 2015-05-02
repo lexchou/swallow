@@ -33,6 +33,7 @@
 #include "semantics/GenericArgument.h"
 #include "semantics/FunctionOverloadedSymbol.h"
 #include "semantics/TypeBuilder.h"
+#include "semantics/ScopedNodes.h"
 #include <sstream>
 
 USE_SWALLOW_NS
@@ -73,6 +74,7 @@ Type::Type(Category category)
     variadicParameters = false;
     inheritantDepth = 0;
     accessLevel = AccessLevelInternal;
+    scope = nullptr;
 }
 /*!
  * A type place holder for protocol's typealias
@@ -272,6 +274,38 @@ const Type::EnumCaseMap& Type::getEnumCases() const
     return enumCases;
 }
 
+/*!
+ * Gets the scope of the type.
+ * Only class/struct/enum/protocol can has a scope
+ */
+SymbolScope* Type::getScope()
+{
+    if(scope)
+        return scope;
+    TypeDeclarationPtr ref = getReference();
+    if(!ref)
+        return nullptr;
+    //TODO: remove ScopedClass/ScopedStruct/ScopedEnum/ScopedProtocol
+    //Save scope into type instance
+    switch(category)
+    {
+        case Class:
+            scope = static_pointer_cast<ScopedClass>(ref)->getScope();
+            break;
+        case Struct:
+            scope = static_pointer_cast<ScopedStruct>(ref)->getScope();
+            break;
+        case Enum:
+            scope = static_pointer_cast<ScopedEnum>(ref)->getScope();
+            break;
+        case Protocol:
+            scope = static_pointer_cast<ScopedProtocol>(ref)->getScope();
+            break;
+        default:
+            return nullptr;
+    }
+    return scope;
+}
 TypeDeclarationPtr Type::getReference()const
 {
     if(reference.expired())

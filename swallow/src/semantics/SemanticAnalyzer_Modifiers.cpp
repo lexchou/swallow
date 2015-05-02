@@ -99,7 +99,7 @@ static bool validateGeneralModifiers(SemanticAnalyzer* analyzer, const Declarati
         //static only exists in struct/enum
         if(!isDeclaredInTypeLevel(analyzer))
             return analyzer->error(decl, Errors::E_STATIC_PROPERTIES_MAY_ONLY_BE_DECLARED_ON_A_TYPE);
-        if(ctx->currentType->getCategory() != Type::Struct && ctx->currentType->getCategory() != Type::Enum)
+        if(ctx->currentType->getCategory() == Type::Class)
             return analyzer->error(decl, Errors::E_STATIC_PROPERTIES_ARE_ONLY_ALLOWED_WITHIN_STRUCTS_AND_ENUMS);
 
     }

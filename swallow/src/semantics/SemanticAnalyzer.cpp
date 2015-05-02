@@ -108,6 +108,7 @@ void SemanticAnalyzer::delayDeclare(const DeclarationPtr& node)
     //map<wstring, list<DeclarationPtr>> lazyDeclarations;
     std::wstring name = getDeclarationName(node);
     auto iter = lazyDeclarations.find(name);
+    //wprintf(L"Delay declare %S\n", name.c_str());
     if(iter == lazyDeclarations.end())
     {
         LazyDeclarationPtr decls(new LazyDeclaration());
@@ -133,9 +134,10 @@ void SemanticAnalyzer::declareImmediately(const std::wstring& name)
     {
         SCOPED_SET(lazyDeclaration, false);
 
-        //while (!decls.empty())
+        //wprintf(L"Declare immediately %S %d definitions\n", name.c_str(), decls->size());
         for(auto decl : *decls)
         {
+            //wprintf(L"   fs:%p cs:%p\n", decl.fileScope, decl.currentScope);
             symbolRegistry->setCurrentScope(decl.currentScope);
             symbolRegistry->setFileScope(decl.fileScope);
             SCOPED_SET(this->ctx.currentType, nullptr);
@@ -161,7 +163,17 @@ bool SemanticAnalyzer::resolveLazySymbol(const std::wstring& name)
 {
     auto entry = lazyDeclarations.find(name);
     if(entry == lazyDeclarations.end())
+    {
+        //wprintf(L"Cannot resolve lazy symbol %S\n", name.c_str());
+        /*
+        for(auto entry : lazyDeclarations)
+        {
+            wprintf(L"%S, ", entry.first.c_str());
+        }
+        wprintf(L"\n");
+        */
         return false;
+    }
     declareImmediately(name);
     return true;
 }
@@ -767,11 +779,14 @@ SymbolPtr SemanticAnalyzer::getMemberFromType(const TypePtr& type, const std::ws
     {
         if(filter & FilterLookupInExtension)
         {
-            TypePtr extension = scope->getExtension(type->getName());
-            if (extension)
+            std::vector<TypePtr>* extensions = nullptr;
+            if (scope->getExtension(type->getName(), &extensions))
             {
-                assert(extension->getCategory() == Type::Extension);
-                ret = getMember(extension, fieldName, filter);
+                for(const TypePtr& extension : *extensions)
+                {
+                    assert(extension->getCategory() == Type::Extension);
+                    ret = getMember(extension, fieldName, filter);
+                }
             }
         }
     }
@@ -839,11 +854,17 @@ void SemanticAnalyzer::getMethodsFromType(const TypePtr& type, const std::wstrin
     SymbolScope* scope = this->symbolRegistry->getFileScope();
     if(scope)
     {
-        TypePtr extension = scope->getExtension(type->getName());
-        if(extension && (filter & FilterLookupInExtension))
+        if(filter & FilterLookupInExtension)
         {
-            assert(extension->getCategory() == Type::Extension);
-            loadMethods(extension, fieldName, filter, functions);
+            std::vector<TypePtr> *extensions = nullptr;
+            if(scope->getExtension(type->getName(), &extensions))
+            {
+                for(const TypePtr& extension : *extensions)
+                {
+                    assert(extension->getCategory() == Type::Extension);
+                    loadMethods(extension, fieldName, filter, functions);
+                }
+            }
         }
     }
     for(const FunctionSymbolWrapper& wrapper : functions)

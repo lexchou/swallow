@@ -449,6 +449,8 @@ DeclarationPtr Parser::parseVar(const std::vector<AttributePtr>& attrs, int modi
                     std::pair<CodeBlockPtr, CodeBlockPtr> r = parseGetterSetterKeywordBlock();
                     prop->setGetter(r.first);
                     prop->setSetter(r.second);
+                    if(this->flags & DECLARATION_ONLY)
+                        prop->setModifiers(DeclarationModifiers::_Generated, true);
                 }
                 else
                 {
@@ -800,6 +802,8 @@ DeclarationPtr Parser::parseFunc(const std::vector<AttributePtr>& attrs, int mod
     else
     {
         ret->setBody(nodeFactory->createCodeBlock(*ret->getSourceInfo()));
+        if(flags & DECLARATION_ONLY)
+            ret->setModifiers(DeclarationModifiers::_Generated, true);
     }
     return ret;
 }

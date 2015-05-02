@@ -34,6 +34,15 @@
 USE_SWALLOW_NS
 
 
+ScopeGuard::ScopeGuard(SymbolRegistry* registry, SymbolScope* newScope)
+    :symbolRegistry(nullptr)
+{
+    if(newScope)
+    {
+        symbolRegistry = registry;
+        registry->enterScope(newScope);
+    }
+}
 ScopeGuard::ScopeGuard(ScopeOwner* owner, NodeVisitor* visitor)
     :symbolRegistry(nullptr)
 {

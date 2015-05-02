@@ -33,10 +33,6 @@
 USE_SWALLOW_NS
 
 
-IdentifierPtr ScopedNodeFactory::createIdentifier(const SourceInfo& state)
-{
-    return NodeFactory::createIdentifier(state);
-}
 EnumDefPtr ScopedNodeFactory::createEnum(const SourceInfo& state)
 {
     return create<ScopedEnum>(state);
@@ -52,10 +48,6 @@ ClassDefPtr ScopedNodeFactory::createClass(const SourceInfo& state)
 ProtocolDefPtr ScopedNodeFactory::createProtocol(const SourceInfo& state)
 {
     return create<ScopedProtocol>(state);
-}
-ExtensionDefPtr ScopedNodeFactory::createExtension(const SourceInfo& state)
-{
-    return create<ScopedExtension>(state);
 }
 ProgramPtr ScopedNodeFactory::createProgram()
 {

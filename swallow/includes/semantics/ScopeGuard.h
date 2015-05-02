@@ -35,9 +35,11 @@ SWALLOW_NS_BEGIN
 class SymbolRegistry;
 class NodeVisitor;
 class ScopeOwner;
+class SymbolScope;
 struct SWALLOW_EXPORT ScopeGuard
 {
     ScopeGuard(ScopeOwner* owner, NodeVisitor* visitor);
+    ScopeGuard(SymbolRegistry* registry, SymbolScope* newScope);
     ~ScopeGuard();
     SymbolRegistry* symbolRegistry;
 };

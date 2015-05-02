@@ -71,7 +71,19 @@ void TypeBuilder::setDeclaringType(const TypePtr& type)
 
 void TypeBuilder::setParentType(const TypePtr &type)
 {
+    //detach old parent
+    if(parentType)
+    {
+        auto iter = parents.find(parentType);
+        if(iter != parents.end())
+            parents.erase(iter);
+    }
     this->parentType = type;
+    //attach new parent
+    if(type)
+    {
+        addParentType(type, 1);
+    }
 }
 void TypeBuilder::setInnerType(const TypePtr &type)
 {

@@ -54,7 +54,6 @@ public:
 class SWALLOW_EXPORT ScopedClass : public ClassDef, public ScopeOwner
 {
 public:
-    virtual void accept(NodeVisitor* visitor) override;
     const std::wstring& getName()const;
 public:
     TypePtr type;
@@ -63,7 +62,6 @@ public:
 class SWALLOW_EXPORT ScopedProtocol : public ProtocolDef, public ScopeOwner
 {
 public:
-    virtual void accept(NodeVisitor* visitor) override;
     const std::wstring& getName()const;
 public:
     TypePtr type;
@@ -71,7 +69,6 @@ public:
 class SWALLOW_EXPORT ScopedStruct : public StructDef, public ScopeOwner
 {
 public:
-    virtual void accept(NodeVisitor* visitor) override;
     const std::wstring& getName()const;
 public:
     TypePtr type;
@@ -79,17 +76,9 @@ public:
 class SWALLOW_EXPORT ScopedEnum : public EnumDef, public ScopeOwner
 {
 public:
-    virtual void accept(NodeVisitor* visitor) override;
     const std::wstring& getName()const;
 public:
     TypePtr type;
-};
-class SWALLOW_EXPORT ScopedExtension : public ExtensionDef, public ScopeOwner
-{
-public:
-    virtual void accept(NodeVisitor* visitor) override;
-    const std::wstring& getName()const;
-
 };
 class SWALLOW_EXPORT ScopedCodeBlock : public CodeBlock, public ScopeOwner
 {

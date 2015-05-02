@@ -378,6 +378,15 @@ void DeclarationAnalyzer::visitComputedProperty(const ComputedPropertyPtr& node)
 
     if(ctx->flags & SemanticContext::FLAG_PROCESS_DECLARATION)
     {
+        SymbolScope* scope = symbolRegistry->getCurrentScope();
+        //check if there's already defined this symbol in current scope
+        if(scope->lookup(node->getName(), false))
+        {
+            error(node, Errors::E_INVALID_REDECLARATION_1, node->getName());
+            return;
+        }
+
+        
         node->setType(type);
 
         //register symbol
@@ -400,7 +409,6 @@ void DeclarationAnalyzer::visitComputedProperty(const ComputedPropertyPtr& node)
         ComputedPropertySymbolPtr symbol(new ComputedPropertySymbol(node->getName(), type, flags));
 
         symbol->setAccessLevel(parseAccessLevel(node->getModifiers()));
-        SymbolScope* scope = symbolRegistry->getCurrentScope();
         scope->addSymbol(symbol);
 
         //check access control level
@@ -510,59 +518,17 @@ void DeclarationAnalyzer::visitComputedProperty(const ComputedPropertyPtr& node)
         TypePtr setterType = Type::newFunction(params, symbolRegistry->getGlobalScope()->Void(), false);
 
         SCOPED_SET(ctx->flags, (ctx->flags & (~SemanticContext::FLAG_PROCESS_DECLARATION)) | SemanticContext::FLAG_PROCESS_IMPLEMENTATION);
-        if(property->functions.getter)
-            property->functions.getter->accept(semanticAnalyzer);
-        if(property->functions.setter)
-            property->functions.setter->accept(semanticAnalyzer);
-        if(property->functions.willSet)
-            property->functions.willSet->accept(semanticAnalyzer);
-        if(property->functions.didSet)
-            property->functions.didSet->accept(semanticAnalyzer);
-        /*
-        if (getter)
+        if(!property->hasModifier(DeclarationModifiers::_Generated))
         {
-            getter->setType(getterType);
-            SCOPED_SET(ctx->currentFunction, getterType);
-            registerSelfToAccessor(ctx->currentType, getter);
-            getter->accept(this);
+            if(property->functions.getter)
+                property->functions.getter->accept(semanticAnalyzer);
+            if(property->functions.setter)
+                property->functions.setter->accept(semanticAnalyzer);
+            if(property->functions.willSet)
+                property->functions.willSet->accept(semanticAnalyzer);
+            if(property->functions.didSet)
+                property->functions.didSet->accept(semanticAnalyzer);
         }
-        if (setter)
-        {
-            registerSelfToAccessor(ctx->currentType, setter);
-            std::wstring name = node->getSetterName().empty() ? L"newValue" : node->getSetterName();
-            //TODO: replace the symbol to internal value
-            ScopedCodeBlockPtr cb = std::static_pointer_cast<ScopedCodeBlock>(setter);
-            cb->setType(setterType);
-            cb->getScope()->addSymbol(SymbolPtr(new SymbolPlaceHolder(name, type, SymbolPlaceHolder::R_PARAMETER, SymbolFlagInitialized)));
-
-            SCOPED_SET(ctx->currentFunction, setterType);
-            cb->accept(this);
-        }
-        if (willSet)
-        {
-            std::wstring setter = node->getWillSetSetter().empty() ? L"newValue" : node->getWillSetSetter();
-            //TODO: replace the symbol to internal value
-            ScopedCodeBlockPtr cb = std::static_pointer_cast<ScopedCodeBlock>(willSet);
-            cb->setType(setterType);
-            cb->getScope()->addSymbol(SymbolPtr(new SymbolPlaceHolder(setter, type, SymbolPlaceHolder::R_PARAMETER, SymbolFlagInitialized)));
-
-            SCOPED_SET(ctx->currentFunction, setterType);
-            registerSelfToAccessor(ctx->currentType, willSet);
-            cb->accept(this);
-        }
-        if (didSet)
-        {
-            std::wstring setter = node->getDidSetSetter().empty() ? L"oldValue" : node->getDidSetSetter();
-            //TODO: replace the symbol to internal value
-            ScopedCodeBlockPtr cb = std::static_pointer_cast<ScopedCodeBlock>(didSet);
-            cb->setType(setterType);
-            cb->getScope()->addSymbol(SymbolPtr(new SymbolPlaceHolder(setter, type, SymbolPlaceHolder::R_PARAMETER, SymbolFlagInitialized)));
-
-            SCOPED_SET(ctx->currentFunction, setterType);
-            registerSelfToAccessor(ctx->currentType, didSet);
-            cb->accept(this);
-        }
-        */
     }
 }
 void DeclarationAnalyzer::visitAccessor(const CodeBlockPtr& accessor, const ParametersNodePtr& params, const SymbolPtr& setter, int modifiers)
@@ -985,12 +951,15 @@ void DeclarationAnalyzer::checkForFunctionOverriding(const std::wstring& name, c
 
 void DeclarationAnalyzer::visitFunction(const FunctionDefPtr& node)
 {
+    
     if(ctx->flags & SemanticContext::FLAG_PROCESS_DECLARATION)
     {
         visitFunctionDeclaration(node);
     }
     if(ctx->flags & SemanticContext::FLAG_PROCESS_IMPLEMENTATION)
     {
+        if(node->hasModifier(DeclarationModifiers::_Generated))
+            return;
         //visit implementation
         FunctionSymbolPtr func = static_pointer_cast<SymboledFunction>(node)->symbol;
         assert(func != nullptr);
