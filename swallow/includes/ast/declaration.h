@@ -62,6 +62,7 @@ protected:
     GenericParametersDefPtr genericParameters;
 };
 
+
 SWALLOW_NS_END
 
 #endif//DECLARATION_H
