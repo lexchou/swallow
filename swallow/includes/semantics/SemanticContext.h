@@ -35,6 +35,7 @@ SWALLOW_NS_BEGIN
 
 class ScopedCodeBlock;
 class InitializationTracer;
+typedef std::shared_ptr<class LazyDeclaration> LazyDeclarationPtr;
 
 
 struct SemanticContext
@@ -70,9 +71,14 @@ struct SemanticContext
      */
     std::vector<TypePtr> allTypes;
 
+    std::map<std::wstring, LazyDeclarationPtr> lazyDeclarations;
+    bool lazyDeclaration;
+
     SemanticContext()
         :currentCodeBlock(nullptr), currentInitializationTracer(nullptr), numTemporaryNames(0), flags(FLAG_PROCESS_DECLARATION | FLAG_PROCESS_IMPLEMENTATION)
-    {}
+    {
+        lazyDeclaration = true;
+    }
 };
 
 

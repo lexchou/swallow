@@ -84,6 +84,7 @@ SET(SWALLOW_SRC
     src/semantics/SemanticUtils.cpp
     src/semantics/BuiltinModule.cpp
     src/semantics/LazyDeclaration.cpp
+    src/semantics/TypeResolver.cpp
 
     src/codegen/NameMangling.cpp
 

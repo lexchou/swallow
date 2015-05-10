@@ -49,6 +49,7 @@
 #include <semantics/Symbol.h>
 #include "semantics/DeclarationAnalyzer.h"
 #include "semantics/LazyDeclaration.h"
+#include "semantics/TypeResolver.h"
 
 USE_SWALLOW_NS
 using namespace std;
@@ -58,7 +59,7 @@ SemanticAnalyzer::SemanticAnalyzer(SymbolRegistry* symbolRegistry, CompilerResul
 :SemanticPass(symbolRegistry, compilerResults)
 {
     declarationAnalyzer = new DeclarationAnalyzer(this, &ctx);
-    lazyDeclaration = true;
+    ctx.lazyDeclaration = true;
     ctx.currentModule = currentModule;
 }
 SemanticAnalyzer::~SemanticAnalyzer()
@@ -107,12 +108,12 @@ void SemanticAnalyzer::delayDeclare(const DeclarationPtr& node)
 {
     //map<wstring, list<DeclarationPtr>> lazyDeclarations;
     std::wstring name = getDeclarationName(node);
-    auto iter = lazyDeclarations.find(name);
+    auto iter = ctx.lazyDeclarations.find(name);
     //wprintf(L"Delay declare %S\n", name.c_str());
-    if(iter == lazyDeclarations.end())
+    if(iter == ctx.lazyDeclarations.end())
     {
         LazyDeclarationPtr decls(new LazyDeclaration());
-        lazyDeclarations.insert(make_pair(name, decls));
+        ctx.lazyDeclarations.insert(make_pair(name, decls));
         decls->addDeclaration(symbolRegistry, node);
         return;
     }
@@ -123,16 +124,16 @@ void SemanticAnalyzer::delayDeclare(const DeclarationPtr& node)
  */
 void SemanticAnalyzer::declareImmediately(const std::wstring& name)
 {
-    auto entry = lazyDeclarations.find(name);
-    if(entry == lazyDeclarations.end())
+    auto entry = ctx.lazyDeclarations.find(name);
+    if(entry == ctx.lazyDeclarations.end())
         return;
     LazyDeclarationPtr decls = entry->second;
-    lazyDeclarations.erase(entry);
+    ctx.lazyDeclarations.erase(entry);
     SymbolScope* currentScope = symbolRegistry->getCurrentScope();
     SymbolScope* fileScope = symbolRegistry->getFileScope();
     try
     {
-        SCOPED_SET(lazyDeclaration, false);
+        SCOPED_SET(ctx.lazyDeclaration, false);
 
         //wprintf(L"Declare immediately %S %d definitions\n", name.c_str(), decls->size());
         for(auto decl : *decls)
@@ -161,8 +162,8 @@ void SemanticAnalyzer::declareImmediately(const std::wstring& name)
 }
 bool SemanticAnalyzer::resolveLazySymbol(const std::wstring& name)
 {
-    auto entry = lazyDeclarations.find(name);
-    if(entry == lazyDeclarations.end())
+    auto entry = ctx.lazyDeclarations.find(name);
+    if(entry == ctx.lazyDeclarations.end())
     {
         //wprintf(L"Cannot resolve lazy symbol %S\n", name.c_str());
         /*
@@ -201,269 +202,44 @@ void SemanticAnalyzer::verifyProtocolConforms()
     }
 }
 
+static void resolveTypeAlias(const TypePtr& type)
+{
+    if(type->getCategory() == Type::Alias)
+    {
+        type->resolveAlias();
+        return;
+    }
+    //check nested types
+    for(auto entry : type->getAssociatedTypes())
+    {
+        resolveTypeAlias(entry.second);
+    }
+}
 void SemanticAnalyzer::finalizeLazyDeclaration()
 {
-    lazyDeclaration = false;
+    ctx.lazyDeclaration = false;
     SymbolScope* scope = symbolRegistry->getCurrentScope();
-    while(!lazyDeclarations.empty())
+    while(!ctx.lazyDeclarations.empty())
     {
-        std::wstring symbolName = lazyDeclarations.begin()->first;
+        std::wstring symbolName = ctx.lazyDeclarations.begin()->first;
         //lazyDeclarations.erase(lazyDeclarations.begin());
         declareImmediately(symbolName);
     }
     symbolRegistry->setCurrentScope(scope);
+    //now we make all typealias to resolve its type
+    for(auto entry : scope->getSymbols())
+    {
+        if(entry.second->getKind() != SymbolKindType)
+            continue;
+        TypePtr type = static_pointer_cast<Type>(entry.second);
+        resolveTypeAlias(type);
+    }
 }
 
 TypePtr SemanticAnalyzer::lookupType(const TypeNodePtr& type, bool supressErrors)
 {
-    if(!type)
-        return nullptr;
-    TypePtr ret = type->getType();
-    if(!ret)
-    {
-        ret = lookupTypeImpl(type, supressErrors);
-        type->setType(ret);
-    }
-    return ret;
-}
-TypePtr SemanticAnalyzer::lookupTypeImpl(const TypeNodePtr &type, bool supressErrors)
-{
-    NodeType::T nodeType = type->getNodeType();
-    switch(nodeType)
-    {
-
-        case NodeType::TypeIdentifier:
-        {
-            TypeIdentifierPtr id = std::static_pointer_cast<TypeIdentifier>(type);
-            const wstring& name = id->getName();
-            declareImmediately(name);
-            SymbolPtr s = symbolRegistry->lookupSymbol(name);
-            if(s && s->getKind() == SymbolKindModule)//type declared inside a module
-            {
-                //it's a module, access it's type
-                if(id->getNestedType() == nullptr)
-                {
-                    error(type, Errors::E_USE_OF_UNDECLARED_TYPE_1, name);
-                    return nullptr;
-                }
-                ModulePtr module = static_pointer_cast<Module>(s);
-                id = id->getNestedType();
-                TypePtr ret = dynamic_pointer_cast<Type>(module->getSymbol(id->getName()));
-                if(!ret)
-                {
-                    error(type, Errors::E_NO_TYPE_NAMED_A_IN_MODULE_B_2, id->getName(), name);
-                    return nullptr;
-                }
-                for (TypeIdentifierPtr n = id->getNestedType(); n != nullptr; n = n->getNestedType())
-                {
-                    TypePtr childType = ret->getAssociatedType(n->getName());
-                    if (!childType)
-                    {
-                        if (!supressErrors)
-                            error(n, Errors::E_A_IS_NOT_A_MEMBER_TYPE_OF_B_2, n->getName(), ret->toString());
-                        return nullptr;
-                    }
-                    if (n->numGenericArguments())
-                    {
-                        //nested type is always a non-generic type
-                        if (!supressErrors)
-                            error(n, Errors::E_CANNOT_SPECIALIZE_NON_GENERIC_TYPE_1, childType->toString());
-                        return nullptr;
-                    }
-                    ret = childType;
-                }
-                return ret;
-            }
-            //Self type
-            if(name == L"Self")
-            {
-                if(!ctx.currentType)
-                {
-                    error(type, Errors::E_USE_OF_UNDECLARED_TYPE_1, name);
-                    return nullptr;
-                }
-                return ctx.currentType;
-            }
-
-            //TODO: make a generic type if possible
-            TypePtr ret = symbolRegistry->lookupType(name);
-            if (!ret)
-            {
-                if (!supressErrors)
-                {
-                    std::wstring str = toString(type);
-                    error(type, Errors::E_USE_OF_UNDECLARED_TYPE_1, str);
-                    abort();
-                }
-                return nullptr;
-            }
-            GenericDefinitionPtr generic = ret->getGenericDefinition();
-            if (generic == nullptr && id->numGenericArguments() == 0)
-                return ret;
-            if (generic == nullptr && id->numGenericArguments() > 0)
-            {
-                if (!supressErrors)
-                {
-                    std::wstring str = toString(type);
-                    error(id, Errors::E_CANNOT_SPECIALIZE_NON_GENERIC_TYPE_1, str);
-                }
-                return nullptr;
-            }
-            if (generic != nullptr && id->numGenericArguments() == 0)
-            {
-                if (!supressErrors)
-                {
-                    std::wstring str = toString(type);
-                    error(id, Errors::E_GENERIC_TYPE_ARGUMENT_REQUIRED, str);
-                }
-                return nullptr;
-            }
-            if (id->numGenericArguments() > generic->numParameters())
-            {
-                if (!supressErrors)
-                {
-                    std::wstring str = toString(type);
-                    std::wstring got = toString(id->numGenericArguments());
-                    std::wstring expected = toString(generic->numParameters());
-                    error(id, Errors::E_GENERIC_TYPE_SPECIALIZED_WITH_TOO_MANY_TYPE_PARAMETERS_3, str, got, expected);
-                }
-                return nullptr;
-            }
-            if (id->numGenericArguments() < generic->numParameters())
-            {
-                if (!supressErrors)
-                {
-                    std::wstring str = toString(type);
-                    std::wstring got = toString(id->numGenericArguments());
-                    std::wstring expected = toString(generic->numParameters());
-                    error(id, Errors::E_GENERIC_TYPE_SPECIALIZED_WITH_INSUFFICIENT_TYPE_PARAMETERS_3, str, got, expected);
-                }
-                return nullptr;
-            }
-            //check type
-            GenericArgumentPtr genericArgument(new GenericArgument(generic));
-            for (auto arg : *id)
-            {
-                TypePtr argType = lookupType(arg);
-                if (!argType)
-                    return nullptr;
-                genericArgument->add(argType);
-            }
-            TypePtr base = Type::newSpecializedType(ret, genericArgument);
-            ret = base;
-            //access rest nested types
-            for (TypeIdentifierPtr n = id->getNestedType(); n != nullptr; n = n->getNestedType())
-            {
-                TypePtr childType = ret->getAssociatedType(n->getName());
-                if (!childType)
-                {
-                    if (!supressErrors)
-                        error(n, Errors::E_A_IS_NOT_A_MEMBER_TYPE_OF_B_2, n->getName(), ret->toString());
-                    return nullptr;
-                }
-                if (n->numGenericArguments())
-                {
-                    //nested type is always a non-generic type
-                    if (!supressErrors)
-                        error(n, Errors::E_CANNOT_SPECIALIZE_NON_GENERIC_TYPE_1, childType->toString());
-                    return nullptr;
-                }
-                ret = childType;
-            }
-
-            return ret;
-        }
-        case NodeType::TupleType:
-        {
-            TupleTypePtr tuple = std::static_pointer_cast<TupleType>(type);
-            std::vector<TypePtr> elementTypes;
-            for (const TupleType::TupleElement &e : *tuple)
-            {
-                TypePtr t = lookupType(e.type);
-                elementTypes.push_back(t);
-            }
-            return Type::newTuple(elementTypes);
-        }
-        case NodeType::ArrayType:
-        {
-            ArrayTypePtr array = std::static_pointer_cast<ArrayType>(type);
-            GlobalScope *global = symbolRegistry->getGlobalScope();
-            TypePtr innerType = lookupType(array->getInnerType());
-            assert(innerType != nullptr);
-            TypePtr ret = global->makeArray(innerType);
-            return ret;
-        }
-        case NodeType::DictionaryType:
-        {
-            DictionaryTypePtr array = std::static_pointer_cast<DictionaryType>(type);
-            GlobalScope *scope = symbolRegistry->getGlobalScope();
-            TypePtr keyType = lookupType(array->getKeyType());
-            TypePtr valueType = lookupType(array->getValueType());
-            assert(keyType != nullptr);
-            assert(valueType != nullptr);
-            TypePtr ret = scope->makeDictionary(keyType, valueType);
-            return ret;
-        }
-        case NodeType::OptionalType:
-        {
-            OptionalTypePtr opt = std::static_pointer_cast<OptionalType>(type);
-            GlobalScope *global = symbolRegistry->getGlobalScope();
-            TypePtr innerType = lookupType(opt->getInnerType());
-            assert(innerType != nullptr);
-            TypePtr ret = global->makeOptional(innerType);
-            return ret;
-        }
-        case NodeType::ImplicitlyUnwrappedOptional:
-        {
-            ImplicitlyUnwrappedOptionalPtr opt = std::static_pointer_cast<ImplicitlyUnwrappedOptional>(type);
-            GlobalScope *global = symbolRegistry->getGlobalScope();
-            TypePtr innerType = lookupType(opt->getInnerType());
-            assert(innerType != nullptr);
-            TypePtr ret = global->makeImplicitlyUnwrappedOptional(innerType);
-            return ret;
-        };
-        case NodeType::FunctionType:
-        {
-            FunctionTypePtr func = std::static_pointer_cast<FunctionType>(type);
-            TypePtr retType = nullptr;
-            if (func->getReturnType())
-            {
-                retType = lookupType(func->getReturnType());
-            }
-            vector<Parameter> params;
-            for (auto p : *func->getArgumentsType())
-            {
-                TypePtr paramType = lookupType(p.type);
-                params.push_back(Parameter(p.name, p.inout, paramType));
-            }
-            TypePtr ret = Type::newFunction(params, retType, false, nullptr);
-            return ret;
-        }
-        case NodeType::ProtocolComposition:
-        {
-            ProtocolCompositionPtr composition = static_pointer_cast<ProtocolComposition>(type);
-            vector<TypePtr> protocols;
-            for(const TypeIdentifierPtr& p : *composition)
-            {
-                TypePtr protocol = lookupType(p);
-                //it must be a protocol type
-                assert(protocol != nullptr);
-                if(protocol->getCategory() != Type::Protocol)
-                {
-                    error(p, Errors::E_NON_PROTOCOL_TYPE_A_CANNOT_BE_USED_WITHIN_PROTOCOL_COMPOSITION_1, p->getName());
-                    return nullptr;
-                }
-                protocols.push_back(protocol);
-            }
-            TypePtr ret = Type::newProtocolComposition(protocols);
-            return ret;
-        };
-        default:
-        {
-            assert(0 && "Unsupported type");
-            return nullptr;
-        }
-    }
+    TypeResolver resolver(symbolRegistry, supressErrors ? nullptr : this, this, &ctx);
+    return resolver.lookupType(type);
 }
 /*!
  * Convert expression node to type node
@@ -688,6 +464,8 @@ std::vector<SymbolPtr> SemanticAnalyzer::allFunctions(const std::wstring& name, 
         }
         else if(TypePtr type = dynamic_pointer_cast<Type>(sym))
         {
+            type = type->resolveAlias();
+            assert(type != nullptr);
             ret.push_back(type);
         }
         else

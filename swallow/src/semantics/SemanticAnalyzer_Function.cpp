@@ -61,7 +61,7 @@ void SemanticAnalyzer::visitSubscript(const SubscriptDefPtr &node)
 }
 void SemanticAnalyzer::visitFunction(const FunctionDefPtr& node)
 {
-    if(lazyDeclaration && isGlobal(node))
+    if(ctx.lazyDeclaration && isGlobal(node))
     {
         //mark it as lazy declaration
         delayDeclare(node);

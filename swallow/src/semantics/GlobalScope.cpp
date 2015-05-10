@@ -673,7 +673,7 @@ void GlobalScope::initOperators(SymbolRegistry* registry)
     // T? == nil
     {
         TypePtr T = Type::newType(L"T", Type::GenericParameter);
-        TypePtr optionalT = makeOptional(Type::newType(L"T", Type::Alias));
+        TypePtr optionalT = makeOptional(Type::newType(L"T", Type::GenericParameter));
         GenericDefinitionPtr def(new GenericDefinition());
         def->add(L"T", T);
         vector<Parameter> parameterTypes = {optionalT, __OptionalNilComparisonType};
@@ -687,7 +687,7 @@ void GlobalScope::initOperators(SymbolRegistry* registry)
 
     {
         TypePtr T = Type::newType(L"T", Type::GenericParameter);
-        TypePtr optionalT = makeOptional(Type::newType(L"T", Type::Alias));
+        TypePtr optionalT = makeOptional(Type::newType(L"T", Type::GenericParameter));
         GenericDefinitionPtr def(new GenericDefinition());
         def->add(L"T", T);
         vector<Parameter> parameterTypes = {optionalT, __OptionalNilComparisonType};

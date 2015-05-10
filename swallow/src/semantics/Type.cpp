@@ -33,6 +33,8 @@
 #include "semantics/GenericArgument.h"
 #include "semantics/FunctionOverloadedSymbol.h"
 #include "semantics/TypeBuilder.h"
+#include "semantics/SymbolRegistry.h"
+#include "semantics/TypeResolver.h"
 #include "semantics/ScopedNodes.h"
 #include <sstream>
 
@@ -75,6 +77,7 @@ Type::Type(Category category)
     inheritantDepth = 0;
     accessLevel = AccessLevelInternal;
     scope = nullptr;
+    emptyAlias = true;
 }
 /*!
  * A type place holder for protocol's typealias
@@ -104,8 +107,17 @@ TypePtr Type::newType(const std::wstring& name, Category category, const TypeDec
         ret->inheritantDepth = parentType->inheritantDepth + 1;
     return TypePtr(ret);
 }
+TypePtr Type::newTypeAlias(const std::wstring& name, const TypeNodePtr& decl, std::shared_ptr<TypeResolver> typeResolver)
+{
+    TypePtr ret(new TypeBuilder(Alias));
+    ret->name = name;
+    ret->typeNode = decl;
+    ret->typeResolver = typeResolver;
+    ret->emptyAlias = decl == nullptr && typeResolver == nullptr;
+    return ret;
+}
 
-TypePtr Type::newTypeReference(const TypePtr& innerType)
+TypePtr Type::newMetaType(const TypePtr& innerType)
 {
     TypePtr ret(new TypeBuilder(MetaType));
     ret->innerType = innerType;
@@ -282,7 +294,7 @@ SymbolScope* Type::getScope()
 {
     if(scope)
         return scope;
-    TypeDeclarationPtr ref = getReference();
+    DeclarationPtr ref = getReference();
     if(!ref)
         return nullptr;
     //TODO: remove ScopedClass/ScopedStruct/ScopedEnum/ScopedProtocol
@@ -545,6 +557,25 @@ bool Type::containsGenericParameters() const
             return true;
     }
     return false;
+}
+/*!
+ * If current type is a type reference, return the actual type resolved by scope and type reference
+ */
+TypePtr Type::resolveAlias()
+{
+    TypePtr node = self();
+    if(node->category != Alias)
+        return node;
+    if(emptyAlias)
+        return self();
+    if(innerType || !typeResolver)
+        return innerType;
+    //resolve it by scope and reference
+    assert(typeResolver != nullptr);
+    assert(typeNode != nullptr);
+    innerType = typeResolver->lookupType(typeNode);
+    typeResolver = nullptr;
+    return innerType;
 }
 TypePtr Type::unwrap() const
 {

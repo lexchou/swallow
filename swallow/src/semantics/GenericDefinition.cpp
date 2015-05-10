@@ -130,7 +130,7 @@ void GenericDefinition::registerTo(SymbolScope* scope)
 {
     for(auto entry : constraints)
     {
-        scope->addSymbol(entry.first, Type::newType(entry.first, Type::Alias));//
+        scope->addSymbol(entry.first, Type::newType(entry.first, Type::GenericParameter));//
     }
 
 }

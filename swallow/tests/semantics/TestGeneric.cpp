@@ -46,10 +46,7 @@ TEST(TestGeneric, Func_GenericParameter)
         L"    a = b\n"
         L"    b = temporaryA\n"
         L"}\n");
-    dumpCompilerResults(compilerResults);
-    ASSERT_EQ(0, compilerResults.numResults());
-
-
+    ASSERT_NO_ERRORS();
 }
 TEST(TestGeneric, Struct_GenericParameter)
 {
@@ -63,8 +60,7 @@ TEST(TestGeneric, Struct_GenericParameter)
         L"        return items\n"
         L"    }\n"
         L"}");
-    dumpCompilerResults(compilerResults);
-    ASSERT_EQ(0, compilerResults.numResults());
+    ASSERT_NO_ERRORS();
 }
 TEST(TestGeneric, Use_GenericType)
 {
@@ -95,8 +91,7 @@ TEST(TestGeneric, GenericConstraint)
             //"    }\n"
             L"    return nil\n"
             L"}\n");
-    dumpCompilerResults(compilerResults);
-    ASSERT_EQ(0, compilerResults.numResults());
+    ASSERT_NO_ERRORS();
 }
 TEST(TestGeneric, GenericConstraint2)
 {
@@ -106,10 +101,7 @@ TEST(TestGeneric, GenericConstraint2)
         L"}\n"
         L"var a : Int = 3\n"
         L"test(\"\");");
-//    dumpCompilerResults(compilerResults);
-    ASSERT_EQ(1, compilerResults.numResults());
-    auto res = compilerResults.getResult(0);
-    ASSERT_EQ(Errors::E_TYPE_DOES_NOT_CONFORM_TO_PROTOCOL_2_, res.code);
+    ASSERT_ERROR(Errors::E_TYPE_DOES_NOT_CONFORM_TO_PROTOCOL_2_);
 }
 
 
@@ -119,10 +111,7 @@ TEST(TestGeneric, GenericConstraint3)
         L"{\n"
         L"    \n"
         L"}");
-//    dumpCompilerResults(compilerResults);
-    ASSERT_EQ(1, compilerResults.numResults());
-    auto res = compilerResults.getResult(0);
-    ASSERT_EQ(Errors::E_IS_NOT_A_MEMBER_OF_2, res.code);
+    ASSERT_ERROR(Errors::E_IS_NOT_A_MEMBER_OF_2);
 }
 TEST(TestGeneric, GenericConstraint4)
 {
@@ -135,8 +124,7 @@ TEST(TestGeneric, GenericConstraint4)
         L"{\n"
         L"    \n"
         L"}");
-    dumpCompilerResults(compilerResults);
-    ASSERT_EQ(0, compilerResults.numResults());
+    ASSERT_NO_ERRORS();
 }
 TEST(TestGeneric, GenericConstraint5)
 {
@@ -144,9 +132,7 @@ TEST(TestGeneric, GenericConstraint5)
         L"{\n"
         L"\n"
         L"}");
-    ASSERT_EQ(1, compilerResults.numResults());
-    auto res = compilerResults.getResult(0);
-    ASSERT_EQ(Errors::E_SAME_TYPE_REQUIREMENTS_MAKES_GENERIC_PARAMETER_NON_GENERIC_1, res.code);
+    ASSERT_ERROR(Errors::E_SAME_TYPE_REQUIREMENTS_MAKES_GENERIC_PARAMETER_NON_GENERIC_1);
 
 }
 
@@ -161,9 +147,7 @@ TEST(TestGeneric, GenericConstraint6)
         L"{\n"
         L"    \n"
         L"}");
-    ASSERT_EQ(1, compilerResults.numResults());
-    auto res = compilerResults.getResult(0);
-    ASSERT_EQ(Errors::E_PROTOCOL_CAN_ONLY_BE_USED_AS_GENERIC_CONSTRAINT_1, res.code);
+    ASSERT_ERROR(Errors::E_PROTOCOL_CAN_ONLY_BE_USED_AS_GENERIC_CONSTRAINT_1);
 
 }
 
@@ -172,7 +156,7 @@ TEST(TestGeneric, FuncSpecialization)
     SEMANTIC_ANALYZE(L"func foo<T>(b : T) -> T { return b;}\n"
             L"var a = foo(1);\n"
             L"var b = foo(true);");
-    ASSERT_EQ(0, compilerResults.numResults());
+    ASSERT_NO_ERRORS();
     SymbolPtr a, b;
     ASSERT_NOT_NULL(a = scope->lookup(L"a"));
     ASSERT_NOT_NULL(b = scope->lookup(L"b"));
@@ -197,8 +181,7 @@ TEST(TestGeneric, GenericConstraint7)
 TEST(TestGeneric, GenericConstraint7)
 {
     SEMANTIC_ANALYZE_F("semantics/TestGeneric_GenericConstraint7.swift");
-    dumpCompilerResults(compilerResults);
-    ASSERT_EQ(0, compilerResults.numResults());
+    ASSERT_NO_ERRORS();
 }
 
 TEST(TestGeneric, GenericConstraint8)

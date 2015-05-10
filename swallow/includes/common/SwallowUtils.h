@@ -38,12 +38,16 @@ SWALLOW_NS_BEGIN
 
 class CompilerResults;
 
+typedef std::shared_ptr<class Node> NodePtr;
+
 struct SwallowUtils
 {
     static void dumpHex(const char* s);
     static std::wstring readFile(const char* fileName);
     static std::vector<std::string> readDirectory(const char* path);
     static void dumpCompilerResults(const std::wstring& src, const CompilerResults& compilerResults, std::wostream& out);
+    static std::wstring toString(const NodePtr& node);
+    static std::wstring toString(int i);
 
     /*!
      * A simplified approach to convert std::string to std::wstring

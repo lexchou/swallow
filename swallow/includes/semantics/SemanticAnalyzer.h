@@ -71,7 +71,6 @@ enum MemberFilter
     FilterLookupInExtension = 4
 };
 class DeclarationAnalyzer;
-typedef std::shared_ptr<class LazyDeclaration> LazyDeclarationPtr;
 class SWALLOW_EXPORT SemanticAnalyzer : public SemanticPass, public LazySymbolResolver
 {
     friend class DeclarationAnalyzer;
@@ -253,7 +252,6 @@ private:
     void declarationFinished(const std::wstring& name, const SymbolPtr& decl, const NodePtr& node);
 
 private:
-    TypePtr lookupTypeImpl(const TypeNodePtr& type, bool supressErrors);
 
     /*!
      * Validate modifiers for declarations.
@@ -294,8 +292,6 @@ protected:
 protected:
     SemanticContext ctx;
     DeclarationAnalyzer* declarationAnalyzer;
-    std::map<std::wstring, LazyDeclarationPtr> lazyDeclarations;
-    bool lazyDeclaration;
 };
 
 SWALLOW_NS_END

@@ -43,6 +43,7 @@
 #include <cassert>
 #include "ast/NodeFactory.h"
 #include "common/ScopedValue.h"
+#include "semantics/TypeResolver.h"
 
 USE_SWALLOW_NS
 using namespace std;
@@ -352,17 +353,15 @@ void DeclarationAnalyzer::visitTypeAlias(const TypeAliasPtr& node)
         error(node, Errors::E_INVALID_REDECLARATION_1, node->getName());
         return;
     }
-    type = Type::newType(node->getName(), Type::Alias);
     if(ctx->currentType && ctx->currentType->getCategory() == Type::Protocol && !node->getType())
     {
         //register a type place holder for protocol
+        type = Type::newTypeAlias(node->getName(), nullptr, nullptr);
     }
     else
     {
-        TypePtr innerType = lookupType(node->getType());
-        if(innerType)
-            type = innerType;
-        //static_pointer_cast<TypeBuilder>(type)->setInnerType(innerType);
+        shared_ptr<TypeResolver> typeResolver(new TypeResolver(symbolRegistry, semanticAnalyzer, semanticAnalyzer, ctx));
+        type = Type::newTypeAlias(node->getName(), node->getType(), typeResolver);
     }
     currentScope->addSymbol(node->getName(), type);
     validateDeclarationModifiers(node);

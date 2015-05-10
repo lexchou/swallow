@@ -41,10 +41,12 @@
 SWALLOW_NS_BEGIN
 
 typedef std::shared_ptr<class TypeDeclaration> TypeDeclarationPtr;
+typedef std::shared_ptr<class TypeNode> TypeNodePtr;
 typedef std::weak_ptr<class TypeDeclaration> TypeDeclarationWeakPtr;
 typedef std::shared_ptr<class GenericDefinition> GenericDefinitionPtr;
 typedef std::shared_ptr<class GenericArgument> GenericArgumentPtr;
 typedef std::shared_ptr<class FunctionOverloadedSymbol> FunctionOverloadedSymbolPtr;
+class CompilerResultEmitter;
 struct SWALLOW_EXPORT EnumCase
 {
     std::wstring name;
@@ -124,7 +126,8 @@ public:
     static TypePtr newType(const std::wstring& name, Category category, const TypeDeclarationPtr& reference = nullptr, const TypePtr& parentType = nullptr, const std::vector<TypePtr>& protocols = std::vector<TypePtr>(), const GenericDefinitionPtr& generic = nullptr);
     static TypePtr newTuple(const std::vector<TypePtr>& types);
     static TypePtr newProtocolComposition(const std::vector<TypePtr>& types);
-    static TypePtr newTypeReference(const TypePtr& innerType);
+    static TypePtr newMetaType(const TypePtr& innerType);
+    static TypePtr newTypeAlias(const std::wstring& name, const TypeNodePtr& decl, std::shared_ptr<class TypeResolver> typeResolver);
     static TypePtr newFunction(const std::vector<Parameter>& parameters, const TypePtr& returnType, bool hasVariadicParameters, const GenericDefinitionPtr& generic = nullptr);
     static TypePtr newSpecializedType(const TypePtr& innerType, const GenericArgumentPtr& arguments);
     static TypePtr newSpecializedType(const TypePtr& innerType, const std::map<std::wstring, TypePtr>& arguments);
@@ -226,7 +229,7 @@ public://properties
 
     /*!
      * Gets the scope of the type.
-     * Only class/struct/enum/protocol can has a scope
+     * Only class/struct/enum/protocol/alias can has a scope
      */
     SymbolScope* getScope();
     /*!
@@ -306,6 +309,12 @@ public://properties
      * convert this type to string representation
      */
     std::wstring toString() const;
+
+
+    /*!
+     * If current type is a type reference, return the actual type resolved by scope and type reference
+     */
+    TypePtr resolveAlias();
 
     /*!
      * Unwrap the alias chain, return the last node of the alias chain
@@ -411,6 +420,11 @@ protected:
     std::vector<Subscript> subscripts;
     FunctionSymbolPtr deinit;
     SymbolScope* scope;
+
+    //for type alias
+    TypeNodePtr typeNode;
+    std::shared_ptr<class TypeResolver> typeResolver;
+    bool emptyAlias;
 
     //for protocol
     mutable short _containsSelfType;

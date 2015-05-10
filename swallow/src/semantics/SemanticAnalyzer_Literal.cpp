@@ -215,7 +215,7 @@ void SemanticAnalyzer::visitDictionaryLiteral(const DictionaryLiteralPtr& node)
         if(keyType && valueType)
         {
             TypePtr dict = global->makeDictionary(keyType, valueType);
-            TypePtr ref = Type::newTypeReference(dict);
+            TypePtr ref = Type::newMetaType(dict);
             node->setType(ref);
             return;
         }
@@ -426,7 +426,10 @@ void SemanticAnalyzer::visitIdentifier(const IdentifierPtr& id)
     }
     else if(TypePtr type = dynamic_pointer_cast<Type>(sym))
     {
-        TypePtr ref = Type::newTypeReference(type);
+        if(type->getCategory() == Type::Alias)
+            type = type->resolveAlias();
+        assert(type != nullptr);
+        TypePtr ref = Type::newMetaType(type);
         id->setType(ref);
     }
     else if(FunctionSymbolPtr func = dynamic_pointer_cast<FunctionSymbol>(sym))

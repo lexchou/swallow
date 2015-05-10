@@ -33,7 +33,9 @@
 #include <cassert>
 #include <iostream>
 #include "common/CompilerResults.h"
+#include "ast/utils/NodeSerializer.h"
 #include "common/Errors.h"
+#include "ast/Node.h"
 #include <dirent.h>
 //#include <codecvt>
 
@@ -158,6 +160,19 @@ void SwallowUtils::dumpCompilerResults(const std::wstring& src, const CompilerRe
     }
 
 
+}
+std::wstring SwallowUtils::toString(const NodePtr& node)
+{
+    std::wstringstream out;
+    NodeSerializerW serializer(out);
+    node->accept(&serializer);
+    return out.str();
+}
+std::wstring SwallowUtils::toString(int i)
+{
+    std::wstringstream s;
+    s<<i;
+    return s.str();
 }
 /*!
  * A simplified approach to convert std::string to std::wstring

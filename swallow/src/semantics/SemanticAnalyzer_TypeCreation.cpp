@@ -48,16 +48,17 @@ using namespace std;
 
 void SemanticAnalyzer::visitTypeAlias(const TypeAliasPtr& node)
 {
-    if(lazyDeclaration)
+    /*
+    if(ctx.lazyDeclaration)
     {
         delayDeclare(node);
         return;
-    }
+    }*/
     node->accept(declarationAnalyzer);
 }
 void SemanticAnalyzer::visitEnum(const EnumDefPtr& node)
 {
-    if(lazyDeclaration && isGlobal(node))
+    if(ctx.lazyDeclaration && isGlobal(node))
     {
         //mark it as lazy declaration
         delayDeclare(node);
@@ -67,7 +68,7 @@ void SemanticAnalyzer::visitEnum(const EnumDefPtr& node)
 }
 void SemanticAnalyzer::visitClass(const ClassDefPtr& node)
 {
-    if(lazyDeclaration && isGlobal(node))
+    if(ctx.lazyDeclaration && isGlobal(node))
     {
         //mark it as lazy declaration
         delayDeclare(node);
@@ -77,7 +78,7 @@ void SemanticAnalyzer::visitClass(const ClassDefPtr& node)
 }
 void SemanticAnalyzer::visitStruct(const StructDefPtr& node)
 {
-    if(lazyDeclaration && isGlobal(node))
+    if(ctx.lazyDeclaration && isGlobal(node))
     {
         //mark it as lazy declaration
         delayDeclare(node);
@@ -87,7 +88,7 @@ void SemanticAnalyzer::visitStruct(const StructDefPtr& node)
 }
 void SemanticAnalyzer::visitProtocol(const ProtocolDefPtr& node)
 {
-    if(lazyDeclaration && isGlobal(node))
+    if(ctx.lazyDeclaration && isGlobal(node))
     {
         //mark it as lazy declaration
         delayDeclare(node);
@@ -103,7 +104,7 @@ void SemanticAnalyzer::visitExtension(const ExtensionDefPtr& node)
         return;
     }
     //check if this type is already registered
-    if(lazyDeclaration)
+    if(ctx.lazyDeclaration)
     {
         bool defined = symbolRegistry->isSymbolDefined(node->getIdentifier()->getName());
         if(!defined)

@@ -206,7 +206,7 @@ bool Type::canSpecializeTo(const TypePtr& type, std::map<std::wstring, TypePtr>&
 {
     TypePtr self = static_pointer_cast<Type>(const_cast<Type*>(this)->shared_from_this())->unwrap();
 
-    if(self->category == Alias)
+    if(self->category == GenericParameter || self->category == Alias)
     {
         //it's a alias, type inferece only for undefined alias
         assert(self->innerType == nullptr);

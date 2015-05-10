@@ -506,7 +506,7 @@ void SemanticAnalyzer::visitFunctionCall(const FunctionCallPtr& node)
             }
             else
             {
-                selfType = Type::newTypeReference(ctx.contextualType);
+                selfType = Type::newMetaType(ctx.contextualType);
             }
             bool mutatingSelf = !containsReadonlyNode(ma->getSelf());
             assert(selfType != nullptr);
