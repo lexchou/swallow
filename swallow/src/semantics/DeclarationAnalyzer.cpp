@@ -108,7 +108,10 @@ void DeclarationAnalyzer::prepareParameters(SymbolScope* scope, const Parameters
 
 GenericDefinitionPtr DeclarationAnalyzer::prepareGenericTypes(const GenericParametersDefPtr& params)
 {
-    GenericDefinitionPtr ret(new GenericDefinition());
+    GenericDefinitionPtr parentGeneric = nullptr;
+    if(ctx->currentType)
+        parentGeneric = ctx->currentType->getGenericDefinition();
+    GenericDefinitionPtr ret(new GenericDefinition(parentGeneric));
     for (const TypeIdentifierPtr &typeId : *params)
     {
         if (typeId->getNestedType())
@@ -124,7 +127,8 @@ GenericDefinitionPtr DeclarationAnalyzer::prepareGenericTypes(const GenericParam
             continue;
         }
         std::vector<TypePtr> protocols;
-        TypePtr type = Type::newType(name, Type::GenericParameter, nullptr, nullptr, protocols);
+        TypeBuilderPtr type = static_pointer_cast<TypeBuilder>(Type::newGenericParameter(name));
+        type->setGenericDefinition(ret);
         ret->add(name, type);
     }
     //add constraint

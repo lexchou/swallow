@@ -128,6 +128,8 @@ public:
     static TypePtr newProtocolComposition(const std::vector<TypePtr>& types);
     static TypePtr newMetaType(const TypePtr& innerType);
     static TypePtr newTypeAlias(const std::wstring& name, const TypeNodePtr& decl, std::shared_ptr<class TypeResolver> typeResolver);
+    static TypePtr newGenericParameter(const std::wstring& name);
+    static TypePtr newGenericParameter(const std::wstring& name, std::vector<std::wstring> nestedTypes);
     static TypePtr newFunction(const std::vector<Parameter>& parameters, const TypePtr& returnType, bool hasVariadicParameters, const GenericDefinitionPtr& generic = nullptr);
     static TypePtr newSpecializedType(const TypePtr& innerType, const GenericArgumentPtr& arguments);
     static TypePtr newSpecializedType(const TypePtr& innerType, const std::map<std::wstring, TypePtr>& arguments);
@@ -248,6 +250,11 @@ public://properties
     TypePtr getReturnType() const;
 
     /*!
+     * Gets the self type of a member function
+     */
+    TypePtr getSelfType() const;
+
+    /*!
      * Gets the parameter types if it's a function/closure type
      */
     const std::vector<Parameter>& getParameters() const;
@@ -282,6 +289,12 @@ public://properties
      * Gets the generic definition
      */
     const GenericDefinitionPtr& getGenericDefinition() const;
+    
+    /*!
+     * Nested types for generic parameter for lazy resolving during specialization stage.
+     */
+    const std::vector<std::wstring> getNestedTypes() const;
+    
 
     /*!
      * Check if current type is conform to the given protocol or it is a child class of given class
@@ -394,6 +407,12 @@ protected:
     TypePtr innerType;
     GenericArgumentPtr genericArguments;
 
+
+    //for generic parameter
+    std::vector<std::wstring> nestedTypes;
+
+
+    
     //for enum type
     EnumCaseMap enumCases;
 
@@ -402,6 +421,7 @@ protected:
     TypePtr returnType;
     std::vector<Parameter> parameters;
     bool variadicParameters;
+    TypePtr selfType;
 
     //for tuple type
     std::vector<TypePtr> elementTypes;

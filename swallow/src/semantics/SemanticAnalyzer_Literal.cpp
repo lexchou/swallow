@@ -44,6 +44,7 @@
 #include <iostream>
 #include "common/ScopedValue.h"
 #include "semantics/InitializationTracer.h"
+#include "semantics/TypeResolver.h"
 
 USE_SWALLOW_NS
 using namespace std;
@@ -426,9 +427,30 @@ void SemanticAnalyzer::visitIdentifier(const IdentifierPtr& id)
     }
     else if(TypePtr type = dynamic_pointer_cast<Type>(sym))
     {
-        if(type->getCategory() == Type::Alias)
-            type = type->resolveAlias();
         assert(type != nullptr);
+        if(id->getGenericArgumentDef())
+        {
+            //it has generic arguments, check if it's a generic type
+            GenericDefinitionPtr gd = type->getGenericDefinition();
+            if(!gd)
+            {
+                //attempts to specialize a non-generic type
+                error(id, Errors::E_CANNOT_SPECIALIZE_NON_GENERIC_TYPE_1, id->getIdentifier());
+                return;
+            }
+            bool success = TypeResolver::assertGenericArgumentMatches(this, id, gd->numParameters(), id->getGenericArgumentDef()->numArguments());
+            if(!success)
+                return;
+            GenericArgumentPtr genericArgument(new GenericArgument(gd));
+            for (auto arg : *id->getGenericArgumentDef())
+            {
+                TypePtr argType = lookupType(arg);
+                if (!argType)
+                    return;
+                genericArgument->add(argType);
+            }
+            type = Type::newSpecializedType(type, genericArgument);
+        }
         TypePtr ref = Type::newMetaType(type);
         id->setType(ref);
     }

@@ -657,8 +657,13 @@ void DeclarationAnalyzer::visitExtension(const ExtensionDefPtr& node)
         error(node, Errors::E_GENERIC_ARGUMENTS_ARE_NOT_ALLOWED_ON_AN_EXTENSION);
         return;
     }
-    TypePtr type = lookupType(node->getIdentifier());
-    assert(type != nullptr);
+    //TypePtr type = lookupType(node->getIdentifier());
+    TypePtr type = symbolRegistry->lookupType(node->getIdentifier()->getName());
+    if(!type)
+    {
+        error(node->getIdentifier(), Errors::E_USE_OF_UNDECLARED_TYPE_1, node->getIdentifier()->getName());
+        return;
+    }
     ScopeGuard scope(symbolRegistry, type->getScope());
 
     Type::Category category = type->getCategory();

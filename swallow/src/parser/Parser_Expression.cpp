@@ -936,6 +936,9 @@ ClosurePtr Parser::parseClosureExpression()
             break;
     }
     tokenizer->restore(s);
+    //Shorthand parameter of closure is different in function signature or in expression
+    //Name can be ignored as function signature, and type can be ignored as expression
+    bool insideFunctionSignature = (flags & FUNCTION_SIGNATURE) != 0;
     if(hasSignature)
     {
         if(match(L"["))
@@ -977,9 +980,18 @@ ClosurePtr Parser::parseClosureExpression()
             ParametersNodePtr params = nodeFactory->createParameters(tokenizer->save());
             do
             {
-                expect_identifier(token);
                 ParameterNodePtr param = nodeFactory->createParameter(token.state);
-                param->setLocalName(token.token);
+                if(insideFunctionSignature)
+                {
+                    TypeNodePtr t = parseType();
+                    param->setDeclaredType(t);
+                    param->setLocalName(L"_");
+                }
+                else
+                {
+                    expect_identifier(token);
+                    param->setLocalName(token.token);
+                }
                 params->addParameter(param);
             } while (match(L","));
             ret->setParameters(params);

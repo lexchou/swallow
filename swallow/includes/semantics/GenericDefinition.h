@@ -41,7 +41,7 @@ SWALLOW_NS_BEGIN
 typedef std::shared_ptr<class Type> TypePtr;
 typedef std::shared_ptr<class GenericDefinition> GenericDefinitionPtr;
 class SymbolScope;
-class SWALLOW_EXPORT GenericDefinition
+class SWALLOW_EXPORT GenericDefinition : public  std::enable_shared_from_this<GenericDefinition>
 {
     friend class GenericArgument;
 public:
@@ -79,16 +79,37 @@ public:
         {}
     };
 public:
+    GenericDefinition(const GenericDefinitionPtr& parent);
+public:
     void add(const std::wstring& alias, const TypePtr& type);
     void addConstraint(const std::list<std::wstring>& type, ConstraintType constraint, const TypePtr& referenceType);
     void registerTo(SymbolScope* scope);
     TypePtr get(const std::wstring& alias);
     NodeDefPtr getConstraint(const std::wstring& name);
+
+    /*!
+     * The number of all parameters defined in current definition
+     */
     size_t numParameters() const;
+    /*!
+     * The number of all parameters defined, including the parent definition's parameters
+     */
+    size_t totalParameters() const;
     bool equals(const GenericDefinitionPtr& rhs) const;
     int validate(const std::wstring& typeName, const TypePtr& typeToTest, TypePtr& expectedType) const;
 
     const std::vector<Parameter> getParameters()const;
+
+    GenericDefinitionPtr getParent();
+
+    /*!
+     * Gets the nested definition depth, the depth is 0 if it has no parent definition
+     */
+    int getDepth() const { return depth;}
+
+    const std::vector<Parameter>::const_iterator begin() const {return typeParameters.begin();}
+    const std::vector<Parameter>::const_iterator end() const {return typeParameters.end();}
+
 public:
     static bool equals(const GenericDefinitionPtr& a, const GenericDefinitionPtr& b);
 private:
@@ -96,6 +117,18 @@ private:
 private:
     std::vector<Parameter> typeParameters;
     TypeConstraintMap constraints;
+    /*!
+     * This is used for a nested generic definition. example:
+     * struct GStruct<T>
+     * {
+     *     func map<U>(f: (T) -> U) -> U?
+     *     {
+     *         return nil;
+     *     }
+     * }
+     */
+    GenericDefinitionPtr parent;
+    int depth;
 };
 
 SWALLOW_NS_END

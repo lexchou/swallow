@@ -45,6 +45,8 @@ SWALLOW_NS_BEGIN
     typedef std::shared_ptr<class TupleType> TupleTypePtr;
     typedef std::shared_ptr<class ArrayType> ArrayTypePtr;
     typedef std::shared_ptr<class DictionaryType> DictionaryTypePtr;
+    typedef std::shared_ptr<class Module> ModulePtr;
+    typedef std::shared_ptr<class Node> NodePtr;
     typedef std::shared_ptr<class OptionalType> OptionalTypePtr;
     typedef std::shared_ptr<class ImplicitlyUnwrappedOptional> ImplicitlyUnwrappedOptionalPtr;
     typedef std::shared_ptr<class FunctionType> FunctionTypePtr;
@@ -55,9 +57,11 @@ SWALLOW_NS_BEGIN
         TypeResolver(SymbolRegistry* registry, CompilerResultEmitter* resultEmitter, LazySymbolResolver* symbolResolver, SemanticContext* ctx);
     public:
         TypePtr lookupType(const TypeNodePtr& node);
+        static bool assertGenericArgumentMatches(CompilerResultEmitter* emitter, const NodePtr& node, int expected, int actual);
     private:
         TypePtr resolve(const TypeNodePtr& typeNode);
         TypePtr resolveIdentifier(TypeIdentifierPtr id);
+        TypePtr resolveIdentifier(const ModulePtr& module, TypeIdentifierPtr id);
         TypePtr resolveTuple(const TupleTypePtr& tuple);
         TypePtr resolveArray(const ArrayTypePtr& array);
         TypePtr resolveDictionaryType(const DictionaryTypePtr& dict);
@@ -65,6 +69,7 @@ SWALLOW_NS_BEGIN
         TypePtr resolveImplicitlyUnwrappedOptional(const ImplicitlyUnwrappedOptionalPtr& opt);
         TypePtr resolveFunctionType(const FunctionTypePtr& func);
         TypePtr resolveProtocolComposition(const ProtocolCompositionPtr& composition);
+        TypePtr handleGeneric(const TypePtr& type, const TypeIdentifierPtr& id);
 
     private:
         CompilerResultEmitter* emitter;

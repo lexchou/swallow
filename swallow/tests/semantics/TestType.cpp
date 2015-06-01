@@ -71,8 +71,7 @@ TEST(TestType, testTypealias)
 
     Int = symbolRegistry.lookupType(L"Int");
     ASSERT_NOT_NULL(IntegerLiteralType = std::dynamic_pointer_cast<Type>(scope->lookup(L"IntegerLiteralType")));
-    ASSERT_EQ(Type::Alias, IntegerLiteralType->getCategory());
-    ASSERT_EQ(Int, IntegerLiteralType->resolveAlias());
+    ASSERT_EQ(Int, IntegerLiteralType);
 }
 
 

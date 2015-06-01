@@ -40,7 +40,8 @@ std::wstring Errors::format(int code, const std::vector<std::wstring>& items)
         if (p == -1)
             break;
         int idx = temp[p + 1] - '0';
-        temp.replace(p, 2, items[idx]);
+        std::wstring item = items[idx];
+        temp.replace(p, 2, item);
     }
     return temp;
 }

@@ -140,6 +140,19 @@ TypePtr Type::newProtocolComposition(const std::vector<TypePtr>& types)
     return TypePtr(ret);
 
 }
+TypePtr Type::newGenericParameter(const std::wstring& name)
+{
+    TypePtr ret(new TypeBuilder(GenericParameter));
+    ret->name = name;
+    return ret;
+}
+TypePtr Type::newGenericParameter(const std::wstring& name, std::vector<std::wstring> nestedTypes)
+{
+    TypePtr ret(new TypeBuilder(Extension));
+    ret->name = name;
+    ret->nestedTypes = nestedTypes;
+    return ret;
+}
 
 TypePtr Type::newTuple(const std::vector<TypePtr>& types)
 {
@@ -335,6 +348,13 @@ TypePtr Type::getReturnType() const
 {
     return returnType;
 }
+/*!
+ * Gets the self type of a member function
+ */
+TypePtr Type::getSelfType() const
+{
+    return selfType;
+}
 
 
 const std::vector<Parameter>& Type::getParameters() const
@@ -359,6 +379,13 @@ const GenericArgumentPtr& Type::getGenericArguments() const
 const GenericDefinitionPtr& Type::getGenericDefinition() const
 {
     return genericDefinition;
+}
+/*!
+ * Nested types for generic parameter for lazy resolving during specialization stage.
+ */
+const std::vector<std::wstring> Type::getNestedTypes() const
+{
+    return nestedTypes;
 }
 
 FunctionOverloadedSymbolPtr Type::getDeclaredInitializer()

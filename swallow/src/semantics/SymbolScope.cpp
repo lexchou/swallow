@@ -76,12 +76,20 @@ bool SymbolScope::isSymbolDefined(const std::wstring& name)
     SymbolMap::iterator iter = symbols.find(name);
     return iter != symbols.end();
 }
+static SymbolPtr resolveTypeAlias(const SymbolPtr& sym)
+{
+    if(!sym || sym->getKind() != SymbolKindType)
+        return sym;
+    TypePtr t = std::static_pointer_cast<Type>(sym);
+    TypePtr ret = t->resolveAlias();
+    return ret;
+}
 SymbolPtr SymbolScope::lookup(const std::wstring& name, bool lazyResolve)
 {
     assert(!name.empty());
     SymbolMap::iterator iter = symbols.find(name);
     if(iter != symbols.end())
-        return iter->second;
+        return resolveTypeAlias(iter->second);
     //check it in LazySymbolResolver
     if(lazySymbolResolver && lazyResolve)
     {
@@ -90,7 +98,9 @@ SymbolPtr SymbolScope::lookup(const std::wstring& name, bool lazyResolve)
         {
             iter = symbols.find(name);
             if(iter != symbols.end())
-                return iter->second;
+            {
+                return resolveTypeAlias(iter->second);
+            }
         }
     }
     return nullptr;

@@ -34,10 +34,11 @@
 
 USE_SWALLOW_NS
 
-GenericArgument::GenericArgument(const GenericDefinitionPtr& definition)
-:definition(definition)
+GenericArgument::GenericArgument(const GenericDefinitionPtr& definition, const GenericArgumentPtr& parent)
+:definition(definition), parent(parent), depth(0)
 {
-
+    if(parent)
+        depth = parent->depth + 1;
 }
 
 void GenericArgument::add(const TypePtr& type)
@@ -61,6 +62,15 @@ TypePtr GenericArgument::get(const std::wstring& name) const
 GenericDefinitionPtr GenericArgument::getDefinition() const
 {
     return definition;
+}
+GenericArgumentPtr GenericArgument::getParent()
+{
+    return parent;
+}
+void GenericArgument::setParent(const GenericArgumentPtr& p)
+{
+    depth = p ? p->getDepth() + 1 : 0;
+    this->parent = p;
 }
 int GenericArgument::compare(const GenericArgumentPtr& lhs, const GenericArgumentPtr& rhs)
 {

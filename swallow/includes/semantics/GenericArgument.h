@@ -42,7 +42,7 @@ typedef std::shared_ptr<class GenericArgument> GenericArgumentPtr;
 class SWALLOW_EXPORT GenericArgument
 {
 public:
-    GenericArgument(const GenericDefinitionPtr& definition);
+    GenericArgument(const GenericDefinitionPtr& definition, const GenericArgumentPtr& parent = nullptr);
 public:
 
     void add(const TypePtr& type);
@@ -60,9 +60,14 @@ public:
     GenericDefinitionPtr getDefinition() const;
 
     static int compare(const GenericArgumentPtr& lhs, const GenericArgumentPtr& rhs);
+    int getDepth() const { return depth;}
+    GenericArgumentPtr getParent();
+    void setParent(const GenericArgumentPtr& p);
 
 private:
     GenericDefinitionPtr definition;
+    GenericArgumentPtr parent;
+    int depth;
     std::vector<TypePtr> types;
 };
 

@@ -61,6 +61,10 @@ void TypeBuilder::addParameter(const Parameter& param)
     assert(param.type != nullptr);
     parameters.push_back(param);
 }
+void TypeBuilder::setSelfType(const TypePtr& type)
+{
+    selfType = type;
+}
 /*!
  * Which type declared this
  */
@@ -88,6 +92,10 @@ void TypeBuilder::setParentType(const TypePtr &type)
 void TypeBuilder::setInnerType(const TypePtr &type)
 {
     innerType = type;
+}
+void TypeBuilder::setGenericDefinition(const GenericDefinitionPtr& def)
+{
+    genericDefinition = def;
 }
 void TypeBuilder::setGenericArguments(const GenericArgumentPtr& arguments)
 {
@@ -173,9 +181,21 @@ void TypeBuilder::addMember(const std::wstring& name, const SymbolPtr& member)
         associatedTypes.insert(make_pair(name, type));
         return;
     }
+    else if(FunctionSymbolPtr func = dynamic_pointer_cast<FunctionSymbol>(member))
+    {
+        //function member, needs to update declaring type
+        TypePtr selfType = func->getType();
+        TypeBuilderPtr funcType = static_pointer_cast<TypeBuilder>(selfType);
+        funcType->declaringType = self();
+        if(func->hasFlags(SymbolFlagStatic))
+            selfType = Type::newMetaType(selfType);
+        funcType->setSelfType(selfType);
+    }
     auto iter = members.find(name);
     if(iter != members.end())
     {
+        //there already exists a member with the same name,
+        //check for function overloading
         FunctionOverloadedSymbolPtr oldFuncs = static_pointer_cast<FunctionOverloadedSymbol>(iter->second);
         if(FunctionSymbolPtr func = dynamic_pointer_cast<FunctionSymbol>(member))
             oldFuncs->add(func);
@@ -186,6 +206,7 @@ void TypeBuilder::addMember(const std::wstring& name, const SymbolPtr& member)
     }
     else
     {
+        //always create a FunctionOverloadedSymbol instance for single function symbol
         if(FunctionSymbolPtr func = dynamic_pointer_cast<FunctionSymbol>(member))
         {
             FunctionOverloadedSymbolPtr funcs(new FunctionOverloadedSymbol(name));

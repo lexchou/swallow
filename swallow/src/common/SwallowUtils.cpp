@@ -112,7 +112,7 @@ void SwallowUtils::dumpCompilerResults(const std::wstring& src, const CompilerRe
 
     for(int i = 0; i < compilerResults.numResults(); i++)
     {
-        const CompilerResult &res = compilerResults.getResult(i);
+        CompilerResult res = compilerResults.getResult(i);
 
         //separate source code by lines
         vector<wstring> lines;

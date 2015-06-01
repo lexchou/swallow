@@ -191,6 +191,29 @@ TEST(TestGeneric, GenericConstraint8)
         L"    return T();\n"
         L"}");
 }
+TEST(TestGeneric, NestedGeneric)
+{
+    SEMANTIC_ANALYZE(L"struct GStruct<T>\n"
+        L"{\n"
+        L"    func map<U>(f: (T) -> U) -> U?\n"
+        L"    {\n"
+        L"        return nil;\n"
+        L"    }\n"
+        L"}\n"
+        L"var a = GStruct<Int>().map({ Int -> Bool in return true})\n"
+        );
+    ASSERT_NO_ERRORS();
+    SymbolPtr a;
+    ASSERT_NOT_NULL(a = scope->lookup(L"a"));
+    ASSERT_EQ(L"Optional<Bool>", a->getType()->toString());
+}
+
+TEST(TestGeneric, NonGenericType)
+{
+    SEMANTIC_ANALYZE(L"var a = Int<Bool>()");
+    ASSERT_ERROR(Errors::E_CANNOT_SPECIALIZE_NON_GENERIC_TYPE_1);
+    ASSERT_EQ(L"Int", error->items[0]);
+}
 
 /*
 

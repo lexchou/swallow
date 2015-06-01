@@ -39,6 +39,9 @@ USE_SWALLOW_NS
 using namespace std;
 
 static FunctionSymbolPtr specialize(const FunctionSymbolPtr& func, const GenericArgumentPtr& arguments);
+static ComputedPropertySymbolPtr specialize(const ComputedPropertySymbolPtr& prop, const GenericArgumentPtr& arguments);
+static SymbolPlaceHolderPtr specialize(const SymbolPlaceHolderPtr& s, const GenericArgumentPtr& arguments);
+
 static TypePtr specialize(const TypePtr& type, const GenericArgumentPtr& arguments)
 {
     assert(type != nullptr);
@@ -57,7 +60,15 @@ static TypePtr specialize(const TypePtr& type, const GenericArgumentPtr& argumen
         case Type::Alias:
         case Type::GenericParameter:
         {
+            //specialize a nested generic member, it's not impossible
+            //so we just return the generic parameter and it will be specialized when rest generic arguments supplied.
+            if(type->getGenericDefinition() && (arguments->getDepth() < type->getGenericDefinition()->getDepth()))
+            {
+                return type;
+            }
             TypePtr ret = arguments->get(type->getName());
+            assert(ret != nullptr);
+            assert(type->getNestedTypes().empty());
             return ret;
         }
         case Type::Function:
@@ -108,29 +119,36 @@ static TypePtr specialize(const TypePtr& type, const GenericArgumentPtr& argumen
 
                     sym = specialize(type, arguments);
                     assert(sym != nullptr);
+                    builder->addMember(entry.first, sym);
                 }
                 else if(FunctionSymbolPtr func = dynamic_pointer_cast<FunctionSymbol>(sym))
                 {
                     //rebuild the symbol with specialized type
                     sym = specialize(func, arguments);
+                    builder->addMember(entry.first, sym);
                 }
                 else if(FunctionOverloadedSymbolPtr funcs = dynamic_pointer_cast<FunctionOverloadedSymbol>(sym))
                 {
-                    FunctionOverloadedSymbolPtr newFuncs(new FunctionOverloadedSymbol());
                     for(const FunctionSymbolPtr& func : *funcs)
                     {
                         FunctionSymbolPtr newFunc = specialize(func, arguments);
-                        newFuncs->add(newFunc);
+                        builder->addMember(entry.first, newFunc);
                     }
-                    sym = newFuncs;
                 }
                 else if(SymbolPlaceHolderPtr s = dynamic_pointer_cast<SymbolPlaceHolder>(sym))
                 {
-                    TypePtr t = specialize(s->getType(), arguments);
-                    SymbolPlaceHolderPtr newSym(new SymbolPlaceHolder(s->getName(), t, s->getRole(), s->getFlags()));
-                    sym = newSym;
+                    SymbolPlaceHolderPtr newSym = specialize(s, arguments);
+                    builder->addMember(entry.first, newSym);
                 }
-                builder->addMember(entry.first, sym);
+                else if(ComputedPropertySymbolPtr prop = dynamic_pointer_cast<ComputedPropertySymbol>(sym))
+                {
+                    ComputedPropertySymbolPtr newProp = specialize(prop, arguments);
+                    builder->addMember(entry.first, newProp);
+                }
+                else
+                {
+                    assert(0 && "Unknown member to specialize");
+                }
             }
             if(category == Type::Enum)
             {
@@ -163,7 +181,28 @@ static TypePtr specialize(const TypePtr& type, const GenericArgumentPtr& argumen
 
     return nullptr;
 }
-
+static ComputedPropertySymbolPtr specialize(const ComputedPropertySymbolPtr& prop, const GenericArgumentPtr& arguments)
+{
+    TypePtr type = specialize(prop->getType(), arguments);
+    ComputedPropertySymbolPtr ret(new ComputedPropertySymbol(prop->getName(), type, prop->getFlags()));
+    if(prop->getVariable())
+        ret->setVariable(specialize(prop->getVariable(), arguments));
+    if(prop->getGetter())
+        ret->setGetter(specialize(prop->getGetter(), arguments));
+    if(prop->getSetter())
+        ret->setSetter(specialize(prop->getSetter(), arguments));
+    if(prop->getWillSet())
+        ret->setWillSet(specialize(prop->getWillSet(), arguments));
+    if(prop->getDidSet())
+        ret->setDidSet(specialize(prop->getDidSet(), arguments));
+    return ret;
+}
+static SymbolPlaceHolderPtr specialize(const SymbolPlaceHolderPtr& s, const GenericArgumentPtr& arguments)
+{
+    TypePtr t = specialize(s->getType(), arguments);
+    SymbolPlaceHolderPtr newSym(new SymbolPlaceHolder(s->getName(), t, s->getRole(), s->getFlags()));
+    return newSym;
+}
 static FunctionSymbolPtr specialize(const FunctionSymbolPtr& func, const GenericArgumentPtr& arguments)
 {
 
@@ -172,17 +211,28 @@ static FunctionSymbolPtr specialize(const FunctionSymbolPtr& func, const Generic
     return ret;
 }
 
-TypePtr Type::newSpecializedType(const TypePtr& innerType, const std::map<std::wstring, TypePtr>& arguments)
+static GenericArgumentPtr prepareGenericArguments(const GenericDefinitionPtr& def, const map<wstring, TypePtr>& arguments)
 {
-    assert(innerType->getGenericDefinition() != nullptr);
-    assert(innerType->getGenericArguments() == nullptr);
-    GenericArgumentPtr args(new GenericArgument(innerType->getGenericDefinition()));
-    for(auto param : innerType->getGenericDefinition()->getParameters())
+    GenericArgumentPtr args(new GenericArgument(def));
+    for(auto param : def->getParameters())
     {
         auto iter = arguments.find(param.name);
         assert(iter != arguments.end());
         args->add(iter->second);
     }
+    if(def->getParent())
+    {
+        GenericArgumentPtr pargs = prepareGenericArguments(def->getParent(), arguments);
+        args->setParent(pargs);
+    }
+    return args;
+}
+
+TypePtr Type::newSpecializedType(const TypePtr& innerType, const std::map<std::wstring, TypePtr>& arguments)
+{
+    assert(innerType->getGenericDefinition() != nullptr);
+    assert(innerType->getGenericArguments() == nullptr);
+    GenericArgumentPtr args = prepareGenericArguments(innerType->getGenericDefinition(), arguments);
     return newSpecializedType(innerType, args);
 }
 TypePtr Type::newSpecializedType(const TypePtr& innerType, const GenericArgumentPtr& arguments)

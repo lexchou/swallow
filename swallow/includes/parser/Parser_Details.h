@@ -50,7 +50,8 @@ enum
     UNDER_DO_LOOP       = 0x1000,
     SUPPRESS_TRAILING_CLOSURE = 0x2000,
     UNDER_EXTENSION     = 0x4000,
-    DECLARATION_ONLY    = 0x8000
+    DECLARATION_ONLY    = 0x8000,
+    FUNCTION_SIGNATURE  = 0x10000
 };
 class Parser;
 struct Flags

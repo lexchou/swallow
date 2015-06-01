@@ -53,6 +53,7 @@
 #include "semantics/ScopedNodes.h"
 #include "semantics/InitializationTracer.h"
 #include "semantics/OperatorResolver.h"
+#include <ctime>
 #endif
 
 USE_SWALLOW_NS
@@ -145,8 +146,12 @@ void GlobalScope::initRuntime(SymbolRegistry* symbolRegistry)
         parser.setFlags(DECLARATION_ONLY);
         SourceFilePtr source(new SourceFile(SwallowUtils::toWString(path), code));
         parser.setSourceFile(source);
+
+        clock_t start = clock();
         if(!parser.parse(code.c_str(), ret))
             throw Abort();
+        clock_t end = clock();
+        printf("%fs used for parsing file\n", (float)((end - start) * 1.0f / CLOCKS_PER_SEC));
         OperatorResolver operatorResolver(symbolRegistry, &compilerResults);
         ret->accept(&operatorResolver);
         ret->accept(&analyzer);
@@ -383,7 +388,7 @@ void GlobalScope::initPrimitiveTypes()
 
     {
         TypePtr T = Type::newType(L"T", Type::GenericParameter);
-        GenericDefinitionPtr generic(new GenericDefinition());
+        GenericDefinitionPtr generic(new GenericDefinition(nullptr));
         generic->add(L"T", T);
         _ImplicitlyUnwrappedOptional = Type::newType(L"ImplicitlyUnwrappedOptional", Type::Enum, nullptr, nullptr, std::vector<TypePtr>(), generic);
         type = static_pointer_cast<TypeBuilder>(_ImplicitlyUnwrappedOptional);
@@ -398,7 +403,7 @@ void GlobalScope::initPrimitiveTypes()
 
     {
         TypePtr T = Type::newType(L"T", Type::GenericParameter);
-        GenericDefinitionPtr generic(new GenericDefinition());
+        GenericDefinitionPtr generic(new GenericDefinition(nullptr));
         generic->add(L"T", T);
         _Optional = Type::newType(L"Optional", Type::Enum, nullptr, nullptr, std::vector<TypePtr>(), generic);
         type = static_pointer_cast<TypeBuilder>(_Optional);
@@ -412,7 +417,7 @@ void GlobalScope::initPrimitiveTypes()
     }
     {
         TypePtr T = Type::newType(L"T", Type::GenericParameter);
-        GenericDefinitionPtr generic(new GenericDefinition());
+        GenericDefinitionPtr generic(new GenericDefinition(nullptr));
         generic->add(L"T", T);
         _Array = Type::newType(L"Array", Type::Struct, nullptr, nullptr, std::vector<TypePtr>(), generic);
         TypeBuilderPtr builder = static_pointer_cast<TypeBuilder>(_Array);
@@ -455,7 +460,7 @@ void GlobalScope::initPrimitiveTypes()
     {
         TypePtr Key = Type::newType(L"Key", Type::GenericParameter);
         TypePtr Value = Type::newType(L"Value", Type::GenericParameter);
-        GenericDefinitionPtr generic(new GenericDefinition());
+        GenericDefinitionPtr generic(new GenericDefinition(nullptr));
         generic->add(L"Key", Key);
         generic->add(L"Value", Value);
         _Dictionary = Type::newType(L"Dictionary", Type::Struct, nullptr, nullptr, std::vector<TypePtr>(), generic);
@@ -563,9 +568,9 @@ FunctionSymbolPtr GlobalScope::vcreateFunction(const std::wstring&name, int flag
 
 TypePtr GlobalScope::makeArray(const TypePtr& elementType) const
 {
-    GenericArgumentPtr ga(new GenericArgument(_Array->getGenericDefinition()));
+    GenericArgumentPtr ga(new GenericArgument(Array()->getGenericDefinition()));
     ga->add(elementType);
-    return Type::newSpecializedType(_Array, ga);
+    return Type::newSpecializedType(Array(), ga);
 }
 
 /*!
@@ -574,9 +579,9 @@ TypePtr GlobalScope::makeArray(const TypePtr& elementType) const
 TypePtr GlobalScope::makeOptional(const TypePtr& elementType) const
 {
     assert(elementType != nullptr);
-    GenericArgumentPtr ga(new GenericArgument(_Optional->getGenericDefinition()));
+    GenericArgumentPtr ga(new GenericArgument(Optional()->getGenericDefinition()));
     ga->add(elementType);
-    return Type::newSpecializedType(_Optional, ga);
+    return Type::newSpecializedType(Optional(), ga);
 }
 /*!
  * A short-hand way to create an implicitly unwrapped Optional type
@@ -584,9 +589,9 @@ TypePtr GlobalScope::makeOptional(const TypePtr& elementType) const
 TypePtr GlobalScope::makeImplicitlyUnwrappedOptional(const TypePtr& elementType) const
 {
     assert(elementType != nullptr);
-    GenericArgumentPtr ga(new GenericArgument(_Optional->getGenericDefinition()));
+    GenericArgumentPtr ga(new GenericArgument(ImplicitlyUnwrappedOptional()->getGenericDefinition()));
     ga->add(elementType);
-    return Type::newSpecializedType(_ImplicitlyUnwrappedOptional, ga);
+    return Type::newSpecializedType(ImplicitlyUnwrappedOptional(), ga);
 }
 
 /*!
@@ -594,10 +599,10 @@ TypePtr GlobalScope::makeImplicitlyUnwrappedOptional(const TypePtr& elementType)
  */
 TypePtr GlobalScope::makeDictionary(const TypePtr& keyType, const TypePtr& valueType) const
 {
-    GenericArgumentPtr ga(new GenericArgument(_Dictionary->getGenericDefinition()));
+    GenericArgumentPtr ga(new GenericArgument(Dictionary()->getGenericDefinition()));
     ga->add(keyType);
     ga->add(valueType);
-    return Type::newSpecializedType(_Dictionary, ga);
+    return Type::newSpecializedType(Dictionary(), ga);
 }
 
 void GlobalScope::initOperators(SymbolRegistry* registry)
@@ -674,7 +679,7 @@ void GlobalScope::initOperators(SymbolRegistry* registry)
     {
         TypePtr T = Type::newType(L"T", Type::GenericParameter);
         TypePtr optionalT = makeOptional(Type::newType(L"T", Type::GenericParameter));
-        GenericDefinitionPtr def(new GenericDefinition());
+        GenericDefinitionPtr def(new GenericDefinition(nullptr));
         def->add(L"T", T);
         vector<Parameter> parameterTypes = {optionalT, __OptionalNilComparisonType};
         TypePtr funcType = Type::newFunction(parameterTypes, _Bool, false, def);
@@ -688,7 +693,7 @@ void GlobalScope::initOperators(SymbolRegistry* registry)
     {
         TypePtr T = Type::newType(L"T", Type::GenericParameter);
         TypePtr optionalT = makeOptional(Type::newType(L"T", Type::GenericParameter));
-        GenericDefinitionPtr def(new GenericDefinition());
+        GenericDefinitionPtr def(new GenericDefinition(nullptr));
         def->add(L"T", T);
         vector<Parameter> parameterTypes = {optionalT, __OptionalNilComparisonType};
         TypePtr funcType = Type::newFunction(parameterTypes, _Bool, false, def);

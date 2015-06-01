@@ -60,4 +60,11 @@ struct SwallowUtils
 };
 SWALLOW_NS_END
 
+#ifndef DebugBreak
+#define DebugBreak() __asm__("int $3")
+#endif
+#define BREAK_IF(cond) if((cond)) DebugBreak();
+
+
+
 #endif//SWALLOW_UTILS_H

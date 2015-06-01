@@ -60,76 +60,45 @@ TypePtr TypeResolver::lookupType(const TypeNodePtr& type)
     }
     return ret;
 }
-TypePtr TypeResolver::resolveIdentifier(TypeIdentifierPtr id)
+bool TypeResolver::assertGenericArgumentMatches(CompilerResultEmitter* emitter, const NodePtr& node, int expected, int actual)
 {
-    const wstring& name = id->getName();
-    symbolResolver->resolveLazySymbol(name);
-    SymbolPtr s = symbolRegistry->lookupSymbol(name);
-    if(s && s->getKind() == SymbolKindModule)//type declared inside a module
-    {
-        //it's a module, access it's type
-        if(id->getNestedType() == nullptr)
-        {
-            if(emitter)
-                emitter->error(id, Errors::E_USE_OF_UNDECLARED_TYPE_1, name);
-            return nullptr;
-        }
-        ModulePtr module = static_pointer_cast<Module>(s);
-        id = id->getNestedType();
-        TypePtr ret = dynamic_pointer_cast<Type>(module->getSymbol(id->getName()));
-        if(!ret)
-        {
-            if(emitter)
-                emitter->error(id, Errors::E_NO_TYPE_NAMED_A_IN_MODULE_B_2, id->getName(), name);
-            return nullptr;
-        }
-        for (TypeIdentifierPtr n = id->getNestedType(); n != nullptr; n = n->getNestedType())
-        {
-            TypePtr childType = ret->getAssociatedType(n->getName());
-            if (!childType)
-            {
-                if (emitter)
-                    emitter->error(n, Errors::E_A_IS_NOT_A_MEMBER_TYPE_OF_B_2, n->getName(), ret->toString());
-                return nullptr;
-            }
-            if (n->numGenericArguments())
-            {
-                //nested type is always a non-generic type
-                if (emitter)
-                    emitter->error(n, Errors::E_CANNOT_SPECIALIZE_NON_GENERIC_TYPE_1, childType->toString());
-                return nullptr;
-            }
-            ret = childType;
-        }
-        return ret;
-    }
-    //Self type
-    if(name == L"Self")
-    {
-        if(!ctx || !ctx->currentType)
-        {
-            if(emitter)
-                emitter->error(id, Errors::E_USE_OF_UNDECLARED_TYPE_1, name);
-            return nullptr;
-        }
-        return ctx->currentType;
-    }
-
-    //TODO: make a generic type if possible
-    TypePtr ret = symbolRegistry->lookupType(name);
-    if (!ret)
+    if (actual > expected)
     {
         if (emitter)
         {
-            std::wstring str = SwallowUtils::toString(id);
-            emitter->error(id, Errors::E_USE_OF_UNDECLARED_TYPE_1, str);
-            abort();
+            std::wstring str = SwallowUtils::toString(node);
+            std::wstring got = SwallowUtils::toString(actual);
+            std::wstring sexpected = SwallowUtils::toString(expected);
+            emitter->error(node, Errors::E_GENERIC_TYPE_SPECIALIZED_WITH_TOO_MANY_TYPE_PARAMETERS_3, str, got, sexpected);
         }
-        return nullptr;
+        return false;
     }
-    GenericDefinitionPtr generic = ret->getGenericDefinition();
+    if (actual < expected)
+    {
+        if (emitter)
+        {
+            std::wstring str = SwallowUtils::toString(node);
+            std::wstring got = SwallowUtils::toString(actual);
+            std::wstring sexpected = SwallowUtils::toString(expected);
+            emitter->error(node, Errors::E_GENERIC_TYPE_SPECIALIZED_WITH_INSUFFICIENT_TYPE_PARAMETERS_3, str, got, sexpected);
+        }
+        return false;
+    }
+    return true;
+}
+TypePtr TypeResolver::handleGeneric(const TypePtr& type, const TypeIdentifierPtr& id)
+{
+    if(type->getCategory() == Type::GenericParameter)
+        return type;//do nothing for generic parameter.
+    
+    GenericDefinitionPtr generic = type->getGenericDefinition();
+    //not a generic type
     if (generic == nullptr && id->numGenericArguments() == 0)
-        return ret;
+    {
+        //load nested types
+        //return Type::newGenericParameter(type->getName, nestedTypes());
+        return type;
+    }
     if (generic == nullptr && id->numGenericArguments() > 0)
     {
         if (emitter)
@@ -148,28 +117,8 @@ TypePtr TypeResolver::resolveIdentifier(TypeIdentifierPtr id)
         }
         return nullptr;
     }
-    if (id->numGenericArguments() > generic->numParameters())
-    {
-        if (emitter)
-        {
-            std::wstring str = SwallowUtils::toString(id);
-            std::wstring got = SwallowUtils::toString(id->numGenericArguments());
-            std::wstring expected = SwallowUtils::toString(generic->numParameters());
-            emitter->error(id, Errors::E_GENERIC_TYPE_SPECIALIZED_WITH_TOO_MANY_TYPE_PARAMETERS_3, str, got, expected);
-        }
+    if(!assertGenericArgumentMatches(emitter, id, generic->numParameters(), id->numGenericArguments()))
         return nullptr;
-    }
-    if (id->numGenericArguments() < generic->numParameters())
-    {
-        if (emitter)
-        {
-            std::wstring str = SwallowUtils::toString(id);
-            std::wstring got = SwallowUtils::toString(id->numGenericArguments());
-            std::wstring expected = SwallowUtils::toString(generic->numParameters());
-            emitter->error(id, Errors::E_GENERIC_TYPE_SPECIALIZED_WITH_INSUFFICIENT_TYPE_PARAMETERS_3, str, got, expected);
-        }
-        return nullptr;
-    }
     //check type
     GenericArgumentPtr genericArgument(new GenericArgument(generic));
     for (auto arg : *id)
@@ -179,16 +128,55 @@ TypePtr TypeResolver::resolveIdentifier(TypeIdentifierPtr id)
             return nullptr;
         genericArgument->add(argType);
     }
-    TypePtr base = Type::newSpecializedType(ret, genericArgument);
-    ret = base;
-    //access rest nested types
+    TypePtr base = Type::newSpecializedType(type, genericArgument);
+    return base;
+}
+TypePtr TypeResolver::resolveIdentifier(const ModulePtr& module, TypeIdentifierPtr id)
+{
+    TypePtr ret = nullptr;
+    if(module)
+    {
+        ret = dynamic_pointer_cast<Type>(module->getSymbol(id->getName()));
+    }
+    else
+    {
+        ret = symbolRegistry->lookupType(id->getName());
+    }
+    //type is undeclared
+    if(!ret)
+    {
+        if(emitter)
+        {
+            if(module)
+            {
+                emitter->error(id, Errors::E_NO_TYPE_NAMED_A_IN_MODULE_B_2, id->getName(), module->getName());
+            }
+            else
+            {
+                std::wstring str = SwallowUtils::toString(id);
+                emitter->error(id, Errors::E_USE_OF_UNDECLARED_TYPE_1, str);
+            }
+        }
+        return nullptr;
+    }
+
+    ret = handleGeneric(ret, id);
+    if(ret->getCategory() == Type::GenericParameter)
+        return ret;//nested type access is treated as generic parameter, will be handled when type specialized
+
+
     for (TypeIdentifierPtr n = id->getNestedType(); n != nullptr; n = n->getNestedType())
     {
-        TypePtr childType = ret->getAssociatedType(n->getName());
+        const std::wstring& name = n->getName();
+        TypePtr childType;
+        if(name == L"Type")
+            childType = Type::newMetaType(ret);
+        else
+            childType = ret->getAssociatedType(name);
         if (!childType)
         {
             if (emitter)
-                emitter->error(n, Errors::E_A_IS_NOT_A_MEMBER_TYPE_OF_B_2, n->getName(), ret->toString());
+                emitter->error(n, Errors::E_A_IS_NOT_A_MEMBER_TYPE_OF_B_2, name, wstring(ret->toString()));
             return nullptr;
         }
         if (n->numGenericArguments())
@@ -200,8 +188,37 @@ TypePtr TypeResolver::resolveIdentifier(TypeIdentifierPtr id)
         }
         ret = childType;
     }
-
     return ret;
+}
+TypePtr TypeResolver::resolveIdentifier(TypeIdentifierPtr id)
+{
+    const wstring& name = id->getName();
+    symbolResolver->resolveLazySymbol(name);
+    SymbolPtr s = symbolRegistry->lookupSymbol(name);
+    if(s && s->getKind() == SymbolKindModule)//type declared inside a module
+    {
+        //it's a module, access it's type
+        if(id->getNestedType() == nullptr)
+        {
+            if(emitter)
+                emitter->error(id, Errors::E_USE_OF_UNDECLARED_TYPE_1, name);
+            return nullptr;
+        }
+        ModulePtr module = static_pointer_cast<Module>(s);
+        return resolveIdentifier(module, id->getNestedType());
+    }
+    //Self type
+    if(name == L"Self")
+    {
+        if(!ctx || !ctx->currentType)
+        {
+            if(emitter)
+                emitter->error(id, Errors::E_USE_OF_UNDECLARED_TYPE_1, name);
+            return nullptr;
+        }
+        return ctx->currentType;
+    }
+    return resolveIdentifier(nullptr, id);
 }
 TypePtr TypeResolver::resolveTuple(const TupleTypePtr& tuple)
 {

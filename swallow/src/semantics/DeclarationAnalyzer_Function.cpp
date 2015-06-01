@@ -46,6 +46,7 @@
 #include "semantics/ReturnStatementValidator.h"
 #include "semantics/InitializerValidator.h"
 #include "semantics/InitializationTracer.h"
+#include "common/SwallowUtils.h"
 #include <set>
 #include <cassert>
 #include <ast/NodeFactory.h>
@@ -55,8 +56,12 @@ using namespace std;
 
 void DeclarationAnalyzer::visitParameter(const ParameterNodePtr& node)
 {
-    TypePtr type = lookupType(node->getDeclaredType());
-    node->setType(type);
+    if(!node->getType())
+    {
+        TypePtr type = lookupType(node->getDeclaredType());
+        assert(type != nullptr);
+        node->setType(type);
+    }
     //check if local name is already defined
     SymbolScope* scope = symbolRegistry->getCurrentScope();
     SymbolPtr sym = scope->lookup(node->getLocalName());
@@ -161,7 +166,7 @@ FunctionSymbolPtr DeclarationAnalyzer::createFunctionSymbol(const FunctionDefPtr
     TypePtr retType = symbolRegistry->getGlobalScope()->Void();
     if(func->getReturnType())
         retType = lookupType(func->getReturnType());
-    TypePtr funcType = createFunctionType(func->getParametersList().begin(), func->getParametersList().end(), retType, generic);
+    TypeBuilderPtr funcType = static_pointer_cast<TypeBuilder>(createFunctionType(func->getParametersList().begin(), func->getParametersList().end(), retType, generic));
     //prepare flags
     if(ctx->currentType)
     {
@@ -169,14 +174,27 @@ FunctionSymbolPtr DeclarationAnalyzer::createFunctionSymbol(const FunctionDefPtr
         bool valueType = category == Type::Struct || category == Type::Enum;
         bool prototype = category == Type::Protocol;
         bool mutating = func->hasModifier(DeclarationModifiers::Mutating);
+        bool staticFunc = func->hasModifier(DeclarationModifiers::Static) || func->hasModifier(DeclarationModifiers::Class);
         if(!prototype && (!valueType || mutating))
             funcType->setFlags(SymbolFlagMutating, true);
+        funcType->setFlags(SymbolFlagStatic, staticFunc);
         funcType->setFlags(SymbolFlagMember, true);
-        static_pointer_cast<TypeBuilder>(funcType)->setDeclaringType(ctx->currentType);
+        funcType->setDeclaringType(ctx->currentType);
+    }
+    //prepare self type
+    if(ctx->currentType)
+    {
+        TypePtr selfType = ctx->currentType;
+        //static function's self is a meta type of current type
+        if(funcType->hasFlags(SymbolFlagStatic))
+            selfType = Type::newMetaType(selfType);
+        funcType->setSelfType(selfType);
     }
     FunctionSymbolPtr ret(new FunctionSymbol(func->getName(), funcType, FunctionRoleNormal, func->getBody()));
     return ret;
 }
+
+
 void DeclarationAnalyzer::visitClosure(const ClosurePtr& node)
 {
     ScopedClosurePtr closure = std::static_pointer_cast<ScopedClosure>(node);
@@ -188,31 +206,45 @@ void DeclarationAnalyzer::visitClosure(const ClosurePtr& node)
         return;
     }
 
-    TypePtr returnedType = this->lookupType(node->getReturnType());
+    TypePtr returnedType = nullptr;
+    if(node->getReturnType())
+        returnedType = lookupType(node->getReturnType());
+    else if(ctx->contextualType)
+        returnedType = ctx->contextualType->getReturnType();
     std::vector<Parameter> params;
+    bool variadic = false;
     if(node->getParameters())
     {
+        variadic = node->getParameters()->isVariadicParameters();
+        //infer parameter types if they're ignored
+        TypePtr contextualType = ctx->contextualType;
+        int i = 0;
+        for(ParameterNodePtr param : *node->getParameters())
+        {
+            if(param->getDeclaredType() == nullptr)
+            {
+                assert(contextualType != nullptr && contextualType->getCategory() == Type::Function);
+                TypePtr paramType = contextualType->getParameters()[i].type;
+                param->setType(paramType);
+            }
+            i++;
+        }
+
         node->getParameters()->accept(this);
         prepareParameters(closure->getScope(), node->getParameters());
 
         //create a function type for this
         for(const ParameterNodePtr& param : *node->getParameters())
         {
-            TypePtr type = lookupType(param->getDeclaredType());
+            TypePtr type = param->getType();//lookupType(param->getDeclaredType());
             assert(type != nullptr);
             const std::wstring& name = param->isShorthandExternalName() ? param->getLocalName() : param->getExternalName();
             params.push_back(Parameter(name, param->isInout(), type));
         }
     }
-    if(ctx->contextualType)
-    {
-        node->setType(ctx->contextualType);
-    }
-    else
-    {
-        TypePtr type = Type::newFunction(params, returnedType, node->getParameters()->isVariadicParameters());
-        node->setType(type);
-    }
+    TypePtr closureType = Type::newFunction(params, returnedType, variadic);
+    node->setType(closureType);
+
 
     if(node->getCapture())
     {

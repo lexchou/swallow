@@ -55,6 +55,8 @@ public:
     void setInnerType(const TypePtr& type);
 
     void setGenericArguments(const GenericArgumentPtr& arguments);
+    
+    void setGenericDefinition(const GenericDefinitionPtr& def);
 
     /*!
      * One generic type can be specialized to different concrete types with different generic arguments
@@ -71,6 +73,7 @@ public:
      * Add function's parameter if it's a function type
      */
     void addParameter(const Parameter& param);
+    void setSelfType(const TypePtr& type);
 
     void addMember(const std::wstring& name, const SymbolPtr& member);
     void addMember(const SymbolPtr& symbol);

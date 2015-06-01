@@ -259,10 +259,22 @@ float SemanticAnalyzer::calculateFitScore(bool mutatingSelf, SymbolPtr& func, co
                 abort();
             }
         }
-        assert(generic->numParameters() == genericTypes.size());
+        //collect generic arguments from declaring type if it's a nested generic definition
+        if(func->getDeclaringType() && func->getDeclaringType()->getGenericArguments())
+        {
+            GenericArgumentPtr ga = func->getDeclaringType()->getGenericArguments();
+            GenericDefinitionPtr gd = ga->getDefinition();
+            for(const GenericDefinition::Parameter& p : *gd)
+            {
+                TypePtr argType = ga->get(p.index);
+                genericTypes.insert(make_pair(p.name, argType));
+            }
+        }
+        
+        assert(generic->totalParameters() == genericTypes.size());
         //Specialization on function call depends on varying type arguments
         CodeBlockPtr definition = nullptr;
-        type = type->newSpecializedType(type, genericTypes);
+        type = Type::newSpecializedType(type, genericTypes);
         FunctionSymbolPtr func2 = dynamic_pointer_cast<FunctionSymbol>(func);
         assert(func2 != nullptr);
         func = FunctionSymbolPtr(new FunctionSymbol(func->getName(), type, func2->getRole(), definition));
@@ -486,6 +498,17 @@ void SemanticAnalyzer::visitFunctionCall(const FunctionCallPtr& node)
                     if (category == Type::Class || category == Type::Struct || category == Type::Enum)
                     {
                         funcs.clear();
+                        //the identifier refers to a type, it may has generic definition
+                        //so the variable *type* here may only looked up to a generic's base type
+                        //it's not what we want, the name here is only usefuly when allFunctions can return
+                        //more than one overloaded functions, for types, we can just get only one result
+                        //then here we're sure it's definitely a type, we get it from variable *id*
+                        //it will has a specialized type, it's what we really need here.
+                        type = id->getType();
+                        assert(type != nullptr);
+                        assert(type->getCategory() == Type::MetaType);
+                        type = type->getInnerType();
+                        assert(type != nullptr);
                         getMethodsFromType(type, L"init", FilterLookupInExtension, funcs);
                     }
                 }

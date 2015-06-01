@@ -31,10 +31,18 @@
 #include <cassert>
 #include "semantics/Type.h"
 #include "semantics/SymbolScope.h"
+#include "semantics/TypeBuilder.h"
 
 USE_SWALLOW_NS
 using namespace std;
 
+GenericDefinition::GenericDefinition(const GenericDefinitionPtr& parent)
+:depth(0)
+{
+    this->parent = parent;
+    if(parent)
+        depth = parent->depth + 1;
+}
 
 int GenericDefinition::validate(const std::wstring& typeName, const TypePtr& typeToTest, TypePtr& expectedType) const
 {
@@ -42,7 +50,12 @@ int GenericDefinition::validate(const std::wstring& typeName, const TypePtr& typ
         return 1;
     auto iter = constraints.find(typeName);
     if(iter == constraints.end())
+    {
+        //not found in current definition, try to find it in parent definition
+        if(parent)
+            return parent->validate(typeName, typeToTest, expectedType);
         return 0;
+    }
     NodeDefPtr node = iter->second;
     return validate(node, typeToTest, expectedType);
 }
@@ -90,6 +103,7 @@ int GenericDefinition::validate(const NodeDefPtr& node, const TypePtr& typeToTes
 void GenericDefinition::add(const std::wstring& alias, const TypePtr& type)
 {
     assert(type != nullptr);
+    assert(type->getCategory() == Type::GenericParameter);
     TypePtr old = get(alias);
     assert(old == nullptr);
     int index = (int)typeParameters.size();
@@ -97,6 +111,7 @@ void GenericDefinition::add(const std::wstring& alias, const TypePtr& type)
     NodeDefPtr node(new NodeDef());
     node->type = type;
     node->index = index;
+    static_pointer_cast<TypeBuilder>(type)->setGenericDefinition(shared_from_this());
     constraints.insert(make_pair(alias, node));
 }
 void GenericDefinition::addConstraint(const std::list<std::wstring>& type, ConstraintType constraint, const TypePtr& referenceType)
@@ -128,15 +143,28 @@ TypePtr GenericDefinition::get(const std::wstring &alias)
 }
 void GenericDefinition::registerTo(SymbolScope* scope)
 {
-    for(auto entry : constraints)
+    for(auto p : typeParameters)
     {
-        scope->addSymbol(entry.first, Type::newType(entry.first, Type::GenericParameter));//
+        scope->addSymbol(p.name, p.type);
     }
-
 }
 size_t GenericDefinition::numParameters() const
 {
     return typeParameters.size();
+}
+/*!
+ * The number of all parameters defined, including the parent definition's parameters
+ */
+size_t GenericDefinition::totalParameters() const
+{
+    size_t ret = numParameters();
+    if(parent)
+        ret += parent->totalParameters();
+    return ret;
+}
+GenericDefinitionPtr GenericDefinition::getParent()
+{
+    return parent;
 }
 const std::vector<GenericDefinition::Parameter> GenericDefinition::getParameters()const
 {
