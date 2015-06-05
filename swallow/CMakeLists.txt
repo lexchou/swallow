@@ -63,6 +63,7 @@ SET(SWALLOW_SRC
     src/semantics/SemanticAnalyzer.cpp
     src/semantics/DeclarationAnalyzer.cpp
     src/semantics/DeclarationAnalyzer_Type.cpp
+    src/semantics/DeclarationAnalyzer_ProtocolConform.cpp
     src/semantics/DeclarationAnalyzer_Function.cpp
     src/semantics/DeclarationAnalyzer_Variables.cpp
     src/semantics/SemanticAnalyzer_Variables.cpp

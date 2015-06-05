@@ -216,6 +216,11 @@ TypePtr TypeResolver::resolveIdentifier(TypeIdentifierPtr id)
                 emitter->error(id, Errors::E_USE_OF_UNDECLARED_TYPE_1, name);
             return nullptr;
         }
+        if(ctx->currentType->getCategory() == Type::Protocol)
+        {
+            TypePtr ret = Type::newTypeAlias(name, nullptr, nullptr);
+            return ret;
+        }
         return ctx->currentType;
     }
     return resolveIdentifier(nullptr, id);

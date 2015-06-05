@@ -260,3 +260,13 @@ TEST(TestProtocol, PropertyRequirement5)
 
 }
 
+TEST(TestProtocol, SelfRequirement)
+{
+    SEMANTIC_ANALYZE(L"protocol SelfProtocol { \n"
+    "    func getSelf() -> Self \n"
+    "} \n"
+    "class MySelfClass : SelfProtocol { \n"
+    "    func getSelf() -> Self { return self} \n"
+    "}");
+    ASSERT_NO_ERRORS();
+}

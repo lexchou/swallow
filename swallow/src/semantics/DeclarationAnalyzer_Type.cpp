@@ -510,6 +510,7 @@ static void makeRawRepresentable(const TypeBuilderPtr& type, GlobalScope* global
     //var rawValue: RawValue { get }
     TypePtr RawValue = type->getParentType();
     SymbolPlaceHolderPtr rawValue(new SymbolPlaceHolder(L"rawValue", RawValue, SymbolPlaceHolder::R_PROPERTY, SymbolFlagMember | SymbolFlagReadable));
+    type->addMember(L"RawValue", RawValue);
     type->addMember(rawValue);
 }
 void DeclarationAnalyzer::visitEnum(const EnumDefPtr& node)
@@ -694,89 +695,3 @@ void DeclarationAnalyzer::visitExtension(const ExtensionDefPtr& node)
 }
 
 
-
-/*!
- * Verify if the specified type conform to the given protocol
- */
-void DeclarationAnalyzer::verifyProtocolConform(const TypePtr& type)
-{
-    for(const TypePtr& protocol : type->getProtocols())
-    {
-        if(protocol->containsAssociatedType())
-            continue;//it's already done in SymbolResolveAction.cpp
-        verifyProtocolConform(type, protocol);
-    }
-}
-void DeclarationAnalyzer::verifyProtocolConform(const TypePtr& type, const TypePtr& protocol)
-{
-    for(auto entry : protocol->getDeclaredMembers())
-    {
-        SymbolPtr requirement = entry.second;
-        if(FunctionOverloadedSymbolPtr funcs = std::dynamic_pointer_cast<FunctionOverloadedSymbol>(requirement))
-        {
-            //verify function
-            for(auto func : *funcs)
-            {
-                verifyProtocolFunction(type, protocol, func);
-            }
-        }
-        else if(FunctionSymbolPtr func = std::dynamic_pointer_cast<FunctionSymbol>(requirement))
-        {
-            //verify function
-            verifyProtocolFunction(type, protocol, func);
-        }
-            /*
-            else if(requirement == Type::getPlaceHolder())
-            {
-                //verify inner type
-                SymbolPtr sym = type->getAssociatedType(entry.first);
-                if(!(std::dynamic_pointer_cast<Type>(sym)))
-                {
-                    //Type %0 does not conform to protocol %1, unimplemented type %2
-                    error(type->getReference(), Errors::E_TYPE_DOES_NOT_CONFORM_TO_PROTOCOL_UNIMPLEMENTED_TYPE_3, type->getName(), protocol->getName(), entry.first);
-                }
-            }*/
-        else if(TypePtr t = std::dynamic_pointer_cast<Type>(requirement))
-        {
-            //type can be ignored
-        }
-        else if(dynamic_pointer_cast<ComputedPropertySymbol>(requirement) || dynamic_pointer_cast<SymbolPlaceHolder>(requirement))
-        {
-            //verify computed properties
-            SymbolPtr sym = type->getMember(entry.first);
-            //ComputedPropertySymbolPtr sp = std::dynamic_pointer_cast<ComputedPropertySymbol>(sym);
-            if(!sym)
-            {
-                error(type->getReference(), Errors::E_TYPE_DOES_NOT_CONFORM_TO_PROTOCOL_UNIMPLEMENTED_PROPERTY_3, type->getName(), protocol->getName(), entry.first);
-            }
-            bool expectedSetter = requirement->hasFlags(SymbolFlagWritable);
-            bool actualSetter = sym->hasFlags(SymbolFlagWritable);
-            if(expectedSetter && !actualSetter)
-            {
-                error(type->getReference(), Errors::E_TYPE_DOES_NOT_CONFORM_TO_PROTOCOL_UNWRITABLE_PROPERTY_3, type->getName(), protocol->getName(), entry.first);
-            }
-        }
-    }
-}
-void DeclarationAnalyzer::verifyProtocolFunction(const TypePtr& type, const TypePtr& protocol, const FunctionSymbolPtr& expected)
-{
-    std::vector<SymbolPtr> results;
-    int filter = FilterLookupInExtension | FilterRecursive;
-    if(expected->hasFlags(SymbolFlagStatic))
-        filter |= FilterStaticMember;
-    semanticAnalyzer->getMethodsFromType(type, expected->getName(), (MemberFilter)filter, results);
-    TypePtr expectedType = expected->getType();
-    assert(expectedType != nullptr);
-    //verify if they're the same type
-    bool found = false;
-    for(const SymbolPtr& func : results)
-    {
-        if(Type::equals(func->getType(), expectedType))
-        {
-            found = true;
-            break;
-        }
-    }
-    if(!found)
-        error(type->getReference(), Errors::E_TYPE_DOES_NOT_CONFORM_TO_PROTOCOL_UNIMPLEMENTED_FUNCTION_3, type->getName(), protocol->getName(), expected->getName());
-}
