@@ -215,6 +215,32 @@ TEST(TestGeneric, NonGenericType)
     ASSERT_EQ(L"Int", error->items[0]);
 }
 
+TEST(TestGeneric, InferTypeAlias)
+{
+    SEMANTIC_ANALYZE(L"protocol MyProtocol \n"
+                     L"{ \n"
+                     L"    typealias Element \n"
+                     L"    func test() -> Element \n"
+                     L"} \n"
+                     L"struct Test : MyProtocol \n"
+                     L"{ \n"
+                     L"    func test() -> Int \n"
+                     L"    { \n"
+                     L"        return 3 \n"
+                     L"    } \n"
+                     L"} \n"
+                     L"var f : Test.Element = 3");
+    ASSERT_NO_ERRORS();
+}
+
+TEST(TestGeneric, TypeAlias)
+{
+    SEMANTIC_ANALYZE(L"struct Test<T> { \n"
+                     L"   typealias F = T \n"
+                     L"}");
+    ASSERT_NO_ERRORS();
+}
+
 /*
 
 protocol DD

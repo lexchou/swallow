@@ -113,12 +113,18 @@ void TypeBuilder::addProtocol(const TypePtr &protocol)
 {
     assert(protocol != nullptr);
     protocols.push_back(protocol);
+    protocolFlags.push_back(0);
+
     auto iter = parents.find(protocol);
     if(iter == parents.end())
         parents.insert(make_pair(protocol, 1));
     else
         iter->second = 1;
     addParentTypesFrom(protocol);
+}
+std::vector<int>& TypeBuilder::getProtocolFlags()
+{
+    return protocolFlags;
 }
 void TypeBuilder::addParentTypesFrom(const TypePtr& type)
 {

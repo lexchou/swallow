@@ -346,7 +346,7 @@ public://member access
 
     TypePtr getAssociatedType(const std::wstring& name) const;
     TypePtr getDeclaredAssociatedType(const std::wstring& name) const;
-    const std::map<std::wstring, TypePtr> getAssociatedTypes() const;
+    const std::map<std::wstring, TypePtr>& getAssociatedTypes() const;
     const std::vector<SymbolPtr>& getDeclaredStoredProperties() const;
     const std::vector<FunctionOverloadedSymbolPtr>& getDeclaredFunctions() const;
     const std::vector<Subscript>& getSubscripts() const;
@@ -429,6 +429,7 @@ protected:
     //for custom type
     TypePtr parentType;//The direct inherited parent type
     std::vector<TypePtr> protocols; //Protocols that this type directly conform to
+    std::vector<int> protocolFlags;
     std::map<TypePtr, int> parents;//All parent types and protocols in inheritance tree
     SymbolMap members;
     SymbolMap staticMembers;

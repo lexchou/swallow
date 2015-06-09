@@ -434,7 +434,8 @@ void DeclarationAnalyzer::visitStruct(const StructDefPtr& node)
     //prepare default initializers
     this->prepareDefaultInitializers(type);
     //Type verification and typealias inference
-
+    
+    /*
     for(auto entry : type->getAllParents())
     {
         TypePtr parent = entry.first;
@@ -451,7 +452,6 @@ void DeclarationAnalyzer::visitStruct(const StructDefPtr& node)
         }
         if(parent->containsSelfType())
             associatedTypes.insert(make_pair(L"Self", type));
-
         for(const FunctionOverloadedSymbolPtr& funcs : parent->getDeclaredFunctions())
         {
             for(const FunctionSymbolPtr& expectedFunc : *funcs)
@@ -480,8 +480,7 @@ void DeclarationAnalyzer::visitStruct(const StructDefPtr& node)
                     return;
                 }
             }
-        }
-        //now make types infered above visible
+        }        //now make types infered above visible
 
         for(auto entry : associatedTypes)
         {
@@ -489,9 +488,11 @@ void DeclarationAnalyzer::visitStruct(const StructDefPtr& node)
                 continue;
             static_pointer_cast<TypeBuilder>(type)->addMember(entry.first, entry.second);
         }
-    }
+         }
+         */
 
-    //verifyProtocolConform(type);
+
+//    verifyProtocolConform(type);
     validateDeclarationModifiers(node);
 
 

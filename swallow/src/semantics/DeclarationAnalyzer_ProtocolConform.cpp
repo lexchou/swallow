@@ -50,12 +50,28 @@ using namespace std;
 /*!
  * Verify if the specified type conform to the given protocol
  */
-void DeclarationAnalyzer::verifyProtocolConform(const TypePtr& type)
+bool DeclarationAnalyzer::verifyProtocolConform(const TypePtr& type, bool supressError)
 {
+    if(type->getCategory() == Type::Protocol)
+        return true;//do not perform protocol conform on protocol type
+    int idx = 0;
+    TypeBuilderPtr type2 = static_pointer_cast<TypeBuilder>(type);
+    vector<int>& protocolFlags = type2->getProtocolFlags();
     for(const TypePtr& protocol : type->getProtocols())
     {
-        verifyProtocolConform(type, protocol);
+        //TODO check if the protocol is checked
+        if(protocolFlags[idx] == 0)
+        {
+            bool success = verifyProtocolConform(type, protocol, supressError);
+            if(success)
+            {
+                //TODO: mark the protocol is checked
+                protocolFlags[idx] = 1;
+            }
+        }
+        idx++;
     }
+    return true;
 }
 
 /*!
@@ -65,10 +81,20 @@ static bool checkTypeConform(const TypePtr& ownerType, TypePtr requirementType, 
 {
     if(requirementType->getCategory() == Type::Alias)
     {
-        if(requirementType->getName() == L"Self")
+        wstring name = requirementType->getName();
+        if(name == L"Self")
             requirementType = ownerType;
         else
-            requirementType = ownerType->getAssociatedType(requirementType->getName());
+            requirementType = ownerType->getAssociatedType(name);
+        if(requirementType != nullptr)
+            requirementType = requirementType->resolveAlias();
+        if(requirementType == nullptr && actualType && actualType->getCategory() != Type::Alias)
+        {
+            //do typealias infer, the required type is not existing in owner type, we implicitly declare it as associated type
+            requirementType = actualType;
+            TypeBuilderPtr type = static_pointer_cast<TypeBuilder>(ownerType);
+            type->addMember(name, actualType);
+        }
         if(requirementType == nullptr)
             return false;
     }
@@ -124,6 +150,25 @@ static bool checkTypeConform(const TypePtr& ownerType, TypePtr requirementType, 
             return true;
         }
         case Type::Specialized:
+        {
+            if(!Type::equals(requirementType->getInnerType(), actualType->getInnerType()))
+                return false;
+            GenericArgumentPtr greq = requirementType->getGenericArguments();
+            GenericArgumentPtr gact = actualType->getGenericArguments();
+            if(greq->size() != gact->size())
+                return false;
+            size_t size = greq->size();
+            //TODO: check for parent generic arguments
+            for(size_t i = 0; i < size; i++)
+            {
+                TypePtr req = greq->get(i);
+                TypePtr act = gact->get(i);
+                if(!checkTypeConform(ownerType, req, act))
+                    return false;
+            }
+            return true;
+        
+        }
         default:
             assert(0 && "Unsupported type category");
             return false;
@@ -131,7 +176,7 @@ static bool checkTypeConform(const TypePtr& ownerType, TypePtr requirementType, 
     }
 }
 
-void DeclarationAnalyzer::verifyProtocolConform(const TypePtr& type, const TypePtr& protocol)
+bool DeclarationAnalyzer::verifyProtocolConform(const TypePtr& type, const TypePtr& protocol, bool supressError)
 {
     for(auto entry : protocol->getDeclaredMembers())
     {
@@ -141,13 +186,17 @@ void DeclarationAnalyzer::verifyProtocolConform(const TypePtr& type, const TypeP
             //verify function
             for(auto func : *funcs)
             {
-                verifyProtocolFunction(type, protocol, func);
+                bool success = verifyProtocolFunction(type, protocol, func, supressError);
+                if(!success)
+                    return false;
             }
         }
         else if(FunctionSymbolPtr func = std::dynamic_pointer_cast<FunctionSymbol>(requirement))
         {
             //verify function
-            verifyProtocolFunction(type, protocol, func);
+            bool success = verifyProtocolFunction(type, protocol, func, supressError);
+            if(!success)
+                return false;
         }
         /*
          else if(requirement == Type::getPlaceHolder())
@@ -162,7 +211,16 @@ void DeclarationAnalyzer::verifyProtocolConform(const TypePtr& type, const TypeP
          }*/
         else if(TypePtr t = std::dynamic_pointer_cast<Type>(requirement))
         {
-            //type can be ignored
+            //if type doesn't declare a type alias but the protocol has defined it with a full definition, then we will implicitly declare it
+            wstring name = t->getName();
+            TypePtr originalType = t->resolveAlias();
+            if(type->getAssociatedType(name) == nullptr && originalType != nullptr && originalType->getCategory() != Type::Alias)
+            {
+                TypeBuilderPtr builder = static_pointer_cast<TypeBuilder>(type);
+                builder->addMember(name, originalType);
+            }
+            //typealias checking is moved to second stage, when all other members verified
+            continue;
         }
         else if(dynamic_pointer_cast<ComputedPropertySymbol>(requirement) || dynamic_pointer_cast<SymbolPlaceHolder>(requirement))
         {
@@ -171,18 +229,41 @@ void DeclarationAnalyzer::verifyProtocolConform(const TypePtr& type, const TypeP
             //ComputedPropertySymbolPtr sp = std::dynamic_pointer_cast<ComputedPropertySymbol>(sym);
             if(!sym || !checkTypeConform(type, requirement->getType(), sym->getType()))
             {
-                error(type->getReference(), Errors::E_TYPE_DOES_NOT_CONFORM_TO_PROTOCOL_UNIMPLEMENTED_PROPERTY_3, type->getName(), protocol->getName(), entry.first);
+                if(!supressError)
+                {
+                    error(type->getReference(), Errors::E_TYPE_DOES_NOT_CONFORM_TO_PROTOCOL_UNIMPLEMENTED_PROPERTY_3, type->getName(), protocol->getName(), entry.first);
+                }
+                return false;
             }
             bool expectedSetter = requirement->hasFlags(SymbolFlagWritable);
             bool actualSetter = sym->hasFlags(SymbolFlagWritable);
             if(expectedSetter && !actualSetter)
             {
-                error(type->getReference(), Errors::E_TYPE_DOES_NOT_CONFORM_TO_PROTOCOL_UNWRITABLE_PROPERTY_3, type->getName(), protocol->getName(), entry.first);
+                if(!supressError)
+                {
+                    error(type->getReference(), Errors::E_TYPE_DOES_NOT_CONFORM_TO_PROTOCOL_UNWRITABLE_PROPERTY_3, type->getName(), protocol->getName(), entry.first);
+                }
+                return false;
             }
         }
     }
+    //check again for associated types
+    for(auto entry : protocol->getAssociatedTypes())
+    {
+        TypePtr t = type->getAssociatedType(entry.first);
+        if(t == nullptr)
+        {
+            //undefined type alias
+            if(!supressError)
+            {
+                error(type->getReference(), Errors::E_TYPE_DOES_NOT_CONFORM_TO_PROTOCOL_2_, type->getName(), protocol->getName());
+            }
+            return false;
+        }
+    }
+    return true;
 }
-void DeclarationAnalyzer::verifyProtocolFunction(const TypePtr& type, const TypePtr& protocol, const FunctionSymbolPtr& expected)
+bool DeclarationAnalyzer::verifyProtocolFunction(const TypePtr& type, const TypePtr& protocol, const FunctionSymbolPtr& expected, bool supressError)
 {
     std::vector<SymbolPtr> results;
     int filter = FilterLookupInExtension | FilterRecursive;
@@ -202,5 +283,12 @@ void DeclarationAnalyzer::verifyProtocolFunction(const TypePtr& type, const Type
         }
     }
     if(!found)
-        error(type->getReference(), Errors::E_TYPE_DOES_NOT_CONFORM_TO_PROTOCOL_UNIMPLEMENTED_FUNCTION_3, type->getName(), protocol->getName(), expected->getName());
+    {
+        if(!supressError)
+        {
+            error(type->getReference(), Errors::E_TYPE_DOES_NOT_CONFORM_TO_PROTOCOL_UNIMPLEMENTED_FUNCTION_3, type->getName(), protocol->getName(), expected->getName());
+        }
+        return false;
+    }
+    return true;
 }

@@ -150,7 +150,7 @@ TEST(TestProtocol, TypeInheritance)
     SEMANTIC_ANALYZE(L"protocol MyProtocol { typealias Element = Int }\n"
         L"class Test : MyProtocol {}");
     //TODO: type inference for let a : Test.Element
-    ASSERT_EQ(0, compilerResults.numResults());
+    ASSERT_NO_ERRORS();
 
 }
 
@@ -268,5 +268,44 @@ TEST(TestProtocol, SelfRequirement)
     "class MySelfClass : SelfProtocol { \n"
     "    func getSelf() -> Self { return self} \n"
     "}");
+    ASSERT_NO_ERRORS();
+}
+TEST(TestProtocol, TypeAliasRequirement)
+{
+    SEMANTIC_ANALYZE(L"protocol MyProtocol \n"
+    L"{ \n"
+    L"    typealias Index \n"
+    L"    typealias Element \n"
+    L"    subscript(a : Index) -> Element {get} \n"
+    L"} \n"
+    L"struct Test : MyProtocol \n"
+    L"{ \n"
+    L"    typealias Index = Int \n"
+    L"    typealias Element = Int \n"
+    L"    subscript(a : Index) -> Element \n"
+    L"    { \n"
+    L"        return 3 \n"
+    L"    } \n"
+    L"}");
+   ASSERT_NO_ERRORS();
+}
+
+TEST(TestProtocol, TypeAliasRequirement2)
+{
+    SEMANTIC_ANALYZE(L"protocol MyProtocol \n"
+                     L"{ \n"
+                     L"    typealias Index \n"
+                     L"    typealias Element \n"
+                     L"    subscript(a : Index?) -> Element {get} \n"
+                     L"} \n"
+                     L"struct Test : MyProtocol \n"
+                     L"{ \n"
+                     L"    typealias Index = Int \n"
+                     L"    typealias Element = Int \n"
+                     L"    subscript(a : Index?) -> Element \n"
+                     L"    { \n"
+                     L"        return 3 \n"
+                     L"    } \n"
+                     L"}");
     ASSERT_NO_ERRORS();
 }

@@ -68,6 +68,8 @@ public:
      * Adds a protocol that this type conform to
      */
     void addProtocol(const TypePtr& protocol);
+    
+    std::vector<int>& getProtocolFlags();
 
     /*!
      * Add function's parameter if it's a function type

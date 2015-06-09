@@ -104,7 +104,7 @@ public:
     /*!
      * Verify if the specified type conform to the given protocol
      */
-    void verifyProtocolConform(const TypePtr& type);
+    bool verifyProtocolConform(const TypePtr& type, bool supressError);
 
 public://properties
     const TypePtr& getCurrentFunction() const;
@@ -121,8 +121,8 @@ private:
      */
     void prepareParameters(SymbolScope* scope, const ParametersNodePtr& params);
 
-    void verifyProtocolConform(const TypePtr& type, const TypePtr& protocol);
-    void verifyProtocolFunction(const TypePtr& type, const TypePtr& protocol, const FunctionSymbolPtr& expected);
+    bool verifyProtocolConform(const TypePtr& type, const TypePtr& protocol, bool supressError);
+    bool verifyProtocolFunction(const TypePtr& type, const TypePtr& protocol, const FunctionSymbolPtr& expected, bool supressError);
 
     GenericDefinitionPtr prepareGenericTypes(const GenericParametersDefPtr& params);
 

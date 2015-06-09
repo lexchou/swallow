@@ -134,7 +134,7 @@ void SemanticAnalyzer::declareImmediately(const std::wstring& name)
     try
     {
         SCOPED_SET(ctx.lazyDeclaration, false);
-
+        SymbolPtr symbol = nullptr;
         //wprintf(L"Declare immediately %S %d definitions\n", name.c_str(), decls->size());
         for(auto decl : *decls)
         {
@@ -149,6 +149,14 @@ void SemanticAnalyzer::declareImmediately(const std::wstring& name)
             SCOPED_SET(this->ctx.currentInitializationTracer, nullptr);
             SCOPED_SET(this->ctx.flags, SemanticContext::FLAG_PROCESS_DECLARATION | SemanticContext::FLAG_PROCESS_IMPLEMENTATION);
             decl.node->accept(this);
+            if(!symbol)
+                symbol = decl.currentScope->lookup(name, false);
+
+        }
+        if(symbol && symbol->getKind() == SymbolKindType)
+        {
+            TypePtr type = static_pointer_cast<Type>(symbol);
+            declarationAnalyzer->verifyProtocolConform(type, true);
         }
     }
     catch(...)
@@ -198,7 +206,7 @@ void SemanticAnalyzer::verifyProtocolConforms()
     {
         if(type->getCategory() == Type::Protocol)
             continue;
-        declarationAnalyzer->verifyProtocolConform(type);
+        declarationAnalyzer->verifyProtocolConform(type, false);
     }
 }
 

@@ -38,6 +38,7 @@ SWALLOW_NS_BEGIN
     class GlobalScope;
     class SymbolRegistry;
     struct LazySymbolResolver;
+    class SymbolScope;
     struct SemanticContext;
     typedef std::shared_ptr<class Type> TypePtr;
     typedef std::shared_ptr<class TypeNode> TypeNodePtr;
@@ -76,6 +77,7 @@ SWALLOW_NS_BEGIN
         SymbolRegistry* symbolRegistry;
         LazySymbolResolver* symbolResolver;
         SemanticContext* ctx;
+        SymbolScope* lookupScope;
     };
 
 SWALLOW_NS_END

@@ -99,22 +99,22 @@ static int getDeclarationPriority(const DeclarationPtr& decl)
     NodeType::T t = decl->getNodeType();
     switch(t)
     {
-        case NodeType::ValueBindings:
+        case NodeType::TypeAlias:
             return 0;
+        case NodeType::ValueBindings:
+            return 1;
         case NodeType::Init:
             if(!decl->hasModifier(DeclarationModifiers::Convenience))
-                return 1;
-            else
                 return 2;
+            else
+                return 3;
         case NodeType::ComputedProperty:
-            return 3;
-        case NodeType::Subscript:
             return 4;
-        case NodeType::Function:
+        case NodeType::Subscript:
             return 5;
-        case NodeType::Deinit:
+        case NodeType::Function:
             return 6;
-        case NodeType::TypeAlias:
+        case NodeType::Deinit:
             return 7;
         default:
             return 8;

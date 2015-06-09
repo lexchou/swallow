@@ -47,6 +47,7 @@ using namespace std;
 TypeResolver::TypeResolver(SymbolRegistry* registry, CompilerResultEmitter* resultEmitter, LazySymbolResolver* symbolResolver, SemanticContext* ctx)
     :emitter(resultEmitter), symbolRegistry(registry), symbolResolver(symbolResolver), ctx(ctx)
 {
+    lookupScope = registry->getCurrentScope();
 }
 TypePtr TypeResolver::lookupType(const TypeNodePtr& type)
 {
@@ -140,7 +141,10 @@ TypePtr TypeResolver::resolveIdentifier(const ModulePtr& module, TypeIdentifierP
     }
     else
     {
-        ret = symbolRegistry->lookupType(id->getName());
+        SymbolPtr s;
+        symbolRegistry->lookupSymbol(lookupScope, id->getName(), nullptr, &s, true);
+        if(s && s->getKind() == SymbolKindType)
+            ret = static_pointer_cast<Type>(s);
     }
     //type is undeclared
     if(!ret)

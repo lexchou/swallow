@@ -95,13 +95,12 @@ TypePtr Type::newType(const std::wstring& name, Category category, const TypeDec
     ret->name = name;
     ret->reference = reference;
     ret->parentType = parentType;
-    ret->protocols = protocols;
     ret->genericDefinition = generic;
     if(parentType)
         ret->addParentTypesFrom(parentType);
-    for(const TypePtr& t : protocols)
+    for(const TypePtr& p : protocols)
     {
-        ret->addParentTypesFrom(t);
+        ret->addProtocol(p);
     }
     if(parentType)
         ret->inheritantDepth = parentType->inheritantDepth + 1;
@@ -634,7 +633,7 @@ TypePtr Type::getDeclaredAssociatedType(const std::wstring& name) const
     TypePtr ret = dynamic_pointer_cast<Type>(symbol);
     return ret;
 }
-const std::map<std::wstring, TypePtr> Type::getAssociatedTypes() const
+const std::map<std::wstring, TypePtr>& Type::getAssociatedTypes() const
 {
     return associatedTypes;
 }
