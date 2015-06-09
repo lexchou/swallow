@@ -257,6 +257,7 @@ void DeclarationAnalyzer::prepareDefaultInitializers(const TypePtr& type)
     2) Compiler will not generate initializers if there's custom initializers
     3) Convenience initializers will not be counted
      */
+    SCOPED_SET(ctx->currentType, type);
     FunctionOverloadedSymbolPtr initializers = type->getDeclaredInitializer();
     int designatedInitializers = numDesignatedInitializers(initializers);
     if(designatedInitializers == 0)
@@ -310,6 +311,8 @@ void DeclarationAnalyzer::prepareDefaultInitializers(const TypePtr& type)
     //inherit designated initializers from parent type
     if(type->getParentType() && type->getCategory() == Type::Class)
     {
+        FunctionOverloadedSymbolPtr initializers = type->getDeclaredInitializer();
+
         TypeBuilderPtr builder = static_pointer_cast<TypeBuilder>(type);
         if(!initializers)
         {
@@ -318,23 +321,26 @@ void DeclarationAnalyzer::prepareDefaultInitializers(const TypePtr& type)
         }
         TypePtr parent = type->getParentType();
         FunctionOverloadedSymbolPtr baseInitializers = parent->getDeclaredInitializer();
-        for(const FunctionSymbolPtr& baseInitializer : *baseInitializers)
+        if(baseInitializers)
         {
-            //skip convenience initializer
-            if(baseInitializer->hasFlags(SymbolFlagConvenienceInit))
-                continue;
-            //check if it's defined in current type
-            TypePtr initType = baseInitializer->getType();
-            FunctionSymbolPtr initializer = initializers->lookupByType(initType);
-            if(!initializer)
+            for(const FunctionSymbolPtr& baseInitializer : *baseInitializers)
             {
-                //this initializer exists in base type, but not in current type
-                //so we need to create it in current type
-                initializer = FunctionSymbolPtr(new FunctionSymbol(L"init", initType, FunctionRoleInit, nullptr));
-                //initializers->add(initializer);
-                builder->addMember(initializer);
+                //skip convenience initializer
+                if(baseInitializer->hasFlags(SymbolFlagConvenienceInit))
+                    continue;
+                //check if it's defined in current type
+                TypePtr initType = baseInitializer->getType();
+                FunctionSymbolPtr initializer = initializers->lookupByType(initType);
+                if(!initializer)
+                {
+                    //this initializer exists in base type, but not in current type
+                    //so we need to create it in current type
+                    initializer = FunctionSymbolPtr(new FunctionSymbol(L"init", initType, FunctionRoleInit, nullptr));
+                    //initializers->add(initializer);
+                    builder->addMember(initializer);
+                }
+                
             }
-
         }
     }
 }
@@ -378,7 +384,7 @@ void DeclarationAnalyzer::visitClass(const ClassDefPtr& node)
     if(type->getParentType() != nullptr)
         verifyAccessLevel(node, type->getParentType(), D_CLASS, C_SUPERCLASS);
     visitDeclaration(node);
-    //verifyProtocolConform(type);
+    
     prepareDefaultInitializers(type);
     validateDeclarationModifiers(node);
     visitImplementation(node);
@@ -432,71 +438,10 @@ void DeclarationAnalyzer::visitStruct(const StructDefPtr& node)
     SCOPED_SET(ctx->currentType, type);
     visitDeclaration(node);
     //prepare default initializers
-    this->prepareDefaultInitializers(type);
+    //NOTE: default initializer was generated when code has implicitly accessed it.
+    //this->prepareDefaultInitializers(type);
     //Type verification and typealias inference
-    
-    /*
-    for(auto entry : type->getAllParents())
-    {
-        TypePtr parent = entry.first;
-        if(parent->getCategory() != Type::Protocol || !(parent->containsAssociatedType() || parent->containsSelfType()))
-            continue;
-        //this parent is a protocol that contains associated type, now validate protocol's methods and infer the types out
-        std::map<std::wstring, TypePtr> associatedTypes;
-        //collect all defined associated types
-        for(auto entry : parent->getAssociatedTypes())
-        {
-            TypePtr type = entry.second->unwrap();
-            if(type->getCategory() != Type::Alias)
-                associatedTypes.insert(make_pair(entry.first, type));
-        }
-        if(parent->containsSelfType())
-            associatedTypes.insert(make_pair(L"Self", type));
-        for(const FunctionOverloadedSymbolPtr& funcs : parent->getDeclaredFunctions())
-        {
-            for(const FunctionSymbolPtr& expectedFunc : *funcs)
-            {
-                TypePtr expectedType = expectedFunc->getType();
-                assert(expectedType != nullptr);
-                bool matched = false;
-                //get all methods with the same name, and check their signature one by one
-                vector<SymbolPtr> funcs;
-                bool staticMember = expectedFunc->hasFlags(SymbolFlagStatic);
-                semanticAnalyzer->getMethodsFromType(type, expectedFunc->getName(), (MemberFilter)((staticMember ? FilterStaticMember : 0) | (FilterLookupInExtension | FilterRecursive)), funcs);
-                for(const SymbolPtr& func : funcs)
-                {
-                    TypePtr actualType = func->getType();
-                    assert(actualType != nullptr);
-                    if(expectedType->canSpecializeTo(actualType, associatedTypes))
-                    {
-                        matched = true;
-                        break;
-                    }
-                }
-                if(!matched)
-                {
-                    //no matched function
-                    error(node, Errors::E_TYPE_DOES_NOT_CONFORM_TO_PROTOCOL_UNIMPLEMENTED_FUNCTION_3, type->getName(), parent->getName(), expectedFunc->getName());
-                    return;
-                }
-            }
-        }        //now make types infered above visible
-
-        for(auto entry : associatedTypes)
-        {
-            if(entry.first == L"Self")
-                continue;
-            static_pointer_cast<TypeBuilder>(type)->addMember(entry.first, entry.second);
-        }
-         }
-         */
-
-
-//    verifyProtocolConform(type);
     validateDeclarationModifiers(node);
-
-
-
     visitImplementation(node);
 }
 

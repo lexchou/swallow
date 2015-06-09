@@ -300,3 +300,52 @@ TEST(TestExtension, ProtocolImplmentedByExtension)
             L"a.test()");
     ASSERT_NO_ERRORS();
 }
+
+
+TEST(TestExtension, RedeclareInit)
+{
+    SEMANTIC_ANALYZE(L"struct Test \n"
+                     L"{ \n"
+                     L"} \n"
+                     L"extension Test \n"
+                     L"{ \n"
+                     L"    init() \n"
+                     L"    { \n"
+                     L"    } \n"
+                     L"}");
+    ASSERT_NO_ERRORS();
+}
+
+TEST(TestExtension, RedeclareInit2)
+{
+    SEMANTIC_ANALYZE(L"struct Test \n"
+                     L"{ \n"
+                     L"    init() \n"
+                     L"    { \n"
+                     L"    } \n"
+                     L"} \n"
+                     L"extension Test \n"
+                     L"{ \n"
+                     L"    init() \n"
+                     L"    { \n"
+                     L"    } \n"
+                     L"}");
+    ASSERT_ERROR(Errors::E_INVALID_REDECLARATION_1);
+    ASSERT_EQ(L"init", error->items[0]);
+}
+
+TEST(TestExtension, RedeclareInit3)
+{
+    SEMANTIC_ANALYZE(L"struct Test \n"
+                     L"{ \n"
+                     L"} \n"
+                     L"var a = Test() \n"
+                     L"extension Test \n"
+                     L"{ \n"
+                     L"    init() \n"
+                     L"    { \n"
+                     L"    } \n"
+                     L"}");
+    ASSERT_ERROR(Errors::E_INVALID_REDECLARATION_1);
+    ASSERT_EQ(L"init", error->items[0]);
+}

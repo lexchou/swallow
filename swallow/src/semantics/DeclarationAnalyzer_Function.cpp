@@ -1110,6 +1110,8 @@ void DeclarationAnalyzer::visitInit(const InitializerDefPtr& node)
         std::wstring name(L"init");
         FunctionSymbolPtr init(new FunctionSymbol(name, funcType, FunctionRoleInit, nullptr));
         init->setAccessLevel(parseAccessLevel(node->getModifiers()));
+        if(ctx->currentType->getParentType())
+            prepareDefaultInitializers(ctx->currentType->getParentType());
         checkForFunctionOverriding(name, init, node);
         declarationFinished(name, init, node);
         node->getBody()->setType(funcType);

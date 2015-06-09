@@ -68,7 +68,7 @@ std::wstring Errors::getErrorTemplate(int errorCode)
         case Errors::E_COMPUTED_PROPERTY_CANNOT_BE_DECLARED_UNDER_FOR_LOOP: return L"Computed property cannot be declared under for loop";
 
 
-        case Errors::E_INVALID_REDECLARATION_1: return L"Invalid redeclaration of type %0";
+        case Errors::E_INVALID_REDECLARATION_1: return L"Invalid redeclaration of '%0'";
         case Errors::E_USE_OF_UNDECLARED_TYPE_1: return L"Use of undeclared type %0";
         case Errors::E_CANNOT_ASSIGN_TO_THE_RESULT_OF_THIS_EXPRESSION: return L"cannot assign to the result of this expression";
         case Errors::E_CANNOT_ASSIGN_TO_A_IN_B_2: return L"Cannot assign to '%0' in '%1'";

@@ -45,6 +45,7 @@
 #include "common/ScopedValue.h"
 #include "semantics/InitializationTracer.h"
 #include "semantics/SemanticUtils.h"
+#include "semantics/DeclarationAnalyzer.h"
 
 USE_SWALLOW_NS
 using namespace std;
@@ -510,6 +511,14 @@ void SemanticAnalyzer::visitFunctionCall(const FunctionCallPtr& node)
                         type = type->getInnerType();
                         assert(type != nullptr);
                         getMethodsFromType(type, L"init", FilterLookupInExtension, funcs);
+                        if(funcs.empty())
+                        {
+                            //no initializers, we'll create a default initializer for it
+                            declarationAnalyzer->prepareDefaultInitializers(type);
+                            //and try again
+                            getMethodsFromType(type, L"init", FilterLookupInExtension, funcs);
+                            assert(!funcs.empty());
+                        }
                     }
                 }
             }
@@ -545,18 +554,30 @@ void SemanticAnalyzer::visitFunctionCall(const FunctionCallPtr& node)
                 }
             }
             vector<SymbolPtr> funcs;
-            if(selfType->getCategory() == Type::MetaType)
+            bool staticAccess = selfType->getCategory() == Type::MetaType;
+            if(staticAccess)
             {
                 selfType = selfType->getInnerType();
                 bool isEnum = selfType->getCategory() == Type::Enum || (selfType->getCategory() == Type::Specialized && selfType->getInnerType()->getCategory() == Type::Enum);
                 if(isEnum && (c = selfType->getEnumCase(identifier)) && c->constructor)
+                {
                     //constructing an enum
                     funcs.push_back(c->constructor);
-                else
-                    getMethodsFromType(selfType, identifier,  (MemberFilter)(FilterStaticMember | FilterLookupInExtension | FilterRecursive), funcs);
+                }
             }
-            else
-                getMethodsFromType(selfType, identifier,  (MemberFilter)(FilterLookupInExtension | FilterRecursive), funcs);
+            if(funcs.empty())
+            {
+                int filter = FilterLookupInExtension | FilterRecursive;
+                if(staticAccess)
+                    filter = filter | FilterStaticMember;
+                getMethodsFromType(selfType, identifier, (MemberFilter)filter, funcs);
+                if(funcs.empty() && !staticAccess && identifier == L"init")
+                {
+                    //no default initializer, we'll need to manually prepare for it
+                    declarationAnalyzer->prepareDefaultInitializers(selfType);
+                    getMethodsFromType(selfType, identifier, (MemberFilter)filter, funcs);
+                }
+            }
 
             if(funcs.empty())
             {

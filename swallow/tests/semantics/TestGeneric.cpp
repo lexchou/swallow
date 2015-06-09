@@ -241,6 +241,19 @@ TEST(TestGeneric, TypeAlias)
     ASSERT_NO_ERRORS();
 }
 
+TEST(TestGeneric, Extension)
+{
+    SEMANTIC_ANALYZE(L"struct Test<T> \n"
+                     L"{ \n"
+        
+                     L"} \n"
+                     L"extension Test \n"
+                     L"{ \n"
+                     L"    func foo(a : T) \n"
+                     L"    {} \n"
+                     L"}");
+    ASSERT_NO_ERRORS();
+}
 /*
 
 protocol DD

@@ -110,9 +110,9 @@ public://properties
     const TypePtr& getCurrentFunction() const;
     const TypePtr& getCurrentType() const;
     SemanticAnalyzer* getSemanticAnalyzer() {return semanticAnalyzer;}
+    void prepareDefaultInitializers(const TypePtr& type);
 private:
     TypePtr defineType(const std::shared_ptr<TypeDeclaration>& node);
-    void prepareDefaultInitializers(const TypePtr& type);
     FunctionSymbolPtr createFunctionSymbol(const FunctionDefPtr& func, const GenericDefinitionPtr& generic);
     TypePtr createFunctionType(const std::vector<ParametersNodePtr>::const_iterator& begin, const std::vector<ParametersNodePtr>::const_iterator& end, const TypePtr& retType, const GenericDefinitionPtr& generic);
 
