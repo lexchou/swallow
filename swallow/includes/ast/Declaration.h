@@ -50,6 +50,7 @@ public:
 
     int getModifiers()const;
     void setModifiers(int modifiers);
+    void setModifiers(int modifiers, bool set);
     bool hasModifier(int modifier) const;
 
     GenericParametersDefPtr getGenericParametersDef();
@@ -60,6 +61,7 @@ protected:
     int modifiers;
     GenericParametersDefPtr genericParameters;
 };
+
 
 SWALLOW_NS_END
 
