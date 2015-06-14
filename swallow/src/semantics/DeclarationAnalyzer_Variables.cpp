@@ -52,22 +52,10 @@ using namespace std;
 void DeclarationAnalyzer::registerSymbol(const SymbolPlaceHolderPtr& symbol, const NodePtr& node)
 {
     SymbolScope* scope = symbolRegistry->getCurrentScope();
-    NodeType::T nodeType = scope->getOwner()->getNodeType();
-    //if(nodeType != NodeType::Program)
-    //    symbol->setFlags(SymbolFlagMember, true);
     scope->addSymbol(symbol);
-    switch(nodeType)
+    if(!ctx->currentFunction && ctx->currentType)
     {
-        case NodeType::Class:
-        case NodeType::Struct:
-        case NodeType::Protocol:
-        case NodeType::Extension:
-        case NodeType::Enum:
-            assert(ctx->currentType != nullptr);
-            declarationFinished(symbol->getName(), symbol, node);
-            break;
-        default:
-            break;
+        declarationFinished(symbol->getName(), symbol, node);
     }
 }
 

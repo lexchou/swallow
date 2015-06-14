@@ -58,42 +58,18 @@ void SemanticAnalyzer::visitTypeAlias(const TypeAliasPtr& node)
 }
 void SemanticAnalyzer::visitEnum(const EnumDefPtr& node)
 {
-    if(ctx.lazyDeclaration && isGlobal(node))
-    {
-        //mark it as lazy declaration
-        delayDeclare(node);
-        return;
-    }
     node->accept(declarationAnalyzer);
 }
 void SemanticAnalyzer::visitClass(const ClassDefPtr& node)
 {
-    if(ctx.lazyDeclaration && isGlobal(node))
-    {
-        //mark it as lazy declaration
-        delayDeclare(node);
-        return;
-    }
     node->accept(declarationAnalyzer);
 }
 void SemanticAnalyzer::visitStruct(const StructDefPtr& node)
 {
-    if(ctx.lazyDeclaration && isGlobal(node))
-    {
-        //mark it as lazy declaration
-        delayDeclare(node);
-        return;
-    }
     node->accept(declarationAnalyzer);
 }
 void SemanticAnalyzer::visitProtocol(const ProtocolDefPtr& node)
 {
-    if(ctx.lazyDeclaration && isGlobal(node))
-    {
-        //mark it as lazy declaration
-        delayDeclare(node);
-        return;
-    }
     node->accept(declarationAnalyzer);
 }
 void SemanticAnalyzer::visitExtension(const ExtensionDefPtr& node)

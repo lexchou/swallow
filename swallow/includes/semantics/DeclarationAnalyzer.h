@@ -134,6 +134,7 @@ private:
      * Convert a AST TypeNode into symboled Type
      */
     TypePtr lookupType(const TypeNodePtr& type, bool supressErrors = false);
+    TypePtr resolveType(const TypeNodePtr& type, bool allowForwardDeclaration, bool supressErrors = false);
     /*!
      * Declaration finished, added it as a member to current type or current type extension.
      */

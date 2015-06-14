@@ -102,7 +102,7 @@ std::wstring SwallowUtils::readFile(const char* fileName)
     return ret;
 
 }
-void SwallowUtils::dumpCompilerResults(const std::wstring& src, const CompilerResults& compilerResults, std::wostream& out)
+void SwallowUtils::dumpCompilerResults(const CompilerResults& compilerResults, std::wostream& out)
 {
 
     using namespace Swallow;

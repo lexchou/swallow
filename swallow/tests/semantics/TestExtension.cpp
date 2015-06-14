@@ -128,8 +128,7 @@ TEST(TestExtension, Initializers)
             L"}\n"
             L"let centerRect = Rect(center: Point(x: 4.0, y: 4.0),\n"
             L"    size: Size(width: 3.0, height: 3.0))");
-    dumpCompilerResults(compilerResults, content);
-    ASSERT_EQ(0, compilerResults.numResults());
+    ASSERT_NO_ERRORS();
 }
 
 TEST(TestExtension, Methods)
@@ -148,8 +147,7 @@ TEST(TestExtension, Methods)
             L"3.repetitions {\n"
             L"    println(\"Goodbye!\")\n"
             L"}");
-    dumpCompilerResults(compilerResults, content);
-    ASSERT_EQ(0, compilerResults.numResults());
+    ASSERT_NO_ERRORS();
 }
 TEST(TestExtension, MutaingMethods)
 {
@@ -160,8 +158,7 @@ TEST(TestExtension, MutaingMethods)
             L"}\n"
             L"var someInt = 3\n"
             L"someInt.square()");
-    dumpCompilerResults(compilerResults, content);
-    ASSERT_EQ(0, compilerResults.numResults());
+    ASSERT_NO_ERRORS();
 }
 TEST(TestExtension, Subscript)
 {
@@ -177,15 +174,13 @@ TEST(TestExtension, Subscript)
             L"    }\n"
             L"}\n"
             "var a = 343434[2]");
-    dumpCompilerResults(compilerResults, content);
-    ASSERT_EQ(0, compilerResults.numResults());
+    ASSERT_NO_ERRORS();
 }
 
 TEST(TestExtension, NestedType)
 {
     SEMANTIC_ANALYZE_F("semantics/TestExtension_NestedTypes.swift");
-    dumpCompilerResults(compilerResults, content);
-    ASSERT_EQ(0, compilerResults.numResults());
+    ASSERT_NO_ERRORS();
 }
 
 TEST(TestExtension, Redeclaration_Property)
@@ -260,8 +255,7 @@ TEST(TestExtension, Redeclaration_Subscription)
             L"{\n"
             L"    subscript(a : Int) -> Bool {return true;}\n"
             L"}");
-    dumpCompilerResults(compilerResults, content);
-    ASSERT_EQ(0, compilerResults.numResults());
+    ASSERT_NO_ERRORS();
 }
 
 

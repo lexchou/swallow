@@ -42,14 +42,16 @@
 #include "semantics/GlobalScope.h"
 #include "semantics/ScopedNodes.h"
 #include "codegen/NameMangling.h"
+#include "SwallowCompiler.h"
 
 
 #define ASSERT_NOT_NULL(condition) GTEST_TEST_BOOLEAN_((condition) != NULL, #condition, false, true, GTEST_FATAL_FAILURE_)
 #define ASSERT_NULL(condition) GTEST_TEST_BOOLEAN_((condition) == NULL, #condition, false, true, GTEST_FATAL_FAILURE_)
 
-void dumpCompilerResults(Swallow::CompilerResults& compilerResults, const std::wstring& code = L"");
+void dumpCompilerResults(Swallow::CompilerResults& compilerResults);
 Swallow::NodePtr parseStatement(Swallow::CompilerResults& compilerResults, const char* func, const wchar_t* str);
 Swallow::ProgramPtr parseStatements(Swallow::CompilerResults& compilerResults, const char* func, const wchar_t* str);
+void initTestMethods(Swallow::SwallowCompiler& compiler);
 
 Swallow::ScopedProgramPtr analyzeStatement(Swallow::SymbolRegistry& registry, Swallow::CompilerResults& compilerResults, const char* func, const wchar_t* str);
 std::wstring readFile(const char* fileName);
@@ -75,28 +77,46 @@ struct Tracer
 
 
 #define SEMANTIC_ANALYZE(s) Tracer tracer(__FILE__, __LINE__, __FUNCTION__); \
+    SwallowCompiler compiler(L"test"); \
+    initTestMethods(compiler); \
+    compiler.addSource(L"code", s); \
+    Swallow::SymbolRegistry& symbolRegistry = *compiler.getSymbolRegistry(); \
+    Swallow::GlobalScope* global = symbolRegistry.getGlobalScope(); (void)global; \
+    Swallow::CompilerResults& compilerResults = *compiler.getCompilerResults(); \
+    NameMangling mangling(&symbolRegistry); \
+    std::vector<std::shared_ptr<Swallow::Program>> roots; \
+    compiler.compile(roots); \
+    std::shared_ptr<Swallow::Program> root = roots[0]; \
+    Swallow::SymbolScope* scope = compiler.getScope(); \
+    (void)scope; \
+    (void)compilerResults; \
+    (void)mangling; \
+    const CompilerResult* error = nullptr; \
+    (void)error;
+/*
+#define SEMANTIC_ANALYZE(s) Tracer tracer(__FILE__, __LINE__, __FUNCTION__); \
     Swallow::SymbolRegistry symbolRegistry; \
-    std::wstring content = s; \
     Swallow::GlobalScope* global = symbolRegistry.getGlobalScope(); (void)global; \
     Swallow::CompilerResults compilerResults; \
     NameMangling mangling(&symbolRegistry); \
-    std::shared_ptr<Swallow::ScopedProgram> root = analyzeStatement(symbolRegistry, compilerResults, __FUNCTION__, content.c_str()); \
+    std::shared_ptr<Swallow::ScopedProgram> root = analyzeStatement(symbolRegistry, compilerResults, __FUNCTION__, s); \
     Swallow::SymbolScope* scope = root ? root->getScope() : (Swallow::SymbolScope*)nullptr; \
     (void)scope; \
     (void)mangling; \
     const CompilerResult* error = nullptr; \
     (void)error;
+*/
 
 
-#define SEMANTIC_ANALYZE_F(fileName) SEMANTIC_ANALYZE(readFile(fileName));
+#define SEMANTIC_ANALYZE_F(fileName) SEMANTIC_ANALYZE(readFile(fileName).c_str());
 #define ASSERT_NO_ERRORS() if(0 != compilerResults.numResults()) { \
-        dumpCompilerResults(compilerResults, content); \
+        dumpCompilerResults(compilerResults); \
         GTEST_FATAL_FAILURE_("Unexpected compilation errors."); \
     }
 
 #define ASSERT_ERROR(e) error = getCompilerResultByError(compilerResults, e); \
     if(!error) { \
-        dumpCompilerResults(compilerResults, content); \
+        dumpCompilerResults(compilerResults); \
         if(compilerResults.numResults()) \
             GTEST_FATAL_FAILURE_("Expect compiler result " #e); \
         else \

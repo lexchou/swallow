@@ -121,6 +121,15 @@ public:
      * Register an extension to this scope.
      */
     void addExtension(const TypePtr& extension);
+
+    /*!
+     * Register a type as forward declaration, it cannot be retrieved by lookup* functions but only by getForwardDeclaration
+     */
+    void addForwardDeclaration(const TypePtr& type);
+    /*!
+     * Get a registered forward Declaration
+     */
+    TypePtr getForwardDeclaration(const std::wstring& name);
 protected:
     OperatorMap operators;
     Node* owner;
@@ -128,6 +137,8 @@ protected:
     SymbolMap symbols;
     LazySymbolResolver* lazySymbolResolver;
     std::map<std::wstring, std::vector<TypePtr>> extensions;
+
+    std::map<std::wstring, TypePtr> forwardDeclarations;
 };
 
 

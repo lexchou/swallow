@@ -67,9 +67,9 @@ wstring readFile(const char* fileName)
     return SwallowUtils::readFile(fileName);
 }
 
-void dumpCompilerResults(Swallow::CompilerResults& compilerResults, const std::wstring& code)
+void dumpCompilerResults(Swallow::CompilerResults& compilerResults)
 {
-    SwallowUtils::dumpCompilerResults(code, compilerResults, std::wcout);
+    SwallowUtils::dumpCompilerResults(compilerResults, std::wcout);
 }
 
 
@@ -114,14 +114,19 @@ static void dumpAST(const NodePtr& node, const wchar_t* title)
         node->accept(&dumper);
     }
 }
-Swallow::ScopedProgramPtr analyzeStatement(Swallow::SymbolRegistry& registry, Swallow::CompilerResults& compilerResults, const char* func, const wchar_t* str)
+
+void initTestMethods(Swallow::SwallowCompiler& compiler)
 {
-    using namespace Swallow;
-    GlobalScope* global = registry.getGlobalScope();
+    GlobalScope* global = compiler.getSymbolRegistry()->getGlobalScope();
     global->declareFunction(L"println", 0, L"Void", L"Int", NULL);
     global->declareFunction(L"println", 0, L"Void", L"String", NULL);
     global->declareFunction(L"print", 0, L"Void", L"String", NULL);
     global->declareFunction(L"assert", 0, L"Void", L"Bool", L"String", NULL);
+}
+Swallow::ScopedProgramPtr analyzeStatement(Swallow::SymbolRegistry& registry, Swallow::CompilerResults& compilerResults, const char* func, const wchar_t* str)
+{
+    using namespace Swallow;
+    GlobalScope* global = registry.getGlobalScope();
 
 
     ScopedNodeFactory nodeFactory;

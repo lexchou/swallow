@@ -74,8 +74,7 @@ TEST(TestLoop, For)
     SEMANTIC_ANALYZE(L"for var index = 0; index < 3; index++ {\n"
             L"    println(\"index is \\(index)\")\n"
             L"}");
-    dumpCompilerResults(compilerResults, content);
-    ASSERT_EQ(0, compilerResults.numResults());
+    ASSERT_NO_ERRORS();
 }
 
 
@@ -85,8 +84,7 @@ TEST(TestLoop, For_InnerScope)
             L"for var index = 0; index < 3; index++ {\n"
             L"    println(\"index is \\(index)\")\n"
             L"}");
-    dumpCompilerResults(compilerResults, content);
-    ASSERT_EQ(0, compilerResults.numResults());
+    ASSERT_NO_ERRORS();
 }
 
 
@@ -120,7 +118,7 @@ TEST(TestLoop, While)
             L"  sum = sum + i\n"
             L"  i++\n"
             L"}");
-    ASSERT_EQ(0, compilerResults.numResults());
+    ASSERT_NO_ERRORS();
 }
 
 TEST(TestLoop, While_NonBooleanCondition)
@@ -144,7 +142,7 @@ TEST(TestLoop, Do)
             L"  sum = sum + i\n"
             L"  i++\n"
             L"} while i < 20");
-    ASSERT_EQ(0, compilerResults.numResults());
+    ASSERT_NO_ERRORS();
 }
 
 TEST(TestLoop, Do_NonBooleanCondition)

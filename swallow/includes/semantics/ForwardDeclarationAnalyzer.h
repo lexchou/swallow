@@ -1,4 +1,4 @@
-/* SwallowUtils.h --
+/* ForwardDeclarationAnalyzer.h --
  *
  * Copyright (c) 2014, Lex Chou <lex at chou dot it>
  * All rights reserved.
@@ -27,44 +27,35 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef SWALLOW_UTILS_H
-#define SWALLOW_UTILS_H
-#include "swallow_conf.h"
-#include <string>
-#include <ostream>
-#include <vector>
+#ifndef FORWARD_DECLARATION_ANALYZER_H
+#define FORWARD_DECLARATION_ANALYZER_H
+#include "SemanticPass.h"
+#include "Type.h"
 
 SWALLOW_NS_BEGIN
 
-class CompilerResults;
-
-typedef std::shared_ptr<class Node> NodePtr;
-
-struct SwallowUtils
+/*!
+ * This analyzer will perform forward declaration of type
+ */
+class SWALLOW_EXPORT ForwardDeclarationAnalyzer : public SemanticPass
 {
-    static void dumpHex(const char* s);
-    static std::wstring readFile(const char* fileName);
-    static std::vector<std::string> readDirectory(const char* path);
-    static void dumpCompilerResults(const CompilerResults& compilerResults, std::wostream& out);
-    static std::wstring toString(const NodePtr& node);
-    static std::wstring toString(int i);
-
-    /*!
-     * A simplified approach to convert std::string to std::wstring
-     */
-    static std::wstring toWString(const std::string& str);
-    /*!
-     * A simplified approach to convert std::wstring to std::string
-     */
-    static std::string toString(const std::wstring& str);
+public:
+    ForwardDeclarationAnalyzer(SemanticPass* semanticPass);
+public:
+    virtual void visitTypeAlias(const TypeAliasPtr& node) override;
+    virtual void visitClass(const ClassDefPtr& node) override;
+    virtual void visitStruct(const StructDefPtr& node) override;
+    virtual void visitEnum(const EnumDefPtr& node) override;
+    virtual void visitProtocol(const ProtocolDefPtr& node) override;
+    virtual void visitExtension(const ExtensionDefPtr& node) override;
+private:
+    void forwardDeclare(const std::wstring& name, Type::Category category);
+protected:
 };
+
 SWALLOW_NS_END
 
-#ifndef DebugBreak
-#define DebugBreak() __asm__("int $3")
-#endif
-#define BREAK_IF(cond) if((cond)) DebugBreak();
 
 
 
-#endif//SWALLOW_UTILS_H
+#endif//FORWARD_DECLARATION_ANALYZER_H

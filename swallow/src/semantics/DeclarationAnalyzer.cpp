@@ -45,6 +45,7 @@
 #include "semantics/FunctionOverloadedSymbol.h"
 #include "semantics/FunctionSymbol.h"
 #include "common/ScopedValue.h"
+#include "semantics/TypeResolver.h"
 #include <set>
 #include <semantics/Symbol.h>
 
@@ -206,7 +207,12 @@ GenericDefinitionPtr DeclarationAnalyzer::prepareGenericTypes(const GenericParam
 
 TypePtr DeclarationAnalyzer::lookupType(const TypeNodePtr& type, bool supressErrors)
 {
-    return semanticAnalyzer->lookupType(type, supressErrors);
+    return resolveType(type, false, supressErrors);
+}
+TypePtr DeclarationAnalyzer::resolveType(const TypeNodePtr& type, bool allowForwardDeclaration, bool supressErrors)
+{
+    TypeResolver resolver(symbolRegistry, supressErrors ? nullptr : this, semanticAnalyzer, ctx, allowForwardDeclaration);
+    return resolver.lookupType(type);
 }
 
 

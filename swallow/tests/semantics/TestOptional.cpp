@@ -199,24 +199,21 @@ TEST(TestOptional, OptionalChaining3)
 TEST(TestOptional, OptionalChaining_Property)
 {
     SEMANTIC_ANALYZE_F("semantics/TestOptional_OptionalChaining_Property.swift");
-    dumpCompilerResults(compilerResults, content);
-    ASSERT_EQ(0, compilerResults.numResults());
+    ASSERT_NO_ERRORS();
 }
 
 
 TEST(TestOptional, OptionalChaining_Method)
 {
     SEMANTIC_ANALYZE_F("semantics/TestOptional_OptionalChaining_Method.swift");
-    dumpCompilerResults(compilerResults, content);
-    ASSERT_EQ(0, compilerResults.numResults());
+    ASSERT_NO_ERRORS();
 }
 
 
 TEST(TestOptional, OptionalChaining_Subscript)
 {
     SEMANTIC_ANALYZE_F("semantics/TestOptional_OptionalChaining_Subscript.swift");
-    dumpCompilerResults(compilerResults, content);
-    ASSERT_EQ(0, compilerResults.numResults());
+    ASSERT_NO_ERRORS();
 }
 TEST(TestOptional, DictSubscriptAccess)
 {
@@ -243,16 +240,14 @@ TEST(TestOptional, MultipleLevelChaining2)
             L"if var a = res?.address?.name { \n"
             L"   println(a)\n"
             L"}");
-    dumpCompilerResults(compilerResults);
-    ASSERT_EQ(0, compilerResults.numResults());
+    ASSERT_NO_ERRORS();
 }
 
 
 TEST(TestOptional, ChainingMethods)
 {
     SEMANTIC_ANALYZE_F("semantics/TestOptional_ChainingMethods.swift");
-    dumpCompilerResults(compilerResults, content);
-    ASSERT_EQ(0, compilerResults.numResults());
+    ASSERT_NO_ERRORS();
 }
 
 

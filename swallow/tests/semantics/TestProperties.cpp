@@ -47,8 +47,7 @@ TEST(TestProperties, StoredProperties)
             L"}\n"
             L"var rangeOfThreeItems = FixedLengthRange(firstValue: 0, length: 3)\n"
             L"rangeOfThreeItems.firstValue = 6");
-    dumpCompilerResults(compilerResults, content);
-    ASSERT_EQ(0, compilerResults.numResults());
+    ASSERT_NO_ERRORS();
 }
 
 TEST(TestProperties, StoredProperties_ConstantStructure)
@@ -93,8 +92,7 @@ TEST(TestProperties, StoredProperties_ConstantClass2)
             L"}\n"
             L"let f = Container();\n"
             L"f.f.firstValue = 6");
-    dumpCompilerResults(compilerResults, content);
-    ASSERT_EQ(0, compilerResults.numResults());
+    ASSERT_NO_ERRORS();
 }
 
 
@@ -226,8 +224,7 @@ TEST(TestProperties, ComputedProperty_ShorthandSetter)
             L"        }\n"
             L"    }\n"
             L"}");
-    dumpCompilerResults(compilerResults, content);
-    ASSERT_EQ(0, compilerResults.numResults());
+    ASSERT_NO_ERRORS();
 }
 
 TEST(TestProperties, ReadonlyComputedProperty)
@@ -271,8 +268,7 @@ TEST(TestProperties, Observer)
             L"// About to set totalSteps to 360\n"
             L"// Added 160 steps\n"
             L"stepCounter.totalSteps = 896");
-    dumpCompilerResults(compilerResults, content);
-    ASSERT_EQ(0, compilerResults.numResults());
+    ASSERT_NO_ERRORS();
 }
 
 TEST(TestProperties, GlobalLazy)
@@ -322,8 +318,7 @@ TEST(TestProperties, TypeProperty)
             L"SomeStructure.storedTypeProperty = \"Another value.\"\n"
             L"println(SomeStructure.storedTypeProperty)"
     );
-    dumpCompilerResults(compilerResults, content);
-    ASSERT_EQ(0, compilerResults.numResults());
+    ASSERT_NO_ERRORS();
 }
 TEST(TestProperties, StaticVar_Global)
 {

@@ -145,7 +145,12 @@ TypePtr DeclarationAnalyzer::defineType(const std::shared_ptr<TypeDeclaration>& 
     
     
     //register this type
-    TypeBuilderPtr type = static_pointer_cast<TypeBuilder>(Type::newType(node->getIdentifier()->getName(), category, node, nullptr, std::vector<TypePtr>(), generic));
+    TypeBuilderPtr type = static_pointer_cast<TypeBuilder>(currentScope->getForwardDeclaration(id->getName()));
+    assert(type != nullptr);
+    assert(type->getCategory() == category);
+    type->setReference(node);
+    type->setGenericDefinition(generic);
+    
     node->setType(type);
     currentScope->addSymbol(type);
     if(node->hasModifier(DeclarationModifiers::Final))
@@ -366,7 +371,7 @@ void DeclarationAnalyzer::visitTypeAlias(const TypeAliasPtr& node)
     }
     else
     {
-        shared_ptr<TypeResolver> typeResolver(new TypeResolver(symbolRegistry, semanticAnalyzer, semanticAnalyzer, ctx));
+        shared_ptr<TypeResolver> typeResolver(new TypeResolver(symbolRegistry, semanticAnalyzer, semanticAnalyzer, ctx, false));
         type = Type::newTypeAlias(node->getName(), node->getType(), typeResolver);
     }
     currentScope->addSymbol(node->getName(), type);

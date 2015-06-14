@@ -1,4 +1,4 @@
-/* SwallowUtils.h --
+/* SwallowCompiler.h --
  *
  * Copyright (c) 2014, Lex Chou <lex at chou dot it>
  * All rights reserved.
@@ -27,44 +27,60 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef SWALLOW_UTILS_H
-#define SWALLOW_UTILS_H
+#ifndef SWALLOW_COMPILER_H
+#define SWALLOW_COMPILER_H
 #include "swallow_conf.h"
-#include <string>
-#include <ostream>
 #include <vector>
-
 SWALLOW_NS_BEGIN
 
+
 class CompilerResults;
+class SymbolRegistry;
+class OperatorResolver;
+class SemanticAnalyzer;
+class DeclarationAnalyzer;
+class NodeFactory;
+class SymbolScope;
+typedef std::shared_ptr<struct SourceFile> SourceFilePtr;
+typedef std::shared_ptr<class Module> ModulePtr;
+typedef std::shared_ptr<class Program> ProgramPtr;
+using std::wstring;
 
-typedef std::shared_ptr<class Node> NodePtr;
-
-struct SwallowUtils
+class SwallowCompiler
 {
-    static void dumpHex(const char* s);
-    static std::wstring readFile(const char* fileName);
-    static std::vector<std::string> readDirectory(const char* path);
-    static void dumpCompilerResults(const CompilerResults& compilerResults, std::wostream& out);
-    static std::wstring toString(const NodePtr& node);
-    static std::wstring toString(int i);
+public:
+    SwallowCompiler(const wstring& moduleName);
+    ~SwallowCompiler();
+public:
+    void addSourceFile(const SourceFilePtr& sourceFile);
+    void addSource(const wstring& name, const wstring& code);
+public:
+    bool compile();
+    bool compile(std::vector<ProgramPtr>& programs);
+public:
+    ModulePtr getModule();
+    ProgramPtr getProgram();
+    CompilerResults* getCompilerResults();
+    SymbolRegistry* getSymbolRegistry();
+    SymbolScope* getScope();
 
-    /*!
-     * A simplified approach to convert std::string to std::wstring
-     */
-    static std::wstring toWString(const std::string& str);
-    /*!
-     * A simplified approach to convert std::wstring to std::string
-     */
-    static std::string toString(const std::wstring& str);
+protected:
+    virtual ProgramPtr createProgramNode();
+private:
+    SymbolRegistry* symbolRegistry;
+    NodeFactory* nodeFactory;
+
+    OperatorResolver* operatorResolver;
+    SemanticAnalyzer* semanticAnalyzer;
+    DeclarationAnalyzer* declarationAnalyzer;
+    std::vector<SourceFilePtr> sourceFiles;
+
+    //results:
+    CompilerResults* compilerResults;
+    ModulePtr module;
+    ProgramPtr program;
+    SymbolScope* scope;
 };
+
 SWALLOW_NS_END
-
-#ifndef DebugBreak
-#define DebugBreak() __asm__("int $3")
-#endif
-#define BREAK_IF(cond) if((cond)) DebugBreak();
-
-
-
-#endif//SWALLOW_UTILS_H
+#endif//SWALLOW_COMPILER_H

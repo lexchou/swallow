@@ -50,7 +50,7 @@ TEST(TestSymbolResolve, testUndeclaredVars)
 TEST(TestSymbolResolve, testUseConstantBeforeDeclaration)
 {
     SEMANTIC_ANALYZE(L"let a = b, b = 1;");
-    dumpCompilerResults(compilerResults, content);
+    dumpCompilerResults(compilerResults);
     //ASSERT_EQ(0, compilerResults.numResults());
     //NOTE: old implementation will not allow to use a variable before initialization
     //TODO: Fix this to let a and b are both Int
@@ -97,7 +97,7 @@ TEST(TestSymbolResolve, testLocalGlobal)
     ASSERT_NOT_NULL(test = symbol->getDefinition());
     ScopedCodeBlockPtr cb = std::static_pointer_cast<ScopedCodeBlock>(test);
     SymbolPtr local = cb->getScope()->lookup(L"local");
-    SymbolPtr g = root->getScope()->lookup(L"global");
+    SymbolPtr g = scope->lookup(L"global");
     ASSERT_TRUE(local != NULL);
     ASSERT_TRUE(g != NULL);
 }

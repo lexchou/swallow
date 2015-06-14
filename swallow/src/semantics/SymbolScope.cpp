@@ -134,3 +134,21 @@ void SymbolScope::addExtension(const TypePtr& extension)
     }
     iter->second.push_back(extension);
 }
+
+/*!
+ * Register a type as forward declaration, it cannot be retrieved by lookup* functions but only by getForwardDeclaration
+ */
+void SymbolScope::addForwardDeclaration(const TypePtr& type)
+{
+    forwardDeclarations.insert(make_pair(type->getName(), type));
+}
+/*!
+ * Get a registered forward Declaration
+ */
+TypePtr SymbolScope::getForwardDeclaration(const std::wstring& name)
+{
+    auto iter = forwardDeclarations.find(name);
+    if(iter == forwardDeclarations.end())
+        return nullptr;
+    return iter->second;
+}

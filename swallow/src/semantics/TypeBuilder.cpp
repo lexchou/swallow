@@ -280,3 +280,11 @@ void TypeBuilder::addSubscript(const Subscript& subscript)
 {
     subscripts.push_back(subscript);
 }
+
+/*!
+ * Sets which declaration this type referenced to
+ */
+void TypeBuilder::setReference(const TypeDeclarationPtr& ref)
+{
+    reference = ref;
+}

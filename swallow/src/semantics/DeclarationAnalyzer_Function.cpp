@@ -58,7 +58,7 @@ void DeclarationAnalyzer::visitParameter(const ParameterNodePtr& node)
 {
     if(!node->getType())
     {
-        TypePtr type = lookupType(node->getDeclaredType());
+        TypePtr type = resolveType(node->getDeclaredType(), true);
         assert(type != nullptr);
         node->setType(type);
     }
@@ -165,7 +165,7 @@ FunctionSymbolPtr DeclarationAnalyzer::createFunctionSymbol(const FunctionDefPtr
 
     TypePtr retType = symbolRegistry->getGlobalScope()->Void();
     if(func->getReturnType())
-        retType = lookupType(func->getReturnType());
+        retType = resolveType(func->getReturnType(), true);
     TypeBuilderPtr funcType = static_pointer_cast<TypeBuilder>(createFunctionType(func->getParametersList().begin(), func->getParametersList().end(), retType, generic));
     //prepare flags
     if(ctx->currentType)
@@ -208,7 +208,7 @@ void DeclarationAnalyzer::visitClosure(const ClosurePtr& node)
 
     TypePtr returnedType = nullptr;
     if(node->getReturnType())
-        returnedType = lookupType(node->getReturnType());
+        returnedType = resolveType(node->getReturnType(), true);
     else if(ctx->contextualType)
         returnedType = ctx->contextualType->getReturnType();
     std::vector<Parameter> params;
@@ -402,7 +402,7 @@ void DeclarationAnalyzer::visitComputedProperty(const ComputedPropertyPtr& node)
     CodeBlockPtr willSet = node->getWillSet();
     CodeBlockPtr getter = node->getGetter();
     CodeBlockPtr setter = node->getSetter();
-    TypePtr type = lookupType(node->getDeclaredType());
+    TypePtr type = resolveType(node->getDeclaredType(), true);
     assert(type != nullptr);
 
     shared_ptr<ComposedComputedProperty> property = static_pointer_cast<ComposedComputedProperty>(node);
@@ -666,7 +666,7 @@ void DeclarationAnalyzer::visitSubscript(const SubscriptDefPtr &node)
 
     // Register subscript as functions to type
     std::vector<ParametersNodePtr> paramsList = {parameters};
-    TypePtr retType = lookupType(node->getReturnType());
+    TypePtr retType = resolveType(node->getReturnType(), true);
     if (!node->getGetter() && !node->getSetter())
         return;
 
@@ -723,13 +723,13 @@ void DeclarationAnalyzer::visitSubscript(const SubscriptDefPtr &node)
     {
         //TypeInference
 
-        TypePtr type = lookupType(node->getReturnType());
+        TypePtr type = resolveType(node->getReturnType(), true);
         assert(type != nullptr);
         std::vector<Parameter> params;
         for (const ParameterNodePtr &param : *node->getParameters())
         {
             wstring name = param->isShorthandExternalName() ? param->getLocalName() : param->getExternalName();
-            TypePtr paramType = lookupType(param->getDeclaredType());
+            TypePtr paramType = resolveType(param->getDeclaredType(), true);
             params.push_back(Parameter(name, param->isInout(), paramType));
             //verify index's access level
             verifyAccessLevel(node, paramType, D_SUBSCRIPT, C_INDEX);

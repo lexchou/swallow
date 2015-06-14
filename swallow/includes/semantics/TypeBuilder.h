@@ -90,6 +90,10 @@ public:
      * add a new enum case
      */
     void addEnumCase(const std::wstring& name, const TypePtr& associatedType);
+    /*!
+     * Sets which declaration this type referenced to
+     */
+    void setReference(const TypeDeclarationPtr& );
 };
 typedef std::shared_ptr<TypeBuilder> TypeBuilderPtr;
 

@@ -28,6 +28,7 @@ endif()
 
 
 SET(SWALLOW_SRC
+    src/SwallowCompiler.cpp
     src/common/CompilerResults.cpp
     src/common/Errors.cpp
     src/common/SwallowUtils.cpp
@@ -86,6 +87,7 @@ SET(SWALLOW_SRC
     src/semantics/BuiltinModule.cpp
     src/semantics/LazyDeclaration.cpp
     src/semantics/TypeResolver.cpp
+    src/semantics/ForwardDeclarationAnalyzer.cpp
 
     src/codegen/NameMangling.cpp
 

@@ -55,7 +55,7 @@ SWALLOW_NS_BEGIN
     class SWALLOW_EXPORT TypeResolver
     {
     public:
-        TypeResolver(SymbolRegistry* registry, CompilerResultEmitter* resultEmitter, LazySymbolResolver* symbolResolver, SemanticContext* ctx);
+        TypeResolver(SymbolRegistry* registry, CompilerResultEmitter* resultEmitter, LazySymbolResolver* symbolResolver, SemanticContext* ctx, bool allowForwardDeclaration);
     public:
         TypePtr lookupType(const TypeNodePtr& node);
         static bool assertGenericArgumentMatches(CompilerResultEmitter* emitter, const NodePtr& node, int expected, int actual);
@@ -73,6 +73,7 @@ SWALLOW_NS_BEGIN
         TypePtr handleGeneric(const TypePtr& type, const TypeIdentifierPtr& id);
 
     private:
+        bool allowForwardDeclaration;
         CompilerResultEmitter* emitter;
         SymbolRegistry* symbolRegistry;
         LazySymbolResolver* symbolResolver;

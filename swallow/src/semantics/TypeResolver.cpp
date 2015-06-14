@@ -44,10 +44,11 @@
 USE_SWALLOW_NS
 using namespace std;
 
-TypeResolver::TypeResolver(SymbolRegistry* registry, CompilerResultEmitter* resultEmitter, LazySymbolResolver* symbolResolver, SemanticContext* ctx)
+TypeResolver::TypeResolver(SymbolRegistry* registry, CompilerResultEmitter* resultEmitter, LazySymbolResolver* symbolResolver, SemanticContext* ctx, bool allowForwardDeclaration)
     :emitter(resultEmitter), symbolRegistry(registry), symbolResolver(symbolResolver), ctx(ctx)
 {
     lookupScope = registry->getCurrentScope();
+    this->allowForwardDeclaration = allowForwardDeclaration;
 }
 TypePtr TypeResolver::lookupType(const TypeNodePtr& type)
 {
@@ -142,7 +143,17 @@ TypePtr TypeResolver::resolveIdentifier(const ModulePtr& module, TypeIdentifierP
     else
     {
         SymbolPtr s;
-        symbolRegistry->lookupSymbol(lookupScope, id->getName(), nullptr, &s, true);
+        wstring name = id->getName();
+        symbolRegistry->lookupSymbol(lookupScope, name, nullptr, &s, true);
+        if(!s && allowForwardDeclaration)
+        {
+            //use forward declaration lookup
+            SymbolScope* scope = lookupScope ? lookupScope : symbolRegistry->getCurrentScope();
+            for(; scope && !s; scope = scope->getParentScope())
+            {
+                s = scope->getForwardDeclaration(name);
+            }
+        }
         if(s && s->getKind() == SymbolKindType)
             ret = static_pointer_cast<Type>(s);
     }

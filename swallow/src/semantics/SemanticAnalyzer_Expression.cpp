@@ -162,7 +162,7 @@ void SemanticAnalyzer::visitMemberAccess(const MemberAccessPtr& node)
             //if it's a int litertal, we can try to look it up in double type
             //this is not defined in official's document, but infered from official's example
             GlobalScope* global = symbolRegistry->getGlobalScope();
-            if(node->getSelf()->getNodeType() == NodeType::IntegerLiteral && selfType == global->Int() && !staticAccess)
+            if(node->getSelf() && node->getSelf()->getNodeType() == NodeType::IntegerLiteral && selfType == global->Int() && !staticAccess)
             {
                 member = getMemberFromType(global->Double(), fieldName, (MemberFilter)((staticAccess ? FilterStaticMember : 0) | (FilterLookupInExtension | FilterRecursive)));
                 if(member)

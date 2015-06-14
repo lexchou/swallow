@@ -50,6 +50,7 @@
 #include "semantics/DeclarationAnalyzer.h"
 #include "semantics/LazyDeclaration.h"
 #include "semantics/TypeResolver.h"
+#include "semantics/ForwardDeclarationAnalyzer.h"
 
 USE_SWALLOW_NS
 using namespace std;
@@ -188,6 +189,10 @@ bool SemanticAnalyzer::resolveLazySymbol(const std::wstring& name)
 }
 void SemanticAnalyzer::visitProgram(const ProgramPtr& node)
 {
+    //a full scan on AST tree to perform forward declaration of types
+    ForwardDeclarationAnalyzer forwardDeclarationAnalyzer(this);
+    node->accept(&forwardDeclarationAnalyzer);
+
     InitializationTracer tracer(nullptr, InitializationTracer::Sequence);
     SCOPED_SET(ctx.currentInitializationTracer, &tracer);
 
@@ -246,7 +251,7 @@ void SemanticAnalyzer::finalizeLazyDeclaration()
 
 TypePtr SemanticAnalyzer::lookupType(const TypeNodePtr& type, bool supressErrors)
 {
-    TypeResolver resolver(symbolRegistry, supressErrors ? nullptr : this, this, &ctx);
+    TypeResolver resolver(symbolRegistry, supressErrors ? nullptr : this, this, &ctx, false);
     return resolver.lookupType(type);
 }
 /*!
