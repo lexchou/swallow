@@ -40,7 +40,7 @@ SWALLOW_NS_BEGIN
 class SWALLOW_EXPORT ForwardDeclarationAnalyzer : public SemanticPass
 {
 public:
-    ForwardDeclarationAnalyzer(SemanticPass* semanticPass);
+    ForwardDeclarationAnalyzer(SymbolRegistry* symbolRegistry, CompilerResults* results);
 public:
     virtual void visitTypeAlias(const TypeAliasPtr& node) override;
     virtual void visitClass(const ClassDefPtr& node) override;
@@ -49,7 +49,7 @@ public:
     virtual void visitProtocol(const ProtocolDefPtr& node) override;
     virtual void visitExtension(const ExtensionDefPtr& node) override;
 private:
-    void forwardDeclare(const std::wstring& name, Type::Category category);
+    TypePtr forwardDeclare(const NodePtr& node, const std::wstring& name, Type::Category category);
 protected:
 };
 

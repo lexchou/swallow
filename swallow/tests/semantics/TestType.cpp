@@ -53,10 +53,11 @@ TEST(TestType, testCovariance)
 
 TEST(TestType, testInheritance)
 {
-    SEMANTIC_ANALYZE(L"class SomeSuperclass{}"
+    SEMANTIC_ANALYZE(L"class SomeSuperclass{}\n"
         L"class SomeClass : SomeSuperclass{}");
     TypePtr SomeSuperclass, SomeClass;
 
+    ASSERT_NO_ERRORS();
     ASSERT_NOT_NULL(SomeSuperclass = std::dynamic_pointer_cast<Type>(scope->lookup(L"SomeSuperclass")));
     ASSERT_NOT_NULL(SomeClass = std::dynamic_pointer_cast<Type>(scope->lookup(L"SomeClass")));
 

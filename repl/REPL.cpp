@@ -16,7 +16,7 @@ using namespace Swallow;
 
 
 REPL::REPL(const ConsoleWriterPtr& out)
-:out(out), canQuit(false)
+    :compiler(L"repl"), out(out), canQuit(false)
 {
     initCommands();
     resultId = 0;
@@ -28,8 +28,6 @@ void REPL::repl()
     wstring line;
     int id = 1;
     out->printf(L"Welcome to Swallow! Type :help for assistance.\n");
-    program = nodeFactory.createProgram();
-    module = ModulePtr(new Module(L"eval", registry.getGlobalScope()->getModuleType()));
     while(!canQuit && !wcin.eof())
     {
         out->printf(L"%3d> ", id);
@@ -41,36 +39,23 @@ void REPL::repl()
             evalCommand(line.substr(1));
             continue;
         }
-        CompilerResults compilerResults;
-        eval(compilerResults, line);
-        dumpCompilerResults(compilerResults, line);
+        eval(line);
+        dumpCompilerResults(line);
         id++;
     }
 }
 
-void REPL::eval(CompilerResults& compilerResults, const wstring& line)
+void REPL::eval(const wstring& line)
 {
-    Parser parser(&nodeFactory, &compilerResults);
-    parser.setSourceFile(SourceFilePtr(new SourceFile(L"<eval>", line)));
-    //remove parsed nodes in last eval
-    program->clearStatements();
-
-    bool successed = parser.parse(line.c_str(), program);
-    if(!successed)
+    compiler.getCompilerResults()->clear();
+    compiler.clearSources();
+    compiler.addSource(L"<eval>", line);
+    vector<ProgramPtr> programs;
+    if(!compiler.compile(programs))
         return;
-    try
-    {
-        SemanticAnalyzer analyzer(&registry, &compilerResults, module);
-        program->accept(&analyzer);
-        dumpProgram();
-    }
-    catch(const Abort&)
-    {
-//ignore this
-    }
-
+    dumpProgram(programs[0]);
 }
-void REPL::dumpProgram()
+void REPL::dumpProgram(const ProgramPtr& program)
 {
     SymbolScope* scope = static_pointer_cast<ScopedProgram>(program)->getScope();
     assert(scope != nullptr);
@@ -104,7 +89,7 @@ void REPL::dumpProgram()
             {
                 if(PatternPtr pat = dynamic_pointer_cast<Pattern>(st))
                 {
-                    if(pat->getType() && !Type::equals(registry.getGlobalScope()->Void(), pat->getType()))
+                    if(pat->getType() && !Type::equals(compiler.getSymbolRegistry()->getGlobalScope()->Void(), pat->getType()))
                     {
                         wstringstream s;
                         s<<L"$R"<<(resultId++);
@@ -129,9 +114,9 @@ void REPL::dumpSymbol(const SymbolPtr& sym)
 }
 
 
-void REPL::dumpCompilerResults(CompilerResults& compilerResults, const std::wstring& code)
+void REPL::dumpCompilerResults(const std::wstring& code)
 {
-    for(auto res : compilerResults)
+    for(auto res : *compiler.getCompilerResults())
     {
         out->setForegroundColor(White);
         out->printf(L"%d:%d: ", res.line, res.column);
@@ -269,11 +254,10 @@ static void dumpSymbols(SymbolScope* scope, const ConsoleWriterPtr& out)
 }
 void REPL::commandSymbols(const wstring& args)
 {
-    SymbolScope* scope = nullptr;
-    ScopedProgramPtr p = static_pointer_cast<ScopedProgram>(program);
+    SymbolScope* scope;
     if(args == L"global")
-        scope = this->registry.getGlobalScope();
+        scope = compiler.getSymbolRegistry()->getGlobalScope();
     else
-        scope = p->getScope();
+        scope = compiler.getScope();
     dumpSymbols(scope, out);
 }

@@ -45,6 +45,7 @@
 #include "common/ScopedValue.h"
 #include "semantics/InitializationTracer.h"
 #include "semantics/TypeResolver.h"
+#include "semantics/SemanticContext.h"
 
 USE_SWALLOW_NS
 using namespace std;
@@ -72,28 +73,28 @@ bool SemanticAnalyzer::isFloat(const TypePtr& type)
 void SemanticAnalyzer::visitNilLiteral(const NilLiteralPtr& node)
 {
     GlobalScope* scope = symbolRegistry->getGlobalScope();
-    if(!ctx.contextualType || !ctx.contextualType->canAssignTo(scope->NilLiteralConvertible()))
+    if(!ctx->contextualType || !ctx->contextualType->canAssignTo(scope->NilLiteralConvertible()))
     {
         error(node, Errors::E_EXPRESSION_DOES_NOT_CONFORM_TO_PROTOCOL_1, L"NilLiteralConvertible");
         return;
     }
-    node->setType(ctx.contextualType);
+    node->setType(ctx->contextualType);
 }
 void SemanticAnalyzer::visitBooleanLiteral(const BooleanLiteralPtr& node)
 {
     GlobalScope* scope = symbolRegistry->getGlobalScope();
-    if(ctx.contextualType && ctx.contextualType->canAssignTo(scope->BooleanLiteralConvertible()))
-        node->setType(ctx.contextualType);
+    if(ctx->contextualType && ctx->contextualType->canAssignTo(scope->BooleanLiteralConvertible()))
+        node->setType(ctx->contextualType);
     else
         node->setType(scope->Bool());
 }
 void SemanticAnalyzer::visitString(const StringLiteralPtr& node)
 {
     GlobalScope* scope = symbolRegistry->getGlobalScope();
-    if(ctx.contextualType && ctx.contextualType->canAssignTo(scope->StringLiteralConvertible()))
-        node->setType(ctx.contextualType);
-    else if(ctx.contextualType && node->value.length() == 1 && ctx.contextualType->canAssignTo(scope->UnicodeScalarLiteralConvertible()))
-        node->setType(ctx.contextualType);
+    if(ctx->contextualType && ctx->contextualType->canAssignTo(scope->StringLiteralConvertible()))
+        node->setType(ctx->contextualType);
+    else if(ctx->contextualType && node->value.length() == 1 && ctx->contextualType->canAssignTo(scope->UnicodeScalarLiteralConvertible()))
+        node->setType(ctx->contextualType);
     else
         node->setType(scope->String());
 }
@@ -101,8 +102,8 @@ void SemanticAnalyzer::visitStringInterpolation(const StringInterpolationPtr &no
 {
     //TODO: check all expressions inside can be converted to string
     GlobalScope* scope = symbolRegistry->getGlobalScope();
-    if(ctx.contextualType && ctx.contextualType->canAssignTo(scope->StringInterpolationConvertible()))
-        node->setType(ctx.contextualType);
+    if(ctx->contextualType && ctx->contextualType->canAssignTo(scope->StringInterpolationConvertible()))
+        node->setType(ctx->contextualType);
     else
         node->setType(scope->String());
 }
@@ -110,18 +111,18 @@ void SemanticAnalyzer::visitInteger(const IntegerLiteralPtr& node)
 {
     GlobalScope* scope = symbolRegistry->getGlobalScope();
     //TODO: it will changed to use standard library's overloaded type constructor to infer type when the facility is mature enough.
-    if(ctx.contextualType && ctx.contextualType->canAssignTo(scope->IntegerLiteralConvertible()))
-        node->setType(ctx.contextualType);
-    else if(ctx.contextualType && ctx.contextualType->canAssignTo(scope->FloatLiteralConvertible()))
-        node->setType(ctx.contextualType);
+    if(ctx->contextualType && ctx->contextualType->canAssignTo(scope->IntegerLiteralConvertible()))
+        node->setType(ctx->contextualType);
+    else if(ctx->contextualType && ctx->contextualType->canAssignTo(scope->FloatLiteralConvertible()))
+        node->setType(ctx->contextualType);
     else
         node->setType(scope->Int());
 }
 void SemanticAnalyzer::visitFloat(const FloatLiteralPtr& node)
 {
     GlobalScope* scope = symbolRegistry->getGlobalScope();
-    if(ctx.contextualType && ctx.contextualType->canAssignTo(scope->FloatLiteralConvertible()))
-        node->setType(ctx.contextualType);
+    if(ctx->contextualType && ctx->contextualType->canAssignTo(scope->FloatLiteralConvertible()))
+        node->setType(ctx->contextualType);
     else
         node->setType(scope->Double());
 }
@@ -152,15 +153,15 @@ void SemanticAnalyzer::visitArrayLiteral(const ArrayLiteralPtr& node)
 {
     int num = node->numElements();
     GlobalScope* global = symbolRegistry->getGlobalScope();
-    if(ctx.contextualType)
+    if(ctx->contextualType)
     {
         //TODO if hint specified, it must be Array type nor conform to ArrayLiteralConvertible protocol
-        if(ctx.contextualType->getInnerType() != global->Array())
+        if(ctx->contextualType->getInnerType() != global->Array())
         {
             bool conformToArrayLiteralConvertible = false;
             if(!conformToArrayLiteralConvertible)
             {
-                error(node, Errors::E_TYPE_DOES_NOT_CONFORM_TO_PROTOCOL_2_, ctx.contextualType->getName(), L"ArrayLiteralConvertible");
+                error(node, Errors::E_TYPE_DOES_NOT_CONFORM_TO_PROTOCOL_2_, ctx->contextualType->getName(), L"ArrayLiteralConvertible");
                 return;
             }
         }
@@ -170,18 +171,18 @@ void SemanticAnalyzer::visitArrayLiteral(const ArrayLiteralPtr& node)
 
     if(num == 0)
     {
-        if(!ctx.contextualType)//cannot define an empty array without type hint.
+        if(!ctx->contextualType)//cannot define an empty array without type hint.
             error(node, Errors::E_CANNOT_DEFINE_AN_EMPTY_ARRAY_WITHOUT_CONTEXTUAL_TYPE);
         else
-            node->setType(ctx.contextualType);
+            node->setType(ctx->contextualType);
         return;
     }
 
-    TypePtr elementType = ctx.contextualType != nullptr ? ctx.contextualType->getGenericArguments()->get(0) : nullptr;
+    TypePtr elementType = ctx->contextualType != nullptr ? ctx->contextualType->getGenericArguments()->get(0) : nullptr;
     CollectionTypeAnalyzer analyzer(elementType, global);
     for(const ExpressionPtr& el : *node)
     {
-        SCOPED_SET(ctx.contextualType, analyzer.finalType);
+        SCOPED_SET(ctx->contextualType, analyzer.finalType);
         el->accept(this);
         analyzer.analyze(el);
 
@@ -222,17 +223,17 @@ void SemanticAnalyzer::visitDictionaryLiteral(const DictionaryLiteralPtr& node)
         }
     }
 
-    if(ctx.contextualType)
+    if(ctx->contextualType)
     {
-        if(!ctx.contextualType->conformTo(global->DictionaryLiteralConvertible()))
+        if(!ctx->contextualType->conformTo(global->DictionaryLiteralConvertible()))
         {
-            error(node, Errors::E_A_IS_NOT_CONVERTIBLE_TO_B_2, ctx.contextualType->toString(), L"DictionaryLiteralConvertible");
+            error(node, Errors::E_A_IS_NOT_CONVERTIBLE_TO_B_2, ctx->contextualType->toString(), L"DictionaryLiteralConvertible");
             return;
         }
-        if(global->isDictionary(ctx.contextualType))
+        if(global->isDictionary(ctx->contextualType))
         {
-            keyHint = ctx.contextualType->getGenericArguments()->get(0);
-            valueHint = ctx.contextualType->getGenericArguments()->get(1);
+            keyHint = ctx->contextualType->getGenericArguments()->get(0);
+            valueHint = ctx->contextualType->getGenericArguments()->get(1);
             if(!keyHint->conformTo(global->Hashable()))
             {
                 error(node, Errors::E_TYPE_DOES_NOT_CONFORM_TO_PROTOCOL_2_, keyHint->toString(), L"Hashable");
@@ -243,10 +244,10 @@ void SemanticAnalyzer::visitDictionaryLiteral(const DictionaryLiteralPtr& node)
 
     if(node->numElements() == 0)
     {
-        if(!ctx.contextualType)//cannot define an empty array without type hint.
+        if(!ctx->contextualType)//cannot define an empty array without type hint.
             error(node, Errors::E_CANNOT_DEFINE_AN_EMPTY_DICTIONARY_WITHOUT_CONTEXTUAL_TYPE);
         else
-            node->setType(ctx.contextualType);
+            node->setType(ctx->contextualType);
         return;
     }
 
@@ -255,10 +256,10 @@ void SemanticAnalyzer::visitDictionaryLiteral(const DictionaryLiteralPtr& node)
 
     for(auto entry : *node)
     {
-        SCOPED_SET(ctx.contextualType, keyHint);
-        ctx.contextualType = keyHint;
+        SCOPED_SET(ctx->contextualType, keyHint);
+        ctx->contextualType = keyHint;
         entry.first->accept(this);
-        ctx.contextualType = valueHint;
+        ctx->contextualType = valueHint;
         entry.second->accept(this);
         keyAnalyzer.analyze(entry.first);
         valueAnalyzer.analyze(entry.second);
@@ -275,9 +276,9 @@ void SemanticAnalyzer::visitDictionaryLiteral(const DictionaryLiteralPtr& node)
             error(entry.second, Errors::E_CANNOT_CONVERT_EXPRESSION_TYPE_2, toString(entry.second), valueAnalyzer.finalType->toString());
     }
 
-    if(ctx.contextualType)
+    if(ctx->contextualType)
     {
-        node->setType(ctx.contextualType);
+        node->setType(ctx->contextualType);
     }
     else
     {
@@ -292,17 +293,17 @@ void SemanticAnalyzer::visitDictionaryLiteral(const DictionaryLiteralPtr& node)
 void SemanticAnalyzer::visitParenthesizedExpression(const ParenthesizedExpressionPtr& node)
 {
     //NodeVisitor::visitParenthesizedExpression(node);
-    TypePtr hint = ctx.contextualType;
+    TypePtr hint = ctx->contextualType;
     std::vector<TypePtr> types;
     int index = 0;
     for(ParenthesizedExpression::Term& element : *node)
     {
         TypePtr elementHint = nullptr;
-        if(ctx.contextualType && ctx.contextualType->getCategory() == Type::Tuple && index < ctx.contextualType->numElementTypes())
+        if(ctx->contextualType && ctx->contextualType->getCategory() == Type::Tuple && index < ctx->contextualType->numElementTypes())
         {
-            elementHint = ctx.contextualType->getElementType(index++);
+            elementHint = ctx->contextualType->getElementType(index++);
         }
-        SCOPED_SET(ctx.contextualType, elementHint);
+        SCOPED_SET(ctx->contextualType, elementHint);
         element.expression->accept(this);
         element.expression = transformExpression(elementHint, element.expression);
         TypePtr elementType = element.expression->getType();
@@ -328,11 +329,11 @@ void SemanticAnalyzer::visitTuple(const TuplePtr& node)
     for(; iter != node->end(); iter++)
     {
         TypePtr elementHint = nullptr;
-        if(ctx.contextualType && ctx.contextualType->getCategory() == Type::Tuple && index < ctx.contextualType->numElementTypes())
+        if(ctx->contextualType && ctx->contextualType->getCategory() == Type::Tuple && index < ctx->contextualType->numElementTypes())
         {
-            elementHint = ctx.contextualType->getElementType(index++);
+            elementHint = ctx->contextualType->getElementType(index++);
         }
-        SCOPED_SET(ctx.contextualType, elementHint);
+        SCOPED_SET(ctx->contextualType, elementHint);
         PatternPtr element = *iter;
         element->accept(this);
         if(ExpressionPtr expr = dynamic_pointer_cast<Expression>(element))
@@ -381,10 +382,10 @@ void SemanticAnalyzer::visitIdentifier(const IdentifierPtr& id)
     symbolRegistry->lookupSymbol(name, &scope, &sym);
     //not found by accesing from scope
     //look up again if it belongs to a super class
-    if(!sym && ctx.currentType)
+    if(!sym && ctx->currentType)
     {
-        bool staticLookup = ctx.currentFunction && ctx.currentFunction->hasFlags(SymbolFlagStatic);
-        TypePtr type = ctx.currentType->getParentType();
+        bool staticLookup = ctx->currentFunction && ctx->currentFunction->hasFlags(SymbolFlagStatic);
+        TypePtr type = ctx->currentType->getParentType();
         for(; type; type = type->getParentType())
         {
             sym = staticLookup ? type->getDeclaredStaticMember(id->getIdentifier()) : type->getDeclaredMember(id->getIdentifier());
@@ -410,19 +411,20 @@ void SemanticAnalyzer::visitIdentifier(const IdentifierPtr& id)
             error(id, Errors::E_USE_OF_INITIALIZING_VARIABLE, placeholder->getName());
             return;
         }
-        if(!placeholder->hasFlags(SymbolFlagInitialized) && (ctx.flags & SemanticContext::FLAG_WRITE_CONTEXT) == 0)
+        if(!placeholder->hasFlags(SymbolFlagInitialized) && (ctx->flags & SemanticContext::FLAG_WRITE_CONTEXT) == 0)
         {
             error(id, Errors::E_VARIABLE_A_USED_BEFORE_BEING_INITIALIZED_1, placeholder->getName());
             return;
         }
         //check if this identifier is accessed inside a class/protocol/extension/struct/enum but defined not in program
-        if(dynamic_cast<TypeDeclaration*>(symbolRegistry->getCurrentScope()->getOwner()) && symbolRegistry->getCurrentScope() != scope)
+        if(ctx->currentType && symbolRegistry->getCurrentScope() != scope)
         {
             if(scope->getOwner()->getNodeType() != NodeType::Program)
             {
                 error(id, Errors::E_USE_OF_FUNCTION_LOCAL_INSIDE_TYPE, placeholder->getName());
             }
         }
+        assert(sym->getType() != nullptr);
         id->setType(sym->getType());
     }
     else if(TypePtr type = dynamic_pointer_cast<Type>(sym))

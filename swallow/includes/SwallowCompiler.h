@@ -39,8 +39,10 @@ class SymbolRegistry;
 class OperatorResolver;
 class SemanticAnalyzer;
 class DeclarationAnalyzer;
+class ForwardDeclarationAnalyzer;
 class NodeFactory;
 class SymbolScope;
+struct SemanticContext;
 typedef std::shared_ptr<struct SourceFile> SourceFilePtr;
 typedef std::shared_ptr<class Module> ModulePtr;
 typedef std::shared_ptr<class Program> ProgramPtr;
@@ -54,6 +56,7 @@ public:
 public:
     void addSourceFile(const SourceFilePtr& sourceFile);
     void addSource(const wstring& name, const wstring& code);
+    void clearSources();
 public:
     bool compile();
     bool compile(std::vector<ProgramPtr>& programs);
@@ -73,7 +76,9 @@ private:
     OperatorResolver* operatorResolver;
     SemanticAnalyzer* semanticAnalyzer;
     DeclarationAnalyzer* declarationAnalyzer;
+    ForwardDeclarationAnalyzer* forwardDeclarationAnalyzer;
     std::vector<SourceFilePtr> sourceFiles;
+    SemanticContext* ctx;
 
     //results:
     CompilerResults* compilerResults;

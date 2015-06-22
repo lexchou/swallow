@@ -44,6 +44,7 @@
 #include <iostream>
 #include "common/ScopedValue.h"
 #include "semantics/InitializationTracer.h"
+#include "semantics/SemanticContext.h"
 
 USE_SWALLOW_NS
 using namespace std;
@@ -109,13 +110,13 @@ bool SemanticAnalyzer::isParentInOptionalChain(const NodePtr& node)
 
 void SemanticAnalyzer::visitMemberAccess(const MemberAccessPtr& node)
 {
-    TypePtr selfType = ctx.contextualType;
+    TypePtr selfType = ctx->contextualType;
     wstring fieldName = node->getField() ? node->getField()->getIdentifier() : toString(node->getIndex());
     bool staticAccess = false;
     if(node->getSelf())
     {
         validateInitializerDelegation(node);
-        SCOPED_SET(ctx.flags, ctx.flags & ~SemanticContext::FLAG_WRITE_CONTEXT);
+        SCOPED_SET(ctx->flags, ctx->flags & ~SemanticContext::FLAG_WRITE_CONTEXT);
         node->getSelf()->accept(this);
         selfType = node->getSelf()->getType();
         assert(selfType != nullptr);
@@ -128,8 +129,8 @@ void SemanticAnalyzer::visitMemberAccess(const MemberAccessPtr& node)
     }
     else //Type is implicitly retrieved from contextual type
     {
-        selfType = ctx.contextualType;
-        if(!ctx.contextualType)
+        selfType = ctx->contextualType;
+        if(!ctx->contextualType)
         {
             //invalid contextual type
             error(node, Errors::E_NO_CONTEXTUAL_TYPE_TO_ACCESS_MEMBER_A_1, fieldName);
@@ -248,6 +249,6 @@ void SemanticAnalyzer::visitSubscriptAccess(const SubscriptAccessPtr& node)
 
 void SemanticAnalyzer::visitValueBindingPattern(const ValueBindingPatternPtr& node)
 {
-    assert(ctx.contextualType != nullptr);
-    node->setType(ctx.contextualType);
+    assert(ctx->contextualType != nullptr);
+    node->setType(ctx->contextualType);
 }

@@ -33,8 +33,11 @@
 #include "semantics/SymbolRegistry.h"
 #include "semantics/OperatorResolver.h"
 #include "semantics/SemanticAnalyzer.h"
+#include "semantics/SemanticContext.h"
 #include "semantics/DeclarationAnalyzer.h"
 #include "semantics/GlobalScope.h"
+#include "semantics/ScopeGuard.h"
+#include "semantics/ForwardDeclarationAnalyzer.h"
 #include "common/CompilerResults.h"
 #include "parser/Parser.h"
 using namespace std;
@@ -46,16 +49,25 @@ SwallowCompiler::SwallowCompiler(const wstring& moduleName)
     compilerResults = new CompilerResults();
     nodeFactory = new ScopedNodeFactory();
     module = ModulePtr(new Module(moduleName, symbolRegistry->getGlobalScope()->getModuleType()));
+
+    ctx = new SemanticContext();
+    ctx->currentModule = module;
+    ctx->lazyDeclaration = true;
     operatorResolver = new OperatorResolver(symbolRegistry, compilerResults);
-    semanticAnalyzer = new SemanticAnalyzer(symbolRegistry, compilerResults, module);
-    declarationAnalyzer = new DeclarationAnalyzer(semanticAnalyzer, semanticAnalyzer->getContext());
+    declarationAnalyzer = new DeclarationAnalyzer(symbolRegistry, compilerResults, ctx);
+    semanticAnalyzer = new SemanticAnalyzer(symbolRegistry, compilerResults, ctx, declarationAnalyzer);
+    declarationAnalyzer->setSemanticAnalyzer(semanticAnalyzer);
+    forwardDeclarationAnalyzer = new ForwardDeclarationAnalyzer(symbolRegistry, compilerResults);
     scope = new SymbolScope();
 }
 SwallowCompiler::~SwallowCompiler()
 {
-    delete declarationAnalyzer;
+    delete scope;
+    delete forwardDeclarationAnalyzer;
     delete semanticAnalyzer;
+    delete declarationAnalyzer;
     delete operatorResolver;
+    delete ctx;
     delete nodeFactory;
     delete compilerResults;
     delete symbolRegistry;
@@ -67,6 +79,10 @@ void SwallowCompiler::addSourceFile(const SourceFilePtr& sourceFile)
 void SwallowCompiler::addSource(const wstring& name, const wstring& code)
 {
     addSourceFile(SourceFilePtr(new SourceFile(name, code)));
+}
+void SwallowCompiler::clearSources()
+{
+    sourceFiles.clear();
 }
 
 ProgramPtr SwallowCompiler::createProgramNode()
@@ -86,6 +102,8 @@ bool SwallowCompiler::compile(std::vector<ProgramPtr>& programs)
     programs.clear();
     try
     {
+        ScopeGuard g(symbolRegistry, scope);
+        symbolRegistry->setFileScope(scope);
         for(const SourceFilePtr& source : sourceFiles)
         {
             ProgramPtr program = createProgramNode();
@@ -96,12 +114,15 @@ bool SwallowCompiler::compile(std::vector<ProgramPtr>& programs)
                 throw Abort();
 
             program->accept(operatorResolver);
-            //program->accept(declarationAnalyzer);
+            program->accept(forwardDeclarationAnalyzer);
+            program->accept(declarationAnalyzer);
             program->accept(semanticAnalyzer);
         }
+        symbolRegistry->setFileScope(nullptr);
     }
     catch(const Abort&)
     {
+        symbolRegistry->setFileScope(nullptr);
         //TODO: refactor compiler
         // ScopedProgram shouldn't maintaince its own scope.
         for(ProgramPtr p : programs)
@@ -110,7 +131,6 @@ bool SwallowCompiler::compile(std::vector<ProgramPtr>& programs)
             {
                 sp->setScope(scope);
             }
-            
         }
         return false;
     }

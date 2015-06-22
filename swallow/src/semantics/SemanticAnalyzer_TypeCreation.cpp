@@ -37,10 +37,11 @@
 #include "common/Errors.h"
 #include "semantics/TypeBuilder.h"
 #include "semantics/GlobalScope.h"
+#include "semantics/ScopeGuard.h"
+#include "semantics/SemanticContext.h"
 #include <cassert>
 #include "ast/NodeFactory.h"
 #include "common/ScopedValue.h"
-#include "semantics/DeclarationAnalyzer.h"
 
 USE_SWALLOW_NS
 using namespace std;
@@ -48,39 +49,70 @@ using namespace std;
 
 void SemanticAnalyzer::visitTypeAlias(const TypeAliasPtr& node)
 {
-    /*
-    if(ctx.lazyDeclaration)
-    {
-        delayDeclare(node);
-        return;
-    }*/
-    node->accept(declarationAnalyzer);
+    //bring type from forward declaration to current scope
+    SymbolScope* scope = symbolRegistry->getCurrentScope();
+    SymbolPtr sym = scope->getForwardDeclaration(node->getName());
+    assert(sym && sym->getKind() == SymbolKindType);
+    scope->addSymbol(node->getName(), sym);
+    SemanticPass::visitTypeAlias(node);
 }
 void SemanticAnalyzer::visitEnum(const EnumDefPtr& node)
 {
-    node->accept(declarationAnalyzer);
+    SymbolScope* scope = symbolRegistry->getCurrentScope();
+    SymbolPtr sym = scope->getForwardDeclaration(node->getIdentifier()->getName());
+    assert(sym && sym->getKind() == SymbolKindType);
+    scope->addSymbol(node->getIdentifier()->getName(), sym);
+    TypePtr type = static_pointer_cast<Type>(sym);
+    ScopeGuard guard(symbolRegistry, type->getScope());
+    SCOPED_SET(ctx->currentType, type);
+
+    SemanticPass::visitEnum(node);
 }
 void SemanticAnalyzer::visitClass(const ClassDefPtr& node)
 {
-    node->accept(declarationAnalyzer);
+    SymbolScope* scope = symbolRegistry->getCurrentScope();
+    SymbolPtr sym = scope->getForwardDeclaration(node->getIdentifier()->getName());
+    assert(sym && sym->getKind() == SymbolKindType);
+    scope->addSymbol(node->getIdentifier()->getName(), sym);
+    TypePtr type = static_pointer_cast<Type>(sym);
+    ScopeGuard guard(symbolRegistry, type->getScope());
+    SCOPED_SET(ctx->currentType, type);
+
+    SemanticPass::visitClass(node);
 }
 void SemanticAnalyzer::visitStruct(const StructDefPtr& node)
 {
-    node->accept(declarationAnalyzer);
+    SymbolScope* scope = symbolRegistry->getCurrentScope();
+    SymbolPtr sym = scope->getForwardDeclaration(node->getIdentifier()->getName());
+    assert(sym && sym->getKind() == SymbolKindType);
+    scope->addSymbol(node->getIdentifier()->getName(), sym);
+    TypePtr type = static_pointer_cast<Type>(sym);
+    ScopeGuard guard(symbolRegistry, type->getScope());
+    SCOPED_SET(ctx->currentType, type);
+    SemanticPass::visitStruct(node);
 }
 void SemanticAnalyzer::visitProtocol(const ProtocolDefPtr& node)
 {
-    node->accept(declarationAnalyzer);
+    SymbolScope* scope = symbolRegistry->getCurrentScope();
+    SymbolPtr sym = scope->getForwardDeclaration(node->getIdentifier()->getName());
+    assert(sym && sym->getKind() == SymbolKindType);
+    scope->addSymbol(node->getIdentifier()->getName(), sym);
+    TypePtr type = static_pointer_cast<Type>(sym);
+    ScopeGuard guard(symbolRegistry, type->getScope());
+    SCOPED_SET(ctx->currentType, type);
+
+    SemanticPass::visitProtocol(node);
 }
 void SemanticAnalyzer::visitExtension(const ExtensionDefPtr& node)
 {
-    if(ctx.currentFunction || ctx.currentType)
+    if(ctx->currentFunction || ctx->currentType)
     {
         error(node, Errors::E_A_MAY_ONLY_BE_DECLARED_AT_FILE_SCOPE_1, node->getIdentifier()->getName());
         return;
     }
+    /*
     //check if this type is already registered
-    if(ctx.lazyDeclaration)
+    if(ctx->lazyDeclaration)
     {
         bool defined = symbolRegistry->isSymbolDefined(node->getIdentifier()->getName());
         if(!defined)
@@ -89,7 +121,14 @@ void SemanticAnalyzer::visitExtension(const ExtensionDefPtr& node)
             return;
         }
     }
-    node->accept(declarationAnalyzer);
+    */
+    TypePtr type;
+    symbolRegistry->lookupType(node->getIdentifier()->getName(), nullptr, &type, false);
+    assert(type != nullptr);
+    ScopeGuard scope(symbolRegistry, type->getScope());
+    SCOPED_SET(ctx->currentType, type);
+
+    SemanticPass::visitExtension(node);
 }
 void SemanticAnalyzer::visitOptionalType(const OptionalTypePtr& node)
 {

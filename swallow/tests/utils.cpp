@@ -105,6 +105,7 @@ Swallow::ProgramPtr parseStatements(Swallow::CompilerResults& compilerResults, c
     dumpCompilerResults(compilerResults);
     return ret;
 }
+/*
 static void dumpAST(const NodePtr& node, const wchar_t* title)
 {
     if(node && opt_dumpAST)
@@ -114,7 +115,7 @@ static void dumpAST(const NodePtr& node, const wchar_t* title)
         node->accept(&dumper);
     }
 }
-
+*/
 void initTestMethods(Swallow::SwallowCompiler& compiler)
 {
     GlobalScope* global = compiler.getSymbolRegistry()->getGlobalScope();
@@ -123,11 +124,10 @@ void initTestMethods(Swallow::SwallowCompiler& compiler)
     global->declareFunction(L"print", 0, L"Void", L"String", NULL);
     global->declareFunction(L"assert", 0, L"Void", L"Bool", L"String", NULL);
 }
+/*
 Swallow::ScopedProgramPtr analyzeStatement(Swallow::SymbolRegistry& registry, Swallow::CompilerResults& compilerResults, const char* func, const wchar_t* str)
 {
     using namespace Swallow;
-    GlobalScope* global = registry.getGlobalScope();
-
 
     ScopedNodeFactory nodeFactory;
     Parser parser(&nodeFactory, &compilerResults);
@@ -154,6 +154,7 @@ Swallow::ScopedProgramPtr analyzeStatement(Swallow::SymbolRegistry& registry, Sw
     return ret;
 }
 
+*/
 
 Tracer::Tracer(const char* file, int line, const char* func)
 {

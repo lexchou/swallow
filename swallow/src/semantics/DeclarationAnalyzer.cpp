@@ -46,15 +46,16 @@
 #include "semantics/FunctionSymbol.h"
 #include "common/ScopedValue.h"
 #include "semantics/TypeResolver.h"
+#include "semantics/SemanticContext.h"
 #include <set>
-#include <semantics/Symbol.h>
+#include "semantics/Symbol.h"
 
 USE_SWALLOW_NS
 using namespace std;
 
 
-DeclarationAnalyzer::DeclarationAnalyzer(SemanticAnalyzer* analyzer, SemanticContext* ctx)
-:SemanticPass(analyzer), semanticAnalyzer(analyzer), ctx(ctx)
+DeclarationAnalyzer::DeclarationAnalyzer(SymbolRegistry* symbolRegistry, CompilerResults* compilerResults, SemanticContext* ctx)
+:SemanticPass(symbolRegistry, compilerResults), semanticAnalyzer(nullptr), ctx(ctx)
 {
 
 }
@@ -251,7 +252,7 @@ static wstring accessLevelToString(AccessLevel accessLevel)
 /*!
  * Verify access level
  */
-void DeclarationAnalyzer::verifyAccessLevel(const DeclarationPtr& node, const TypePtr& type, int declaration, int component)
+void DeclarationAnalyzer::verifyAccessLevel(const DeclarationPtr& node, const TypePtr& type, DeclarationType declaration, ComponentType component)
 {
     int modifiers = node->getModifiers();
     AccessLevel currentLevel = parseAccessLevel(modifiers);

@@ -44,6 +44,7 @@
 #include "ast/utils/ASTHierachyDumper.h"
 #include "common/ScopedValue.h"
 #include "semantics/ScopeGuard.h"
+#include "semantics/SemanticContext.h"
 
 USE_SWALLOW_NS
 using namespace std;
@@ -65,9 +66,9 @@ void SemanticAnalyzer::visitWhileLoop(const WhileLoopPtr& node)
 void SemanticAnalyzer::visitForIn(const ForInLoopPtr& node)
 {
     ScopedCodeBlockPtr codeBlock = static_pointer_cast<ScopedCodeBlock>(node->getCodeBlock());
-    SCOPED_SET(ctx.contextualType, nullptr);
+    SCOPED_SET(ctx->contextualType, nullptr);
     if(node->getDeclaredType())
-        ctx.contextualType = lookupType(node->getDeclaredType());
+        ctx->contextualType = lookupType(node->getDeclaredType());
     node->getContainer()->accept(this);
     TypePtr sequenceType = node->getContainer()->getType();
     GlobalScope* global = symbolRegistry->getGlobalScope();

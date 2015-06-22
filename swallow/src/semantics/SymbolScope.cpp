@@ -30,6 +30,7 @@
 #include "semantics/SymbolScope.h"
 #include "semantics/SymbolRegistry.h"
 #include "semantics/Type.h"
+#include "common/SwallowUtils.h"
 #include <cassert>
 #include <iostream>
 
@@ -74,7 +75,10 @@ void SymbolScope::removeSymbol(const SymbolPtr& symbol)
 bool SymbolScope::isSymbolDefined(const std::wstring& name)
 {
     SymbolMap::iterator iter = symbols.find(name);
-    return iter != symbols.end();
+    if(iter != symbols.end())
+        return true;//defined as symbol
+    //check again in forward declaration
+    return getForwardDeclaration(name) != nullptr;
 }
 static SymbolPtr resolveTypeAlias(const SymbolPtr& sym)
 {

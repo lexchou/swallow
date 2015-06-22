@@ -45,6 +45,7 @@
 #include "common/ScopedValue.h"
 #include "semantics/InitializationTracer.h"
 #include "semantics/SemanticUtils.h"
+#include "semantics/SemanticContext.h"
 #include "semantics/DeclarationAnalyzer.h"
 
 USE_SWALLOW_NS
@@ -186,7 +187,7 @@ float SemanticAnalyzer::calculateFitScore(bool mutatingSelf, SymbolPtr& func, co
     {
         const Parameter& parameter = *paramIter;
         ParenthesizedExpression::Term& argument = *argumentIter;
-        SCOPED_SET(ctx.contextualType, parameter.type);
+        SCOPED_SET(ctx->contextualType, parameter.type);
         argument.transformedExpression = this->transformExpression(parameter.type, argument.expression);
         bool ret = checkArgument(type, parameter, make_pair(argumentIter->name, argumentIter->transformedExpression), false, score, supressErrors, genericTypes);
         if(!ret)
@@ -477,13 +478,13 @@ void SemanticAnalyzer::visitFunctionCall(const FunctionCallPtr& node)
                 return;
             }
             bool mutatingSelf = true;
-            if(ctx.currentType)
+            if(ctx->currentType)
             {
                 // TODO: currentFunction might be nullptr while this is called during variable initialization
-                Type::Category category = ctx.currentType->getCategory();
+                Type::Category category = ctx->currentType->getCategory();
                 if(category == Type::Struct || category == Type::Enum)
                 {
-                    if(!ctx.currentFunction || !ctx.currentFunction->hasFlags(SymbolFlagMutating))
+                    if(!ctx->currentFunction || !ctx->currentFunction->hasFlags(SymbolFlagMutating))
                     {
                         mutatingSelf = false;
                     }
@@ -538,7 +539,7 @@ void SemanticAnalyzer::visitFunctionCall(const FunctionCallPtr& node)
             }
             else
             {
-                selfType = Type::newMetaType(ctx.contextualType);
+                selfType = Type::newMetaType(ctx->contextualType);
             }
             bool mutatingSelf = !containsReadonlyNode(ma->getSelf());
             assert(selfType != nullptr);
@@ -590,7 +591,7 @@ void SemanticAnalyzer::visitFunctionCall(const FunctionCallPtr& node)
             TypePtr funcType = func->getType();
 
             //failable initializer chaining check.
-            if(funcType->hasFlags(SymbolFlagFailableInitializer) && !ctx.currentFunction->hasFlags(SymbolFlagFailableInitializer))
+            if(funcType->hasFlags(SymbolFlagFailableInitializer) && !ctx->currentFunction->hasFlags(SymbolFlagFailableInitializer))
             {
                 wstringstream ss;
                 ss<<L"init(";
@@ -677,28 +678,28 @@ void SemanticAnalyzer::visitFunctionCall(const FunctionCallPtr& node)
 
 void SemanticAnalyzer::visitReturn(const ReturnStatementPtr& node)
 {
-    if(!ctx.currentFunction)
+    if(!ctx->currentFunction)
     {
         error(node, Errors::E_RETURN_INVALID_OUTSIDE_OF_A_FUNC);
         return;
     }
-    if(ctx.currentFunction->hasFlags(SymbolFlagInit) && node->getExpression())
+    if(ctx->currentFunction->hasFlags(SymbolFlagInit) && node->getExpression())
     {
         if(node->getExpression()->getNodeType() != NodeType::NilLiteral)
         {
             error(node->getExpression(), Errors::E_NIL_IS_THE_ONLY_RETURN_VALUE_PERMITTED_IN_AN_INITIALIZER);
             return;
         }
-        if(!ctx.currentFunction->hasFlags(SymbolFlagFailableInitializer))
+        if(!ctx->currentFunction->hasFlags(SymbolFlagFailableInitializer))
         {
             error(node, Errors::E_ONLY_A_FAILABLE_INITIALIZER_CAN_RETURN_NIL);
             return;
         }
-        if(ctx.currentType->getCategory() == Type::Class)
+        if(ctx->currentType->getCategory() == Type::Class)
         {
             //all stored properties must be initialized before returning nil
             //this rule only applies to class
-            if(!SemanticUtils::allInitialized(ctx.currentType->getDeclaredStoredProperties()))
+            if(!SemanticUtils::allInitialized(ctx->currentType->getDeclaredStoredProperties()))
             {
                 error(node, Errors::E_ALL_STORED_PROPERTIES_OF_A_CLASS_MUST_BE_INITIALIZED_BEFORE_RETURNING_NIL);
                 return;
@@ -707,7 +708,7 @@ void SemanticAnalyzer::visitReturn(const ReturnStatementPtr& node)
         else
         {
             //for value types, mark all stored properties initialized while returning nil
-            for(const SymbolPtr& prop : ctx.currentType->getDeclaredStoredProperties())
+            for(const SymbolPtr& prop : ctx->currentType->getDeclaredStoredProperties())
             {
                 markInitialized(prop);
             }
@@ -715,9 +716,9 @@ void SemanticAnalyzer::visitReturn(const ReturnStatementPtr& node)
         //nil is permitted in failable initializer, no more checking
         return;
     }
-    TypePtr funcType = ctx.currentFunction;
+    TypePtr funcType = ctx->currentFunction;
 
-    SCOPED_SET(ctx.contextualType, funcType->getReturnType());
+    SCOPED_SET(ctx->contextualType, funcType->getReturnType());
 
     float score = 0;
     TypePtr retType = this->getExpressionType(node->getExpression(), funcType->getReturnType(), score);

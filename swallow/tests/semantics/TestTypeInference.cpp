@@ -292,8 +292,8 @@ TEST(TestTypeInference, StructInstance)
     ASSERT_TRUE(type == t_Test);
 
     ASSERT_NOT_NULL(t_Test->getReference());
-    ScopedStructPtr def;
-    ASSERT_NOT_NULL(def = std::dynamic_pointer_cast<ScopedStruct>(t_Test->getReference()));
+    StructDefPtr def;
+    ASSERT_NOT_NULL(def = std::dynamic_pointer_cast<StructDef>(t_Test->getReference()));
 
 
     ASSERT_NOT_NULL(a = scope->lookup(L"a"));

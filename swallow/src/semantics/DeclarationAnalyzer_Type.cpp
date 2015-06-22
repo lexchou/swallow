@@ -44,6 +44,7 @@
 #include "ast/NodeFactory.h"
 #include "common/ScopedValue.h"
 #include "semantics/TypeResolver.h"
+#include "semantics/SemanticContext.h"
 
 USE_SWALLOW_NS
 using namespace std;
@@ -83,7 +84,6 @@ static bool isLiteralExpression(const ExpressionPtr& expr)
 TypePtr DeclarationAnalyzer::defineType(const std::shared_ptr<TypeDeclaration>& node)
 {
     TypeIdentifierPtr id = node->getIdentifier();
-    SymbolScope* scope = NULL;
 
     //Analyze the type's category
     Type::Category category;
@@ -106,18 +106,8 @@ TypePtr DeclarationAnalyzer::defineType(const std::shared_ptr<TypeDeclaration>& 
     }
 
     //it's inside the type's scope, so need to access parent scope;
-    SymbolScope* typeScope = dynamic_cast<ScopeOwner*>(node.get())->getScope();
     SymbolScope* currentScope = symbolRegistry->getCurrentScope();
 
-    //check if this type is already defined
-    TypePtr tmp;
-    symbolRegistry->lookupType(id->getName(), &scope, &tmp, false);
-    if(tmp && scope == currentScope)
-    {
-        //invalid redeclaration of type T
-        error(node, Errors::E_INVALID_REDECLARATION_1, id->getName());
-        return nullptr;
-    }
     //prepare for generic types
     GenericDefinitionPtr generic;
     GenericParametersDefPtr genericParams = node->getGenericParametersDef();
@@ -136,23 +126,22 @@ TypePtr DeclarationAnalyzer::defineType(const std::shared_ptr<TypeDeclaration>& 
             return nullptr;
         }
     }
-
-    if(genericParams)
-    {
-        generic = prepareGenericTypes(genericParams);
-        generic->registerTo(typeScope);
-    }
     
     
     //register this type
     TypeBuilderPtr type = static_pointer_cast<TypeBuilder>(currentScope->getForwardDeclaration(id->getName()));
+
+    if(genericParams)
+    {
+        generic = prepareGenericTypes(genericParams);
+        generic->registerTo(type->getScope());
+    }
     assert(type != nullptr);
     assert(type->getCategory() == category);
     type->setReference(node);
     type->setGenericDefinition(generic);
     
     node->setType(type);
-    currentScope->addSymbol(type);
     if(node->hasModifier(DeclarationModifiers::Final))
         type->setFlags(SymbolFlagFinal, true);
     static_pointer_cast<TypeBuilder>(type)->setModuleName(ctx->currentModule->getName());
@@ -164,8 +153,8 @@ TypePtr DeclarationAnalyzer::defineType(const std::shared_ptr<TypeDeclaration>& 
 
     for(const TypeIdentifierPtr& parentType : node->getParents())
     {
-        parentType->accept(semanticAnalyzer);
-        TypePtr ptr = this->lookupType(parentType);
+        parentType->accept(this);
+        TypePtr ptr = resolveType(parentType, true);
         if(ptr->getCategory() == Type::Class && category == Type::Class)
         {
             if(!first)
@@ -352,29 +341,21 @@ void DeclarationAnalyzer::prepareDefaultInitializers(const TypePtr& type)
 
 void DeclarationAnalyzer::visitTypeAlias(const TypeAliasPtr& node)
 {
-    SymbolScope* scope = nullptr;
     TypePtr type;
     SymbolScope* currentScope = symbolRegistry->getCurrentScope();
 
-    //check if this type is already defined
-    symbolRegistry->lookupType(node->getName(), &scope, &type, false);
-    if(type && scope == currentScope)
-    {
-        //invalid redeclaration of type T
-        error(node, Errors::E_INVALID_REDECLARATION_1, node->getName());
-        return;
-    }
+    type = currentScope->getForwardDeclaration(node->getName());
     if(ctx->currentType && ctx->currentType->getCategory() == Type::Protocol && !node->getType())
     {
         //register a type place holder for protocol
-        type = Type::newTypeAlias(node->getName(), nullptr, nullptr);
+        //type = Type::newTypeAlias(node->getName(), nullptr, nullptr);
     }
     else
     {
-        shared_ptr<TypeResolver> typeResolver(new TypeResolver(symbolRegistry, semanticAnalyzer, semanticAnalyzer, ctx, false));
-        type = Type::newTypeAlias(node->getName(), node->getType(), typeResolver);
+        shared_ptr<TypeResolver> typeResolver(new TypeResolver(symbolRegistry, semanticAnalyzer, semanticAnalyzer, ctx, true));
+        TypeBuilderPtr builder = static_pointer_cast<TypeBuilder>(type);
+        builder->initAlias(node->getType(), typeResolver);
     }
-    currentScope->addSymbol(node->getName(), type);
     validateDeclarationModifiers(node);
     declarationFinished(node->getName(), type, node);
 }
@@ -383,22 +364,24 @@ void DeclarationAnalyzer::visitTypeAlias(const TypeAliasPtr& node)
 void DeclarationAnalyzer::visitClass(const ClassDefPtr& node)
 {
     TypePtr type = defineType(node);
-    ScopeGuard scope(static_cast<ScopedClass*>(node.get()), this);
+    ScopeGuard scope(symbolRegistry, type->getScope());
     SCOPED_SET(ctx->currentType, type);
+    SCOPED_SET(ctx->currentFunction, nullptr);
+
     assert(type->getAccessLevel() != AccessLevelUndefined);
     if(type->getParentType() != nullptr)
-        verifyAccessLevel(node, type->getParentType(), D_CLASS, C_SUPERCLASS);
+        verifyAccessLevel(node, type->getParentType(), DeclarationTypeClass, ComponentTypeSuperclass);
     visitDeclaration(node);
     
     prepareDefaultInitializers(type);
     validateDeclarationModifiers(node);
-    visitImplementation(node);
+    //visitImplementation(node);
 }
 void DeclarationAnalyzer::visitDeclaration(const TypeDeclarationPtr &node)
 {
     SCOPED_SET(ctx->flags, (ctx->flags & (~SemanticContext::FLAG_PROCESS_IMPLEMENTATION)) | SemanticContext::FLAG_PROCESS_DECLARATION);
     for (auto decl : *node)
-        decl->accept(semanticAnalyzer);
+        decl->accept(this);
 }
 void DeclarationAnalyzer::visitImplementation(const TypeDeclarationPtr &node)
 {
@@ -416,7 +399,7 @@ void DeclarationAnalyzer::visitImplementation(const TypeDeclarationPtr &node)
             case NodeType::EnumCasePattern:
                 break;
             case NodeType::Init:
-                decl->accept(semanticAnalyzer);
+                decl->accept(this);
                 break;
             case NodeType::ComputedProperty:
             case NodeType::Function:
@@ -427,10 +410,10 @@ void DeclarationAnalyzer::visitImplementation(const TypeDeclarationPtr &node)
                 {
                     prop->setFlags(SymbolFlagInitialized, true);
                 }
-                decl->accept(semanticAnalyzer);
+                decl->accept(this);
                 break;
             default:
-                decl->accept(semanticAnalyzer);
+                decl->accept(this);
                 break;
         }
     }
@@ -439,15 +422,16 @@ void DeclarationAnalyzer::visitImplementation(const TypeDeclarationPtr &node)
 void DeclarationAnalyzer::visitStruct(const StructDefPtr& node)
 {
     TypePtr type = defineType(node);
-    ScopeGuard scope(static_cast<ScopedStruct*>(node.get()), this);
+    ScopeGuard scope(symbolRegistry, type->getScope());
     SCOPED_SET(ctx->currentType, type);
+    SCOPED_SET(ctx->currentFunction, nullptr);
     visitDeclaration(node);
     //prepare default initializers
     //NOTE: default initializer was generated when code has implicitly accessed it.
     //this->prepareDefaultInitializers(type);
     //Type verification and typealias inference
     validateDeclarationModifiers(node);
-    visitImplementation(node);
+//    visitImplementation(node);
 }
 
 
@@ -467,8 +451,10 @@ static void makeRawRepresentable(const TypeBuilderPtr& type, GlobalScope* global
 void DeclarationAnalyzer::visitEnum(const EnumDefPtr& node)
 {
     TypeBuilderPtr type = static_pointer_cast<TypeBuilder>(defineType(node));
-    ScopeGuard scope(static_cast<ScopedEnum*>(node.get()), this);
+    ScopeGuard scope(symbolRegistry, type->getScope());
     SCOPED_SET(ctx->currentType, type);
+    SCOPED_SET(ctx->currentFunction, nullptr);
+
 
     GlobalScope* global = symbolRegistry->getGlobalScope();
     SymbolScope* local = symbolRegistry->getCurrentScope();
@@ -527,7 +513,7 @@ void DeclarationAnalyzer::visitEnum(const EnumDefPtr& node)
                 }
 
                 SCOPED_SET(ctx->contextualType, rawType);
-                initializer->accept(semanticAnalyzer);
+                initializer->accept(this);
                 TypePtr caseType = initializer->getType();
                 assert(caseType != nullptr);
                 if(!caseType->canAssignTo(rawType))
@@ -574,7 +560,7 @@ void DeclarationAnalyzer::visitEnum(const EnumDefPtr& node)
                 error(node, Errors::E_ENUMS_MAY_NOT_CONTAIN_STORED_PROPERTIES);
                 continue;
             }
-            decl->accept(semanticAnalyzer);
+            decl->accept(this);
         }
         //add a default initializer for raw value enum
         if(isRawValues)
@@ -589,15 +575,17 @@ void DeclarationAnalyzer::visitEnum(const EnumDefPtr& node)
         }
     }
     if(type->getParentType() != nullptr)
-        verifyAccessLevel(node, type->getParentType(), D_ENUM, C_RAW_TYPE);
+        verifyAccessLevel(node, type->getParentType(), DeclarationTypeEnum, ComponentTypeRawType);
     validateDeclarationModifiers(node);
-    visitImplementation(node);
+    //visitImplementation(node);
 }
 void DeclarationAnalyzer::visitProtocol(const ProtocolDefPtr& node)
 {
     TypePtr type = defineType(node);
-    ScopeGuard scope(static_cast<ScopedProtocol*>(node.get()), this);
+    ScopeGuard scope(symbolRegistry, type->getScope());
     SCOPED_SET(ctx->currentType, type);
+    SCOPED_SET(ctx->currentFunction, nullptr);
+
     visitDeclaration(node);
     validateDeclarationModifiers(node);
 }
@@ -641,7 +629,7 @@ void DeclarationAnalyzer::visitExtension(const ExtensionDefPtr& node)
             error(node, Errors::E_EXTENSIONS_MAY_NOT_CONTAIN_STORED_PROPERTIES);
             continue;
         }
-        decl->accept(semanticAnalyzer);
+        decl->accept(this);
     }
 }
 

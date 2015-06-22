@@ -51,27 +51,26 @@
 #include "semantics/LazyDeclaration.h"
 #include "semantics/TypeResolver.h"
 #include "semantics/ForwardDeclarationAnalyzer.h"
+#include "semantics/SemanticContext.h"
 
 USE_SWALLOW_NS
 using namespace std;
 
 
-SemanticAnalyzer::SemanticAnalyzer(SymbolRegistry* symbolRegistry, CompilerResults* compilerResults, const ModulePtr& currentModule)
+SemanticAnalyzer::SemanticAnalyzer(SymbolRegistry* symbolRegistry, CompilerResults* compilerResults, SemanticContext* context, DeclarationAnalyzer* declarationAnalyzer)
 :SemanticPass(symbolRegistry, compilerResults)
 {
-    declarationAnalyzer = new DeclarationAnalyzer(this, &ctx);
-    ctx.lazyDeclaration = true;
-    ctx.currentModule = currentModule;
+    ctx = context;
+    this->declarationAnalyzer = declarationAnalyzer;
 }
 SemanticAnalyzer::~SemanticAnalyzer()
 {
-    delete declarationAnalyzer;
 }
 
 std::wstring SemanticAnalyzer::generateTempName()
 {
     std::wstringstream ss;
-    ss<<L"#"<<ctx.numTemporaryNames++;
+    ss<<L"#"<<ctx->numTemporaryNames++;
     return ss.str();
 }
 
@@ -109,12 +108,12 @@ void SemanticAnalyzer::delayDeclare(const DeclarationPtr& node)
 {
     //map<wstring, list<DeclarationPtr>> lazyDeclarations;
     std::wstring name = getDeclarationName(node);
-    auto iter = ctx.lazyDeclarations.find(name);
+    auto iter = ctx->lazyDeclarations.find(name);
     //wprintf(L"Delay declare %S\n", name.c_str());
-    if(iter == ctx.lazyDeclarations.end())
+    if(iter == ctx->lazyDeclarations.end())
     {
         LazyDeclarationPtr decls(new LazyDeclaration());
-        ctx.lazyDeclarations.insert(make_pair(name, decls));
+        ctx->lazyDeclarations.insert(make_pair(name, decls));
         decls->addDeclaration(symbolRegistry, node);
         return;
     }
@@ -125,16 +124,16 @@ void SemanticAnalyzer::delayDeclare(const DeclarationPtr& node)
  */
 void SemanticAnalyzer::declareImmediately(const std::wstring& name)
 {
-    auto entry = ctx.lazyDeclarations.find(name);
-    if(entry == ctx.lazyDeclarations.end())
+    auto entry = ctx->lazyDeclarations.find(name);
+    if(entry == ctx->lazyDeclarations.end())
         return;
     LazyDeclarationPtr decls = entry->second;
-    ctx.lazyDeclarations.erase(entry);
+    ctx->lazyDeclarations.erase(entry);
     SymbolScope* currentScope = symbolRegistry->getCurrentScope();
     SymbolScope* fileScope = symbolRegistry->getFileScope();
     try
     {
-        SCOPED_SET(ctx.lazyDeclaration, false);
+        SCOPED_SET(ctx->lazyDeclaration, false);
         SymbolPtr symbol = nullptr;
         //wprintf(L"Declare immediately %S %d definitions\n", name.c_str(), decls->size());
         for(auto decl : *decls)
@@ -142,13 +141,13 @@ void SemanticAnalyzer::declareImmediately(const std::wstring& name)
             //wprintf(L"   fs:%p cs:%p\n", decl.fileScope, decl.currentScope);
             symbolRegistry->setCurrentScope(decl.currentScope);
             symbolRegistry->setFileScope(decl.fileScope);
-            SCOPED_SET(this->ctx.currentType, nullptr);
-            SCOPED_SET(this->ctx.currentFunction, nullptr);
-            SCOPED_SET(this->ctx.contextualType, nullptr);
-            SCOPED_SET(this->ctx.currentExtension, nullptr);
-            SCOPED_SET(this->ctx.currentCodeBlock, nullptr);
-            SCOPED_SET(this->ctx.currentInitializationTracer, nullptr);
-            SCOPED_SET(this->ctx.flags, SemanticContext::FLAG_PROCESS_DECLARATION | SemanticContext::FLAG_PROCESS_IMPLEMENTATION);
+            SCOPED_SET(this->ctx->currentType, nullptr);
+            SCOPED_SET(this->ctx->currentFunction, nullptr);
+            SCOPED_SET(this->ctx->contextualType, nullptr);
+            SCOPED_SET(this->ctx->currentExtension, nullptr);
+            SCOPED_SET(this->ctx->currentCodeBlock, nullptr);
+            SCOPED_SET(this->ctx->currentInitializationTracer, nullptr);
+            SCOPED_SET(this->ctx->flags, SemanticContext::FLAG_PROCESS_DECLARATION | SemanticContext::FLAG_PROCESS_IMPLEMENTATION);
             decl.node->accept(this);
             if(!symbol)
                 symbol = decl.currentScope->lookup(name, false);
@@ -171,8 +170,8 @@ void SemanticAnalyzer::declareImmediately(const std::wstring& name)
 }
 bool SemanticAnalyzer::resolveLazySymbol(const std::wstring& name)
 {
-    auto entry = ctx.lazyDeclarations.find(name);
-    if(entry == ctx.lazyDeclarations.end())
+    auto entry = ctx->lazyDeclarations.find(name);
+    if(entry == ctx->lazyDeclarations.end())
     {
         //wprintf(L"Cannot resolve lazy symbol %S\n", name.c_str());
         /*
@@ -189,12 +188,8 @@ bool SemanticAnalyzer::resolveLazySymbol(const std::wstring& name)
 }
 void SemanticAnalyzer::visitProgram(const ProgramPtr& node)
 {
-    //a full scan on AST tree to perform forward declaration of types
-    ForwardDeclarationAnalyzer forwardDeclarationAnalyzer(this);
-    node->accept(&forwardDeclarationAnalyzer);
-
     InitializationTracer tracer(nullptr, InitializationTracer::Sequence);
-    SCOPED_SET(ctx.currentInitializationTracer, &tracer);
+    SCOPED_SET(ctx->currentInitializationTracer, &tracer);
 
     SemanticPass::visitProgram(node);
     //now we'll deal with the lazy declaration of functions and classes
@@ -207,7 +202,7 @@ void SemanticAnalyzer::visitProgram(const ProgramPtr& node)
     */
 void SemanticAnalyzer::verifyProtocolConforms()
 {
-    for(const TypePtr& type : ctx.allTypes)
+    for(const TypePtr& type : ctx->allTypes)
     {
         if(type->getCategory() == Type::Protocol)
             continue;
@@ -230,11 +225,11 @@ static void resolveTypeAlias(const TypePtr& type)
 }
 void SemanticAnalyzer::finalizeLazyDeclaration()
 {
-    ctx.lazyDeclaration = false;
+    ctx->lazyDeclaration = false;
     SymbolScope* scope = symbolRegistry->getCurrentScope();
-    while(!ctx.lazyDeclarations.empty())
+    while(!ctx->lazyDeclarations.empty())
     {
-        std::wstring symbolName = ctx.lazyDeclarations.begin()->first;
+        std::wstring symbolName = ctx->lazyDeclarations.begin()->first;
         //lazyDeclarations.erase(lazyDeclarations.begin());
         declareImmediately(symbolName);
     }
@@ -251,7 +246,7 @@ void SemanticAnalyzer::finalizeLazyDeclaration()
 
 TypePtr SemanticAnalyzer::lookupType(const TypeNodePtr& type, bool supressErrors)
 {
-    TypeResolver resolver(symbolRegistry, supressErrors ? nullptr : this, this, &ctx, false);
+    TypeResolver resolver(symbolRegistry, supressErrors ? nullptr : this, this, ctx, false);
     return resolver.lookupType(type);
 }
 /*!
@@ -382,12 +377,12 @@ ExpressionPtr SemanticAnalyzer::expandSelfAccess(const ExpressionPtr& expr)
             SymbolPtr sym = symbolRegistry->lookupSymbol(name);
             if(sym && !sym->hasFlags(SymbolFlagMember))
                 return expr;// it refers to a non-member symbol
-            if(!ctx.currentFunction || ctx.currentFunction->hasFlags(SymbolFlagStatic))
+            if(!ctx->currentFunction || ctx->currentFunction->hasFlags(SymbolFlagStatic))
                 return expr;// self access will not be expanded within a static/class method
             if(!sym || sym->hasFlags(SymbolFlagMember))
             {
                 //check if it's defined in super class
-                TypePtr type = ctx.currentType;
+                TypePtr type = ctx->currentType;
                 bool found = false;
                 for(; type; type = type->getParentType())
                 {
@@ -422,7 +417,7 @@ ExpressionPtr SemanticAnalyzer::expandSelfAccess(const ExpressionPtr& expr)
  */
 ExpressionPtr SemanticAnalyzer::transformExpression(const TypePtr& contextualType, ExpressionPtr expr)
 {
-    SCOPED_SET(ctx.contextualType, contextualType);
+    SCOPED_SET(ctx->contextualType, contextualType);
     expr = expandSelfAccess(expr);
     expr->accept(this);
     if(!contextualType)
@@ -495,13 +490,13 @@ std::vector<SymbolPtr> SemanticAnalyzer::allFunctions(const std::wstring& name, 
 void SemanticAnalyzer::declarationFinished(const std::wstring& name, const SymbolPtr& decl, const NodePtr& node)
 {
     //verify if this has been declared in the type or its extension
-    if(ctx.currentType)
+    if(ctx->currentType)
     {
         int filter = FilterRecursive | FilterLookupInExtension;
         if(decl->hasFlags(SymbolFlagStatic))
             filter |= FilterStaticMember;
 
-        SymbolPtr m = getMemberFromType(ctx.currentType, name, (MemberFilter)filter);
+        SymbolPtr m = getMemberFromType(ctx->currentType, name, (MemberFilter)filter);
 
         if(FunctionSymbolPtr func = dynamic_pointer_cast<FunctionSymbol>(decl))
         {
@@ -525,11 +520,11 @@ void SemanticAnalyzer::declarationFinished(const std::wstring& name, const Symbo
 
 
 
-    TypePtr target = ctx.currentExtension ? ctx.currentExtension : ctx.currentType;
+    TypePtr target = ctx->currentExtension ? ctx->currentExtension : ctx->currentType;
     if(target)
     {
         TypeBuilderPtr builder = static_pointer_cast<TypeBuilder>(target);
-        if(ctx.currentExtension)
+        if(ctx->currentExtension)
         {
             decl->setFlags(SymbolFlagExtension, true);
         }
@@ -672,9 +667,9 @@ void SemanticAnalyzer::markInitialized(const SymbolPtr& sym)
     if(sym->hasFlags(SymbolFlagInitialized))
         return;
     sym->setFlags(SymbolFlagInitialized, true);
-    if(ctx.currentInitializationTracer)
+    if(ctx->currentInitializationTracer)
     {
-        ctx.currentInitializationTracer->add(sym);
+        ctx->currentInitializationTracer->add(sym);
     }
 }
 /*!
@@ -734,25 +729,28 @@ void SemanticAnalyzer::expandTuple(vector<TupleExtractionResult>& results, vecto
         }
         case NodeType::Tuple:
         {
-            if(type->getCategory() != Type::Tuple)
+            if(type && type->getCategory() != Type::Tuple)
             {
                 error(name, Errors::E_TUPLE_PATTERN_CANNOT_MATCH_VALUES_OF_THE_NON_TUPLE_TYPE_A_1, type->toString());
                 return;
             }
             TuplePtr tuple = static_pointer_cast<Tuple>(name);
             declaredType = tuple->getDeclaredType();
-            if((type->getCategory() != Type::Tuple) || (tuple->numElements() != type->numElementTypes()))
+            if(type)
             {
-                error(name, Errors::E_TYPE_ANNOTATION_DOES_NOT_MATCH_CONTEXTUAL_TYPE_A_1, type->toString());
-                abort();
-                return;
+                if((type->getCategory() != Type::Tuple) || (tuple->numElements() != type->numElementTypes()))
+                {
+                    error(name, Errors::E_TYPE_ANNOTATION_DOES_NOT_MATCH_CONTEXTUAL_TYPE_A_1, type->toString());
+                    abort();
+                    return;
+                }
             }
             //check each elements
             int elements = tuple->numElements();
             for(int i = 0; i < elements; i++)
             {
                 PatternPtr element = tuple->getElement(i);
-                TypePtr elementType = type->getElementType(i);
+                TypePtr elementType = type ? type->getElementType(i) : nullptr;
                 indices.push_back(i);
                 //validateTupleType(isReadonly, element, elementType);
                 expandTuple(results, indices, element, tempName, elementType, accessibility);

@@ -44,6 +44,7 @@
 #include <iostream>
 #include "common/ScopedValue.h"
 #include "semantics/InitializationTracer.h"
+#include "semantics/SemanticContext.h"
 
 USE_SWALLOW_NS
 using namespace std;
@@ -178,7 +179,7 @@ void SemanticAnalyzer::verifyTuplePatternForAssignment(const PatternPtr& pattern
             else
             {
                 //do not emit this error if and only if the target is a member variable and inside an initializer
-                bool init = ctx.currentFunction && ctx.currentFunction->hasFlags(SymbolFlagInit);
+                bool init = ctx->currentFunction && ctx->currentFunction->hasFlags(SymbolFlagInit);
                 bool storedProperty = sym->hasFlags(SymbolFlagStoredProperty);
                 if(!(init && storedProperty))
                 {
@@ -214,7 +215,7 @@ void SemanticAnalyzer::visitAssignment(const AssignmentPtr& node)
     node->setType(symbolRegistry->getGlobalScope()->Void());
     PatternPtr destination = node->getLHS();
     {
-        SCOPED_SET(ctx.flags, ctx.flags | SemanticContext::FLAG_WRITE_CONTEXT);
+        SCOPED_SET(ctx->flags, ctx->flags | SemanticContext::FLAG_WRITE_CONTEXT);
         if (ExpressionPtr expr = std::dynamic_pointer_cast<Expression>(destination))
         {
             expr = transformExpression(nullptr, expr);
@@ -309,13 +310,13 @@ void SemanticAnalyzer::visitAssignment(const AssignmentPtr& node)
                     }
                 }
                 bool supressError = false;
-                if(isSelf && member && ctx.currentFunction && ctx.currentFunction->hasFlags(SymbolFlagInit) && member->hasFlags(SymbolFlagStoredProperty))
+                if(isSelf && member && ctx->currentFunction && ctx->currentFunction->hasFlags(SymbolFlagInit) && member->hasFlags(SymbolFlagStoredProperty))
                 {
                     //check if the member is defined in current type and not the super type
                     supressError = true;//it's allowed to modify 'let' variable inside an initializer
                 }
                 //Write on a field of a non-mutating symbol
-                bool insideInit = ctx.currentFunction && ctx.currentFunction->hasFlags(SymbolFlagInit);
+                bool insideInit = ctx->currentFunction && ctx->currentFunction->hasFlags(SymbolFlagInit);
                 if(selfSymbol->hasFlags(SymbolFlagNonmutating) && !staticAccess)
                 {
                     //assigning on constant variable
@@ -332,7 +333,7 @@ void SemanticAnalyzer::visitAssignment(const AssignmentPtr& node)
                 {
                     //assigning on constant member inside an init function
                     bool constantMember = member && !member->hasFlags(SymbolFlagWritable);
-                    bool declaredBySuperClass = !Type::equals(memberDeclaringType, ctx.currentType);
+                    bool declaredBySuperClass = !Type::equals(memberDeclaringType, ctx->currentType);
                     if(constantMember)
                     {
                         if (declaredBySuperClass)
@@ -374,7 +375,7 @@ void SemanticAnalyzer::visitAssignment(const AssignmentPtr& node)
     else
     {
 
-        SCOPED_SET(ctx.contextualType, destinationType);
+        SCOPED_SET(ctx->contextualType, destinationType);
         node->getRHS()->accept(this);
     }
     TypePtr sourceType = node->getRHS()->getType();

@@ -4,42 +4,43 @@
 #include "semantics/Type.h"
 #include "semantics/ScopeGuard.h"
 #include "semantics/ScopedNodes.h"
+#include "common/Errors.h"
 #include "ast/ast.h"
 
 USE_SWALLOW_NS
 using namespace std;
 
-ForwardDeclarationAnalyzer::ForwardDeclarationAnalyzer(SemanticPass* semanticPass)
-:SemanticPass(semanticPass)
+ForwardDeclarationAnalyzer::ForwardDeclarationAnalyzer(SymbolRegistry* symbolRegistry, CompilerResults* results)
+    :SemanticPass(symbolRegistry, results)
 {
 }
 void ForwardDeclarationAnalyzer::visitTypeAlias(const TypeAliasPtr& node)
 {
-    forwardDeclare(node->getName(), Type::Alias);
+    TypePtr type = forwardDeclare(node, node->getName(), Type::Alias);
     SemanticPass::visitTypeAlias(node);
 }
 void ForwardDeclarationAnalyzer::visitClass(const ClassDefPtr& node)
 {
-    forwardDeclare(node->getIdentifier()->getName(), Type::Class);
-    ScopeGuard scope(static_cast<ScopedClass*>(node.get()), this);
+    TypePtr type = forwardDeclare(node, node->getIdentifier()->getName(), Type::Class);
+    ScopeGuard scope(symbolRegistry, type->getScope());
     SemanticPass::visitClass(node);
 }
 void ForwardDeclarationAnalyzer::visitStruct(const StructDefPtr& node)
 {
-    forwardDeclare(node->getIdentifier()->getName(), Type::Struct);
-    ScopeGuard scope(static_cast<ScopedStruct*>(node.get()), this);
+    TypePtr type = forwardDeclare(node, node->getIdentifier()->getName(), Type::Struct);
+    ScopeGuard scope(symbolRegistry, type->getScope());
     SemanticPass::visitStruct(node);
 }
 void ForwardDeclarationAnalyzer::visitEnum(const EnumDefPtr& node)
 {
-    forwardDeclare(node->getIdentifier()->getName(), Type::Enum);
-    ScopeGuard scope(static_cast<ScopedEnum*>(node.get()), this);
+    TypePtr type = forwardDeclare(node, node->getIdentifier()->getName(), Type::Enum);
+    ScopeGuard scope(symbolRegistry, type->getScope());
     SemanticPass::visitEnum(node);
 }
 void ForwardDeclarationAnalyzer::visitProtocol(const ProtocolDefPtr& node)
 {
-    forwardDeclare(node->getIdentifier()->getName(), Type::Protocol);
-    ScopeGuard scope(static_cast<ScopedProtocol*>(node.get()), this);
+    TypePtr type = forwardDeclare(node, node->getIdentifier()->getName(), Type::Protocol);
+    ScopeGuard scope(symbolRegistry, type->getScope());
     SemanticPass::visitProtocol(node);
 }
 void ForwardDeclarationAnalyzer::visitExtension(const ExtensionDefPtr& node)
@@ -49,9 +50,17 @@ void ForwardDeclarationAnalyzer::visitExtension(const ExtensionDefPtr& node)
 }
 
 
-void ForwardDeclarationAnalyzer::forwardDeclare(const std::wstring& name, Type::Category category)
+TypePtr ForwardDeclarationAnalyzer::forwardDeclare(const NodePtr& node, const std::wstring& name, Type::Category category)
 {
-    TypePtr type = Type::newType(name, category);
     SymbolScope* scope = symbolRegistry->getCurrentScope();
+    //check if this type is already defined
+    if(scope->isSymbolDefined(name))
+    {
+        //invalid redeclaration of type T
+        error(node, Errors::E_INVALID_REDECLARATION_1, name);
+        return nullptr;
+    }
+    TypePtr type = Type::newType(name, category);
     scope->addForwardDeclaration(type);
+    return type;
 }

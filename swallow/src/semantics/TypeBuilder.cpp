@@ -55,6 +55,13 @@ void TypeBuilder::setDeinit(const FunctionSymbolPtr& deinit)
     if(deinit)
         deinit->declaringType = self();
 }
+void TypeBuilder::initAlias(const TypeNodePtr& decl, std::shared_ptr<TypeResolver> typeResolver)
+{
+    this->typeNode = decl;
+    this->typeResolver = typeResolver;
+    this->emptyAlias = decl == nullptr && typeResolver == nullptr;
+}
+
 
 void TypeBuilder::addParameter(const Parameter& param)
 {

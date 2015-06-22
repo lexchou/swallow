@@ -115,10 +115,8 @@ TEST(TestSymbolResolve, testLocalTypeUsesUpperLocalSymbol)
     L"\n"
     L"}\n";
     SEMANTIC_ANALYZE(code);
-    ASSERT_EQ(1, compilerResults.numResults());
-    const CompilerResult& r = compilerResults.getResult(0);
-    ASSERT_EQ((int)Errors::E_USE_OF_FUNCTION_LOCAL_INSIDE_TYPE, r.code);
-    ASSERT_EQ(L"b", r.items[0]);
+    ASSERT_ERROR(Errors::E_USE_OF_FUNCTION_LOCAL_INSIDE_TYPE);
+    ASSERT_EQ(L"b", error->items[0]);
 }
 TEST(TestSymbolResolve, testClassVariable1)
 {
@@ -136,8 +134,7 @@ TEST(TestSymbolResolve, testClassVariable1)
             L"    }\n"
             L"}";
     SEMANTIC_ANALYZE(code);
-    dumpCompilerResults(compilerResults);
-    ASSERT_EQ(0, compilerResults.numResults());
+    ASSERT_NO_ERRORS();
 }
 
 TEST(TestSymbolResolve, testClassVariable2)
@@ -156,7 +153,7 @@ TEST(TestSymbolResolve, testClassVariable2)
     L"    }\n"
     L"}";
     SEMANTIC_ANALYZE(code);
-    ASSERT_EQ(0, compilerResults.numResults());
+    ASSERT_NO_ERRORS();
 }
 
 TEST(TestSymbolResolve, testClassVariable3)
@@ -175,7 +172,7 @@ TEST(TestSymbolResolve, testClassVariable3)
     L"    }\n"
     L"}";
     SEMANTIC_ANALYZE(code);
-    ASSERT_EQ(0, compilerResults.numResults());
+    ASSERT_NO_ERRORS();
 }
 
 TEST(TestSymbolResolve, testStructureInit)

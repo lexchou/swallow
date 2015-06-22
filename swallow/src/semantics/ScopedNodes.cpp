@@ -42,40 +42,18 @@ USE_SWALLOW_NS
 
 
 
+ScopedProgram::~ScopedProgram()
+{
+    setScope(nullptr);
+}
 void ScopedProgram::accept(NodeVisitor* visitor)
 {
-    ScopeGuard scope(this, visitor);
-    if(scope.symbolRegistry)
-        scope.symbolRegistry->setFileScope(this->getScope());
     accept2(visitor, &NodeVisitor::visitProgram);
-    if(scope.symbolRegistry)
-        scope.symbolRegistry->setFileScope(nullptr);
 }
 void ScopedProgram::setScope(SymbolScope* scope)
 {
     this->symbolScope = scope;
 }
-
-const std::wstring& ScopedClass::getName()const
-{
-    return identifier->getName();
-}
-
-
-const std::wstring& ScopedProtocol::getName()const
-{
-    return identifier->getName();
-}
-
-const std::wstring& ScopedStruct::getName()const
-{
-    return identifier->getName();
-}
-const std::wstring& ScopedEnum::getName()const
-{
-    return identifier->getName();
-}
-
 
 
 void ScopedCodeBlock::accept(NodeVisitor* visitor)

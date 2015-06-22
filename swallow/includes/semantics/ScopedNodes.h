@@ -48,37 +48,10 @@ SWALLOW_NS_BEGIN
 class SWALLOW_EXPORT ScopedProgram : public Program, public ScopeOwner
 {
 public:
+    ~ScopedProgram();
+public:
     virtual void accept(NodeVisitor* visitor) override;
     void setScope(SymbolScope* scope);
-};
-class SWALLOW_EXPORT ScopedClass : public ClassDef, public ScopeOwner
-{
-public:
-    const std::wstring& getName()const;
-public:
-    TypePtr type;
-
-};
-class SWALLOW_EXPORT ScopedProtocol : public ProtocolDef, public ScopeOwner
-{
-public:
-    const std::wstring& getName()const;
-public:
-    TypePtr type;
-};
-class SWALLOW_EXPORT ScopedStruct : public StructDef, public ScopeOwner
-{
-public:
-    const std::wstring& getName()const;
-public:
-    TypePtr type;
-};
-class SWALLOW_EXPORT ScopedEnum : public EnumDef, public ScopeOwner
-{
-public:
-    const std::wstring& getName()const;
-public:
-    TypePtr type;
 };
 class SWALLOW_EXPORT ScopedCodeBlock : public CodeBlock, public ScopeOwner
 {

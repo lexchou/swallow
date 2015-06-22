@@ -49,27 +49,8 @@ struct SemanticContext;
  */
 class SWALLOW_EXPORT DeclarationAnalyzer : public SemanticPass
 {
-    enum
-    {
-        D_VARIABLE = 0,
-        D_PROPERTY,
-        D_FUNCTION,
-        D_METHOD,
-        D_SUBSCRIPT,
-        D_INITIALIZER,
-        D_CLASS,
-        D_ENUM,
-
-        C_TYPE = 0,
-        C_SUPERCLASS,
-        C_PARAMETER,
-        C_RESULT,
-        C_INDEX,
-        C_ELEMENT_TYPE,
-        C_RAW_TYPE
-    };
 public:
-    DeclarationAnalyzer(SemanticAnalyzer* semanticAnalyzer, SemanticContext* ctx);
+    DeclarationAnalyzer(SymbolRegistry* symbolRegistry, CompilerResults* compilerResults, SemanticContext* ctx);
 public:
     virtual void visitTypeAlias(const TypeAliasPtr& node) override;
     virtual void visitClass(const ClassDefPtr& node) override;
@@ -81,14 +62,14 @@ public:
     void visitFunctionDeclaration(const FunctionDefPtr& node);
     virtual void visitParameter(const ParameterNodePtr& node) override;
     virtual void visitParameters(const ParametersNodePtr& node) override;
-    virtual void visitClosure(const ClosurePtr& node) override;
+    //virtual void visitClosure(const ClosurePtr& node) override;
     virtual void visitSubscript(const SubscriptDefPtr &node) override;
     virtual void visitDeinit(const DeinitializerDefPtr& node) override;
     virtual void visitInit(const InitializerDefPtr& node) override;
-    virtual void visitCodeBlock(const CodeBlockPtr &node) override;
+    //virtual void visitCodeBlock(const CodeBlockPtr &node) override;
     void visitAccessor(const CodeBlockPtr& accessor, const ParametersNodePtr& params, const SymbolPtr& setter, int modifiers);
     virtual void visitComputedProperty(const ComputedPropertyPtr& node) override;
-    virtual void visitValueBinding(const ValueBindingPtr& node) override;
+    //virtual void visitValueBinding(const ValueBindingPtr& node) override;
     virtual void visitValueBindings(const ValueBindingsPtr& node) override;
 
     /*!
@@ -105,21 +86,28 @@ public:
      * Verify if the specified type conform to the given protocol
      */
     bool verifyProtocolConform(const TypePtr& type, bool supressError);
+    /*!
+     * Verify access level
+     */
+    void verifyAccessLevel(const DeclarationPtr& node, const TypePtr& type, DeclarationType declaration, ComponentType component);
+    TypePtr resolveType(const TypeNodePtr& type, bool allowForwardDeclaration, bool supressErrors = false);
 
 public://properties
     const TypePtr& getCurrentFunction() const;
     const TypePtr& getCurrentType() const;
     SemanticAnalyzer* getSemanticAnalyzer() {return semanticAnalyzer;}
+    void setSemanticAnalyzer(SemanticAnalyzer* analyzer) {semanticAnalyzer = analyzer;}
     void prepareDefaultInitializers(const TypePtr& type);
-private:
-    TypePtr defineType(const std::shared_ptr<TypeDeclaration>& node);
-    FunctionSymbolPtr createFunctionSymbol(const FunctionDefPtr& func, const GenericDefinitionPtr& generic);
-    TypePtr createFunctionType(const std::vector<ParametersNodePtr>::const_iterator& begin, const std::vector<ParametersNodePtr>::const_iterator& end, const TypePtr& retType, const GenericDefinitionPtr& generic);
 
     /*!
      * Prepare parameters as symbols in given code block
      */
     void prepareParameters(SymbolScope* scope, const ParametersNodePtr& params);
+private:
+    TypePtr defineType(const std::shared_ptr<TypeDeclaration>& node);
+    FunctionSymbolPtr createFunctionSymbol(const FunctionDefPtr& func, const GenericDefinitionPtr& generic);
+    TypePtr createFunctionType(const std::vector<ParametersNodePtr>::const_iterator& begin, const std::vector<ParametersNodePtr>::const_iterator& end, const TypePtr& retType, const GenericDefinitionPtr& generic);
+
 
     bool verifyProtocolConform(const TypePtr& type, const TypePtr& protocol, bool supressError);
     bool verifyProtocolFunction(const TypePtr& type, const TypePtr& protocol, const FunctionSymbolPtr& expected, bool supressError);
@@ -134,7 +122,6 @@ private:
      * Convert a AST TypeNode into symboled Type
      */
     TypePtr lookupType(const TypeNodePtr& type, bool supressErrors = false);
-    TypePtr resolveType(const TypeNodePtr& type, bool allowForwardDeclaration, bool supressErrors = false);
     /*!
      * Declaration finished, added it as a member to current type or current type extension.
      */
@@ -162,10 +149,6 @@ private:
      */
     void explodeValueBindings(const ValueBindingsPtr& node);
 
-    /*!
-     * Verify access level
-     */
-    void verifyAccessLevel(const DeclarationPtr& node, const TypePtr& type, int declaration, int component);
 protected:
     SemanticAnalyzer* semanticAnalyzer;
 

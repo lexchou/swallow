@@ -45,6 +45,7 @@ public:
 
     void setParentType(const TypePtr& type);
 
+    void initAlias(const TypeNodePtr& decl, std::shared_ptr<TypeResolver> typeResolver);
     /*!
      * Which type declared this
      */

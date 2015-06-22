@@ -32,6 +32,7 @@
 #include <string>
 #include <map>
 #include <memory>
+#include <SwallowCompiler.h>
 #include "common/CompilerResults.h"
 #include <semantics/SymbolRegistry.h>
 #include <semantics/ScopedNodeFactory.h>
@@ -50,9 +51,9 @@ public:
     void repl();
 private:
     void evalCommand(const wstring& command);
-    void eval(Swallow::CompilerResults& compilerResults, const wstring& line);
-    void dumpCompilerResults(Swallow::CompilerResults& compilerResults, const std::wstring& code);
-    void dumpProgram();
+    void eval(const wstring& line);
+    void dumpCompilerResults(const std::wstring& code);
+    void dumpProgram(const Swallow::ProgramPtr& program);
     void dumpSymbol(const Swallow::SymbolPtr& sym);
 
 private://commands
@@ -61,10 +62,7 @@ private://commands
     void commandQuit(const wstring& args);
     void commandSymbols(const wstring& args);
 private:
-    Swallow::SymbolRegistry registry;
-    Swallow::ScopedNodeFactory nodeFactory;
-    Swallow::ProgramPtr program;
-    Swallow::ModulePtr module;
+    Swallow::SwallowCompiler compiler;
     std::map<std::wstring, CommandMethod> methods;
     ConsoleWriterPtr out;
     int resultId;

@@ -108,11 +108,9 @@ TypePtr Type::newType(const std::wstring& name, Category category, const TypeDec
 }
 TypePtr Type::newTypeAlias(const std::wstring& name, const TypeNodePtr& decl, std::shared_ptr<TypeResolver> typeResolver)
 {
-    TypePtr ret(new TypeBuilder(Alias));
+    TypeBuilderPtr ret(new TypeBuilder(Alias));
     ret->name = name;
-    ret->typeNode = decl;
-    ret->typeResolver = typeResolver;
-    ret->emptyAlias = decl == nullptr && typeResolver == nullptr;
+    ret->initAlias(decl, typeResolver);
     return ret;
 }
 
@@ -306,24 +304,13 @@ SymbolScope* Type::getScope()
 {
     if(scope)
         return scope;
-    DeclarationPtr ref = getReference();
-    if(!ref)
-        return nullptr;
-    //TODO: remove ScopedClass/ScopedStruct/ScopedEnum/ScopedProtocol
-    //Save scope into type instance
     switch(category)
     {
         case Class:
-            scope = static_pointer_cast<ScopedClass>(ref)->getScope();
-            break;
         case Struct:
-            scope = static_pointer_cast<ScopedStruct>(ref)->getScope();
-            break;
         case Enum:
-            scope = static_pointer_cast<ScopedEnum>(ref)->getScope();
-            break;
         case Protocol:
-            scope = static_pointer_cast<ScopedProtocol>(ref)->getScope();
+            scope = new SymbolScope();
             break;
         default:
             return nullptr;

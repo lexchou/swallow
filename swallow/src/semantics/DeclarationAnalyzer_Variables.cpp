@@ -59,146 +59,13 @@ void DeclarationAnalyzer::registerSymbol(const SymbolPlaceHolderPtr& symbol, con
     }
 }
 
-void DeclarationAnalyzer::checkTupleDefinition(const TuplePtr& tuple, const ExpressionPtr& initializer)
-{
-    //this is a tuple definition, the corresponding declared type must be a tuple type
-    TypeNodePtr declaredType = tuple->getDeclaredType();
-    TypePtr type = semanticAnalyzer->lookupType(declaredType);
-    if(!type)
-    {
-        error(tuple, Errors::E_USE_OF_UNDECLARED_TYPE_1, toString(declaredType));
-        return;
-    }
-    if(!(type->getCategory() == Type::Tuple))
-    {
-        //tuple definition must have a tuple type definition
-        error(tuple, Errors::E_TUPLE_PATTERN_MUST_MATCH_TUPLE_TYPE_1, toString(declaredType));
-        return;
-    }
-    if(tuple->numElements() != type->numElementTypes())
-    {
-        //tuple pattern has the wrong length for tuple type '%'
-        error(tuple, Errors::E_TUPLE_PATTERN_MUST_MATCH_TUPLE_TYPE_1, toString(declaredType));
-        return;
-    }
-    //check if initializer has the same type with the declared type
-    if(initializer)
-    {
-        TypePtr valueType = semanticAnalyzer->evaluateType(initializer);
-        if(valueType && !Type::equals(valueType, type))
-        {
-            //tuple pattern has the wrong length for tuple type '%'
-            //tuple types '%0' and '%1' have a different number of elements (%2 vs. %3)
-            wstring expectedType = type->toString();
-            wstring got = toString(valueType->numElementTypes());
-            wstring expected = toString(type->numElementTypes());
-            error(initializer, Errors::E_TUPLE_TYPES_HAVE_A_DIFFERENT_NUMBER_OF_ELEMENT_4, toString(declaredType), expectedType, got, expected);
-            return;
-        }
-    }
 
-
-    for(const PatternPtr& p : *tuple)
-    {
-        NodeType::T nodeType = p->getNodeType();
-        if(nodeType != NodeType::Identifier)
-        {
-
-        }
-
-    }
-}
-
-
-void DeclarationAnalyzer::visitValueBinding(const ValueBindingPtr& node)
-{
-    if(node->getOwner()->isReadOnly() && !node->getInitializer() && ctx->currentType == nullptr)
-    {
-        error(node, Errors::E_LET_REQUIRES_INITIALIZER);
-        return;
-    }
-
-    //add implicitly constructor for Optional
-
-
-    //TypePtr type = evaluateType(node->initializer);
-    if(IdentifierPtr id = std::dynamic_pointer_cast<Identifier>(node->getName()))
-    {
-        TypePtr declaredType = node->getType() ? node->getType() : semanticAnalyzer->lookupType(node->getDeclaredType());//node->getDeclaredType() == nullptr ? id->getDeclaredType() : node->getDeclaredType());
-        SCOPED_SET(ctx->contextualType, declaredType);
-        if(!declaredType && !node->getInitializer())
-        {
-            error(node, Errors::E_TYPE_ANNOTATION_MISSING_IN_PATTERN);
-            return;
-        }
-        SymbolPtr sym = symbolRegistry->getCurrentScope()->lookup(id->getIdentifier());
-        assert(sym != nullptr);
-        SymbolPlaceHolderPtr placeholder = std::dynamic_pointer_cast<SymbolPlaceHolder>(sym);
-        assert(placeholder != nullptr);
-        if(declaredType)
-        {
-            placeholder->setType(declaredType);
-        }
-        if(node->getInitializer())
-        {
-            placeholder->setFlags(SymbolFlagInitializing, true);
-            ExpressionPtr initializer = semanticAnalyzer->transformExpression(declaredType, node->getInitializer());
-            node->setInitializer(initializer);
-            TypePtr actualType = initializer->getType();
-            assert(actualType != nullptr);
-            if(declaredType)
-            {
-                if(!Type::equals(actualType, declaredType) && !semanticAnalyzer->canConvertTo(initializer, declaredType))
-                {
-                    error(initializer, Errors::E_CANNOT_CONVERT_EXPRESSION_TYPE_2, actualType->toString(), declaredType->toString());
-                    return;
-                }
-            }
-
-            if(!declaredType)
-                placeholder->setType(actualType);
-        }
-        assert(placeholder->getType() != nullptr);
-        placeholder->setFlags(SymbolFlagInitializing, false);
-    }
-    else if(TuplePtr id = std::dynamic_pointer_cast<Tuple>(node->getName()))
-    {
-        TypeNodePtr declaredType = id->getDeclaredType();
-        if(declaredType)
-        {
-            checkTupleDefinition(id, node->getInitializer());
-        }
-    }
-    if(ctx->currentType && ctx->currentType->getCategory() == Type::Protocol)
-    {
-        error(node, Errors::E_PROTOCOL_VAR_MUST_BE_COMPUTED_PROPERTY_1);
-    }
-}
 
 static void explodeValueBinding(SemanticAnalyzer* semanticAnalyzer, const ValueBindingsPtr& valueBindings, ValueBindings::Iterator& iter)
 {
     ValueBindingPtr var = *iter;
     TuplePtr name = dynamic_pointer_cast<Tuple>(var->getName());
     TypePtr declaredType = var->getDeclaredType() ? semanticAnalyzer->lookupType(var->getDeclaredType()) : nullptr;
-    TypePtr initializerType;
-    if(var->getInitializer())
-    {
-        SemanticContext* ctx = semanticAnalyzer->getContext();
-        SCOPED_SET(ctx->contextualType, declaredType);
-        var->getInitializer()->accept(semanticAnalyzer);
-        initializerType = var->getInitializer()->getType();
-        assert(initializerType != nullptr);
-    }
-
-    if(declaredType && initializerType)
-    {
-        //it has both type definition and initializer, then we need to check if the initializer expression matches the type annotation
-        if(!initializerType->canAssignTo(declaredType))
-        {
-            semanticAnalyzer->error(var, Errors::E_CANNOT_CONVERT_EXPRESSION_TYPE_2, initializerType->toString(), declaredType->toString());
-            return;
-        }
-    }
     //expand it into tuple assignment
     NodeFactory* nodeFactory = valueBindings->getNodeFactory();
     //need a temporay variable to hold the initializer
@@ -208,7 +75,7 @@ static void explodeValueBinding(SemanticAnalyzer* semanticAnalyzer, const ValueB
     tempVarId->setIdentifier(tempName);
     tempVar->setName(tempVarId);
     tempVar->setInitializer(var->getInitializer());
-    tempVar->setType(declaredType ? declaredType : initializerType);
+    tempVar->setType(declaredType ? declaredType : nullptr);
     tempVar->setTemporary(true);
     valueBindings->insertBefore(tempVar, iter);
     //now expand tuples
@@ -245,9 +112,6 @@ void DeclarationAnalyzer::explodeValueBindings(const ValueBindingsPtr& node)
 
 void DeclarationAnalyzer::visitValueBindings(const ValueBindingsPtr& node)
 {
-    if(!(ctx->flags & SemanticContext::FLAG_PROCESS_DECLARATION))
-        return;
-
     explodeValueBindings(node);
 
     //this will make untyped bindings has the type in following forms:
@@ -270,8 +134,8 @@ void DeclarationAnalyzer::visitValueBindings(const ValueBindingsPtr& node)
         return;
     }
 
-    int flags = SymbolFlagReadable;
-    if(dynamic_cast<TypeDeclaration*>(symbolRegistry->getCurrentScope()->getOwner()))
+    int flags = SymbolFlagReadable | SymbolFlagInitializing;
+    if(ctx->currentType)
         flags |= SymbolFlagMember;
     if(node->isReadOnly())
         flags |= SymbolFlagNonmutating;
@@ -312,12 +176,12 @@ void DeclarationAnalyzer::visitValueBindings(const ValueBindingsPtr& node)
         }
         else
         {
-            SymbolPlaceHolderPtr pattern(new SymbolPlaceHolder(id->getIdentifier(), id->getType(), role, flags));
+            int vflags = flags;
+            SymbolPlaceHolderPtr pattern(new SymbolPlaceHolder(id->getIdentifier(), id->getType(), role, vflags));
             pattern->setAccessLevel(accessLevel);
             registerSymbol(pattern, id);
         }
     }
-    GlobalScope* global = symbolRegistry->getGlobalScope();
     for(const ValueBindingPtr& v : *node)
     {
         PatternPtr name = v->getName();
@@ -330,24 +194,7 @@ void DeclarationAnalyzer::visitValueBindings(const ValueBindingsPtr& node)
         ExpressionPtr initializer = v->getInitializer();
         SymbolPlaceHolderPtr placeholder = std::dynamic_pointer_cast<SymbolPlaceHolder>(s);
         assert(placeholder != nullptr);
-        if (initializer)
-            placeholder->setFlags(SymbolFlagHasInitializer, true);
-        if(v->isTemporary())
-        {
-            placeholder->setFlags(SymbolFlagTemporary, true);
-            semanticAnalyzer->markInitialized(placeholder);
-        }
-        v->accept(semanticAnalyzer);
+        v->accept(this);
 
-        //optional type always considered initialized, compiler will make it has a default value nil
-        TypePtr symbolType = s->getType();
-        if(initializer || global->isOptional(symbolType) || global->isImplicitlyUnwrappedOptional(symbolType))
-            semanticAnalyzer->markInitialized(placeholder);
-        if(!v->isTemporary())
-        {
-            //check access control level
-            int decl = ctx->currentType ? D_PROPERTY : D_VARIABLE;
-            verifyAccessLevel(node, placeholder->getType(), decl, C_TYPE);
-        }
     }
 }

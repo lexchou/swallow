@@ -40,6 +40,7 @@
 #include "semantics/FunctionSymbol.h"
 #include "semantics/FunctionOverloadedSymbol.h"
 #include "semantics/GlobalScope.h"
+#include "semantics/SemanticContext.h"
 #include "ast/NodeFactory.h"
 #include "common/ScopedValue.h"
 #include "swallow_types.h"

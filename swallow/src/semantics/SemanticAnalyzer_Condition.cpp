@@ -46,6 +46,7 @@
 #include "semantics/ScopeGuard.h"
 #include "semantics/InitializationTracer.h"
 #include "semantics/SemanticUtils.h"
+#include "semantics/SemanticContext.h"
 
 
 USE_SWALLOW_NS
@@ -140,18 +141,18 @@ void SemanticAnalyzer::visitIf(const IfStatementPtr& node)
         }
     }
 
-    InitializationTracer tracer(ctx.currentInitializationTracer, InitializationTracer::Sequence);
+    InitializationTracer tracer(ctx->currentInitializationTracer, InitializationTracer::Sequence);
 
-    SCOPED_SET(ctx.currentInitializationTracer, &tracer);
+    SCOPED_SET(ctx->currentInitializationTracer, &tracer);
 
     {
         InitializationTracer ifTracer(&tracer, InitializationTracer::Branch);
-        SCOPED_SET(ctx.currentInitializationTracer, &ifTracer);
+        SCOPED_SET(ctx->currentInitializationTracer, &ifTracer);
         node->getThen()->accept(this);
     }
     {
         InitializationTracer elseTracer(&tracer, InitializationTracer::Branch);
-        SCOPED_SET(ctx.currentInitializationTracer, &elseTracer);
+        SCOPED_SET(ctx->currentInitializationTracer, &elseTracer);
         if (node->getElse())
             node->getElse()->accept(this);
     }
@@ -188,17 +189,17 @@ void SemanticAnalyzer::visitSwitchCase(const SwitchCasePtr& node)
     node->getControlExpression()->accept(this);
     TypePtr conditionType = node->getControlExpression()->getType();
     assert(conditionType != nullptr);
-    SCOPED_SET(ctx.contextualType, conditionType);
+    SCOPED_SET(ctx->contextualType, conditionType);
 
     checkExhausiveSwitch(this, node);
 
-    InitializationTracer tracer(ctx.currentInitializationTracer, InitializationTracer::Sequence);
+    InitializationTracer tracer(ctx->currentInitializationTracer, InitializationTracer::Sequence);
     for(const CaseStatementPtr& c : *node)
     {
         CodeBlockPtr statements = c->getCodeBlock();
 
         InitializationTracer caseTracer(&tracer, InitializationTracer::Branch);
-        SCOPED_SET(ctx.currentInitializationTracer, &caseTracer);
+        SCOPED_SET(ctx->currentInitializationTracer, &caseTracer);
         if(statements->numStatements() == 0)
         {
             error(node, Errors::E_A_LABEL_IN_SWITCH_SHOULD_HAVE_AT_LEAST_ONE_STATEMENT_0, L"case");
@@ -208,7 +209,7 @@ void SemanticAnalyzer::visitSwitchCase(const SwitchCasePtr& node)
     }
     {
         InitializationTracer caseTracer(&tracer, InitializationTracer::Branch);
-        SCOPED_SET(ctx.currentInitializationTracer, &caseTracer);
+        SCOPED_SET(ctx->currentInitializationTracer, &caseTracer);
         if (node->getDefaultCase())
         {
             if (node->getDefaultCase()->getCodeBlock()->numStatements() == 0)
@@ -224,19 +225,19 @@ void SemanticAnalyzer::visitSwitchCase(const SwitchCasePtr& node)
 void SemanticAnalyzer::visitEnumCasePattern(const EnumCasePatternPtr& node)
 {
     //enum-case is similar to member access but also provided associated-value-enum binding's unpacking
-    if(!ctx.contextualType)
+    if(!ctx->contextualType)
     {
         //invalid contextual type
         error(node, Errors::E_NO_CONTEXTUAL_TYPE_TO_ACCESS_MEMBER_A_1, node->getName());
         return;
     }
-    const EnumCase* ec = ctx.contextualType->getEnumCase(node->getName());
+    const EnumCase* ec = ctx->contextualType->getEnumCase(node->getName());
     if (ec == nullptr)
     {
-        error(node, Errors::E_DOES_NOT_HAVE_A_MEMBER_2, ctx.contextualType->toString(), node->getName());
+        error(node, Errors::E_DOES_NOT_HAVE_A_MEMBER_2, ctx->contextualType->toString(), node->getName());
         return;
     }
-    node->setType(ctx.contextualType);
+    node->setType(ctx->contextualType);
     //TODO check for associated values for unpacking
 
 }
@@ -244,17 +245,17 @@ void SemanticAnalyzer::visitEnumCasePattern(const EnumCasePatternPtr& node)
 
 void SemanticAnalyzer::visitCase(const CaseStatementPtr& node)
 {
-    assert(ctx.contextualType != nullptr);
+    assert(ctx->contextualType != nullptr);
     ScopedCodeBlockPtr codeBlock = static_pointer_cast<ScopedCodeBlock>(node->getCodeBlock());
     for(const CaseStatement::Condition& cond : node->getConditions())
     {
         //the pattern should be evaluated to the contextual type where the condition must evaluate to BooleanLiteralConvertible
-        if(ctx.currentType && ctx.currentType->getCategory() == Type::Enum && cond.condition->getNodeType() == NodeType::Identifier)
+        if(ctx->currentType && ctx->currentType->getCategory() == Type::Enum && cond.condition->getNodeType() == NodeType::Identifier)
         {
             IdentifierPtr id = static_pointer_cast<Identifier>(cond.condition);
-            if(ctx.currentType->getEnumCase(id->getIdentifier()))
+            if(ctx->currentType->getEnumCase(id->getIdentifier()))
             {
-                cond.condition->setType(ctx.currentType);
+                cond.condition->setType(ctx->currentType);
             }
             else
             {
@@ -265,13 +266,13 @@ void SemanticAnalyzer::visitCase(const CaseStatementPtr& node)
             cond.condition->accept(this);
         TypePtr patternType = cond.condition->getType();
         assert(patternType != nullptr);
-        if(!patternType->canAssignTo(ctx.contextualType))
+        if(!patternType->canAssignTo(ctx->contextualType))
         {
-            error(cond.condition, Errors::E_CANNOT_CONVERT_EXPRESSION_TYPE_2, patternType->toString(), ctx.contextualType->toString());
+            error(cond.condition, Errors::E_CANNOT_CONVERT_EXPRESSION_TYPE_2, patternType->toString(), ctx->contextualType->toString());
             break;
         }
         //create symbols that used for unpacking associated values
-        if(ctx.contextualType->getCategory() == Type::Enum)
+        if(ctx->contextualType->getCategory() == Type::Enum)
         {
             PatternAccessibility accessibility = AccessibilityUndefined;
             TuplePtr tuple = nullptr;
@@ -279,18 +280,18 @@ void SemanticAnalyzer::visitCase(const CaseStatementPtr& node)
             if(cond.condition->getNodeType() == NodeType::Identifier)
             {
                 IdentifierPtr id = static_pointer_cast<Identifier>(cond.condition);
-                ec = ctx.contextualType->getEnumCase(id->getIdentifier());
+                ec = ctx->contextualType->getEnumCase(id->getIdentifier());
             }
             else if(EnumCasePatternPtr enumCase = dynamic_pointer_cast<EnumCasePattern>(cond.condition))
             {
-                ec = ctx.contextualType->getEnumCase(enumCase->getName());
+                ec = ctx->contextualType->getEnumCase(enumCase->getName());
             }
             else if (ValueBindingPatternPtr binding = dynamic_pointer_cast<ValueBindingPattern>(cond.condition))
             {
                 EnumCasePatternPtr enumCase = dynamic_pointer_cast<EnumCasePattern>(binding->getBinding());
                 assert(enumCase != nullptr);
                 accessibility = binding->isReadOnly() ? AccessibilityConstant : AccessibilityVariable;
-                ec = ctx.contextualType->getEnumCase(enumCase->getName());
+                ec = ctx->contextualType->getEnumCase(enumCase->getName());
 
             }
             if(ec && ec->type != symbolRegistry->getGlobalScope()->Void())
@@ -320,7 +321,7 @@ void SemanticAnalyzer::visitCase(const CaseStatementPtr& node)
                     vector<TupleExtractionResult> results;
                     vector<int> indices;
                     wstring tempName = this->generateTempName();
-                    expandTuple(results, indices, binding->getBinding(), tempName, ctx.contextualType, accessibility);
+                    expandTuple(results, indices, binding->getBinding(), tempName, ctx->contextualType, accessibility);
                     for (auto var : results)
                     {
                         //register symbol
@@ -335,7 +336,7 @@ void SemanticAnalyzer::visitCase(const CaseStatementPtr& node)
                     IdentifierPtr id = dynamic_pointer_cast<Identifier>(binding->getBinding());
                     assert(id != nullptr);
                     const wstring &name = id->getIdentifier();
-                    SymbolPlaceHolderPtr sym(new SymbolPlaceHolder(name, ctx.contextualType, SymbolPlaceHolder::R_LOCAL_VARIABLE, flags));
+                    SymbolPlaceHolderPtr sym(new SymbolPlaceHolder(name, ctx->contextualType, SymbolPlaceHolder::R_LOCAL_VARIABLE, flags));
                     codeBlock->getScope()->addSymbol(sym);
                 }
             }

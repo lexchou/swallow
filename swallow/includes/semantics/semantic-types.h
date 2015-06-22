@@ -57,14 +57,31 @@ typedef std::shared_ptr<FunctionSymbol> FunctionSymbolPtr;
 //class SymboledFunction;
 //typedef std::shared_ptr<class SymboledFunction> SymboledFunctionPtr;
 
-typedef std::shared_ptr<class ScopedClass> ScopedClassPtr;
-typedef std::shared_ptr<class ScopedStruct> ScopedStructPtr;
-typedef std::shared_ptr<class ScopedEnum> ScopedEnumPtr;
-typedef std::shared_ptr<class ScopedExtension> ScopedExtensionPtr;
-typedef std::shared_ptr<class ScopedProtocol> ScopedProtocolPtr;
 typedef std::shared_ptr<class ScopedClosure> ScopedClosurePtr;
 typedef std::shared_ptr<class SymboledVariable> SymboledVariablePtr;
 typedef std::shared_ptr<class SymboledConstant> SymboledConstantPtr;
+
+enum DeclarationType
+{
+    DeclarationTypeVariable,
+    DeclarationTypeProperty,
+    DeclarationTypeFunction,
+    DeclarationTypeMethod,
+    DeclarationTypeSubscript,
+    DeclarationTypeInitializer,
+    DeclarationTypeClass,
+    DeclarationTypeEnum,
+};
+enum ComponentType
+{
+    ComponentTypeType,
+    ComponentTypeSuperclass,
+    ComponentTypeParameter,
+    ComponentTypeResult,
+    ComponentTypeIndex,
+    ComponentTypeElementType,
+    ComponentTypeRawType
+};
 
 
 SWALLOW_NS_END

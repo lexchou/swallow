@@ -44,6 +44,7 @@
 #include <iostream>
 #include "common/ScopedValue.h"
 #include "semantics/InitializationTracer.h"
+#include "semantics/SemanticContext.h"
 
 USE_SWALLOW_NS
 using namespace std;
@@ -56,7 +57,7 @@ void SemanticAnalyzer::validateInitializerDelegation(const FunctionCallPtr& node
     const wstring& name = static_pointer_cast<Identifier>(ma->getSelf())->getIdentifier();
     bool self_init = name == L"self";
     bool super_init = name == L"super";
-    bool insideInit = ctx.currentFunction && ctx.currentFunction->hasFlags(SymbolFlagInit);
+    bool insideInit = ctx->currentFunction && ctx->currentFunction->hasFlags(SymbolFlagInit);
     //calling a super.init or super.init outside the initializer
     if(!insideInit)
     {
@@ -78,10 +79,10 @@ void SemanticAnalyzer::validateInitializerDelegation(const FunctionCallPtr& node
     //Initializer Delegation Safety check 1: A designated initializer must
     //ensure that all of the properties introduced by its class are
     //initialized before it delegates up to a superclass initializer.
-    assert(ctx.currentType != nullptr);
+    assert(ctx->currentType != nullptr);
     if(super_init)
     {
-        for (const SymbolPtr &prop : ctx.currentType->getDeclaredStoredProperties())
+        for (const SymbolPtr &prop : ctx->currentType->getDeclaredStoredProperties())
         {
             if (!prop->hasFlags(SymbolFlagInitialized))
             {
@@ -90,21 +91,21 @@ void SemanticAnalyzer::validateInitializerDelegation(const FunctionCallPtr& node
             }
         }
     }
-    else if(self_init && ctx.currentFunction->hasFlags(SymbolFlagConvenienceInit))
+    else if(self_init && ctx->currentFunction->hasFlags(SymbolFlagConvenienceInit))
     {
         //calling self.init inside a convenience initializer will treat all stored property initialized
-        for (const SymbolPtr &prop : ctx.currentType->getDeclaredStoredProperties())
+        for (const SymbolPtr &prop : ctx->currentType->getDeclaredStoredProperties())
         {
             markInitialized(prop);
         }
     }
 
-    if(ctx.currentInitializationTracer)
+    if(ctx->currentInitializationTracer)
     {
         if(self_init)
-            ctx.currentInitializationTracer->selfInit = true;
+            ctx->currentInitializationTracer->selfInit = true;
         if(super_init)
-            ctx.currentInitializationTracer->superInit = true;
+            ctx->currentInitializationTracer->superInit = true;
     }
 
 
@@ -117,17 +118,17 @@ void SemanticAnalyzer::validateInitializerDelegation(const MemberAccessPtr& node
     //accessing member of self(not accessing initializer) inside an initializer
     if(!Identifier::is(node->getSelf(), L"self"))
         return;
-    if(!ctx.currentFunction || !ctx.currentFunction->hasFlags(SymbolFlagInit))
+    if(!ctx->currentFunction || !ctx->currentFunction->hasFlags(SymbolFlagInit))
         return;
     if(!node->getField() || node->getField()->getIdentifier() == L"init")
         return;
-    assert(ctx.currentInitializationTracer != nullptr);
-    InitializationTracer* tracer = ctx.currentInitializationTracer;
+    assert(ctx->currentInitializationTracer != nullptr);
+    InitializationTracer* tracer = ctx->currentInitializationTracer;
     TypePtr memberDeclaringType = nullptr;
-    SymbolPtr member = getMemberFromType(ctx.currentType, node->getField()->getIdentifier(), (MemberFilter) (FilterLookupInExtension | FilterRecursive), &memberDeclaringType);
-    bool declaredBySuperClass = ctx.currentType != memberDeclaringType;
+    SymbolPtr member = getMemberFromType(ctx->currentType, node->getField()->getIdentifier(), (MemberFilter) (FilterLookupInExtension | FilterRecursive), &memberDeclaringType);
+    bool declaredBySuperClass = ctx->currentType != memberDeclaringType;
     //assigning it on a field declared by base class but not yet called super.init
-    bool convenience = ctx.currentFunction->hasFlags(SymbolFlagConvenienceInit);
+    bool convenience = ctx->currentFunction->hasFlags(SymbolFlagConvenienceInit);
     bool designated = !convenience;
     if(designated && declaredBySuperClass && !tracer->superInit)
     {
@@ -153,7 +154,7 @@ void SemanticAnalyzer::validateInitializerDelegation(const MemberAccessPtr& node
     //An initializer cannot call any instance methods, read the values of any
     //instance properties, or refer to self as a value until after the first
     //phase of initialization is complete.
-    if (designated && ctx.currentType->getParentType() != nullptr)
+    if (designated && ctx->currentType->getParentType() != nullptr)
     {
         //super.init must be called
         if (declaredBySuperClass && !tracer->superInit)

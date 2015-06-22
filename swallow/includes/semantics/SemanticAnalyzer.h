@@ -32,7 +32,6 @@
 #include "SemanticPass.h"
 #include "Type.h"
 #include <list>
-#include "SemanticContext.h"
 #include "SymbolScope.h"
 
 SWALLOW_NS_BEGIN
@@ -41,6 +40,7 @@ class TypeDeclaration;
 class Expression;
 class Pattern;
 class NodeFactory;
+struct SemanticContext;
 struct TupleExtractionResult
 {
     IdentifierPtr name;
@@ -75,12 +75,12 @@ class SWALLOW_EXPORT SemanticAnalyzer : public SemanticPass, public LazySymbolRe
 {
     friend class DeclarationAnalyzer;
 public:
-    SemanticAnalyzer(SymbolRegistry* symbolRegistry, CompilerResults* compilerResults, const ModulePtr& module);
+    SemanticAnalyzer(SymbolRegistry* symbolRegistry, CompilerResults* compilerResults, SemanticContext* context, DeclarationAnalyzer* declarationAnalyzer);
     ~SemanticAnalyzer();
 public:
     virtual void visitAssignment(const AssignmentPtr& node) override;
     virtual void visitComputedProperty(const ComputedPropertyPtr& node) override;
-    virtual void visitValueBindings(const ValueBindingsPtr& node) override;
+    //virtual void visitValueBindings(const ValueBindingsPtr& node) override;
     virtual void visitTypeAlias(const TypeAliasPtr& node) override;
     virtual void visitClass(const ClassDefPtr& node) override;
     virtual void visitStruct(const StructDefPtr& node) override;
@@ -137,7 +137,7 @@ public:// Condition control flow
 public://Syntax sugar for type
     virtual void visitOptionalType(const OptionalTypePtr& node);
 public:
-    SemanticContext* getContext() {return &ctx;}
+    SemanticContext* getContext() {return ctx;}
 
     virtual bool resolveLazySymbol(const std::wstring& name) override;
     /*!
@@ -252,6 +252,7 @@ private:
     void declarationFinished(const std::wstring& name, const SymbolPtr& decl, const NodePtr& node);
 
 private:
+    void visitAccessor(const CodeBlockPtr& accessor, const ParametersNodePtr& params, const SymbolPtr& setter, int modifiers);
 
     /*!
      * Validate modifiers for declarations.
@@ -290,7 +291,7 @@ protected:
     void verifyProtocolConforms();
 
 protected:
-    SemanticContext ctx;
+    SemanticContext* ctx;
     DeclarationAnalyzer* declarationAnalyzer;
 };
 
