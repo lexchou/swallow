@@ -102,10 +102,9 @@ void SemanticAnalyzer::visitValueBinding(const ValueBindingPtr& node)
         return;
     }
     //handle type inference for temporary variable
-    if(node->isTemporary())
+    if(node->isTemporary() && node->getInitializer())
     {
         //temporary variable always has an initializer
-        assert(node->getInitializer() != nullptr);
         TypePtr initializerType;
         TypePtr declaredType = node->getType();
 

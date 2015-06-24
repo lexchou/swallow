@@ -62,7 +62,7 @@ public:
     void visitFunctionDeclaration(const FunctionDefPtr& node);
     virtual void visitParameter(const ParameterNodePtr& node) override;
     virtual void visitParameters(const ParametersNodePtr& node) override;
-    //virtual void visitClosure(const ClosurePtr& node) override;
+    virtual void visitClosure(const ClosurePtr& node) override;
     virtual void visitSubscript(const SubscriptDefPtr &node) override;
     virtual void visitDeinit(const DeinitializerDefPtr& node) override;
     virtual void visitInit(const InitializerDefPtr& node) override;

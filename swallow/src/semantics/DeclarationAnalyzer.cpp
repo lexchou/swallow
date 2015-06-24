@@ -140,7 +140,7 @@ GenericDefinitionPtr DeclarationAnalyzer::prepareGenericTypes(const GenericParam
         list<wstring> types;
         TypeIdentifierPtr typeId = constraint->getIdentifier();
         TypeBuilderPtr type = static_pointer_cast<TypeBuilder>(ret->get(typeId->getName()));
-        TypePtr expectedType = lookupType(constraint->getExpectedType());
+        TypePtr expectedType = resolveType(constraint->getExpectedType(), true);
 
         if(type == nullptr)
         {

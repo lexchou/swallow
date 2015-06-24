@@ -150,6 +150,10 @@ void SymbolRegistry::enterScope(SymbolScope* scope)
 {
     scopes.push(currentScope);
     scope->parent = currentScope;
+    if(currentScope)
+        scope->depth = currentScope->depth + 1;
+    else
+        scope->depth = 0;
     currentScope = scope;
 }
 void SymbolRegistry::leaveScope()

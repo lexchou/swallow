@@ -684,6 +684,10 @@ void DeclarationAnalyzer::checkForFunctionOverriding(const std::wstring& name, c
     }
 }
 
+void DeclarationAnalyzer::visitClosure(const ClosurePtr& node)
+{
+    
+}
 void DeclarationAnalyzer::visitFunction(const FunctionDefPtr& node)
 {
     GenericDefinitionPtr generic;

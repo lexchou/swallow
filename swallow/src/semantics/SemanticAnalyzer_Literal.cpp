@@ -419,7 +419,7 @@ void SemanticAnalyzer::visitIdentifier(const IdentifierPtr& id)
         //check if this identifier is accessed inside a class/protocol/extension/struct/enum but defined not in program
         if(ctx->currentType && symbolRegistry->getCurrentScope() != scope)
         {
-            if(scope->getOwner()->getNodeType() != NodeType::Program)
+            if(scope->getDepth() < ctx->currentType->getScope()->getDepth())
             {
                 error(id, Errors::E_USE_OF_FUNCTION_LOCAL_INSIDE_TYPE, placeholder->getName());
             }

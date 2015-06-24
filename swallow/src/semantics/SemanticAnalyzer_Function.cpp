@@ -84,12 +84,13 @@ void SemanticAnalyzer::visitClosure(const ClosurePtr& node)
             {
                 assert(contextualType != nullptr && contextualType->getCategory() == Type::Function);
                 TypePtr paramType = contextualType->getParameters()[i].type;
+                assert(paramType != nullptr);
                 param->setType(paramType);
             }
             i++;
         }
 
-        node->getParameters()->accept(this);
+        node->getParameters()->accept(declarationAnalyzer);
         declarationAnalyzer->prepareParameters(closure->getScope(), node->getParameters());
 
         //create a function type for this
@@ -172,6 +173,8 @@ void SemanticAnalyzer::visitFunction(const FunctionDefPtr& node)
         return;
     //visit implementation
     FunctionSymbolPtr func = static_pointer_cast<SymboledFunction>(node)->symbol;
+    if(func->getDeclaringType() && func->getDeclaringType()->getCategory() == Type::Protocol)
+        return;//do not check implementation if it's defined as protocol function
     assert(func != nullptr);
     SCOPED_SET(ctx->currentFunction, func->getType());
     node->getBody()->accept(this);

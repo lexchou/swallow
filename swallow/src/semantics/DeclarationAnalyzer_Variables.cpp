@@ -177,7 +177,9 @@ void DeclarationAnalyzer::visitValueBindings(const ValueBindingsPtr& node)
         else
         {
             int vflags = flags;
-            SymbolPlaceHolderPtr pattern(new SymbolPlaceHolder(id->getIdentifier(), id->getType(), role, vflags));
+            TypeNodePtr declaredType = var->getDeclaredType();
+            TypePtr symType = declaredType ? resolveType(declaredType, true) : nullptr;
+            SymbolPlaceHolderPtr pattern(new SymbolPlaceHolder(id->getIdentifier(), symType, role, vflags));
             pattern->setAccessLevel(accessLevel);
             registerSymbol(pattern, id);
         }

@@ -290,6 +290,11 @@ protected:
      */
     void verifyProtocolConforms();
 
+    /*!
+     * visit member implementation nodes
+     */
+    void visitImplementation(const TypeDeclarationPtr& node);
+
 protected:
     SemanticContext* ctx;
     DeclarationAnalyzer* declarationAnalyzer;

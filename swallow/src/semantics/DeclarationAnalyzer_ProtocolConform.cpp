@@ -79,6 +79,7 @@ bool DeclarationAnalyzer::verifyProtocolConform(const TypePtr& type, bool supres
  */
 static bool checkTypeConform(const TypePtr& ownerType, TypePtr requirementType, const TypePtr& actualType)
 {
+    assert(actualType != nullptr);
     if(requirementType->getCategory() == Type::Alias)
     {
         wstring name = requirementType->getName();

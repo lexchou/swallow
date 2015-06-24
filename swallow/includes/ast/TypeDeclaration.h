@@ -61,11 +61,6 @@ public:
     std::vector<DeclarationPtr>::iterator begin() {return declarations.begin();}
     std::vector<DeclarationPtr>::iterator end() {return declarations.end();}
 
-    /*!
-     * Sort member declaration by priority
-     * Priority order: stored property > initializer > convenience initializer -> computed property > subscript > func > deinit
-     */
-    void sortByPriority();
 public:
     std::vector<TypeIdentifierPtr> parents;
     TypeIdentifierPtr identifier;

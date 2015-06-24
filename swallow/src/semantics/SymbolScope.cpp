@@ -40,6 +40,7 @@ SymbolScope::SymbolScope()
     :owner(NULL), parent(NULL)
 {
     lazySymbolResolver = nullptr;
+    depth = 0;
 }
 SymbolScope::~SymbolScope()
 {

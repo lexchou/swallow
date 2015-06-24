@@ -180,7 +180,36 @@ TEST(TestGeneric, GenericConstraint7)
 
 TEST(TestGeneric, GenericConstraint7)
 {
-    SEMANTIC_ANALYZE_F("semantics/TestGeneric_GenericConstraint7.swift");
+    //SEMANTIC_ANALYZE_F("semantics/TestGeneric_GenericConstraint7.swift");
+    SEMANTIC_ANALYZE(
+        L"protocol Container {\n"
+        L"    typealias ItemType\n"
+        L"    mutating func append(item: ItemType)\n"
+        L"    var count: Int { get }\n"
+        L"    subscript(i: Int) -> ItemType { get }\n"
+        L"}\n"
+        L"\n"
+        L"struct Stack<T>: Container {\n"
+        L"    // original Stack<T> implementation\n"
+        L"    var items = [T]()\n"
+        L"    mutating func push(item: T) {\n"
+        L"        items.append(item)\n"
+        L"    }\n"
+        L"    mutating func pop() -> T {\n"
+        L"        return items.removeLast()\n"
+        L"    }\n"
+        L"    // conformance to the Container protocol\n"
+        L"    mutating func append(item: T) {\n"
+        L"        self.push(item)\n"
+        L"    }\n"
+        L"    var count: Int {\n"
+        L"        return items.count\n"
+        L"    }\n"
+        L"    subscript(i: Int) -> T {\n"
+        L"       return items[i]\n"
+        L"    }\n"
+        L"}\n"
+        L"var a : Stack<Int>.ItemType = 3\n");
     ASSERT_NO_ERRORS();
 }
 

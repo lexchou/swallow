@@ -104,6 +104,10 @@ public:
     Node* getOwner();
     SymbolScope* getParentScope() {return parent;}
     const SymbolMap& getSymbols() {return symbols;}
+    /*!
+     * Gets the depth of scope stack
+     */
+    int getDepth() const { return depth;}
 
     /*!
      * If SymbolScope failed to look-up a symbol, it will try to use LazySymbolResolver to find it
@@ -139,6 +143,7 @@ protected:
     std::map<std::wstring, std::vector<TypePtr>> extensions;
 
     std::map<std::wstring, TypePtr> forwardDeclarations;
+    int depth;
 };
 
 

@@ -39,6 +39,7 @@
 #include "semantics/GlobalScope.h"
 #include "semantics/ScopeGuard.h"
 #include "semantics/SemanticContext.h"
+#include "semantics/DeclarationAnalyzer.h"
 #include <cassert>
 #include "ast/NodeFactory.h"
 #include "common/ScopedValue.h"
@@ -47,6 +48,60 @@ USE_SWALLOW_NS
 using namespace std;
 
 
+void SemanticAnalyzer::visitImplementation(const TypeDeclarationPtr& node)
+{
+    vector<TypeAliasPtr> aliasNodes;
+    vector<InitializerDefPtr> designatedInits;
+    vector<InitializerDefPtr> convenienceInits;
+    vector<DeclarationPtr> others;
+
+    for(const DeclarationPtr& decl : *node)
+    {
+        switch(decl->getNodeType())
+        {
+            case NodeType::TypeAlias:
+                aliasNodes.push_back(static_pointer_cast<TypeAlias>(decl));
+                break;
+            case NodeType::Init:
+            {
+                InitializerDefPtr init = static_pointer_cast<InitializerDef>(decl);
+                if(init->hasModifier(DeclarationModifiers::Convenience))
+                    convenienceInits.push_back(init);
+                else
+                    designatedInits.push_back(init);
+                break;
+            }
+            default:
+                others.push_back(decl);
+                break;
+        }
+    }
+
+    for(auto decl : aliasNodes)
+    {
+        decl->accept(this);
+    }
+    for(auto decl : designatedInits)
+    {
+        decl->accept(this);
+    }
+    //mark all stored properties initialized after designated initializer visited.
+    assert(ctx->currentType);
+    for(const SymbolPtr& p : ctx->currentType->getDeclaredStoredProperties())
+    {
+        markInitialized(p);
+    }
+    
+    
+    for(auto decl : convenienceInits)
+    {
+        decl->accept(this);
+    }
+    for(auto decl : others)
+    {
+        decl->accept(this);
+    }
+}
 void SemanticAnalyzer::visitTypeAlias(const TypeAliasPtr& node)
 {
     //bring type from forward declaration to current scope
@@ -66,7 +121,8 @@ void SemanticAnalyzer::visitEnum(const EnumDefPtr& node)
     ScopeGuard guard(symbolRegistry, type->getScope());
     SCOPED_SET(ctx->currentType, type);
 
-    SemanticPass::visitEnum(node);
+    declarationAnalyzer->verifyProtocolConform(type, true);
+    visitImplementation(node);
 }
 void SemanticAnalyzer::visitClass(const ClassDefPtr& node)
 {
@@ -77,8 +133,8 @@ void SemanticAnalyzer::visitClass(const ClassDefPtr& node)
     TypePtr type = static_pointer_cast<Type>(sym);
     ScopeGuard guard(symbolRegistry, type->getScope());
     SCOPED_SET(ctx->currentType, type);
-
-    SemanticPass::visitClass(node);
+    declarationAnalyzer->verifyProtocolConform(type, true);
+    visitImplementation(node);
 }
 void SemanticAnalyzer::visitStruct(const StructDefPtr& node)
 {
@@ -89,7 +145,8 @@ void SemanticAnalyzer::visitStruct(const StructDefPtr& node)
     TypePtr type = static_pointer_cast<Type>(sym);
     ScopeGuard guard(symbolRegistry, type->getScope());
     SCOPED_SET(ctx->currentType, type);
-    SemanticPass::visitStruct(node);
+    declarationAnalyzer->verifyProtocolConform(type, true);
+    visitImplementation(node);
 }
 void SemanticAnalyzer::visitProtocol(const ProtocolDefPtr& node)
 {
@@ -101,7 +158,7 @@ void SemanticAnalyzer::visitProtocol(const ProtocolDefPtr& node)
     ScopeGuard guard(symbolRegistry, type->getScope());
     SCOPED_SET(ctx->currentType, type);
 
-    SemanticPass::visitProtocol(node);
+    visitImplementation(node);
 }
 void SemanticAnalyzer::visitExtension(const ExtensionDefPtr& node)
 {
@@ -128,7 +185,9 @@ void SemanticAnalyzer::visitExtension(const ExtensionDefPtr& node)
     ScopeGuard scope(symbolRegistry, type->getScope());
     SCOPED_SET(ctx->currentType, type);
 
-    SemanticPass::visitExtension(node);
+    declarationAnalyzer->verifyProtocolConform(type, true);
+    //SemanticPass::visitExtension(node);
+    visitImplementation(node);
 }
 void SemanticAnalyzer::visitOptionalType(const OptionalTypePtr& node)
 {

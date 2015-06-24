@@ -598,13 +598,16 @@ void DeclarationAnalyzer::visitExtension(const ExtensionDefPtr& node)
         return;
     }
     //TypePtr type = lookupType(node->getIdentifier());
+    SymbolScope* scope = symbolRegistry->getCurrentScope();
     TypePtr type = symbolRegistry->lookupType(node->getIdentifier()->getName());
+    if(!type)
+        type = scope->getForwardDeclaration(node->getIdentifier()->getName());
     if(!type)
     {
         error(node->getIdentifier(), Errors::E_USE_OF_UNDECLARED_TYPE_1, node->getIdentifier()->getName());
         return;
     }
-    ScopeGuard scope(symbolRegistry, type->getScope());
+    ScopeGuard guard(symbolRegistry, type->getScope());
 
     Type::Category category = type->getCategory();
     if(category == Type::Protocol)
