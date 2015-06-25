@@ -65,22 +65,6 @@ static bool isLiteralTypeForEnum(GlobalScope* global, const TypePtr& type)
     //nil, array, dictionary literal is not working for enum
     return false;
 }
-static bool isLiteralExpression(const ExpressionPtr& expr)
-{
-    if(!expr)
-        return false;
-    NodeType::T nodeType = expr->getNodeType();
-    switch(nodeType)
-    {
-        case NodeType::StringLiteral:
-        case NodeType::FloatLiteral:
-        case NodeType::IntegerLiteral:
-            return true;
-        default:
-            break;
-    }
-    return false;
-}
 TypePtr DeclarationAnalyzer::defineType(const std::shared_ptr<TypeDeclaration>& node)
 {
     TypeIdentifierPtr id = node->getIdentifier();
@@ -504,23 +488,6 @@ void DeclarationAnalyzer::visitEnum(const EnumDefPtr& node)
                     error(node, Errors::E_ENUM_WITH_RAW_TYPE_CANNOT_HAVE_CASES_WITH_ARGUMENTS);
                     return;
                 }
-                ExpressionPtr initializer = dynamic_pointer_cast<Expression>(c.value);
-                assert(initializer != nullptr);
-                if(!isLiteralExpression(initializer))
-                {
-                    error(node, Errors::E_RAW_VALUE_FOR_ENUM_CASE_MUST_BE_LITERAL);
-                    return;
-                }
-
-                SCOPED_SET(ctx->contextualType, rawType);
-                initializer->accept(this);
-                TypePtr caseType = initializer->getType();
-                assert(caseType != nullptr);
-                if(!caseType->canAssignTo(rawType))
-                {
-                    error(node, Errors::E_A_IS_NOT_CONVERTIBLE_TO_B_2, caseType->toString(), rawType->toString());
-                    return;
-                }
             }
             type->addEnumCase(c.name, global->Void());
             //register it to scope
@@ -591,6 +558,11 @@ void DeclarationAnalyzer::visitProtocol(const ProtocolDefPtr& node)
 }
 void DeclarationAnalyzer::visitExtension(const ExtensionDefPtr& node)
 {
+    if(ctx->currentFunction || ctx->currentType)
+    {
+        error(node, Errors::E_A_MAY_ONLY_BE_DECLARED_AT_FILE_SCOPE_1, node->getIdentifier()->getName());
+        return;
+    }
     //if(parentNode && parentNode->getNodeType() != NodeType::Program)
     if(node->getGenericParametersDef())
     {

@@ -54,9 +54,8 @@ TEST(TestExtension, ExtensionUnderBadScope)
     SEMANTIC_ANALYZE(L"class SomeType { \n"
             L"  extension SomeType {}\n"
             L"}");
-    ASSERT_EQ(1, compilerResults.numResults());
-    auto res = compilerResults.getResult(0);
-    ASSERT_EQ(Errors::E_A_MAY_ONLY_BE_DECLARED_AT_FILE_SCOPE_1, res.code);
+    ASSERT_ERROR(Errors::E_A_MAY_ONLY_BE_DECLARED_AT_FILE_SCOPE_1);
+    ASSERT_EQ(L"SomeType", error->items[0]);
 }
 
 

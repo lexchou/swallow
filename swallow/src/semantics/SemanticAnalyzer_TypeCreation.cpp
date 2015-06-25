@@ -47,12 +47,29 @@
 USE_SWALLOW_NS
 using namespace std;
 
+static bool isLiteralExpression(const ExpressionPtr& expr)
+{
+    if(!expr)
+        return false;
+    NodeType::T nodeType = expr->getNodeType();
+    switch(nodeType)
+    {
+        case NodeType::StringLiteral:
+        case NodeType::FloatLiteral:
+        case NodeType::IntegerLiteral:
+            return true;
+        default:
+            break;
+    }
+    return false;
+}
 
 void SemanticAnalyzer::visitImplementation(const TypeDeclarationPtr& node)
 {
     vector<TypeAliasPtr> aliasNodes;
     vector<InitializerDefPtr> designatedInits;
     vector<InitializerDefPtr> convenienceInits;
+    vector<DeclarationPtr> props;
     vector<DeclarationPtr> others;
 
     for(const DeclarationPtr& decl : *node)
@@ -71,6 +88,10 @@ void SemanticAnalyzer::visitImplementation(const TypeDeclarationPtr& node)
                     designatedInits.push_back(init);
                 break;
             }
+            case NodeType::ValueBindings:
+            case NodeType::ComputedProperty:
+                props.push_back(decl);
+                break;
             default:
                 others.push_back(decl);
                 break;
@@ -78,6 +99,10 @@ void SemanticAnalyzer::visitImplementation(const TypeDeclarationPtr& node)
     }
 
     for(auto decl : aliasNodes)
+    {
+        decl->accept(this);
+    }
+    for(auto decl : props)
     {
         decl->accept(this);
     }
@@ -121,8 +146,34 @@ void SemanticAnalyzer::visitEnum(const EnumDefPtr& node)
     ScopeGuard guard(symbolRegistry, type->getScope());
     SCOPED_SET(ctx->currentType, type);
 
-    declarationAnalyzer->verifyProtocolConform(type, true);
     visitImplementation(node);
+    declarationAnalyzer->verifyProtocolConform(type, true);
+    //check enum cases' initializers
+    for(auto c : node->getCases())
+    {
+        if(!c.value || c.value->getNodeType() == NodeType::ParenthesizedExpression)
+            continue;
+        ExpressionPtr initializer = dynamic_pointer_cast<Expression>(c.value);
+        if(!initializer)
+            continue;
+        if(!isLiteralExpression(initializer))
+        {
+            error(node, Errors::E_RAW_VALUE_FOR_ENUM_CASE_MUST_BE_LITERAL);
+            return;
+        }
+        TypePtr rawType = type->getParentType();
+        assert(rawType != nullptr);
+
+        SCOPED_SET(ctx->contextualType, rawType);
+        initializer->accept(this);
+        TypePtr caseType = initializer->getType();
+        assert(caseType != nullptr);
+        if(!caseType->canAssignTo(rawType))
+        {
+            error(node, Errors::E_A_IS_NOT_CONVERTIBLE_TO_B_2, caseType->toString(), rawType->toString());
+            return;
+        }
+    }
 }
 void SemanticAnalyzer::visitClass(const ClassDefPtr& node)
 {
@@ -133,8 +184,9 @@ void SemanticAnalyzer::visitClass(const ClassDefPtr& node)
     TypePtr type = static_pointer_cast<Type>(sym);
     ScopeGuard guard(symbolRegistry, type->getScope());
     SCOPED_SET(ctx->currentType, type);
-    declarationAnalyzer->verifyProtocolConform(type, true);
     visitImplementation(node);
+    declarationAnalyzer->verifyProtocolConform(type, true);
+
 }
 void SemanticAnalyzer::visitStruct(const StructDefPtr& node)
 {
@@ -145,8 +197,8 @@ void SemanticAnalyzer::visitStruct(const StructDefPtr& node)
     TypePtr type = static_pointer_cast<Type>(sym);
     ScopeGuard guard(symbolRegistry, type->getScope());
     SCOPED_SET(ctx->currentType, type);
-    declarationAnalyzer->verifyProtocolConform(type, true);
     visitImplementation(node);
+    declarationAnalyzer->verifyProtocolConform(type, true);
 }
 void SemanticAnalyzer::visitProtocol(const ProtocolDefPtr& node)
 {
@@ -162,32 +214,15 @@ void SemanticAnalyzer::visitProtocol(const ProtocolDefPtr& node)
 }
 void SemanticAnalyzer::visitExtension(const ExtensionDefPtr& node)
 {
-    if(ctx->currentFunction || ctx->currentType)
-    {
-        error(node, Errors::E_A_MAY_ONLY_BE_DECLARED_AT_FILE_SCOPE_1, node->getIdentifier()->getName());
-        return;
-    }
-    /*
-    //check if this type is already registered
-    if(ctx->lazyDeclaration)
-    {
-        bool defined = symbolRegistry->isSymbolDefined(node->getIdentifier()->getName());
-        if(!defined)
-        {
-            delayDeclare(node);
-            return;
-        }
-    }
-    */
     TypePtr type;
     symbolRegistry->lookupType(node->getIdentifier()->getName(), nullptr, &type, false);
     assert(type != nullptr);
     ScopeGuard scope(symbolRegistry, type->getScope());
     SCOPED_SET(ctx->currentType, type);
 
-    declarationAnalyzer->verifyProtocolConform(type, true);
     //SemanticPass::visitExtension(node);
     visitImplementation(node);
+    declarationAnalyzer->verifyProtocolConform(type, true);
 }
 void SemanticAnalyzer::visitOptionalType(const OptionalTypePtr& node)
 {

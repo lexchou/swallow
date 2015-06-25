@@ -349,6 +349,8 @@ void SemanticAnalyzer::visitAssignment(const AssignmentPtr& node)
                         markInitialized(member);
                     }
                 }
+                assert(member->getType());
+                destination->setType(member->getType());
             }
             else
             {
