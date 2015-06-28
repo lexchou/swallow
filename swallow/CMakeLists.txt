@@ -67,6 +67,7 @@ SET(SWALLOW_SRC
     src/semantics/DeclarationAnalyzer_ProtocolConform.cpp
     src/semantics/DeclarationAnalyzer_Function.cpp
     src/semantics/DeclarationAnalyzer_Variables.cpp
+    src/semantics/DeclarationAnalyzer_ControlFlow.cpp
     src/semantics/SemanticAnalyzer_Variables.cpp
     src/semantics/SemanticAnalyzer_Expression.cpp
     src/semantics/SemanticAnalyzer_Condition.cpp

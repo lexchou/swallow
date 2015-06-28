@@ -31,7 +31,7 @@
 USE_SWALLOW_NS
 
 
-Pattern::Pattern(NodeType::T nodeType)
+Pattern::Pattern(NodeType nodeType)
     :Statement(nodeType)
 {
 }

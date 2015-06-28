@@ -322,7 +322,7 @@ TypePtr TypeResolver::resolveProtocolComposition(const ProtocolCompositionPtr& c
 }
 TypePtr TypeResolver::resolve(const TypeNodePtr& type)
 {
-    NodeType::T nodeType = type->getNodeType();
+    NodeType nodeType = type->getNodeType();
     switch(nodeType)
     {
 

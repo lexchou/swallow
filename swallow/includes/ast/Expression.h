@@ -36,7 +36,7 @@ SWALLOW_NS_BEGIN
 class SWALLOW_EXPORT Expression : public Pattern
 {
 protected:
-	Expression(NodeType::T nodeType);
+	Expression(NodeType nodeType);
 };
 typedef std::shared_ptr<Expression> ExpressionPtr;
 SWALLOW_NS_END

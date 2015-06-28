@@ -1,4 +1,4 @@
-/* Statement.h --
+/* DeclarationAnalyzer_ControlFlow.cpp --
  *
  * Copyright (c) 2014, Lex Chou <lex at chou dot it>
  * All rights reserved.
@@ -27,21 +27,47 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef STATEMENT_H
-#define STATEMENT_H
-#include "Node.h"
-#include <string>
+#include "semantics/DeclarationAnalyzer.h"
+#include "semantics/GlobalScope.h"
+#include "semantics/SymbolRegistry.h"
+#include "ast/ast.h"
+#include "common/Errors.h"
+#include "semantics/FunctionOverloadedSymbol.h"
+#include "semantics/FunctionSymbol.h"
+#include "semantics/GenericDefinition.h"
+#include "semantics/GenericArgument.h"
+#include "semantics/TypeBuilder.h"
+#include "semantics/ScopedNodes.h"
+#include <cassert>
+#include <algorithm>
+#include <iostream>
+#include "ast/utils/ASTHierachyDumper.h"
+#include "common/ScopedValue.h"
+#include "semantics/ScopeGuard.h"
+#include "semantics/SemanticContext.h"
 
-SWALLOW_NS_BEGIN
+USE_SWALLOW_NS
+using namespace std;
 
-class SWALLOW_EXPORT Statement : public Node
+
+
+void DeclarationAnalyzer::visitWhileLoop(const WhileLoopPtr& node)
 {
-public:
-    Statement(NodeType nodeType);
-private:
-};
-typedef std::shared_ptr<Statement> StatementPtr;
+    node->getCodeBlock()->accept(this);
+}
+void DeclarationAnalyzer::visitForIn(const ForInLoopPtr& node)
+{
+    node->getCodeBlock()->accept(this);
+}
+void DeclarationAnalyzer::visitForLoop(const ForLoopPtr& node)
+{
+    ScopedCodeBlockPtr codeBlock = static_pointer_cast<ScopedCodeBlock>(node->getCodeBlock());
+    SCOPED_SET(ctx->contextualType, nullptr);
 
-SWALLOW_NS_END
-
-#endif//STATEMENT_H
+    if(node->getInitializer())
+    {
+        ScopeGuard guard(codeBlock.get(), this);
+        node->getInitializer()->accept(this);
+    }
+    node->getCodeBlock()->accept(this);
+}

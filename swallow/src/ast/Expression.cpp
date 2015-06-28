@@ -30,7 +30,7 @@
 #include "ast/Expression.h"
 USE_SWALLOW_NS
 
-Expression::Expression(NodeType::T nodeType)
+Expression::Expression(NodeType nodeType)
     :Pattern(nodeType)
 {
 

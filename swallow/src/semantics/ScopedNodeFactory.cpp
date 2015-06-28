@@ -49,6 +49,10 @@ FunctionDefPtr ScopedNodeFactory::createFunction(const SourceInfo& state)
 {
     return create<SymboledFunction>(state);
 }
+ExtensionDefPtr ScopedNodeFactory::createExtension(const SourceInfo& state)
+{
+    return create<SemanticExtensionDef>(state);
+}
 InitializerDefPtr ScopedNodeFactory::createInitializer(const SourceInfo& state)
 {
     return create<SymboledInit>(state);

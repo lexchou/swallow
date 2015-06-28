@@ -39,6 +39,7 @@ public:
     virtual ProgramPtr createProgram() override;
     virtual CodeBlockPtr createCodeBlock(const SourceInfo& state) override;
     virtual ClosurePtr createClosure(const SourceInfo& state) override;
+    virtual ExtensionDefPtr createExtension(const SourceInfo& state) override;
 
     virtual FunctionDefPtr createFunction(const SourceInfo& state) override;
     virtual InitializerDefPtr createInitializer(const SourceInfo& state) override;

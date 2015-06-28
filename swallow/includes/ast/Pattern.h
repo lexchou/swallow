@@ -39,7 +39,7 @@ typedef std::shared_ptr<Type> TypePtr;
 class SWALLOW_EXPORT Pattern : public Statement
 {
 public:
-    Pattern(NodeType::T nodeType);
+    Pattern(NodeType nodeType);
 public:
     void setType(const TypePtr& type);
     TypePtr getType();

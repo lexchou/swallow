@@ -36,7 +36,7 @@ SWALLOW_NS_BEGIN
 class SWALLOW_EXPORT Operator : public Expression
 {
 protected:
-    Operator(NodeType::T);
+    Operator(NodeType);
 public:
     
     OperatorType::T getOperatorType() const { return operatorType;}

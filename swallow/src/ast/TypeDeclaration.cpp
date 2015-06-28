@@ -33,7 +33,7 @@
 USE_SWALLOW_NS
 
 
-TypeDeclaration::TypeDeclaration(NodeType::T nodeType)
+TypeDeclaration::TypeDeclaration(NodeType nodeType)
     :Declaration(nodeType), identifier(NULL)
 {
 }

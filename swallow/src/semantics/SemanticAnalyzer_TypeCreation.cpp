@@ -40,6 +40,7 @@
 #include "semantics/ScopeGuard.h"
 #include "semantics/SemanticContext.h"
 #include "semantics/DeclarationAnalyzer.h"
+#include "semantics/ScopedNodes.h"
 #include <cassert>
 #include "ast/NodeFactory.h"
 #include "common/ScopedValue.h"
@@ -51,7 +52,7 @@ static bool isLiteralExpression(const ExpressionPtr& expr)
 {
     if(!expr)
         return false;
-    NodeType::T nodeType = expr->getNodeType();
+    NodeType nodeType = expr->getNodeType();
     switch(nodeType)
     {
         case NodeType::StringLiteral:
@@ -214,11 +215,15 @@ void SemanticAnalyzer::visitProtocol(const ProtocolDefPtr& node)
 }
 void SemanticAnalyzer::visitExtension(const ExtensionDefPtr& node)
 {
-    TypePtr type;
-    symbolRegistry->lookupType(node->getIdentifier()->getName(), nullptr, &type, false);
+    SemanticExtensionDefPtr extensionNode = static_pointer_cast<SemanticExtensionDef>(node);
+    TypePtr extension = extensionNode->extension;
+    assert(extension != nullptr);
+    TypePtr type = extension->getInnerType();
+    symbolRegistry->getFileScope()->addExtension(extension);
     assert(type != nullptr);
     ScopeGuard scope(symbolRegistry, type->getScope());
     SCOPED_SET(ctx->currentType, type);
+    SCOPED_SET(ctx->currentExtension, extension);
 
     //SemanticPass::visitExtension(node);
     visitImplementation(node);

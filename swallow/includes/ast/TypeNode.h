@@ -39,7 +39,7 @@ typedef std::shared_ptr<class Type> TypePtr;
 class SWALLOW_EXPORT TypeNode : public Statement
 {
 public:
-    TypeNode(NodeType::T nodeType);
+    TypeNode(NodeType nodeType);
     ~TypeNode();
 public:
     void addAttribute(AttributePtr attr);

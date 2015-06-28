@@ -44,87 +44,84 @@
 SWALLOW_NS_BEGIN
 
 class NodeVisitor;
-struct NodeType
+enum class NodeType
 {
-    enum T
-    {
-        ArrayLiteral,
-        ArrayType,
-        Assignment,
-        Attribute,
-        BinaryOperator,
-        BooleanLiteral,
-        Break,
-        Case,
-        Class,
-        Closure,
-        CodeBlock,
-        Comment,
-        CompileConstant,
-        ConditionalOperator,
-        ComputedProperty,
-        Continue,
-        Deinit,
-        DefaultValue,
-        DictionaryLiteral,
-        DictionaryType,
-        Do,
-        DynamicType,
-        EnumCasePattern,
-        Enum,
-        Extension,
-        Fallthrough,
-        FloatLiteral,
-        ForIn,
-        For,
-        ForcedValue,
-        FunctionCall,
-        Function,
-        FunctionType,
-        GenericArgumentDef,
-        GenericConstraintDef,
-        GenericParameterDef,
-        Identifier,
-        If,
-        ImplicitlyUnwrappedOptional,
-        Import,
-        InOut,
-        Init,
-        InitRef,
-        IntegerLiteral,
-        LabeledStatement,
-        MemberAccess,
-        NilLiteral,
-        Operator,
-        OptionalChaining,
-        OptionalType,
-        Parameter,
-        Parameters,
-        ParenthesizedExpression,
-        Program,
-        ProtocolComposition,
-        Protocol,
-        Return,
-        Self,
-        StringInterpolation,
-        StringLiteral,
-        Struct,
-        SubscriptAccess,
-        Subscript,
-        SwitchCase,
-        Tuple,
-        TupleType,
-        TypedPattern,
-        TypeAlias,
-        TypeCase,
-        TypeCheck,
-        TypeIdentifier,
-        UnaryOperator,
-        ValueBinding,
-        ValueBindings,
-        ValueBindingPattern,
-        While
-    };
+    ArrayLiteral,
+    ArrayType,
+    Assignment,
+    Attribute,
+    BinaryOperator,
+    BooleanLiteral,
+    Break,
+    Case,
+    Class,
+    Closure,
+    CodeBlock,
+    Comment,
+    CompileConstant,
+    ConditionalOperator,
+    ComputedProperty,
+    Continue,
+    Deinit,
+    DefaultValue,
+    DictionaryLiteral,
+    DictionaryType,
+    Do,
+    DynamicType,
+    EnumCasePattern,
+    Enum,
+    Extension,
+    Fallthrough,
+    FloatLiteral,
+    ForIn,
+    For,
+    ForcedValue,
+    FunctionCall,
+    Function,
+    FunctionType,
+    GenericArgumentDef,
+    GenericConstraintDef,
+    GenericParameterDef,
+    Identifier,
+    If,
+    ImplicitlyUnwrappedOptional,
+    Import,
+    InOut,
+    Init,
+    InitRef,
+    IntegerLiteral,
+    LabeledStatement,
+    MemberAccess,
+    NilLiteral,
+    Operator,
+    OptionalChaining,
+    OptionalType,
+    Parameter,
+    Parameters,
+    ParenthesizedExpression,
+    Program,
+    ProtocolComposition,
+    Protocol,
+    Return,
+    Self,
+    StringInterpolation,
+    StringLiteral,
+    Struct,
+    SubscriptAccess,
+    Subscript,
+    SwitchCase,
+    Tuple,
+    TupleType,
+    TypedPattern,
+    TypeAlias,
+    TypeCase,
+    TypeCheck,
+    TypeIdentifier,
+    UnaryOperator,
+    ValueBinding,
+    ValueBindings,
+    ValueBindingPattern,
+    While
 };
 
 class NodeFactory;
@@ -133,12 +130,12 @@ class SWALLOW_EXPORT Node : public std::enable_shared_from_this<Node>
 {
     friend class NodeFactory;
 protected:
-    Node(NodeType::T nodeType);
+    Node(NodeType nodeType);
 public:
     virtual ~Node();
 public:
     SourceInfo* getSourceInfo();
-    NodeType::T getNodeType();
+    NodeType getNodeType();
     NodeFactory* getNodeFactory();
     NodePtr getParentNode() const;
 public:
@@ -158,12 +155,12 @@ public:
     /*!
      * Used for debugging, convert node type into it's class name
      */
-    static const char* nodeTypeToName(NodeType::T nodeType);
+    static const char* nodeTypeToName(NodeType nodeType);
 protected:
 
 protected:
     SourceInfo sourceInfo;
-    NodeType::T nodeType;
+    NodeType nodeType;
     NodeFactory* nodeFactory;
     std::weak_ptr<Node> parentNode;
 #ifdef TRACE_NODE

@@ -255,7 +255,7 @@ TypePtr SemanticAnalyzer::lookupType(const TypeNodePtr& type, bool supressErrors
 TypeNodePtr SemanticAnalyzer::expressionToType(const ExpressionPtr& expr)
 {
     assert(expr != nullptr);
-    NodeType::T nodeType = expr->getNodeType();
+    NodeType nodeType = expr->getNodeType();
     switch(nodeType)
     {
         case NodeType::Identifier:
@@ -367,7 +367,7 @@ TypePtr SemanticAnalyzer::finalTypeOfOptional(const TypePtr& optionalType)
  */
 ExpressionPtr SemanticAnalyzer::expandSelfAccess(const ExpressionPtr& expr)
 {
-    NodeType::T nodeType = expr->getNodeType();
+    NodeType nodeType = expr->getNodeType();
     switch(nodeType)
     {
         case NodeType::Identifier:

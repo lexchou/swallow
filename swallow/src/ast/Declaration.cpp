@@ -33,7 +33,7 @@
 USE_SWALLOW_NS
 
 
-Declaration::Declaration(NodeType::T nodeType)
+Declaration::Declaration(NodeType nodeType)
     :Statement(nodeType), modifiers(0), genericParameters(NULL)
 {
 }

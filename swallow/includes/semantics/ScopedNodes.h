@@ -53,6 +53,13 @@ public:
     virtual void accept(NodeVisitor* visitor) override;
     void setScope(SymbolScope* scope);
 };
+
+class SWALLOW_EXPORT SemanticExtensionDef : public ExtensionDef
+{
+public:
+    TypePtr extension;
+};
+typedef std::shared_ptr<SemanticExtensionDef> SemanticExtensionDefPtr;
 class SWALLOW_EXPORT ScopedCodeBlock : public CodeBlock, public ScopeOwner
 {
 public:

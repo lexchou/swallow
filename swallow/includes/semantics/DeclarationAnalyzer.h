@@ -72,6 +72,10 @@ public:
     //virtual void visitValueBinding(const ValueBindingPtr& node) override;
     virtual void visitValueBindings(const ValueBindingsPtr& node) override;
 
+    virtual void visitWhileLoop(const WhileLoopPtr& node) override;
+    virtual void visitForIn(const ForInLoopPtr& node) override;
+    virtual void visitForLoop(const ForLoopPtr& node) override;
+
     /*!
      * Only visits the implementation of members of given type definition
      */

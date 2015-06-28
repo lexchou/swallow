@@ -40,7 +40,7 @@ typedef std::shared_ptr<class Type> TypePtr;
 class SWALLOW_EXPORT TypeDeclaration : public Declaration
 {
 public:
-    TypeDeclaration(NodeType::T nodeType);
+    TypeDeclaration(NodeType nodeType);
     ~TypeDeclaration();
 public:
     void addParent(const TypeIdentifierPtr& parent);

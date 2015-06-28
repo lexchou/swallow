@@ -133,7 +133,7 @@ static bool validateGeneralModifiers(SemanticAnalyzer* analyzer, const Declarati
     if(modifiers & DeclarationModifiers::Final)
     {
         //final only applies to class or member definition
-        NodeType::T nodeType = decl->getNodeType();
+        NodeType nodeType = decl->getNodeType();
         switch(nodeType)
         {
             case NodeType::Struct:
@@ -239,7 +239,7 @@ void SemanticAnalyzer::validateDeclarationModifiers(const DeclarationPtr& declar
 {
     if(declaration->hasModifier(DeclarationModifiers::_Generated))
         return;// no checking for generated declarations
-    NodeType::T nodeType = declaration->getNodeType();
+    NodeType nodeType = declaration->getNodeType();
     switch(nodeType)
     {
         case NodeType::ComputedProperty:

@@ -30,7 +30,7 @@
 #include "ast/Operator.h"
 USE_SWALLOW_NS
 
-Operator::Operator(NodeType::T nodeType)
+Operator::Operator(NodeType nodeType)
     :Expression(nodeType), operatorType(OperatorType::_), associativity(Associativity::None), precedence(100)
 {
     

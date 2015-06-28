@@ -6,6 +6,7 @@
 #include "semantics/ScopedNodes.h"
 #include "common/Errors.h"
 #include "ast/ast.h"
+#include <cassert>
 
 USE_SWALLOW_NS
 using namespace std;
@@ -45,8 +46,20 @@ void ForwardDeclarationAnalyzer::visitProtocol(const ProtocolDefPtr& node)
 }
 void ForwardDeclarationAnalyzer::visitExtension(const ExtensionDefPtr& node)
 {
-    //TODO enter type's scope
-    SemanticPass::visitExtension(node);
+    wstring name = node->getIdentifier()->getName();
+    TypePtr type;
+    symbolRegistry->lookupType(name, nullptr, &type, false);
+    if(type == nullptr)
+    {
+        //check it by forward declaration
+        type = symbolRegistry->getCurrentScope()->getForwardDeclaration(name);
+    }
+    if(type != nullptr)
+    {
+        //TODO: we should allow if the extension is declared after type,
+        ScopeGuard scope(symbolRegistry, type->getScope());
+        SemanticPass::visitExtension(node);
+    }
 }
 
 

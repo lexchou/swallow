@@ -82,7 +82,7 @@ void SemanticAnalyzer::checkTupleDefinition(const TuplePtr& tuple, const Express
 
     for(const PatternPtr& p : *tuple)
     {
-        NodeType::T nodeType = p->getNodeType();
+        NodeType nodeType = p->getNodeType();
         if(nodeType != NodeType::Identifier)
         {
 

@@ -41,7 +41,7 @@ class GenericParametersDef;
 class SWALLOW_EXPORT Declaration : public Statement
 {
 public:
-    Declaration(NodeType::T nodeType);
+    Declaration(NodeType nodeType);
     ~Declaration();
 public:
     void setAttributes(const std::vector<AttributePtr>& attrs);

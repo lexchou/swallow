@@ -80,7 +80,7 @@ bool SemanticAnalyzer::hasOptionalChaining(const NodePtr& node)
 {
     if(!node)
         return false;
-    NodeType::T nodeType = node->getNodeType();
+    NodeType nodeType = node->getNodeType();
     if(nodeType == NodeType::OptionalChaining)
         return true;
     if(nodeType == NodeType::MemberAccess)

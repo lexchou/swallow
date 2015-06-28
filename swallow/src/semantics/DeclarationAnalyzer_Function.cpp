@@ -606,6 +606,18 @@ void DeclarationAnalyzer::visitSubscript(const SubscriptDefPtr &node)
     Subscript subscript(getterType->getParameters(), getterType->getReturnType(), getter, setter, flags);
     checkForSubscriptOverride(subscript, node);
     t->addSubscript(subscript);
+    
+    
+    //visit for inner variable declarations
+    {
+        SCOPED_SET(ctx->currentFunction, getter->getType());
+        node->getGetter()->accept(this);
+    }
+    if(node->getSetter())
+    {
+        SCOPED_SET(ctx->currentFunction, setter->getType());
+        node->getSetter()->accept(this);
+    }
 }
 void DeclarationAnalyzer::checkForFunctionOverriding(const std::wstring& name, const FunctionSymbolPtr& decl, const DeclarationPtr& node)
 {
@@ -859,6 +871,10 @@ void DeclarationAnalyzer::visitDeinit(const DeinitializerDefPtr& node)
     node->getBody()->setType(funcType);
     registerSelfSuper(ctx->currentType, funcType, node->getBody(), node->getModifiers());
     static_pointer_cast<TypeBuilder>(ctx->currentType)->setDeinit(deinit);
+    
+    //visit for inner variable declarations
+    SCOPED_SET(ctx->currentFunction, deinit->getType());
+    node->getBody()->accept(this);
 }
 
 void DeclarationAnalyzer::visitInit(const InitializerDefPtr& node)
@@ -929,5 +945,10 @@ void DeclarationAnalyzer::visitInit(const InitializerDefPtr& node)
     declarationFinished(name, init, node);
     node->getBody()->setType(funcType);
     static_pointer_cast<SymboledInit>(node)->symbol = init;
+    
+    
+    //visit for inner variable declarations
+    SCOPED_SET(ctx->currentFunction, init->getType());
+    node->getBody()->accept(this);
 }
 

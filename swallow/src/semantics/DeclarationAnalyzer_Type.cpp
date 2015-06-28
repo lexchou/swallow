@@ -372,7 +372,7 @@ void DeclarationAnalyzer::visitImplementation(const TypeDeclarationPtr &node)
     SCOPED_SET(ctx->flags, (ctx->flags & (~SemanticContext::FLAG_PROCESS_DECLARATION)) | SemanticContext::FLAG_PROCESS_IMPLEMENTATION);
     for (auto decl : *node)
     {
-        NodeType::T t = decl->getNodeType();
+        NodeType t = decl->getNodeType();
         switch(t)
         {
             case NodeType::Class:
@@ -593,9 +593,9 @@ void DeclarationAnalyzer::visitExtension(const ExtensionDefPtr& node)
         return;
     }
 
-    SCOPED_SET(ctx->currentType, type);
     TypePtr extension = Type::newExtension(type);
-    symbolRegistry->getFileScope()->addExtension(extension);
+    static_pointer_cast<SemanticExtensionDef>(node)->extension = extension;
+    SCOPED_SET(ctx->currentType, type);
     SCOPED_SET(ctx->currentExtension, extension);
     for(const DeclarationPtr& decl : *node)
     {

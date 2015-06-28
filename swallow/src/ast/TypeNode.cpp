@@ -32,7 +32,7 @@
 USE_SWALLOW_NS
 
 
-TypeNode::TypeNode(NodeType::T nodeType)
+TypeNode::TypeNode(NodeType nodeType)
     :Statement(nodeType)
 {
 }

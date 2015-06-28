@@ -121,7 +121,7 @@ bool SemanticAnalyzer::containsReadonlyNode(const ExpressionPtr& node)
 {
     if(node == nullptr)
         return false;
-    NodeType::T nodeType = node->getNodeType();
+    NodeType nodeType = node->getNodeType();
     if(nodeType == NodeType::Identifier)
     {
         IdentifierPtr id = static_pointer_cast<Identifier>(node);

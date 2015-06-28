@@ -452,7 +452,7 @@ SymbolPtr SemanticAnalyzer::visitFunctionCall(bool mutatingSelf, std::vector<Sym
 
 void SemanticAnalyzer::visitFunctionCall(const FunctionCallPtr& node)
 {
-    NodeType::T nodeType = node->getFunction()->getNodeType();
+    NodeType nodeType = node->getFunction()->getNodeType();
     ExpressionPtr func = node->getFunction();
 
     //merge trailing closure as the last parameter

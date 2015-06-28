@@ -46,7 +46,7 @@ std::list<Node*> Node::UnreleasedNodes;
 /*!
 * Used for debugging, convert node type into it's class name
 */
-const char* Node::nodeTypeToName(NodeType::T nodeType)
+const char* Node::nodeTypeToName(NodeType nodeType)
 {
 #define CASE_TYPE(T) case NodeType::T: return #T;
     switch(nodeType)
@@ -134,7 +134,7 @@ const char* Node::nodeTypeToName(NodeType::T nodeType)
 
 
 
-Node::Node(NodeType::T nodeType)
+Node::Node(NodeType nodeType)
 :nodeType(nodeType), nodeFactory(nullptr)
 {
 #ifdef TRACE_NODE
@@ -161,7 +161,7 @@ SourceInfo* Node::getSourceInfo()
 {
     return &sourceInfo;
 }
-NodeType::T Node::getNodeType()
+NodeType Node::getNodeType()
 {
     return nodeType;
 }
