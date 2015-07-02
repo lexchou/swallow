@@ -90,10 +90,99 @@ void SemanticAnalyzer::checkTupleDefinition(const TuplePtr& tuple, const Express
 
     }
 }
+/*!
+ * Verify type of tuple declaration
+ */
+void SemanticAnalyzer::validateTupleTypeDeclaration(const ValueBindingPtr& node)
+{
+    TypePtr tupleType = nullptr;
+    TypePtr initializerType = nullptr;
+    if(node->getDeclaredType())
+        tupleType = lookupType(node->getDeclaredType());
+    if(node->getInitializer())
+    {
+        SCOPED_SET(ctx->contextualType, tupleType);
+        node->getInitializer()->accept(this);
+        initializerType = node->getInitializer()->getType();
+        assert(initializerType != nullptr);
+    }
+    //now validate with name
+    PatternPtr name = node->getName();
+    validateTupleTypeDeclaration(name, tupleType, initializerType);
+}
+void SemanticAnalyzer::validateTupleTypeDeclaration(const PatternPtr& name, const TypePtr& declType, const TypePtr& initType)
+{
+    switch(name->getNodeType())
+    {
+        case NodeType::Identifier:
+        {
+            if(initType && declType && !initType->canAssignTo(declType))
+            {
+                error(name, Errors::E_CANNOT_CONVERT_EXPRESSION_TYPE_2, initType->toString(), declType->toString());
+            }
+            break;
+        }
+        case NodeType::TypedPattern:
+        {
+            TypedPatternPtr pat = static_pointer_cast<TypedPattern>(name);
+            assert(pat->getDeclaredType());
+            TypePtr nameType = lookupType(pat->getDeclaredType());
+            assert(nameType != nullptr);
+            if(declType && !Type::equals(nameType, declType))
+            {
+                error(name, Errors::E_TYPE_ANNOTATION_DOES_NOT_MATCH_CONTEXTUAL_TYPE_A_1, declType->toString());
+                abort();
+                return;
+            }
+
+            break;
+        }
+        case NodeType::Tuple:
+        {
+            TuplePtr tuple = static_pointer_cast<Tuple>(name);
+            if(declType)
+            {
+                if((declType->getCategory() != Type::Tuple) || (tuple->numElements() != declType->numElementTypes()))
+                {
+                    error(name, Errors::E_TYPE_ANNOTATION_DOES_NOT_MATCH_CONTEXTUAL_TYPE_A_1, declType->toString());
+                    abort();
+                    return;
+                }
+            }
+            int elements = tuple->numElements();
+            for(int i = 0; i < elements; i++)
+            {
+                PatternPtr element = tuple->getElement(i);
+                TypePtr elementDecl = declType ? declType->getElementType(i) : nullptr;
+                TypePtr elementInit = initType ? initType->getElementType(i) : nullptr;
+                validateTupleTypeDeclaration(element, elementDecl, elementInit);
+            }
+            break;
+        }
+        case NodeType::ValueBindingPattern:
+            break;
+        case NodeType::EnumCasePattern:
+        {
+            
+            break;
+        }
+        case NodeType::TypeCase:
+        case NodeType::TypeCheck:
+        default:
+            error(name, Errors::E_EXPECT_TUPLE_OR_IDENTIFIER);
+            break;
+    }
+    
+}
+
 void SemanticAnalyzer::visitValueBinding(const ValueBindingPtr& node)
 {
     PatternPtr name = node->getName();
     //tuple was already exploded in declaration analyzer
+    if(name->getNodeType() == NodeType::Tuple)
+    {
+        validateTupleTypeDeclaration(node);
+    }
     if (name->getNodeType() != NodeType::Identifier)
         return;
     if(node->getOwner()->isReadOnly() && !node->getInitializer() && ctx->currentType == nullptr)

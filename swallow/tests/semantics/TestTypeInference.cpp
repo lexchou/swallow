@@ -187,24 +187,20 @@ TEST(TestTypeInference, TupleAssignment1)
 TEST(TestTypeInference, TupleAssignment2)
 {
     SEMANTIC_ANALYZE(L"let (a : String, b) : (Int, Double) = (1, 0.3)");
-    ASSERT_EQ(1, compilerResults.numResults());
-    auto res = compilerResults.getResult(0);
-    ASSERT_EQ(Errors::E_TYPE_ANNOTATION_DOES_NOT_MATCH_CONTEXTUAL_TYPE_A_1, res.code);
+    ASSERT_ERROR(Errors::E_TYPE_ANNOTATION_DOES_NOT_MATCH_CONTEXTUAL_TYPE_A_1);
+    ASSERT_EQ(L"Int", error->items[0]);
 }
 //The 'a' already has a type but equals to the contextual type, should not emit a compiler error
 TEST(TestTypeInference, TupleAssignment3)
 {
     SEMANTIC_ANALYZE(L"let (a : Int, b) : (Int, Double) = (1, 0)");
-    dumpCompilerResults(compilerResults);
-    ASSERT_EQ(0, compilerResults.numResults());
+    ASSERT_NO_ERRORS();
 }
 
 TEST(TestTypeInference, TupleAssignment4)
 {
     SEMANTIC_ANALYZE(L"let (a, b) : (Int, Int) = (1, 0.3)");
-    ASSERT_EQ(1, compilerResults.numResults());
-    auto res = compilerResults.getResult(0);
-    ASSERT_EQ(Errors::E_CANNOT_CONVERT_EXPRESSION_TYPE_2, res.code);
+    ASSERT_ERROR(Errors::E_CANNOT_CONVERT_EXPRESSION_TYPE_2);
 }
 
 TEST(TestTypeInference, TupleAssignment5)

@@ -278,6 +278,11 @@ private:
      * Validate initializer delegation safety check
      */
     void validateInitializerDelegation(const MemberAccessPtr& node);
+    /*!
+     * Verify type of tuple declaration
+     */
+    void validateTupleTypeDeclaration(const ValueBindingPtr& node);
+    void validateTupleTypeDeclaration(const PatternPtr& name, const TypePtr& declType, const TypePtr& initType);
 protected:
 
     /*!

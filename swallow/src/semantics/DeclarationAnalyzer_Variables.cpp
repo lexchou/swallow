@@ -65,7 +65,7 @@ static void explodeValueBinding(SemanticAnalyzer* semanticAnalyzer, const ValueB
 {
     ValueBindingPtr var = *iter;
     TuplePtr name = dynamic_pointer_cast<Tuple>(var->getName());
-    TypePtr declaredType = var->getDeclaredType() ? semanticAnalyzer->lookupType(var->getDeclaredType()) : nullptr;
+    TypePtr declaredType = nullptr;//var->getDeclaredType() ? semanticAnalyzer->lookupType(var->getDeclaredType()) : nullptr;
     //expand it into tuple assignment
     NodeFactory* nodeFactory = valueBindings->getNodeFactory();
     //need a temporay variable to hold the initializer

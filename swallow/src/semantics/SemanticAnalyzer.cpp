@@ -716,7 +716,8 @@ void SemanticAnalyzer::expandTuple(vector<TupleExtractionResult>& results, vecto
         {
             TypedPatternPtr pat = static_pointer_cast<TypedPattern>(name);
             assert(pat->getDeclaredType());
-            TypePtr declaredType = lookupType(pat->getDeclaredType());
+            TypePtr declaredType = nullptr;//lookupType(pat->getDeclaredType());
+            /*
             pat->setType(declaredType);
             if(!Type::equals(declaredType, type))
             {
@@ -724,6 +725,7 @@ void SemanticAnalyzer::expandTuple(vector<TupleExtractionResult>& results, vecto
                 abort();
                 return;
             }
+             */
             expandTuple(results, indices, pat->getPattern(), tempName, declaredType, accessibility);
             break;
         }
