@@ -1,4 +1,4 @@
-/* CompilerResultEmitter.h --
+/* FunctionAnalyzer.h --
  *
  * Copyright (c) 2014, Lex Chou <lex at chou dot it>
  * All rights reserved.
@@ -27,46 +27,42 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef COMPILER_RESULT_EMITTER_H
-#define COMPILER_RESULT_EMITTER_H
-#include "swallow_conf.h"
-#include <vector>
-#include <string>
+#ifndef FUNCTION_ANALYZER_H
+#define FUNCTION_ANALYZER_H
+#include "SemanticPass.h"
+#include "Type.h"
+#include <list>
+#include "SymbolScope.h"
 
 SWALLOW_NS_BEGIN
 
-class CompilerResults;
-typedef std::shared_ptr<class Node> NodePtr;
-class SWALLOW_EXPORT CompilerResultEmitter
+class SemanticAnalyzer;
+class DeclarationAnalyzer;
+struct SemanticContext;
+class SWALLOW_EXPORT FunctionAnalyzer : public SemanticPass
 {
+    friend class DeclarationAnalyzer;
 public:
-    CompilerResultEmitter(CompilerResults* compilerResults);
+    FunctionAnalyzer(SymbolRegistry* symbolRegistry, CompilerResults* compilerResults, SemanticContext* context, SemanticAnalyzer* semanticAnalyzer, DeclarationAnalyzer* declarationAnalyzer);
 public:
-    /*!
-    * Abort the visitor
-    */
-    void abort();
-
-    /*!
-     * Outputs an compiler error
-     */
-    bool error(const NodePtr& node, int code);
-    bool error(const NodePtr& node, int code, const std::vector<std::wstring>& items);
-    bool error(const NodePtr& node, int code, const std::wstring& item);
-    bool error(const NodePtr& node, int code, const std::wstring& item1, const std::wstring& item2);
-    bool error(const NodePtr& node, int code, const std::wstring& item1, const std::wstring& item2, const std::wstring& item3);
-    bool error(const NodePtr& node, int code, const std::wstring& item1, const std::wstring& item2, const std::wstring& item3, const std::wstring& item4);
-
-
-    /*!
-     * Outputs an compiler error
-     */
-    void warning(const NodePtr& node, int code, const std::wstring& item = std::wstring());
+    virtual void visitExtension(const ExtensionDefPtr& node) override;
+    virtual void visitProtocol(const ProtocolDefPtr& node) override;
+    virtual void visitStruct(const StructDefPtr& node) override;
+    virtual void visitClass(const ClassDefPtr& node) override;
+    virtual void visitEnum(const EnumDefPtr& node) override;
 public:
-    CompilerResults* getCompilerResults();
-
+    virtual void visitClosure(const ClosurePtr& node) override;
+    virtual void visitFunction(const FunctionDefPtr& node) override;
+    virtual void visitDeinit(const DeinitializerDefPtr& node) override;
+    virtual void visitInit(const InitializerDefPtr& node) override;
+    virtual void visitComputedProperty(const ComputedPropertyPtr& node) override;
+    virtual void visitCodeBlock(const CodeBlockPtr &node) override;
+    virtual void visitSubscript(const SubscriptDefPtr &node) override;
+    void visitAccessor(const CodeBlockPtr& accessor, const ParametersNodePtr& params, const SymbolPtr& setter, int modifiers);
 protected:
-    CompilerResults* compilerResults;
+    SemanticContext* ctx;
+    SemanticAnalyzer* semanticAnalyzer;
+    DeclarationAnalyzer* declarationAnalyzer;
 };
 
 SWALLOW_NS_END
@@ -74,4 +70,4 @@ SWALLOW_NS_END
 
 
 
-#endif//OPERATOR_RESOLVER_H
+#endif//SEMANTIC_ANALYZER_H

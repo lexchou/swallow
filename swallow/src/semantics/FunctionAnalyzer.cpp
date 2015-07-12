@@ -1,4 +1,4 @@
-/* SemanticAnalyzer_Function.cpp --
+/* FunctionAnalyzer.cpp --
  *
  * Copyright (c) 2014, Lex Chou <lex at chou dot it>
  * All rights reserved.
@@ -27,7 +27,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "semantics/SemanticAnalyzer.h"
+#include "semantics/FunctionAnalyzer.h"
 #include "semantics/FunctionSymbol.h"
 #include "semantics/GenericDefinition.h"
 #include "semantics/TypeBuilder.h"
@@ -48,73 +48,91 @@
 #include "semantics/ReturnStatementValidator.h"
 #include "semantics/InitializerValidator.h"
 #include "semantics/InitializationTracer.h"
+#include "semantics/SemanticAnalyzer.h"
 
 USE_SWALLOW_NS
 using namespace std;
 
+FunctionAnalyzer::FunctionAnalyzer(SymbolRegistry* symbolRegistry, CompilerResults* compilerResults, SemanticContext* context, SemanticAnalyzer* semanticAnalyzer, DeclarationAnalyzer* declarationAnalyzer)
+    :SemanticPass(symbolRegistry, compilerResults)
+{
+    this->ctx = context;
+    this->semanticAnalyzer = semanticAnalyzer;
+    this->declarationAnalyzer = declarationAnalyzer;
+}
 
 
-void SemanticAnalyzer::visitClosure(const ClosurePtr& node)
+//Enter type scope
+void FunctionAnalyzer::visitEnum(const EnumDefPtr& node)
+{
+    SymbolScope* scope = symbolRegistry->getCurrentScope();
+    SymbolPtr sym = scope->getForwardDeclaration(node->getIdentifier()->getName());
+    assert(sym && sym->getKind() == SymbolKindType);
+    TypePtr type = static_pointer_cast<Type>(sym);
+    ScopeGuard guard(symbolRegistry, type->getScope());
+    SCOPED_SET(ctx->currentType, type);
+
+    semanticAnalyzer->visitImplementation(node, this, true);
+}
+void FunctionAnalyzer::visitClass(const ClassDefPtr& node)
+{
+    SymbolScope* scope = symbolRegistry->getCurrentScope();
+    SymbolPtr sym = scope->getForwardDeclaration(node->getIdentifier()->getName());
+    TypePtr type = static_pointer_cast<Type>(sym);
+    ScopeGuard guard(symbolRegistry, type->getScope());
+    SCOPED_SET(ctx->currentType, type);
+    semanticAnalyzer->visitImplementation(node, this, true);
+}
+void FunctionAnalyzer::visitStruct(const StructDefPtr& node)
+{
+    SymbolScope* scope = symbolRegistry->getCurrentScope();
+    SymbolPtr sym = scope->getForwardDeclaration(node->getIdentifier()->getName());
+    assert(sym && sym->getKind() == SymbolKindType);
+    TypePtr type = static_pointer_cast<Type>(sym);
+    ScopeGuard guard(symbolRegistry, type->getScope());
+    SCOPED_SET(ctx->currentType, type);
+    semanticAnalyzer->visitImplementation(node, this, true);
+}
+void FunctionAnalyzer::visitProtocol(const ProtocolDefPtr& node)
+{
+    SymbolScope* scope = symbolRegistry->getCurrentScope();
+    SymbolPtr sym = scope->getForwardDeclaration(node->getIdentifier()->getName());
+    assert(sym && sym->getKind() == SymbolKindType);
+    TypePtr type = static_pointer_cast<Type>(sym);
+    ScopeGuard guard(symbolRegistry, type->getScope());
+    SCOPED_SET(ctx->currentType, type);
+    semanticAnalyzer->visitImplementation(node, this, true);
+}
+
+void FunctionAnalyzer::visitExtension(const ExtensionDefPtr& node)
+{
+    SemanticExtensionDefPtr extensionNode = static_pointer_cast<SemanticExtensionDef>(node);
+    TypePtr extension = extensionNode->extension;
+    assert(extension != nullptr);
+    TypePtr type = extension->getInnerType();
+    assert(type != nullptr);
+    ScopeGuard scope(symbolRegistry, type->getScope());
+    SCOPED_SET(ctx->currentType, type);
+    SCOPED_SET(ctx->currentExtension, extension);
+    semanticAnalyzer->visitImplementation(node, this, true);
+}
+
+
+
+void FunctionAnalyzer::visitClosure(const ClosurePtr& node)
 {
     ScopedClosurePtr closure = std::static_pointer_cast<ScopedClosure>(node);
-
-    //check contextual type
-    if(ctx->contextualType && ctx->contextualType->getCategory() != Type::Function)
+    TypePtr type = node->getType();
+    assert(type != nullptr);
+    SCOPED_SET(ctx->currentFunction, node->getType());
+    for(const StatementPtr& st : *node)
     {
-        error(node, Errors::E_FUNCTION_PROCEDURES_EXPECTD_TYPE_A_DID_YOU_MEAN_TO_CALL_IT_WITH_1, ctx->contextualType->toString());
-        return;
-    }
-
-    TypePtr returnedType = nullptr;
-    if(node->getReturnType())
-        returnedType = declarationAnalyzer->resolveType(node->getReturnType(), true);
-    else if(ctx->contextualType)
-        returnedType = ctx->contextualType->getReturnType();
-    std::vector<Parameter> params;
-    bool variadic = false;
-    if(node->getParameters())
-    {
-        variadic = node->getParameters()->isVariadicParameters();
-        //infer parameter types if they're ignored
-        TypePtr contextualType = ctx->contextualType;
-        int i = 0;
-        for(ParameterNodePtr param : *node->getParameters())
-        {
-            if(param->getDeclaredType() == nullptr)
-            {
-                assert(contextualType != nullptr && contextualType->getCategory() == Type::Function);
-                TypePtr paramType = contextualType->getParameters()[i].type;
-                assert(paramType != nullptr);
-                param->setType(paramType);
-            }
-            i++;
-        }
-
-        node->getParameters()->accept(declarationAnalyzer);
-        declarationAnalyzer->prepareParameters(closure->getScope(), node->getParameters());
-
-        //create a function type for this
-        for(const ParameterNodePtr& param : *node->getParameters())
-        {
-            TypePtr type = param->getType();//lookupType(param->getDeclaredType());
-            assert(type != nullptr);
-            const std::wstring& name = param->isShorthandExternalName() ? param->getLocalName() : param->getExternalName();
-            params.push_back(Parameter(name, param->isInout(), type));
-        }
-    }
-    TypePtr closureType = Type::newFunction(params, returnedType, variadic);
-    node->setType(closureType);
-
-
-    if(node->getCapture())
-    {
-        node->getCapture()->accept(this);
+        st->accept(semanticAnalyzer);
     }
 }
 
-void SemanticAnalyzer::visitSubscript(const SubscriptDefPtr &node)
+void FunctionAnalyzer::visitSubscript(const SubscriptDefPtr &node)
 {
-    /*
     //TypeInference
     ParametersNodePtr parameters = node->getParameters();
     TypePtr retType = declarationAnalyzer->resolveType(node->getReturnType(), true);
@@ -142,9 +160,10 @@ void SemanticAnalyzer::visitSubscript(const SubscriptDefPtr &node)
         setterName = node->getSetterName();
     SymbolPlaceHolderPtr setter(new SymbolPlaceHolder(setterName, retType, SymbolPlaceHolder::R_PARAMETER, SymbolFlagReadable | SymbolFlagInitialized));
     visitAccessor(node->getSetter(), parameters, setter, node->getModifiers());
-    */
 }
-void SemanticAnalyzer::visitAccessor(const CodeBlockPtr& accessor, const ParametersNodePtr& params, const SymbolPtr& setter, int modifiers)
+
+
+void FunctionAnalyzer::visitAccessor(const CodeBlockPtr& accessor, const ParametersNodePtr& params, const SymbolPtr& setter, int modifiers)
 {
     if(!accessor)
         return;
@@ -159,32 +178,62 @@ void SemanticAnalyzer::visitAccessor(const CodeBlockPtr& accessor, const Paramet
 
     SCOPED_SET(ctx->currentFunction, accessor->getType());
 
-    accessor->accept(this);
+    accessor->accept(semanticAnalyzer);
 }
 
-void SemanticAnalyzer::visitFunction(const FunctionDefPtr& node)
+void FunctionAnalyzer::visitFunction(const FunctionDefPtr& node)
 {
+    if(node->hasModifier(DeclarationModifiers::_Generated))
+        return;
+    //visit implementation
+    FunctionSymbolPtr func = static_pointer_cast<SymboledFunction>(node)->symbol;
+    if(func->getDeclaringType() && func->getDeclaringType()->getCategory() == Type::Protocol)
+        return;//do not check implementation if it's defined as protocol function
+    assert(func != nullptr);
+    SCOPED_SET(ctx->currentFunction, func->getType());
+    node->getBody()->accept(semanticAnalyzer);
+
+    if(!Type::equals(func->getType()->getReturnType(), symbolRegistry->getGlobalScope()->Void()))
+    {
+        //check return in all branches
+        ReturnStatementValidator validator(ctx);
+        node->getBody()->accept(&validator);
+        NodePtr refNode = validator.getRefNode() ? validator.getRefNode() : node;
+        ReturnCoverResult  result = validator.getResult();
+        if (result & ReturnCoverDeadcode)
+        {
+            this->warning(refNode, Errors::W_CODE_AFTER_A_WILL_NEVER_BE_EXECUTED_1, L"return");
+            return;
+        }
+        switch (result)
+        {
+            case ReturnCoverNoResult:
+            case ReturnCoverUnmatched:
+            case ReturnCoverPartial:
+                error(refNode, Errors::E_MISSING_RETURN_IN_A_FUNCTION_EXPECTED_TO_RETURN_A_1, func->getType()->getReturnType()->toString());
+                return;
+            default:
+                break;
+        }
+    }
 }
 
-void SemanticAnalyzer::visitDeinit(const DeinitializerDefPtr& node)
+void FunctionAnalyzer::visitDeinit(const DeinitializerDefPtr& node)
 {
-    /*
     TypePtr funcType = ctx->currentType->getDeinit()->getType();
     SCOPED_SET(ctx->currentFunction, funcType);
-    node->getBody()->accept(this);
-    */
+    node->getBody()->accept(semanticAnalyzer);
 }
 
-void SemanticAnalyzer::visitInit(const InitializerDefPtr& node)
+void FunctionAnalyzer::visitInit(const InitializerDefPtr& node)
 {
-    /*
     FunctionSymbolPtr init = static_pointer_cast<SymboledInit>(node)->symbol;
     TypePtr funcType = init->getType();
     SCOPED_SET(ctx->currentFunction, funcType);
     {
         InitializationTracer tracer(nullptr, InitializationTracer::Sequence);
         SCOPED_SET(ctx->currentInitializationTracer, &tracer);
-        node->getBody()->accept(this);
+        node->getBody()->accept(semanticAnalyzer);
         //check if some stored property is not initialized
         for(const SymbolPtr& storedProp : ctx->currentType->getDeclaredStoredProperties())
         {
@@ -261,24 +310,14 @@ void SemanticAnalyzer::visitInit(const InitializerDefPtr& node)
         }
 
     }
-    */
 }
 
-void SemanticAnalyzer::visitCodeBlock(const CodeBlockPtr &node)
+void FunctionAnalyzer::visitCodeBlock(const CodeBlockPtr &node)
 {
-    SCOPED_SET(ctx->flags, ctx->flags | SemanticContext::FLAG_PROCESS_IMPLEMENTATION | SemanticContext::FLAG_PROCESS_DECLARATION);
-    auto iter = node->begin();
-    for(; iter != node->end(); iter++)
-    {
-        StatementPtr st = *iter;
-        if(BinaryOperatorPtr op = dynamic_pointer_cast<BinaryOperator>(st))
-            *iter = transformExpression(nullptr, op);
-        st->accept(this);
-    }
 }
 
 
-void SemanticAnalyzer::visitComputedProperty(const ComputedPropertyPtr& node)
+void FunctionAnalyzer::visitComputedProperty(const ComputedPropertyPtr& node)
 {
     CodeBlockPtr didSet = node->getDidSet();
     CodeBlockPtr willSet = node->getWillSet();
@@ -300,12 +339,12 @@ void SemanticAnalyzer::visitComputedProperty(const ComputedPropertyPtr& node)
     if(!property->hasModifier(DeclarationModifiers::_Generated))
     {
         if(property->functions.getter)
-            property->functions.getter->accept(this);
+            property->functions.getter->accept(semanticAnalyzer);
         if(property->functions.setter)
-            property->functions.setter->accept(this);
+            property->functions.setter->accept(semanticAnalyzer);
         if(property->functions.willSet)
-            property->functions.willSet->accept(this);
+            property->functions.willSet->accept(semanticAnalyzer);
         if(property->functions.didSet)
-            property->functions.didSet->accept(this);
+            property->functions.didSet->accept(semanticAnalyzer);
     }
 }

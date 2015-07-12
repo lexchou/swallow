@@ -38,6 +38,8 @@
 #include "semantics/GlobalScope.h"
 #include "semantics/ScopeGuard.h"
 #include "semantics/ForwardDeclarationAnalyzer.h"
+#include "semantics/InitializationTracer.h"
+#include "semantics/FunctionAnalyzer.h"
 #include "common/CompilerResults.h"
 #include "parser/Parser.h"
 using namespace std;
@@ -58,11 +60,13 @@ SwallowCompiler::SwallowCompiler(const wstring& moduleName)
     semanticAnalyzer = new SemanticAnalyzer(symbolRegistry, compilerResults, ctx, declarationAnalyzer);
     declarationAnalyzer->setSemanticAnalyzer(semanticAnalyzer);
     forwardDeclarationAnalyzer = new ForwardDeclarationAnalyzer(symbolRegistry, compilerResults);
+    functionAnalyzer = new FunctionAnalyzer(symbolRegistry, compilerResults, ctx, semanticAnalyzer, declarationAnalyzer);
     scope = new SymbolScope();
 }
 SwallowCompiler::~SwallowCompiler()
 {
     delete scope;
+    delete functionAnalyzer;
     delete forwardDeclarationAnalyzer;
     delete semanticAnalyzer;
     delete declarationAnalyzer;
@@ -113,10 +117,15 @@ bool SwallowCompiler::compile(std::vector<ProgramPtr>& programs)
             if(!parser.parse(source->code.c_str(), program))
                 throw Abort();
 
+            
+            InitializationTracer tracer(nullptr, InitializationTracer::Sequence);
+            SCOPED_SET(ctx->currentInitializationTracer, &tracer);
+
             program->accept(operatorResolver);
             program->accept(forwardDeclarationAnalyzer);
             program->accept(declarationAnalyzer);
             program->accept(semanticAnalyzer);
+            program->accept(functionAnalyzer);
         }
         symbolRegistry->setFileScope(nullptr);
     }

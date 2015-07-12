@@ -188,9 +188,6 @@ bool SemanticAnalyzer::resolveLazySymbol(const std::wstring& name)
 }
 void SemanticAnalyzer::visitProgram(const ProgramPtr& node)
 {
-    InitializationTracer tracer(nullptr, InitializationTracer::Sequence);
-    SCOPED_SET(ctx->currentInitializationTracer, &tracer);
-
     SemanticPass::visitProgram(node);
     //now we'll deal with the lazy declaration of functions and classes
     finalizeLazyDeclaration();

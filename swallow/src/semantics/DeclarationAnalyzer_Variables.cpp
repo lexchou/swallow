@@ -45,6 +45,7 @@
 #include "semantics/SemanticContext.h"
 #include "semantics/SemanticAnalyzer.h"
 #include "semantics/SemanticUtils.h"
+#include "semantics/TypeResolver.h"
 
 USE_SWALLOW_NS
 using namespace std;
@@ -65,7 +66,12 @@ static void explodeValueBinding(SemanticAnalyzer* semanticAnalyzer, const ValueB
 {
     ValueBindingPtr var = *iter;
     TuplePtr name = dynamic_pointer_cast<Tuple>(var->getName());
-    TypePtr declaredType = nullptr;//var->getDeclaredType() ? semanticAnalyzer->lookupType(var->getDeclaredType()) : nullptr;
+    TypePtr declaredType = nullptr;
+    if(var->getDeclaredType())
+    {
+        TypeResolver typeResolver(semanticAnalyzer->getSymbolRegistry(), semanticAnalyzer, semanticAnalyzer, semanticAnalyzer->getContext(), true);
+        declaredType = typeResolver.lookupType(var->getDeclaredType());//var->getDeclaredType() ? semanticAnalyzer->lookupType(var->getDeclaredType()) : nullptr;
+    }
     //expand it into tuple assignment
     NodeFactory* nodeFactory = valueBindings->getNodeFactory();
     //need a temporay variable to hold the initializer

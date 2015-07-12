@@ -74,6 +74,7 @@ class DeclarationAnalyzer;
 class SWALLOW_EXPORT SemanticAnalyzer : public SemanticPass, public LazySymbolResolver
 {
     friend class DeclarationAnalyzer;
+    friend class FunctionAnalyzer;
 public:
     SemanticAnalyzer(SymbolRegistry* symbolRegistry, CompilerResults* compilerResults, SemanticContext* context, DeclarationAnalyzer* declarationAnalyzer);
     ~SemanticAnalyzer();
@@ -162,6 +163,12 @@ public:
      *
      */
     void expandTuple(std::vector<TupleExtractionResult>& results, std::vector<int>& indices, const PatternPtr& name, const std::wstring& tempName, const TypePtr& type, PatternAccessibility accessibility);
+
+    /*!
+     * visit member implementation nodes
+     */
+    void visitImplementation(const TypeDeclarationPtr& node);
+    void visitImplementation(const TypeDeclarationPtr& node, NodeVisitor* visitor, bool initializeMembers);
 private:
     //Verify each symbol in the tuple is initialized and writable
     void verifyTuplePatternForAssignment(const PatternPtr& pattern);
@@ -294,11 +301,6 @@ protected:
      * Verification of protocol confirmation in all types of current module
      */
     void verifyProtocolConforms();
-
-    /*!
-     * visit member implementation nodes
-     */
-    void visitImplementation(const TypeDeclarationPtr& node);
 
 protected:
     SemanticContext* ctx;

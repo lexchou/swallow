@@ -91,4 +91,8 @@ void CompilerResultEmitter::warning(const NodePtr& node, int code, const std::ws
     compilerResults->add(ErrorLevel::Warning, *node->getSourceInfo(), code, item);
 }
 
+CompilerResults* CompilerResultEmitter::getCompilerResults()
+{
+    return compilerResults;
+}
 

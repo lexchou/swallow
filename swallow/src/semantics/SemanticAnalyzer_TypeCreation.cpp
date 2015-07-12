@@ -67,6 +67,10 @@ static bool isLiteralExpression(const ExpressionPtr& expr)
 
 void SemanticAnalyzer::visitImplementation(const TypeDeclarationPtr& node)
 {
+    visitImplementation(node, this, false);
+}
+void SemanticAnalyzer::visitImplementation(const TypeDeclarationPtr& node, NodeVisitor* visitor, bool initializeMembers)
+{
     vector<TypeAliasPtr> aliasNodes;
     vector<InitializerDefPtr> designatedInits;
     vector<InitializerDefPtr> convenienceInits;
@@ -101,31 +105,34 @@ void SemanticAnalyzer::visitImplementation(const TypeDeclarationPtr& node)
 
     for(auto decl : aliasNodes)
     {
-        decl->accept(this);
+        decl->accept(visitor);
     }
     for(auto decl : props)
     {
-        decl->accept(this);
+        decl->accept(visitor);
     }
     for(auto decl : designatedInits)
     {
-        decl->accept(this);
+        decl->accept(visitor);
     }
     //mark all stored properties initialized after designated initializer visited.
-    assert(ctx->currentType);
-    for(const SymbolPtr& p : ctx->currentType->getDeclaredStoredProperties())
+    if(initializeMembers)
     {
-        markInitialized(p);
+        assert(ctx->currentType);
+        for(const SymbolPtr& p : ctx->currentType->getDeclaredStoredProperties())
+        {
+            markInitialized(p);
+        }
     }
     
     
     for(auto decl : convenienceInits)
     {
-        decl->accept(this);
+        decl->accept(visitor);
     }
     for(auto decl : others)
     {
-        decl->accept(this);
+        decl->accept(visitor);
     }
 }
 void SemanticAnalyzer::visitTypeAlias(const TypeAliasPtr& node)

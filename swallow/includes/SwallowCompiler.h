@@ -40,6 +40,7 @@ class OperatorResolver;
 class SemanticAnalyzer;
 class DeclarationAnalyzer;
 class ForwardDeclarationAnalyzer;
+class FunctionAnalyzer;
 class NodeFactory;
 class SymbolScope;
 struct SemanticContext;
@@ -77,6 +78,7 @@ private:
     SemanticAnalyzer* semanticAnalyzer;
     DeclarationAnalyzer* declarationAnalyzer;
     ForwardDeclarationAnalyzer* forwardDeclarationAnalyzer;
+    FunctionAnalyzer* functionAnalyzer;
     std::vector<SourceFilePtr> sourceFiles;
     SemanticContext* ctx;
 
