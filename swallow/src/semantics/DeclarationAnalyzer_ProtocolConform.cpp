@@ -251,6 +251,8 @@ bool DeclarationAnalyzer::verifyProtocolConform(const TypePtr& type, const TypeP
     //check again for associated types
     for(auto entry : protocol->getAssociatedTypes())
     {
+        if(entry.second->resolveAlias() != nullptr)
+            continue;
         TypePtr t = type->getAssociatedType(entry.first);
         if(t == nullptr)
         {
