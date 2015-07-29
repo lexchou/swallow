@@ -47,6 +47,7 @@ class REPL
 {
 public:
     REPL(const ConsoleWriterPtr& out);
+    ~REPL();
 public:
     void repl();
 private:
@@ -62,7 +63,7 @@ private://commands
     void commandQuit(const wstring& args);
     void commandSymbols(const wstring& args);
 private:
-    Swallow::SwallowCompiler compiler;
+    Swallow::SwallowCompiler* compiler;
     std::map<std::wstring, CommandMethod> methods;
     ConsoleWriterPtr out;
     int resultId;

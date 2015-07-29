@@ -619,89 +619,27 @@ void DeclarationAnalyzer::visitSubscript(const SubscriptDefPtr &node)
         node->getSetter()->accept(this);
     }
 }
-void DeclarationAnalyzer::checkForFunctionOverriding(const std::wstring& name, const FunctionSymbolPtr& decl, const DeclarationPtr& node)
-{
-    if(!ctx->currentType)
-        return;//not for global function
-    if(node->hasModifier(DeclarationModifiers::_Generated))
-        return;//do not check for generated functions
-    bool staticMember = decl->hasFlags(SymbolFlagStatic);
-    //check if there's the same signature exists
-    {
-        std::vector<SymbolPtr> funcs;
-        //std::wstring typeName = ctx.currentType->getName();
-        semanticAnalyzer->getMethodsFromType(ctx->currentType, name, (MemberFilter)((staticMember ? FilterStaticMember : 0) | FilterLookupInExtension ), funcs);
-        for(const SymbolPtr& f : funcs)
-        {
-            if(f == decl)
-                continue;
-            if(Type::equals(f->getType(), decl->getType()))
-            {
-                error(node, Errors::E_INVALID_REDECLARATION_1, name);
-                return;
-            }
-        }
-    }
-
-    //check if it override
-    if(ctx->currentType->getParentType())
-    {
-        std::vector<SymbolPtr> funcs;
-        semanticAnalyzer->getMethodsFromType(ctx->currentType->getParentType(), name, (MemberFilter)((staticMember ? FilterStaticMember : 0) | (FilterLookupInExtension | FilterRecursive)), funcs);
-        SymbolPtr matched = nullptr;
-        for(const SymbolPtr& func : funcs)
-        {
-            if(Type::equals(func->getType(), decl->getType()))
-            {
-                matched = func;
-                break;
-            }
-        }
-        assert(node != nullptr);
-        {
-            if(ctx->currentExtension && matched)
-            {
-                error(node, Errors::E_DECLARATIONS_IN_EXTENSIONS_CANNOT_OVERRIDE_YET);
-                return;
-            }
-            if (node->hasModifier(DeclarationModifiers::Override))
-            {
-                if (!matched)
-                {
-                    error(node, Errors::E_METHOD_DOES_NOT_OVERRIDE_ANY_METHOD_FROM_ITS_SUPERCLASS);
-                    return;
-                }
-                if(matched->hasFlags(SymbolFlagFinal))
-                {
-                    error(node, Errors::E_INSTANCE_METHOD_OVERRIDES_A_FINAL_INSTANCE_METHOD);
-                    return;
-                }
-            }
-            else
-            {
-                bool supress = false;
-                //it's ok to use keyword 'required' without 'override' on an initializer
-                if(decl->getType()->hasFlags(SymbolFlagRequired) && matched && matched->getType()->hasFlags(SymbolFlagRequired))
-                    supress = true;
-                if (matched && !supress)
-                {
-                    if(matched->getType()->hasFlags(SymbolFlagRequired))
-                        error(node, Errors::E_REQUIRED_MODIFIER_MUST_BE_PRESENT_ON_ALL_OVERRIDES_OF_A_REQUIRED_INITIALIZER);
-                    else
-                        error(node, Errors::E_OVERRIDING_DECLARATION_REQUIRES_AN_OVERRIDE_KEYWORD);
-                    return;
-                }
-            }
-        }
-    }
-}
-
 void DeclarationAnalyzer::visitClosure(const ClosurePtr& node)
 {
     
 }
+
+/*!
+ * Check if the declaration is declared as global
+ */
+bool isGlobal(const DeclarationPtr& node)
+{
+    NodePtr parent = node->getParentNode();
+    bool ret(parent == nullptr || parent->getNodeType() == NodeType::Program);
+    return ret;
+}
 void DeclarationAnalyzer::visitFunction(const FunctionDefPtr& node)
 {
+    if(ctx->lazyDeclaration && isGlobal(node))
+    {
+        delayDeclare(node);
+        return;
+    }
     GenericDefinitionPtr generic;
     if(node->getGenericParametersDef())
         generic = prepareGenericTypes(node->getGenericParametersDef());
@@ -852,7 +790,6 @@ void DeclarationAnalyzer::visitFunction(const FunctionDefPtr& node)
     static_pointer_cast<SymboledFunction>(node)->symbol = func;
     //validate it and mark it declared
     validateDeclarationModifiers(node);
-    checkForFunctionOverriding(sym->getName(), func, node);
     declarationFinished(sym->getName(), func, node);
 
     //visit for inner variable declarations
@@ -941,7 +878,6 @@ void DeclarationAnalyzer::visitInit(const InitializerDefPtr& node)
     init->setAccessLevel(parseAccessLevel(node->getModifiers()));
     if(ctx->currentType->getParentType())
         prepareDefaultInitializers(ctx->currentType->getParentType());
-    checkForFunctionOverriding(name, init, node);
     declarationFinished(name, init, node);
     node->getBody()->setType(funcType);
     static_pointer_cast<SymboledInit>(node)->symbol = init;

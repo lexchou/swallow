@@ -52,6 +52,83 @@
 USE_SWALLOW_NS
 using namespace std;
 
+void SemanticAnalyzer::checkForFunctionOverriding(const std::wstring& name, const FunctionSymbolPtr& decl, const DeclarationPtr& node)
+{
+    if(!ctx->currentType)
+        return;//not for global function
+    if(node->hasModifier(DeclarationModifiers::_Generated))
+        return;//do not check for generated functions
+    bool staticMember = decl->hasFlags(SymbolFlagStatic);
+    //check if there's the same signature exists
+    {
+        std::vector<SymbolPtr> funcs;
+        //std::wstring typeName = ctx.currentType->getName();
+        getMethodsFromType(ctx->currentType, name, (MemberFilter)((staticMember ? FilterStaticMember : 0) | FilterLookupInExtension ), funcs);
+        for(const SymbolPtr& f : funcs)
+        {
+            if(f == decl)
+                continue;
+            if(Type::equals(f->getType(), decl->getType()))
+            {
+                error(node, Errors::E_INVALID_REDECLARATION_1, name);
+                return;
+            }
+        }
+    }
+
+    //check if it override
+    if(ctx->currentType->getParentType())
+    {
+        std::vector<SymbolPtr> funcs;
+        getMethodsFromType(ctx->currentType->getParentType(), name, (MemberFilter)((staticMember ? FilterStaticMember : 0) | (FilterLookupInExtension | FilterRecursive)), funcs);
+        SymbolPtr matched = nullptr;
+        for(const SymbolPtr& func : funcs)
+        {
+            if(Type::equals(func->getType(), decl->getType()))
+            {
+                matched = func;
+                break;
+            }
+        }
+        assert(node != nullptr);
+        {
+            if(ctx->currentExtension && matched)
+            {
+                error(node, Errors::E_DECLARATIONS_IN_EXTENSIONS_CANNOT_OVERRIDE_YET);
+                return;
+            }
+            if (node->hasModifier(DeclarationModifiers::Override))
+            {
+                if (!matched)
+                {
+                    error(node, Errors::E_METHOD_DOES_NOT_OVERRIDE_ANY_METHOD_FROM_ITS_SUPERCLASS);
+                    return;
+                }
+                if(matched->hasFlags(SymbolFlagFinal))
+                {
+                    error(node, Errors::E_INSTANCE_METHOD_OVERRIDES_A_FINAL_INSTANCE_METHOD);
+                    return;
+                }
+            }
+            else
+            {
+                bool supress = false;
+                //it's ok to use keyword 'required' without 'override' on an initializer
+                if(decl->getType()->hasFlags(SymbolFlagRequired) && matched && matched->getType()->hasFlags(SymbolFlagRequired))
+                    supress = true;
+                if (matched && !supress)
+                {
+                    if(matched->getType()->hasFlags(SymbolFlagRequired))
+                        error(node, Errors::E_REQUIRED_MODIFIER_MUST_BE_PRESENT_ON_ALL_OVERRIDES_OF_A_REQUIRED_INITIALIZER);
+                    else
+                        error(node, Errors::E_OVERRIDING_DECLARATION_REQUIRES_AN_OVERRIDE_KEYWORD);
+                    return;
+                }
+            }
+        }
+    }
+}
+
 
 
 void SemanticAnalyzer::visitClosure(const ClosurePtr& node)
@@ -114,154 +191,25 @@ void SemanticAnalyzer::visitClosure(const ClosurePtr& node)
 
 void SemanticAnalyzer::visitSubscript(const SubscriptDefPtr &node)
 {
-    /*
-    //TypeInference
-    ParametersNodePtr parameters = node->getParameters();
-    TypePtr retType = declarationAnalyzer->resolveType(node->getReturnType(), true);
-
-    TypePtr type = declarationAnalyzer->resolveType(node->getReturnType(), true);
-    assert(type != nullptr);
-    std::vector<Parameter> params;
-    for (const ParameterNodePtr &param : *node->getParameters())
-    {
-        wstring name = param->isShorthandExternalName() ? param->getLocalName() : param->getExternalName();
-        TypePtr paramType = declarationAnalyzer->resolveType(param->getDeclaredType(), true);
-        params.push_back(Parameter(name, param->isInout(), paramType));
-        //verify index's access level
-        declarationAnalyzer->verifyAccessLevel(node, paramType, DeclarationTypeSubscript, ComponentTypeIndex);
-    }
-    //verify element type's access level
-    declarationAnalyzer->verifyAccessLevel(node, type, DeclarationTypeSubscript, ComponentTypeType);
-
-
-    //process getter
-    visitAccessor(node->getGetter(), parameters, nullptr, node->getModifiers());
-    //process setter
-    wstring setterName = L"newValue";
-    if (!node->getSetterName().empty())
-        setterName = node->getSetterName();
-    SymbolPlaceHolderPtr setter(new SymbolPlaceHolder(setterName, retType, SymbolPlaceHolder::R_PARAMETER, SymbolFlagReadable | SymbolFlagInitialized));
-    visitAccessor(node->getSetter(), parameters, setter, node->getModifiers());
-    */
-}
-void SemanticAnalyzer::visitAccessor(const CodeBlockPtr& accessor, const ParametersNodePtr& params, const SymbolPtr& setter, int modifiers)
-{
-    if(!accessor)
-        return;
-    ScopedCodeBlockPtr codeBlock = std::static_pointer_cast<ScopedCodeBlock>(accessor);
-    SymbolScope *scope = codeBlock->getScope();
-    ScopeGuard scopeGuard(codeBlock.get(), this);
-    (void) scopeGuard;
-    if(setter)
-        scope->addSymbol(setter);
-    params->accept(this);
-    declarationAnalyzer->prepareParameters(scope, params);
-
-    SCOPED_SET(ctx->currentFunction, accessor->getType());
-
-    accessor->accept(this);
+    //TODO: validate the getter/setter if it's already exists
 }
 
 void SemanticAnalyzer::visitFunction(const FunctionDefPtr& node)
 {
+    FunctionSymbolPtr func = static_pointer_cast<SymboledFunction>(node)->symbol;
+    checkForFunctionOverriding(func->getName(), func, node);
 }
 
 void SemanticAnalyzer::visitDeinit(const DeinitializerDefPtr& node)
 {
-    /*
-    TypePtr funcType = ctx->currentType->getDeinit()->getType();
-    SCOPED_SET(ctx->currentFunction, funcType);
-    node->getBody()->accept(this);
-    */
+    //TODO: validate the deinit if it's already exists
+    //FunctionSymbolPtr func = static_pointer_cast<SymboledFunction>(node)->symbol;
 }
 
 void SemanticAnalyzer::visitInit(const InitializerDefPtr& node)
 {
-    /*
     FunctionSymbolPtr init = static_pointer_cast<SymboledInit>(node)->symbol;
-    TypePtr funcType = init->getType();
-    SCOPED_SET(ctx->currentFunction, funcType);
-    {
-        InitializationTracer tracer(nullptr, InitializationTracer::Sequence);
-        SCOPED_SET(ctx->currentInitializationTracer, &tracer);
-        node->getBody()->accept(this);
-        //check if some stored property is not initialized
-        for(const SymbolPtr& storedProp : ctx->currentType->getDeclaredStoredProperties())
-        {
-            if(!storedProp->hasFlags(SymbolFlagInitialized))
-            {
-                error(node, Errors::E_PROPERTY_A_NOT_INITIALIZED, L"self." + storedProp->getName());
-                return;
-            }
-        }
-    }
-
-    if(node->hasModifier(DeclarationModifiers::Convenience))
-    {
-        //convenience initializer must call designated initializer in all paths
-        InitializerValidator validator(ctx, this);
-        node->getBody()->accept(&validator);
-        NodePtr refNode = validator.getRefNode() ? validator.getRefNode() : node;
-        if(validator.getResult() & InitializerCoverMultiple)
-        {
-            error(refNode, Errors::E_SELF_INIT_CALLED_MULTIPLE_TIMES_IN_INITIALIZER);
-            return;
-        }
-        switch(validator.getResult())
-        {
-            case InitializerCoverNoResult:
-            case InitializerCoverUnmatched:
-            case InitializerCoverPartial:
-                error(refNode, Errors::E_SELF_INIT_ISNT_CALLED_ON_ALL_PATHS_IN_DELEGATING_INITIALIZER);
-                return;
-            default:
-                break;
-        }
-
-    }
-    else
-    {
-        //designated initializer must call designated initializer if parent type has customized initializer
-        bool hasCustomizedInitializer = false;
-        if(ctx->currentType->getParentType())
-        {
-            FunctionOverloadedSymbolPtr inits = ctx->currentType->getDeclaredInitializer();
-            if(inits)
-            {
-                for(const FunctionSymbolPtr& init : *inits)
-                {
-                    if(!init->getType()->getParameters().empty())
-                    {
-                        hasCustomizedInitializer = true;
-                        break;
-                    }
-                }
-            }
-        }
-        if(hasCustomizedInitializer)
-        {
-            InitializerValidator validator(ctx, this);
-            node->getBody()->accept(&validator);
-            NodePtr refNode = validator.getRefNode() ? validator.getRefNode() : node;
-            if(validator.getResult() & InitializerCoverMultiple)
-            {
-                error(refNode, Errors::E_SUPER_INIT_CALLED_MULTIPLE_TIMES_IN_INITIALIZER);
-                return;
-            }
-            switch(validator.getResult())
-            {
-                case InitializerCoverNoResult:
-                case InitializerCoverUnmatched:
-                case InitializerCoverPartial:
-                    error(refNode, Errors::E_SUPER_INIT_ISNT_CALLED_BEFORE_RETURNING_FROM_INITIALIZER);
-                    return;
-                default:
-                    break;
-            }
-        }
-
-    }
-    */
+    checkForFunctionOverriding(init->getName(), init, node);
 }
 
 void SemanticAnalyzer::visitCodeBlock(const CodeBlockPtr &node)
@@ -280,32 +228,5 @@ void SemanticAnalyzer::visitCodeBlock(const CodeBlockPtr &node)
 
 void SemanticAnalyzer::visitComputedProperty(const ComputedPropertyPtr& node)
 {
-    CodeBlockPtr didSet = node->getDidSet();
-    CodeBlockPtr willSet = node->getWillSet();
-    CodeBlockPtr getter = node->getGetter();
-    CodeBlockPtr setter = node->getSetter();
-    TypePtr type = declarationAnalyzer->resolveType(node->getDeclaredType(), true);
-    assert(type != nullptr);
-
-    shared_ptr<ComposedComputedProperty> property = static_pointer_cast<ComposedComputedProperty>(node);
-    //prepare type for getter/setter
-    /*
-    std::vector<Parameter> params;
-    TypePtr getterType = Type::newFunction(params, type, nullptr);
-    params.push_back(Parameter(type));
-    TypePtr setterType = Type::newFunction(params, symbolRegistry->getGlobalScope()->Void(), false);
-
-    */
-    SCOPED_SET(ctx->flags, (ctx->flags & (~SemanticContext::FLAG_PROCESS_DECLARATION)) | SemanticContext::FLAG_PROCESS_IMPLEMENTATION);
-    if(!property->hasModifier(DeclarationModifiers::_Generated))
-    {
-        if(property->functions.getter)
-            property->functions.getter->accept(this);
-        if(property->functions.setter)
-            property->functions.setter->accept(this);
-        if(property->functions.willSet)
-            property->functions.willSet->accept(this);
-        if(property->functions.didSet)
-            property->functions.didSet->accept(this);
-    }
+    //TODO: validate the getter/setter/willSet/didSet if it's already exists
 }

@@ -69,7 +69,7 @@ TEST(TestType, testTypealias)
 {
     SEMANTIC_ANALYZE(L"typealias IntegerLiteralType = Int");
     TypePtr IntegerLiteralType, Int;
-
+    ASSERT_NO_ERRORS();
     Int = symbolRegistry.lookupType(L"Int");
     ASSERT_NOT_NULL(IntegerLiteralType = std::dynamic_pointer_cast<Type>(scope->lookup(L"IntegerLiteralType")));
     ASSERT_EQ(Int, IntegerLiteralType);
@@ -80,11 +80,8 @@ TEST(TestType, testTypealias_UndeclaredType)
 {
     SEMANTIC_ANALYZE(L"typealias IntegerLiteralType = Intff");
 
-    ASSERT_EQ(1, compilerResults.numResults());
-    auto result = compilerResults.getResult(0);
-
-    ASSERT_EQ(Errors::E_USE_OF_UNDECLARED_TYPE_1, result.code);
-    ASSERT_EQ(L"Intff", result.items[0]);
+    ASSERT_ERROR(Errors::E_USE_OF_UNDECLARED_TYPE_1);
+    ASSERT_EQ(L"Intff", error->items[0]);
 }
 
 TEST(TestType, testTypealias_Redefinition)

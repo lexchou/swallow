@@ -34,13 +34,14 @@
 
 SWALLOW_NS_BEGIN
 
+class DeclarationAnalyzer;
 /*!
  * This analyzer will perform forward declaration of type
  */
 class SWALLOW_EXPORT ForwardDeclarationAnalyzer : public SemanticPass
 {
 public:
-    ForwardDeclarationAnalyzer(SymbolRegistry* symbolRegistry, CompilerResults* results);
+    ForwardDeclarationAnalyzer(SymbolRegistry* symbolRegistry, CompilerResults* results, DeclarationAnalyzer* declarationAnalyzer);
 public:
     virtual void visitTypeAlias(const TypeAliasPtr& node) override;
     virtual void visitClass(const ClassDefPtr& node) override;
@@ -51,6 +52,7 @@ public:
 private:
     TypePtr forwardDeclare(const NodePtr& node, const std::wstring& name, Type::Category category);
 protected:
+    DeclarationAnalyzer* declarationAnalyzer;
 };
 
 SWALLOW_NS_END

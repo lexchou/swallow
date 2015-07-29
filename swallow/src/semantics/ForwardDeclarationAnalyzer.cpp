@@ -4,6 +4,9 @@
 #include "semantics/Type.h"
 #include "semantics/ScopeGuard.h"
 #include "semantics/ScopedNodes.h"
+#include "semantics/DeclarationAnalyzer.h"
+#include "semantics/GenericDefinition.h"
+#include "semantics/TypeBuilder.h"
 #include "common/Errors.h"
 #include "ast/ast.h"
 #include <cassert>
@@ -11,13 +14,14 @@
 USE_SWALLOW_NS
 using namespace std;
 
-ForwardDeclarationAnalyzer::ForwardDeclarationAnalyzer(SymbolRegistry* symbolRegistry, CompilerResults* results)
+ForwardDeclarationAnalyzer::ForwardDeclarationAnalyzer(SymbolRegistry* symbolRegistry, CompilerResults* results, DeclarationAnalyzer* declarationAnalyzer)
     :SemanticPass(symbolRegistry, results)
 {
+    this->declarationAnalyzer = declarationAnalyzer;
 }
 void ForwardDeclarationAnalyzer::visitTypeAlias(const TypeAliasPtr& node)
 {
-    TypePtr type = forwardDeclare(node, node->getName(), Type::Alias);
+    //TypePtr type = forwardDeclare(node, node->getName(), Type::Alias);
     SemanticPass::visitTypeAlias(node);
 }
 void ForwardDeclarationAnalyzer::visitClass(const ClassDefPtr& node)
@@ -73,7 +77,20 @@ TypePtr ForwardDeclarationAnalyzer::forwardDeclare(const NodePtr& node, const st
         error(node, Errors::E_INVALID_REDECLARATION_1, name);
         return nullptr;
     }
-    TypePtr type = Type::newType(name, category);
+    TypeBuilderPtr type = static_pointer_cast<TypeBuilder>(Type::newType(name, category));
+    GenericDefinitionPtr generic;
+    TypeDeclarationPtr tnode = dynamic_pointer_cast<TypeDeclaration>(node);
+    if(tnode && tnode->getGenericParametersDef())
+    {
+        GenericParametersDefPtr genericParams = tnode->getGenericParametersDef();
+        generic = declarationAnalyzer->prepareGenericTypes(genericParams);
+        generic->registerTo(type->getScope());
+    }
+    type->setReference(tnode);
+    type->setGenericDefinition(generic);
+    
+    if(tnode)
+        tnode->setType(type);
     scope->addForwardDeclaration(type);
     return type;
 }

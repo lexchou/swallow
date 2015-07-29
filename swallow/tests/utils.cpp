@@ -116,9 +116,9 @@ static void dumpAST(const NodePtr& node, const wchar_t* title)
     }
 }
 */
-void initTestMethods(Swallow::SwallowCompiler& compiler)
+void initTestMethods(const std::shared_ptr<Swallow::SwallowCompiler>& compiler)
 {
-    GlobalScope* global = compiler.getSymbolRegistry()->getGlobalScope();
+    GlobalScope* global = compiler->getSymbolRegistry()->getGlobalScope();
     global->declareFunction(L"println", 0, L"Void", L"Int", NULL);
     global->declareFunction(L"println", 0, L"Void", L"String", NULL);
     global->declareFunction(L"print", 0, L"Void", L"String", NULL);

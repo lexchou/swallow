@@ -45,14 +45,10 @@
 
 #if USE_RUNTIME_FILE
 #include <iostream>
-#include "common/SwallowUtils.h"
+#include "SwallowCompiler.h"
 #include "common/CompilerResults.h"
-#include "parser/Parser.h"
-#include "semantics/ScopedNodeFactory.h"
-#include "semantics/SemanticAnalyzer.h"
+#include "common/SwallowUtils.h"
 #include "semantics/ScopedNodes.h"
-#include "semantics/InitializationTracer.h"
-#include "semantics/OperatorResolver.h"
 #include <ctime>
 #endif
 
@@ -69,47 +65,57 @@ GlobalScope::GlobalScope()
 }
 
 
+#if USE_RUNTIME_FILE
+class StdlibCompiler : public SwallowCompiler
+{
+public:
+    StdlibCompiler(SymbolRegistry* symbolRegistry, GlobalScope* global)
+    {
+        this->symbolRegistry = symbolRegistry;
+        module = ModulePtr(new Module(L"Swift", global->getModuleType()));
+        this->scope = global;
+        initPasses();
+    }
+    ~StdlibCompiler()
+    {
+        destroyPasses();
+    }
+protected:
+    virtual ParserPtr createParser() override
+    {
+        ParserPtr ret = SwallowCompiler::createParser();
+        ret->setFlags(DECLARATION_ONLY);
+        return ret;
+    }
+    virtual ProgramPtr createProgramNode() override
+    {
+        ScopedProgramPtr ret(new ScopedProgram());
+        ret->setScope(scope);
+        return ret;
+    }
+};
+#endif
+
 
 void GlobalScope::initRuntime(SymbolRegistry* symbolRegistry)
 {
 #if USE_RUNTIME_FILE
 
-    class RuntimeAnalyzer : public SemanticAnalyzer
-    {
-    public:
-        RuntimeAnalyzer(SymbolRegistry* symbolRegistry, CompilerResults* compilerResults, const ModulePtr& module)
-            :SemanticAnalyzer(symbolRegistry, compilerResults, module)
-        {
-        }
-        void visitProgram(const ProgramPtr& node)
-        {
-            InitializationTracer tracer(nullptr, InitializationTracer::Sequence);
-            SCOPED_SET(ctx.currentInitializationTracer, &tracer);
-            ScopedProgramPtr p = static_pointer_cast<ScopedProgram>(node);
-            p->getScope()->setLazySymbolResolver(this);
-            SemanticPass::visitProgram(node);
-            p->getScope()->setLazySymbolResolver(nullptr);
-        }
-        using SemanticAnalyzer::finalizeLazyDeclaration;
-        using SemanticAnalyzer::verifyProtocolConforms;
-    };
-
+    //add builtin module
     this->addSymbol(SymbolPtr(new BuiltinModule(getModuleType())));
 
+    //add the most primitive types
+    _Void = Type::newTuple(vector<TypePtr>());
+    
+
+    StdlibCompiler compiler(symbolRegistry, this);
 
     //cout<<"Loading runtime file"<<endl;
-    ScopedNodeFactory nodeFactory;
-    CompilerResults compilerResults;
-    wstring code;
-    ScopedProgramPtr ret;
-    ModulePtr module(new Module(L"Swift", getModuleType()));
+    ModulePtr module = compiler.getModule();
     try
     {
-        RuntimeAnalyzer analyzer(symbolRegistry, &compilerResults, module);
-        symbolRegistry->setFileScope(this);
-        string dir = "../../stdlib/core/";
-
         /*
+        string dir = "../../stdlib/core/";
         for(std::string file : SwallowUtils::readDirectory(dir.c_str()))
         {
             if(file[0] == '.')
@@ -137,36 +143,23 @@ void GlobalScope::initRuntime(SymbolRegistry* symbolRegistry)
             ret->setScope(nullptr);
         }
         */
-        ret = ScopedProgramPtr(new ScopedProgram());
-        ret->setScope(this);
         string path = "../../stdlib/reference-archives/swiftCore-1.2-602.0.49.6.swift";
         printf("Compiling %s...\n", path.c_str());
-        code = SwallowUtils::readFile(path.c_str());
-        Parser parser(&nodeFactory, &compilerResults);
-        parser.setFlags(DECLARATION_ONLY);
-        SourceFilePtr source(new SourceFile(SwallowUtils::toWString(path), code));
-        parser.setSourceFile(source);
-
+        std::wstring code = SwallowUtils::readFile(path.c_str());
+        compiler.addSource(L"Swift", code);
         clock_t start = clock();
-        if(!parser.parse(code.c_str(), ret))
-            throw Abort();
-        clock_t end = clock();
-        printf("%fs used for parsing file\n", (float)((end - start) * 1.0f / CLOCKS_PER_SEC));
-        OperatorResolver operatorResolver(symbolRegistry, &compilerResults);
-        ret->accept(&operatorResolver);
-        ret->accept(&analyzer);
-        ret->setScope(nullptr);
-
-
-        this->setLazySymbolResolver(&analyzer);
-        analyzer.finalizeLazyDeclaration();
-        analyzer.verifyProtocolConforms();
-        this->setLazySymbolResolver(nullptr);
+        bool success = compiler.compile();
+        float time = (clock() - start) * 1.0f / CLOCKS_PER_SEC;
+        printf("%fs used to load stdlib\n", time);
+        if(!success)
+        {
+            SwallowUtils::dumpCompilerResults(*compiler.getCompilerResults(), std::wcout);
+            assert(0 && "Failed to load runtime.swift");
+        }
     }
     catch(Abort&)
     {
-        ret->setScope(nullptr);
-        SwallowUtils::dumpCompilerResults(code, compilerResults, std::wcout);
+        SwallowUtils::dumpCompilerResults(*compiler.getCompilerResults(), std::wcout);
         assert(0 && "Failed to load runtime.swift");
     }
 

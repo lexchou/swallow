@@ -93,7 +93,6 @@ TypePtr DeclarationAnalyzer::defineType(const std::shared_ptr<TypeDeclaration>& 
     SymbolScope* currentScope = symbolRegistry->getCurrentScope();
 
     //prepare for generic types
-    GenericDefinitionPtr generic;
     GenericParametersDefPtr genericParams = node->getGenericParametersDef();
 
     //check if it's defined as a nested type
@@ -111,21 +110,20 @@ TypePtr DeclarationAnalyzer::defineType(const std::shared_ptr<TypeDeclaration>& 
         }
     }
     
-    
     //register this type
     TypeBuilderPtr type = static_pointer_cast<TypeBuilder>(currentScope->getForwardDeclaration(id->getName()));
 
-    if(genericParams)
-    {
-        generic = prepareGenericTypes(genericParams);
-        generic->registerTo(type->getScope());
-    }
     assert(type != nullptr);
     assert(type->getCategory() == category);
-    type->setReference(node);
-    type->setGenericDefinition(generic);
+    //prepare for generic
+    if(!type->getGenericDefinition() && node->getGenericParametersDef())
+    {
+        GenericParametersDefPtr genericParams = node->getGenericParametersDef();
+        GenericDefinitionPtr generic = prepareGenericTypes(genericParams);
+        generic->registerTo(type->getScope());
+        type->setGenericDefinition(generic);
+    }
     
-    node->setType(type);
     if(node->hasModifier(DeclarationModifiers::Final))
         type->setFlags(SymbolFlagFinal, true);
     static_pointer_cast<TypeBuilder>(type)->setModuleName(ctx->currentModule->getName());
@@ -325,23 +323,37 @@ void DeclarationAnalyzer::prepareDefaultInitializers(const TypePtr& type)
 
 void DeclarationAnalyzer::visitTypeAlias(const TypeAliasPtr& node)
 {
+    if(!ctx->currentType && ctx->lazyDeclaration)
+    {
+        delayDeclare(node);
+        return;
+    }
     TypePtr type;
     SymbolScope* currentScope = symbolRegistry->getCurrentScope();
+    
+    if(currentScope->isSymbolDefined(node->getName()))
+    {
+        error(node, Errors::E_INVALID_REDECLARATION_1, node->getName());
+        return;
+    }
 
-    type = currentScope->getForwardDeclaration(node->getName());
+    //type = currentScope->getForwardDeclaration(node->getName());
     if(ctx->currentType && ctx->currentType->getCategory() == Type::Protocol && !node->getType())
     {
         //register a type place holder for protocol
-        //type = Type::newTypeAlias(node->getName(), nullptr, nullptr);
+        type = Type::newTypeAlias(node->getName(), nullptr, nullptr);
     }
     else
     {
-        shared_ptr<TypeResolver> typeResolver(new TypeResolver(symbolRegistry, semanticAnalyzer, semanticAnalyzer, ctx, true));
-        TypeBuilderPtr builder = static_pointer_cast<TypeBuilder>(type);
-        builder->initAlias(node->getType(), typeResolver);
+        shared_ptr<TypeResolver> typeResolver(new TypeResolver(symbolRegistry, semanticAnalyzer, this, ctx, true));
+        //TypeBuilderPtr builder = static_pointer_cast<TypeBuilder>(type);
+        type = resolveType(node->getType(), true);
+        //builder->setInnerType(type);
+        //builder->initAlias(node->getType(), typeResolver);
     }
     validateDeclarationModifiers(node);
     declarationFinished(node->getName(), type, node);
+    currentScope->addSymbol(node->getName(), type);
 }
 
 

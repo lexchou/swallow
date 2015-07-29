@@ -38,6 +38,7 @@
 #include "semantics/GlobalScope.h"
 #include "semantics/ScopeGuard.h"
 #include "semantics/ForwardDeclarationAnalyzer.h"
+#include "semantics/GenericDeclarationAnalyzer.h"
 #include "semantics/InitializationTracer.h"
 #include "semantics/FunctionAnalyzer.h"
 #include "common/CompilerResults.h"
@@ -45,36 +46,67 @@
 using namespace std;
 USE_SWALLOW_NS
 
-SwallowCompiler::SwallowCompiler(const wstring& moduleName)
+class StandardSwallowCompiler : public SwallowCompiler
 {
-    symbolRegistry = new SymbolRegistry();
+public:
+    StandardSwallowCompiler(const wstring& moduleName)
+    {
+        symbolRegistry = new SymbolRegistry();
+        module = ModulePtr(new Module(moduleName, symbolRegistry->getGlobalScope()->getModuleType()));
+        initPasses();
+    }
+    ~StandardSwallowCompiler()
+    {
+        delete scope;
+        destroyPasses();
+        delete symbolRegistry;
+    }
+};
+
+
+SwallowCompiler* SwallowCompiler::newCompiler(const wstring& moduleName)
+{
+    return new StandardSwallowCompiler(moduleName);
+}
+
+SwallowCompiler::SwallowCompiler()
+{
     compilerResults = new CompilerResults();
     nodeFactory = new ScopedNodeFactory();
-    module = ModulePtr(new Module(moduleName, symbolRegistry->getGlobalScope()->getModuleType()));
+}
+SwallowCompiler::~SwallowCompiler()
+{
+    delete compilerResults;
+    delete nodeFactory;
+}
+
+void SwallowCompiler::destroyPasses()
+{
+    for(SemanticPass* pass : passes)
+        delete pass;
+    delete ctx;
+}
+void SwallowCompiler::initPasses()
+{
 
     ctx = new SemanticContext();
     ctx->currentModule = module;
     ctx->lazyDeclaration = true;
-    operatorResolver = new OperatorResolver(symbolRegistry, compilerResults);
-    declarationAnalyzer = new DeclarationAnalyzer(symbolRegistry, compilerResults, ctx);
-    semanticAnalyzer = new SemanticAnalyzer(symbolRegistry, compilerResults, ctx, declarationAnalyzer);
+    OperatorResolver* operatorResolver = new OperatorResolver(symbolRegistry, compilerResults);
+    DeclarationAnalyzer* declarationAnalyzer = new DeclarationAnalyzer(symbolRegistry, compilerResults, ctx);
+    SemanticAnalyzer* semanticAnalyzer = new SemanticAnalyzer(symbolRegistry, compilerResults, ctx, declarationAnalyzer);
     declarationAnalyzer->setSemanticAnalyzer(semanticAnalyzer);
-    forwardDeclarationAnalyzer = new ForwardDeclarationAnalyzer(symbolRegistry, compilerResults);
-    functionAnalyzer = new FunctionAnalyzer(symbolRegistry, compilerResults, ctx, semanticAnalyzer, declarationAnalyzer);
+    ForwardDeclarationAnalyzer* forwardDeclarationAnalyzer = new ForwardDeclarationAnalyzer(symbolRegistry, compilerResults, declarationAnalyzer);
+    GenericDeclarationAnalyzer* genericDeclarationAnalyzer = new GenericDeclarationAnalyzer(symbolRegistry, compilerResults, declarationAnalyzer);
+    FunctionAnalyzer* functionAnalyzer = new FunctionAnalyzer(symbolRegistry, compilerResults, ctx, semanticAnalyzer, declarationAnalyzer);
+
+    passes.push_back(operatorResolver);
+    passes.push_back(forwardDeclarationAnalyzer);
+    passes.push_back(genericDeclarationAnalyzer);
+    passes.push_back(declarationAnalyzer);
+    passes.push_back(semanticAnalyzer);
+    passes.push_back(functionAnalyzer);
     scope = new SymbolScope();
-}
-SwallowCompiler::~SwallowCompiler()
-{
-    delete scope;
-    delete functionAnalyzer;
-    delete forwardDeclarationAnalyzer;
-    delete semanticAnalyzer;
-    delete declarationAnalyzer;
-    delete operatorResolver;
-    delete ctx;
-    delete nodeFactory;
-    delete compilerResults;
-    delete symbolRegistry;
 }
 void SwallowCompiler::addSourceFile(const SourceFilePtr& sourceFile)
 {
@@ -101,6 +133,10 @@ bool SwallowCompiler::compile()
     std::vector<ProgramPtr> programs;
     return compile(programs);
 }
+ParserPtr SwallowCompiler::createParser()
+{
+    return ParserPtr(new Parser(nodeFactory, compilerResults));
+}
 bool SwallowCompiler::compile(std::vector<ProgramPtr>& programs)
 {
     programs.clear();
@@ -112,20 +148,18 @@ bool SwallowCompiler::compile(std::vector<ProgramPtr>& programs)
         {
             ProgramPtr program = createProgramNode();
             programs.push_back(program);
-            Parser parser(nodeFactory, compilerResults);
-            parser.setSourceFile(source);
-            if(!parser.parse(source->code.c_str(), program))
+            ParserPtr parser = createParser();
+            parser->setSourceFile(source);
+            if(!parser->parse(source->code.c_str(), program))
                 throw Abort();
 
-            
             InitializationTracer tracer(nullptr, InitializationTracer::Sequence);
             SCOPED_SET(ctx->currentInitializationTracer, &tracer);
 
-            program->accept(operatorResolver);
-            program->accept(forwardDeclarationAnalyzer);
-            program->accept(declarationAnalyzer);
-            program->accept(semanticAnalyzer);
-            program->accept(functionAnalyzer);
+            for(SemanticPass* pass : passes)
+            {
+                program->accept(pass);
+            }
         }
         symbolRegistry->setFileScope(nullptr);
     }

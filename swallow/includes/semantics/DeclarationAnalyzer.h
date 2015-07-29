@@ -30,6 +30,7 @@
 #ifndef DECLARATION_ANALYZER_H
 #define DECLARATION_ANALYZER_H
 #include "SemanticPass.h"
+#include "SymbolScope.h"
 #include "Type.h"
 #include <list>
 #include <ast/SubscriptDef.h>
@@ -47,7 +48,7 @@ struct SemanticContext;
 /*!
  * This analyzer will make a lazy declaration on types and functions
  */
-class SWALLOW_EXPORT DeclarationAnalyzer : public SemanticPass
+class SWALLOW_EXPORT DeclarationAnalyzer : public SemanticPass, public LazySymbolResolver
 {
 public:
     DeclarationAnalyzer(SymbolRegistry* symbolRegistry, CompilerResults* compilerResults, SemanticContext* ctx);
@@ -107,6 +108,11 @@ public://properties
      * Prepare parameters as symbols in given code block
      */
     void prepareParameters(SymbolScope* scope, const ParametersNodePtr& params);
+    /*!
+     * The declarations that marked as lazy will be declared immediately
+     */
+    void declareImmediately(const std::wstring& name);
+    GenericDefinitionPtr prepareGenericTypes(const GenericParametersDefPtr& params);
 private:
     TypePtr defineType(const std::shared_ptr<TypeDeclaration>& node);
     FunctionSymbolPtr createFunctionSymbol(const FunctionDefPtr& func, const GenericDefinitionPtr& generic);
@@ -116,7 +122,6 @@ private:
     bool verifyProtocolConform(const TypePtr& type, const TypePtr& protocol, bool supressError);
     bool verifyProtocolFunction(const TypePtr& type, const TypePtr& protocol, const FunctionSymbolPtr& expected, bool supressError);
 
-    GenericDefinitionPtr prepareGenericTypes(const GenericParametersDefPtr& params);
 
     /*!
      * Validate modifiers for declarations.
@@ -133,7 +138,6 @@ private:
 
     TypePtr defineType(const TypeDeclarationPtr& decl, Type::Category category);
 private:
-    void checkForFunctionOverriding(const std::wstring& name, const FunctionSymbolPtr& decl, const DeclarationPtr& node);
     void checkForPropertyOverriding(const std::wstring& name, const ComputedPropertySymbolPtr& decl, const ComputedPropertyPtr& node);
     void checkForSubscriptOverride(const Subscript& subscript, const SubscriptDefPtr& node);
     /*!
@@ -152,6 +156,19 @@ private:
      * Need to explode a tuple variable definition into a sequence of single variable definitions
      */
     void explodeValueBindings(const ValueBindingsPtr& node);
+private://lazy declaration
+    /*!
+     * Declare the rest lazy declaration immediately
+     */
+    void finalizeLazyDeclaration();
+
+    bool resolveLazySymbol(const std::wstring& name);
+    void visitProgram(const ProgramPtr& node);
+    /*!
+     * Mark this declaration node as lazy declaration, it will be processed only when being used or after the end of the program.
+     */
+    void delayDeclare(const DeclarationPtr& node);
+
 
 protected:
     SemanticAnalyzer* semanticAnalyzer;

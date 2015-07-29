@@ -138,11 +138,13 @@ void SemanticAnalyzer::visitImplementation(const TypeDeclarationPtr& node, NodeV
 void SemanticAnalyzer::visitTypeAlias(const TypeAliasPtr& node)
 {
     //bring type from forward declaration to current scope
+    /*
     SymbolScope* scope = symbolRegistry->getCurrentScope();
     SymbolPtr sym = scope->getForwardDeclaration(node->getName());
     assert(sym && sym->getKind() == SymbolKindType);
     scope->addSymbol(node->getName(), sym);
     SemanticPass::visitTypeAlias(node);
+     */
 }
 void SemanticAnalyzer::visitEnum(const EnumDefPtr& node)
 {
@@ -233,7 +235,10 @@ void SemanticAnalyzer::visitExtension(const ExtensionDefPtr& node)
     SCOPED_SET(ctx->currentExtension, extension);
 
     //SemanticPass::visitExtension(node);
-    visitImplementation(node);
+    for(const DeclarationPtr& decl : *node)
+    {
+        decl->accept(this);
+    }
     declarationAnalyzer->verifyProtocolConform(type, true);
 }
 void SemanticAnalyzer::visitOptionalType(const OptionalTypePtr& node)

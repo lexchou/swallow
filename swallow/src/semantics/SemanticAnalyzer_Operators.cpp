@@ -45,6 +45,7 @@
 #include "common/ScopedValue.h"
 #include "semantics/InitializationTracer.h"
 #include "semantics/SemanticContext.h"
+#include "semantics/DeclarationAnalyzer.h"
 
 USE_SWALLOW_NS
 using namespace std;
@@ -58,7 +59,7 @@ void SemanticAnalyzer::visitConditionalOperator(const ConditionalOperatorPtr& no
 }
 void SemanticAnalyzer::visitBinaryOperator(const BinaryOperatorPtr& node)
 {
-    declareImmediately(node->getOperator());
+    declarationAnalyzer->declareImmediately(node->getOperator());
     //look for binary function that matches
     OperatorInfo* op = symbolRegistry->getOperator(node->getOperator(), OperatorType::InfixBinary);
     std::vector<SymbolPtr> funcs = allFunctions(node->getOperator(), 0, true);
@@ -91,7 +92,7 @@ void SemanticAnalyzer::visitBinaryOperator(const BinaryOperatorPtr& node)
 }
 void SemanticAnalyzer::visitUnaryOperator(const UnaryOperatorPtr& node)
 {
-    declareImmediately(node->getOperator());
+    declarationAnalyzer->declareImmediately(node->getOperator());
     int mask = 0;
     if(node->getOperatorType() == OperatorType::PostfixUnary)
         mask = SymbolFlagPostfix;
@@ -211,7 +212,7 @@ void SemanticAnalyzer::verifyTuplePatternForAssignment(const PatternPtr& pattern
 
 void SemanticAnalyzer::visitAssignment(const AssignmentPtr& node)
 {
-    declareImmediately(node->getOperator());
+    declarationAnalyzer->declareImmediately(node->getOperator());
     node->setType(symbolRegistry->getGlobalScope()->Void());
     PatternPtr destination = node->getLHS();
     {

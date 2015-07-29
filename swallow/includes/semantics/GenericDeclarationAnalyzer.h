@@ -1,4 +1,4 @@
-/* SwallowCompiler.h --
+/* GenericDeclarationAnalyzer.h --
  *
  * Copyright (c) 2014, Lex Chou <lex at chou dot it>
  * All rights reserved.
@@ -27,67 +27,35 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef SWALLOW_COMPILER_H
-#define SWALLOW_COMPILER_H
-#include "swallow_conf.h"
-#include <vector>
+#ifndef GENERIC_DECLARATION_ANALYZER_H
+#define GENERIC_DECLARATION_ANALYZER_H
+#include "SemanticPass.h"
+#include "Type.h"
+
 SWALLOW_NS_BEGIN
 
-
-class CompilerResults;
-class SymbolRegistry;
-class NodeFactory;
-class SymbolScope;
-class SemanticPass;
-struct SemanticContext;
-typedef std::shared_ptr<struct SourceFile> SourceFilePtr;
-typedef std::shared_ptr<class Module> ModulePtr;
-typedef std::shared_ptr<class Parser> ParserPtr;
-typedef std::shared_ptr<class Program> ProgramPtr;
-using std::wstring;
-
-class SwallowCompiler
+class DeclarationAnalyzer;
+/*!
+ * This analyzer will perform generic declaration of type
+ */
+class SWALLOW_EXPORT GenericDeclarationAnalyzer : public SemanticPass
 {
 public:
-    static SwallowCompiler* newCompiler(const wstring& moduleName);
+    GenericDeclarationAnalyzer(SymbolRegistry* symbolRegistry, CompilerResults* results, DeclarationAnalyzer* declarationAnalyzer);
 public:
-    virtual ~SwallowCompiler();
+    virtual void visitClass(const ClassDefPtr& node) override;
+    virtual void visitStruct(const StructDefPtr& node) override;
+    virtual void visitEnum(const EnumDefPtr& node) override;
+    virtual void visitProtocol(const ProtocolDefPtr& node) override;
+private:
+    TypePtr defineGeneric(const TypeDeclarationPtr& node);
 protected:
-    SwallowCompiler();
-    void initPasses();
-    void destroyPasses();
-
-public:
-    void addSourceFile(const SourceFilePtr& sourceFile);
-    void addSource(const wstring& name, const wstring& code);
-    void clearSources();
-public:
-    bool compile();
-    bool compile(std::vector<ProgramPtr>& programs);
-public:
-    ModulePtr getModule();
-    ProgramPtr getProgram();
-    CompilerResults* getCompilerResults();
-    SymbolRegistry* getSymbolRegistry();
-    SymbolScope* getScope();
-
-protected:
-    virtual ProgramPtr createProgramNode();
-    virtual ParserPtr createParser();
-protected:
-    SymbolRegistry* symbolRegistry;
-    NodeFactory* nodeFactory;
-
-    std::vector<SemanticPass*> passes;
-    std::vector<SourceFilePtr> sourceFiles;
-    SemanticContext* ctx;
-
-    //results:
-    CompilerResults* compilerResults;
-    ModulePtr module;
-    ProgramPtr program;
-    SymbolScope* scope;
+    DeclarationAnalyzer* declarationAnalyzer;
 };
 
 SWALLOW_NS_END
-#endif//SWALLOW_COMPILER_H
+
+
+
+
+#endif//GENERIC_DECLARATION_ANALYZER_H

@@ -46,6 +46,7 @@
 #include "semantics/InitializationTracer.h"
 #include "semantics/TypeResolver.h"
 #include "semantics/SemanticContext.h"
+#include "semantics/DeclarationAnalyzer.h"
 
 USE_SWALLOW_NS
 using namespace std;
@@ -377,7 +378,7 @@ void SemanticAnalyzer::visitIdentifier(const IdentifierPtr& id)
 {
     SymbolPtr sym = NULL;
     SymbolScope* scope = NULL;
-    declareImmediately(id->getIdentifier());
+    declarationAnalyzer->declareImmediately(id->getIdentifier());
     const wstring& name = id->getIdentifier();
     symbolRegistry->lookupSymbol(name, &scope, &sym);
     //not found by accesing from scope

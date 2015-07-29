@@ -51,7 +51,7 @@
 void dumpCompilerResults(Swallow::CompilerResults& compilerResults);
 Swallow::NodePtr parseStatement(Swallow::CompilerResults& compilerResults, const char* func, const wchar_t* str);
 Swallow::ProgramPtr parseStatements(Swallow::CompilerResults& compilerResults, const char* func, const wchar_t* str);
-void initTestMethods(Swallow::SwallowCompiler& compiler);
+void initTestMethods(const std::shared_ptr<Swallow::SwallowCompiler>& compiler);
 
 Swallow::ScopedProgramPtr analyzeStatement(Swallow::SymbolRegistry& registry, Swallow::CompilerResults& compilerResults, const char* func, const wchar_t* str);
 std::wstring readFile(const char* fileName);
@@ -77,17 +77,17 @@ struct Tracer
 
 
 #define SEMANTIC_ANALYZE(s) Tracer tracer(__FILE__, __LINE__, __FUNCTION__); \
-    SwallowCompiler compiler(L"test"); \
+    std::shared_ptr<SwallowCompiler> compiler(SwallowCompiler::newCompiler(L"test")); \
     initTestMethods(compiler); \
-    compiler.addSource(L"code", s); \
-    Swallow::SymbolRegistry& symbolRegistry = *compiler.getSymbolRegistry(); \
+    compiler->addSource(L"code", s); \
+    Swallow::SymbolRegistry& symbolRegistry = *compiler->getSymbolRegistry(); \
     Swallow::GlobalScope* global = symbolRegistry.getGlobalScope(); (void)global; \
-    Swallow::CompilerResults& compilerResults = *compiler.getCompilerResults(); \
+    Swallow::CompilerResults& compilerResults = *compiler->getCompilerResults(); \
     NameMangling mangling(&symbolRegistry); \
     std::vector<std::shared_ptr<Swallow::Program>> roots; \
-    compiler.compile(roots); \
+    compiler->compile(roots); \
     std::shared_ptr<Swallow::Program> root = roots[0]; \
-    Swallow::SymbolScope* scope = compiler.getScope(); \
+    Swallow::SymbolScope* scope = compiler->getScope(); \
     (void)scope; \
     (void)compilerResults; \
     (void)mangling; \

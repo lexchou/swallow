@@ -43,11 +43,11 @@ using namespace std;
 TEST(TestBasic, UseModule)
 {
     //SEMANTIC_ANALYZE(L"var a = Builtin");
-    SwallowCompiler compiler(L"test");
-    compiler.addSource(L"test", L"var a = Builtin");
-    compiler.compile();
+    shared_ptr<SwallowCompiler> compiler(SwallowCompiler::newCompiler(L"test"));
+    compiler->addSource(L"test", L"var a = Builtin");
+    compiler->compile();
     const CompilerResult* error = nullptr;
-    Swallow::CompilerResults& compilerResults = *compiler.getCompilerResults();
+    Swallow::CompilerResults& compilerResults = *compiler->getCompilerResults();
     ASSERT_ERROR(Errors::E_EXPECT_MODULE_MEMBER_NAME_AFTER_MODULE_NAME);
 }
 TEST(TestBasic, VariableUseBeforeInitialized)

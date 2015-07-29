@@ -16,11 +16,16 @@ using namespace Swallow;
 
 
 REPL::REPL(const ConsoleWriterPtr& out)
-    :compiler(L"repl"), out(out), canQuit(false)
+    :out(out), canQuit(false)
 {
+    compiler = SwallowCompiler::newCompiler(L"repl");
     initCommands();
     resultId = 0;
 
+}
+REPL::~REPL()
+{
+    delete compiler;
 }
 
 void REPL::repl()
@@ -47,11 +52,11 @@ void REPL::repl()
 
 void REPL::eval(const wstring& line)
 {
-    compiler.getCompilerResults()->clear();
-    compiler.clearSources();
-    compiler.addSource(L"<eval>", line);
+    compiler->getCompilerResults()->clear();
+    compiler->clearSources();
+    compiler->addSource(L"<eval>", line);
     vector<ProgramPtr> programs;
-    if(!compiler.compile(programs))
+    if(!compiler->compile(programs))
         return;
     dumpProgram(programs[0]);
 }
@@ -89,7 +94,7 @@ void REPL::dumpProgram(const ProgramPtr& program)
             {
                 if(PatternPtr pat = dynamic_pointer_cast<Pattern>(st))
                 {
-                    if(pat->getType() && !Type::equals(compiler.getSymbolRegistry()->getGlobalScope()->Void(), pat->getType()))
+                    if(pat->getType() && !Type::equals(compiler->getSymbolRegistry()->getGlobalScope()->Void(), pat->getType()))
                     {
                         wstringstream s;
                         s<<L"$R"<<(resultId++);
@@ -116,7 +121,7 @@ void REPL::dumpSymbol(const SymbolPtr& sym)
 
 void REPL::dumpCompilerResults(const std::wstring& code)
 {
-    for(auto res : *compiler.getCompilerResults())
+    for(auto res : *compiler->getCompilerResults())
     {
         out->setForegroundColor(White);
         out->printf(L"%d:%d: ", res.line, res.column);
@@ -256,8 +261,8 @@ void REPL::commandSymbols(const wstring& args)
 {
     SymbolScope* scope;
     if(args == L"global")
-        scope = compiler.getSymbolRegistry()->getGlobalScope();
+        scope = compiler->getSymbolRegistry()->getGlobalScope();
     else
-        scope = compiler.getScope();
+        scope = compiler->getScope();
     dumpSymbols(scope, out);
 }

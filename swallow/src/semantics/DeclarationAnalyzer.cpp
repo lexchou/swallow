@@ -49,6 +49,7 @@
 #include "semantics/SemanticContext.h"
 #include <set>
 #include "semantics/Symbol.h"
+#include "semantics/LazyDeclaration.h"
 
 USE_SWALLOW_NS
 using namespace std;
@@ -212,7 +213,7 @@ TypePtr DeclarationAnalyzer::lookupType(const TypeNodePtr& type, bool supressErr
 }
 TypePtr DeclarationAnalyzer::resolveType(const TypeNodePtr& type, bool allowForwardDeclaration, bool supressErrors)
 {
-    TypeResolver resolver(symbolRegistry, supressErrors ? nullptr : this, semanticAnalyzer, ctx, allowForwardDeclaration);
+    TypeResolver resolver(symbolRegistry, supressErrors ? nullptr : this, this, ctx, allowForwardDeclaration);
     return resolver.lookupType(type);
 }
 
@@ -272,4 +273,150 @@ void DeclarationAnalyzer::verifyAccessLevel(const DeclarationPtr& node, const Ty
         error(node, Errors::E_A_MUST_BE_DECLARED_B_BECAUSE_ITS_C_USES_A_D_TYPE_4, sdecl, parent, scomp, parent);
     else
         error(node, Errors::E_A_CANNOT_BE_DECLARED_B_BECAUSE_ITS_C_USES_A_D_TYPE_4, sdecl, cur, scomp, parent);
+}
+
+static std::wstring getDeclarationName(const DeclarationPtr& node)
+{
+    if(FunctionDefPtr func = dynamic_pointer_cast<FunctionDef>(node))
+    {
+        return func->getName();
+    }
+    if(TypeDeclarationPtr type = dynamic_pointer_cast<TypeDeclaration>(node))
+    {
+        return type->getIdentifier()->getName();
+    }
+    if(TypeAliasPtr alias = dynamic_pointer_cast<TypeAlias>(node))
+    {
+        return alias->getName();
+    }
+    assert(0 && "Invalid declaration type");
+    return L"";
+}
+/*!
+  * Mark this declaration node as lazy declaration, it will be processed only when being used or after the end of the program.
+  */
+void DeclarationAnalyzer::delayDeclare(const DeclarationPtr& node)
+{
+    //map<wstring, list<DeclarationPtr>> lazyDeclarations;
+    std::wstring name = getDeclarationName(node);
+    auto iter = ctx->lazyDeclarations.find(name);
+    //wprintf(L"Delay declare %S\n", name.c_str());
+    if(iter == ctx->lazyDeclarations.end())
+    {
+        LazyDeclarationPtr decls(new LazyDeclaration());
+        ctx->lazyDeclarations.insert(make_pair(name, decls));
+        decls->addDeclaration(symbolRegistry, node);
+        return;
+    }
+    iter->second->addDeclaration(symbolRegistry, node);
+}
+static void resolveTypeAlias(const TypePtr& type)
+{
+    if(type->getCategory() == Type::Alias)
+    {
+        type->resolveAlias();
+        return;
+    }
+    //check nested types
+    for(auto entry : type->getAssociatedTypes())
+    {
+        resolveTypeAlias(entry.second);
+    }
+}
+
+void DeclarationAnalyzer::finalizeLazyDeclaration()
+{
+    ctx->lazyDeclaration = false;
+    SymbolScope* scope = symbolRegistry->getCurrentScope();
+    while(!ctx->lazyDeclarations.empty())
+    {
+        std::wstring symbolName = ctx->lazyDeclarations.begin()->first;
+        //lazyDeclarations.erase(lazyDeclarations.begin());
+        declareImmediately(symbolName);
+    }
+    symbolRegistry->setCurrentScope(scope);
+    //now we make all typealias to resolve its type
+    for(auto entry : scope->getSymbols())
+    {
+        if(entry.second->getKind() != SymbolKindType)
+            continue;
+        TypePtr type = static_pointer_cast<Type>(entry.second);
+        resolveTypeAlias(type);
+    }
+}
+
+/*!
+ * The declarations that marked as lazy will be declared immediately
+ */
+void DeclarationAnalyzer::declareImmediately(const std::wstring& name)
+{
+    auto entry = ctx->lazyDeclarations.find(name);
+    if(entry == ctx->lazyDeclarations.end())
+        return;
+    LazyDeclarationPtr decls = entry->second;
+    ctx->lazyDeclarations.erase(entry);
+    SymbolScope* currentScope = symbolRegistry->getCurrentScope();
+    SymbolScope* fileScope = symbolRegistry->getFileScope();
+    try
+    {
+        SCOPED_SET(ctx->lazyDeclaration, false);
+        SymbolPtr symbol = nullptr;
+        //wprintf(L"Declare immediately %S %d definitions\n", name.c_str(), decls->size());
+        for(auto decl : *decls)
+        {
+            //wprintf(L"   fs:%p cs:%p\n", decl.fileScope, decl.currentScope);
+            symbolRegistry->setCurrentScope(decl.currentScope);
+            symbolRegistry->setFileScope(decl.fileScope);
+            SCOPED_SET(this->ctx->currentType, nullptr);
+            SCOPED_SET(this->ctx->currentFunction, nullptr);
+            SCOPED_SET(this->ctx->contextualType, nullptr);
+            SCOPED_SET(this->ctx->currentExtension, nullptr);
+            SCOPED_SET(this->ctx->currentCodeBlock, nullptr);
+            SCOPED_SET(this->ctx->currentInitializationTracer, nullptr);
+            SCOPED_SET(this->ctx->flags, SemanticContext::FLAG_PROCESS_DECLARATION | SemanticContext::FLAG_PROCESS_IMPLEMENTATION);
+            decl.node->accept(this);
+            if(!symbol)
+                symbol = decl.currentScope->lookup(name, false);
+
+        }
+        if(symbol && symbol->getKind() == SymbolKindType)
+        {
+            TypePtr type = static_pointer_cast<Type>(symbol);
+            verifyProtocolConform(type, true);
+        }
+    }
+    catch(...)
+    {
+        symbolRegistry->setCurrentScope(currentScope);
+        symbolRegistry->setFileScope(fileScope);
+        throw;
+    }
+    symbolRegistry->setCurrentScope(currentScope);
+    symbolRegistry->setFileScope(fileScope);
+}
+
+bool DeclarationAnalyzer::resolveLazySymbol(const std::wstring& name)
+{
+    auto entry = ctx->lazyDeclarations.find(name);
+    if(entry == ctx->lazyDeclarations.end())
+    {
+        //wprintf(L"Cannot resolve lazy symbol %S\n", name.c_str());
+        /*
+        for(auto entry : lazyDeclarations)
+        {
+            wprintf(L"%S, ", entry.first.c_str());
+        }
+        wprintf(L"\n");
+        */
+        return false;
+    }
+    declareImmediately(name);
+    return true;
+}
+
+void DeclarationAnalyzer::visitProgram(const ProgramPtr& node)
+{
+    SemanticPass::visitProgram(node);
+    //now we'll deal with the lazy declaration of functions and classes
+    finalizeLazyDeclaration();
 }

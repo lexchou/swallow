@@ -90,6 +90,7 @@ SET(SWALLOW_SRC
     src/semantics/TypeResolver.cpp
     src/semantics/ForwardDeclarationAnalyzer.cpp
     src/semantics/FunctionAnalyzer.cpp
+    src/semantics/GenericDeclarationAnalyzer.cpp
 
     src/codegen/NameMangling.cpp
 

@@ -469,7 +469,7 @@ void SemanticAnalyzer::visitFunctionCall(const FunctionCallPtr& node)
             func->accept(this);
             IdentifierPtr id = std::static_pointer_cast<Identifier>(func);
             const std::wstring &symbolName = id->getIdentifier();
-            declareImmediately(symbolName);
+            declarationAnalyzer->declareImmediately(symbolName);
             //TODO: add a parameter on allFunctions to allow it to select types
             vector<SymbolPtr> funcs = allFunctions(symbolName, 0, true);
             if (funcs.empty())

@@ -69,7 +69,7 @@ static void explodeValueBinding(SemanticAnalyzer* semanticAnalyzer, const ValueB
     TypePtr declaredType = nullptr;
     if(var->getDeclaredType())
     {
-        TypeResolver typeResolver(semanticAnalyzer->getSymbolRegistry(), semanticAnalyzer, semanticAnalyzer, semanticAnalyzer->getContext(), true);
+        TypeResolver typeResolver(semanticAnalyzer->getSymbolRegistry(), semanticAnalyzer, semanticAnalyzer->getDeclarationAnalyzer(), semanticAnalyzer->getContext(), true);
         declaredType = typeResolver.lookupType(var->getDeclaredType());//var->getDeclaredType() ? semanticAnalyzer->lookupType(var->getDeclaredType()) : nullptr;
     }
     //expand it into tuple assignment

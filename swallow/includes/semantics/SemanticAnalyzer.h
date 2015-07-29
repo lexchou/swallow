@@ -71,7 +71,7 @@ enum MemberFilter
     FilterLookupInExtension = 4
 };
 class DeclarationAnalyzer;
-class SWALLOW_EXPORT SemanticAnalyzer : public SemanticPass, public LazySymbolResolver
+class SWALLOW_EXPORT SemanticAnalyzer : public SemanticPass
 {
     friend class DeclarationAnalyzer;
     friend class FunctionAnalyzer;
@@ -139,8 +139,8 @@ public://Syntax sugar for type
     virtual void visitOptionalType(const OptionalTypePtr& node);
 public:
     SemanticContext* getContext() {return ctx;}
+    DeclarationAnalyzer* getDeclarationAnalyzer() {return declarationAnalyzer;}
 
-    virtual bool resolveLazySymbol(const std::wstring& name) override;
     /*!
      * This implementation will try to find the member from the type, and look up from extension as a fallback.
      */
@@ -205,20 +205,6 @@ private:
     bool isNumber(const TypePtr& type);
     bool isFloat(const TypePtr& type);
 
-    /*!
-     * Check if the declaration is declared as global
-     */
-    bool isGlobal(const DeclarationPtr& node);
-
-    /*!
-     * Mark this declaration node as lazy declaration, it will be processed only when being used or after the end of the program.
-     */
-    void delayDeclare(const DeclarationPtr& node);
-    /*!
-     * The declarations that marked as lazy will be declared immediately
-     */
-    void declareImmediately(const std::wstring& name);
-
 
     /*!
      * Expand given expression to given Optional<T> type by adding implicit Optional<T>.Some calls
@@ -259,8 +245,8 @@ private:
     void declarationFinished(const std::wstring& name, const SymbolPtr& decl, const NodePtr& node);
 
 private:
-    void visitAccessor(const CodeBlockPtr& accessor, const ParametersNodePtr& params, const SymbolPtr& setter, int modifiers);
 
+    void checkForFunctionOverriding(const std::wstring& name, const FunctionSymbolPtr& decl, const DeclarationPtr& node);
     /*!
      * Validate modifiers for declarations.
      */
@@ -291,11 +277,6 @@ private:
     void validateTupleTypeDeclaration(const ValueBindingPtr& node);
     void validateTupleTypeDeclaration(const PatternPtr& name, const TypePtr& declType, const TypePtr& initType);
 protected:
-
-    /*!
-     * Declare the rest lazy declaration immediately
-     */
-    void finalizeLazyDeclaration();
 
     /*!
      * Verification of protocol confirmation in all types of current module
