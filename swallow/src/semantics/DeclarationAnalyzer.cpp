@@ -47,9 +47,11 @@
 #include "common/ScopedValue.h"
 #include "semantics/TypeResolver.h"
 #include "semantics/SemanticContext.h"
+#include "semantics/ScopeGuard.h"
 #include <set>
 #include "semantics/Symbol.h"
 #include "semantics/LazyDeclaration.h"
+#include "semantics/ScopedNodes.h"
 
 USE_SWALLOW_NS
 using namespace std;
@@ -172,15 +174,6 @@ GenericDefinitionPtr DeclarationAnalyzer::prepareGenericTypes(const GenericParam
         {
             wstring name = typeId->getName();
             types.push_back(name);
-            TypePtr childType = type->getAssociatedType(name);
-            if(!childType)
-            {
-                //childType = Type::newType(name, Type::Placeholder, nullptr);
-                //type->getSymbols()[name] = childType;
-                error(typeId, Errors::E_IS_NOT_A_MEMBER_OF_2, name, type->getName());
-                return ret;
-            }
-            type = static_pointer_cast<TypeBuilder>(childType);
             typeId = typeId->getNestedType();
         }
         if(expectedType->getCategory() == Type::Protocol)
@@ -419,4 +412,108 @@ void DeclarationAnalyzer::visitProgram(const ProgramPtr& node)
     SemanticPass::visitProgram(node);
     //now we'll deal with the lazy declaration of functions and classes
     finalizeLazyDeclaration();
+    //and do a final generic constraint checking
+    verifyGenericConstraints(node);
+}
+void DeclarationAnalyzer::verifyGenericConstraints(const ProgramPtr& node)
+{
+    for(const NodePtr& childNode : *node)
+    {
+        TypeDeclarationPtr typeNode = dynamic_pointer_cast<TypeDeclaration>(childNode);
+        if(typeNode)
+        {
+            verifyGenericConstraints(typeNode);
+        }
+        FunctionDefPtr funcNode = dynamic_pointer_cast<FunctionDef>(childNode);
+        if(funcNode)
+        {
+            verifyGenericConstraints(funcNode);
+        }
+    }
+}
+
+void DeclarationAnalyzer::verifyGenericConstraints(const FunctionDefPtr& node)
+{
+    SymboledFunctionPtr funcNode = dynamic_pointer_cast<SymboledFunction>(node);
+    assert(funcNode);
+    if(node->getGenericParametersDef())
+    {
+        FunctionSymbolPtr func = funcNode->symbol;
+        TypePtr funcType = func->getType();
+        GenericParametersDefPtr params = node->getGenericParametersDef();
+        GenericDefinitionPtr def = funcType->getGenericDefinition();
+        verifyGenericConstraints(params, def);
+    }
+}
+void DeclarationAnalyzer::verifyGenericConstraints(const TypeDeclarationPtr& node)
+{
+    wstring typeName = node->getIdentifier()->getName();
+    //enter type's scope
+    SymbolScope* currentScope = symbolRegistry->getCurrentScope();
+    TypePtr type = static_pointer_cast<TypeBuilder>(currentScope->getForwardDeclaration(typeName));
+    if(!type && node->getNodeType() == NodeType::Extension)
+        type = symbolRegistry->lookupType(typeName);
+
+    assert(type != nullptr);
+
+    if(node->getGenericParametersDef())
+    {
+        GenericParametersDefPtr params = node->getGenericParametersDef();
+        GenericDefinitionPtr def = type->getGenericDefinition();
+        verifyGenericConstraints(params, def);
+    }
+    SCOPED_SET(ctx->currentType, type);
+    SCOPED_SET(ctx->currentFunction, nullptr);
+    ScopeGuard scope(symbolRegistry, type->getScope());
+
+    for(const NodePtr& childNode : *node)
+    {
+        TypeDeclarationPtr typeNode = dynamic_pointer_cast<TypeDeclaration>(childNode);
+        if(typeNode)
+        {
+            verifyGenericConstraints(typeNode);
+            continue;
+        }
+        FunctionDefPtr funcNode = dynamic_pointer_cast<FunctionDef>(childNode);
+        if(funcNode)
+        {
+            verifyGenericConstraints(funcNode);
+        }
+    }
+}
+
+void DeclarationAnalyzer::verifyGenericConstraints(const GenericParametersDefPtr& params, const GenericDefinitionPtr& def)
+{
+    for(const GenericConstraintDefPtr& constraint : params->getConstraints())
+    {
+        TypeIdentifierPtr typeId = constraint->getIdentifier();
+        std::wstring paramName = typeId->getName();
+        TypePtr expectedType = def->get(paramName);
+        typeId = typeId->getNestedType();
+        while(typeId != nullptr)
+        {
+            wstring childName = typeId->getName();
+            TypePtr innerType = expectedType->getAssociatedType(childName);
+            //check in parent type
+            if(innerType == nullptr && expectedType->getParentType())
+                innerType = expectedType->getParentType()->getAssociatedType(childName);
+            //check in protocols
+            if(innerType == nullptr)
+            {
+                for(const TypePtr& protocol : expectedType->getProtocols())
+                {
+                    innerType = protocol->getAssociatedType(childName);
+                    if(innerType)
+                        break;
+                }
+            }
+            if(!innerType)
+            {
+                error(typeId, Errors::E_IS_NOT_A_MEMBER_OF_2, childName, paramName);
+                return;
+            }
+            expectedType = innerType;
+            typeId = typeId->getNestedType();
+        }
+    }
 }

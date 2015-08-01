@@ -78,17 +78,8 @@ TypePtr ForwardDeclarationAnalyzer::forwardDeclare(const NodePtr& node, const st
         return nullptr;
     }
     TypeBuilderPtr type = static_pointer_cast<TypeBuilder>(Type::newType(name, category));
-    GenericDefinitionPtr generic;
     TypeDeclarationPtr tnode = dynamic_pointer_cast<TypeDeclaration>(node);
-    if(tnode && tnode->getGenericParametersDef())
-    {
-        GenericParametersDefPtr genericParams = tnode->getGenericParametersDef();
-        generic = declarationAnalyzer->prepareGenericTypes(genericParams);
-        generic->registerTo(type->getScope());
-    }
-    type->setReference(tnode);
-    type->setGenericDefinition(generic);
-    
+    type->setReference(tnode);    
     if(tnode)
         tnode->setType(type);
     scope->addForwardDeclaration(type);

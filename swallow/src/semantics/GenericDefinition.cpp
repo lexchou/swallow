@@ -126,7 +126,7 @@ void GenericDefinition::addConstraint(const std::list<std::wstring>& type, Const
         if(!next)
         {
             TypePtr childType = node->type->getAssociatedType(*begin);
-            assert(childType != nullptr);
+            //assert(childType != nullptr);
             next = NodeDefPtr(new NodeDef());
             next->type = childType;
             node->children.insert(make_pair(*begin, next));

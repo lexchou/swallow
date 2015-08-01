@@ -43,6 +43,7 @@ class Pattern;
 class NodeFactory;
 typedef std::shared_ptr<class Identifier> IdentifierPtr;
 
+
 class SemanticAnalyzer;
 struct SemanticContext;
 /*!
@@ -169,7 +170,11 @@ private://lazy declaration
      */
     void delayDeclare(const DeclarationPtr& node);
 
+    void verifyGenericConstraints(const ProgramPtr& node);
 
+    void verifyGenericConstraints(const TypeDeclarationPtr& node);
+    void verifyGenericConstraints(const GenericParametersDefPtr& params, const GenericDefinitionPtr& def);
+    void verifyGenericConstraints(const FunctionDefPtr& node);
 protected:
     SemanticAnalyzer* semanticAnalyzer;
 
