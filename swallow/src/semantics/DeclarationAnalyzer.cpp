@@ -403,9 +403,67 @@ bool DeclarationAnalyzer::resolveLazySymbol(const std::wstring& name)
         */
         return false;
     }
-    declareImmediately(name);
+    forwardDeclareImmediately(name);
     return true;
 }
+void DeclarationAnalyzer::forwardDeclareImmediately(const std::wstring& name)
+{
+    auto entry = ctx->lazyDeclarations.find(name);
+    if(entry == ctx->lazyDeclarations.end())
+        return;
+    LazyDeclarationPtr decls = entry->second;
+    SymbolScope* currentScope = symbolRegistry->getCurrentScope();
+    SymbolScope* fileScope = symbolRegistry->getFileScope();
+    try
+    {
+        SCOPED_SET(ctx->lazyDeclaration, false);
+        SymbolPtr symbol = nullptr;
+        //wprintf(L"Declare immediately %S %d definitions\n", name.c_str(), decls->size());
+        for(LazyDeclaration::DeclarationEntry& decl : *decls)
+        {
+            if(decl.forwardDeclared)
+                continue;
+            //wprintf(L"   fs:%p cs:%p\n", decl.fileScope, decl.currentScope);
+            switch(decl.node->getNodeType())
+            {
+                case NodeType::Extension:
+                    continue;
+                case NodeType::Class:
+                case NodeType::Enum:
+                case NodeType::Struct:
+                case NodeType::Protocol:
+                {
+                    decl.forwardDeclared = true;
+                    symbolRegistry->setCurrentScope(decl.currentScope);
+                    symbolRegistry->setFileScope(decl.fileScope);
+                    SCOPED_SET(this->ctx->currentType, nullptr);
+                    SCOPED_SET(this->ctx->currentFunction, nullptr);
+                    SCOPED_SET(this->ctx->contextualType, nullptr);
+                    SCOPED_SET(this->ctx->currentExtension, nullptr);
+                    SCOPED_SET(this->ctx->currentCodeBlock, nullptr);
+                    SCOPED_SET(this->ctx->currentInitializationTracer, nullptr);
+                    SCOPED_SET(this->ctx->flags, SemanticContext::FLAG_PROCESS_DECLARATION | SemanticContext::FLAG_PROCESS_IMPLEMENTATION);
+                    TypeDeclarationPtr tnode = static_pointer_cast<TypeDeclaration>(decl.node);
+                    TypePtr type = defineType(tnode);
+                    decl.currentScope->addForwardDeclaration(type);
+                    break;
+                }
+                default:
+                    assert(0 && "Only type forward declaration is allowed here.");
+                    break;
+            }
+        }
+    }
+    catch(...)
+    {
+        symbolRegistry->setCurrentScope(currentScope);
+        symbolRegistry->setFileScope(fileScope);
+        throw;
+    }
+    symbolRegistry->setCurrentScope(currentScope);
+    symbolRegistry->setFileScope(fileScope);
+}
+
 
 void DeclarationAnalyzer::visitProgram(const ProgramPtr& node)
 {
@@ -516,4 +574,18 @@ void DeclarationAnalyzer::verifyGenericConstraints(const GenericParametersDefPtr
             typeId = typeId->getNestedType();
         }
     }
+}
+
+/*!
+ * return true if the node will be declared in lazy mode
+ */
+bool DeclarationAnalyzer::isLazyDeclared(const DeclarationPtr& node)
+{
+    bool global = !ctx->currentType && !ctx->currentFunction;
+    if(global && ctx->lazyDeclaration)
+    {
+        delayDeclare(node);
+        return true;
+    }
+    return false;
 }

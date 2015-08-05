@@ -133,7 +133,7 @@ public:
     /*!
      * Get a registered forward Declaration
      */
-    TypePtr getForwardDeclaration(const std::wstring& name);
+    TypePtr getForwardDeclaration(const std::wstring& name) const;
 protected:
     OperatorMap operators;
     Node* owner;

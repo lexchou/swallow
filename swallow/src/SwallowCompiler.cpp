@@ -54,6 +54,7 @@ public:
         symbolRegistry = new SymbolRegistry();
         module = ModulePtr(new Module(moduleName, symbolRegistry->getGlobalScope()->getModuleType()));
         initPasses();
+        scope = new SymbolScope();
     }
     ~StandardSwallowCompiler()
     {
@@ -96,17 +97,16 @@ void SwallowCompiler::initPasses()
     DeclarationAnalyzer* declarationAnalyzer = new DeclarationAnalyzer(symbolRegistry, compilerResults, ctx);
     SemanticAnalyzer* semanticAnalyzer = new SemanticAnalyzer(symbolRegistry, compilerResults, ctx, declarationAnalyzer);
     declarationAnalyzer->setSemanticAnalyzer(semanticAnalyzer);
-    ForwardDeclarationAnalyzer* forwardDeclarationAnalyzer = new ForwardDeclarationAnalyzer(symbolRegistry, compilerResults, declarationAnalyzer);
-    GenericDeclarationAnalyzer* genericDeclarationAnalyzer = new GenericDeclarationAnalyzer(symbolRegistry, compilerResults, declarationAnalyzer);
+    //ForwardDeclarationAnalyzer* forwardDeclarationAnalyzer = new ForwardDeclarationAnalyzer(symbolRegistry, compilerResults, declarationAnalyzer);
+    //GenericDeclarationAnalyzer* genericDeclarationAnalyzer = new GenericDeclarationAnalyzer(symbolRegistry, compilerResults, declarationAnalyzer);
     FunctionAnalyzer* functionAnalyzer = new FunctionAnalyzer(symbolRegistry, compilerResults, ctx, semanticAnalyzer, declarationAnalyzer);
 
     passes.push_back(operatorResolver);
-    passes.push_back(forwardDeclarationAnalyzer);
-    passes.push_back(genericDeclarationAnalyzer);
+    //passes.push_back(forwardDeclarationAnalyzer);
+    //passes.push_back(genericDeclarationAnalyzer);
     passes.push_back(declarationAnalyzer);
     passes.push_back(semanticAnalyzer);
     passes.push_back(functionAnalyzer);
-    scope = new SymbolScope();
 }
 void SwallowCompiler::addSourceFile(const SourceFilePtr& sourceFile)
 {

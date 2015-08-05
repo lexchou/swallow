@@ -150,7 +150,7 @@ void SymbolScope::addForwardDeclaration(const TypePtr& type)
 /*!
  * Get a registered forward Declaration
  */
-TypePtr SymbolScope::getForwardDeclaration(const std::wstring& name)
+TypePtr SymbolScope::getForwardDeclaration(const std::wstring& name) const
 {
     auto iter = forwardDeclarations.find(name);
     if(iter == forwardDeclarations.end())
