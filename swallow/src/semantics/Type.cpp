@@ -652,7 +652,7 @@ bool Type::canAssignTo(const TypePtr &type) const
     {
         if(this->category == Type::Specialized)
             self = innerType;
-        if(self->parents.find(type) != parents.end())
+        if(self->parents.find(type) != self->parents.end())
         {
             return true;
         }

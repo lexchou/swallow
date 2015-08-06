@@ -1,7 +1,7 @@
 PROJECT(tests)
 cmake_minimum_required(VERSION 2.6)
-SET(GTEST_LIBS gtest gtest_main pthread)
 cmake_policy(SET CMP0015 OLD)
+cmake_policy(SET CMP0054 OLD)
 LINK_DIRECTORIES(../../bin ../../gtest-1.7.0)
 
 INCLUDE_DIRECTORIES(
@@ -11,7 +11,20 @@ INCLUDE_DIRECTORIES(
 )
 SET( CMAKE_BUILD_TYPE Debug )
 SET(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/../../bin)
-SET(CMAKE_CXX_FLAGS "$ENV{CXXFLAGS} -O0 -Wall -g -std=c++0x")
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -O0 -g -std=c++11")
+    SET(GTEST_LIBS gtest pthread)
+elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+    # using GCC
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -O0 -g -std=c++11")
+    SET(GTEST_LIBS gtest pthread)
+elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
+    # using Intel C++
+elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
+    # using Visual Studio C++
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W0 /EHsc /Zi /DEBUG")
+    SET(GTEST_LIBS gtest)
+endif()
 
 add_definitions(-DTRACE_NODE)
 
@@ -93,3 +106,16 @@ add_test(NAME test-tokenizer COMMAND TestTokenizer)
 add_test(NAME test-parser COMMAND TestParser)
 add_test(NAME test-semantics COMMAND TestSemantics)
 add_test(NAME test-codegen COMMAND TestCodeGen)
+
+
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
+    add_custom_command(TARGET TestSemantics POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "${PROJECT_BINARY_DIR}/../../bin/Debug/swallow.dll"
+            $<TARGET_FILE_DIR:TestSemantics>
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "${PROJECT_BINARY_DIR}/../../bin/Debug/swallow.pdb"
+            $<TARGET_FILE_DIR:TestSemantics>
+            )
+
+endif()

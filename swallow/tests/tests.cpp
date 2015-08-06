@@ -30,9 +30,3 @@
 #include "utils.h"
 using namespace Swallow;
 
-
-int main(int argc, char** argv)
-{
-    testInit(argc, argv);
-    return RUN_ALL_TESTS();
-}

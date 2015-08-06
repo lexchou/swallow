@@ -41,23 +41,23 @@ using namespace Swallow;
 /*
   GRAMMAR OF A DECLARATION
  
- ‌ declaration → import-declaration
- ‌ declaration → constant-declaration
- ‌ declaration → variable-declaration
- ‌ declaration → typealias-declaration
- ‌ declaration → function-declaration
- ‌ declaration → enum-declaration
- ‌ declaration → struct-declaration
- ‌ declaration → class-declaration
- ‌ declaration → protocol-declaration
- ‌ declaration → initializer-declaration
- ‌ declaration → deinitializer-declaration
- ‌ declaration → extension-declaration
- ‌ declaration → subscript-declaration
- ‌ declaration → operator-declaration
- ‌ declarations → declaration declarations opt
- ‌ declaration-specifiers → declaration-specifier declaration-specifiersopt
- ‌ declaration-specifier → class  mutating  nonmutating  override  static  unowned  unowned(safe) unowned(unsafe)  weak”
+ ‌ declaration -> import-declaration
+ ‌ declaration -> constant-declaration
+ ‌ declaration -> variable-declaration
+ ‌ declaration -> typealias-declaration
+ ‌ declaration -> function-declaration
+ ‌ declaration -> enum-declaration
+ ‌ declaration -> struct-declaration
+ ‌ declaration -> class-declaration
+ ‌ declaration -> protocol-declaration
+ ‌ declaration -> initializer-declaration
+ ‌ declaration -> deinitializer-declaration
+ ‌ declaration -> extension-declaration
+ ‌ declaration -> subscript-declaration
+ ‌ declaration -> operator-declaration
+ ‌ declarations -> declaration declarations opt
+ ‌ declaration-specifiers -> declaration-specifier declaration-specifiersopt
+ ‌ declaration-specifier -> class  mutating  nonmutating  override  static  unowned  unowned(safe) unowned(unsafe)  weak
 */
 DeclarationPtr Parser::parseDeclaration()
 {
@@ -73,34 +73,34 @@ DeclarationPtr Parser::parseDeclaration()
         unexpected(token);
     switch(token.identifier.keyword)
     {
-        case Keyword::Import://declaration → import-declaration
+        case Keyword::Import://declaration -> import-declaration
             return parseImport(attrs);
-        case Keyword::Let://declaration → constant-declaration
+        case Keyword::Let://declaration -> constant-declaration
             return parseLet(attrs, modifiers);
-        case Keyword::Var://declaration → variable-declaration
+        case Keyword::Var://declaration -> variable-declaration
             return parseVar(attrs, modifiers);
-        case Keyword::Typealias://declaration → typealias-declaration    ‌
+        case Keyword::Typealias://declaration -> typealias-declaration    ‌
             return parseTypealias(attrs, modifiers);
-        case Keyword::Func://declaration → function-declaration
+        case Keyword::Func://declaration -> function-declaration
             return parseFunc(attrs, modifiers);
-        case Keyword::Enum://declaration → enum-declaration
+        case Keyword::Enum://declaration -> enum-declaration
             return parseEnum(attrs, modifiers);
-        case Keyword::Struct://declaration → struct-declaration
+        case Keyword::Struct://declaration -> struct-declaration
             return parseStruct(attrs, modifiers);
-        case Keyword::Class://declaration → class-declaration
+        case Keyword::Class://declaration -> class-declaration
             return parseClass(attrs, modifiers);
-        case Keyword::Protocol://declaration → protocol-declaration
+        case Keyword::Protocol://declaration -> protocol-declaration
             return parseProtocol(attrs, modifiers);
-        case Keyword::Init://declaration → initializer-declaration
+        case Keyword::Init://declaration -> initializer-declaration
         case Keyword::Convenience:
             return parseInit(attrs, modifiers);
-        case Keyword::Deinit://declaration → deinitializer-declaration
+        case Keyword::Deinit://declaration -> deinitializer-declaration
             return parseDeinit(attrs, modifiers);
-        case Keyword::Extension://declaration → extension-declaration
+        case Keyword::Extension://declaration -> extension-declaration
             return parseExtension(attrs, modifiers);
-        case Keyword::Subscript://declaration → subscript-declaration
+        case Keyword::Subscript://declaration -> subscript-declaration
             return parseSubscript(attrs, modifiers);
-        case Keyword::Operator://declaration → operator-declaration
+        case Keyword::Operator://declaration -> operator-declaration
             return parseOperator(attrs, modifiers);
         default:
             //destroy attributes before reporting an issue
@@ -112,8 +112,8 @@ DeclarationPtr Parser::parseDeclaration()
 
     return NULL;
 }
-// declaration-specifiers → declaration-specifier declaration-specifiers opt
-// declaration-specifier → class  mutating  nonmutating  override  static  unowned  unowned(safe) unowned(unsafe)  weak”
+// declaration-specifiers -> declaration-specifier declaration-specifiers opt
+// declaration-specifier -> class  mutating  nonmutating  override  static  unowned  unowned(safe) unowned(unsafe)  weak
 
 int Parser::parseDeclarationModifiers()
 {
@@ -236,10 +236,10 @@ void Parser::verifyDeclarationSpecifiers(const Token& token, int actualSpecifier
 /*
   GRAMMAR OF AN IMPORT DECLARATION
  
- ‌ import-declaration → attributesoptimportimport-kindoptimport-path
- ‌ import-kind → typealias  struct  class  enum protocol  var  func
- ‌ import-path → import-path-identifier | import-path-identifier.import-path
- ‌ import-path-identifier → identifier | operator”
+ ‌ import-declaration -> attributesoptimportimport-kindoptimport-path
+ ‌ import-kind -> typealias  struct  class  enum protocol  var  func
+ ‌ import-path -> import-path-identifier | import-path-identifier.import-path
+ ‌ import-path-identifier -> identifier | operator
 */
 DeclarationPtr Parser::parseImport(const std::vector<AttributePtr>& attrs)
 {
@@ -299,10 +299,10 @@ DeclarationPtr Parser::parseImport(const std::vector<AttributePtr>& attrs)
 /*
   GRAMMAR OF A CONSTANT DECLARATION
  
- ‌ constant-declaration → attributes opt declaration-specifiers opt let pattern-initializer-list
- ‌ pattern-initializer-list → pattern-initializer | pattern-initializer,pattern-initializer-list
- ‌ pattern-initializer → pattern initializer opt
- ‌ initializer → =expression
+ ‌ constant-declaration -> attributes opt declaration-specifiers opt let pattern-initializer-list
+ ‌ pattern-initializer-list -> pattern-initializer | pattern-initializer,pattern-initializer-list
+ ‌ pattern-initializer -> pattern initializer opt
+ ‌ initializer -> =expression
 */
 DeclarationPtr Parser::parseLet(const std::vector<AttributePtr>& attrs, int modifiers)
 {
@@ -380,13 +380,13 @@ ValueBindingPtr Parser::parseVariableDeclaration()
 /*
   GRAMMAR OF A VARIABLE DECLARATION
  
- ‌ variable-declaration → variable-declaration-head pattern-initializer-list
- ‌ variable-declaration → variable-declaration-head variable-name type-annotation code-block
- ‌ variable-declaration → variable-declaration-head variable-name type-annotation getter-setter-block
-  variable-declaration → variable-declaration-head variable-name type-annotation getter-setter-keyword-block
- ‌ variable-declaration → variable-declaration-head variable-name type-annotation initializer opt willSet-didSet-block
- ‌ variable-declaration-head → attributes opt declaration-specifiers opt var
- ‌ variable-name → identifier
+ ‌ variable-declaration -> variable-declaration-head pattern-initializer-list
+ ‌ variable-declaration -> variable-declaration-head variable-name type-annotation code-block
+ ‌ variable-declaration -> variable-declaration-head variable-name type-annotation getter-setter-block
+  variable-declaration -> variable-declaration-head variable-name type-annotation getter-setter-keyword-block
+ ‌ variable-declaration -> variable-declaration-head variable-name type-annotation initializer opt willSet-didSet-block
+ ‌ variable-declaration-head -> attributes opt declaration-specifiers opt var
+ ‌ variable-name -> identifier
 */
 DeclarationPtr Parser::parseVar(const std::vector<AttributePtr>& attrs, int modifiers)
 {
@@ -444,7 +444,7 @@ DeclarationPtr Parser::parseVar(const std::vector<AttributePtr>& attrs, int modi
             case Keyword::Set:
                 if(this->flags & (UNDER_PROTOCOL | DECLARATION_ONLY))
                 {
-                    // variable-declaration → variable-declaration-head variable-name type-annotation getter-setter-keyword-block
+                    // variable-declaration -> variable-declaration-head variable-name type-annotation getter-setter-keyword-block
                     //no code block for getter/setter for protocol
                     std::pair<CodeBlockPtr, CodeBlockPtr> r = parseGetterSetterKeywordBlock();
                     prop->setGetter(r.first);
@@ -454,7 +454,7 @@ DeclarationPtr Parser::parseVar(const std::vector<AttributePtr>& attrs, int modi
                 }
                 else
                 {
-                    //  variable-declaration → variable-declaration-head variable-name type-annotation getter-setter-block
+                    //  variable-declaration -> variable-declaration-head variable-name type-annotation getter-setter-block
                     std::pair<CodeBlockPtr, std::pair<std::wstring, CodeBlockPtr> > r = parseGetterSetterBlock();
                     prop->setGetter(r.first);
                     prop->setSetterName(r.second.first);
@@ -463,11 +463,11 @@ DeclarationPtr Parser::parseVar(const std::vector<AttributePtr>& attrs, int modi
                 break;
             case Keyword::WillSet:
             case Keyword::DidSet:
-                //  variable-declaration → variable-declaration-head variable-name type-annotation initializer opt willSet-didSet-block
+                //  variable-declaration -> variable-declaration-head variable-name type-annotation initializer opt willSet-didSet-block
                 parseWillSetDidSetBlock(prop);
                 break;
             default:
-                //‌ variable-declaration → variable-declaration-head variable-name type-annotation code-block
+                //‌ variable-declaration -> variable-declaration-head variable-name type-annotation code-block
                 CodeBlockPtr getter = nodeFactory->createCodeBlock(token.state);
                 prop->setGetter(getter);
                 do
@@ -484,7 +484,7 @@ DeclarationPtr Parser::parseVar(const std::vector<AttributePtr>& attrs, int modi
 }
 
 /*
-willSet-clause → attributes opt willSet setter-name opt code-block
+willSet-clause -> attributes opt willSet setter-name opt code-block
 */
 void Parser::parseWillSetClause(const ComputedPropertyPtr& property, bool opt)
 {
@@ -509,7 +509,7 @@ void Parser::parseWillSetClause(const ComputedPropertyPtr& property, bool opt)
     property->setWillSet(cb);
 }
 /*
- ‌ didSet-clause → attributes opt didSet setter-name opt code-block
+ ‌ didSet-clause -> attributes opt didSet setter-name opt code-block
 */
 void Parser::parseDidSetClause(const ComputedPropertyPtr& property, bool opt)
 {
@@ -532,8 +532,8 @@ void Parser::parseDidSetClause(const ComputedPropertyPtr& property, bool opt)
 }
 
 /*
- ‌ willSet-didSet-block → {willSet-clause didSet-clause opt}
- ‌ willSet-didSet-block → {didSet-clause willSet-clause}
+ ‌ willSet-didSet-block -> {willSet-clause didSet-clause opt}
+ ‌ willSet-didSet-block -> {didSet-clause willSet-clause}
  */
 void Parser::parseWillSetDidSetBlock(const ComputedPropertyPtr& property)
 {
@@ -545,7 +545,7 @@ void Parser::parseWillSetDidSetBlock(const ComputedPropertyPtr& property)
     parseAttributes(attrs);
     if(predicate(L"willSet"))
     {
-        //willSet-didSet-block → {willSet-clause didSet-clause opt}
+        //willSet-didSet-block -> {willSet-clause didSet-clause opt}
         parseWillSetClause(property, false);
         parseDidSetClause(property, true);
         return;
@@ -558,11 +558,11 @@ void Parser::parseWillSetDidSetBlock(const ComputedPropertyPtr& property)
 }
 
 /*
- ‌ getter-setter-block → {getter-clause setter-clauseopt}
- ‌ getter-setter-block → {setter-clause getter-clause}
- ‌ getter-clause → attributes opt get code-block
- ‌ setter-clause → attributes opt set setter-name opt code-block
- ‌ setter-name → (identifier)
+ ‌ getter-setter-block -> {getter-clause setter-clauseopt}
+ ‌ getter-setter-block -> {setter-clause getter-clause}
+ ‌ getter-clause -> attributes opt get code-block
+ ‌ setter-clause -> attributes opt set setter-name opt code-block
+ ‌ setter-name -> (identifier)
 */
 std::pair<CodeBlockPtr, std::pair<std::wstring, CodeBlockPtr> > Parser::parseGetterSetterBlock()
 {
@@ -601,7 +601,7 @@ std::pair<CodeBlockPtr, std::pair<std::wstring, CodeBlockPtr> > Parser::parseGet
     return std::make_pair(getter, setter);
 }
 /*
- ‌ setter-clause → attributes opt set setter-name opt code-block
+ ‌ setter-clause -> attributes opt set setter-name opt code-block
 */
 std::pair<std::wstring, CodeBlockPtr> Parser::parseSetterClause()
 {
@@ -619,10 +619,10 @@ std::pair<std::wstring, CodeBlockPtr> Parser::parseSetterClause()
     return std::make_pair(name, setter);
 }
 /*
- ‌ getter-setter-keyword-block → {getter-keyword-clause setter-keyword-clause opt}
- ‌ getter-setter-keyword-block → {setter-keyword-clause getter-keyword-clause}
- ‌ getter-keyword-clause → attributes opt get
- ‌ setter-keyword-clause → attributes opt set
+ ‌ getter-setter-keyword-block -> {getter-keyword-clause setter-keyword-clause opt}
+ ‌ getter-setter-keyword-block -> {setter-keyword-clause getter-keyword-clause}
+ ‌ getter-keyword-clause -> attributes opt get
+ ‌ setter-keyword-clause -> attributes opt set
 */
 std::pair<CodeBlockPtr, CodeBlockPtr> Parser::parseGetterSetterKeywordBlock()
 {
@@ -696,10 +696,10 @@ int Parser::parseAccessorModifiers()
 /*
  “GRAMMAR OF A TYPE ALIAS DECLARATION
  
- ‌ typealias-declaration → typealias-head typealias-assignment
- ‌ typealias-head → typealias typealias-name
- ‌ typealias-name → identifier
- ‌ typealias-assignment → =type
+ ‌ typealias-declaration -> typealias-head typealias-assignment
+ ‌ typealias-head -> typealias typealias-name
+ ‌ typealias-name -> identifier
+ ‌ typealias-assignment -> =type
 */
 DeclarationPtr Parser::parseTypealias(const Attributes& attrs, int modifiers)
 {
@@ -742,12 +742,12 @@ DeclarationPtr Parser::parseTypealias(const Attributes& attrs, int modifiers)
 /*
   GRAMMAR OF A FUNCTION DECLARATION
  
- ‌ function-declaration → function-head function-name generic-parameter-clause opt function-signature function-body
- ‌ function-head → attributes opt declaration-specifiers opt func
- ‌ function-name → identifier | operator
- ‌ function-signature → parameter-clauses function-result opt
- ‌ function-result → ->attributes opt type
- ‌ function-body → code-block
+ ‌ function-declaration -> function-head function-name generic-parameter-clause opt function-signature function-body
+ ‌ function-head -> attributes opt declaration-specifiers opt func
+ ‌ function-name -> identifier | operator
+ ‌ function-signature -> parameter-clauses function-result opt
+ ‌ function-result -> ->attributes opt type
+ ‌ function-body -> code-block
 */
 DeclarationPtr Parser::parseFunc(const std::vector<AttributePtr>& attrs, int modifiers)
 {
@@ -783,7 +783,7 @@ DeclarationPtr Parser::parseFunc(const std::vector<AttributePtr>& attrs, int mod
     }
     if(match(L"->"))
     {
-        //function-result → ->attributes opt type
+        //function-result -> ->attributes opt type
         Attributes retAttrs;
         parseAttributes(retAttrs);
         TypeNodePtr retType = parseType();
@@ -809,15 +809,15 @@ DeclarationPtr Parser::parseFunc(const std::vector<AttributePtr>& attrs, int mod
 }
 
 /*
- ‌ parameter-clauses → parameter-clause parameter-clauses opt
- ‌ parameter-clause → () | (parameter-list...opt)
- ‌ parameter-list → parameter | parameter,parameter-list
- ‌ parameter → inout opt let opt#opt parameter-name local-parameter-name opt type-annotation default-argument-clause opt
- ‌ parameter → inout opt var #opt parameter-name local-parameter-name opt type-annotation default-argument-clause opt
- ‌ parameter → attributes opt type
- ‌ parameter-name → identifier | _
- ‌ local-parameter-name → identifier | _
- ‌ default-argument-clause → =expression
+ ‌ parameter-clauses -> parameter-clause parameter-clauses opt
+ ‌ parameter-clause -> () | (parameter-list...opt)
+ ‌ parameter-list -> parameter | parameter,parameter-list
+ ‌ parameter -> inout opt let opt#opt parameter-name local-parameter-name opt type-annotation default-argument-clause opt
+ ‌ parameter -> inout opt var #opt parameter-name local-parameter-name opt type-annotation default-argument-clause opt
+ ‌ parameter -> attributes opt type
+ ‌ parameter-name -> identifier | _
+ ‌ local-parameter-name -> identifier | _
+ ‌ default-argument-clause -> =expression
 */
 ParametersNodePtr Parser::parseParameterClause()
 {
@@ -901,9 +901,9 @@ ParametersNodePtr Parser::parseParameterClause()
 /*
   GRAMMAR OF AN ENUMERATION DECLARATION
  
- ‌ enum-declaration → attributes opt union-style-enum | attributes opt raw-value-style-enum
- ‌ enum-name → identifier
- ‌ enum-case-name → identifier
+ ‌ enum-declaration -> attributes opt union-style-enum | attributes opt raw-value-style-enum
+ ‌ enum-name -> identifier
+ ‌ enum-case-name -> identifier
  
 */
 DeclarationPtr Parser::parseEnum(const std::vector<AttributePtr>& attrs, int modifiers)
@@ -978,9 +978,9 @@ DeclarationPtr Parser::parseEnum(const std::vector<AttributePtr>& attrs, int mod
 /*
  “GRAMMAR OF A STRUCTURE DECLARATION
  
- ‌ struct-declaration → attributes opt struct struct-name generic-parameter-clause opt type-inheritance-clause opt struct-body
- ‌ struct-name → identifier
- ‌ struct-body → {declarations opt}”
+ ‌ struct-declaration -> attributes opt struct struct-name generic-parameter-clause opt type-inheritance-clause opt struct-body
+ ‌ struct-name -> identifier
+ ‌ struct-body -> {declarations opt}
 */
 DeclarationPtr Parser::parseStruct(const std::vector<AttributePtr>& attrs, int modifiers)
 {
@@ -1028,9 +1028,9 @@ DeclarationPtr Parser::parseStruct(const std::vector<AttributePtr>& attrs, int m
 /*
  “GRAMMAR OF A CLASS DECLARATION
  
- ‌ class-declaration → attributes opt class class-name generic-parameter-clause opt type-inheritance-clause opt class-body
- ‌ class-name → identifier
- ‌ class-body → {declarations opt}”
+ ‌ class-declaration -> attributes opt class class-name generic-parameter-clause opt type-inheritance-clause opt class-body
+ ‌ class-name -> identifier
+ ‌ class-body -> {declarations opt}
  
 */
 DeclarationPtr Parser::parseClass(const std::vector<AttributePtr>& attrs, int modifiers)
@@ -1075,36 +1075,36 @@ DeclarationPtr Parser::parseClass(const std::vector<AttributePtr>& attrs, int mo
 /*
  “GRAMMAR OF A PROTOCOL DECLARATION
  
- ‌ protocol-declaration → attributes opt protocol protocol-name type-inheritance-clause opt protocol-body
- ‌ protocol-name → identifier
- ‌ protocol-body → {protocol-member-declarations opt}
- ‌ protocol-member-declaration → protocol-property-declaration
- ‌ protocol-member-declaration → protocol-method-declaration
- ‌ protocol-member-declaration → protocol-initializer-declaration
- ‌ protocol-member-declaration → protocol-subscript-declaration
- ‌ protocol-member-declaration → protocol-associated-type-declaration
- ‌ protocol-member-declarations → protocol-member-declaration protocol-member-declarations opt
+ ‌ protocol-declaration -> attributes opt protocol protocol-name type-inheritance-clause opt protocol-body
+ ‌ protocol-name -> identifier
+ ‌ protocol-body -> {protocol-member-declarations opt}
+ ‌ protocol-member-declaration -> protocol-property-declaration
+ ‌ protocol-member-declaration -> protocol-method-declaration
+ ‌ protocol-member-declaration -> protocol-initializer-declaration
+ ‌ protocol-member-declaration -> protocol-subscript-declaration
+ ‌ protocol-member-declaration -> protocol-associated-type-declaration
+ ‌ protocol-member-declarations -> protocol-member-declaration protocol-member-declarations opt
  ”
  
  “GRAMMAR OF A PROTOCOL PROPERTY DECLARATION
  
- ‌ protocol-property-declaration → variable-declaration-head variable-name type-annotation getter-setter-keyword-block
+ ‌ protocol-property-declaration -> variable-declaration-head variable-name type-annotation getter-setter-keyword-block
  ”
  “GRAMMAR OF A PROTOCOL METHOD DECLARATION
  
- ‌ protocol-method-declaration → function-head function-name generic-parameter-clause opt function-signature
+ ‌ protocol-method-declaration -> function-head function-name generic-parameter-clause opt function-signature
  ”
  “GRAMMAR OF A PROTOCOL INITIALIZER DECLARATION
  
- ‌ protocol-initializer-declaration → initializer-head generic-parameter-clause opt parameter-clause
+ ‌ protocol-initializer-declaration -> initializer-head generic-parameter-clause opt parameter-clause
  ”
  “GRAMMAR OF A PROTOCOL SUBSCRIPT DECLARATION
  
- ‌ protocol-subscript-declaration → subscript-head subscript-result getter-setter-keyword-block”
+ ‌ protocol-subscript-declaration -> subscript-head subscript-result getter-setter-keyword-block”
  
  “GRAMMAR OF A PROTOCOL ASSOCIATED TYPE DECLARATION
  
- ‌ protocol-associated-type-declaration → typealias-head type-inheritance-clause opt typealias-assignment opt
+ ‌ protocol-associated-type-declaration -> typealias-head type-inheritance-clause opt typealias-assignment opt
  ‌”
  
 
@@ -1147,9 +1147,9 @@ DeclarationPtr Parser::parseProtocol(const std::vector<AttributePtr>& attrs, int
 /*
   GRAMMAR OF AN INITIALIZER DECLARATION
  
- ‌ initializer-declaration → initializer-head generic-parameter-clause opt parameter-clause initializer-body
- ‌ initializer-head → attributes opt convenience opt init
- ‌ initializer-body → code-block
+ ‌ initializer-declaration -> initializer-head generic-parameter-clause opt parameter-clause initializer-body
+ ‌ initializer-head -> attributes opt convenience opt init
+ ‌ initializer-body -> code-block
  
 */
 DeclarationPtr Parser::parseInit(const std::vector<AttributePtr>& attrs, int modifiers)
@@ -1193,7 +1193,7 @@ DeclarationPtr Parser::parseInit(const std::vector<AttributePtr>& attrs, int mod
 /*
   GRAMMAR OF A DEINITIALIZER DECLARATION
  
- ‌ deinitializer-declaration → attributes opt deinit code-block
+ ‌ deinitializer-declaration -> attributes opt deinit code-block
 */
 DeclarationPtr Parser::parseDeinit(const std::vector<AttributePtr>& attrs, int modifiers)
 {
@@ -1216,8 +1216,8 @@ DeclarationPtr Parser::parseDeinit(const std::vector<AttributePtr>& attrs, int m
 /*
  “GRAMMAR OF AN EXTENSION DECLARATION
  
- ‌ extension-declaration → extension type-identifier type-inheritance-clause opt extension-body
- ‌ extension-body → {declarationsopt}”
+ ‌ extension-declaration -> extension type-identifier type-inheritance-clause opt extension-body
+ ‌ extension-body -> {declarationsopt}
 */
 DeclarationPtr Parser::parseExtension(const std::vector<AttributePtr>& attrs, int modifiers)
 {
@@ -1231,7 +1231,7 @@ DeclarationPtr Parser::parseExtension(const std::vector<AttributePtr>& attrs, in
     ret->setModifiers(modifiers);
     if(match(L":"))
     {
-        // type-inheritance-list → type-identifier  type-identifier,type-inheritance-list
+        // type-inheritance-list -> type-identifier  type-identifier,type-inheritance-list
         do
         {
             TypeIdentifierPtr protocol = parseTypeIdentifier();
@@ -1253,11 +1253,11 @@ DeclarationPtr Parser::parseExtension(const std::vector<AttributePtr>& attrs, in
 /*
  “GRAMMAR OF A SUBSCRIPT DECLARATION
  
- ‌ subscript-declaration → subscript-head subscript-result code-block
- ‌ subscript-declaration → subscript-head subscript-result getter-setter-block
- ‌ subscript-declaration → subscript-head subscript-result getter-setter-keyword-block
- ‌ subscript-head → attributes opt subscript parameter-clause
- ‌ subscript-result → ->attributes opt type
+ ‌ subscript-declaration -> subscript-head subscript-result code-block
+ ‌ subscript-declaration -> subscript-head subscript-result getter-setter-block
+ ‌ subscript-declaration -> subscript-head subscript-result getter-setter-keyword-block
+ ‌ subscript-head -> attributes opt subscript parameter-clause
+ ‌ subscript-result -> ->attributes opt type
  ”
 */
 DeclarationPtr Parser::parseSubscript(const std::vector<AttributePtr>& attrs, int modifiers)
@@ -1316,15 +1316,15 @@ DeclarationPtr Parser::parseSubscript(const std::vector<AttributePtr>& attrs, in
 /*
   GRAMMAR OF AN OPERATOR DECLARATION
 
-  operator-declaration → prefix-operator-declaration | postfix-operator-declaration | infix-operator-declaration­
-  prefix-operator-declaration → prefix operator operator{}
-  postfix-operator-declaration → postfix operator operator{}
-  infix-operator-declaration → infix operator operator { infix-operator-attributes opt}
-  infix-operator-attributes → precedence-clause opt associativity-clause opt
-  precedence-clause → precedence precedence-level
-  precedence-level → A decimal integer between 0 and 255, inclusive
-  associativity-clause → associativity associativity­
-  associativity → left  right  none
+  operator-declaration -> prefix-operator-declaration | postfix-operator-declaration | infix-operator-declaration­
+  prefix-operator-declaration -> prefix operator operator{}
+  postfix-operator-declaration -> postfix operator operator{}
+  infix-operator-declaration -> infix operator operator { infix-operator-attributes opt}
+  infix-operator-attributes -> precedence-clause opt associativity-clause opt
+  precedence-clause -> precedence precedence-level
+  precedence-level -> A decimal integer between 0 and 255, inclusive
+  associativity-clause -> associativity associativity­
+  associativity -> left  right  none
 
 */
 DeclarationPtr Parser::parseOperator(const std::vector<AttributePtr>& attrs, int modifiers)

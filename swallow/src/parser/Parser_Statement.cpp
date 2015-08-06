@@ -37,13 +37,13 @@
 using namespace Swallow;
 
 /*
- statement → expression;opt
-‌ statement → declaration;opt
-‌ statement → loop-statement;opt
-‌ statement → branch-statement;opt
-‌ statement → labeled-statement
-‌ statement → control-transfer-statement;opt
-‌ statements → statementstatementsopt
+ statement -> expression;opt
+‌ statement -> declaration;opt
+‌ statement -> loop-statement;opt
+‌ statement -> branch-statement;opt
+‌ statement -> labeled-statement
+‌ statement -> control-transfer-statement;opt
+‌ statements -> statementstatementsopt
 */
 StatementPtr Parser::parseStatement()
 {
@@ -54,19 +54,19 @@ StatementPtr Parser::parseStatement()
         {
             switch(token.getKeyword())
             {
-                    //‌ statement → loop-statement;opt
+                    //‌ statement -> loop-statement;opt
                 case Keyword::For:
                     return parseForLoop();
                 case Keyword::While:
                     return parseWhileLoop();
                 case Keyword::Do:
                     return parseDoLoop();
-                    //‌ statement → branch-statement;opt
+                    //‌ statement -> branch-statement;opt
                 case Keyword::If:
                     return parseIf();
                 case Keyword::Switch:
                     return parseSwitch();
-                    //‌ statement → control-transfer-statement;opt
+                    //‌ statement -> control-transfer-statement;opt
                 case Keyword::Break:
                     return parseBreak();
                 case Keyword::Continue:
@@ -102,7 +102,7 @@ StatementPtr Parser::parseStatement()
                     return parseDeclaration();
                 case Keyword::_:
                     expect_next(token);
-                    //‌ statement → labeled-statement
+                    //‌ statement -> labeled-statement
                     if(predicate(L":"))
                     {
                         restore(token);
@@ -128,7 +128,7 @@ StatementPtr Parser::parseLoopStatement()
     {
         switch(token.getKeyword())
         {
-                //‌ statement → loop-statement;opt
+                //‌ statement -> loop-statement;opt
             case Keyword::For:
                 return parseForLoop();
             case Keyword::While:
@@ -145,10 +145,10 @@ StatementPtr Parser::parseLoopStatement()
 /*
  GRAMMAR OF A FOR STATEMENT
 
-‌ for-statement → forfor-initopt;expressionopt;expressionoptcode-block
-‌ for-statement → for(for-initopt;expressionopt;expressionopt)code-block
-‌ for-init → variable-declaration | expression-list
- for-in-statement → for pattern in expression code-block
+‌ for-statement -> forfor-initopt;expressionopt;expressionoptcode-block
+‌ for-statement -> for(for-initopt;expressionopt;expressionopt)code-block
+‌ for-init -> variable-declaration | expression-list
+ for-in-statement -> for pattern in expression code-block
 */
 StatementPtr Parser::parseForLoop()
 {
@@ -176,7 +176,7 @@ StatementPtr Parser::parseForLoop()
         return parseForStatement();
 }
 /*
- for-in-statement → for pattern in expression code-block
+ for-in-statement -> for pattern in expression code-block
 */
 StatementPtr Parser::parseForIn()
 {
@@ -207,8 +207,8 @@ StatementPtr Parser::parseForStatement()
 {
     std::vector<ExpressionPtr> inits;
 
-    //‌ for-statement → forfor-initopt;expressionopt;expressionoptcode-block
-    //‌ for-statement → for(for-initopt;expressionopt;expressionopt)code-block
+    //‌ for-statement -> forfor-initopt;expressionopt;expressionoptcode-block
+    //‌ for-statement -> for(for-initopt;expressionopt;expressionopt)code-block
     Token token;
     expect(Keyword::For, token);
     Flags flags(this);
@@ -268,13 +268,13 @@ StatementPtr Parser::parseForStatement()
     return ret;
     
     
-    //TODO: for-in-statement → forpatterninexpressioncode-block
+    //TODO: for-in-statement -> forpatterninexpressioncode-block
 }
 /*
   GRAMMAR OF A WHILE STATEMENT
  
- ‌ while-statement → whilewhile-conditioncode-block
- ‌ while-condition → expression | declaration
+ ‌ while-statement -> whilewhile-conditioncode-block
+ ‌ while-condition -> expression | declaration
 */
 StatementPtr Parser::parseWhileLoop()
 {
@@ -289,7 +289,7 @@ StatementPtr Parser::parseWhileLoop()
     ret->setCodeBlock(codeBlock);
     return ret;
 }
-//while-condition → expression  declaration
+//while-condition -> expression  declaration
 ExpressionPtr Parser::parseConditionExpression()
 {
     Token token;
@@ -327,7 +327,7 @@ ExpressionPtr Parser::parseConditionExpression()
 /*
  GRAMMAR OF A DO-WHILE STATEMENT
 
-‌ do-while-statement → docode-blockwhilewhile-condition
+‌ do-while-statement -> docode-blockwhilewhile-condition
 */
 StatementPtr Parser::parseDoLoop()
 {
@@ -345,9 +345,9 @@ StatementPtr Parser::parseDoLoop()
 /*
   GRAMMAR OF AN IF STATEMENT
  
- ‌ if-statement → ifif-conditioncode-blockelse-clauseopt
- ‌ if-condition → expression  declaration
- ‌ else-clause → elsecode-block  elseif-statement
+ ‌ if-statement -> ifif-conditioncode-blockelse-clauseopt
+ ‌ if-condition -> expression  declaration
+ ‌ else-clause -> elsecode-block  elseif-statement
  */
 IfStatementPtr Parser::parseIf()
 {
@@ -387,15 +387,15 @@ IfStatementPtr Parser::parseIf()
 /*
   GRAMMAR OF A SWITCH STATEMENT
  
- ‌ switch-statement → switchexpression{switch-casesopt}
- ‌ switch-cases → switch-case switch-cases opt
- ‌ switch-case → case-labelstatements  |default-labelstatements
- ‌ switch-case → case-label;  default-label;
- ‌ case-label → casecase-item-list:
- ‌ case-item-list → patternguard-clauseopt  patternguard-clauseopt,case-item-list
- ‌ default-label → default:
- ‌ guard-clause → whereguard-expression
- ‌ guard-expression → expression
+ ‌ switch-statement -> switchexpression{switch-casesopt}
+ ‌ switch-cases -> switch-case switch-cases opt
+ ‌ switch-case -> case-labelstatements  |default-labelstatements
+ ‌ switch-case -> case-label;  default-label;
+ ‌ case-label -> casecase-item-list:
+ ‌ case-item-list -> patternguard-clauseopt  patternguard-clauseopt,case-item-list
+ ‌ default-label -> default:
+ ‌ guard-clause -> whereguard-expression
+ ‌ guard-expression -> expression
 */
 StatementPtr Parser::parseSwitch()
 {
@@ -411,19 +411,19 @@ StatementPtr Parser::parseSwitch()
         ret->setControlExpression(controlExpr);
     }
     expect(L"{");
-    // ‌ switch-cases → switch-case switch-cases opt
+    // ‌ switch-cases -> switch-case switch-cases opt
     while(!predicate(L"}"))
     {
-        //switch-case → case-label statements  |default-label statements
+        //switch-case -> case-label statements  |default-label statements
         expect_next(token);
         tassert(token, token.type == TokenType::Identifier, Errors::E_EXPECT_CASE, token.token);
-        // case-label → casecase-item-list:
+        // case-label -> casecase-item-list:
         if(token.identifier.keyword == Keyword::Case)
         {
             Flags fcase(flags);
             fcase += UNDER_CASE;
             
-            //case-item-list → pattern guard-clause opt | pattern guard-clause opt , case-item-list
+            //case-item-list -> pattern guard-clause opt | pattern guard-clause opt , case-item-list
             CaseStatementPtr caseCond = nodeFactory->createCase(token.state);
             CodeBlockPtr codeBlock = nodeFactory->createCodeBlock(token.state);
             caseCond->setCodeBlock(codeBlock);
@@ -485,7 +485,7 @@ void Parser::parseSwitchStatements(const CaseStatementPtr& case_)
 /*
  GRAMMAR OF A BREAK STATEMENT
 
-‌ break-statement → breaklabel-nameopt
+‌ break-statement -> breaklabel-nameopt
 */
 StatementPtr Parser::parseBreak()
 {
@@ -507,7 +507,7 @@ StatementPtr Parser::parseBreak()
 /*
   GRAMMAR OF A CONTINUE STATEMENT
  
- ‌ continue-statement → continuelabel-nameopt
+ ‌ continue-statement -> continuelabel-nameopt
 */
 StatementPtr Parser::parseContinue()
 {
@@ -530,7 +530,7 @@ StatementPtr Parser::parseContinue()
 /*
   GRAMMAR OF A FALLTHROUGH STATEMENT
  
- ‌ fallthrough-statement → fallthrough
+ ‌ fallthrough-statement -> fallthrough
 */
 StatementPtr Parser::parseFallthrough()
 {
@@ -542,7 +542,7 @@ StatementPtr Parser::parseFallthrough()
 /*
  GRAMMAR OF A RETURN STATEMENT
 
-‌ return-statement → returnexpressionopt
+‌ return-statement -> returnexpressionopt
 */
 StatementPtr Parser::parseReturn()
 {
@@ -565,9 +565,9 @@ StatementPtr Parser::parseReturn()
 /*
  GRAMMAR OF A LABELED STATEMENT
 
-‌ labeled-statement → statement-label loop-statement | statement-label switch-statement
-‌ statement-label → label-name:
-‌ label-name → identifier
+‌ labeled-statement -> statement-label loop-statement | statement-label switch-statement
+‌ statement-label -> label-name:
+‌ label-name -> identifier
 */
 StatementPtr Parser::parseLabeledStatement()
 {
@@ -614,7 +614,6 @@ CodeBlockPtr Parser::parseCodeBlock()
     flags -= SUPPRESS_TRAILING_CLOSURE;
     expect(L"{", token);
     CodeBlockPtr ret = nodeFactory->createCodeBlock(token.state);
-    //ENTER_CONTEXT(TokenizerContextUnknown);
     while(!match(L"}"))
     {
         StatementPtr st = parseStatement();

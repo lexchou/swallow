@@ -1,9 +1,6 @@
 PROJECT(swallow)
 cmake_minimum_required(VERSION 2.6)
 SUBDIRS(tests)
-set(CMAKE_BUILD_TYPE Release)
-
-SET(GTEST_LIBS gtest gtest_main pthread)
 
 INCLUDE_DIRECTORIES(
     ${PROJECT_SOURCE_DIR}/includes/
@@ -17,14 +14,17 @@ cmake_policy(SET CMP0015 OLD)
 cmake_policy(SET CMP0054 OLD)
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -O0 -g -std=c++11")
+    SET(GTEST_LIBS gtest gtest_main pthread)
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     # using GCC
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -O0 -g -std=c++11")
+    SET(GTEST_LIBS gtest gtest_main pthread)
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
     # using Intel C++
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
     # using Visual Studio C++
-    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W0 /EHsc /Zi")
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W0 /EHsc /Zi /DEBUG")
+    SET(GTEST_LIBS gtest)
 endif()
 
 
@@ -193,14 +193,11 @@ add_definitions(-DTRACE_NODE)
 
 file(GLOB_RECURSE headers *.h)
 
-source_group(AST ast)
-source_group(AST FILES ${headers} ast)
-source_group(Semantics semantics)
-source_group(Semantics FILES ${headers} semantics)
-source_group(Parser parser)
-source_group(Semantics FILES ${headers} parser)
-source_group(Common common)
-source_group(Common FILES ${headers} common)
+source_group(AST REGULAR_EXPRESSION "ast")
+source_group(Tokenizer REGULAR_EXPRESSION "tokenizer")
+source_group(Semantics REGULAR_EXPRESSION "semantics")
+source_group(Parser REGULAR_EXPRESSION "parser")
+source_group(Common REGULAR_EXPRESSION "common")
 
 add_library(swallow SHARED ${headers} ${SWALLOW_SRC})
 

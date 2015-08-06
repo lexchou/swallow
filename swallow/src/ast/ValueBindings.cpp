@@ -65,7 +65,8 @@ ValueBindings::Iterator ValueBindings::insertBefore(const ValueBindingPtr& bindi
     else
     {
         Iterator it = iter;
-        it--;
+		if(iter != valueBindings.begin())
+			it--;
         return ++valueBindings.insert(it, binding);
     }
 }

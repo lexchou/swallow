@@ -174,7 +174,7 @@ inline static int to_digit(wchar_t ch)
 
 
 
-inline static bool isIdentifierHead(wchar_t ch)
+static bool isIdentifierHead(wchar_t ch)
 {
     if(ch >= 'a' && ch <= 'z')
         return true;
@@ -268,7 +268,7 @@ inline static bool isIdentifierCharacter(wchar_t ch)
     CHECK(0x1DC0, 0x1DFF)
     CHECK(0x20D0, 0x20FF)
     CHECK(0xFE20, 0xFE2F)
-    //‌ identifier-character → identifier-head”
+    //‌ identifier-character → identifier-head
     return isIdentifierHead(ch);
 }
 #undef CHECK

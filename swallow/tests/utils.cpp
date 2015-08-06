@@ -44,11 +44,25 @@
 #include "ast/utils/ASTHierachyDumper.h"
 #include "semantics/OperatorResolver.h"
 #include <iostream>
+#ifdef _MSC_VER
+#include <Windows.h>
+#endif
 
 using namespace std;
 USE_SWALLOW_NS
 static bool opt_dumpAST = false;
 
+
+int main(int argc, char** argv)
+{
+    testInit(argc, argv);
+    int ret = RUN_ALL_TESTS();
+#ifdef _MSC_VER
+	printf("Done, press any key to quit\n");
+	getchar();
+#endif
+	return ret;
+}
 
 void testInit(int argc, char** argv)
 {
@@ -64,6 +78,16 @@ void testInit(int argc, char** argv)
 
 wstring readFile(const char* fileName)
 {
+#ifdef _MSC_VER
+	char buf[1024];
+	GetCurrentDirectory(sizeof(buf), buf);
+	string fullPath = buf;
+	if (fullPath.find("\\Debug") != string::npos)
+		fullPath += "\\..";
+	fullPath += "\\..\\..\\..\\swallow\\tests\\";
+	fullPath += fileName;
+	fileName = fullPath.c_str();
+#endif
     return SwallowUtils::readFile(fileName);
 }
 

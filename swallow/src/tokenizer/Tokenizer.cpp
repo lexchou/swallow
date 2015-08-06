@@ -396,11 +396,11 @@ OperatorType::T Tokenizer::calculateOperatorType(const wchar_t* begin, const wch
 
 bool Tokenizer::readMultilineComment(Token& token)
 {
-    wchar_t ch, last;
+    wchar_t ch = 0, last = 0;
     token.type = TokenType::Comment;
     token.comment.multiline = true;
     token.comment.nestedLevels = 0;
-    get(ch);
+    get(last);
     get(ch);
     int level = 1;
     for(;get(ch); last = ch)
