@@ -43,6 +43,7 @@ class Pattern;
 class NodeFactory;
 typedef std::shared_ptr<class Identifier> IdentifierPtr;
 
+
 class SemanticAnalyzer;
 struct SemanticContext;
 /*!
@@ -112,9 +113,11 @@ public://properties
      * The declarations that marked as lazy will be declared immediately
      */
     void declareImmediately(const std::wstring& name);
+    void forwardDeclareImmediately(const std::wstring& name);
     GenericDefinitionPtr prepareGenericTypes(const GenericParametersDefPtr& params);
 private:
     TypePtr defineType(const std::shared_ptr<TypeDeclaration>& node);
+    TypePtr getOrDefineType(const std::shared_ptr<TypeDeclaration>& node);
     FunctionSymbolPtr createFunctionSymbol(const FunctionDefPtr& func, const GenericDefinitionPtr& generic);
     TypePtr createFunctionType(const std::vector<ParametersNodePtr>::const_iterator& begin, const std::vector<ParametersNodePtr>::const_iterator& end, const TypePtr& retType, const GenericDefinitionPtr& generic);
 
@@ -169,7 +172,15 @@ private://lazy declaration
      */
     void delayDeclare(const DeclarationPtr& node);
 
+    void verifyGenericConstraints(const ProgramPtr& node);
 
+    void verifyGenericConstraints(const TypeDeclarationPtr& node);
+    void verifyGenericConstraints(const GenericParametersDefPtr& params, const GenericDefinitionPtr& def);
+    void verifyGenericConstraints(const FunctionDefPtr& node);
+    /*!
+     * return true if the node will be declared in lazy mode
+     */
+    bool isLazyDeclared(const DeclarationPtr& node);
 protected:
     SemanticAnalyzer* semanticAnalyzer;
 

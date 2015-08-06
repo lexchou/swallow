@@ -90,7 +90,7 @@ protected:
     virtual ProgramPtr createProgramNode() override
     {
         ScopedProgramPtr ret(new ScopedProgram());
-        ret->setScope(scope);
+        ret->setScope(symbolRegistry->getGlobalScope());
         return ret;
     }
 };
@@ -154,7 +154,7 @@ void GlobalScope::initRuntime(SymbolRegistry* symbolRegistry)
         if(!success)
         {
             SwallowUtils::dumpCompilerResults(*compiler.getCompilerResults(), std::wcout);
-            assert(0 && "Failed to load runtime.swift");
+            SASSERT(0 && "Failed to load runtime.swift");
         }
     }
     catch(Abort&)
@@ -848,10 +848,22 @@ TypePtr GlobalScope::getModuleType() const
 }
 
 #if USE_RUNTIME_FILE
+
+
+static void initializeGetter(GlobalScope* global, TypePtr& out, const wchar_t* typeName)
+{
+    if(out)
+        return;
+    wstring name = typeName;
+    out = static_pointer_cast<Type>(global->lookup(name));
+    if(!out)
+        out = global->getForwardDeclaration(name);
+    assert(out != nullptr);
+}
+
 #define IMPLEMENT_GETTER(T) TypePtr GlobalScope::T() const { \
   GlobalScope* self = const_cast<GlobalScope*>(this); \
-  if(!self->_##T){self->_##T = static_pointer_cast<Type>(self->lookup(L## #T ));} \
-  assert(_##T != nullptr); \
+  initializeGetter(self, self->_##T, L## #T);                      \
   return _##T; \
 }
 #else

@@ -283,6 +283,33 @@ TEST(TestGeneric, Extension)
                      L"}");
     ASSERT_NO_ERRORS();
 }
+
+
+TEST(TestGeneric, Constraint)
+{
+    SEMANTIC_ANALYZE(L"struct TTT<T : Indexable where T.Index == Int>\n"
+                     L"{\n"
+                     L"}\n"
+                     L"\n"
+                     L"protocol Indexable\n"
+                     L"{\n"
+                     L"    typealias Index\n"
+                     L"}\n"
+                     L"\n"
+                     L"struct IntIndexable\n"
+                     L"{\n"
+                     L"    typealias Index = Int\n"
+                     L"}\n"
+                     L"\n"
+                     L"extension IntIndexable : Indexable\n"
+                     L"{\n"
+                     L"\n"
+                     L"}\n"
+                     L"\n"
+                     L"var a = TTT<IntIndexable>()\n");
+    ASSERT_NO_ERRORS();
+}
+
 /*
 
 protocol DD

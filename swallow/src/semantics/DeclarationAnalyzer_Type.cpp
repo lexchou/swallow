@@ -38,6 +38,7 @@
 #include "semantics/ScopeGuard.h"
 #include "semantics/ScopedNodes.h"
 #include "common/Errors.h"
+#include "common/SwallowUtils.h"
 #include "semantics/TypeBuilder.h"
 #include "semantics/GlobalScope.h"
 #include <cassert>
@@ -65,6 +66,16 @@ static bool isLiteralTypeForEnum(GlobalScope* global, const TypePtr& type)
     //nil, array, dictionary literal is not working for enum
     return false;
 }
+TypePtr DeclarationAnalyzer::getOrDefineType(const std::shared_ptr<TypeDeclaration>& node)
+{
+    SymbolScope* currentScope = symbolRegistry->getCurrentScope();
+    TypeIdentifierPtr id = node->getIdentifier();
+    TypePtr type = currentScope->getForwardDeclaration(id->getName());
+    if(type)
+        return type;
+    type = defineType(node);
+    return type;
+}
 TypePtr DeclarationAnalyzer::defineType(const std::shared_ptr<TypeDeclaration>& node)
 {
     TypeIdentifierPtr id = node->getIdentifier();
@@ -90,7 +101,6 @@ TypePtr DeclarationAnalyzer::defineType(const std::shared_ptr<TypeDeclaration>& 
     }
 
     //it's inside the type's scope, so need to access parent scope;
-    SymbolScope* currentScope = symbolRegistry->getCurrentScope();
 
     //prepare for generic types
     GenericParametersDefPtr genericParams = node->getGenericParametersDef();
@@ -111,7 +121,15 @@ TypePtr DeclarationAnalyzer::defineType(const std::shared_ptr<TypeDeclaration>& 
     }
     
     //register this type
+    SymbolScope* currentScope = symbolRegistry->getCurrentScope();
     TypeBuilderPtr type = static_pointer_cast<TypeBuilder>(currentScope->getForwardDeclaration(id->getName()));
+    SASSERT(type == nullptr);
+    type = static_pointer_cast<TypeBuilder>(Type::newType(id->getName(), category));
+    currentScope->addForwardDeclaration(type);
+    TypeDeclarationPtr tnode = dynamic_pointer_cast<TypeDeclaration>(node);
+    type->setReference(tnode);    
+    if(tnode)
+        tnode->setType(type);
 
     assert(type != nullptr);
     assert(type->getCategory() == category);
@@ -136,6 +154,8 @@ TypePtr DeclarationAnalyzer::defineType(const std::shared_ptr<TypeDeclaration>& 
     for(const TypeIdentifierPtr& parentType : node->getParents())
     {
         parentType->accept(this);
+        if(first)
+            declareImmediately(parentType->getName());
         TypePtr ptr = resolveType(parentType, true);
         if(ptr->getCategory() == Type::Class && category == Type::Class)
         {
@@ -323,11 +343,8 @@ void DeclarationAnalyzer::prepareDefaultInitializers(const TypePtr& type)
 
 void DeclarationAnalyzer::visitTypeAlias(const TypeAliasPtr& node)
 {
-    if(!ctx->currentType && ctx->lazyDeclaration)
-    {
-        delayDeclare(node);
+    if(isLazyDeclared(node))
         return;
-    }
     TypePtr type;
     SymbolScope* currentScope = symbolRegistry->getCurrentScope();
     
@@ -346,8 +363,8 @@ void DeclarationAnalyzer::visitTypeAlias(const TypeAliasPtr& node)
     else
     {
         shared_ptr<TypeResolver> typeResolver(new TypeResolver(symbolRegistry, semanticAnalyzer, this, ctx, true));
-        //TypeBuilderPtr builder = static_pointer_cast<TypeBuilder>(type);
         type = resolveType(node->getType(), true);
+        //TypeBuilderPtr builder = static_pointer_cast<TypeBuilder>(type);
         //builder->setInnerType(type);
         //builder->initAlias(node->getType(), typeResolver);
     }
@@ -359,7 +376,9 @@ void DeclarationAnalyzer::visitTypeAlias(const TypeAliasPtr& node)
 
 void DeclarationAnalyzer::visitClass(const ClassDefPtr& node)
 {
-    TypePtr type = defineType(node);
+    if(isLazyDeclared(node))
+        return;
+    TypePtr type = getOrDefineType(node);
     ScopeGuard scope(symbolRegistry, type->getScope());
     SCOPED_SET(ctx->currentType, type);
     SCOPED_SET(ctx->currentFunction, nullptr);
@@ -417,7 +436,9 @@ void DeclarationAnalyzer::visitImplementation(const TypeDeclarationPtr &node)
 
 void DeclarationAnalyzer::visitStruct(const StructDefPtr& node)
 {
-    TypePtr type = defineType(node);
+    if(isLazyDeclared(node))
+        return;
+    TypePtr type = getOrDefineType(node);
     ScopeGuard scope(symbolRegistry, type->getScope());
     SCOPED_SET(ctx->currentType, type);
     SCOPED_SET(ctx->currentFunction, nullptr);
@@ -446,7 +467,9 @@ static void makeRawRepresentable(const TypeBuilderPtr& type, GlobalScope* global
 }
 void DeclarationAnalyzer::visitEnum(const EnumDefPtr& node)
 {
-    TypeBuilderPtr type = static_pointer_cast<TypeBuilder>(defineType(node));
+    if(isLazyDeclared(node))
+        return;
+    TypeBuilderPtr type = static_pointer_cast<TypeBuilder>(getOrDefineType(node));
     ScopeGuard scope(symbolRegistry, type->getScope());
     SCOPED_SET(ctx->currentType, type);
     SCOPED_SET(ctx->currentFunction, nullptr);
@@ -560,7 +583,9 @@ void DeclarationAnalyzer::visitEnum(const EnumDefPtr& node)
 }
 void DeclarationAnalyzer::visitProtocol(const ProtocolDefPtr& node)
 {
-    TypePtr type = defineType(node);
+    if(isLazyDeclared(node))
+        return;
+    TypePtr type = getOrDefineType(node);
     ScopeGuard scope(symbolRegistry, type->getScope());
     SCOPED_SET(ctx->currentType, type);
     SCOPED_SET(ctx->currentFunction, nullptr);
@@ -570,6 +595,8 @@ void DeclarationAnalyzer::visitProtocol(const ProtocolDefPtr& node)
 }
 void DeclarationAnalyzer::visitExtension(const ExtensionDefPtr& node)
 {
+    if(isLazyDeclared(node))
+        return;
     if(ctx->currentFunction || ctx->currentType)
     {
         error(node, Errors::E_A_MAY_ONLY_BE_DECLARED_AT_FILE_SCOPE_1, node->getIdentifier()->getName());

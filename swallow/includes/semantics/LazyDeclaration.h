@@ -45,6 +45,7 @@ public:
         SymbolScope* currentScope;
         SymbolScope* fileScope;
         DeclarationPtr node;
+        bool forwardDeclared;
         DeclarationEntry(SymbolScope* currentScope, SymbolScope* fileScope, const DeclarationPtr& node);
     };
 public:

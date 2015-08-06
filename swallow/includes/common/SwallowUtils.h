@@ -64,6 +64,7 @@ SWALLOW_NS_END
 #define DebugBreak() __asm__("int $3")
 #endif
 #define BREAK_IF(cond) if((cond)) DebugBreak();
+#define SASSERT(cond) if(!(cond)) {printf("Assertion failed: %s, function %s, file %s, line %d\n", #cond, __FUNCTION__, __FILE__, __LINE__);exit(1);}
 
 
 

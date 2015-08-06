@@ -36,6 +36,7 @@ using namespace std;
 LazyDeclaration::DeclarationEntry::DeclarationEntry(SymbolScope* currentScope, SymbolScope* fileScope, const DeclarationPtr& node)
     :currentScope(currentScope), fileScope(fileScope), node(node)
 {
+    forwardDeclared = false;
 }
 
 void LazyDeclaration::addDeclaration(SymbolRegistry* registry, const DeclarationPtr& node)

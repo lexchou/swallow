@@ -7,6 +7,12 @@ struct _SwiftNSRange {}
 
 //swiftCore
 
+/// The empty tuple type.
+///
+/// This is the default return type of functions for which no explicit
+/// return type is specified.
+typealias Void = ()
+
 infix operator & {
     associativity left
     precedence 150
@@ -5556,7 +5562,7 @@ protocol OutputStreamType {
 /// A *generator* that adapts a *collection* `C` and any *sequence* of
 /// its `Index` type to present the collection's elements in a
 /// permuted order.
-struct PermutationGenerator<C : CollectionType, Indices : SequenceType where C.Index == C.Index> : GeneratorType, SequenceType {
+struct PermutationGenerator<C : CollectionType, Indices : SequenceType> : GeneratorType, SequenceType {
 
     /// The type of element returned by `next()`.
     typealias Element = C.Generator.Element
@@ -8416,6 +8422,7 @@ struct UTF8 : UnicodeCodecType {
 
 /// An unsigned integer type that occupies one machine word
 typealias UWord = UInt
+typealias Word = Int
 
 
 /// A Unicode `encoding scheme
@@ -9060,12 +9067,6 @@ protocol UnsignedIntegerType : _UnsignedIntegerType, IntegerType {
 final class VaListBuilder {
 }
 
-
-/// The empty tuple type.
-///
-/// This is the default return type of functions for which no explicit
-/// return type is specified.
-typealias Void = ()
 
 
 /// A signed integer type that occupies one machine word
