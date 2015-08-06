@@ -46,7 +46,7 @@ typedef std::shared_ptr<class Parser> ParserPtr;
 typedef std::shared_ptr<class Program> ProgramPtr;
 using std::wstring;
 
-class SwallowCompiler
+class SWALLOW_EXPORT SwallowCompiler
 {
 public:
     static SwallowCompiler* newCompiler(const wstring& moduleName);

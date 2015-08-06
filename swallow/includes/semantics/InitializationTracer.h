@@ -33,7 +33,7 @@
 #include <set>
 #include <algorithm>
 #include "SemanticUtils.h"
-
+#include <iterator>
 SWALLOW_NS_BEGIN
     /*!
      * A InitializationTracer will trace symbol initialization in all branches

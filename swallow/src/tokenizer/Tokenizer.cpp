@@ -448,8 +448,8 @@ bool Tokenizer::readString(Token& token)
     token.type = TokenType::String;
     token.string.expressionFollowed = false;
     
-    must_get();//“string-literal → "quoted-text”
-    while(get(ch))//“quoted-text → quoted-text-itemquoted-textopt”
+    must_get();//string-literal → "quoted-text"
+    while(get(ch))//quoted-text → quoted-text-item quoted-text opt
     {
         if(ch == '\"')
             break;
@@ -459,7 +459,7 @@ bool Tokenizer::readString(Token& token)
             continue;
         }
         ch = must_get();
-        if(ch == '(')//“quoted-text-item → \(expression)”
+        if(ch == '(')//quoted-text-item → \(expression)
         {
             token.string.expressionFollowed = true;
             state.inStringExpression = 1;

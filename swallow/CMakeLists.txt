@@ -14,15 +14,17 @@ INCLUDE_DIRECTORIES(
 SET( CMAKE_BUILD_TYPE Debug )
 SET(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/../bin)
 cmake_policy(SET CMP0015 OLD)
-SET(CMAKE_CXX_FLAGS "$ENV{CXXFLAGS} -O0 -Wall -g -std=c++11")
+cmake_policy(SET CMP0054 OLD)
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror -Wreturn-type -Wsign-compare -Wunused-variable -Wunused-const-variable -Wparentheses ")
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -O0 -g -std=c++11")
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     # using GCC
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -O0 -g -std=c++11")
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
     # using Intel C++
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
     # using Visual Studio C++
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W0 /EHsc /Zi")
 endif()
 
 
@@ -188,7 +190,19 @@ SET(SWALLOW_SRC
 
 add_definitions(-DTRACE_NODE)
 
-add_library(swallow SHARED ${SWALLOW_SRC})
+
+file(GLOB_RECURSE headers *.h)
+
+source_group(AST ast)
+source_group(AST FILES ${headers} ast)
+source_group(Semantics semantics)
+source_group(Semantics FILES ${headers} semantics)
+source_group(Parser parser)
+source_group(Semantics FILES ${headers} parser)
+source_group(Common common)
+source_group(Common FILES ${headers} common)
+
+add_library(swallow SHARED ${headers} ${SWALLOW_SRC})
 
 
 #enable_testing()

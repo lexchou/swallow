@@ -40,7 +40,7 @@ class CompilerResults;
 
 typedef std::shared_ptr<class Node> NodePtr;
 
-struct SwallowUtils
+struct SWALLOW_EXPORT SwallowUtils
 {
     static void dumpHex(const char* s);
     static std::wstring readFile(const char* fileName);
@@ -60,7 +60,7 @@ struct SwallowUtils
 };
 SWALLOW_NS_END
 
-#ifndef DebugBreak
+#if !defined(_MSC_VER)
 #define DebugBreak() __asm__("int $3")
 #endif
 #define BREAK_IF(cond) if((cond)) DebugBreak();

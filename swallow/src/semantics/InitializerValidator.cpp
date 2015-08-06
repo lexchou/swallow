@@ -3,6 +3,7 @@
 #include "semantics/SemanticContext.h"
 #include "semantics/CompilerResultEmitter.h"
 #include "common/Errors.h"
+#include <algorithm>
 USE_SWALLOW_NS
 using namespace std;
 

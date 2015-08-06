@@ -29,6 +29,7 @@
  */
 #include "ast/TypeNode.h"
 #include <algorithm>
+#include <iterator>
 USE_SWALLOW_NS
 
 

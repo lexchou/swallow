@@ -36,7 +36,11 @@
 #include "ast/utils/NodeSerializer.h"
 #include "common/Errors.h"
 #include "ast/Node.h"
+#if defined(_WIN32) || defined(_WIN64)
+#include <Windows.h>
+#else
 #include <dirent.h>
+#endif
 //#include <codecvt>
 
 USE_SWALLOW_NS
@@ -68,8 +72,11 @@ void SwallowUtils::dumpHex(const char* s)
 }
 std::vector<std::string> SwallowUtils::readDirectory(const char* path)
 {
+	vector<string> ret;
+#if defined(_WIN32) || defined(_WIN64)
+	assert(0 && "Not supported");
+#else
     DIR *dir;
-    vector<string> ret;
     dir = opendir(path);
     if (dir)
     {
@@ -80,7 +87,8 @@ std::vector<std::string> SwallowUtils::readDirectory(const char* path)
         }
         closedir(dir);
     }
-    return ret;
+#endif
+	return ret;
 }
 
 

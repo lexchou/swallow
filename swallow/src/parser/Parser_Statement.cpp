@@ -289,7 +289,7 @@ StatementPtr Parser::parseWhileLoop()
     ret->setCodeBlock(codeBlock);
     return ret;
 }
-//“while-condition → expression  declaration”
+//while-condition → expression  declaration
 ExpressionPtr Parser::parseConditionExpression()
 {
     Token token;
@@ -423,7 +423,7 @@ StatementPtr Parser::parseSwitch()
             Flags fcase(flags);
             fcase += UNDER_CASE;
             
-            //“case-item-list → pattern guard-clause opt | pattern guard-clause opt , case-item-list”
+            //case-item-list → pattern guard-clause opt | pattern guard-clause opt , case-item-list
             CaseStatementPtr caseCond = nodeFactory->createCase(token.state);
             CodeBlockPtr codeBlock = nodeFactory->createCodeBlock(token.state);
             caseCond->setCodeBlock(codeBlock);

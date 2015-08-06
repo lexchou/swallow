@@ -30,6 +30,7 @@
 #include "ast/Declaration.h"
 #include "ast/Attribute.h"
 #include <algorithm>
+#include <iterator>
 USE_SWALLOW_NS
 
 
