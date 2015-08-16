@@ -633,6 +633,7 @@ void DeclarationAnalyzer::visitExtension(const ExtensionDefPtr& node)
     }
 
     TypePtr extension = Type::newExtension(type);
+    symbolRegistry->getFileScope()->addExtension(extension);
     static_pointer_cast<SemanticExtensionDef>(node)->extension = extension;
     SCOPED_SET(ctx->currentType, type);
     SCOPED_SET(ctx->currentExtension, extension);

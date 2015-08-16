@@ -49,6 +49,7 @@
 #include "common/CompilerResults.h"
 #include "common/SwallowUtils.h"
 #include "semantics/ScopedNodes.h"
+#include "semantics/DeclarationAnalyzer.h"
 #include <ctime>
 #endif
 
@@ -75,9 +76,17 @@ public:
         module = ModulePtr(new Module(L"Swift", global->getModuleType()));
         this->scope = global;
         initPasses();
+        for(SemanticPass* pass : passes)
+        {
+            DeclarationAnalyzer* da = dynamic_cast<DeclarationAnalyzer*>(pass);
+            if(!da)
+                continue;
+            global->setLazySymbolResolver(da);
+        }
     }
     ~StdlibCompiler()
     {
+        scope->setLazySymbolResolver(nullptr);
         destroyPasses();
     }
 protected:

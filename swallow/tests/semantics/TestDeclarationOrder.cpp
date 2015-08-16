@@ -183,6 +183,25 @@ TEST(TestDeclarationOrder, Func_Struct_Var)
     ASSERT_EQ(TTT, a->getType());
 }
 
+TEST(TestDeclarationOrder, Func_Use_Nested_Type)
+{
+    SEMANTIC_ANALYZE(L"struct Type\n"
+                     L"{\n"
+                     L"}\n"
+                     L"extension Type\n"
+                     L"{\n"
+                     L"    typealias Inner2 = Int\n"
+                     L"    struct Inner\n"
+                     L"    {\n"
+                     L"    }\n"
+                     L"}\n"
+                     L"\n"
+                     L"func ==(a : Type.Inner, b : Type.Inner2)\n"
+                     L"{\n"
+                     L"}");
+    ASSERT_NO_ERRORS();
+}
+
 /*
 //TODO: fix this later
 TEST(TestDeclarationOrder, Func_Struct_Var_2)

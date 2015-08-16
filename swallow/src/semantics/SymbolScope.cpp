@@ -140,6 +140,11 @@ void SymbolScope::addExtension(const TypePtr& extension)
     iter->second.push_back(extension);
 }
 
+void SymbolScope::clearExtensions()
+{
+    extensions.clear();
+}
+
 /*!
  * Register a type as forward declaration, it cannot be retrieved by lookup* functions but only by getForwardDeclaration
  */

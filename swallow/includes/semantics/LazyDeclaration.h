@@ -55,6 +55,7 @@ public:
     size_t size() const { return decls.size();}
     std::vector<DeclarationEntry>::iterator begin() { return decls.begin(); }
     std::vector<DeclarationEntry>::iterator end() { return decls.end(); }
+    bool isFunc() const;
 
 private:
     std::vector<DeclarationEntry> decls;

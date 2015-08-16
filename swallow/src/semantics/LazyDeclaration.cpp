@@ -29,6 +29,7 @@
  */
 #include "semantics/LazyDeclaration.h"
 #include "semantics/SymbolRegistry.h"
+#include "ast/Declaration.h"
 
 USE_SWALLOW_NS
 
@@ -46,4 +47,11 @@ void LazyDeclaration::addDeclaration(SymbolRegistry* registry, const Declaration
 void LazyDeclaration::clear()
 {
     decls.clear();
+}
+bool LazyDeclaration::isFunc() const
+{
+    if(decls.empty())
+        return false;
+    bool ret = decls[0].node->getNodeType() == NodeType::Function;
+    return ret;
 }

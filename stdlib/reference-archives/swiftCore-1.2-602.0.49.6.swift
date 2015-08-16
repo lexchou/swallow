@@ -4,6 +4,17 @@
 struct _SwiftNSFastEnumerationState {}
 struct _SwiftNSRange {}
 
+protocol _DisabledRangeIndex_ {
+}
+protocol _OptionalNilComparisonType {
+}
+struct _UnitTestArray<T> {
+}
+struct _UnitTestArrayBuffer<T> {
+}
+struct _ContiguousArrayBuffer<T> {
+}
+
 
 //swiftCore
 
@@ -466,13 +477,13 @@ func *=<T : _IntegerArithmeticType>(inout lhs: T, rhs: T)
 
 prefix func +<T : _SignedNumberType>(x: T) -> T
 
-func +<C : _ExtensibleCollectionType, S : SequenceType where C.Generator.Element == C.Generator.Element>(lhs: C, rhs: S) -> C
+func +<C : _ExtensibleCollectionType, S : SequenceType>(lhs: C, rhs: S) -> C
 
-func +<C : _ExtensibleCollectionType, S : SequenceType where C.Generator.Element == C.Generator.Element>(lhs: S, rhs: C) -> C
+func +<C : _ExtensibleCollectionType, S : SequenceType>(lhs: S, rhs: C) -> C
 
-func +<C : _ExtensibleCollectionType, S : CollectionType where C.Generator.Element == C.Generator.Element>(lhs: C, rhs: S) -> C
+func +<C : _ExtensibleCollectionType, S : CollectionType>(lhs: C, rhs: S) -> C
 
-func +<EC1 : _ExtensibleCollectionType, EC2 : _ExtensibleCollectionType where EC1.Generator.Element == EC1.Generator.Element>(lhs: EC1, rhs: EC2) -> EC1
+func +<EC1 : _ExtensibleCollectionType, EC2 : _ExtensibleCollectionType>(lhs: EC1, rhs: EC2) -> EC1
 
 func +<T : Strideable>(lhs: T, rhs: T.Stride) -> T
 

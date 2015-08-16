@@ -321,6 +321,16 @@ void DeclarationAnalyzer::finalizeLazyDeclaration()
 {
     ctx->lazyDeclaration = false;
     SymbolScope* scope = symbolRegistry->getCurrentScope();
+    vector<wstring> nonFuncs;
+    for(auto entry : ctx->lazyDeclarations)
+    {
+        if(!entry.second->isFunc())
+            nonFuncs.push_back(entry.first);
+    }
+    for(auto symbolName : nonFuncs)
+    {
+        declareImmediately(symbolName);
+    }
     while(!ctx->lazyDeclarations.empty())
     {
         std::wstring symbolName = ctx->lazyDeclarations.begin()->first;
@@ -423,26 +433,33 @@ void DeclarationAnalyzer::forwardDeclareImmediately(const std::wstring& name)
         {
             if(decl.forwardDeclared)
                 continue;
-            //wprintf(L"   fs:%p cs:%p\n", decl.fileScope, decl.currentScope);
+            decl.forwardDeclared = true;
+
+            symbolRegistry->setCurrentScope(decl.currentScope);
+            symbolRegistry->setFileScope(decl.fileScope);
+            SCOPED_SET(this->ctx->currentType, nullptr);
+            SCOPED_SET(this->ctx->currentFunction, nullptr);
+            SCOPED_SET(this->ctx->contextualType, nullptr);
+            SCOPED_SET(this->ctx->currentExtension, nullptr);
+            SCOPED_SET(this->ctx->currentCodeBlock, nullptr);
+            SCOPED_SET(this->ctx->currentInitializationTracer, nullptr);
+            SCOPED_SET(this->ctx->flags, SemanticContext::FLAG_PROCESS_DECLARATION | SemanticContext::FLAG_PROCESS_IMPLEMENTATION);
+            
             switch(decl.node->getNodeType())
             {
                 case NodeType::Extension:
                     continue;
+                case NodeType::TypeAlias:
+                {
+                    TypeAliasPtr talias = static_pointer_cast<TypeAlias>(decl.node);
+                    decl.node->accept(this);
+                    break;
+                }
                 case NodeType::Class:
                 case NodeType::Enum:
                 case NodeType::Struct:
                 case NodeType::Protocol:
                 {
-                    decl.forwardDeclared = true;
-                    symbolRegistry->setCurrentScope(decl.currentScope);
-                    symbolRegistry->setFileScope(decl.fileScope);
-                    SCOPED_SET(this->ctx->currentType, nullptr);
-                    SCOPED_SET(this->ctx->currentFunction, nullptr);
-                    SCOPED_SET(this->ctx->contextualType, nullptr);
-                    SCOPED_SET(this->ctx->currentExtension, nullptr);
-                    SCOPED_SET(this->ctx->currentCodeBlock, nullptr);
-                    SCOPED_SET(this->ctx->currentInitializationTracer, nullptr);
-                    SCOPED_SET(this->ctx->flags, SemanticContext::FLAG_PROCESS_DECLARATION | SemanticContext::FLAG_PROCESS_IMPLEMENTATION);
                     TypeDeclarationPtr tnode = static_pointer_cast<TypeDeclaration>(decl.node);
                     TypePtr type = defineType(tnode);
                     decl.currentScope->addForwardDeclaration(type);
@@ -472,6 +489,8 @@ void DeclarationAnalyzer::visitProgram(const ProgramPtr& node)
     finalizeLazyDeclaration();
     //and do a final generic constraint checking
     verifyGenericConstraints(node);
+    //clear extension in file scope
+    symbolRegistry->getFileScope()->clearExtensions();
 }
 void DeclarationAnalyzer::verifyGenericConstraints(const ProgramPtr& node)
 {

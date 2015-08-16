@@ -125,6 +125,8 @@ public:
      * Register an extension to this scope.
      */
     void addExtension(const TypePtr& extension);
+    
+    void clearExtensions();
 
     /*!
      * Register a type as forward declaration, it cannot be retrieved by lookup* functions but only by getForwardDeclaration

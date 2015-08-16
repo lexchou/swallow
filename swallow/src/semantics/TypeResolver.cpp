@@ -187,7 +187,25 @@ TypePtr TypeResolver::resolveIdentifier(const ModulePtr& module, TypeIdentifierP
         if(name == L"Type")
             childType = Type::newMetaType(ret);
         else
+        {
+            //first we check the associated type directly defined in the type
             childType = ret->getAssociatedType(name);
+            //if not found, check it again in extensions
+            if(!childType)
+            {
+                vector<TypePtr>* extensions = nullptr;
+                if(symbolRegistry->getFileScope()->getExtension(ret->getName(), &extensions))
+                {
+                    //this type has extension defined
+                    for(TypePtr ext : *extensions)
+                    {
+                        childType = ext->getAssociatedType(name);
+                        if(childType)
+                            break;//associated type found
+                    }
+                }
+            }
+        }
         if (!childType)
         {
             if (emitter)
