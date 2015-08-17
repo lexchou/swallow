@@ -50,7 +50,7 @@ void ConsoleWriter::printf(const wchar_t* fmt, ...)
 
 ConsoleWriter* ConsoleWriter::create()
 {
-#if !defined(_WIN32) && !defined(WIN32)
+#if !defined(_WIN32) && !defined(WIN32) && !(__CYGWIN__)
     if(isatty(fileno(stdout)))
     {
         return new AnsiConsoleWriter();
@@ -62,7 +62,7 @@ ConsoleWriter* ConsoleWriter::create()
 #else
     return new PlainConsoleWriter();
 #endif
-
+    return nullptr;
 }
 
 

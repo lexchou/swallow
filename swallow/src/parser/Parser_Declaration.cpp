@@ -572,7 +572,7 @@ std::pair<CodeBlockPtr, std::pair<std::wstring, CodeBlockPtr> > Parser::parseGet
 
     ENTER_CONTEXT(TokenizerContextComputedProperty);
     int modifiers = parseAccessorModifiers();
-
+    S_UNUSED(modifiers);
     peek(token);
     CodeBlockPtr getter = NULL;
     std::pair<std::wstring, CodeBlockPtr> setter = std::make_pair(std::wstring(), CodeBlockPtr());
@@ -635,6 +635,7 @@ std::pair<CodeBlockPtr, CodeBlockPtr> Parser::parseGetterSetterKeywordBlock()
 
     ENTER_CONTEXT(TokenizerContextComputedProperty);
     int modifiers = parseAccessorModifiers();
+    S_UNUSED(modifiers);
 
     if(match(Keyword::Get, token))
     {

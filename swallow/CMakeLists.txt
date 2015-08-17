@@ -1,13 +1,12 @@
 PROJECT(swallow)
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 2.8.4)
 SUBDIRS(tests)
 
 INCLUDE_DIRECTORIES(
     ${PROJECT_SOURCE_DIR}/includes/
     ../gtest-1.7.0/include/
 )
-
-
+SET(CMAKE_CXX_FLAGS_DEBUG "-DSWALLOW_DEBUG")
 SET( CMAKE_BUILD_TYPE Debug )
 SET(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/../bin)
 cmake_policy(SET CMP0015 OLD)
@@ -16,7 +15,7 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
     SET(GTEST_LIBS gtest gtest_main pthread)
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     # using GCC
-    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -O0 -g -std=c++11")
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -O0 -g -ggdb -std=gnu++11")
     SET(GTEST_LIBS gtest gtest_main pthread)
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
     # using Intel C++

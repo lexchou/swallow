@@ -78,17 +78,20 @@ void testInit(int argc, char** argv)
 
 wstring readFile(const char* fileName)
 {
+	string fullPath;
 #ifdef _MSC_VER
 	char buf[1024];
 	GetCurrentDirectory(sizeof(buf), buf);
-	string fullPath = buf;
+        fullPath = buf;
 	if (fullPath.find("\\Debug") != string::npos)
 		fullPath += "\\..";
 	fullPath += "\\..\\..\\..\\swallow\\tests\\";
 	fullPath += fileName;
 	fileName = fullPath.c_str();
+#else
+        fullPath = string("../swallow/tests/") + fileName;        
 #endif
-    return SwallowUtils::readFile(fileName);
+    return SwallowUtils::readFile(fullPath.c_str());
 }
 
 void dumpCompilerResults(Swallow::CompilerResults& compilerResults)
