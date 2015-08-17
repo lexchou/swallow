@@ -41,7 +41,7 @@
 #include "parser/Parser.h"
 #include "parser/Parser_Details.h"
 
-#define USE_RUNTIME_FILE 0
+#define USE_RUNTIME_FILE 1
 
 #if USE_RUNTIME_FILE
 #include <iostream>

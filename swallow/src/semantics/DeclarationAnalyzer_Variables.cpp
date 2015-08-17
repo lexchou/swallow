@@ -174,7 +174,7 @@ void DeclarationAnalyzer::visitValueBindings(const ValueBindingsPtr& node)
         IdentifierPtr id = std::static_pointer_cast<Identifier>(name);
         SymbolPtr s = nullptr;
         SymbolScope* scope = nullptr;
-        symbolRegistry->lookupSymbol(id->getIdentifier(), &scope, &s);
+        symbolRegistry->lookupSymbol(id->getIdentifier(), &scope, &s, false);
         if(s && scope == symbolRegistry->getCurrentScope())
         {
             //already defined in current scope
