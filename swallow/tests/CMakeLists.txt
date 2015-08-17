@@ -9,13 +9,14 @@ INCLUDE_DIRECTORIES(
     ../../gtest-1.7.0/include/
 )
 SET( CMAKE_BUILD_TYPE Debug )
-SET(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/../../bin)
+set(CMAKE_LEGACY_CYGWIN_WIN32 0)
+SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/../../bin)
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -O0 -g -std=c++11")
     SET(GTEST_LIBS gtest pthread)
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     # using GCC
-    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -O0 -g -std=c++11")
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -O0 -g -std=gnu++11")
     SET(GTEST_LIBS gtest pthread)
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
     # using Intel C++

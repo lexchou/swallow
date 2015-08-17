@@ -123,7 +123,7 @@ TypePtr DeclarationAnalyzer::defineType(const std::shared_ptr<TypeDeclaration>& 
     //register this type
     SymbolScope* currentScope = symbolRegistry->getCurrentScope();
     TypeBuilderPtr type = static_pointer_cast<TypeBuilder>(currentScope->getForwardDeclaration(id->getName()));
-    SASSERT(type == nullptr);
+    S_ASSERT(type == nullptr);
     type = static_pointer_cast<TypeBuilder>(Type::newType(id->getName(), category));
     currentScope->addForwardDeclaration(type);
     TypeDeclarationPtr tnode = dynamic_pointer_cast<TypeDeclaration>(node);

@@ -31,6 +31,7 @@
 #define GLOBAL_SCOPE_H
 #include "SymbolScope.h"
 #include <vector>
+#include <stdarg.h>
 SWALLOW_NS_BEGIN
 
 class SWALLOW_EXPORT GlobalScope : public SymbolScope

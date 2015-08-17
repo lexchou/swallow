@@ -30,6 +30,10 @@
 #ifndef SWALLOW_CONF_H
 #define SWALLOW_CONF_H
 #include <memory>
+#ifdef DEBUG
+#include <cstdlib>
+#include <cstdio>
+#endif
 
 #if !defined(_WIN32) && !defined(WIN32)
 #define SWALLOW_EXPORT 
@@ -45,6 +49,12 @@
 #define SWALLOW_NS_BEGIN namespace Swallow {
 #define SWALLOW_NS_END }
 #define USE_SWALLOW_NS using namespace Swallow;
-
+#define S_UNUSED(x) (void)x;
+#ifdef SWALLOW_DEBUG
+//#define S_ASSERT(cond) if(!(cond)) {printf("Assertion failed: %s, function %s, file %s, line %d\n", #cond, __FUNCTION__, __FILE__, __LINE__);exit(1);}
+#define S_ASSERT(cond) assert(cond)
+#else
+#define S_ASSERT(cond)
+#endif
 
 #endif//SWALLOW_CONF_H

@@ -36,6 +36,7 @@
 #include "ast/utils/NodeSerializer.h"
 #include "common/Errors.h"
 #include "ast/Node.h"
+#include <cstdlib>
 #if defined(_WIN32) || defined(_WIN64)
 #include <Windows.h>
 #else

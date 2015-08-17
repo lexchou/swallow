@@ -311,6 +311,7 @@ void SemanticAnalyzer::visitAssignment(const AssignmentPtr& node)
                     }
                 }
                 bool supressError = false;
+                S_UNUSED(supressError);
                 if(isSelf && member && ctx->currentFunction && ctx->currentFunction->hasFlags(SymbolFlagInit) && member->hasFlags(SymbolFlagStoredProperty))
                 {
                     //check if the member is defined in current type and not the super type

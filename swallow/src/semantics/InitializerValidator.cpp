@@ -51,6 +51,8 @@ void InitializerValidator::visitFunctionCall(const FunctionCallPtr& node)
         return;
     MemberAccessPtr ma = static_pointer_cast<MemberAccess>(node->getFunction());
     bool isSelf = false, isSuper = false;
+    S_UNUSED(isSelf);
+    S_UNUSED(isSuper);
     if(ma->getSelf() && ma->getSelf()->getNodeType() == NodeType::Identifier)
     {
         IdentifierPtr id = static_pointer_cast<Identifier>(ma->getSelf());
