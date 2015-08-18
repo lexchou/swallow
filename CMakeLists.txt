@@ -1,3 +1,5 @@
+set(CMAKE_LEGACY_CYGWIN_WIN32 0) 
 PROJECT(swallow)
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 3.0.0)
+enable_testing()
 SUBDIRS(gtest-1.7.0 swallow repl)

@@ -16,7 +16,7 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
     SET(GTEST_LIBS gtest pthread)
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     # using GCC
-    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -O0 -g -std=gnu++11")
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -O0 -g -ggdb -std=gnu++11")
     SET(GTEST_LIBS gtest pthread)
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
     # using Intel C++
@@ -78,22 +78,18 @@ SET(CODEGEN_SRC
     )
 ADD_EXECUTABLE(TestCodeGen
     utils.cpp
-    tests.cpp
     ${CODEGEN_SRC}
     )
 ADD_EXECUTABLE(TestTokenizer
     utils.cpp
-    tests.cpp
     ${TOKENIZER_SRC}
     )
 ADD_EXECUTABLE(TestParser
     utils.cpp
-    tests.cpp
     ${PARSER_SRC}
     )
 ADD_EXECUTABLE(TestSemantics
     utils.cpp
-    tests.cpp
     ${SEMANTICS_SRC}
     )
 target_link_libraries(TestTokenizer swallow ${GTEST_LIBS})
@@ -103,20 +99,8 @@ target_link_libraries(TestCodeGen swallow ${GTEST_LIBS})
 
 
 enable_testing()
-add_test(NAME test-tokenizer COMMAND TestTokenizer)
-add_test(NAME test-parser COMMAND TestParser)
-add_test(NAME test-semantics COMMAND TestSemantics)
-add_test(NAME test-codegen COMMAND TestCodeGen)
+add_test(NAME TestTokenizer COMMAND TestTokenizer ../../bin)
+add_test(NAME TestParser COMMAND TestParser ../../bin)
+add_test(NAME TestSemantics COMMAND TestSemantics ../../bin)
+add_test(NAME TestCodeGen COMMAND TestCodeGen ../../bin)
 
-
-if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
-    add_custom_command(TARGET TestSemantics POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            "${PROJECT_BINARY_DIR}/../../bin/Debug/swallow.dll"
-            $<TARGET_FILE_DIR:TestSemantics>
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            "${PROJECT_BINARY_DIR}/../../bin/Debug/swallow.pdb"
-            $<TARGET_FILE_DIR:TestSemantics>
-            )
-
-endif()

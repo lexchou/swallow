@@ -46,6 +46,8 @@
 #include <iostream>
 #ifdef _MSC_VER
 #include <Windows.h>
+#else
+#include <unistd.h>
 #endif
 
 using namespace std;
@@ -79,8 +81,8 @@ void testInit(int argc, char** argv)
 wstring readFile(const char* fileName)
 {
 	string fullPath;
-#ifdef _MSC_VER
 	char buf[1024];
+#ifdef _MSC_VER
 	GetCurrentDirectory(sizeof(buf), buf);
         fullPath = buf;
 	if (fullPath.find("\\Debug") != string::npos)
@@ -89,7 +91,13 @@ wstring readFile(const char* fileName)
 	fullPath += fileName;
 	fileName = fullPath.c_str();
 #else
-        fullPath = string("../swallow/tests/") + fileName;        
+        getcwd(buf, sizeof(buf));
+        fullPath = buf;
+        size_t len = strlen(buf);
+        if(!strcmp(buf + len - 6, "/tests"))
+            fullPath += string("/") + fileName;        
+        else
+            fullPath += string("/../swallow/tests/") + fileName; 
 #endif
     return SwallowUtils::readFile(fullPath.c_str());
 }
