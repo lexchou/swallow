@@ -2118,7 +2118,6 @@ extension Bool : Reflectable {
 /// Conforming types can be initialized with the boolean literals
 /// `true` and `false`.
 protocol BooleanLiteralConvertible {
-    typealias BooleanLiteralType
 
     /// Create an instance initialized to `value`.
     init(booleanLiteral value: BooleanLiteralType)
@@ -2656,7 +2655,7 @@ extension ContiguousArray : _ArrayType {
     /// and concatenate the elements of the resulting sequence.  For
     /// example, `[-1, -2].join([[1, 2, 3], [4, 5, 6], [7, 8, 9]])`
     /// yields `[1, 2, 3, -1, -2, 4, 5, 6, -1, -2, 7, 8, 9]`
-    func join<S : SequenceType where ContiguousArray<T> == ContiguousArray<T>>(elements: S) -> ContiguousArray<T>
+    func join<S : SequenceType>(elements: S) -> ContiguousArray<T>
 
     /// Return the result of repeatedly calling `combine` with an
     /// accumulated value initialized to `initial` and each element of
@@ -5824,7 +5823,7 @@ protocol RangeReplaceableCollectionType : ExtensibleCollectionType {
     /// Complexity: O(\ `count(subRange)`\ ) if
     /// `subRange.endIndex == self.endIndex` and `isEmpty(newElements)`,
     /// O(\ `count(self)` + `count(newElements)`\ ) otherwise.
-    mutating func replaceRange<C : CollectionType where Self.Generator.Element == Self.Generator.Element>(subRange: Range<Self.Index>, with newElements: C)
+    mutating func replaceRange<C : CollectionType>(subRange: Range<Self.Index>, with newElements: C)
 
     /// Insert `newElement` at index `i`.
     ///
@@ -5846,7 +5845,7 @@ protocol RangeReplaceableCollectionType : ExtensibleCollectionType {
     /// Can be implemented as::
     ///
     ///   Swift.splice(&self, newElements, atIndex: i)
-    mutating func splice<S : CollectionType where Self.Generator.Element == Self.Generator.Element>(newElements: S, atIndex i: Self.Index)
+    mutating func splice<S : CollectionType>(newElements: S, atIndex i: Self.Index)
 
     /// Remove the element at index `i`
     ///
@@ -8433,7 +8432,6 @@ struct UTF8 : UnicodeCodecType {
 
 /// An unsigned integer type that occupies one machine word
 typealias UWord = UInt
-typealias Word = Int
 
 
 /// A Unicode `encoding scheme
@@ -9447,7 +9445,7 @@ protocol _ExtensibleCollectionType : CollectionType {
     ///   for x in newElements {
     ///     self.append(x)
     ///   }
-    mutating func extend<S : SequenceType where Self.Generator.Element == Self.Generator.Element>(newElements: S)
+    mutating func extend<S : SequenceType>(newElements: S)
 }
 
 

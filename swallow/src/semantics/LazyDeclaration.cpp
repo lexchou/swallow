@@ -38,6 +38,7 @@ LazyDeclaration::DeclarationEntry::DeclarationEntry(SymbolScope* currentScope, S
     :currentScope(currentScope), fileScope(fileScope), node(node)
 {
     forwardDeclared = false;
+    fullyDeclared = false;
 }
 
 void LazyDeclaration::addDeclaration(SymbolRegistry* registry, const DeclarationPtr& node)

@@ -148,75 +148,83 @@ TypePtr DeclarationAnalyzer::defineType(const std::shared_ptr<TypeDeclaration>& 
     ctx->allTypes.push_back(type);
     
     //check inheritance clause
-    TypePtr parent = nullptr;
-    bool first = true;
-
-    for(const TypeIdentifierPtr& parentType : node->getParents())
     {
-        parentType->accept(this);
-        if(first)
-            declareImmediately(parentType->getName());
-        TypePtr ptr = resolveType(parentType, true);
-        if(ptr->getCategory() == Type::Class && category == Type::Class)
-        {
-            if(!first)
-            {
-                //only the first type can be class type
-                error(parentType, Errors::E_SUPERCLASS_MUST_APPEAR_FIRST_IN_INHERITANCE_CLAUSE_1, toString(parentType));
-                return nullptr;
-            }
-            parent = ptr;
-            if(parent->hasFlags(SymbolFlagFinal))
-            {
-                error(parentType, Errors::E_INHERITANCE_FROM_A_FINAL_CLASS_A_1, parentType->getName());
-                return nullptr;
-            }
-        }
-        else if(category == Type::Enum && ptr->getCategory() != Type::Protocol)
-        {
+        TypePtr parent = nullptr;
+        bool first = true;
 
-            if(parent)//already has a raw type
-            {
-                error(parentType, Errors::E_MULTIPLE_ENUM_RAW_TYPES_A_AND_B_2, parent->toString(), ptr->toString());
-                return nullptr;
-            }
-            if(!first)
-            {
-                error(parentType, Errors::E_RAW_TYPE_A_MUST_APPEAR_FIRST_IN_THE_ENUM_INHERITANCE_CLAUSE_1, ptr->toString());
-                return nullptr;
-            }
-            //check if the raw type is literal convertible
-            if(!isLiteralTypeForEnum(symbolRegistry->getGlobalScope(), ptr))
-            {
-                error(parentType, Errors::E_RAW_TYPE_A_IS_NOT_CONVERTIBLE_FROM_ANY_LITERAL_1, ptr->toString());
-                return nullptr;
-            }
-            if(!ptr->canAssignTo(symbolRegistry->getGlobalScope()->Equatable()))
-            {
-                error(parentType, Errors::E_RAWREPRESENTABLE_INIT_CANNOT_BE_SYNTHESIZED_BECAUSE_RAW_TYPE_A_IS_NOT_EQUATABLE_1, ptr->toString());
-                return nullptr;
-            }
-            parent = ptr;
-        }
-        else if(ptr->getCategory() == Type::Protocol)
+        ScopeGuard scope(symbolRegistry, type->getScope());
+        SCOPED_SET(ctx->currentType, type);
+        for(const TypeIdentifierPtr& parentType : node->getParents())
         {
-            type->addProtocol(ptr);
-        }
-        else
-        {
-            if(category == Type::Class)
-                error(parentType, Errors::E_INHERITANCE_FROM_NONE_PROTOCOL_NON_CLASS_TYPE_1, toString(parentType));
+            parentType->accept(this);
+            if(first)
+                declareImmediately(parentType->getName());
+            TypePtr ptr = resolveType(parentType, true);
+            Type::Category pcategory = ptr->getCategory();
+            if(pcategory == Type::Specialized)
+                pcategory = ptr->getInnerType()->getCategory();
+            if(pcategory == Type::Class && category == Type::Class)
+            {
+                if(!first)
+                {
+                    //only the first type can be class type
+                    error(parentType, Errors::E_SUPERCLASS_MUST_APPEAR_FIRST_IN_INHERITANCE_CLAUSE_1, toString(parentType));
+                    return nullptr;
+                }
+                parent = ptr;
+                if(parent->hasFlags(SymbolFlagFinal))
+                {
+                    error(parentType, Errors::E_INHERITANCE_FROM_A_FINAL_CLASS_A_1, parentType->getName());
+                    return nullptr;
+                }
+            }
+            else if(category == Type::Enum && pcategory != Type::Protocol)
+            {
+
+                if(parent)//already has a raw type
+                {
+                    error(parentType, Errors::E_MULTIPLE_ENUM_RAW_TYPES_A_AND_B_2, parent->toString(), ptr->toString());
+                    return nullptr;
+                }
+                if(!first)
+                {
+                    error(parentType, Errors::E_RAW_TYPE_A_MUST_APPEAR_FIRST_IN_THE_ENUM_INHERITANCE_CLAUSE_1, ptr->toString());
+                    return nullptr;
+                }
+                //check if the raw type is literal convertible
+                if(!isLiteralTypeForEnum(symbolRegistry->getGlobalScope(), ptr))
+                {
+                    error(parentType, Errors::E_RAW_TYPE_A_IS_NOT_CONVERTIBLE_FROM_ANY_LITERAL_1, ptr->toString());
+                    return nullptr;
+                }
+                if(!ptr->canAssignTo(symbolRegistry->getGlobalScope()->Equatable()))
+                {
+                    error(parentType, Errors::E_RAWREPRESENTABLE_INIT_CANNOT_BE_SYNTHESIZED_BECAUSE_RAW_TYPE_A_IS_NOT_EQUATABLE_1, ptr->toString());
+                    return nullptr;
+                }
+                parent = ptr;
+            }
+            else if(pcategory == Type::Protocol)
+            {
+                type->addProtocol(ptr);
+            }
             else
-                error(parentType, Errors::E_INHERITANCE_FROM_NONE_PROTOCOL_TYPE_1, toString(parentType));
-            return nullptr;
+            {
+                if(category == Type::Class)
+                    error(parentType, Errors::E_INHERITANCE_FROM_NONE_PROTOCOL_NON_CLASS_TYPE_1, toString(parentType));
+                else
+                    error(parentType, Errors::E_INHERITANCE_FROM_NONE_PROTOCOL_TYPE_1, toString(parentType));
+                return nullptr;
+            }
+            first = false;
         }
-        first = false;
+
+        type->setParentType(parent);
+        if(parent && parent->getAccessLevel() == AccessLevelPublic && (node->getModifiers() & DeclarationModifiers::AccessModifiers) == 0)
+            type->setAccessLevel(AccessLevelPublic);//when access level is undefined, try to inherit base's access level
+        else
+            type->setAccessLevel(parseAccessLevel(node->getModifiers()));
     }
-    type->setParentType(parent);
-    if(parent && parent->getAccessLevel() == AccessLevelPublic && (node->getModifiers() & DeclarationModifiers::AccessModifiers) == 0)
-        type->setAccessLevel(AccessLevelPublic);//when access level is undefined, try to inherit base's access level
-    else
-        type->setAccessLevel(parseAccessLevel(node->getModifiers()));
     
 
     declarationFinished(type->getName(), type, node);
@@ -347,7 +355,7 @@ void DeclarationAnalyzer::visitTypeAlias(const TypeAliasPtr& node)
         return;
     TypePtr type;
     SymbolScope* currentScope = symbolRegistry->getCurrentScope();
-    
+
     if(currentScope->isSymbolDefined(node->getName()))
     {
         error(node, Errors::E_INVALID_REDECLARATION_1, node->getName());
@@ -544,7 +552,7 @@ void DeclarationAnalyzer::visitEnum(const EnumDefPtr& node)
                     return;
                 }
                 assert(typeNode != nullptr);
-                associatedType = lookupType(typeNode);
+                associatedType = resolveType(typeNode, true);
             }
             type->addEnumCase(c.name, associatedType);
             if(associatedType == global->Void())

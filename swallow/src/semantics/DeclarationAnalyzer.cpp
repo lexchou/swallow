@@ -52,6 +52,8 @@
 #include "semantics/Symbol.h"
 #include "semantics/LazyDeclaration.h"
 #include "semantics/ScopedNodes.h"
+#include "common/SwallowUtils.h"
+
 
 USE_SWALLOW_NS
 using namespace std;
@@ -339,6 +341,8 @@ void DeclarationAnalyzer::finalizeLazyDeclaration()
     }
     symbolRegistry->setCurrentScope(scope);
     //now we make all typealias to resolve its type
+    
+    /*
     for(auto entry : scope->getSymbols())
     {
         if(entry.second->getKind() != SymbolKindType)
@@ -346,6 +350,7 @@ void DeclarationAnalyzer::finalizeLazyDeclaration()
         TypePtr type = static_pointer_cast<Type>(entry.second);
         resolveTypeAlias(type);
     }
+     */
 }
 
 /*!
@@ -367,6 +372,8 @@ void DeclarationAnalyzer::declareImmediately(const std::wstring& name)
         //wprintf(L"Declare immediately %S %d definitions\n", name.c_str(), decls->size());
         for(auto decl : *decls)
         {
+            if(decl.fullyDeclared)
+                continue;
             //wprintf(L"   fs:%p cs:%p\n", decl.fileScope, decl.currentScope);
             symbolRegistry->setCurrentScope(decl.currentScope);
             symbolRegistry->setFileScope(decl.fileScope);
@@ -453,6 +460,7 @@ void DeclarationAnalyzer::forwardDeclareImmediately(const std::wstring& name)
                 {
                     TypeAliasPtr talias = static_pointer_cast<TypeAlias>(decl.node);
                     decl.node->accept(this);
+                    decl.fullyDeclared = true;
                     break;
                 }
                 case NodeType::Class:

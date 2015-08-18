@@ -310,6 +310,14 @@ TEST(TestGeneric, Constraint)
     ASSERT_NO_ERRORS();
 }
 
+
+TEST(TestGeneric, GenericInParent)
+{
+    SEMANTIC_ANALYZE(L"class Parent<T>{}\n"
+                     "class Child<T> : Parent<T>{}");
+    ASSERT_NO_ERRORS();
+}
+
 /*
 
 protocol DD

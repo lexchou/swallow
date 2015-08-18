@@ -197,6 +197,7 @@ void SemanticAnalyzer::visitSubscript(const SubscriptDefPtr &node)
 void SemanticAnalyzer::visitFunction(const FunctionDefPtr& node)
 {
     FunctionSymbolPtr func = static_pointer_cast<SymboledFunction>(node)->symbol;
+    assert(func != nullptr);
     checkForFunctionOverriding(func->getName(), func, node);
 }
 
