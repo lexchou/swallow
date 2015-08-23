@@ -31,7 +31,7 @@
 #define CONSOLE_WRITER_H
 
 
-enum ConsoleColor
+enum class ConsoleColor
 {
     Black,
     Red,
@@ -42,7 +42,7 @@ enum ConsoleColor
     Cyan,
     White
 };
-enum ConsoleIntensity
+enum class ConsoleIntensity
 {
     Normal,
     Bright
@@ -51,8 +51,8 @@ enum ConsoleIntensity
 class ConsoleWriter
 {
 public:
-    virtual void setForegroundColor(ConsoleColor color, ConsoleIntensity intensity = Normal) = 0;
-    virtual void setBackgroundColor(ConsoleColor color, ConsoleIntensity intensity = Normal) = 0;
+    virtual void setForegroundColor(ConsoleColor color, ConsoleIntensity intensity = ConsoleIntensity::Normal) = 0;
+    virtual void setBackgroundColor(ConsoleColor color, ConsoleIntensity intensity = ConsoleIntensity::Normal) = 0;
     virtual void reset() = 0;
 
     void printf(const wchar_t* fmt, ...);
@@ -66,16 +66,16 @@ protected:
 class PlainConsoleWriter : public ConsoleWriter
 {
 public:
-    virtual void setForegroundColor(ConsoleColor color, ConsoleIntensity intensity = Normal)override;
-    virtual void setBackgroundColor(ConsoleColor color, ConsoleIntensity intensity = Normal)override;
+    virtual void setForegroundColor(ConsoleColor color, ConsoleIntensity intensity = ConsoleIntensity::Normal)override;
+    virtual void setBackgroundColor(ConsoleColor color, ConsoleIntensity intensity = ConsoleIntensity::Normal)override;
     virtual void reset()override;
 };
 
 class AnsiConsoleWriter : public ConsoleWriter
 {
 public:
-    virtual void setForegroundColor(ConsoleColor color, ConsoleIntensity intensity = Normal)override;
-    virtual void setBackgroundColor(ConsoleColor color, ConsoleIntensity intensity = Normal)override;
+    virtual void setForegroundColor(ConsoleColor color, ConsoleIntensity intensity = ConsoleIntensity::Normal)override;
+    virtual void setBackgroundColor(ConsoleColor color, ConsoleIntensity intensity = ConsoleIntensity::Normal)override;
     virtual void reset()override;
 };
 

@@ -6566,13 +6566,13 @@ extension String {
 
         /// A type whose instances can produce the elements of this
         /// sequence, in order.
-        typealias Generator
+        //COMMENTED: typealias Generator
 
         /// Return a *generator* over the code points that comprise this
         /// *sequence*.
         ///
         /// Complexity: O(1)
-        func generate() -> Generator
+        //COMMENTED: func generate() -> Generator
         subscript (i: String.UTF16View.Index) -> UInt16 { get }
         subscript (subRange: Range<String.UTF16View.Index>) -> String.UTF16View { get }
 
@@ -6595,6 +6595,7 @@ extension String {
 }
 
 extension String {
+    typealias CodeUnit = UInt32
 
     /// A collection of UTF-8 code units that encodes a `String` value.
     struct UTF8View : CollectionType, Reflectable, Printable, DebugPrintable {

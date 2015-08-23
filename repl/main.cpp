@@ -30,6 +30,7 @@
 #include <iostream>
 #include "ConsoleWriter.h"
 #include "common/Errors.h"
+#include "common/SwallowUtils.h"
 #include "REPL.h"
 
 using namespace std;
@@ -40,7 +41,33 @@ using namespace Swallow;
 int main(int argc, char** argv)
 {
     ConsoleWriterPtr out(ConsoleWriter::create());
-    REPL repl(out);
-    repl.repl();
+    if(argc > 1)
+    {
+        //evaluation mode
+        const char * fileName = argv[1];
+        if(!SwallowUtils::fileExists(fileName))
+        {
+            out->setForegroundColor(ConsoleColor::Red, ConsoleIntensity::Bright);
+            out->printf(L"Swallow source file %s is not existing.\n", fileName);
+            out->reset();
+            return 1;
+        }
+        SwallowCompiler* compiler = SwallowCompiler::newCompiler(L"repl");
+        wstring code = SwallowUtils::readFile(fileName);
+        compiler->addSource(SwallowUtils::toWString(fileName), code);
+        out->printf(L"Evaluating %s...\n", fileName);
+        compiler->compile();
+        if(compiler->getCompilerResults()->numResults() == 0)
+            out->printf(L"No errors.\n", fileName);
+        else
+            REPL::dumpCompilerResults(compiler->getCompilerResults(), out);
+        delete compiler;
+    }
+    else
+    {
+        //repl mode
+        REPL repl(out);
+        repl.repl();
+    }
     return 0;
 }

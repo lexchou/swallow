@@ -41,7 +41,7 @@
 #include "parser/Parser.h"
 #include "parser/Parser_Details.h"
 
-#define USE_RUNTIME_FILE 1
+#define USE_RUNTIME_FILE 0
 
 #if USE_RUNTIME_FILE
 #include <iostream>
@@ -152,7 +152,7 @@ void GlobalScope::initRuntime(SymbolRegistry* symbolRegistry)
             ret->setScope(nullptr);
         }
         */
-        string path = "../../stdlib/reference-archives/swiftCore-1.2-602.0.49.6.swift";
+        string path = SwallowUtils::locateFile("stdlib/reference-archives/swiftCore-1.2-602.0.49.6.swift");
         printf("Compiling %s...\n", path.c_str());
         std::wstring code = SwallowUtils::readFile(path.c_str());
         compiler.addSource(L"Swift", code);
@@ -163,7 +163,7 @@ void GlobalScope::initRuntime(SymbolRegistry* symbolRegistry)
         if(!success)
         {
             SwallowUtils::dumpCompilerResults(*compiler.getCompilerResults(), std::wcout);
-            SASSERT(0 && "Failed to load runtime.swift");
+            assert(0 && "Failed to load runtime.swift");
         }
     }
     catch(Abort&)

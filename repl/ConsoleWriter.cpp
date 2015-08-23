@@ -80,11 +80,11 @@ void PlainConsoleWriter::reset()
 
 void AnsiConsoleWriter::setForegroundColor(ConsoleColor color, ConsoleIntensity intensity)
 {
-    printf(L"\x1b[%dm", (intensity == Normal ? 30 : 90) + color);
+    printf(L"\x1b[%dm", (intensity == ConsoleIntensity::Normal ? 30 : 90) + (int)color);
 }
 void AnsiConsoleWriter::setBackgroundColor(ConsoleColor color, ConsoleIntensity intensity)
 {
-    printf(L"\x1b[%dm", (intensity == Normal ? 40 : 100) + color);
+    printf(L"\x1b[%dm", (intensity == ConsoleIntensity::Normal ? 40 : 100) + (int)color);
 }
 void AnsiConsoleWriter::reset()
 {

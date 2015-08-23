@@ -64,7 +64,7 @@ void REPL::dumpProgram(const ProgramPtr& program)
 {
     SymbolScope* scope = static_pointer_cast<ScopedProgram>(program)->getScope();
     assert(scope != nullptr);
-    out->setForegroundColor(Cyan);
+    out->setForegroundColor(ConsoleColor::Cyan);
     for(const StatementPtr& st : *program)
     {
         SymbolPtr sym = nullptr;
@@ -121,40 +121,62 @@ void REPL::dumpSymbol(const SymbolPtr& sym)
 
 void REPL::dumpCompilerResults(const std::wstring& code)
 {
-    for(auto res : *compiler->getCompilerResults())
+    dumpCompilerResults(compiler->getCompilerResults(), out);
+}
+void REPL::dumpCompilerResults(CompilerResults* compilerResults, const ConsoleWriterPtr& out)
+{
+    for(auto res : *compilerResults)
     {
-        out->setForegroundColor(White);
+        //separate source code by lines
+        vector<wstring> lines;
+        wstringstream stream(res.sourceFile->code);
+        wstring line;
+        while(getline(stream, line))
+        {
+            lines.push_back(line);
+        }
+
+        out->setForegroundColor(ConsoleColor::White);
         out->printf(L"%d:%d: ", res.line, res.column);
         switch(res.level)
         {
             case ErrorLevel::Fatal:
-                out->setForegroundColor(Red);
+                out->setForegroundColor(ConsoleColor::Red);
                 out->printf(L"fatal");
                 break;
             case ErrorLevel::Error:
-                out->setForegroundColor(Red, Bright);
+                out->setForegroundColor(ConsoleColor::Red, ConsoleIntensity::Bright);
                 out->printf(L"error");
                 break;
             case ErrorLevel::Note:
-                out->setForegroundColor(White);
+                out->setForegroundColor(ConsoleColor::White);
                 out->printf(L"note");
                 break;
             case ErrorLevel::Warning:
-                out->setForegroundColor(Yellow);
+                out->setForegroundColor(ConsoleColor::Yellow);
                 out->printf(L"warning");
                 break;
         }
-        out->setForegroundColor(White, Bright);
+        out->setForegroundColor(ConsoleColor::White, ConsoleIntensity::Bright);
         out->printf(L": ");
         wstring msg = Errors::format(res.code, res.items);
         out->printf(L"%ls\n", msg.c_str());
         out->reset();
-        out->printf(L"%ls\n", code.c_str());
+        if(res.line > 0 && res.line <= (int)lines.size())
+        {
+            wstring line = lines[res.line - 1];
+            out->printf(L"%ls\n", line.c_str());
+            for(int i = 0; i < res.column - 1; i++)
+            {
+                out->printf(L" ");
+            }
+            out->printf(L"^\n");
+        }
         for(int i = 1; i < res.column; i++)
         {
             out->printf(L" ");
         }
-        out->setForegroundColor(Green);
+        out->setForegroundColor(ConsoleColor::Green);
         out->printf(L"^\n");
         out->reset();
     }
@@ -214,20 +236,20 @@ static void dumpSymbol(const wstring& name, const SymbolPtr& sym, const ConsoleW
     else if(dynamic_pointer_cast<FunctionSymbol>(sym))
         kind = L"Function";
 
-    out->setForegroundColor(White , Bright);
+    out->setForegroundColor(ConsoleColor::White , ConsoleIntensity::Bright);
     out->printf(L"%10ls\t", name.c_str());
-    out->setForegroundColor(Magenta , Bright);
+    out->setForegroundColor(ConsoleColor::Magenta , ConsoleIntensity::Bright);
     out->printf(L"%7ls\t", kind);
 
     if(sym->getType())
     {
         wstring type = sym->getType()->toString();
-        out->setForegroundColor(Yellow, Bright);
+        out->setForegroundColor(ConsoleColor::Yellow, ConsoleIntensity::Bright);
         out->printf(L"%ls\t", type.c_str());
     }
 
 
-    out->setForegroundColor(Cyan, Bright);
+    out->setForegroundColor(ConsoleColor::Cyan, ConsoleIntensity::Bright);
     static const SymbolFlags flags[] = {SymbolFlagInitializing, SymbolFlagInitialized, SymbolFlagMember, SymbolFlagWritable, SymbolFlagReadable, SymbolFlagTemporary,
             SymbolFlagHasInitializer, SymbolFlagStatic, SymbolFlagInit};
     static const wchar_t* flagNames[] = {L"initializing", L"initialized", L"member", L"writable", L"readable", L"temporary", L"has_initializer", L"static", L"init"};

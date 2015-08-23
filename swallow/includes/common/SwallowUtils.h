@@ -51,6 +51,12 @@ struct SWALLOW_EXPORT SwallowUtils
     static std::wstring toString(int i);
 
     /*!
+     * allow access file while current working directory is in any sub directory of swallow project structure
+     */
+    static std::string locateFile(const char* fileName);
+    static bool fileExists(const char* path);
+
+    /*!
      * A simplified approach to convert std::string to std::wstring
      */
     static std::wstring toWString(const std::string& str);

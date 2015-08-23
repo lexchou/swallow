@@ -46,6 +46,7 @@
 #include "semantics/SemanticAnalyzer.h"
 #include "semantics/SemanticUtils.h"
 #include "semantics/TypeResolver.h"
+#include "common/SwallowUtils.h"
 
 USE_SWALLOW_NS
 using namespace std;
@@ -183,7 +184,12 @@ void DeclarationAnalyzer::visitValueBindings(const ValueBindingsPtr& node)
         else
         {
             int vflags = flags;
-            SymbolPlaceHolderPtr pattern(new SymbolPlaceHolder(id->getIdentifier(), nullptr, role, vflags));
+            TypePtr type = nullptr;
+            if(var->getDeclaredType())
+            {
+                type = resolveType(var->getDeclaredType(), true);
+            }
+            SymbolPlaceHolderPtr pattern(new SymbolPlaceHolder(id->getIdentifier(), type, role, vflags));
             pattern->setAccessLevel(accessLevel);
             registerSymbol(pattern, id);
         }

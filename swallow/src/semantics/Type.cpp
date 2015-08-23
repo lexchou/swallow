@@ -744,8 +744,10 @@ int Type::compare(const TypePtr &lhs, const TypePtr &rhs)
                 return result;
             if(!::compare(lhs->name, rhs->name, result))
                 return result;
-            assert(lhs->getReference() == rhs->getReference());
-            assert(isGenericDefinitionEquals(lhs->genericDefinition, rhs->genericDefinition));
+            if(lhs->getReference() != rhs->getReference())
+                return -1;
+            if(!isGenericDefinitionEquals(lhs->genericDefinition, rhs->genericDefinition))
+                return -1;
             return 0;
         case Alias:
         {

@@ -77,28 +77,10 @@ void testInit(int argc, char** argv)
     testing::InitGoogleTest(&argc, argv);
 }
 
-
 wstring readFile(const char* fileName)
 {
-	string fullPath;
-	char buf[1024];
-#ifdef _MSC_VER
-	GetCurrentDirectory(sizeof(buf), buf);
-        fullPath = buf;
-	if (fullPath.find("\\Debug") != string::npos)
-		fullPath += "\\..";
-	fullPath += "\\..\\..\\..\\swallow\\tests\\";
-	fullPath += fileName;
-	fileName = fullPath.c_str();
-#else
-        getcwd(buf, sizeof(buf));
-        fullPath = buf;
-        size_t len = strlen(buf);
-        if(!strcmp(buf + len - 6, "/tests"))
-            fullPath += string("/") + fileName;        
-        else
-            fullPath += string("/../swallow/tests/") + fileName; 
-#endif
+    string tmp = string("swallow/tests/") + fileName;
+	string fullPath = SwallowUtils::locateFile(tmp.c_str());
     return SwallowUtils::readFile(fullPath.c_str());
 }
 

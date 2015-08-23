@@ -50,6 +50,7 @@ public:
     ~REPL();
 public:
     void repl();
+    static void dumpCompilerResults(Swallow::CompilerResults* compilerResults, const ConsoleWriterPtr& out);
 private:
     void evalCommand(const wstring& command);
     void eval(const wstring& line);

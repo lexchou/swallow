@@ -41,6 +41,7 @@
 #include <Windows.h>
 #else
 #include <dirent.h>
+#include <unistd.h>
 #endif
 //#include <codecvt>
 
@@ -48,6 +49,51 @@ USE_SWALLOW_NS
 using namespace std;
 
 
+
+bool SwallowUtils::fileExists(const char* path)
+{
+#ifdef _MSC_VER
+    return _access(path, 0 )) != -1;
+#else
+    return access(path, F_OK) != -1;
+#endif
+}
+
+//allow access file while current working directory is in any sub directory of swallow project structure
+string SwallowUtils::locateFile(const char* fileName)
+{
+	char dir[1024];
+    char rel[1024];
+    char fullPath[2048];
+    size_t len;
+#ifdef _MSC_VER
+	GetCurrentDirectory(sizeof(dir), dir);
+#define SEPARATOR '\\'
+#else
+    getcwd(dir, sizeof(dir));
+#define SEPARATOR '/'
+#endif
+    len = strlen(dir);
+    if(dir[len - 1] == SEPARATOR)
+        dir[--len] = 0;
+    rel[0] = 0;
+    if(*fileName != '/')
+        strcpy(rel, "/");
+    strcat(rel, fileName);
+    for(;;)
+    {
+        strcpy(fullPath, dir);
+        strcat(fullPath, rel);
+        if(fileExists(fullPath))
+            return fullPath;
+        //move to upper folder
+        char*p = strrchr(dir, SEPARATOR);
+        assert(p != nullptr);
+        *p = 0;
+    }
+    return nullptr;
+#undef SEPARATOR
+}
 
 void SwallowUtils::dumpHex(const char* s)
 {
@@ -101,6 +147,7 @@ std::wstring SwallowUtils::readFile(const char* fileName)
     if(!wif.is_open())
     {
         cerr << "Failed to open swift source file for testing, file name " <<fileName<<endl;
+        cerr.flush();
         abort();
     }
     //wif.imbue(std::locale(std::locale(), new std::codecvt_utf8<wchar_t>));

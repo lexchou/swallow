@@ -372,6 +372,7 @@ void DeclarationAnalyzer::visitTypeAlias(const TypeAliasPtr& node)
     {
         shared_ptr<TypeResolver> typeResolver(new TypeResolver(symbolRegistry, semanticAnalyzer, this, ctx, true));
         type = resolveType(node->getType(), true);
+        assert(type != nullptr && "Cannot resolve type");
         //TypeBuilderPtr builder = static_pointer_cast<TypeBuilder>(type);
         //builder->setInnerType(type);
         //builder->initAlias(node->getType(), typeResolver);
@@ -389,6 +390,7 @@ void DeclarationAnalyzer::visitClass(const ClassDefPtr& node)
     TypePtr type = getOrDefineType(node);
     ScopeGuard scope(symbolRegistry, type->getScope());
     SCOPED_SET(ctx->currentType, type);
+    SCOPED_SET(ctx->currentExtension, nullptr);
     SCOPED_SET(ctx->currentFunction, nullptr);
 
     assert(type->getAccessLevel() != AccessLevelUndefined);
@@ -449,6 +451,7 @@ void DeclarationAnalyzer::visitStruct(const StructDefPtr& node)
     TypePtr type = getOrDefineType(node);
     ScopeGuard scope(symbolRegistry, type->getScope());
     SCOPED_SET(ctx->currentType, type);
+    SCOPED_SET(ctx->currentExtension, nullptr);
     SCOPED_SET(ctx->currentFunction, nullptr);
     visitDeclaration(node);
     //prepare default initializers
@@ -480,6 +483,7 @@ void DeclarationAnalyzer::visitEnum(const EnumDefPtr& node)
     TypeBuilderPtr type = static_pointer_cast<TypeBuilder>(getOrDefineType(node));
     ScopeGuard scope(symbolRegistry, type->getScope());
     SCOPED_SET(ctx->currentType, type);
+    SCOPED_SET(ctx->currentExtension, nullptr);
     SCOPED_SET(ctx->currentFunction, nullptr);
 
 
@@ -596,6 +600,7 @@ void DeclarationAnalyzer::visitProtocol(const ProtocolDefPtr& node)
     TypePtr type = getOrDefineType(node);
     ScopeGuard scope(symbolRegistry, type->getScope());
     SCOPED_SET(ctx->currentType, type);
+    SCOPED_SET(ctx->currentExtension, nullptr);
     SCOPED_SET(ctx->currentFunction, nullptr);
 
     visitDeclaration(node);

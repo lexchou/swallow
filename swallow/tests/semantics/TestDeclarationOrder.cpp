@@ -201,6 +201,23 @@ TEST(TestDeclarationOrder, Func_Use_Nested_Type)
                      L"}");
     ASSERT_NO_ERRORS();
 }
+TEST(TestDeclarationOrder, Func_Use_NestedType2)
+{
+    SEMANTIC_ANALYZE(L"class MyClass\n"
+                     L"{\n"
+                     L"\n"
+                     L"}\n"
+                     L"extension MyClass\n"
+                     L"{\n"
+                     L"    struct Inner\n"
+                     L"    {\n"
+                     L"        typealias I = Int\n"
+                     L"    }\n"
+                     L"}\n"
+                     L"\n"
+                     L"var a : MyClass.Inner.I = 3\n");
+    ASSERT_NO_ERRORS();
+}
 
 /*
 //TODO: fix this later
