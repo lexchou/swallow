@@ -256,7 +256,7 @@ float SemanticAnalyzer::calculateFitScore(bool mutatingSelf, SymbolPtr& func, co
             if(!constraintSatisfied)
             {
                 if(supressErrors)
-                    return false;
+                    return -1;
                 error(arguments, Errors::E_TYPE_DOES_NOT_CONFORM_TO_PROTOCOL_2_, argType->getName(), expectedType->getName());
                 abort();
             }

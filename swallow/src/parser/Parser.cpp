@@ -58,7 +58,7 @@ void Parser::setSourceFile(const SourceFilePtr& sourceFile)
 }
 void Parser::setFunctionName(const wchar_t* function)
 {
-    this->functionName = functionName;
+    this->functionName = function;
 }
 int Parser::getFlags() const
 {

@@ -762,7 +762,7 @@ int Type::compare(const TypePtr &lhs, const TypePtr &rhs)
         case Tuple:
         {
             if (lhs->elementTypes.size() != rhs->elementTypes.size())
-                return false;
+                return -1;
             auto iter = lhs->elementTypes.begin(), iter2 = rhs->elementTypes.begin();
             for (; iter != lhs->elementTypes.end() && iter2 != rhs->elementTypes.end(); iter++, iter2++)
             {
@@ -775,7 +775,7 @@ int Type::compare(const TypePtr &lhs, const TypePtr &rhs)
         case MetaType:
             return compare(lhs->innerType, rhs->innerType);
         case Module:
-            return true;
+            return 1;
         case Function:
         {
             auto iter = lhs->parameters.begin(), iter2 = rhs->parameters.begin();
