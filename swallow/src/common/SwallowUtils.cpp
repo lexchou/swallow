@@ -39,6 +39,7 @@
 #include <cstdlib>
 #if defined(_WIN32) || defined(_WIN64)
 #include <Windows.h>
+#include <io.h>
 #else
 #include <dirent.h>
 #include <unistd.h>
@@ -53,7 +54,7 @@ using namespace std;
 bool SwallowUtils::fileExists(const char* path)
 {
 #ifdef _MSC_VER
-    return _access(path, 0 )) != -1;
+    return _access(path, 0 ) != -1;
 #else
     return access(path, F_OK) != -1;
 #endif

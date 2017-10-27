@@ -927,7 +927,7 @@ TEST(TestClass, testWeakReference)
     ASSERT_EQ(4, s->numDeclarations());
 
     ASSERT_NOT_NULL(vars = std::dynamic_pointer_cast<ValueBindings>(s->getDeclaration(2)));
-    ASSERT_TRUE(vars->getModifiers() && DeclarationModifiers::Weak);
+    ASSERT_TRUE(vars->getModifiers() & DeclarationModifiers::Weak);
 
 }
 
@@ -951,7 +951,7 @@ TEST(TestClass, testUnownedReference)
     ASSERT_EQ(4, s->numDeclarations());
 
     ASSERT_NOT_NULL(let = std::dynamic_pointer_cast<ValueBindings>(s->getDeclaration(1)));
-    ASSERT_TRUE(let->getModifiers() && DeclarationModifiers::Unowned);
+    ASSERT_TRUE(let->getModifiers() & DeclarationModifiers::Unowned);
 
 }
 

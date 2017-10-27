@@ -363,7 +363,7 @@ OperatorType::T Tokenizer::calculateOperatorType(const wchar_t* begin, const wch
     OperatorType::T ret = OperatorType::_;
     bool whiteLeft = hasWhiteLeft(begin);
     bool whiteRight = hasWhiteRight(end);
-    if((whiteRight && whiteLeft) || (!whiteLeft && !whiteRight))
+    if(whiteRight == whiteLeft)
     {
         //If an operator has whitespace around both sides or around neither side, it is treated as a binary operator. As an example, the + operator in a+b and a + b is treated as a binary operator.
         ret = OperatorType::InfixBinary;
